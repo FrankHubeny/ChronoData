@@ -22,6 +22,7 @@ CONSTANTS = {
     'LEFTBRACE' : '{',
     'NEGATIVE' : '-',
     'NEWLINE' : '\n',
+    'RIGHTBRACE' : '}',
     'SPACE' : ' ',
 }
 
@@ -187,6 +188,25 @@ class Chronology():
     secular calendar using 'CE' rather than 'AD' labels.
     """
 
+    MSG = {
+        'badlabel' : 'The date "{0}" contains an inappropriate label "{1}" rather than either "{2}" or "{3}" for the {4} calendar.',
+        'bothnamefile' : 'Both a chronology name "{0}" and a filename "{1}" have been specified, but only one can be used.',
+        'calendarsdontmatch' : 'The calendars "{0}" and "{1}" do not match.',
+        'changed' : 'The chronology has been changed to the "{0}" calendar.',
+        'countreserved' : '{0} reserved keys were used.',
+        'hascalendar' : 'The chronology already has the "{0}" calendar.',
+        'keyremoved' : 'The name "{0}" has been removed from the "{0}" dictionary.',
+        'missingname' : 'The chronology has neither a name nor a file to load.',
+        'nocomments' : 'There are no comments for the {0} chronology.',
+        'nodictname' : 'The chronology "{0}" has no {1}.',
+        'notindict' : 'The name "{0}" is not in the chronology dictionary "{1}".',
+        'notremovable' : 'The name "{0}" is a reserved key and cannot be removed.', 
+        'one' : 'One reserved key were used.',
+        'outofrange' : 'There are only {0} comments in the list. The index starts at 0.',
+        'rename' : 'The chronology has been renamed "{0}".',
+        'reserved' : 'The key "{0}" is a reserved key.',
+    }
+
     def __init__(
             self,
             chronologyname: str = '',
@@ -194,9 +214,9 @@ class Chronology():
             calendar: str = 'Gregorian'
         ):
         if chronologyname == '' and filename == '':
-            print('The chronology has neither a name nor a file to load.')
+            print(self.MSG['missingname'])
         elif chronologyname != '' and filename != '':
-            print(f'Both a chronology name "{chronologyname}" and a filename "{filename}" have been specified, but only one can be used.')
+            print(self.MSG['bothnamefile'].format(chronologyname, filename))   
         else:
             self.commentlist = []
             self.filename = filename
@@ -252,7 +272,7 @@ class Chronology():
         """Rename the chronology."""
         self.chronology[KEYS['OVERVIEW']].update({KEYS['NAME'] : newname})
         self.name = self.chronology[KEYS['OVERVIEW']][KEYS['NAME']]
-        print(f'The chronology has been renamed "{self.name}".')
+        print(self.MSG['rename'].format(self.name))
 
     def combine(self, chronologyname: str, chronology: dict, comments: list = [], keepcomments: bool = True):
         """Return a new chronology containing a combination of the current one and another chronology.
@@ -278,8 +298,8 @@ class Chronology():
             Add the comments from the self chronology into the new chronology.
         """
 
-        newchron = Chronology(chronologyname=chronologyname, cal=self.calendar)
-        if self.calendar == chronology[KEYS['CALENDAR']]:
+        newchron = Chronology(chronologyname=chronologyname, calendar=self.calendar)
+        if self.calendar == chronology[KEYS['OVERVIEW']][KEYS['CALENDAR']][KEYS['NAME']]:
             if keepcomments:
                 newchron.comments.extend(self.comments)
             newchron.comments.extend(comments)
@@ -288,7 +308,7 @@ class Chronology():
                 newchron.chronology[key].update(chronology[key])
             return newchron
         else:
-            raise ValueError(f'The calendars "{self.calendar}" and "{chronology[KEYS['CALENDAR']]}" do not match.')
+            print(self.MSG['calendarsdontmatch'].format(self.calendar, chronology[KEYS['OVERVIEW']][KEYS['CALENDAR']][KEYS['NAME']]))
 
 
     ###### ACTORS 
@@ -351,7 +371,7 @@ class Chronology():
         if date[-self.poslabellen:] == self.poslabel or date[-self.neglabellen:] == self.neglabel:
             return True
         else:
-            print(f'The date "{date}" contains an inappropriate label "{date[-self.poslabellen:]}" rather than either "{self.poslabel}" or "{self.neglabel}" for the {self.calendar} calendar.')
+            print(self.MSG['badlabel'].format(date, date[-self.poslabellen:], self.poslabel, self.neglabel, self.calendar))
             return False
 
         
@@ -501,7 +521,7 @@ class Chronology():
         poslabellen = -len(poslabel)
         newcalendar = CALENDARS[calendar]
         if CALENDARS[calendar][KEYS['NAME']] == self.calendar:
-            print(f'The chronology already has the "{self.calendar}" calendar.')
+            print(self.MSG['hascalendar'].format(self.calendar))
         else:
             if calendar in labelcalendars and self.calendar in labelcalendars:
                 self.chronology[KEYS['OVERVIEW']][KEYS['CALENDAR']].update(newcalendar)
@@ -536,7 +556,7 @@ class Chronology():
             self.poslabellen = len(CALENDARS[self.calendar][KEYS['POSLABEL']])
             self.neglabel = CALENDARS[self.calendar][KEYS['NEGLABEL']]
             self.neglabellen = len(CALENDARS[self.calendar][KEYS['NEGLABEL']])
-            print(f'The chronology has been changed to the "{self.calendar}" calendar.')
+            print(self.MSG['changed'].format(self.calendar))
 
     ###### CHALLENGES 
 
@@ -577,7 +597,7 @@ class Chronology():
         """Display a numbered list of comments."""
         listlen = len(self.commentlist)
         if listlen == 0:
-            print(f'There are no comments for the {self.name} chronology.')
+            print(self.MSG['nocomments'].format(self.name))
         else:
             space = int(np.ceil(np.log10(listlen)))
             for i in range(0, len(self.commentlist)):
@@ -625,8 +645,9 @@ class Chronology():
 
     def remove_comment(self, index: int):
         """Remove a comment from the chronology by specifying its number in the comments list."""
-        if index >= len(self.commentlist):
-            print(f'There are only {len(self.commentlist)} comments in the list. The index starts at 0.')
+        lengthlist = len(self.commentlist)
+        if index >= lengthlist:
+            print(self.MSG['outofrange'].format(lengthlist))
         else:
             self.commentlist.pop(index)
 
@@ -644,13 +665,9 @@ class Chronology():
         count = 0
         for i in keyvalues.keys():
             if i in KEYS.keys():
-                print(f'The key "{i}" is a reserved key.')
+                print(self.MSG['reserved'].format(i))
                 count += 1
         if count > 0:
-            if count == 1:
-                print(f'One reserved key were used.')
-            else:
-                print(f'{count} reserved keys were used.')
             return False
         else:
             return True
@@ -659,10 +676,10 @@ class Chronology():
         for key in self.chronology.keys():
             if isinstance(self.chronology[key], dict):
                 if len(self.chronology[key]) > 0:
-                    print('{} : {}'.format(key, '{'))
+                    print('{} : {}'.format(key, CONSTANTS['LEFTBRACE']))
                     for subkey in self.chronology[key]:
                         print('{}{} : {}'.format(tab, subkey, self.chronology[key][subkey]))
-                    print('}')
+                    print(CONSTANTS['RIGHTBRACE'])
                 else:
                     print('{} : {}'.format(key, self.chronology[key]))
             else:
@@ -692,7 +709,8 @@ class Chronology():
         if len(self.chronology[dictname]) > 0:
             return pd.DataFrame.from_dict(self.chronology[dictname], orient='index')
         else:
-            print(f'The chronology "{self.name}" has no {dictname.lower()}.')
+            print(self.MSG['nodictname'].format(self.name, dictname.lower()))
+            
     
     def remove_key(self, dictname: str, key: str):
         """Revove a key from a dictionary of the chronology.  
@@ -709,12 +727,12 @@ class Chronology():
         
         """
         if key in KEYS.keys():
-            print(f'The name "{key}" is a reserved key and cannot be removed.')
+            print(self.MSG['notremovable'].format(key))
         elif key not in self.chronology[dictname].keys():
-            print(f'The name "{key}" is not in the chronology dictionary "{dictname}".')
+            print(self.MSG['notindict'].format(key, dictname))
         else:
             self.chronology[dictname].pop(key)
-            print(f'The name "{key}" has been removed from the "{dictname}" dictionary.')
+            print(self.MSG['keyremoved'].format(key, dictname))
 
 
     ###### EVENTS 
@@ -822,14 +840,7 @@ class Chronology():
 
     ###### SAVE 
 
-    def save(self, filename: str = ''):
-        if filename == '':
-            if self.filename == '':
-                raise ValueError(f'No file name has been provided.')
-            else:
-                file = self.filename
-        else:
-            file=filename
+    def save(self, file: str):
         with open(file, 'w') as f:
             for i in self.commentlist:
                 f.write('%s\n' % i)
@@ -880,8 +891,3 @@ class Chronology():
     def remove_text(self, textname):
         """Permanently remove a text from the dictionary."""
         self.remove_key(KEYS['TEXTS'], textname)
-
-
-
-
-            
