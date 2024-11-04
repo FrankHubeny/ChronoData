@@ -18,7 +18,7 @@ import copy
 __all__ = ['Chronology', 'Compare',]
 
 CONSTANTS = {
-    'DATETIME_EPOCH': 1970,
+    'DATETIMEEPOCH': 1970,
     'LEFTBRACE' : '{',
     'NEGATIVE' : '-',
     'NEWLINE' : '\n',
@@ -44,6 +44,7 @@ KEYS = {
     'FEMALE' : 'FEMALE',
     'FILE' : 'FILENAME',
     'GREGORIAN' : 'Gregorian',
+    'LABELS' : 'LABELS',
     'MALE' : 'MALE',
     'MARKERS' : 'MARKERS',
     'MOTHER' : 'MOTHER',
@@ -63,28 +64,28 @@ CALENDARS = {
         'NAME' : 'Before Present',
         'POS LABEL' : '',
         'NEG LABEL' : ' BP',
-        'ZERO YEAR' : -CONSTANTS['DATETIME_EPOCH'],
+        'ZERO YEAR' : -CONSTANTS['DATETIMEEPOCH'],
         'USE ZERO' : False,
     },
     'Experiment' : {
         'NAME' : 'Experiment',
         'POS LABEL' : '',
         'NEG LABEL' : '',
-        'Zero Year' : -CONSTANTS['DATETIME_EPOCH'],
+        'Zero Year' : -CONSTANTS['DATETIMEEPOCH'],
         'USE ZERO' : False,
     },
     'Gregorian' : {
         'NAME' : 'Gregorian',
         'POS LABEL' : ' AD',
         'NEG LABEL' : ' BC',
-        'ZERO YEAR' : -CONSTANTS['DATETIME_EPOCH'],
+        'ZERO YEAR' : -CONSTANTS['DATETIMEEPOCH'],
         'USE ZERO' : False,
     },
     'Secular' : {
         'NAME' : 'Secular',
         'POS LABEL' : ' CE',
         'NEG LABEL' : ' BCE',
-        'ZERO YEAR' : -CONSTANTS['DATETIME_EPOCH'],
+        'ZERO YEAR' : -CONSTANTS['DATETIMEEPOCH'],
         'USE ZERO' : False,
     },
 }
@@ -189,6 +190,7 @@ class Chronology():
     """
 
     MSG = {
+        'baddate' : 'The value "{0}" for a date is not properly formatted.',
         'badlabel' : 'The date "{0}" contains an inappropriate label "{1}" rather than either "{2}" or "{3}" for the {4} calendar.',
         'bothnamefile' : 'Both a chronology name "{0}" and a filename "{1}" have been specified, but only one can be used.',
         'calendarsdontmatch' : 'The calendars "{0}" and "{1}" do not match.',
@@ -218,6 +220,7 @@ class Chronology():
         elif chronologyname != '' and filename != '':
             print(self.MSG['bothnamefile'].format(chronologyname, filename))   
         else:
+            self.labelstrict = False
             self.commentlist = []
             self.filename = filename
             self.maindictionaries = [
@@ -233,6 +236,7 @@ class Chronology():
                     KEYS['OVERVIEW'] : {
                         KEYS['NAME'] : chronologyname,
                         KEYS['CALENDAR'] : {},
+                        KEYS['LABELS'] : self.labelstrict,
                     },
                     KEYS['ACTORS'] : {},
                     KEYS['CHALLENGES'] : {},
@@ -345,8 +349,8 @@ class Chronology():
             self.chronology[KEYS['ACTORS']].update({name : {
                 KEYS['FATHER'] : father,
                 KEYS['MOTHER'] : mother,
-                KEYS['BIRTH'] : birth,
-                KEYS['DEATH'] : death,
+                KEYS['BIRTH'] : self.format_date(birth),
+                KEYS['DEATH'] : self.format_date(death),
                 KEYS['DESCRIPTION'] : description,
             }})
             self.chronology[KEYS['ACTORS']][name].update(keyvalues)
@@ -367,14 +371,59 @@ class Chronology():
         """Display the DATETIMES constants."""
         return pd.DataFrame.from_dict(DATETIMES, orient='index', columns=['Value'])
     
+    def enable_strict_labels(self):
+        """Set strict formatting for dates."""
+        self.labelstrict = True
+        self.chronology[KEYS['OVERVIEW']].update({KEYS['LABELS'] : False})
+
+    def disable_strict_labels(self):
+        """Set relaxed formatting for dates."""
+        self.labelstrict = False
+        self.chronology[KEYS['OVERVIEW']].update({KEYS['LABELS'] : False})
+
     def check_date(self, date: str):
-        if date[-self.poslabellen:] == self.poslabel or date[-self.neglabellen:] == self.neglabel:
-            return True
+        cleandate = date.upper().strip()
+        if cleandate[-self.neglabellen:] == self.neglabel:
+            try:
+                test = np.datetime64(cleandate[0:-self.neglabellen:])
+            except ValueError:
+                print(self.MSG['baddate'].format(date))
+                return False
+            else:
+                return True
+        elif cleandate[-self.poslabellen:] == self.poslabel:
+            try:
+                test = np.datetime64(cleandate[0:-self.poslabellen:])
+            except ValueError:
+                print(self.MSG['baddate'].format(date))
+                return False
+            else:
+                return True
+        elif not self.labelstrict:
+            try:
+                test = np.datetime64(cleandate)
+            except ValueError:
+                print(self.MSG['baddate'].format(date))
+                return False
+            else:
+                return True
         else:
             print(self.MSG['badlabel'].format(date, date[-self.poslabellen:], self.poslabel, self.neglabel, self.calendar))
             return False
 
+    def format_date(self, date: str):
+        formatted_date = date.upper().strip()
+        if self.labelstrict:
+            try:
+                test = np.datetime64(formatted_date)
+            except ValueError:
+                return formatted_date
+            else: 
+                return ''.join([formatted_date, self.poslabel])
+        else:
+            return formatted_date
         
+
     def to_datetime64(self, date: str):
         """Convert a calendar date to an ISO 8601 date and time string.
         
@@ -581,7 +630,7 @@ class Chronology():
         """Add a challenge to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
             self.chronology[KEYS['CHALLENGES']].update({name : {
-                KEYS['DATE'] : date,
+                KEYS['DATE'] : self.format_date(date),
                 KEYS['DESCRIPTION'] : description,
             }})
             self.chronology[KEYS['CHALLENGES']][name].update(keyvalues)
@@ -764,7 +813,7 @@ class Chronology():
         """Add an event to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
             self.chronology[KEYS['EVENTS']].update({name : {
-                KEYS['DATE'] : date,
+                KEYS['DATE'] : self.format_date(date),
                 KEYS['DESCRIPTION'] : description,
             }})
             self.chronology[KEYS['EVENTS']][name].update(keyvalues)
@@ -796,7 +845,7 @@ class Chronology():
         """Add a marker to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
             self.chronology[KEYS['MARKERS']].update({name : {
-                KEYS['DATE'] : date,
+                KEYS['DATE'] : self.format_date(date),
                 KEYS['DESCRIPTION'] : description,
             }})
             self.chronology[KEYS['MARKERS']][name].update(keyvalues)
@@ -829,8 +878,8 @@ class Chronology():
         """Add a period to the dictionary."""
         if self.check_date(begin) and self.check_date(end) and self.check_keys(keyvalues): 
             self.chronology[KEYS['PERIODS']].update({name : {
-                KEYS['BEGIN'] : begin,
-                KEYS['END'] : end,
+                KEYS['BEGIN'] : self.format_date(begin),
+                KEYS['END'] : self.format_date(end),
             }})
             self.chronology[KEYS['PERIODS']][name].update(keyvalues)
 
@@ -883,7 +932,7 @@ class Chronology():
         """Add an event to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
             self.chronology[KEYS['TEXTS']].update({name : {
-                KEYS['DATE'] : date,
+                KEYS['DATE'] : self.format_date(date),
                 KEYS['DESCRIPTION'] : description,
             }})
             self.chronology[KEYS['TEXTS']][name].update(keyvalues)

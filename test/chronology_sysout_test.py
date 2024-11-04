@@ -8,17 +8,43 @@ import pytest
 
 from chronodata.chronology import Chronology, KEYS, CALENDARS, CONSTANTS, DATETIMES
 
-def test_badlabel(capsys):
-    date = '2000'
+"""------------------------------------------------------------------------------
+                            MSG: baddate
+------------------------------------------------------------------------------"""
+
+def test_baddate(capsys):
+    date = '200x'
     a = Chronology('testname')
     a.add_event('eventname', date)
     captured = capsys.readouterr()  
-    assert captured.out == ''.join([a.MSG['badlabel'].format(date, '000', CALENDARS[a.calendar][KEYS['POSLABEL']], CALENDARS[a.calendar][KEYS['NEGLABEL']], a.calendar),'\n'])
+    assert captured.out == ''.join([a.MSG['baddate'].format(date),'\n'])
+
+"""------------------------------------------------------------------------------
+                            MSG: badlabel
+------------------------------------------------------------------------------"""
+
+def test_badlabel(capsys):
+    a = Chronology('testname')
+    date = '2000 Ax'
+    a.enable_strict_labels()
+    a.check_date(date)
+    captured = capsys.readouterr()  
+    assert captured.out == ''.join([a.MSG['badlabel'].format(date, ' Ax', CALENDARS[a.calendar][KEYS['POSLABEL']], CALENDARS[a.calendar][KEYS['NEGLABEL']], a.calendar),'\n'])
+
+
+
+"""------------------------------------------------------------------------------
+                            MSG: bothnamefile
+------------------------------------------------------------------------------"""
 
 def test_bothnamefile(capsys):
     a = Chronology(chronologyname='chronname', filename='filename')
     captured = capsys.readouterr()  
     assert captured.out == ''.join([a.MSG['bothnamefile'].format('chronname', 'filename'), '\n'])
+
+"""------------------------------------------------------------------------------
+                            MSG: calendarsdontmatch
+------------------------------------------------------------------------------"""
 
 def test_calendarsdontmatch(capsys):
     a = Chronology('one')
@@ -26,6 +52,10 @@ def test_calendarsdontmatch(capsys):
     a.combine(b.name, b.chronology)
     captured = capsys.readouterr()  
     assert captured.out == ''.join([a.MSG['calendarsdontmatch'].format(KEYS['GREGORIAN'], KEYS['SECULAR']), '\n'])
+
+"""------------------------------------------------------------------------------
+                            MSG: changed
+------------------------------------------------------------------------------"""
 
 def test_changed(capsys):
     a = Chronology('one')
