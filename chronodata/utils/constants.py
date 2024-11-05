@@ -15,7 +15,7 @@ class Number:
     DATETIME_EPOCH = 1970
 
 class Msg:
-    BAD_DATE = 'The value "{0}" for a date is not properly formatted.'
+    BAD_DATE = 'The value "{0}" for a date is not properly formatted in the {1} calendar.'
     BAD_LABEL = 'The date "{0}" contains an inappropriate label "{1}" rather than either "{2}" or "{3}" for the {4} calendar.'
     BOTH_NAME_FILE = 'Both a chronology name "{0}" and a filename "{1}" have been specified, but only one can be used.'
     CALENDARS_DONT_MATCH = 'The calendars "{0}" and "{1}" do not match.'
