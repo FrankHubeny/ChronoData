@@ -6,7 +6,8 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from chronodata.chronology import Chronology, KEYS, CALENDARS, CONSTANTS, DATETIMES
+from chronodata.chronology import Chronology
+from chronodata.utils.constants import String, Number, Msg, Datetime, Key, Calendar
     
 """------------------------------------------------------------------------------
                                 DataFrame Tests

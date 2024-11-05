@@ -4,7 +4,8 @@
 
 import pytest
 
-from chronodata.chronology import Chronology, KEYS, CALENDARS, CONSTANTS, DATETIMES
+from chronodata.chronology import Chronology
+from chronodata.utils.constants import String, Number, Msg, Datetime, Key, Calendar
 
 """------------------------------------------------------------------------------
                                    init
@@ -38,7 +39,7 @@ def test_add_comment(input_n, expected):
 
 testdata = [
     ('a.name', 'newname'),
-    ('a.chronology[KEYS["OVERVIEW"]][KEYS["NAME"]]', 'newname'),
+    ('a.chronology[Key.value["OVERVIEW"]][Key.value["NAME"]]', 'newname'),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_rename(input_n, expected):

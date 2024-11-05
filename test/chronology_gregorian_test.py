@@ -4,7 +4,8 @@
 
 import pytest
 
-from chronodata.chronology import Chronology, KEYS, CALENDARS, CONSTANTS, DATETIMES
+from chronodata.chronology import Chronology
+from chronodata.utils.constants import String, Number, Msg, Datetime, Key, Calendar
     
 """------------------------------------------------------------------------------
                               Gregorian Chronology
@@ -27,7 +28,7 @@ testdata = [
     ('a.date_diff("1000 AD", "1500 AD")', 500.0),
     ('a.date_diff("1000 BC", "1500 AD")', 2499.0),
     ('a.date_diff("1 BC", "1 AD")', 1.0),
-    ('a.date_diff("1000 BC", "1000 AD", unit=DATETIMES["DAY"])', 730120.0),
+    ('a.date_diff("1000 BC", "1000 AD", unit=Datetime.unit["DAY"])', 730120.0),
     # to_datetime64
     ('a.to_datetime64("1000 AD")', '1000'),
     ('a.to_datetime64("1000 BC")', '-999'),

@@ -4,7 +4,8 @@
 
 import pytest
 
-from chronodata.chronology import Chronology, KEYS, CALENDARS, CONSTANTS, DATETIMES
+from chronodata.chronology import Chronology
+from chronodata.utils.constants import String, Number, Msg, Datetime, Key, Calendar
     
 """------------------------------------------------------------------------------
                               Secular Chronology
