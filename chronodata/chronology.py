@@ -9,14 +9,18 @@ using constraints that could lead one to falsify the
 chronology unless the constraints are answered.
 """
 
+from datetime import datetime
 import numpy as np
 import pandas as pd
+import json
 import ast
 import copy
+from typing import Any, Literal
 
 from chronodata.utils.constants import String, Msg, Datetime, Key, Calendar
 
 __all__ = ['Chronology', 'Compare',]
+__author__ = 'Frank Hubeny'
 
 
 class Compare():
@@ -99,65 +103,85 @@ class Chronology():
     secular calendar using 'CE' rather than 'AD' labels.
     """
 
+    USER: str = ''
+
     def __init__(
             self,
             chronologyname: str = '',
             filename: str = '',
-            calendar: str = Key.value['GREGORIAN']
-            #calendar: str = Calendar.system[Key.value['GREGORIAN']]
+            calendar: str = Key.GREGORIAN,
+            user: str = '',
+            labelstrict: bool = False
         ):
+        self.chronologyname: str = ''
+        self.filename: str = ''
         if chronologyname == '' and filename == '':
             print(Msg.MISSING_NAME)
         elif chronologyname != '' and filename != '':
-            print(Msg.BOTH_NAME_FILE.format(chronologyname, filename))   
-        else:
-            self.labelstrict: bool = False
-            self.commentlist: list = []
-            self.filename: str = filename
-            self.maindictionaries: list = [
-                Key.value['ACTORS'], 
-                Key.value['CHALLENGES'], 
-                Key.value['EVENTS'], 
-                Key.value['MARKERS'],
-                Key.value['PERIODS'], 
-                Key.value['TEXTS'], 
-            ]
-            if chronologyname != '':
-                self.chronology: dict = {
-                    Key.value['OVERVIEW'] : {
-                        Key.value['NAME'] : chronologyname,
-                        Key.value['CALENDAR'] : {},
-                        Key.value['LABELS'] : self.labelstrict,
-                    },
-                    Key.value['ACTORS'] : {},
-                    Key.value['CHALLENGES'] : {},
-                    Key.value['EVENTS'] : {},
-                    Key.value['MARKERS'] : {},
-                    Key.value['PERIODS'] : {},
-                    Key.value['TEXTS'] : {},
-                }
-                
-                self.chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']].update(Calendar.system[calendar])
-                self.name: str = self.chronology[Key.value['OVERVIEW']][Key.value['NAME']]
-                self.calendar: str = self.chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']][Key.value['NAME']]
-                self.poslabel: str = Calendar.system[self.calendar][Key.value['POSLABEL']]
-                self.poslabellen: int = len(Calendar.system[self.calendar][Key.value['POSLABEL']])
-                self.neglabel: str = Calendar.system[self.calendar][Key.value['NEGLABEL']]
-                self.neglabellen: int = len(Calendar.system[self.calendar][Key.value['NEGLABEL']])
-                self.usezero: bool = Calendar.system[self.calendar][Key.value['USEZERO']]
+            print(Msg.BOTH_NAME_FILE.format(chronologyname, filename)) 
+        elif chronologyname != '':
+            self.chronologyname = chronologyname
+        else: 
+            self.filename = filename  
+        if self.chronologyname != '' or self.filename != '':
+            self.user: str = ''
+            if user == '' and self.USER == '':
+                print(Msg.USER_REQUIRED.format(chronologyname, filename))
+            elif user == '' and self.USER != '':
+                self.user = self.USER
+            elif user != '' and self.USER == '':
+                self.user = user
+                self.USER = self.user
             else:
-                self.chronology: dict = {}
-                with open(filename) as file:
-                    for line in file:
-                        if line[0] == String.LEFT_BRACE:
+                self.user = self.USER
+            if self.user != '':
+                self.labelstrict: bool = labelstrict
+                #self.maindictionaries: list[str] = [key for key in self.chronology if key != Key.OVERVIEW]
+                #     Key.ACTORS, 
+                #     Key.CHALLENGES, 
+                #     Key.EVENTS, 
+                #     Key.MARKERS,
+                #     Key.PERIODS, 
+                #     Key.TEXTS, 
+                # ]
+                self.chronology = {}
+                if chronologyname != '':
+                    self.chronology.update({
+                        Key.OVERVIEW : {
+                            Key.NAME : chronologyname,
+                            Key.COMMENTS : {},
+                            Key.CALENDAR : Calendar.system[calendar],
+                            Key.LABELS : self.labelstrict,
+                        },
+                        Key.ACTORS : {},
+                        Key.CHALLENGES : {},
+                        Key.EVENTS : {},
+                        Key.MARKERS : {},
+                        Key.PERIODS : {},
+                        Key.TEXTS : {},
+                    })
+                    self.name: str = self.chronology[Key.OVERVIEW][Key.NAME]
+                    self.calendar: str = calendar 
+                    self.poslabel: str = Calendar.system[self.calendar][Key.POSLABEL]
+                    self.poslabellen: int = len(self.poslabel)
+                    self.neglabel: str = Calendar.system[self.calendar][Key.NEGLABEL]
+                    self.neglabellen: int = len(self.neglabel)
+                    self.usezero: bool = Calendar.system[self.calendar][Key.USEZERO]
+                    print(Msg.CHRONOLOGY_STARTED.format(self.chronologyname, self.user))
+                else:
+                    with open(filename) as file:
+                        for line in file:
+                            # if line[0] == String.LEFT_BRACE:
                             self.chronology.update(ast.literal_eval(line))
-                        else:  
-                            self.commentlist.append(line.replace(String.NEWLINE, ''))
+                            # else:  
+                            #     self.commentlist.append(line.replace(String.NEWLINE, ''))
+                        file.close()
+                    print(Msg.CHRONOLOGY_LOADED.format(self.chronologyname, self.filename, self.user))
+                self.maindictionaries: list[str] = [key for key in self.chronology if key != Key.OVERVIEW]
                         
 
     def show(self, tab: str = '    '):
         """Show the entire chronology of both comments and dictionaries."""
-        self.comments()
         self.dictionaries(tab)
 
     def __str__(self):
@@ -166,11 +190,11 @@ class Chronology():
     
     def rename(self, newname: str):
         """Rename the chronology."""
-        self.chronology[Key.value['OVERVIEW']].update({Key.value['NAME'] : newname})
-        self.name = self.chronology[Key.value['OVERVIEW']][Key.value['NAME']]
+        self.chronology[Key.OVERVIEW].update({Key.NAME : newname})
+        self.name = self.chronology[Key.OVERVIEW][Key.NAME]
         print(Msg.RENAME.format(self.name))
 
-    def combine(self, chronologyname: str, chronology: dict, comments: list = [], keepcomments: bool = True):
+    def combine(self, chronologyname: str, chronology: dict, comments: list = []):
         """Return a new chronology containing a combination of the current one and another chronology.
 
         The two source chronologies are not changed.  A new chronology containing both 
@@ -194,19 +218,17 @@ class Chronology():
             Add the comments from the self chronology into the new chronology.
         """
 
-        newchron = Chronology(chronologyname=chronologyname, calendar=self.calendar)
-        if self.calendar == chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']][Key.value['NAME']]:
-            if keepcomments:
-                newchron.comments.extend(self.comments)
-            newchron.comments.extend(comments)
+        newchron: Chronology = Chronology(chronologyname=chronologyname, calendar=self.calendar)
+        if self.calendar == chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]:
+            #newchron.comments.extend(comments)
             for key in self.maindictionaries:
-                newchron.chronology[key].update(self.chronology[key])
-                newchron.chronology[key].update(chronology[key])
+                newchron.chronology.update(self.chronology[key])
+                newchron.chronology.update(chronology[key])
             return newchron
         else:
             print(Msg.CALENDARS_DONT_MATCH.format(
                 self.calendar, 
-                chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']][Key.value['NAME']]
+                chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]
             ))
 
 
@@ -214,10 +236,10 @@ class Chronology():
 
     def actors(self) -> pd.DataFrame:
         """Display the actors in a chronology."""
-        return self.show_dictionary(Key.value['ACTORS'])
+        return self.show_dictionary(Key.ACTORS)
 
 
-    def actors_pop(self, pops: list):
+    def actors_pop(self, pops: list[str]):
         """Display the actors defined for the chronology if there are any.
         
         Parameter
@@ -226,7 +248,7 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the actors.
             
         """
-        return self.dictionary_pop(pops, Key.value['ACTORS'])
+        return self.dictionary_pop(Key.ACTORS, pops)
 
 
     def add_actor(
@@ -241,19 +263,19 @@ class Chronology():
         ):
         """Add an actor to the dictionary."""
         if self.check_date(birth) and self.check_date(death) and self.check_keys(keyvalues):
-            self.chronology[Key.value['ACTORS']].update({name : {
-                Key.value['FATHER'] : father,
-                Key.value['MOTHER'] : mother,
-                Key.value['BIRTH'] : self.format_date(birth),
-                Key.value['DEATH'] : self.format_date(death),
-                Key.value['DESCRIPTION'] : description,
+            self.chronology[Key.ACTORS].update({name : {
+                Key.FATHER : father,
+                Key.MOTHER : mother,
+                Key.BIRTH : self.format_date(birth),
+                Key.DEATH : self.format_date(death),
+                Key.DESCRIPTION : description,
             }})
-            self.chronology[Key.value['ACTORS']][name].update(keyvalues)
+            self.chronology[Key.ACTORS][name].update(keyvalues)
 
 
     def remove_actor(self, actorname):
         """Remove an actor from the dictionary."""
-        self.remove_key(Key.value['ACTORS'], actorname)
+        self.remove_key(Key.ACTORS, actorname)
 
 
     ###### CALENDARS 
@@ -264,27 +286,27 @@ class Chronology():
     
 
     def datetimes(self) -> pd.DataFrame:
-        """Display the DATETIMES constants."""
-        return pd.DataFrame.from_dict(Datetime.unit, orient='index', columns=['Value'])
+        """Display the challenges in a chronology."""
+        return pd.DataFrame.from_dict(Datetime.units) 
     
 
     def enable_strict_labels(self):
         """Set strict formatting for dates."""
         self.labelstrict = True
-        self.chronology[Key.value['OVERVIEW']].update({Key.value['LABELS'] : False})
+        self.chronology[Key.OVERVIEW].update({Key.LABELS : False})
 
 
     def disable_strict_labels(self):
         """Set relaxed formatting for dates."""
         self.labelstrict = False
-        self.chronology[Key.value['OVERVIEW']].update({Key.value['LABELS'] : False})
+        self.chronology[Key.OVERVIEW].update({Key.LABELS : False})
 
 
     def check_date(self, date: str):
         cleandate = date.upper().strip()
         if cleandate[-self.neglabellen:] == self.neglabel:
             try:
-                test = np.datetime64(cleandate[0:-self.neglabellen:])
+                np.datetime64(cleandate[0:-self.neglabellen:])
             except ValueError:
                 print(Msg.BAD_DATE.format(date, self.calendar))
                 return False
@@ -292,7 +314,7 @@ class Chronology():
                 return True
         elif cleandate[-self.poslabellen:] == self.poslabel:
             try:
-                test = np.datetime64(cleandate[0:-self.poslabellen:])
+                np.datetime64(cleandate[0:-self.poslabellen:])
             except ValueError:
                 print(Msg.BAD_DATE.format(date, self.calendar))
                 return False
@@ -300,7 +322,7 @@ class Chronology():
                 return True
         elif not self.labelstrict:
             try:
-                test = np.datetime64(cleandate)
+                np.datetime64(cleandate)
             except ValueError:
                 print(Msg.BAD_DATE.format(date, self.calendar))
                 return False
@@ -312,10 +334,10 @@ class Chronology():
 
 
     def format_date(self, date: str):
-        formatted_date = date.upper().strip()
+        formatted_date: str = date.upper().strip()
         if self.labelstrict:
             try:
-                test = np.datetime64(formatted_date)
+                np.datetime64(formatted_date)
             except ValueError:
                 return formatted_date
             else: 
@@ -366,35 +388,35 @@ class Chronology():
         return newdate
     
     
-    def date_diff(self, older: str, younger: str, unit: str = Datetime.unit['YEAR']):
+    def date_diff(self, older: str, younger: str, unit: str = Datetime.YEAR):
         olderdate = np.datetime64(self.to_datetime64(older), unit)
         youngerdate = np.datetime64(self.to_datetime64(younger), unit)
         return float((youngerdate - olderdate) / np.timedelta64(1, unit))
 
 
-    # def daysinyear(self, date:str|np.datetime64):
-    #     """A procedure to count number of days in a Gregorian year given the year.
+    def daysinyear(self, date: str|np.datetime64):
+        """A procedure to count number of days in a Gregorian year given the year.
         
-    #     Parameters
-    #     ----------
-    #     date: np.datetime64
-    #         The date to find the number of days in the year
+        Parameters
+        ----------
+        date: np.datetime64
+            The date to find the number of days in the year
             
-    #     Examples
-    #     --------
+        Examples
+        --------
 
-    #     """
-    #     if isinstance(date, str):
-    #         year = np.datetime64(date,'Y').astype('int') + 1970
-    #     else:
-    #         year = date['Y'].astype('int') + 1970
-    #     if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
-    #         return 366
-    #     else:
-    #         return 365
+        """
+        if isinstance(date, str):
+            year = np.datetime64(date, Datetime.YEAR).astype('int') + 1970
+        else:
+            year = np.datetime_as_string(date, unit=Datetime.YEAR).astype('int') + 1970
+        if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
+            return 366
+        else:
+            return 365
 
 
-    def numericdate(self, date: str, unit: str = Datetime.unit['YEAR']):
+    def numericdate(self, date: str, unit: str = Datetime.YEAR):
         """A procedure to convert an ISO string with KEYS to astronomical year numbering.
         This numeric value contains a Year Zero as 0.  Dates labelled as `BC` or `BCE`
         will be converted to a negative value one year larger than the string date with
@@ -428,14 +450,14 @@ class Chronology():
                 numericdate = np.datetime64('-'+date[0:-self.neglabellen])
             else:
                 days = self.daysinyear(date[0:-self.neglabellen])
-                numericdate = np.datetime64('-'+date[0:-self.neglabellen]) + np.timedelta64(days, 'D')
+                numericdate = np.datetime64('-'+date[0:-self.neglabellen]) + np.timedelta64(days, Datetime.DAY)
         elif date[-self.poslabellen:] == self.poslabel:
             numericdate = np.datetime64(date[0:-self.poslabellen])
         else:
             numericdate = np.datetime64(date)
         return numericdate
 
-    def stringdate(self, date: np.datetime64, unit: str = Datetime.unit['YEAR']):
+    def stringdate(self, date: np.ndarray[Any, Any], unit: Literal['Y'] = Datetime.YEAR):
         """A procedure to convert a numeric date to a date labelled with an epoch label.
         
         Parameters
@@ -447,7 +469,7 @@ class Chronology():
         if date is None:
             return ''
         else:
-            return np.datetime_as_string(date, unit='D')
+            return np.datetime_as_string(date, unit=unit)
 
     
     def add_calendar(self, name: str, begin: str, end: str, keyvalues: dict = {}):
@@ -463,52 +485,48 @@ class Chronology():
         calendar: str
             The key of the calendar to convert the current calendar to.
         """
-        name_key = Key.value['NAME']
-        poslabel_key = Key.value['POSLABEL']
-        neglabel_key = Key.value['NEGLABEL']
-        period_key = Key.value['PERIODS']
-        event_key = Key.value['EVENTS']
-        labelcalendars = [Key.value['GREGORIAN'], Key.value['SECULAR']]
+        
+        labelcalendars = [Key.GREGORIAN, Key.SECULAR]
         formercalendar = Calendar.system[self.calendar]
-        poslabel = formercalendar[poslabel_key]
-        poslabellen = -len(poslabel)
+        poslabel: str = formercalendar[Key.POSLABEL]
+        poslabellen: int = -len(poslabel)
         newcalendar = Calendar.system[calendar]
-        if Calendar.system[calendar][name_key] == self.calendar:
+        if Calendar.system[calendar][Key.NAME] == self.calendar:
             print(Msg.HAS_CALENDAR.format(self.calendar))
         else:
             if calendar in labelcalendars and self.calendar in labelcalendars:
-                self.chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']].update(newcalendar)
-                for i in self.chronology[period_key]:
-                    for k in [Key.value['BEGIN'], Key.value['END']]:
-                        if self.chronology[period_key][i][k][poslabellen:] == poslabel:
-                            newvalue = self.chronology[period_key][i][k].replace(
+                self.chronology[Key.OVERVIEW][Key.CALENDAR].update(newcalendar)
+                for i in self.chronology[Key.PERIODS]:
+                    for k in [Key.BEGIN, Key.END]:
+                        if self.chronology[Key.PERIODS][i][k][poslabellen:] == poslabel:
+                            newvalue = self.chronology[Key.PERIODS][i][k].replace(
                                 formercalendar[poslabel], 
                                 newcalendar[poslabel]
                             )
                         else:
-                            newvalue = self.chronology[period_key][i][k].replace(
-                                formercalendar[neglabel_key], 
-                                newcalendar[neglabel_key]
+                            newvalue = self.chronology[Key.PERIODS][i][k].replace(
+                                formercalendar[Key.NEGLABEL], 
+                                newcalendar[Key.NEGLABEL]
                             )
-                        self.chronology[period_key][i].update({k : newvalue})
-                for i in self.chronology[event_key]:
-                    for k in [Key.value['DATE']]:
-                        if self.chronology[event_key][i][k][poslabellen:] == poslabel:
-                            newvalue = self.chronology[event_key][i][k].replace(
-                                formercalendar[poslabel], 
-                                newcalendar[poslabel]
+                        self.chronology[Key.PERIODS][i].update({k : newvalue})
+                for i in self.chronology[Key.EVENTS]:
+                    for k in [Key.DATE]:
+                        if self.chronology[Key.EVENTS][i][k][poslabellen:] == poslabel:
+                            newvalue = self.chronology[Key.EVENTS][i][k].replace(
+                                formercalendar[Key.POSLABEL], 
+                                newcalendar[Key.POSLABEL]
                             )
                         else:
-                            newvalue = self.chronology[event_key][i][k].replace(
-                                formercalendar[neglabel_key], 
-                                newcalendar[neglabel_key]
+                            newvalue = self.chronology[Key.EVENTS][i][k].replace(
+                                formercalendar[Key.NEGLABEL], 
+                                newcalendar[Key.NEGLABEL]
                             )
-                        self.chronology[event_key][i].update({k : newvalue})
-            self.calendar = self.chronology[Key.value['OVERVIEW']][Key.value['CALENDAR']][name_key]
-            self.poslabel = Calendar.system[self.calendar][poslabel_key]
-            self.poslabellen = len(Calendar.system[self.calendar][poslabel_key])
-            self.neglabel = Calendar.system[self.calendar][neglabel_key]
-            self.neglabellen = len(Calendar.system[self.calendar][neglabel_key])
+                        self.chronology[Key.EVENTS][i].update({k : newvalue})
+            self.calendar = self.chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]
+            self.poslabel = Calendar.system[self.calendar][Key.POSLABEL]
+            self.poslabellen = len(self.poslabel)
+            self.neglabel = Calendar.system[self.calendar][Key.NEGLABEL]
+            self.neglabellen = len(self.neglabel)
             print(Msg.CHANGED.format(self.calendar))
 
 
@@ -516,10 +534,10 @@ class Chronology():
 
     def challenges(self) -> pd.DataFrame:
         """Display the challenges in a chronology."""
-        return self.show_dictionary(Key.value['CHALLENGES'])
+        return self.show_dictionary(Key.CHALLENGES)
 
 
-    def challenges_pop(self, pops: list) -> pd.DataFrame:
+    def challenges_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the challenges defined for the chronology if there are any.
         
         Parameter
@@ -528,35 +546,33 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the periods.
             
         """
-        return self.dictionary_pop(pops, Key.value['CHALLENGES'])
+        return self.dictionary_pop(Key.CHALLENGES, pops)
 
 
     def add_challenge(self, name: str, date: str, description: str = '', keyvalues: dict = {}):
         """Add a challenge to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
-            self.chronology[Key.value['CHALLENGES']].update({name : {
-                Key.value['DATE'] : self.format_date(date),
-                Key.value['DESCRIPTION'] : description,
+            self.chronology[Key.CHALLENGES].update({name : {
+                Key.DATE : self.format_date(date),
+                Key.DESCRIPTION : description,
             }})
-            self.chronology[Key.value['CHALLENGES']][name].update(keyvalues)
+            self.chronology[Key.CHALLENGES][name].update(keyvalues)
 
 
     def remove_challenge(self, challengename):
         """Remove a challenge from the dictionary."""
-        self.remove_key(Key.value['CHALLENGES'], challengename)
+        self.remove_key(Key.CHALLENGES, challengename)
 
 
     ###### COMMENTS 
 
     def comments(self):
         """Display a numbered list of comments."""
-        listlen = len(self.commentlist)
-        if listlen == 0:
+        lengthlist: int = len(self.chronology[Key.OVERVIEW][Key.COMMENTS])
+        if lengthlist == 0:
             print(Msg.NO_COMMENTS.format(self.name))
         else:
-            space = int(np.ceil(np.log10(listlen)))
-            for i in range(0, len(self.commentlist)):
-                print('{i:>{s}} : {c}'.format(i=str(i), c=self.commentlist[i], s=space))
+            return pd.DataFrame.from_dict(self.chronology[Key.OVERVIEW][Key.COMMENTS], orient='index')
 
 
     def add_comment(self, text: str = ''):
@@ -590,38 +606,48 @@ class Chronology():
         ---------
         
         """
-        
-        if text == '':
-            self.commentlist.append(String.SPACE)
-        else:
-            texts = text.split(String.NEWLINE)
-            for i in texts:
-                self.commentlist.append(i.replace(String.NEWLINE, ''))
+
+        texts: str = text.split(String.NEWLINE)
+        timestamp: str = str(datetime.now())
+        for i in texts:
+            how_many_comments: str = str(len(self.chronology[Key.OVERVIEW][Key.COMMENTS]) + 1)
+            self.chronology[Key.OVERVIEW][Key.COMMENTS].update({how_many_comments : {
+                Key.MESSAGE : i,
+                Key.USER : self.user,
+                Key.TIMESTAMP : timestamp,
+            }})
+        print(Msg.ADDED_COMMENT.format(text))
 
 
     def remove_comment(self, index: int):
         """Remove a comment from the chronology by specifying its number in the comments list."""
-        lengthlist = len(self.commentlist)
+        lengthlist: int = len(self.chronology[Key.OVERVIEW][Key.COMMENTS])
         if index >= lengthlist:
             print(Msg.OUT_OF_RANGE.format(lengthlist))
         else:
-            self.commentlist.pop(index)
+            comment = self.chronology[Key.OVERVIEW][Key.COMMENTS][str(index)][Key.MESSAGE]
+            self.chronology[Key.OVERVIEW][Key.COMMENTS].pop(str(index))
+            print(Msg.COMMENT_REMOVED.format(str(index), comment))
+        
 
     def remove_all_comments(self):
         """Remove all comments from the chronology."""
-        self.commentlist = []
+        keylist: list = [key for key in self.chronology[Key.OVERVIEW][Key.COMMENTS]]
+        for key in keylist:
+            self.chronology[Key.OVERVIEW][Key.COMMENTS].pop(key)
+        print(Msg.ALL_COMMENTS_REMOVED.format(self.chronologyname))
 
 
     ###### DICTIONARIES
 
-    def keys(self) -> pd.DataFrame:
+    def reserved_keys(self) -> pd.DataFrame:
         """Display the KEYS constants."""
-        return pd.DataFrame.from_dict(Key, orient='index', columns=['Value'])
+        return pd.DataFrame(data=Key.keylist, columns=['Reserved Keys']) 
     
-    def check_keys(self, keyvalues: dict):
+    def check_keys(self, keyvalues: dict[str, str] | dict[str, dict]):
         count = 0
         for i in keyvalues.keys():
-            if i in Key.value.keys():
+            if i in Key.keylist:
                 print(Msg.RESERVED.format(i))
                 count += 1
         if count > 0:
@@ -629,22 +655,60 @@ class Chronology():
         else:
             return True
 
+    def dictshow(self, 
+                 dictname: str = '', 
+                 tab: str = '    ', 
+                 expand: int = 0, 
+                 as_json: bool = False, 
+                 as_pandas: bool = False):
+        if dictname == '':
+            dictionary = self.chronology
+        else:
+            dictionary = self.chronology[dictname]
+        if as_json:
+            print(json.dumps(dictionary, indent=len(tab)))
+        elif as_pandas:
+            return pd.DataFrame.from_dict(dictionary)
+        else:
+            for key in dictionary.keys():
+                if expand > 0 and isinstance(dictionary[key], dict):
+                    if len(dictionary[key]) > 0:
+                        print('{}: {}'.format(key, String.LEFT_BRACE))
+                        for subkey in dictionary[key]:
+                            print('{}{}: {}'.format(tab, subkey, dictionary[key][subkey]))
+                        print(String.RIGHT_BRACE)
+                    else:
+                        print('{}: {}'.format(key, dictionary[key]))
+                else:
+                    print('{}: {}'.format(key, dictionary[key]))
 
-    def dictionaries(self, tab: str = '    '):
+    def dictionaries(self, tab: str = '    ', dictname: str = ''):
         for key in self.chronology.keys():
             if isinstance(self.chronology[key], dict):
                 if len(self.chronology[key]) > 0:
-                    print('{} : {}'.format(key, String.LEFT_BRACE))
+                    print('{}: {}'.format(key, String.LEFT_BRACE))
                     for subkey in self.chronology[key]:
-                        print('{}{} : {}'.format(tab, subkey, self.chronology[key][subkey]))
+                        if subkey == Key.COMMENTS and len(self.chronology[key][subkey]) > 0:
+                            print('{}{}: {}'.format(tab, subkey, String.LEFT_BRACE))
+                            for subsubkey in self.chronology[key][subkey]:
+                                print('{}{}{}: {}'.format(tab, tab, subsubkey, self.chronology[key][subkey][subsubkey]))
+                            print('{}{}'.format(tab,String.RIGHT_BRACE))
+                        else:
+                            print('{}{}: {}'.format(tab, subkey, self.chronology[key][subkey]))
                     print(String.RIGHT_BRACE)
                 else:
-                    print('{} : {}'.format(key, self.chronology[key]))
+                    print('{}: {}'.format(key, self.chronology[key]))
+            # elif isinstance(self.chronology[key], list):
+            #     if len(self.chronology[key]) > 0:
+            #         print('{}: {}'.format(key, String.LEFT_BRACKET))
+            #         for i in self.chronology[key]:
+            #             print('{}{}: {}'.format(tab, str(i), self.chronology[key][i]))
+            #         print(String.RIGHT_BRACKET)
             else:
-                print('{} : {}'.format(key, self.chronology[key]))
+                print('{}: {}'.format(key, self.chronology[key]))
 
 
-    def dictionary_pop(self, dictname: str, pops: list):
+    def dictionary_pop(self, dictname: str, pops: list[str]):
         """Display the dictionary except for specified keys.
         
         Parameter
@@ -686,7 +750,7 @@ class Chronology():
             The name of the key to be removed from the dictionary
         
         """
-        if key in Key.value.keys():
+        if key in Key.keylist:
             print(Msg.NOT_REMOVABLE.format(key))
         elif key not in self.chronology[dictname].keys():
             print(Msg.NOT_IN_DICT.format(key, dictname))
@@ -699,7 +763,7 @@ class Chronology():
 
     def events(self):
         """Display the EVENTS dictionary."""
-        return self.show_dictionary(Key.value['EVENTS'])
+        return self.show_dictionary(Key.EVENTS)
 
 
     def events_pop(self, pops: list) -> pd.DataFrame:
@@ -711,7 +775,7 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the events.
             
         """
-        return self.dictionary_pop(Key.value['EVENTS'], pops)
+        return self.dictionary_pop(Key.EVENTS, pops)
     
     
     def add_event(
@@ -723,23 +787,23 @@ class Chronology():
         ):
         """Add an event to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
-            self.chronology[Key.value['EVENTS']].update({name : {
-                Key.value['DATE'] : self.format_date(date),
-                Key.value['DESCRIPTION'] : description,
+            self.chronology[Key.EVENTS].update({name : {
+                Key.DATE : self.format_date(date),
+                Key.DESCRIPTION : description,
             }})
-            self.chronology[Key.value['EVENTS']][name].update(keyvalues)
+            self.chronology[Key.EVENTS][name].update(keyvalues)
 
 
     def remove_event(self, eventname):
         """Remove an event from the dictionary."""
-        self.remove_key(Key.value['EVENTS'], eventname)
+        self.remove_key(Key.EVENTS, eventname)
 
         
     ###### MARKERS 
 
     def markers(self) -> pd.DataFrame:
         """Display the markers in a chronology."""
-        return self.show_dictionary(Key.value['MARKERS'])
+        return self.show_dictionary(Key.MARKERS)
 
 
     def markers_pop(self, pops: list) -> pd.DataFrame:
@@ -751,29 +815,29 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the markers.
             
         """
-        return self.dictionary_pop(Key.value['MARKERS'], pops)
+        return self.dictionary_pop(Key.MARKERS, pops)
     
 
     def add_marker(self, name: str, date: str, description: str = '', keyvalues: dict = {}):
         """Add a marker to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
-            self.chronology[Key.value['MARKERS']].update({name : {
-                Key.value['DATE'] : self.format_date(date),
-                Key.value['DESCRIPTION'] : description,
+            self.chronology[Key.MARKERS].update({name : {
+                Key.DATE : self.format_date(date),
+                Key.DESCRIPTION : description,
             }})
-            self.chronology[Key.value['MARKERS']][name].update(keyvalues)
+            self.chronology[Key.MARKERS][name].update(keyvalues)
         
 
     def remove_marker(self, markername):
         """Remove a marker from the dictionary."""
-        self.remove_key(Key.value['MARKERS'], markername)
+        self.remove_key(Key.MARKERS, markername)
 
 
     ###### PERIODS 
 
     def periods(self) -> pd.DataFrame:
         """Display the periods defined for the chronology if there are any."""
-        return self.show_dictionary(Key.value['PERIODS'])
+        return self.show_dictionary(Key.PERIODS)
 
 
     def periods_pop(self, pops: list) -> pd.DataFrame:
@@ -785,22 +849,22 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the periods.
             
         """
-        return self.dictionary_pop(Key.value['PERIODS'], pops)
+        return self.dictionary_pop(Key.PERIODS, pops)
 
     
     def add_period(self, name: str, begin: str, end: str, keyvalues: dict = {}):
         """Add a period to the dictionary."""
         if self.check_date(begin) and self.check_date(end) and self.check_keys(keyvalues): 
-            self.chronology[Key.value['PERIODS']].update({name : {
-                Key.value['BEGIN'] : self.format_date(begin),
-                Key.value['END'] : self.format_date(end),
+            self.chronology[Key.PERIODS].update({name : {
+                Key.BEGIN : self.format_date(begin),
+                Key.END : self.format_date(end),
             }})
-            self.chronology[Key.value['PERIODS']][name].update(keyvalues)
+            self.chronology[Key.PERIODS][name].update(keyvalues)
 
 
     def remove_period(self, periodname):
         """Remove a period from the dictionary."""
-        self.remove_key(Key.value['PERIODS'], periodname)
+        self.remove_key(Key.PERIODS, periodname)
 
 
     ###### SAVE 
@@ -811,14 +875,15 @@ class Chronology():
                 f.write('%s\n' % i)
             for key, value in self.chronology.items():
                 if isinstance(value, dict):
-                    f.write("{'%s' : %s}\n" % (key, value))
+                    f.write("{'%s': %s}\n" % (key, value))
                 else:
-                    f.write("{'%s' : '%s'}\n" % (key, value))
+                    f.write("{'%s': '%s'}\n" % (key, value))
             f.close()
 
 
-    def save_as_json(self):
-        pass
+    def save_as_json(self, filename: str):
+        with open(filename, 'w') as file:
+            json.dump(self.chronology, file, indent=4)
 
 
     def save_as_html(self):
@@ -833,7 +898,7 @@ class Chronology():
 
     def texts(self) -> pd.DataFrame:
         """Display the texts referenced to justify a chronology."""
-        return self.show_dictionary(Key.value['TEXTS'])
+        return self.show_dictionary(Key.TEXTS)
 
 
     def texts_pop(self, pops: list) -> pd.DataFrame:
@@ -845,19 +910,19 @@ class Chronology():
             A list of keys to be temporarily removed before displaying the texts.
             
         """
-        return self.dictionary_pop(Key.value['TEXTS'], pops)
+        return self.dictionary_pop(Key.TEXTS, pops)
 
 
     def add_text(self, name: str, date: str, description: str = '', keyvalues: dict = {}):
         """Add an event to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
-            self.chronology[Key.value['TEXTS']].update({name : {
-                Key.value['DATE'] : self.format_date(date),
-                Key.value['DESCRIPTION'] : description,
+            self.chronology[Key.TEXTS].update({name : {
+                Key.DATE : self.format_date(date),
+                Key.DESCRIPTION : description,
             }})
-            self.chronology[Key.value['TEXTS']][name].update(keyvalues)
+            self.chronology[Key.TEXTS][name].update(keyvalues)
 
 
     def remove_text(self, textname):
         """Permanently remove a text from the dictionary."""
-        self.remove_key(Key.value['TEXTS'], textname)
+        self.remove_key(Key.TEXTS, textname)

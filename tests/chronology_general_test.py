@@ -39,7 +39,7 @@ def test_add_comment(input_n, expected):
 
 testdata = [
     ('a.name', 'newname'),
-    ('a.chronology[Key.value["OVERVIEW"]][Key.value["NAME"]]', 'newname'),
+    ('a.chronology[Key.OVERVIEW][Key.NAME]', 'newname'),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_rename(input_n, expected):

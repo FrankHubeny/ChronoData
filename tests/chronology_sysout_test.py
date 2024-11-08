@@ -18,7 +18,7 @@ def test_baddate(capsys):
     a = Chronology('testname')
     a.add_event('eventname', date)
     captured = capsys.readouterr()  
-    assert captured.out == ''.join([Msg.BAD_DATE.format(date),'\n'])
+    assert captured.out == ''.join([Msg.BAD_DATE.format(date, a.calendar),'\n'])
 
 """------------------------------------------------------------------------------
                             Msg.BAD_LABEL
@@ -30,7 +30,7 @@ def test_badlabel(capsys):
     a.enable_strict_labels()
     a.check_date(date)
     captured = capsys.readouterr()  
-    assert captured.out == ''.join([Msg.BAD_LABEL.format(date, ' Ax', Calendar.system[a.calendar][Key.value['POSLABEL']], Calendar.system[a.calendar][Key.value['NEGLABEL']], a.calendar),'\n'])
+    assert captured.out == ''.join([Msg.BAD_LABEL.format(date, ' Ax', Calendar.system[a.calendar][Key.POSLABEL], Calendar.system[a.calendar][Key.NEGLABEL], a.calendar),'\n'])
 
 """------------------------------------------------------------------------------
                             Msg.BOTH_NAME_FILE
@@ -50,7 +50,7 @@ def test_calendarsdontmatch(capsys):
     b = Chronology('two', calendar='Secular')
     a.combine(b.name, b.chronology)
     captured = capsys.readouterr()  
-    assert captured.out == ''.join([Msg.CALENDARS_DONT_MATCH.format(Key.value['GREGORIAN'], Key.value['SECULAR']), '\n'])
+    assert captured.out == ''.join([Msg.CALENDARS_DONT_MATCH.format(Key.GREGORIAN, Key.SECULAR), '\n'])
 
 """------------------------------------------------------------------------------
                             Msg.CHANGED
@@ -58,9 +58,9 @@ def test_calendarsdontmatch(capsys):
 
 def test_changed(capsys):
     a = Chronology('one')
-    a.to(Calendar.system[Key.value['SECULAR']][Key.value['NAME']])
+    a.to(Calendar.system[Key.SECULAR][Key.NAME])
     captured = capsys.readouterr()  
-    assert captured.out == ''.join([Msg.CHANGED.format(Calendar.system[Key.value['SECULAR']][Key.value['NAME']]), '\n'])
+    assert captured.out == ''.join([Msg.CHANGED.format(Calendar.system[Key.SECULAR][Key.NAME]), '\n'])
 
 """------------------------------------------------------------------------------
                             Msg.HAS_CALENDAR
