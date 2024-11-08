@@ -12,13 +12,13 @@ from chronodata.utils.constants import String, Number, Msg, Datetime, Key, Calen
 
 testdata = [
     # keys
-    ('Key.EVENTS', 'EVENTS'),
     ('Key.ACTORS', 'ACTORS'),
     ('Key.BEFOREPRESENT', 'Before Present'),
     ('Key.BEGIN', 'BEGIN'),
     ('Key.BIRTH', 'BIRTH'),
     ('Key.CALENDAR', 'CALENDAR'),
     ('Key.CHALLENGES', 'CHALLENGES'),
+    ('Key.COMMENTS', 'COMMENTS'),
     ('Key.DATE', 'DATE'),
     ('Key.DEATH', 'DEATH'),
     ('Key.DESCRIPTION', 'DESCRIPTION'),
@@ -29,8 +29,10 @@ testdata = [
     ('Key.FEMALE', 'FEMALE'),
     ('Key.FILE', 'FILENAME'),
     ('Key.GREGORIAN', 'Gregorian'),
+    ('Key.LABELS', 'LABELS'),
     ('Key.MALE', 'MALE'),
     ('Key.MARKERS', 'MARKERS'),
+    ('Key.MESSAGE', 'MSG'),
     ('Key.MOTHER', 'MOTHER'),
     ('Key.NAME', 'NAME'),
     ('Key.NEGLABEL', 'NEG LABEL'),
@@ -39,6 +41,8 @@ testdata = [
     ('Key.POSLABEL', 'POS LABEL'),
     ('Key.SECULAR', 'Secular'),
     ('Key.TEXTS', 'TEXTS'),
+    ('Key.TIMESTAMP', 'TIMESTAMP'),
+    ('Key.USER', 'USER'),
     ('Key.USEZERO', 'USE ZERO'),
     ('Key.ZEROYEAR', 'ZERO YEAR'),
     # calendars
@@ -49,11 +53,19 @@ testdata = [
     # numbers
     ('Number.DATETIME_EPOCH', 1970),
     # strings
+    ('String.ACTOR', 'actor'),
+    ('String.CHALLENGE', 'challenge'),
+    ('String.EVENT', 'event'),
     ('String.LEFT_BRACE', '{'),
+    ('String.LEFT_BRACKET', '['),
+    ('String.MARKER', 'marker'),
     ('String.NEGATIVE', '-'),
     ('String.NEWLINE', '\n'),
+    ('String.PERIOD', 'period'),
     ('String.RIGHT_BRACE', '}'),
+    ('String.RIGHT_BRACKET', ']'),
     ('String.SPACE', ' '),
+    ('String.TEXT', 'text'),
     # datetimes
     ('Datetime.ATTOSECOND', 'as'),
     ('Datetime.DAY', 'D'),

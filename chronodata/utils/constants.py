@@ -5,18 +5,25 @@ from typing import Literal
 
 class String:
     
-    LEFT_BRACE: str = '{'
-    LEFT_BRACKET: str = '['
-    NEGATIVE: str = '-'
-    NEWLINE: str = '\n'
-    RIGHT_BRACE: str = '}'
-    RIGHT_BRACKET: str = ']'
-    SPACE: str = ' '
+    ACTOR: Literal['actor'] = 'actor'
+    CHALLENGE: Literal['challenge'] = 'challenge'
+    EVENT: Literal['event'] = 'event'
+    LEFT_BRACE: Literal['{'] = '{'
+    LEFT_BRACKET: Literal['['] = '['
+    MARKER: Literal['marker'] = 'marker'
+    NEGATIVE: Literal['-'] = '-'
+    NEWLINE: Literal['\n'] = '\n'
+    PERIOD: Literal['period'] = 'period'
+    RIGHT_BRACE: Literal['}'] = '}'
+    RIGHT_BRACKET: Literal[']'] = ']'
+    SPACE: Literal[' '] = ' '
+    TEXT: Literal['text'] = 'text'
 
 class Number:
     DATETIME_EPOCH: int = 1970
 
 class Msg:
+    ADDED: str = 'The {0} "{1}" has been added to the chronology.'
     ADDED_COMMENT: str = 'The comment "{0}" has been added.'
     ALL_COMMENTS_REMOVED: str = 'All comments have been removed from the "{0}" chronology.'
     BAD_DATE: str = 'The value "{0}" for a date is not properly formatted in the {1} calendar.'
@@ -29,14 +36,14 @@ class Msg:
     COMMENT_REMOVED: str = 'Comment {0} "{1}" has been removed from the chronology.'
     COUNT_RESERVED: str = '{0} reserved keys were used.'
     HAS_CALENDAR: str = 'The chronology already has the "{0}" calendar.'
-    KEY_REMOVED: str = 'The name "{0}" has been removed from the "{0}" dictionary.'
+    KEY_REMOVED: str = 'The name "{0}" has been removed from "{1}".'
     MISSING_NAME: str = 'The chronology has neither a name nor a file to load.'
     NO_COMMENTS: str = 'There are no comments for the {0} chronology.'
     NO_DICT_NAME: str = 'The chronology "{0}" has no {1}.'
-    NOT_IN_DICT: str = 'The name "{0}" is not in the chronology dictionary "{1}".'
+    NOT_IN_DICT: str = 'The name "{0}" is not in the "{1}".'
     NOT_REMOVABLE: str = 'The name "{0}" is a reserved key and cannot be removed.'
     ONE: str = 'One reserved key were used.'
-    OUT_OF_RANGE: str = 'There are only {0} comments in the list. The index starts at 0.'
+    OUT_OF_RANGE: str = 'There is no comment at index {0}.'
     RENAME: str = 'The chronology has been renamed "{0}".'
     RESERVED: str = 'The key "{0}" is a reserved key.'
     USER_REQUIRED: str = 'A named user is required to log comments, challenges and responses for the "{0}" chronology or to load the "{1}" file.'
@@ -89,7 +96,6 @@ class Key:
     FEMALE: str = 'FEMALE'
     FILE: str = 'FILENAME'
     GREGORIAN: str = 'Gregorian'
-    ID: str = 'ID'
     LABELS: str = 'LABELS'
     MALE: str = 'MALE'
     MARKERS: str = 'MARKERS'
@@ -140,7 +146,7 @@ class Key:
     ]
 
 class Calendar():
-    system: dict = {
+    system: dict[str, dict] = {
         Key.BEFOREPRESENT : {
             Key.NAME : 'Before Present',
             Key.POSLABEL : '',

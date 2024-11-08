@@ -17,7 +17,7 @@ testdata = [
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_init(input_n, expected):
-    a = Chronology('oldname')
+    a = Chronology(user='Frank', chronologyname='oldname')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -25,11 +25,12 @@ def test_init(input_n, expected):
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ('a.commentlist[0]', 'Test'),
+    ('a.chronology[Key.OVERVIEW][Key.COMMENTS][str(1)][Key.MESSAGE]', 'Test'),
+    ('a.chronology[Key.OVERVIEW][Key.COMMENTS][str(1)][Key.USER]', 'Frank'),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_add_comment(input_n, expected):
-    a = Chronology('oldname')
+    a = Chronology(user='Frank', chronologyname='oldname')
     a.add_comment('Test')
     assert eval(input_n) == expected
 
@@ -43,7 +44,7 @@ testdata = [
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_rename(input_n, expected):
-    a = Chronology('oldname')
+    a = Chronology(user='Frank', chronologyname='oldname')
     a.rename('newname')
     assert eval(input_n) == expected
 
@@ -52,14 +53,14 @@ def test_rename(input_n, expected):
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ('a.commentlist[0]', 'Test2'),
+    ('a.chronology[Key.OVERVIEW][Key.COMMENTS][str(1)][Key.MESSAGE]', 'Test2'),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_remove_comment(input_n, expected):
-    a = Chronology('oldname')
+    a = Chronology(user='Frank', chronologyname='oldname')
     a.add_comment('Test')
     a.add_comment('Test2')
-    a.remove_comment(0)
+    a.remove_comment(1)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -67,11 +68,11 @@ def test_remove_comment(input_n, expected):
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ('len(a.commentlist)', 0),
+    ('len(a.chronology[Key.OVERVIEW][Key.COMMENTS])', 0),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_remove_all_comments(input_n, expected):
-    a = Chronology('oldname')
+    a = Chronology(user='Frank', chronologyname='oldname')
     a.add_comment('Test')
     a.add_comment('Test2')
     a.remove_all_comments()

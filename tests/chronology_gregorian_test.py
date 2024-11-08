@@ -69,14 +69,14 @@ testdata = [
 
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_gregorian_calendar(input_n, expected):
-    a = Chronology('newname')
+    a = Chronology(user='Frank', chronologyname='newname')
     a.add_period('Period One', '1000 BC', '500 BC')
     a.add_period('Period Two', '1000 BC', '1000 AD')
     a.add_period('Period Three', '1000 AD', '2000 AD')
     a.add_period('Period Four', '2020-01-06 01:30:00 AD', '2024-02-05 23:15:40 AD')
     a.add_period('Period Five', '2020-01-06 01:30:00 BC', '2024-02-05 23:15:40 BC')
-    a.add_period('Current', '2000 AD', '2100 AD', keyvalues={'Location' : 'Here'})
-    a.add_period('Current2', '2000 AD', '2100 AD', keyvalues={'Location' : 'Here', 'Where' : 'There'})
+    a.add_period('Current', '2000 AD', '2100 AD', Location='Here')
+    a.add_period('Current2', '2000 AD', '2100 AD', Location='Here', Where='There')
     assert eval(input_n) == expected
     
 
