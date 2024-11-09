@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """This module provides a namespace for constants."""
 
-from typing import Literal
+from typing import Any, Literal
 
 class String:
     
@@ -146,7 +146,7 @@ class Key:
     ]
 
 class Calendar():
-    system: dict[str, dict] = {
+    system: dict[str, Any] = {
         Key.BEFOREPRESENT : {
             Key.NAME : 'Before Present',
             Key.POSLABEL : '',

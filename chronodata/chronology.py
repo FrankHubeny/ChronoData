@@ -48,7 +48,7 @@ __author__ = 'Frank Hubeny'
     #     self.chronologies = chronologies
 
 
-class Chronology():
+class Chronology(dict[str, Any]):
     """Construct a dictionary to represent a chronology.
 
     The tools provide for storing dates associated with periods and events.
@@ -138,7 +138,7 @@ class Chronology():
                 self.user = self.USER
             if self.user != '':
                 self.labelstrict: bool = labelstrict
-                self.chronology = {}
+                self.chronology: dict[str, dict[str, Any]] = {}
                 if chronologyname != '':
                     self.chronology.update({
                         Key.OVERVIEW : {
@@ -175,55 +175,55 @@ class Chronology():
                 self.usezero: bool = Calendar.system[self.calendar][Key.USEZERO]
                         
 
-    def show(self, tab: str = '    '):
-        """Show the entire chronology of both comments and dictionaries."""
+    def show(self, tab: str = '    ') -> None:
+        """Show the entire chronology."""
         self.dictionaries(tab)
 
     def __str__(self):
         self.show()
         return ''
     
-    def rename(self, newname: str) -> str:
+    def rename(self, newname: str) -> None:
         """Rename the chronology."""
         self.chronology[Key.OVERVIEW].update({Key.NAME : newname})
         self.name = self.chronology[Key.OVERVIEW][Key.NAME]
         print(Msg.RENAME.format(self.name))
 
-    def combine(self, newname: str, chronology: dict):
-        """Return a new chronology containing a combination of the current one and another chronology.
+    # def combine(self, newname: str, chronology: dict[str, Any]):
+    #     """Return a new chronology containing a combination of the current one and another chronology.
 
-        The two source chronologies are not changed.  A new chronology containing both 
-        of them is returned.  The two chronologies must have the same calendar. Use
-        the `to` method to convert one of the chronologies to the other if their
-        calendars do not agree.
+    #     The two source chronologies are not changed.  A new chronology containing both 
+    #     of them is returned.  The two chronologies must have the same calendar. Use
+    #     the `to` method to convert one of the chronologies to the other if their
+    #     calendars do not agree.
 
-        See Also
-        --------
-        to
+    #     See Also
+    #     --------
+    #     to
         
-        Parameters
-        ----------
-        chronologyname: str
-            The name of the new chronology
-        chronology: dict
-            The chronology to combine with the present one.
-        comments: list (optional)
-            The comments from the combined chronology.
-        keepcomments: bool (default True)
-            Add the comments from the self chronology into the new chronology.
-        """
+    #     Parameters
+    #     ----------
+    #     chronologyname: str
+    #         The name of the new chronology
+    #     chronology: dict
+    #         The chronology to combine with the present one.
+    #     comments: list (optional)
+    #         The comments from the combined chronology.
+    #     keepcomments: bool (default True)
+    #         Add the comments from the self chronology into the new chronology.
+    #     """
 
-        if self.calendar == chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]:
-            newchron: Chronology = Chronology(user=self.user, chronologyname=newname, calendar=self.calendar)
-            for key in self.maindictionaries:
-                newchron.chronology.update(self.chronology[key])
-                newchron.chronology.update(chronology[key])
-            return newchron
-        else:
-            print(Msg.CALENDARS_DONT_MATCH.format(
-                self.calendar, 
-                chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]
-            ))
+    #     if self.calendar == chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]:
+    #         newchron: Chronology = Chronology(user=self.user, chronologyname=newname, calendar=self.calendar)
+    #         for key in self.maindictionaries:
+    #             newchron.chronology.update(self.chronology[key])
+    #             newchron.chronology.update(chronology[key])
+    #         return newchron
+    #     else:
+    #         print(Msg.CALENDARS_DONT_MATCH.format(
+    #             self.calendar, 
+    #             chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]
+    #         ))
 
 
     ###### ACTORS 
@@ -233,7 +233,7 @@ class Chronology():
         return self.show_dictionary(Key.ACTORS)
 
 
-    def actors_pop(self, pops: list[str]):
+    def actors_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the actors defined for the chronology if there are any.
         
         Parameter
@@ -253,8 +253,8 @@ class Chronology():
             birth: str = '', 
             death: str = '', 
             description: str = '', 
-            **keyvalues
-        ) -> str:
+            **keyvalues: str
+        ) -> None:
         """Add an actor to the dictionary."""
         if self.check_date(birth) and self.check_date(death): # and self.check_keys(keyvalues):
             self.chronology[Key.ACTORS].update({name : {
@@ -268,7 +268,7 @@ class Chronology():
             print(Msg.ADDED.format(String.ACTOR, self.chronology[Key.ACTORS][name]))
 
 
-    def remove_actor(self, actorname: str) -> str:
+    def remove_actor(self, actorname: str) -> None:
         """Remove an actor from the dictionary."""
         self.remove_key(Key.ACTORS, actorname)
 
@@ -411,7 +411,7 @@ class Chronology():
             return 365
 
 
-    def numericdate(self, date: str, unit: str = Datetime.YEAR) -> float:
+    def numericdate(self, date: str, unit: str = Datetime.YEAR) -> np.datetime64:
         """A procedure to convert an ISO string with KEYS to astronomical year numbering.
         This numeric value contains a Year Zero as 0.  Dates labelled as `BC` or `BCE`
         will be converted to a negative value one year larger than the string date with
@@ -452,7 +452,7 @@ class Chronology():
             numericdate = np.datetime64(date)
         return numericdate
 
-    def stringdate(self, date: np.ndarray[Any, Any], unit: Literal['Y'] = Datetime.YEAR) -> str:
+    def stringdate(self, date: np.ndarray[Any, Any], unit: Literal['Y'] = Datetime.YEAR) -> np.ndarray[Any, np.dtype[Any]]:
         """A procedure to convert a numeric date to a date labelled with an epoch label.
         
         Parameters
@@ -461,13 +461,11 @@ class Chronology():
             The numeric date to be converted to a string
 
         """
-        if date is None:
-            return ''
-        else:
-            return np.datetime_as_string(date, unit=unit)
+        
+        return np.datetime_as_string(date, unit=unit)
 
     
-    def add_calendar(self, name: str, begin: str, end: str, **keyvalues) -> None:
+    def add_calendar(self, name: str, begin: str, end: str, **keyvalues: str) -> None:
         """Add a calendar to the dictionary."""
         pass
 
@@ -544,7 +542,7 @@ class Chronology():
         return self.dictionary_pop(Key.CHALLENGES, pops)
 
 
-    def add_challenge(self, name: str, date: str, description: str = '', **keyvalues) -> None:
+    def add_challenge(self, name: str, date: str, description: str = '', **keyvalues: str) -> None:
         """Add a challenge to the dictionary."""
         if self.check_date(date): # and self.check_keys(keyvalues):
             self.chronology[Key.CHALLENGES].update({name : {
@@ -568,8 +566,7 @@ class Chronology():
         lengthlist: int = len(self.chronology[Key.OVERVIEW][Key.COMMENTS])
         if lengthlist == 0:
             print(Msg.NO_COMMENTS.format(self.name))
-        else:
-            return pd.DataFrame.from_dict(self.chronology[Key.OVERVIEW][Key.COMMENTS], orient='index')
+        return pd.DataFrame.from_dict(self.chronology[Key.OVERVIEW][Key.COMMENTS], orient='index')
 
 
     def add_comment(self, text: str = '') -> None:
@@ -616,7 +613,7 @@ class Chronology():
         print(Msg.ADDED_COMMENT.format(text))
 
 
-    def remove_comment(self, *index) -> None:
+    def remove_comment(self, *index: int) -> None:
         """Remove a comment from the chronology by specifying its number in the comments list."""
         for idx in index:
             if str(idx) not in self.chronology[Key.OVERVIEW][Key.COMMENTS].keys():
@@ -648,7 +645,7 @@ class Chronology():
         """Display the KEYS constants."""
         return pd.DataFrame(data=Key.keylist, columns=['Reserved Keys']) 
     
-    def check_keys(self, keyvalues: dict[str, str] | dict[str, dict]) -> bool:
+    def check_keys(self, keyvalues: dict[str, str] | dict[str, dict[str, Any]]) -> bool:
         count = 0
         for i in keyvalues.keys():
             if i in Key.keylist:
@@ -664,7 +661,7 @@ class Chronology():
                  tab: str = '    ', 
                  expand: int = 0, 
                  as_json: bool = False, 
-                 as_pandas: bool = False) -> None:
+                 as_pandas: bool = False) -> Any:
         if dictname == '':
             dictionary = self.chronology
         else:
@@ -717,7 +714,7 @@ class Chronology():
             The name of the dictionary to display.
             
         """
-        dictionary: dict = copy.deepcopy(dict(self.chronology[dictname]))
+        dictionary: dict[str, dict[str, Any]] = copy.deepcopy(dict(self.chronology[dictname]))
         for i in pops:
             for j in dictionary:
                 try:
@@ -728,11 +725,10 @@ class Chronology():
     
 
     def show_dictionary(self, dictname: str) -> pd.DataFrame:
-        if len(self.chronology[dictname]) > 0:
-            return pd.DataFrame.from_dict(self.chronology[dictname], orient='index')
-        else:
+        if len(self.chronology[dictname]) == 0:
             print(Msg.NO_DICT_NAME.format(self.name, dictname.lower()))
-            
+        return pd.DataFrame.from_dict(self.chronology[dictname], orient='index')
+         
     
     def remove_key(self, dictname: str, key: str) -> None:
         """Revove a key from a dictionary of the chronology.  
@@ -764,7 +760,7 @@ class Chronology():
         return self.show_dictionary(Key.EVENTS)
 
 
-    def events_pop(self, pops: list[str]) -> None:
+    def events_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the events defined for the chronology without some of the keys.
         
         Parameter
@@ -781,7 +777,7 @@ class Chronology():
             name: str, 
             date: str, 
             description: str = '', 
-            **keyvalues
+            **keyvalues: str
         ) -> None:
         """Add an event to the dictionary."""
         if self.check_date(date): #and self.check_keys(keyvalues):
@@ -805,7 +801,7 @@ class Chronology():
         return self.show_dictionary(Key.MARKERS)
 
 
-    def markers_pop(self, pops: list[str]) -> None:
+    def markers_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the markers defined for the chronology if there are any.
         
         Parameter
@@ -817,7 +813,7 @@ class Chronology():
         return self.dictionary_pop(Key.MARKERS, pops)
     
 
-    def add_marker(self, name: str, date: str, description: str = '', **keyvalues) -> None:
+    def add_marker(self, name: str, date: str, description: str = '', **keyvalues: str) -> None:
         """Add a marker to the dictionary."""
         if self.check_date(date) and self.check_keys(keyvalues):
             self.chronology[Key.MARKERS].update({name : {
@@ -840,7 +836,7 @@ class Chronology():
         return self.show_dictionary(Key.PERIODS)
 
 
-    def periods_pop(self, pops: list) -> None:
+    def periods_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the periods defined for the chronology except for specified keys.
         
         Parameter
@@ -852,7 +848,7 @@ class Chronology():
         return self.dictionary_pop(Key.PERIODS, pops)
 
     
-    def add_period(self, name: str, begin: str, end: str, **keyvalues) -> None:
+    def add_period(self, name: str, begin: str, end: str, **keyvalues: str) -> None:
         """Add a period to the dictionary."""
         if self.check_date(begin) and self.check_date(end) and self.check_keys(keyvalues): 
             self.chronology[Key.PERIODS].update({name : {
@@ -873,10 +869,10 @@ class Chronology():
     def save(self, file: str) -> None:
         with open(file, 'w') as f:
             for key, value in self.chronology.items():
-                if isinstance(value, dict):
-                    f.write("{'%s': %s}\n" % (key, value))
-                else:
-                    f.write("{'%s': '%s'}\n" % (key, value))
+                #if isinstance(value, dict):
+                f.write("{'%s': %s}\n" % (key, value))
+                #else:
+                #    f.write("{'%s': '%s'}\n" % (key, value))
             f.close()
 
 
@@ -900,7 +896,7 @@ class Chronology():
         return self.show_dictionary(Key.TEXTS)
 
 
-    def texts_pop(self, pops: list) -> None:
+    def texts_pop(self, pops: list[str]) -> pd.DataFrame:
         """Display the texts defined for the chronology except for specified keys.
         
         Parameter
@@ -912,7 +908,7 @@ class Chronology():
         return self.dictionary_pop(Key.TEXTS, pops)
 
 
-    def add_text(self, name: str, date: str, description: str = '', **keyvalues) -> None:
+    def add_text(self, name: str, date: str, description: str = '', **keyvalues: str) -> None:
         """Add an event to the dictionary."""
         if self.check_date(date): # and self.check_keys(keyvalues):
             self.chronology[Key.TEXTS].update({name : {

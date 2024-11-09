@@ -81,10 +81,10 @@ def test_bothnamefile(capsys):
                             Msg.CALENDARS_DONT_MATCH
 ------------------------------------------------------------------------------"""
 
-def test_calendarsdontmatch(capsys):
-    A.combine('combinedname', B.chronology)
-    captured = capsys.readouterr()  
-    assert captured.out == ''.join([Msg.CALENDARS_DONT_MATCH.format(A.calendar, B.chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]), '\n'])
+#def test_calendarsdontmatch(capsys):
+#    A.combine('combinedname', B.chronology)
+#    captured = capsys.readouterr()  
+#    assert captured.out == ''.join([Msg.CALENDARS_DONT_MATCH.format(A.calendar, B.chronology[Key.OVERVIEW][Key.CALENDAR][Key.NAME]), '\n'])
 
 """------------------------------------------------------------------------------
                             Msg.CHANGED
