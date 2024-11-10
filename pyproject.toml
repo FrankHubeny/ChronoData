@@ -54,7 +54,13 @@ Changelog = "https://github.com/FrankHubeny/ChronoData/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+addopts = [
+    "-ra", 
+    "--showlocals", 
+    "--strict-markers", 
+    "--strict-config", 
+    "--cov=chronodata",
+]
 xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "info"
@@ -142,11 +148,3 @@ skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
-[project.scripts]
-# spam-cli = "spam:main_cli"
-
-[project.gui-scripts]
-# spam-gui = "spam:main_gui"
-
-[project.entry-points."spam.magical"]
-# tomatoes = "spam:main_tomatoes"
