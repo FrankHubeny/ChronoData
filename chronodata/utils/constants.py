@@ -1,26 +1,8 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-"""This module provides a namespace for constants."""
+"""This module provides a namespace for typed constants."""
 
-from typing import Any, Literal
+from typing import Literal
 
-class String:
-    
-    ACTOR: Literal['actor'] = 'actor'
-    CHALLENGE: Literal['challenge'] = 'challenge'
-    EVENT: Literal['event'] = 'event'
-    LEFT_BRACE: Literal['{'] = '{'
-    LEFT_BRACKET: Literal['['] = '['
-    MARKER: Literal['marker'] = 'marker'
-    NEGATIVE: Literal['-'] = '-'
-    NEWLINE: Literal['\n'] = '\n'
-    PERIOD: Literal['period'] = 'period'
-    RIGHT_BRACE: Literal['}'] = '}'
-    RIGHT_BRACKET: Literal[']'] = ']'
-    SPACE: Literal[' '] = ' '
-    TEXT: Literal['text'] = 'text'
-
-class Number:
-    DATETIME_EPOCH: int = 1970
 
 class Msg:
     ADDED: str = 'The {0} "{1}" has been added to the chronology.'
@@ -47,6 +29,28 @@ class Msg:
     RENAME: str = 'The chronology has been renamed "{0}".'
     RESERVED: str = 'The key "{0}" is a reserved key.'
     USER_REQUIRED: str = 'A named user is required to log comments, challenges and responses for the "{0}" chronology or to load the "{1}" file.'
+
+
+class Number:
+    DATETIME_EPOCH: int = 1970
+
+
+class String:
+    
+    ACTOR: Literal['actor'] = 'actor'
+    CHALLENGE: Literal['challenge'] = 'challenge'
+    EVENT: Literal['event'] = 'event'
+    LEFT_BRACE: Literal['{'] = '{'
+    LEFT_BRACKET: Literal['['] = '['
+    MARKER: Literal['marker'] = 'marker'
+    NEGATIVE: Literal['-'] = '-'
+    NEWLINE: Literal['\n'] = '\n'
+    PERIOD: Literal['period'] = 'period'
+    RIGHT_BRACE: Literal['}'] = '}'
+    RIGHT_BRACKET: Literal[']'] = ']'
+    SPACE: Literal[' '] = ' '
+    TEXT: Literal['text'] = 'text'
+
 
 class Datetime:
         ATTOSECOND: Literal['as'] = 'as'
@@ -77,6 +81,7 @@ class Datetime:
             'week' : WEEK,
             'year' : YEAR,
         }
+
 
 class Key:
     ACTORS: str = 'ACTORS'
@@ -145,35 +150,33 @@ class Key:
         ZEROYEAR,
     ]
 
-class Calendar():
-    system: dict[str, Any] = {
-        Key.BEFOREPRESENT : {
-            Key.NAME : 'Before Present',
-            Key.POSLABEL : '',
-            Key.NEGLABEL : ' BP',
-            Key.ZEROYEAR : -Number.DATETIME_EPOCH,
-            Key.USEZERO : False,
-        },
-        Key.EXPERIMENT : {
-            Key.NAME : 'Experiment',
-            Key.POSLABEL : '',
-            Key.NEGLABEL : '',
-            Key.ZEROYEAR : -Number.DATETIME_EPOCH,
-            Key.USEZERO : False,
-        },
-        Key.GREGORIAN : {
-            Key.NAME : 'Gregorian',
-            Key.POSLABEL : ' AD',
-            Key.NEGLABEL : ' BC',
-            Key.ZEROYEAR : -Number.DATETIME_EPOCH,
-            Key.USEZERO : False,
-        },
-        Key.SECULAR : {
-            Key.NAME : 'Secular',
-            Key.POSLABEL : ' CE',
-            Key.NEGLABEL : ' BCE',
-            Key.ZEROYEAR : -Number.DATETIME_EPOCH,
-            Key.USEZERO : False,
-        },
+class Calendar:
+    BEFORE_PRESENT: dict[str, str | int | bool] = {
+        Key.NAME : 'Before Present',
+        Key.POSLABEL : '',
+        Key.NEGLABEL : ' BP',
+        Key.ZEROYEAR : -Number.DATETIME_EPOCH,
+        Key.USEZERO : False,
+    }
+    EXPERIMENT: dict[str, str | int | bool] = {
+        Key.NAME : 'Experiment',
+        Key.POSLABEL : '',
+        Key.NEGLABEL : '',
+        Key.ZEROYEAR : -Number.DATETIME_EPOCH,
+        Key.USEZERO : False,
+    }
+    GREGORIAN: dict[str, str | int | bool] = {
+        Key.NAME : 'Gregorian',
+        Key.POSLABEL : ' AD',
+        Key.NEGLABEL : ' BC',
+        Key.ZEROYEAR : -Number.DATETIME_EPOCH,
+        Key.USEZERO : False,
+    }
+    SECULAR: dict[str, str | int | bool] = {
+        Key.NAME : 'Secular',
+        Key.POSLABEL : ' CE',
+        Key.NEGLABEL : ' BCE',
+        Key.ZEROYEAR : -Number.DATETIME_EPOCH,
+        Key.USEZERO : False,
     }
 
