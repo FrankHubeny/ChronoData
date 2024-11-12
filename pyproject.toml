@@ -53,7 +53,7 @@ addopts = [
     "--showlocals", 
     "--strict-markers", 
     "--strict-config",
-    "--import-mode=importlib"	
+    "--import-mode=importlib",	
     "--cov=chronodata",
 ]
 xfail_strict = true
