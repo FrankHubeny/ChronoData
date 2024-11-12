@@ -30,6 +30,7 @@ either "{2}" or "{3}" for the {4} cSalendar.'
     FILE_SAVED: str = 'The file "{0}" has been saved.'
     HAS_CALENDAR: str = 'The chronology already has the "{0}" calendar.'
     KEY_REMOVED: str = 'The name "{0}" has been removed from "{1}".'
+    NEG_YEAR: str = 'Negative year but a negative label "{0}".'
     NO_COMMENTS: str = 'There are no comments for the {0} chronology.'
     NO_DICT_NAME: str = 'The chronology "{0}" has no {1}.'
     NOT_IN_DICT: str = 'The name "{0}" is not in the "{1}".'
@@ -38,6 +39,7 @@ either "{2}" or "{3}" for the {4} cSalendar.'
     )
     ONE: str = 'One reserved key was used.'
     OUT_OF_RANGE: str = 'There is no comment at index {0}.'
+    POS_YEAR: str = 'Negative year but positive label "{0}".'
     RENAME: str = 'The chronology has been renamed "{0}".'
     RESERVED: str = 'The key "{0}" is a reserved key.'
     USER_REQUIRED: str = (
@@ -122,12 +124,12 @@ class Key:
     ACTORS: str = 'ACTORS'
     BEGIN: str = 'BEGIN'
     BIRTH: str = 'BIRTH'
-    CALENDAR: str = 'CALENDAR'
+    CAL: str = 'CALENDAR'
     CHALLENGES: str = 'CHALLENGES'
     COMMENTS: str = 'COMMENTS'
     DATE: str = 'DATE'
     DEATH: str = 'DEATH'
-    DESCRIPTION: str = 'DESCRIPTION'
+    DESC: str = 'DESC'
     END: str = 'END'
     EVENTS: str = 'EVENTS'
     FATHER: str = 'FATHER'
@@ -140,25 +142,22 @@ class Key:
     MOTHER: str = 'MOTHER'
     NAME: str = 'NAME'
     NEGLABEL: str = 'NEG LABEL'
-    OVERVIEW: str = 'OVERVIEW'
     PERIODS: str = 'PERIODS'
     POSLABEL: str = 'POS LABEL'
     SOURCES: str = 'SOURCES'
     TEXTS: str = 'TEXTS'
     TIMESTAMP: str = 'TIMESTAMP'
     USER: str = 'USER'
-    USEZERO: str = 'USE ZERO'
-    ZEROYEAR: str = 'ZERO YEAR'
     keylist: list[str] = [
         ACTORS,
         BEGIN,
         BIRTH,
-        CALENDAR,
+        CAL,
         CHALLENGES,
         COMMENTS,
         DATE,
         DEATH,
-        DESCRIPTION,
+        DESC,
         END,
         EVENTS,
         FATHER,
@@ -170,13 +169,12 @@ class Key:
         MOTHER,
         NAME,
         NEGLABEL,
-        OVERVIEW,
         PERIODS,
         POSLABEL,
         SOURCES,
         TEXTS,
-        USEZERO,
-        ZEROYEAR,
+        # USEZERO,
+        # ZEROYEAR,
     ]
 
 
@@ -185,31 +183,39 @@ class Calendar:
     particular calendars using previously defined constants.
     """
 
-    BEFORE_PRESENT: dict[str, dict[str, str]] = {Key.CALENDAR: {
-        Key.NAME: String.BEFORE_PRESENT,
-        Key.POSLABEL: String.EMPTY,
-        Key.NEGLABEL: String.BP,
-        #Key.ZEROYEAR: -Number.DATETIME_EPOCH,
-        #Key.USEZERO: False,
-    }}
-    EXPERIMENT: dict[str, dict[str, str]] = {Key.CALENDAR: {
-        Key.NAME: String.EXPERIMENT,
-        Key.POSLABEL: String.EMPTY,
-        Key.NEGLABEL: String.EMPTY,
-        #Key.ZEROYEAR: -Number.DATETIME_EPOCH,
-        #Key.USEZERO: False,
-    }}
-    GREGORIAN: dict[str, dict[str, str]] = {Key.CALENDAR: {
-        Key.NAME: String.GREGORIAN,
-        Key.POSLABEL: String.AD,
-        Key.NEGLABEL: String.BC,
-        #Key.ZEROYEAR: -Number.DATETIME_EPOCH,
-        #Key.USEZERO: False,
-    }}
-    SECULAR: dict[str, dict[str, str]]  = {Key.CALENDAR: {
-        Key.NAME: String.SECULAR,
-        Key.POSLABEL: String.CE,
-        Key.NEGLABEL: String.BCE,
-        #Key.ZEROYEAR: -Number.DATETIME_EPOCH,
-        #Key.USEZERO: False,
-    }}
+    BEFORE_PRESENT: dict[str, dict[str, str]] = {
+        Key.CAL: {
+            Key.NAME: String.BEFORE_PRESENT,
+            Key.POSLABEL: String.EMPTY,
+            Key.NEGLABEL: String.BP,
+            # Key.ZEROYEAR: -Number.DATETIME_EPOCH,
+            # Key.USEZERO: False,
+        }
+    }
+    EXPERIMENT: dict[str, dict[str, str]] = {
+        Key.CAL: {
+            Key.NAME: String.EXPERIMENT,
+            Key.POSLABEL: String.EMPTY,
+            Key.NEGLABEL: String.EMPTY,
+            # Key.ZEROYEAR: -Number.DATETIME_EPOCH,
+            # Key.USEZERO: False,
+        }
+    }
+    GREGORIAN: dict[str, dict[str, str]] = {
+        Key.CAL: {
+            Key.NAME: String.GREGORIAN,
+            Key.POSLABEL: String.AD,
+            Key.NEGLABEL: String.BC,
+            # Key.ZEROYEAR: -Number.DATETIME_EPOCH,
+            # Key.USEZERO: False,
+        }
+    }
+    SECULAR: dict[str, dict[str, str]] = {
+        Key.CAL: {
+            Key.NAME: String.SECULAR,
+            Key.POSLABEL: String.CE,
+            Key.NEGLABEL: String.BCE,
+            # Key.ZEROYEAR: -Number.DATETIME_EPOCH,
+            # Key.USEZERO: False,
+        }
+    }
