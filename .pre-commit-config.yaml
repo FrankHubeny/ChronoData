@@ -73,7 +73,7 @@ repos:
       - id: mypy
         #args: [--hide-error-codes]
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
+  - repo: https://github.com/rbubley/mirrors-prettier
     rev: "" # Use the sha / tag you want to point at
     hooks:
       - id: prettier
