@@ -17,21 +17,45 @@ maintainers = [
 description = "Tools to help one construct, display and assess competing chronologies"
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE.md"}
-keywords = ["chronology", ]
+keywords = [
+  "chronology",
+  "history",
+  "science",
+  "religion",
+  "archaeology",
+  "genealogy",
+  "ancient near east",
+  "israel",
+  "egypt",
+]
 classifiers = [
-  "Development Status :: 3 - Beta",
-  "Intended Audience :: Historians",
-  "Topic :: Chronology :: History",
-  "Topic :: Genealogy :: History",
-  "License :: OSI Approved :: BSD 3-Clause License",
+  "Development Status :: 1 - Planning",
+  "Framework :: Jupyter :: JupyterLab",
+  "Intended Audience :: Education",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Religion",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python",
+  "Topic :: Database",
+  "Topic :: Education",
+  "Topic :: File Formats :: JSON",
+  "Topic :: Sociology :: Genealogy",
+  "Topic :: Sociology :: History",
   "Typing :: Typed",
 ]
+dependencies = [
+  "astropy>=6.1.6",
+  "json>=2.0.9",
+  "matplotlib>=3.8.4",
+  "numpy>=2.0.2",
+  "pandas>=2.2.2",
+]
 
-#[project.optional-dependencies]
-#gui = ["Jupyter Lab"],
+[project.optional-dependencies]
+gui = ["Jupyter Lab"],
 #]
 
 #https://docs.astral.sh/ruff/linter/#disabling-fixes
@@ -62,8 +86,11 @@ log_cli_level = "INFO"
 testpaths = ["tests"]
 
 [tool.mypy]
-mypy_path = ["chronodata"]
-files = ["chronodata", "tests"]
+mypy_path = ["chronodata", "tests"]
+files = [
+    "chronodata/chronology.py", 
+	"chronodata/utils/constants.py", 
+	"tests/constants_test.py"]
 python_version = "3.12"
 warn_unused_configs = true
 strict = true
@@ -139,9 +166,18 @@ docstring-code-format = true
 # Like Black, use double quotes for strings.
 # quote-style = "double"
 # Like Black, indent with spaces, rather than tabs.
-#indent-style = "space"
+indent-style = "space"
 # Like Black, respect magic trailing commas.
 skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 #line-ending = "auto"
 
+[tool.repo-review]
+ignore = [
+    "MY",    # ignore MyPy setting checks
+    "PC111", # ignore using `blacken-docs` in pre-commit
+    "PC140", # ignore using `mypy` in pre-commit
+    "PC180", # ignore using `prettier` in pre-commit
+    "PC901", # ignore using custom update message (we have many of the default ones in our history already)
+    "PP308", # ignore requiring `-ra` flag for pytest, astropy's test suite is too large for this to be useful
+]
