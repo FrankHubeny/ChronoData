@@ -1,9 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """This module provides a namespace for typed constants."""
 
-from typing import Any, Literal
+from typing import ClassVar, Literal
 
 # DT: type = Literal['Y','M','D','h','m','s','as','fs','us','ns','ps','W']
+
 
 class Arg:
     """The following constants are used as arguments to procedure calls
@@ -13,7 +14,8 @@ class Arg:
     JSONLENGTH: int = len(JSON)
     INDEX: Literal['index'] = 'index'
     INT: str = 'int'
-    WRITE: str = 'w'
+    WRITE: Literal['w'] = 'w'
+
 
 class Msg:
     """The following constants define messages that are returned acknowledging
@@ -30,10 +32,7 @@ class Msg:
     ADD_SOURCE: str = 'The source "{0}" has been added.'
     ADD_TEXT: str = 'The text "{0}" has been added.'
     BAD_DATE: str = 'The date value "{0}" does not fit a {1} calendar.'
-    BAD_LABEL: str = (
-        'The date "{0}" contains an inappropriate label "{1}" rather than \
-either "{2}" or "{3}" for the {4} calendar.'
-    )
+    BAD_LABEL: str = 'The date "{0}" contains an inappropriate label "{1}".'
     CALENDARS_DONT_MATCH: str = 'The calendars "{0}" and "{1}" do not match.'
     CHANGED: str = 'The chronology has been changed to the "{0}" calendar.'
     COMMENT_REMOVED: str = 'Comment {0} "{1}" has been removed.'
@@ -72,29 +71,21 @@ class Value:
     GREGORIAN: str = 'GREGORIAN'
     SECULAR: str = 'SECULAR'
 
+
 class Column:
     """The following constants are used for column headings."""
 
     RESERVED: str = 'Reserved Keys'
+
 
 class String:
     """The following constants define strings that are neither keys
     nor values of a dictionary, but are used in displaying messages.
     """
 
-    #ACTOR: str = 'actor'
-    #CHALLENGE: str = 'challenge'
-    #EVENT: str = 'event'
-    #LEFT_BRACE: str = '{'
-    #LEFT_BRACKET: str = '['
-    #MARKER: str = 'marker'
     NEGATIVE: str = '-'
     NEWLINE: str = '\n'
-    #PERIOD: str = 'period'
-    #RIGHT_BRACE: str = '}'
-    #RIGHT_BRACKET: str = ']'
     SPACE: str = ' '
-    #TEXT: str = 'text'
 
 
 class Datetime:
@@ -113,7 +104,7 @@ class Datetime:
     SECOND: Literal['s'] = 's'
     WEEK: Literal['W'] = 'W'
     YEAR: Literal['Y'] = 'Y'
-    units: dict[str, str] = {
+    units: ClassVar = {
         'attosecond': ATTOSECOND,
         'day': DAY,
         'femtosecond': FEMTOSECOND,
@@ -162,7 +153,7 @@ class Key:
     TEXTS: str = 'TEXTS'
     TIMESTAMP: str = 'TIMESTAMP'
     ZERO: str = 'ZERO'
-    keylist: list[str] = [
+    keylist: ClassVar = [
         ACTORS,
         BEGIN,
         BIRTH,
@@ -197,28 +188,28 @@ class Calendar:
     particular calendars using previously defined constants.
     """
 
-    BEFORE_PRESENT: dict[str, Any] = {
+    BEFORE_PRESENT: ClassVar = {
         Key.NAME: Value.BEFORE_PRESENT,
         Key.POST: Value.EMPTY,
         Key.PRE: Value.BP,
         Key.STRICT: True,
         Key.ZERO: False,
     }
-    EXPERIMENT: dict[str, Any] = {
+    EXPERIMENT: ClassVar = {
         Key.NAME: Value.EXPERIMENT,
         Key.POST: Value.EMPTY,
         Key.PRE: Value.EMPTY,
         Key.STRICT: True,
         Key.ZERO: False,
     }
-    GREGORIAN: dict[str, Any] = {
+    GREGORIAN: ClassVar = {
         Key.NAME: Value.GREGORIAN,
         Key.POST: Value.AD,
         Key.PRE: Value.BC,
         Key.STRICT: True,
         Key.ZERO: False,
     }
-    SECULAR: dict[str, Any] = {
+    SECULAR: ClassVar = {
         Key.NAME: Value.SECULAR,
         Key.POST: Value.CE,
         Key.PRE: Value.BCE,
