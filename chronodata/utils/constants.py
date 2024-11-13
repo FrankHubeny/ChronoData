@@ -1,22 +1,23 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """This module provides a namespace for typed constants."""
 
+from dataclasses import dataclass
 from typing import ClassVar, Literal
 
-# DT: type = Literal['Y','M','D','h','m','s','as','fs','us','ns','ps','W']
 
-
+@dataclass(frozen=True)
 class Arg:
     """The following constants are used as arguments to procedure calls
     such as Pandas DataFrames or NumPy."""
 
     JSON: str = '.json'
-    JSONLENGTH: int = len(JSON)
+    JSONLENGTH: int = 5
     INDEX: Literal['index'] = 'index'
     INT: str = 'int'
     WRITE: Literal['w'] = 'w'
 
 
+@dataclass(frozen=True)
 class Msg:
     """The following constants define messages that are returned acknowledging
     events that happened.
@@ -56,6 +57,7 @@ class Msg:
     STRICT: str = 'Strict formatting of dates has been set to "{0}".'
 
 
+@dataclass(frozen=True)
 class Value:
     """The following constants are dictionary values."""
 
@@ -72,15 +74,18 @@ class Value:
     SECULAR: str = 'SECULAR'
 
 
+@dataclass(frozen=True)
 class Column:
     """The following constants are used for column headings."""
 
     RESERVED: str = 'Reserved Keys'
 
 
+@dataclass(frozen=True)
 class String:
     """The following constants define strings that are neither keys
-    nor values of a dictionary, but are used in displaying messages.
+    nor values of a dictionary, but are used in generating comments,
+    formatting numbers or other processes.
     """
 
     NEGATIVE: str = '-'
@@ -88,6 +93,7 @@ class String:
     SPACE: str = ' '
 
 
+@dataclass(frozen=True)
 class Datetime:
     """The following constants define NumPy units used in datetime64 object."""
 
@@ -121,6 +127,7 @@ class Datetime:
     }
 
 
+@dataclass(frozen=True)
 class Key:
     """The following constants define the keys that are used
     for dictionaries."""
@@ -183,6 +190,7 @@ class Key:
     ]
 
 
+@dataclass(frozen=True)
 class Calendar:
     """The following dictionaries define the constants for
     particular calendars using previously defined constants.
