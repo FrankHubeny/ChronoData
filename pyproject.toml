@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ChronoData"
 dynamic = ["version"]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 authors = [
   {name = "Frank Hubeny", email = "frankhubeny@protonmail.com"},
 ]
@@ -34,7 +34,6 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: BSD License",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Database",
   "Topic :: Education",
@@ -50,15 +49,6 @@ dependencies = [
   "numpy>=2.0.2",
   "pandas>=2.2.2",
 ]
-
-#[project.optional-dependencies]
-#gui = ["Jupyter Lab"],
-#]
-
-#https://docs.astral.sh/ruff/linter/#disabling-fixes
-#[tool.ruff.lint] 
-#fixable = ["ALL"]
-#unfixable = ["F401"]
 
 [project.urls]
 Homepage = "https://github.com/FrankHubeny/ChronoData"
@@ -83,11 +73,11 @@ log_cli_level = "INFO"
 testpaths = ["tests"]
 
 [tool.mypy]
-mypy_path = ["chronodata", "tests"]
+mypy_path = ["chronodata"]
 files = [
     "chronodata/chronology.py", 
 	"chronodata/utils/constants.py", 
-	"tests/constants_test.py"]
+]
 python_version = "3.12"
 warn_unused_configs = true
 strict = true
@@ -157,17 +147,11 @@ ignore = [
 ]
 
 [tool.ruff.format]
-quote-style = "single"
-#indent-style = "tab"
+quote-style = "single"  # quote-style = "double"  # Like Black, use double quotes for strings.
 docstring-code-format = true
-# Like Black, use double quotes for strings.
-# quote-style = "double"
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "space"
-# Like Black, respect magic trailing commas.
-skip-magic-trailing-comma = false
-# Like Black, automatically detect the appropriate line ending.
-#line-ending = "auto"
+indent-style = "space"  # Like Black, indent with spaces, rather than tabs.  #indent-style = "tab"
+skip-magic-trailing-comma = false  # Like Black, respect magic trailing commas.
+line-ending = "auto"  # Like Black, automatically detect the appropriate line ending.
 
 #[tool.repo-review]
 #ignore = [

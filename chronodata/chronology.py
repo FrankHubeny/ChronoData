@@ -12,7 +12,6 @@ chronology unless the constraints are answered.
 import copy
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -20,14 +19,14 @@ from typing import Any, Literal
 import numpy as np
 import pandas as pd
 
-from chronodata.utils.constants import (
+from chronodata.constants import (
     Arg,
     Calendar,
     Column,
-    Datetime,
     Key,
     Msg,
     String,
+    Unit,
     Value,
 )
 
@@ -98,20 +97,24 @@ class Chronology:
 
     def __init__(
         self,
-        name: str,
-        filename: str | os.PathLike[Any] = Value.EMPTY,
+        name: str = Value.EMPTY,
+        filename: str = Value.EMPTY,
         calendar: dict[str, Any] = Calendar.GREGORIAN,
+        log: bool = True,
     ) -> None:
-        logging.basicConfig(level=logging.INFO)
+        self.log: bool = log
+        logging.basicConfig(
+            format='%(levelname)s:%(message)s', level=logging.INFO
+        )
         self.chron: dict[str, Any] = {}
         self.chron_name: str = name
         self.strict: bool = calendar[Key.STRICT]
-        self.filename: str | os.PathLike[Any] = filename
+        self.filename: str = filename
         self.post: str = calendar[Key.POST]
         self.postlen: int = len(self.post)
         self.pre: str = calendar[Key.PRE]
         self.prelen: int = len(self.pre)
-        if name[-Arg.JSONLENGTH :] != Arg.JSON:
+        if filename == Value.EMPTY:
             self.chron = (
                 {Key.NAME: name}
                 | {Key.CAL: calendar}
@@ -124,10 +127,11 @@ class Chronology:
                 | {Key.CHALLENGES: {}}
                 | {Key.TEXTS: {}}
             )
-            logging.info(Msg.STARTED.format(self.chron_name))
+            if self.log:
+                logging.info(Msg.STARTED.format(self.chron_name))
         else:
             mode: Literal['r'] = 'r'
-            with Path.open(self.filename, mode) as file:
+            with Path.open(Path(filename), mode) as file:
                 self.chron = json.load(file)
                 file.close()
             self.cal_name = self.chron[Key.CAL][Key.NAME]
@@ -136,7 +140,8 @@ class Chronology:
             self.postlen = len(self.post)
             self.pre = self.chron[Key.CAL][Key.PRE]
             self.prelen = len(self.pre)
-            logging.info(Msg.LOADED.format(self.chron_name, name))
+            if self.log:
+                logging.info(Msg.LOADED.format(self.chron_name, filename))
 
     def show(self) -> None:
         """Show the entire chronology."""
@@ -149,7 +154,8 @@ class Chronology:
         """Rename the chronology."""
         self.chron.update({Key.NAME: name})
         self.chron_name = self.chron[Key.NAME]
-        logging.info(Msg.RENAME.format(self.chron_name))
+        if self.log:
+            logging.info(Msg.RENAME.format(self.chron_name))
 
     ###### Dictionary Methods
 
@@ -199,7 +205,8 @@ class Chronology:
                 }
             )
             self.chron[Key.ACTORS][name].update(keyvalues)
-            logging.info(Msg.ADD_ACTOR.format(self.chron[Key.ACTORS][name]))
+            if self.log:
+                logging.info(Msg.ADD_ACTOR.format(self.chron[Key.ACTORS][name]))
 
     def remove_actor(self, name: str) -> None:
         """Remove an actor from the dictionary."""
@@ -208,12 +215,30 @@ class Chronology:
     ###### CALENDARS
 
     def calendars(self) -> pd.DataFrame:
-        """Display the CALENDARS constants."""
-        return pd.DataFrame.from_dict(self.chron[Key.CAL])
+        """Display all of the available CALENDARS.
 
-    def datetimes(self) -> pd.DataFrame:
-        """Display the challenges in a chronology."""
-        return pd.DataFrame.from_dict(Datetime.units)
+        This is a list of calendars that one can move to from
+        the one defined by the current chronology.
+
+        See Also
+        --------
+
+        Example
+        -------
+        """
+        return pd.DataFrame(data=Calendar.calendars)
+
+    # def datetimes(self) -> pd.DataFrame:
+    #     """Display the datetime units NumPy permits.
+
+    #     Reference
+    #     ---------
+    #     For more information on the units available in NumPy's `datetime64` see
+    #     [NumPy Units](https://numpy.org/doc/stable/reference/arrays.datetime.html#datetime-units)
+    #     """
+    #     return pd.DataFrame(
+    #         data=Unit.units, columns=[Column.DATETIME, Column.CODE]
+    #     )
 
     def strict_labels(self) -> None:
         """Set strict formatting for dates.
@@ -236,7 +261,8 @@ class Chronology:
         """
         self.strict = True
         self.chron.update({Key.LABELS: self.strict})
-        logging.info(Msg.STRICT.format(str(self.strict)))
+        if self.log:
+            logging.info(Msg.STRICT.format(str(self.strict)))
 
     def relaxed_labels(self) -> None:
         """Set relaxed formatting for dates.
@@ -260,7 +286,8 @@ class Chronology:
         """
         self.strict = False
         self.chron.update({Key.LABELS: self.strict})
-        logging.info(Msg.STRICT.format(str(self.strict)))
+        if self.log:
+            logging.info(Msg.STRICT.format(str(self.strict)))
 
     def check_date(self, date: str) -> bool:
         cleandate = date.upper().strip()
@@ -268,7 +295,8 @@ class Chronology:
             try:
                 np.datetime64(cleandate[0 : -self.prelen :])
             except ValueError:
-                logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                if self.log:
+                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
                 return False
             else:
                 return True
@@ -276,7 +304,8 @@ class Chronology:
             try:
                 np.datetime64(cleandate[0 : -self.postlen :])
             except ValueError:
-                logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                if self.log:
+                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
                 return False
             else:
                 return True
@@ -284,20 +313,22 @@ class Chronology:
             try:
                 np.datetime64(cleandate)
             except ValueError:
-                logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                if self.log:
+                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
                 return False
             else:
                 return True
         else:
-            logging.info(
-                Msg.BAD_LABEL.format(
-                    date,
-                    date[-self.postlen :],
-                    self.post,
-                    self.pre,
-                    self.chron[Key.NAME],
+            if self.log:
+                logging.info(
+                    Msg.BAD_LABEL.format(
+                        date,
+                        date[-self.postlen :],
+                        self.post,
+                        self.pre,
+                        self.chron[Key.NAME],
+                    )
                 )
-            )
             return False
 
     def format_date(self, date: str) -> str:
@@ -350,13 +381,12 @@ class Chronology:
             newdate = Value.EMPTY.join(
                 [String.NEGATIVE, newyear, nolabeldate[len(oldyear) :]]
             )
-            # newdate = new
         else:
             newdate = date
         return newdate
 
     def date_diff(
-        self, older: str, younger: str, unit: str = Datetime.YEAR
+        self, older: str, younger: str, unit: str = Unit.YEAR
     ) -> float:
         olderdate = np.datetime64(self.to_datetime64(older), unit)
         youngerdate = np.datetime64(self.to_datetime64(younger), unit)
@@ -376,10 +406,10 @@ class Chronology:
 
         """
         if isinstance(date, str):
-            year = np.datetime64(date, Datetime.YEAR).astype(Arg.INT) + 1970
+            year = np.datetime64(date, Unit.YEAR).astype(Arg.INT) + 1970
         else:
             year = (
-                np.datetime_as_string(date, unit=Datetime.YEAR).astype(Arg.INT)
+                np.datetime_as_string(date, unit=Unit.YEAR).astype(Arg.INT)
                 + 1970
             )
         if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
@@ -413,16 +443,16 @@ class Chronology:
         # Look for errors
         if date[0] == String.NEGATIVE:
             if date[-self.prelen :] == self.pre:
-                logging.info(Msg.NEG_YEAR.format(date[-self.prelen :]))
+                logging.warning(Msg.NEG_YEAR.format(date[-self.prelen :]))
             elif date[-self.postlen :] == self.post:
-                logging.info(Msg.POS_YEAR.format(date[-self.postlen :]))
+                logging.warning(Msg.POS_YEAR.format(date[-self.postlen :]))
 
         # If no errors, proceed
         if date[-self.prelen :] == self.pre:
             days = self.daysinyear(date[0 : -self.prelen])
             numericdate = np.datetime64(
                 String.NEGATIVE + date[0 : -self.prelen]
-            ) + np.timedelta64(days, Datetime.DAY)
+            ) + np.timedelta64(days, Unit.DAY)
         elif date[-self.postlen :] == self.post:
             numericdate = np.datetime64(date[0 : -self.postlen])
         else:
@@ -430,7 +460,7 @@ class Chronology:
         return numericdate
 
     # def stringdate(
-    #     self, date: np.ndarray[Any, Any], unit: str = Datetime.YEAR
+    #     self, date: np.ndarray[Any, Any], unit: str = Unit.YEAR
     # ) -> np.ndarray[Any, np.dtype[Any]]:
     #     """A procedure to convert a numeric date to a date labelled
     #     with an epoch label.
@@ -444,10 +474,10 @@ class Chronology:
 
     #     return np.datetime_as_string(date, unit=unit)
 
-    def add_calendar(
-        self, name: str, begin: str, end: str, **keyvalues: str
-    ) -> None:
-        """Add a calendar to the dictionary."""
+    # def add_calendar(
+    #     self, name: str, begin: str, end: str, **keyvalues: str
+    # ) -> None:
+    #     """Add a calendar to the dictionary."""
 
     def to(self, calendar: dict[str, Any]) -> None:
         """Convert the calendar of the chronology to anther calendar.
@@ -459,7 +489,8 @@ class Chronology:
         """
 
         if calendar[Key.NAME] == self.chron[Key.CAL][Key.NAME]:
-            logging.info(Msg.HAS_CALENDAR.format(self.chron[Key.CAL][Key.NAME]))
+            if self.log:
+                logging.info(Msg.HAS_CALENDAR.format(self.chron[Key.CAL][Key.NAME]))
         else:
             cals: list[dict[str, Any]] = [Calendar.GREGORIAN, Calendar.SECULAR]
             oldcal: dict[str, Any] = self.chron[Key.CAL]
@@ -494,7 +525,8 @@ class Chronology:
                 self.postlen = len(self.post)
                 self.pre = self.chron[Key.CAL][Key.PRE]
                 self.prelen = len(self.pre)
-                logging.info(Msg.CHANGED.format(self.chron[Key.CAL][Key.NAME]))
+                if self.log:
+                    logging.info(Msg.CHANGED.format(self.chron[Key.CAL][Key.NAME]))
 
     ###### CHALLENGES
 
@@ -529,9 +561,10 @@ class Chronology:
                 }
             )
             self.chron[Key.CHALLENGES][name].update(keyvalues)
-            logging.info(
-                Msg.ADD_CHALLENGE.format(self.chron[Key.CHALLENGES][name])
-            )
+            if self.log:
+                logging.info(
+                    Msg.ADD_CHALLENGE.format(self.chron[Key.CHALLENGES][name])
+                )
 
     def remove_challenge(self, name: str) -> None:
         """Remove a challenge from the dictionary."""
@@ -594,14 +627,16 @@ class Chronology:
                     }
                 }
             )
-        logging.info(Msg.ADD_COMMENT.format(text))
+        if self.log:
+            logging.info(Msg.ADD_COMMENT.format(text))
 
     def remove_comment(self, *index: int) -> None:
         """Remove a comment from the chronology by specifying
         its number in the comments list."""
         for idx in index:
             if str(idx) not in dict(self.chron[Key.COMMENTS]):
-                logging.info(Msg.OUT_OF_RANGE.format(str(idx)))
+                if self.log:
+                    logging.info(Msg.OUT_OF_RANGE.format(str(idx)))
             else:
                 removed = self.chron[Key.COMMENTS][str(idx)][Key.MESSAGE]
                 self.chron[Key.COMMENTS].pop(str(idx))
@@ -611,29 +646,30 @@ class Chronology:
                 self.remove_all_comments(show_message=False)
                 for i in range(1, len(comments) + 1):
                     self.chron[Key.COMMENTS].update({str(i): comments[i - 1]})
-                logging.info(Msg.COMMENT_REMOVED.format(str(idx), removed))
+                if self.log:
+                    logging.info(Msg.COMMENT_REMOVED.format(str(idx), removed))
 
     def remove_all_comments(self, show_message: bool = True) -> None:
         """Remove all comments from the chronology."""
         self.chron[Key.COMMENTS] = {}
-        if show_message:
+        if show_message and self.log:
             logging.info(Msg.REMOVE_ALL_COMMENTS.format(self.chron_name))
 
     ###### DICTIONARIES
 
     def reserved_keys(self) -> pd.DataFrame:
         """Display the KEYS constants."""
-        return pd.DataFrame(data=Key.keylist, columns=[Column.RESERVED])
+        return pd.DataFrame(data=Key.keys, columns=[Column.RESERVED])
 
-    def check_keys(
-        self, keyvalues: dict[str, str] | dict[str, dict[str, Any]]
-    ) -> bool:
-        count = 0
-        for i in dict(keyvalues):
-            if i in Key.keylist:
-                logging.info(Msg.RESERVED.format(i))
-                count += 1
-        return not count > 0
+    # def check_keys(
+    #     self, keyvalues: dict[str, str] | dict[str, dict[str, Any]]
+    # ) -> bool:
+    #     count = 0
+    #     for i in dict(keyvalues):
+    #         if i in Key.keys:
+    #             logging.info(Msg.RESERVED.format(i))
+    #             count += 1
+    #     return not count > 0
 
     def dictshow(
         self,
@@ -668,7 +704,7 @@ class Chronology:
         return pd.DataFrame.from_dict(dictionary, orient=Arg.INDEX)
 
     def show_dictionary(self, dictname: str) -> pd.DataFrame:
-        if len(self.chron[dictname]) == 0:
+        if len(self.chron[dictname]) == 0 and self.log:
             logging.info(
                 Msg.NO_DICT_NAME.format(self.chron_name, dictname.lower())
             )
@@ -689,13 +725,14 @@ class Chronology:
             The name of the key to be removed from the dictionary
 
         """
-        if key in Key.keylist:
-            logging.info(Msg.NOT_REMOVABLE.format(key))
-        elif key not in dict(self.chron[dictname]):
+        # if key in Key.keys:
+        #     logging.info(Msg.NOT_REMOVABLE.format(key))
+        if key not in dict(self.chron[dictname]) and self.log:
             logging.info(Msg.NOT_IN_DICT.format(key, dictname))
         else:
             self.chron[dictname].pop(key)
-            logging.info(Msg.KEY_REMOVED.format(key, dictname))
+            if self.log:
+                logging.info(Msg.KEY_REMOVED.format(key, dictname))
 
     ###### EVENTS
 
@@ -719,7 +756,7 @@ class Chronology:
     def add_event(
         self, name: str, date: str, DESC: str = Value.EMPTY, **keyvalues: str
     ) -> None:
-        """Add an event to the dictionary."""
+        """Add an event to the chronology."""
         if self.check_date(date):
             self.chron[Key.EVENTS].update(
                 {
@@ -730,11 +767,12 @@ class Chronology:
                 }
             )
             self.chron[Key.EVENTS][name].update(keyvalues)
-            logging.info(Msg.ADD_EVENT.format(self.chron[Key.EVENTS][name]))
+            if self.log:
+                logging.info(Msg.ADD_EVENT.format(self.chron[Key.EVENTS][name]))
 
-    def remove_event(self, eventname: str) -> None:
+    def remove_event(self, name: str) -> None:
         """Remove an event from the dictionary."""
-        self.remove_key(Key.EVENTS, eventname)
+        self.remove_key(Key.EVENTS, name)
 
     ###### MARKERS
 
@@ -758,8 +796,8 @@ class Chronology:
     def add_marker(
         self, name: str, date: str, DESC: str = Value.EMPTY, **keyvalues: str
     ) -> None:
-        """Add a marker to the dictionary."""
-        if self.check_date(date) and self.check_keys(keyvalues):
+        """Add a marker to the chronology."""
+        if self.check_date(date): # and self.check_keys(keyvalues):
             self.chron[Key.MARKERS].update(
                 {
                     name: {
@@ -769,11 +807,12 @@ class Chronology:
                 }
             )
             self.chron[Key.MARKERS][name].update(keyvalues)
-            logging.info(Msg.ADD_MARKER.format(self.chron[Key.MARKERS][name]))
+            if self.log:
+                logging.info(Msg.ADD_MARKER.format(self.chron[Key.MARKERS][name]))
 
-    def remove_marker(self, markername: str) -> None:
-        """Remove a marker from the dictionary."""
-        self.remove_key(Key.MARKERS, markername)
+    def remove_marker(self, name: str) -> None:
+        """Remove a marker from the chronology."""
+        self.remove_key(Key.MARKERS, name)
 
     ###### PERIODS
 
@@ -798,7 +837,7 @@ class Chronology:
     def add_period(
         self, name: str, begin: str, end: str, **keyvalues: str
     ) -> None:
-        """Add a period to the dictionary."""
+        """Add a period to the chronology."""
         if self.check_date(begin) and self.check_date(end):
             self.chron[Key.PERIODS].update(
                 {
@@ -809,16 +848,17 @@ class Chronology:
                 }
             )
             self.chron[Key.PERIODS][name].update(keyvalues)
-            logging.info(Msg.ADD_PERIOD.format(self.chron[Key.PERIODS][name]))
+            if self.log:
+                logging.info(Msg.ADD_PERIOD.format(self.chron[Key.PERIODS][name]))
 
-    def remove_period(self, periodname: str) -> None:
-        """Remove a period from the dictionary."""
-        self.remove_key(Key.PERIODS, periodname)
+    def remove_period(self, name: str) -> None:
+        """Remove a period from the chronology."""
+        self.remove_key(Key.PERIODS, name)
 
     ###### SAVE
 
-    def save(self, name: str | os.PathLike[Any] = Value.EMPTY) -> None:
-        file: str | os.PathLike[Any] = Value.EMPTY
+    def save(self, name: str = Value.EMPTY) -> None:
+        file: str = Value.EMPTY
         mode: Literal['w'] = Arg.WRITE
         if name == Value.EMPTY:
             if self.filename == Value.EMPTY:
@@ -828,10 +868,51 @@ class Chronology:
         else:
             file = name
 
-        with Path.open(file, mode) as f:
+        with Path.open(Path(file), mode) as f:
             json.dump(self.chron, f)
             f.close()
-        logging.info(Msg.FILE_SAVED.format(file))
+        if self.log:
+            logging.info(Msg.FILE_SAVED.format(file))
+
+    ###### SOURCES
+
+    def sources(self) -> pd.DataFrame:
+        """Display the sources referenced to justify a chronology."""
+        return self.show_dictionary(Key.SOURCES)
+
+    def sources_pop(self, pops: list[str]) -> pd.DataFrame:
+        """Display the sources defined for the chronology
+        except for specified keys.
+
+        Parameter
+        ---------
+        pops: list
+            A list of keys to be temporarily removed before
+            displaying the sources.
+
+        """
+        return self.dictionary_pop(Key.SOURCES, pops)
+
+    def add_source(
+        self, name: str, date: str, DESC: str = Value.EMPTY, **keyvalues: str
+    ) -> None:
+        """Add a source to the chronology."""
+        if self.check_date(date):
+            self.chron[Key.SOURCES].update(
+                {
+                    name: {
+                        Key.DATE: self.format_date(date),
+                        Key.DESC: DESC,
+                    }
+                }
+            )
+            self.chron[Key.SOURCES][name].update(keyvalues)
+            if self.log:
+                logging.info(Msg.ADD_SOURCE.format(self.chron[Key.SOURCES][name]))
+
+    def remove_source(self, name: str) -> None:
+        """Permanently remove a source from the chronology."""
+        self.remove_key(Key.SOURCES, name)
 
     ###### TEXTS
 
@@ -855,7 +936,7 @@ class Chronology:
     def add_text(
         self, name: str, date: str, DESC: str = Value.EMPTY, **keyvalues: str
     ) -> None:
-        """Add an event to the dictionary."""
+        """Add an event to the chronology."""
         if self.check_date(date):
             self.chron[Key.TEXTS].update(
                 {
@@ -866,8 +947,9 @@ class Chronology:
                 }
             )
             self.chron[Key.TEXTS][name].update(keyvalues)
-            logging.info(Msg.ADD_TEXT.format(self.chron[Key.TEXTS][name]))
+            if self.log:
+                logging.info(Msg.ADD_TEXT.format(self.chron[Key.TEXTS][name]))
 
-    def remove_text(self, textname: str) -> None:
-        """Permanently remove a text from the dictionary."""
-        self.remove_key(Key.TEXTS, textname)
+    def remove_text(self, name: str) -> None:
+        """Permanently remove a text from the chronology."""
+        self.remove_key(Key.TEXTS, name)

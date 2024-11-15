@@ -11,10 +11,10 @@ class Arg:
     such as Pandas DataFrames or NumPy."""
 
     JSON: str = '.json'
-    JSONLENGTH: int = 5
     INDEX: Literal['index'] = 'index'
     INT: str = 'int'
     WRITE: Literal['w'] = 'w'
+    READ: Literal['r'] = 'r'
 
 
 @dataclass(frozen=True)
@@ -79,6 +79,9 @@ class Column:
     """The following constants are used for column headings."""
 
     RESERVED: str = 'Reserved Keys'
+    DATETIME: str = 'Date/Time'
+    CODE: str = 'Code'
+
 
 
 @dataclass(frozen=True)
@@ -94,7 +97,7 @@ class String:
 
 
 @dataclass(frozen=True)
-class Datetime:
+class Unit:
     """The following constants define NumPy units used in datetime64 object."""
 
     ATTOSECOND: Literal['as'] = 'as'
@@ -110,21 +113,21 @@ class Datetime:
     SECOND: Literal['s'] = 's'
     WEEK: Literal['W'] = 'W'
     YEAR: Literal['Y'] = 'Y'
-    units: ClassVar = {
-        'attosecond': ATTOSECOND,
-        'day': DAY,
-        'femtosecond': FEMTOSECOND,
-        'hour': HOUR,
-        'microsecond': MICROSECOND,
-        'millisecond': MILLISECOND,
-        'minute': MINUTE,
-        'month': MONTH,
-        'nanosecond': NANOSECOND,
-        'picosecond': PICOSECOND,
-        'second': SECOND,
-        'week': WEEK,
-        'year': YEAR,
-    }
+    units: ClassVar = [
+        ['Year', YEAR],
+        ['Month', MONTH],
+        ['Week', WEEK],
+        ['Day', DAY],
+        ['Hour', HOUR],
+        ['Minute', MINUTE],
+        ['Second', SECOND],
+        ['Millisecond', MILLISECOND],
+        ['Microsecond', MICROSECOND],
+        ['Nanosecond', NANOSECOND],
+        ['Femtosecond', FEMTOSECOND],
+        ['Picosecond', PICOSECOND],
+        ['Attosecond', ATTOSECOND],
+    ]
 
 
 @dataclass(frozen=True)
@@ -160,7 +163,7 @@ class Key:
     TEXTS: str = 'TEXTS'
     TIMESTAMP: str = 'TIMESTAMP'
     ZERO: str = 'ZERO'
-    keylist: ClassVar = [
+    keys: ClassVar = [
         ACTORS,
         BEGIN,
         BIRTH,
@@ -224,3 +227,9 @@ class Calendar:
         Key.STRICT: True,
         Key.ZERO: False,
     }
+    calendars: ClassVar = [
+        BEFORE_PRESENT,
+        EXPERIMENT,
+        GREGORIAN,
+        SECULAR,
+    ]
