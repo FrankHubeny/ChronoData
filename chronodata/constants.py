@@ -208,7 +208,9 @@ class Tag:
     CHAN: str = 'CHAN'
     CHIL: str = 'CHIL'
     CHILD: str = 'CHILD'  # ?#
+    CHALLENGE: str = 'CHALLENGE'
     CHR: str = 'CHR'
+    CHRONOS: str = 'CHRONOS'
     CHRA: str = 'CHRA'
     CITY: str = 'CITY'
     CLERGY: str = 'CLERGY'  # ?#
