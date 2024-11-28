@@ -13,22 +13,25 @@ import copy
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
+import chronodata.ged
+import chronodata.json
 from chronodata.constants import (
     Arg,
     Calendar,
     Column,
     Key,
-    Msg,
+    Line,
     String,
+    Tag,
     Unit,
     Value,
 )
+from chronodata.messages import Msg
 
 __all__ = ['Chronology']
 __author__ = 'Frank Hubeny'
@@ -110,11 +113,15 @@ class Chronology:
         self.chron_name: str = name
         self.strict: bool = calendar[Key.STRICT]
         self.filename: str = filename
+        self.ged_data: list[str] = []
+        self.ged_splitdata: list[list[tuple]] = []
+        self.ged_issues: list[list[int, str]] = []
+        self.ged_in_version: str = ''
         self.post: str = calendar[Key.POST]
         self.postlen: int = len(self.post)
         self.pre: str = calendar[Key.PRE]
         self.prelen: int = len(self.pre)
-        if filename == Value.EMPTY:
+        if self.filename == Value.EMPTY:
             self.chron = (
                 {Key.NAME: name}
                 | {Key.CAL: calendar}
@@ -129,19 +136,34 @@ class Chronology:
             )
             if self.log:
                 logging.info(Msg.STARTED.format(self.chron_name))
-        else:
-            mode: Literal['r'] = 'r'
-            with Path.open(Path(filename), mode) as file:
-                self.chron = json.load(file)
-                file.close()
-            self.cal_name = self.chron[Key.CAL][Key.NAME]
-            self.chron_name = self.chron[Key.NAME]
-            self.post = self.chron[Key.CAL][Key.POST]
-            self.postlen = len(self.post)
-            self.pre = self.chron[Key.CAL][Key.PRE]
-            self.prelen = len(self.pre)
+        elif self.filename[-Arg.JSONLEN :] == Arg.JSON:
+            (
+                self.cal_name,
+                self.chron_name,
+                self.post,
+                self.postlen,
+                self.pre,
+                self.prelen,
+                self.chron
+            ) = chronodata.json.read(self.filename)
+            # mode: str = Arg.READ
+            # with Path.open(Path(filename), mode) as file:
+            #     self.chron = json.load(file)
+            #     file.close()
+            # self.cal_name = self.chron[Key.CAL][Key.NAME]
+            # self.chron_name = self.chron[Key.NAME]
+            # self.post = self.chron[Key.CAL][Key.POST]
+            # self.postlen = len(self.post)
+            # self.pre = self.chron[Key.CAL][Key.PRE]
+            # self.prelen = len(self.pre)
             if self.log:
                 logging.info(Msg.LOADED.format(self.chron_name, filename))
+        elif self.filename[-Arg.GEDLEN :] == Arg.GED:
+            self.chron = chronodata.ged.read(self.filename)
+        # elif self.filename[-Arg.GRAMPSLEN :] == Arg.GRAMPS:
+        #     self.read_gramps()
+        else:
+            logging.warning(Msg.UNRECOGNIZED.format(self.filename))
 
     def show(self) -> None:
         """Show the entire chronology."""
@@ -150,12 +172,36 @@ class Chronology:
     def __str__(self) -> str:
         return json.dumps(self.chron)
 
+    
+    def save(self, name: str = Value.EMPTY) -> None:
+        file: str = Value.EMPTY
+        if name == Value.EMPTY:
+            if self.filename == Value.EMPTY:
+                file = Value.EMPTY.join([self.chron_name, Arg.JSON])
+                chronodata.json.write(file, self.chron)
+                file = Value.EMPTY.join([self.chron_name, Arg.GED])
+                chronodata.ged.write(file, self.chron)
+            else:
+                file = self.filename
+        else:
+            file = name
+        chronodata.json.write(file, self.chron)
+        if self.log:
+            logging.info(Msg.FILE_SAVED.format(name))
+
+        # with Path.open(Path(file), mode) as f:
+        #     json.dump(self.chron, f)
+        #     f.close()
+        # if self.log:
+        #     logging.info(Msg.FILE_SAVED.format(file))
+
     def rename(self, name: str) -> None:
         """Rename the chronology."""
         self.chron.update({Key.NAME: name})
         self.chron_name = self.chron[Key.NAME]
         if self.log:
             logging.info(Msg.RENAME.format(self.chron_name))
+
 
     ###### Dictionary Methods
 
@@ -296,7 +342,9 @@ class Chronology:
                 np.datetime64(cleandate[0 : -self.prelen :])
             except ValueError:
                 if self.log:
-                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                    logging.info(
+                        Msg.BAD_DATE.format(date, self.chron[Key.NAME])
+                    )
                 return False
             else:
                 return True
@@ -305,7 +353,9 @@ class Chronology:
                 np.datetime64(cleandate[0 : -self.postlen :])
             except ValueError:
                 if self.log:
-                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                    logging.info(
+                        Msg.BAD_DATE.format(date, self.chron[Key.NAME])
+                    )
                 return False
             else:
                 return True
@@ -314,7 +364,9 @@ class Chronology:
                 np.datetime64(cleandate)
             except ValueError:
                 if self.log:
-                    logging.info(Msg.BAD_DATE.format(date, self.chron[Key.NAME]))
+                    logging.info(
+                        Msg.BAD_DATE.format(date, self.chron[Key.NAME])
+                    )
                 return False
             else:
                 return True
@@ -490,7 +542,9 @@ class Chronology:
 
         if calendar[Key.NAME] == self.chron[Key.CAL][Key.NAME]:
             if self.log:
-                logging.info(Msg.HAS_CALENDAR.format(self.chron[Key.CAL][Key.NAME]))
+                logging.info(
+                    Msg.HAS_CALENDAR.format(self.chron[Key.CAL][Key.NAME])
+                )
         else:
             cals: list[dict[str, Any]] = [Calendar.GREGORIAN, Calendar.SECULAR]
             oldcal: dict[str, Any] = self.chron[Key.CAL]
@@ -526,7 +580,9 @@ class Chronology:
                 self.pre = self.chron[Key.CAL][Key.PRE]
                 self.prelen = len(self.pre)
                 if self.log:
-                    logging.info(Msg.CHANGED.format(self.chron[Key.CAL][Key.NAME]))
+                    logging.info(
+                        Msg.CHANGED.format(self.chron[Key.CAL][Key.NAME])
+                    )
 
     ###### CHALLENGES
 
@@ -797,7 +853,7 @@ class Chronology:
         self, name: str, date: str, DESC: str = Value.EMPTY, **keyvalues: str
     ) -> None:
         """Add a marker to the chronology."""
-        if self.check_date(date): # and self.check_keys(keyvalues):
+        if self.check_date(date):  # and self.check_keys(keyvalues):
             self.chron[Key.MARKERS].update(
                 {
                     name: {
@@ -808,7 +864,9 @@ class Chronology:
             )
             self.chron[Key.MARKERS][name].update(keyvalues)
             if self.log:
-                logging.info(Msg.ADD_MARKER.format(self.chron[Key.MARKERS][name]))
+                logging.info(
+                    Msg.ADD_MARKER.format(self.chron[Key.MARKERS][name])
+                )
 
     def remove_marker(self, name: str) -> None:
         """Remove a marker from the chronology."""
@@ -849,30 +907,13 @@ class Chronology:
             )
             self.chron[Key.PERIODS][name].update(keyvalues)
             if self.log:
-                logging.info(Msg.ADD_PERIOD.format(self.chron[Key.PERIODS][name]))
+                logging.info(
+                    Msg.ADD_PERIOD.format(self.chron[Key.PERIODS][name])
+                )
 
     def remove_period(self, name: str) -> None:
         """Remove a period from the chronology."""
         self.remove_key(Key.PERIODS, name)
-
-    ###### SAVE
-
-    def save(self, name: str = Value.EMPTY) -> None:
-        file: str = Value.EMPTY
-        mode: Literal['w'] = Arg.WRITE
-        if name == Value.EMPTY:
-            if self.filename == Value.EMPTY:
-                file = Value.EMPTY.join([self.chron_name, Arg.JSON])
-            else:
-                file = self.filename
-        else:
-            file = name
-
-        with Path.open(Path(file), mode) as f:
-            json.dump(self.chron, f)
-            f.close()
-        if self.log:
-            logging.info(Msg.FILE_SAVED.format(file))
 
     ###### SOURCES
 
@@ -908,7 +949,9 @@ class Chronology:
             )
             self.chron[Key.SOURCES][name].update(keyvalues)
             if self.log:
-                logging.info(Msg.ADD_SOURCE.format(self.chron[Key.SOURCES][name]))
+                logging.info(
+                    Msg.ADD_SOURCE.format(self.chron[Key.SOURCES][name])
+                )
 
     def remove_source(self, name: str) -> None:
         """Permanently remove a source from the chronology."""
