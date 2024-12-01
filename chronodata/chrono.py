@@ -1,20 +1,12 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """Add, update and remove methods for a specific loaded chronology."""
 
-
 import logging
 from typing import Any
 
 from chronodata.constants import (
-    Arg,
     Calendar,
-    Column,
-    Issue,
-    Key,
-    Line,
-    String,
     Tag,
-    Unit,
     Value,
 )
 from chronodata.core import Base
@@ -30,7 +22,20 @@ class Chronology(Base):
         filename: str = Value.EMPTY,
         calendar: dict[str, Any] = Calendar.GREGORIAN,
     ) -> None:
-        super().__init__(name,filename,calendar)
-        
-    def add_event(self, name: str, when: str):
-        self.chron[Tag.EVEN].update({name : when})
+        super().__init__(name, filename, calendar)
+        # self.chrono_name = name
+        # self.filename = filename
+        # self.calendar = calendar
+
+    def _check_tag(
+        self, tag: str, dictionary: dict[str, Any] | None = None
+    ) -> None:
+        if dictionary is None:
+            dictionary = self.chron
+        if tag not in dictionary:
+            dictionary.update({tag: {}})
+
+    def add_event(self, name: str, when: str) -> None:
+        self._check_tag(Tag.EVENT)
+        self.chron[Tag.EVENT].update({name: {Tag.DATE: when}})
+        logging.info(Msg.ADD_EVENT.format(name, self.chron_name))

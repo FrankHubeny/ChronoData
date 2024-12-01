@@ -13,15 +13,14 @@ class Arg:
     GED: str = '.ged'
     GEDLEN: int = 4
     GRAMPS: str = '.gramps'
-    GRAMPSLEN: str = 7
+    GRAMPSLEN: int = 7
     JSON: str = '.json'
     JSONLEN: int = 5
     INDEX: str = 'index'
     INT: str = 'int'
+    LOCATION: str = 'lower right'
     WRITE: str = 'w'
     READ: str = 'r'
-
-
 
 
 @dataclass(frozen=True)
@@ -39,17 +38,6 @@ class Value:
     EXPERIMENT: str = 'EXPERIMENT'
     GREGORIAN: str = 'GREGORIAN'
     SECULAR: str = 'SECULAR'
-
-
-@dataclass(frozen=True)
-class Column:
-    """The following constants are used for column headings."""
-
-    CODE: str = 'Code'
-    DATETIME: str = 'Date/Time'
-    ISSUE: str = 'Issue'
-    LINE: str = 'Line'
-    RESERVED: str = 'Reserved Keys'
 
 
 @dataclass(frozen=True)
@@ -245,7 +233,7 @@ class Tag:
     EMIG: str = 'EMIG'
     ENDL: str = 'ENDL'
     ENGA: str = 'ENGA'
-    EVEN: str = 'EVEN'  # ?#
+    EVENT: str = 'EVEN'  # ?#
     EXCLUDED: str = 'EXCLUDED'  # ?#
     EXID: str = 'EXID'
     EXID_TYPE: str = 'EXID-TYPE'
@@ -392,6 +380,7 @@ class Tag:
     SURN: str = 'SURN'
     TAG: str = 'TAG'
     TEMP: str = 'TEMP'
+    TESTCASES: str = 'TEST CASES'
     TEXT: str = 'TEXT'
     TIME: str = 'TIME'
     TITL: str = 'TITL'
@@ -498,24 +487,12 @@ class ExtTag:
 
 
 @dataclass(frozen=True)
-class Issue:
-    """Messages to report issues."""
-
-    BAD_INC: str = 'The level incremented more than 1 on this line.'
-    LESS_ZERO: str = 'The level decreated below zero on this line.'
-    NO_ZERO: str = 'The first character is the file was not zero.'
-
-
-@dataclass(frozen=True)
 class Line:
     """Strings to write a GEDCOM file."""
 
     HEAD: str = f'0 {Tag.HEAD}\n1 {Tag.GEDC}\n2 {Tag.VERS} 7.0\n'
     SUBM: str = f'0 {Tag.SUBM}\n1 {Tag.NAME} ChronoData\n'
     TAIL: str = f'0 {Tag.TRLR}\n'
-
-
-
 
 
 @dataclass(frozen=True)
