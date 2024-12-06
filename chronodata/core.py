@@ -1,23 +1,23 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-"""Read and write methods for chronology files."""
+"""Read and write files for chronology files."""
 
 import json
 import logging
 from pathlib import Path
 from typing import Any
 
-import numpy as np  # type: ignore  # noqa: PGH003
-import pandas as pd  # type: ignore  # noqa: PGH003
+import numpy as np
+import pandas as pd
 
 from chronodata.constants import (
     Arg,
     Calendar,
     Key,
-    Line,
     String,
     Unit,
     Value,
 )
+from chronodata.g7 import Gedcom, Line
 from chronodata.messages import Issue, Msg
 
 
@@ -29,14 +29,33 @@ class Base:
         name: str = Value.EMPTY,
         filename: str = Value.EMPTY,
         calendar: dict[str, Any] = Calendar.GREGORIAN,
+        log: bool = True,
     ) -> None:
-        self.chron: dict[str, Any] = {}
+        self.chron: dict[str, Any] = {
+            Gedcom.FAM: {},
+            Gedcom.INDI: {},
+            Gedcom.OBJE: {},
+            Gedcom.REPO: {},
+            Gedcom.SNOTE: {},
+            Gedcom.SOUR: {},
+            Gedcom.SUBM: {},
+            Gedcom.SUBM: {},
+        }
         self.chron_name: str = name
         self.strict: bool = calendar[Key.STRICT]
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
+        self.ged_header: list[str] = []
+        self.ged_trailer: list[str] = [Line.TAIL]
+        self.ged_family: list[str] = []
+        self.ged_individual: list[str] = []
+        self.ged_multimedia: list[str] = []
+        self.ged_repository: list[str] = []
+        self.ged_shared_note: list[str] = []
+        self.ged_source: list[str] = []
+        self.ged_submitter: list[str] = []
         self.post: str = calendar[Key.POST]
         self.postlen: int = len(self.post)
         self.pre: str = calendar[Key.PRE]
@@ -49,13 +68,16 @@ class Base:
                     Key.NAME: name,
                     Key.CAL: calendar,
                 }
-                logging.info(Msg.STARTED.format(self.chron_name))
+                if log:
+                    logging.info(Msg.STARTED.format(self.chron_name))
             case Arg.JSON:
                 self.read_json()
-                logging.info(Msg.LOADED.format(self.chron_name, filename))
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
             case Arg.GED:
                 self.read_ged()
-                logging.info(Msg.LOADED.format(self.chron_name, filename))
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
             case _:
                 logging.warning(Msg.UNRECOGNIZED.format(self.filename))
 
@@ -135,7 +157,9 @@ class Base:
             #     tags.append(line[1])
         # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
 
-    def save(self, filename: str = Value.EMPTY, overwrite: bool = False):
+    def save(
+        self, filename: str = Value.EMPTY, overwrite: bool = False
+    ) -> None:
         """Save the current chronology.
 
         Parameters
@@ -162,8 +186,14 @@ class Base:
                     )
                 case Arg.GED:
                     with Path.open(Path(filename), Arg.WRITE) as file:
-                        file.write(Line.HEAD)
-                        file.write(Line.SUBM)
+                        file.write(self.ged_header)
+                        file.write(self.ged_family)
+                        file.write(self.ged_individual)
+                        file.write(self.ged_multimedia)
+                        file.write(self.ged_repository)
+                        file.write(self.ged_shared_note)
+                        file.write(self.ged_source)
+                        file.write(self.ged_submitter)
                         file.write(Line.TAIL)
                         file.close()
                     logging.info(

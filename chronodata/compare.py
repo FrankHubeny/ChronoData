@@ -7,9 +7,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import matplotlib.pyplot as plt  # type: ignore  # noqa: PGH003
-import numpy as np  # type: ignore  # noqa: PGH003
-import pandas as pd  # type: ignore  # noqa: PGH003
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 from chronodata.constants import (
     Arg,
@@ -17,6 +17,7 @@ from chronodata.constants import (
     Value,
 )
 from chronodata.core import Base
+from chronodata.g7 import Gedcom
 from chronodata.messages import Column, Label, Msg
 
 
@@ -43,7 +44,7 @@ class Challenge:
         self.chrons: list[str] = chrons
         self.chronologies: list[Base] = []
         for file in self.chrons:
-            self.chronologies.append(Base(filename=file))
+            self.chronologies.append(Base(filename=file, log=False))
         self.test_cases: list[list[Any]] = test_cases
         self.test_columns = [
             Column.TEST_NAME,
@@ -69,15 +70,15 @@ class Challenge:
             ]
         self.chron_data: list[list[Any]] = []
         for chronology in self.chronologies:
-            begin_event_date = chronology.chron[Tag.EVENT][begin_event][
-                Tag.DATE
+            begin_event_date = chronology.chron[Gedcom.EVEN][begin_event][
+                Gedcom.DATE
             ]
             begin_years_since = chronology.date_diff(
                 begin_event_date, str(today)
             )
             if end_event != Value.EMPTY:
-                end_event_date = chronology.chron[Tag.EVENT][end_event][
-                    Tag.DATE
+                end_event_date = chronology.chron[Gedcom.EVEN][end_event][
+                    Gedcom.DATE
                 ]
                 begin_end_duration = chronology.date_diff(
                     begin_event_date, end_event_date
@@ -93,9 +94,10 @@ class Challenge:
                 self.chron_data.append([begin_event_date, begin_years_since])
         self.challenge: dict[str, Any] = {
             Tag.NAME: self.name,
-            Tag.CHRONOS: self.chrons,
+            Tag.CHRONS: self.chrons,
             Tag.TESTCASES: self.test_cases,
             Tag.DATA: self.chron_data,
+            Tag.CHRON_NAMES: self.chron_names,
         }
         if self.name == Value.EMPTY and self.filename == Value.EMPTY:
             logging.info(Msg.NAME_OR_FILENAME)
@@ -103,17 +105,25 @@ class Challenge:
             with Path.open(Path(self.filename), Arg.READ) as file:
                 self.challenge = json.load(file)
                 file.close()
-            for file in self.challenge[Tag.CHRONOS]:
-                self.chronologies.append(Base(filename=file))
+            self.name = self.challenge[Tag.NAME]
+            for file in self.challenge[Tag.CHRONS]:
+                self.chrons.append(file)
+                self.chronologies.append(Base(filename=file, log=False))
             for test_item in self.challenge[Tag.TESTCASES]:
                 self.test_cases.append(test_item)
             for data_list in self.challenge[Tag.DATA]:
                 self.chron_data.append(data_list)
-            logging.info(Msg.CHALLENGE_LOADED.format(self.name, self.chrons))
+            for chron_name in self.challenge[Tag.CHRON_NAMES]:
+                self.chron_names.append(chron_name)
+            logging.info(
+                Msg.CHALLENGE_LOADED.format(self.name, self.chron_names)
+            )
         else:
             # for file in self.chrons:
             #     self.chronologies.append(Base(filename=file))
-            logging.info(Msg.CHALLENGE_BEGIN.format(self.name, self.chrons))
+            logging.info(
+                Msg.CHALLENGE_BEGIN.format(self.name, self.chron_names)
+            )
 
     def add_age_test_case(
         self, item: str, age: float, color: str, line: str
@@ -153,7 +163,7 @@ class Challenge:
                 file.close()
             logging.info(Msg.CHALLENGE_SAVED.format(self.name, self.filename))
 
-    def remove_age_testcase(self, item) -> None:
+    def remove_age_testcase(self, item: str) -> None:
         for index, value in enumerate(self.test_cases):
             if value[0] == item:
                 self.test_cases.pop(index)

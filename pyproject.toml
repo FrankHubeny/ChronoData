@@ -43,7 +43,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "astropy>=6.1.6",
+  #"astropy>=6.1.6",
   "json>=2.0.9",
   "matplotlib>=3.8.4",
   "numpy>=2.0.2",
@@ -60,12 +60,12 @@ Changelog = "https://github.com/FrankHubeny/ChronoData/CHANGELOG.md"
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = [
-    "-ra", 
-    "--showlocals", 
-    "--strict-markers", 
-    "--strict-config",
-    "--import-mode=importlib",	
-    "--cov=chronodata",
+  "-ra", 
+  "--showlocals", 
+  "--strict-markers", 
+  "--strict-config",
+  "--import-mode=importlib",	
+  "--cov=chronodata",
 ]
 xfail_strict = true
 filterwarnings = ["error"]
@@ -75,8 +75,11 @@ testpaths = ["tests"]
 [tool.mypy]
 mypy_path = ["chronodata"]
 files = [
-    "chronodata/chronology.py", 
-	"chronodata/utils/constants.py", 
+  "chronodata/chrono.py", 
+  "chronodata/constants.py", 
+  "chronodata/core.py",
+  "chronodata/g7.py",
+  "chronodata/compare.py",
 ]
 python_version = "3.12"
 warn_unused_configs = true
