@@ -49,13 +49,13 @@ class Chronology(Base):
     ) -> None:
         super().__init__(name, filename, calendar, log)
         self.xref_counter: int = 1
-        self.xref_family: list[int] = []
-        self.xref_individual: list[int] = []
-        self.xref_multimedia: list[int] = []
-        self.xref_repository: list[int] = []
-        self.xref_shared_note: list[int] = []
-        self.xref_source: list[int] = []
-        self.xref_submitter: list[int] = []
+        self.family_xreflist: list[int] = []
+        self.individual_xreflist: list[int] = []
+        self.multimedia_xreflist: list[int] = []
+        self.repository_xreflist: list[int] = []
+        self.shared_note_xreflist: list[int] = []
+        self.source_xreflist: list[int] = []
+        self.submitter_xreflist: list[int] = []
 
     def _check_tag(
         self, tag: str, dictionary: dict[str, Any] | None = None
@@ -221,7 +221,7 @@ class Chronology(Base):
     #         new_association[Gedcom.ASSO].update({Gedcom.PHRASE: role_phrase})
     #     return new_association
 
-    def now(self, level: int = 2) -> list[str]:
+    def now(self, level: int = 2) -> str:
         """Return the current UTC date and time rather than an entered value.
 
         This will be returned as a list of two lines for a GEDCOM file.
@@ -259,12 +259,12 @@ class Chronology(Base):
         date: str
         time: str
         date, time = self.ged_date()
-        return [
-            f'{level} {Gedcom.DATE} {date}',
-            f'{level + 1} {Gedcom.TIME} {time}',
-        ]
+        return (
+            f'{level} {Gedcom.DATE} {date}\n'
+            f'{level + 1} {Gedcom.TIME} {time}\n'
+        )
 
-    def change_date(self, note: list[str] | None = None) -> list[str]:
+    def change_date(self, note: list[str] | None = None) -> str:
         """Return three GEDCOM lines showing a line with a change tag
         and then two automatically generated
         UTC date and time lines.  These are used to
@@ -283,12 +283,14 @@ class Chronology(Base):
         """
         if note is None:
             note = []
-        lines = [f'1 {Gedcom.CHAN}']
-        lines.extend(self.now())
-        lines.extend(self.note_structure(note))
-        return lines
+        # lines: str = f'1 {Gedcom.CHAN}\n'
+        # lines.join(self.now())
+        # lines.join(self.note_structure(note))
+        return Value.EMPTY.join(
+            [f'1 {Gedcom.CHAN}\n', self.now(), self.note_structure(note)]
+        )
 
-    def creation_date(self) -> list[str]:
+    def creation_date(self) -> str:
         """Return three GEDCOM lines showing a line with a creation tag (CREA)
         and then two automatically generated
         UTC date and time lines.  These are used to
@@ -305,9 +307,7 @@ class Chronology(Base):
         - `source`: the method creating the source record (SOUR)
         - `submitter`: the method creating the submitter record (SUBM)
         """
-        lines = [f'1 {Gedcom.CREA}']
-        lines.extend(self.now())
-        return lines
+        return Value.EMPTY.join([f'1 {Gedcom.CREA}\n', self.now()])
 
     def date_value(
         self,
@@ -315,67 +315,32 @@ class Chronology(Base):
         time: str = Value.EMPTY,
         phrase: str = Value.EMPTY,
         level: int = 1,
-    ) -> list[str]:
+    ) -> str:
         level2: int = level + 1
         if len(date) == 0:
             logging.error(Msg.NO_VALUE)
             raise ValueError(Msg.NO_VALUE)
         if time == Value.EMPTY and phrase == Value.EMPTY:
-            return [f'{level} {Gedcom.DATE} {date}']
+            return f'{level} {Gedcom.DATE} {date}\n'
         if time != Value.EMPTY and phrase == Value.EMPTY:
-            return [
-                f'{level} {Gedcom.DATE} {date}',
-                f'{level2} {Gedcom.TIME} {time}',
-            ]
+            return (
+                f'{level} {Gedcom.DATE} {date}\n'
+                f'{level2} {Gedcom.TIME} {time}\n'
+            )
         if time == Value.EMPTY and phrase != Value.EMPTY:
-            return [
-                f'{level} {Gedcom.DATE} {date}',
-                f'{level2} {Gedcom.PHRASE} {phrase}',
-            ]
-        return [
-            f'{level} {Gedcom.DATE} {date}',
-            f'{level2} {Gedcom.TIME} {time}',
-            f'{level2} {Gedcom.PHRASE} {phrase}',
-        ]
-
-    # def note(
-    #     self,
-    #     text: str,
-    #     mime: str = Value.EMPTY,
-    #     lang: str = Value.EMPTY,
-    #     trans: list | None = None,
-    #     source: list | None = None,
-    #     counter: int = 1,
-    # ) -> dict[str, dict[str, str]]:
-    #     counter2: int = counter + 1
-    #     counter3: int = counter + 1
-    #     line1 = f'{counter} {Gedcom.TEXT} {text}\n'
-    #     line2: str = Value.EMPTY
-    #     line3: str = Value.EMPTY
-    #     transline: str = Value.EMPTY
-    #     sourceline: str = Value.EMPTY
-    #     if mime in Enum.MEDIA_TYPE:
-    #         line2 = f'{counter2} {Gedcom.MIME} {mime}\n'
-    #     if lang != Value.EMPTY:
-    #         line3 = f'{counter2} {Gedcom.LANG} {lang}\n'
-    #     for translation in trans:
-    #         transline = Value.EMPTY.join(
-    #             [
-    #                 transline,
-    #                 f'{counter2} {Gedcom.TRAN} {translation[0]}\n',
-    #                 f'{counter3} {Gedcom.MIME} {translation[1]}\n',
-    #                 f'{counter3} {Gedcom.LANG} {translation[2]}\n',
-    #             ]
-    #         )
-    #     for reference in source:
-    #         sourceline = Value.EMPTY.join(
-    #             [sourceline, f'{counter} {Gedcom.SOUR} {reference}\n']
-    #         )
-    #     return Value.EMPTY.join([line1, line2, line3, transline, sourceline])
+            return (
+                f'{level} {Gedcom.DATE} {date}\n'
+                f'{level2} {Gedcom.PHRASE} {phrase}\n'
+            )
+        return (
+            f'{level} {Gedcom.DATE} {date}\n'
+            f'{level2} {Gedcom.TIME} {time}\n'
+            f'{level2} {Gedcom.PHRASE} {phrase}\n'
+        )
 
     ###### Methods to Assisting Building GEDCOM Records
 
-    def next_counter(self, record: list[int]) -> str:
+    def next_counter(self, record: list[str]) -> str:
         counter: int = self.xref_counter
         xref: str = Value.EMPTY.join(
             [GEDSpecial.ATSIGN, str(counter), GEDSpecial.ATSIGN]
@@ -384,9 +349,7 @@ class Chronology(Base):
         self.xref_counter += 1
         return xref
 
-    def address_structure(
-        self, address: list[Any], level: int = 1
-    ) -> list[str]:
+    def address_structure(self, address: list[Any], level: int = 1) -> str:
         """Add address information.
 
         Each address line is a list of five strings:
@@ -446,48 +409,68 @@ class Chronology(Base):
         If the list is empty the method returns the empty list.
 
         """
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         if len(address) > 0:
             address_lines = address[0].split('\n')
-            lines.extend([f'{level} {Gedcom.ADDR} {address_lines[0]}'])
+            lines = Value.EMPTY.join(
+                [lines, f'{level} {Gedcom.ADDR} {address_lines[0]}\n']
+            )
             for line in address_lines[1:]:
-                lines.extend([f'{level} {Gedcom.CONT} {line}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level} {Gedcom.CONT} {line}\n']
+                )
             if len(address) > 1 and address[1] != Value.EMPTY:
-                lines.extend([f'{level + 1} {Gedcom.CITY} {address[1]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.CITY} {address[1]}\n']
+                )
             if len(address) > 2 and address[2] != Value.EMPTY:
-                lines.extend([f'{level + 1} {Gedcom.STAE} {address[2]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.STAE} {address[2]}\n']
+                )
             if len(address) > 3 and address[3] != Value.EMPTY:
-                lines.extend([f'{level + 1} {Gedcom.POST} {address[3]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.POST} {address[3]}\n']
+                )
             if len(address) > 4 and address[4] != Value.EMPTY:
-                lines.extend([f'{level + 1} {Gedcom.CTRY} {address[4]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.CTRY} {address[4]}\n']
+                )
         return lines
-
-    # def add_anci(self, anci: list[Any], level: int = 1) -> list[str]:
-    #     """Add anci information."""
-    #     lines: list[str] = []
-    #     return lines
 
     def association_structure(
         self, association: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add association information."""
-        lines: list[str] = []
-        if association[0] in self.xref_individual:
-            lines.extend([f'{level} {Gedcom.ASSO} {association[0]}'])
+        lines: str = Value.EMPTY
+        if association[0] in self.individual_xreflist:
+            lines = Value.EMPTY.join(
+                [lines, f'{level} {Gedcom.ASSO} {association[0]}\n']
+            )
             if association[1] != Value.EMPTY:
-                lines.extend([f'{level + 1} {Gedcom.PHRASE} {association[1]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.PHRASE} {association[1]}\n']
+                )
             if association[2] in Enum.ROLE:
-                lines.extend([f'{level + 2} {Gedcom.ROLE} {association[2]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 2} {Gedcom.ROLE} {association[2]}\n']
+                )
                 if association[3] != Value.EMPTY:
-                    lines.extend(
-                        [f'{level + 2} {Gedcom.PHRASE} {association[3]}']
+                    lines = Value.EMPTY.join(
+                        [
+                            lines,
+                            f'{level + 2} {Gedcom.PHRASE} {association[3]}\n',
+                        ]
                     )
             else:
                 raise ValueError(
                     Msg.NOT_VALID_ENUM.format(association[2], EnumName.ROLE)
                 )
-            lines.extend(self.note_structure(association[4]))
-            lines.extend(self.source_citation(association[5]))
+            lines = Value.EMPTY.join(
+                [lines, self.note_structure(association[4])]
+            )
+            lines = Value.EMPTY.join(
+                [lines, self.source_citation(association[5])]
+            )
         else:
             raise ValueError(
                 Msg.NOT_RECORD.format(association[0], Record.INDIVIDUAL)
@@ -496,33 +479,29 @@ class Chronology(Base):
 
     def event_detail(self, event: list[Any], level: int = 1) -> list[str]:
         """Add event detail information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
     def family_attribute_structure(
         self, attribute: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add attribute information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def family_event_detail(
-        self, detail: list[Any], level: int = 1
-    ) -> list[str]:
+    def family_event_detail(self, detail: list[Any], level: int = 1) -> str:
         """Add family event detail information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def family_event_structure(
-        self, event: list[Any], level: int = 1
-    ) -> list[str]:
+    def family_event_structure(self, event: list[Any], level: int = 1) -> str:
         """Add family event information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
     def identifier_structure(
         self, identifier: list[str], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add an identifier to a record.
 
         Each identifier is a list contain at least two strings and at most three.
@@ -530,228 +509,266 @@ class Chronology(Base):
         The second string is the identifier itself.
         The optional third is the type of identifier.
         """
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         if (
             identifier[0] in Enum.ID
             and len(identifier) > 1
             and len(identifier) < 4
         ):
             if len(identifier) > 1:
-                lines.extend([f'{level} {identifier[0][0]} {identifier[0][1]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level} {identifier[0][0]} {identifier[0][1]}\n']
+                )
             if len(identifier) > 2:
-                lines.extend(f'{level + 1} {Gedcom.TYPE} {identifier[0][2]}')
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.TYPE} {identifier[0][2]}\n']
+                )
         return lines
 
     def individual_attribute_structure(
         self, attribute: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add individual attribute information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def individual_event_detail(
-        self, detail: list[Any], level: int = 1
-    ) -> list[str]:
+    def individual_event_detail(self, detail: list[Any], level: int = 1) -> str:
         """Add individual event detail information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
     def individual_event_structure(
         self, event: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add individual event information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
     def lds_individual_ordinance(
         self, ordinance: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add LDS individual ordinance information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def lds_ordinance_detail(
-        self, detail: list[Any], level: int = 1
-    ) -> list[str]:
+    def lds_ordinance_detail(self, detail: list[Any], level: int = 1) -> str:
         """Add LDS ordinance detail information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def lds_spouse_sealing(
-        self, spouse: list[Any], level: int = 1
-    ) -> list[str]:
+    def lds_spouse_sealing(self, spouse: list[Any], level: int = 1) -> str:
         """Add LDS spouse sealing information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def multimedia_link(self, media: list[Any], level: int = 1) -> list[str]:
+    def multimedia_link(self, media: list[Any], level: int = 1) -> str:
         """Add multimedia information."""
-        lines: list[str] = []
-        if len(media) > 0 and media[0] in self.xref_multimedia:
-            lines.extend([f'{level} {Gedcom.OBJE} {media[0]}'])
+        lines: str = Value.EMPTY
+        if len(media) > 0 and media[0] in self.multimedia_xreflist:
+            lines = Value.EMPTY.join(
+                [lines, f'{level} {Gedcom.OBJE} {media[0]}\n']
+            )
             if len(media[1]) == 4:
-                lines.extend(
+                lines = Value.EMPTY.join(
                     [
-                        f'{level + 1} {Gedcom.CROP}',
-                        f'{level + 2} {Gedcom.TOP} {media[1][0]}',
-                        f'{level + 2} {Gedcom.LEFT} {media[1][1]}',
-                        f'{level + 2} {Gedcom.HEIGHT} {media[1][2]}',
-                        f'{level + 2} {Gedcom.WIDTH} {media[1][3]}',
+                        lines,
+                        f'{level + 1} {Gedcom.CROP}\n',
+                        f'{level + 2} {Gedcom.TOP} {media[1][0]}\n',
+                        f'{level + 2} {Gedcom.LEFT} {media[1][1]}\n',
+                        f'{level + 2} {Gedcom.HEIGHT} {media[1][2]}\n',
+                        f'{level + 2} {Gedcom.WIDTH} {media[1][3]}\n',
                     ]
                 )
             if len(media) == 3:
-                lines.extend([f'{level + 1} {Gedcom.TITL} {media[2]}'])
+                lines = Value.EMPTY.join(
+                    [lines, f'{level + 1} {Gedcom.TITL} {media[2]}\n']
+                )
         elif media[0] not in Enum.MEDI:
             raise ValueError(Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA))
         return lines
 
-    def non_event_structure(
-        self, event: list[Any], level: int = 1
-    ) -> list[str]:
+    def non_event_structure(self, event: list[Any], level: int = 1) -> str:
         """Add non event information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def note_structure(self, note: list[Any], level: int = 1) -> list[str]:
+    def note_structure(self, note: list[Any], level: int = 1) -> str:
         """Add note information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def personal_name_pieces(
-        self, note: list[Any], level: int = 1
-    ) -> list[str]:
+    def personal_name_pieces(self, note: list[Any], level: int = 1) -> str:
         """Add pieces of personal name information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def personal_name_structure(
-        self, name: list[Any], level: int = 1
-    ) -> list[str]:
+    def personal_name_structure(self, name: list[Any], level: int = 1) -> str:
         """Add note information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def place_structure(self, place: list[Any], level: int = 1) -> list[str]:
+    def place_structure(self, place: list[Any], level: int = 1) -> str:
         """Add note information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
-    def source_citation(self, source: list[Any], level: int = 1) -> list[str]:
+    def source_citation(self, source: list[Any], level: int = 1) -> str:
         """Add source citation information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
 
     def source_repository_citation(
         self, repository: list[Any], level: int = 1
-    ) -> list[str]:
+    ) -> str:
         """Add source repository information."""
-        lines: list[str] = []
+        lines: str = Value.EMPTY
         return lines
-
-    # def add_data(self, data: list[Any], level: int = 1) -> list[str]:
-    #     """Add data information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_desi(self, desi: list[Any], level: int = 1) -> list[str]:
-    #     """Add desi information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_fam(self, fam: list[Any], level: int = 1) -> list[str]:
-    #     """Add fam information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_family(self, family: list[Any], level: int = 1) -> list[str]:
-    #     """Add family information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_family_attribute(
-    #     self, attribute: list[Any], level: int = 1
-    # ) -> list[str]:
-    #     """Add family attribute information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_family_event(self, event: list[Any], level: int = 1) -> list[str]:
-    #     """Add family event information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_family_non_event(
-    #     self, event: list[Any], level: int = 1
-    # ) -> list[str]:
-    #     """Add family non-event information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_file(self, file: list[Any], level: int = 1) -> list[str]:
-    #     """Add file information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_header_source(self, source: list[Any], level: int = 1) -> list[str]:
-    #     """Add source information for the header."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_individual_event(
-    #     self, event: list[Any], level: int = 1
-    # ) -> list[str]:
-    #     """Add individual event information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_lds_spouse(self, spouse: list[Any], level: int = 1) -> list[str]:
-    #     """Add LDS spouse information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_name(self, name: list[Any], level: int = 1) -> list[str]:
-    #     """Add name information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_ordinance(self, ordinance: list[Any], level: int = 1) -> list[str]:
-    #     """Add LDS ordinance information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_place(self, place: list[Any], level: int = 1) -> list[str]:
-    #     """Add place information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def source_citation(self, source: list[Any], level: int = 1) -> list[str]:
-    #     """Add source information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_submitter(self, submitter: list[Any], level: int = 1) -> list[str]:
-    #     """Add submitter information."""
-    #     lines: list[str] = []
-    #     return lines
-
-    # def add_translation(
-    #     self, translation: list[Any], level: int = 1
-    # ) -> list[str]:
-    #     """Add translation information."""
-    #     lines: list[str] = []
-    #     return lines
 
     ###### GEDCOM Records
 
+    def family_xref(self) -> str:
+        """Create a cross reference identifier for a family.
+
+        A family may reference many individuals.  An individual
+        may reference many families.  This method creates
+        the reference identifier for a family without specifying
+        reference identifiers for its members.
+
+        See Also
+        --------
+        - `individual_xref`: create a cross reference identifier for an individual.
+
+        Examples
+        --------
+        Examples of both `individual_xref` and `family_xref` are provided
+        with the `individual_xref` documentation.
+
+        The following chronology has only two events in it both under a family record.
+
+        >>> from chronodata.chrono import Chronology
+        >>>
+        >>> c = Chronology('mankind')
+        >>> c.family_record(
+        >>>    xref_family=c.family_xref(),
+        >>>    family_events=[]
+        >>> )
+
+        The GEDCOM file for this chronology would look like the following.
+
+        For an example of how ChronoData was used to compare various such
+        chronologies, see
+        """
+        return self.next_counter(self.family_xreflist)
+
+    def individual_xref(self) -> str:
+        """Create a cross reference identifier for an individual.
+
+        A individual may reference different families one where
+        the individual is a parent in one marriage and another where the individual
+        is a child or has been adopted or may be a distant descendent.  This method creates
+        the reference identifier for an individual without associating
+        it with reference identifiers for its families.
+
+        The other five record types (`multimedia`, `repository`, `shared_note`,
+        `source` and `submitter`) return a cross reference identifier
+        which should be saved since they will be needed in individual and family
+        records.
+
+        See Also
+        --------
+        - `family_xref`: create a cross reference identifier for a family.
+
+        Example
+        -------
+        One could start a chronology by getting reference identifiers
+        for the individuals and the families in any order.  Once one has
+        the identifiers one can build out the individual and family records.
+
+        >>> from chronodata.chrono import Chronology
+        >>>
+        >>> c = Chronology('adam to seth')
+        >>> adam = c.individual_xref()
+        >>> adameve = c.family_xref()
+        >>> eve = c.individual_xref()
+        >>> cain = c.individual_xref()
+        >>> abel = c.individual_xref()
+        >>> seth = c.individual_xref()
+        >>> c.family_record(
+        >>>     xref_family=adameve,
+        >>>     husband=adam,
+        >>>     wife=eve,
+        >>>     children=[cain,abel,seth]
+        >>> )
+        >>> c.individual_record(
+        >>>     xref_individual=adam,
+        >>>     families_spouse=[adameve]
+        >>> )
+        >>> c.individual_record(
+        >>>    xref_individual=eve,
+        >>>    families_spouse=[adameve]
+        >>> )
+        >>> c.individual_record(
+        >>>    xref_individual=cain,
+        >>>    families_child=[adameve]
+        >>> )
+        >>> c.individual_record(
+        >>>    xref_individual=abel,
+        >>>    families_child=[adameve]
+        >>> )
+        >>> c.individual_record(
+        >>>    xref_individual=seth,
+        >>>    families_child=[adameve]
+        >>> )
+
+        One would get the following GEDCOM record:
+
+
+        Various chronologies for the Ancient Near East have been constructed.
+        They do not all agree with each other, but one can compare them
+        to identifiy specifically where they disagree and decide which
+        represents the best view of ancient history.
+
+
+        Something similar could be even for non-biological transitions
+        such as the decay of uranium-238 to lead-206.
+
+        >>> from chronodata.chrono import Chronology
+        >>>
+        >>> c = Chronology('uranium to lead')
+        >>> uranium = c.individual_xref()
+        >>> lead = c.individual_xref()
+        >>> uranium_lead = c.family_xref()
+        >>> c.individual_record(
+        >>>     xref_individual=uranium,
+        >>>     families_spouse=[uranium_lead],
+        >>> )
+        >>> c.individual_record(
+        >>>     xref_individual=lead,
+        >>>     families_child=[uranium_lead]
+        >>> )
+        >>> c.family_record(
+        >>>     xref_family=uranium_lead,
+        >>>     wife=uranium,
+        >>>     child=[lead]
+        >>> )
+
+        A complete example of the state transitions from uranium-238 to
+        lead is provided in the example section.
+
+
+        """
+        return self.next_counter(self.individual_xreflist)
+
     def family_record(
         self,
+        xref: str,
         resn: str = Value.EMPTY,
         family_attributes: list[Any] | None = None,
         family_events: list[Any] | None = None,
         family_non_events: list[Any] | None = None,
-        husband: str = Value.EMPTY,
+        husband: str = GEDSpecial.VOID,
         husband_phrase: str = Value.EMPTY,
-        wife: str = Value.EMPTY,
+        wife: str = GEDSpecial.VOID,
         wife_phrase: str = Value.EMPTY,
         children: list[Any] | None = None,
         associations: list[Any] | None = None,
@@ -761,7 +778,60 @@ class Chronology(Base):
         notes: list[Any] | None = None,
         sources: list[Any] | None = None,
         multimedia: list[Any] | None = None,
-    ) -> str:
+    ) -> None:
+        """Create a detailed record for a family.
+
+        Prior to calling this one will need a family cross reference
+        identifier.  This can be obtained by running the `family_xref`
+        method which will return the needed identifier.
+
+        Parameter
+        ---------
+        - xref_family: The cross reference identifier obtained from the
+            `family_xref` method.
+        - resn: A flag specifying if access to the record must be restricted.
+        - family_attributes: list[Any] | None = None,
+        - family_events: list[Any] | None = None,
+        - family_non_events: list[Any] | None = None,
+        - husband: str = GEDSpecial.VOID,
+        - husband_phrase: str = Value.EMPTY,
+        - wife: str = GEDSpecial.VOID,
+        - wife_phrase: str = Value.EMPTY,
+        - children: list[Any] | None = None,
+        - associations: list[Any] | None = None,
+        - submitters: list[Any] | None = None,
+        - lds_spouse_sealing: list[Any] | None = None,
+        - identifiers: list[Any] | None = None,
+        - notes: list[Any] | None = None,
+        - sources: list[Any] | None = None,
+        - multimedia: list[Any] | None = None,
+
+        Exceptions
+        ----------
+        - A value error is raised if the family cross reference identifier
+        has not been created in advance and used for the `xref_family` parameter.
+        ` A value error is raised if the `husband` cross reference identifier
+        has not been created in advance using the `individual_xref` method.
+        ` A value error is raised if the `wife` cross reference identifier
+        has not been created in advance using the `individual_xref` method.
+        ` A value error is raised if any of the `children`
+        do not have a cross reference identifier that was
+        created in advance using the `individual_xref` method.
+        - A value error is raised if the
+        [reason code](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-RESN)
+        for restricting
+        the record is not in the set of valid reason codes.
+
+        Reference
+        ---------
+        - [GEDCOM Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+
+        See Also
+        --------
+        - family_xref: Create a family cross reference identifier.
+        - individual_xref: Create an individual cross reference identifier.
+        """
+
         if associations is None:
             associations = []
         if children is None:
@@ -784,55 +854,66 @@ class Chronology(Base):
             sources = []
         if submitters is None:
             submitters = []
+        if xref not in self.family_xreflist:
+            raise ValueError(Msg.NOT_RECORD.format(xref, Record.FAMILY))
+        if resn != Value.EMPTY and resn not in Enum.RESN:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(resn, EnumName.RESN))
+        if (
+            husband != GEDSpecial.VOID
+            and husband not in self.individual_xreflist
+        ):
+            raise ValueError(Msg.NOT_RECORD.format(husband, Record.INDIVIDUAL))
+        if wife != GEDSpecial.VOID and wife not in self.individual_xreflist:
+            raise ValueError(Msg.NOT_RECORD.format(wife, Record.INDIVIDUAL))
+        for child in children:
+            if (
+                child != GEDSpecial.VOID
+                and child not in self.individual_xreflist
+            ):
+                raise ValueError(
+                    Msg.NOT_RECORD.format(child, Record.INDIVIDUAL)
+                )
         level: int = 0
-        xref: str = self.next_counter(self.xref_family)
-        json_family: dict[str, dict[str, str]] = {}
-        ged_family: list[str] = [
-            f'{level!s} {xref} {Gedcom.FAM}',
-        ]
+        ged_family: str = f'{level!s} {xref} {Gedcom.FAM}\n'
         if resn != Value.EMPTY and resn in Enum.RESN:
-            ged_family.extend([f'1 {Gedcom.RESN} {resn}'])
+            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.RESN} {resn}\n'])
         for attribute in family_attributes:
-            ged_family.extend(self.family_attribute_structure(attribute))
+            ged_family = Value.EMPTY.join([ged_family, self.family_attribute_structure(attribute)])
         for event in family_events:
-            ged_family.extend(self.family_event_structure(event))
+            ged_family = Value.EMPTY.join([ged_family, self.family_event_structure(event)])
         for non_event in family_non_events:
-            ged_family.extend(self.non_event_structure(non_event))
-        if husband != Value.EMPTY:
-            ged_family.extend([f'1 {Gedcom.HUSB} {husband}'])
-            if husband_phrase != Value.EMPTY:
-                ged_family.extend([f'2 {Gedcom.PHRASE} {husband_phrase}'])
-        if wife != Value.EMPTY:
-            ged_family.extend([f'1 {Gedcom.WIFE} {wife}'])
-            if wife_phrase != Value.EMPTY:
-                ged_family.extend([f'2 {Gedcom.PHRASE} {wife_phrase}'])
+            ged_family = Value.EMPTY.join([ged_family, self.non_event_structure(non_event)])
+        ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.HUSB} {husband}\n'])
+        if husband_phrase != Value.EMPTY:
+            ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {husband_phrase}\n'])
+        ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.WIFE} {wife}\n'])
+        if wife_phrase != Value.EMPTY:
+            ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {wife_phrase}\n'])
         for child, phrase in children:
-            ged_family.extend(f'1 {Gedcom.CHIL} {child}')
+            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.CHIL} {child}\n'])
             if phrase != Value.EMPTY:
-                ged_family.extend(f'2 {Gedcom.PHRASE} {phrase}')
+                ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {phrase}\n'])
         for association in associations:
-            ged_family.extend(self.association_structure(association))
+            ged_family = Value.EMPTY.join([ged_family, self.association_structure(association)])
         for submitter in submitters:
-            ged_family.extend(f'1 {Gedcom.SUBM} {submitter}')
+            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.SUBM} {submitter}\n'])
         for spouse in lds_spouse_sealing:
-            ged_family.extend(self.lds_spouse_sealing(spouse))
+            ged_family = Value.EMPTY.join([ged_family, self.lds_spouse_sealing(spouse)])
         for identifier in identifiers:
-            ged_family.extend(self.identifier_structure(identifier))
+            ged_family = Value.EMPTY.join([ged_family, self.identifier_structure(identifier)])
         for note in notes:
-            ged_family.extend(self.note_structure(note))
+            ged_family = Value.EMPTY.join([ged_family, self.note_structure(note)])
         for source in sources:
-            ged_family.extend(self.source_citation(source))
+            ged_family = Value.EMPTY.join([ged_family, self.source_citation(source)])
         for media in multimedia:
-            ged_family.extend(self.multimedia_link(media))
-        ged_family.extend(self.creation_date())
-        self.ged_family.extend(ged_family)
-
-        self.chron[Gedcom.FAM].update(json_family)
+            ged_family = Value.EMPTY.join([ged_family, self.multimedia_link(media)])
+        ged_family = Value.EMPTY.join([ged_family, self.creation_date()])
+        self.ged_family = Value.EMPTY.join([self.ged_family, ged_family])
         logging.info(Msg.ADDED_RECORD.format(Record.FAMILY, xref))
-        return xref
 
     def individual_record(
         self,
+        xref: str,
         resn: str = Value.EMPTY,
         personal_names: list[Any] | None = None,
         sex: str = Value.EMPTY,
@@ -840,8 +921,8 @@ class Chronology(Base):
         events: list[Any] | None = None,
         non_events: list[Any] | None = None,
         lds_individual_ordinances: list[Any] | None = None,
-        families: list[Any] | None = None,
-        fams: list[Any] | None = None,
+        families_child: list[Any] | None = None,
+        families_spouse: list[Any] | None = None,
         submitters: list[Any] | None = None,
         associations: list[Any] | None = None,
         aliases: list[str] | None = None,
@@ -852,43 +933,6 @@ class Chronology(Base):
         sources: list[Any] | None = None,
         multimedia: list[Any] | None = None,
     ) -> str:
-        if resn != Value.EMPTY and resn not in Enum.RESN:
-            raise ValueError(
-                Msg.NOT_VALID_ENUM.format(resn, EnumName.RESN)
-            )
-        if sex != Value.EMPTY and sex not in Enum.SEX:
-            raise ValueError(
-                Msg.NOT_VALID_ENUM.format(sex, EnumName.SEX)
-            )
-        for family in families:
-            if len(family) > 1 and family[1] not in Enum.PEDI:
-                raise ValueError(
-                    Msg.NOT_VALID_ENUM.format(family[3], EnumName.PEDI)
-                )
-            if len(family) > 3 and family[3] not in Enum.STAT:
-                raise ValueError(
-                    Msg.NOT_VALID_ENUM.format(family[3], EnumName.STAT)
-                )
-        for alias in aliases:
-            if alias[0] not in self.xref_individual:
-                raise ValueError(
-                    Msg.NOT_RECORD.format(alias[0], Record.INDIVIDUAL)
-                )
-        for interest in ancestor_interest:
-            if interest not in self.xref_submitter:
-                raise ValueError(
-                    Msg.NOT_RECORD.format(interest, Record.SUBMITTER)
-                )
-        for interest in descendent_interest:
-            if interest not in self.xref_submitter:
-                raise ValueError(
-                    Msg.NOT_RECORD.format(interest, Record.SUBMITTER)
-                )
-        for submitter in submitters:
-            if submitter not in self.xref_submitter:
-                raise ValueError(
-                    Msg.NOT_RECORD.format(submitter, Record.SUBMITTER)
-                )
         if aliases is None:
             aliases = []
         if ancestor_interest is None:
@@ -901,10 +945,10 @@ class Chronology(Base):
             descendent_interest = []
         if events is None:
             events = []
-        if families is None:
-            families = []
-        if fams is None:
-            fams = []
+        if families_child is None:
+            families_child = []
+        if families_spouse is None:
+            families_spouse = []
         if identifiers is None:
             identifiers = []
         if lds_individual_ordinances is None:
@@ -921,117 +965,174 @@ class Chronology(Base):
             sources = []
         if submitters is None:
             submitters = []
+        if xref not in self.individual_xreflist:
+            raise ValueError(Msg.NOT_RECORD.format(xref, Record.INDIVIDUAL))
+        if resn != Value.EMPTY and resn not in Enum.RESN:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(resn, EnumName.RESN))
+        if sex != Value.EMPTY and sex not in Enum.SEX:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(sex, EnumName.SEX))
+        for family in families_child:
+            if len(family) > 1 and family[1] not in Enum.PEDI:
+                raise ValueError(
+                    Msg.NOT_VALID_ENUM.format(family[3], EnumName.PEDI)
+                )
+            if len(family) > 3 and family[3] not in Enum.STAT:
+                raise ValueError(
+                    Msg.NOT_VALID_ENUM.format(family[3], EnumName.STAT)
+                )
+        for alias in aliases:
+            if alias[0] not in self.individual_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(alias[0], Record.INDIVIDUAL)
+                )
+        for interest in ancestor_interest:
+            if interest not in self.submitter_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(interest, Record.SUBMITTER)
+                )
+        for interest in descendent_interest:
+            if interest not in self.submitter_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(interest, Record.SUBMITTER)
+                )
+        for submitter in submitters:
+            if submitter not in self.submitter_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(submitter, Record.SUBMITTER)
+                )
         level: int = 0
-        xref: str = self.next_counter(self.xref_individual)
-        json_individual: dict[str, dict[str, str]] = {}
-
-        ged_individual: list[str] = [
-            f'{level!s} {xref} {Gedcom.INDI}',
-        ]
+        ged_individual: str = f'{level!s} {xref} {Gedcom.INDI}\n'
         if resn != Value.EMPTY and resn in Enum.RESN:
-            ged_individual.extend([f'1 {Gedcom.RESN} {resn}'])
+            ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.RESN} {resn}\n'])
         for name in personal_names:
-            ged_individual.extend(self.personal_name_structure(name))
+            ged_individual = Value.EMPTY.join([ged_individual, self.personal_name_structure(name)])
         if sex != Value.EMPTY and sex in Enum.SEX:
-            ged_individual.extend([f'1 {Gedcom.SEX} {sex}'])
+            ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.SEX} {sex}\n'])
         for attribute in attributes:
-            ged_individual.extend(
-                self.individual_attribute_structure(attribute)
-            )
+            ged_individual = Value.EMPTY.join([ged_individual, self.individual_attribute_structure(attribute)])
         for event in events:
-            ged_individual.extend(self.individual_event_structure(event))
+            ged_individual = Value.EMPTY.join([ged_individual, self.individual_event_structure(event)])
         for non_event in non_events:
-            ged_individual.extend(self.non_event_structure(non_event))
+            ged_individual = Value.EMPTY.join([ged_individual, self.non_event_structure(non_event)])
         for ordinance in lds_individual_ordinances:
-            ged_individual.extend(self.lds_individual_ordinance(ordinance))
-        for family in families:
-            if family[0] in self.xref_family:
-                ged_individual.extend([f'1 {Gedcom.FAMC} {family[0]}'])
+            ged_individual = Value.EMPTY.join([ged_individual, self.lds_individual_ordinance(ordinance)])
+        for family in families_child:
+            if family[0] in self.family_xreflist:
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.FAMC} {family[0]}\n'])
                 if len(family) > 1:
-                    ged_individual.extend([f'2 {Gedcom.PEDI} {family[1]}'])
+                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.PEDI} {family[1]}\n'])
                     if len(family) > 2:
-                        ged_individual.extend(
-                            [f'3 {Gedcom.PHRASE} {family[2]}']
+                        ged_individual = Value.EMPTY.join(
+                            [
+                                ged_individual, 
+                                f'3 {Gedcom.PHRASE} {family[2]}\n'
+                            ]
                         )
                 if len(family) > 3:
-                    ged_individual.extend([f'2 {Gedcom.STAT} {family[2]}'])
+                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.STAT} {family[2]}\n'])
                     if len(family) > 4:
-                        ged_individual.extend(
-                            [f'3 {Gedcom.PHRASE} {family[3]}']
+                        ged_individual = Value.EMPTY.join(
+                            [ged_individual, f'3 {Gedcom.PHRASE} {family[3]}\n']
                         )
-        for family in fams:
-            if family[0] in self.xref_family:
-                ged_individual.extend([f'1 {Gedcom.FAMS} {family[0]}'])
+        for family in families_spouse:
+            if family[0] in self.family_xreflist:
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.FAMS} {family[0]}\n'])
                 if len(family) > 1:
-                    ged_individual.extend(self.note_structure(family[1]))
+                    ged_individual = Value.EMPTY.join([ged_individual, self.note_structure(family[1])])
         for submitter in submitters:
             if submitter in self.xref_submitter:
-                ged_individual.extend([f'1 {Gedcom.SUBM} {submitter}'])
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.SUBM} {submitter}\n'])
         for association in associations:
-            ged_individual.extend(self.association_structure(association))
+            ged_individual = Value.EMPTY.join([ged_individual, self.association_structure(association)])
         for alias in aliases:
-            if alias[0] in self.xref_individual:
-                ged_individual.extend([f'1 {Gedcom.ALIA} {alias[0]}'])
+            if alias[0] in self.individual_xreflist:
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.ALIA} {alias[0]}\n\n'])
                 if len(alias) > 1 and alias[1] != Value.EMPTY:
-                    ged_individual.extend([f'2 {Gedcom.PHRASE} {alias[1]}'])
+                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.PHRASE} {alias[1]}\n'])
         for interest in ancestor_interest:
-            if interest in self.xref_submitter:
-                ged_individual.extend([f'1 {Gedcom.ANCI} {interest}'])
+            if interest in self.submitter_xreflist:
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.ANCI} {interest}\n'])
         for interest in descendent_interest:
-            if interest in self.xref_submitter:
-                ged_individual.extend([f'1 {Gedcom.DESI} {interest}'])
+            if interest in self.submitter_xreflist:
+                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.DESI} {interest}\n'])
         for identifier in identifiers:
-            ged_individual.extend(self.identifier_structure(identifier))
+            ged_individual = Value.EMPTY.join([ged_individual, self.identifier_structure(identifier)])
         for note in notes:
-            ged_individual.extend(self.note_structure(note))
+            ged_individual = Value.EMPTY.join([ged_individual, self.note_structure(note)])
         for source in sources:
-            ged_individual.extend(self.source_citation(source))
+            ged_individual = Value.EMPTY.join([ged_individual, self.source_citation(source)])
         for media in multimedia:
-            ged_individual.extend(self.multimedia_link(media))
-        ged_individual.extend(self.creation_date())
-        self.ged_individual.extend(ged_individual)
-
-        self.chron[Gedcom.INDI].update(json_individual)
+            ged_individual = Value.EMPTY.join([ged_individual, self.multimedia_link(media)])
+        ged_individual = Value.EMPTY.join([ged_individual, self.creation_date()])
+        self.ged_individual = Value.EMPTY.join([self.ged_individual, ged_individual])
         logging.info(Msg.ADDED_RECORD.format(Record.INDIVIDUAL, xref))
-        return xref
 
     def multimedia_record(
         self,
+        files: list[Any],
         resn: str = Value.EMPTY,
-        files: list[Any] | None = None,
         identifiers: list[Any] | None = None,
         notes: list[Any] | None = None,
         sources: list[Any] | None = None,
     ) -> str:
-        if files is None:
-            files = []
         if identifiers is None:
             identifiers = []
         if notes is None:
             notes = []
         if sources is None:
             sources = []
-        level: int = 0
-        xref: str = self.next_counter(self.xref_multimedia)
-        json_multimedia: dict[str, dict[str, str]] = {}
-
-        ged_multimedia: list[str] = [
-            f'{level!s} {xref} {Gedcom.OBJE}',
-        ]
-        if resn != Value.EMPTY and resn in Enum.RESN:
-            ged_multimedia.extend([f'1 {Gedcom.RESN} {resn}'])
-        ged_multimedia.extend(self.creation_date())
+        if resn != Value.EMPTY and resn not in Enum.RESN:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(resn, EnumName.RESN))
         for file in files:
-            ged_multimedia.extend(self.add_file(file))
-        for identifier in identifiers:
-            ged_multimedia.extend(self.identifier_structure(identifier))
-        for note in notes:
-            ged_multimedia.extend(self.note_structure(note))
-        for source in sources:
-            ged_multimedia.extend(self.source_citation(source))
-        self.ged_multimedia.extend(ged_multimedia)
+            if file[1] not in Enum.MEDIA_TYPE:
+                raise ValueError(
+                    Msg.NOT_VALID_ENUM.format(file[1], EnumName.MEDIA_TYPE)
+                )
+        if len(file) > 5 and len(file[5]) > 0:
+            for translation in file[5]:
+                if translation[1] not in Enum.MEDIA_TYPE:
+                    raise ValueError(
+                        Msg.NOT_VALID_ENUM.format(file[1], EnumName.MEDIA_TYPE)
+                    )
+        if (
+            len(file) > 3
+            and file[3] != Value.EMPTY
+            and file[3] not in Enum.MEDI
+        ):
+            raise ValueError(Msg.NOT_VALID_ENUM.format(file[3], EnumName.MEDI))
+        level: int = 0
+        xref: str = self.next_counter(self.multimedia_xreflist)
+        ged_multimedia: str = f'{level!s} {xref} {Gedcom.OBJE}'
+        if resn != Value.EMPTY:
+            ged_multimedia = Value.EMPTY.join([ged_multimedia, f'1 {Gedcom.RESN} {resn}\n'])
+        for file in files:
+            ged_multimedia = Value.EMPTY.join([ged_multimedia, 
+                    f'1 {Gedcom.FILE} {file[0]}\n',
+                    f'2 {Gedcom.FORM} {file[1]}\n',
+                ]
+            )
+            if len(file) > 2 and file[2] != Value.EMPTY:
+                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'3 {Gedcom.MEDI} {file[2]}\n'])
+            if len(file) > 3 and file[3] != Value.EMPTY:
+                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'4 {Gedcom.PHRASE} {file[3]}\n'])
+            if len(file) > 4 and file[4] != Value.EMPTY:
+                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'2 {Gedcom.TITL} {file[4]}\n'])
+            if len(file) > 5 and len(file[5]) > 0:
+                for translation in file[5]:
+                    ged_multimedia = Value.EMPTY.join([ged_multimedia, 
+                            f'2 {Gedcom.TRAN} {translation[0]}\n',
+                            f'3 {Gedcom.FORM} {translation[1]}\n',
+                        ]
+                    )
 
-        self.chron[Gedcom.OBJE].update(json_multimedia)
+        for identifier in identifiers:
+            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.identifier_structure(identifier)])
+        for note in notes:
+            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.note_structure(note)])
+        for source in sources:
+            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.source_citation(source)])
+        ged_multimedia = Value.EMPTY.join([ged_multimedia, self.creation_date()])
+        self.ged_multimedia = Value.EMPTY.join([self.ged_multimedia, ged_multimedia])
         logging.info(Msg.ADDED_RECORD.format(Record.MULTIMEDIA, xref))
         return xref
 
@@ -1046,8 +1147,6 @@ class Chronology(Base):
         notes: list[Any] | None = None,
         identifiers: list[Any] | None = None,
     ) -> str:
-        if name == Value.EMPTY:
-            raise ValueError(Msg.NO_NAME)
         if address is None:
             address = []
         if phones is None:
@@ -1063,30 +1162,24 @@ class Chronology(Base):
         if notes is None:
             notes = []
         level: int = 0
-        xref: str = self.next_counter(self.xref_repository)
-        json_repository: dict[str, dict[str, str]] = {}
-
-        ged_repository: list[str] = [
-            f'{level!s} {xref} {Gedcom.REPO}',
-        ]
-        ged_repository.extend([f'1 {Gedcom.NAME} {name}'])
+        xref: str = self.next_counter(self.repository_xreflist)
+        ged_repository: str = f'{level!s} {xref} {Gedcom.REPO}\n'
+        ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.NAME} {name}\n'])
         for addr in address:
-            ged_repository.extend(self.address_structure(addr))
+            ged_repository = Value.EMPTY.join([ged_repository, self.address_structure(addr)])
         for phone in phones:
-            ged_repository.extend(f'1 {Gedcom.PHON} {phone}')
+            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.PHON} {phone}\n'])
         for email in emails:
-            ged_repository.extend(f'1 {Gedcom.EMAIL} {email}')
+            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.EMAIL} {email}\n'])
         for fax in faxes:
-            ged_repository.extend(f'1 {Gedcom.FAX} {fax}')
+            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.FAX} {fax}\n'])
         for www in wwws:
-            ged_repository.extend(f'1 {Gedcom.WWW} {www}')
+            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.WWW} {www}\n'])
         for note in notes:
-            ged_repository.extend(self.note_structure(note))
+            ged_repository = Value.EMPTY.join([ged_repository, self.note_structure(note)])
         for identifier in identifiers:
-            ged_repository.extend(self.identifier_structure(identifier))
-        ged_repository.extend(self.creation_date())
-
-        self.chron[Gedcom.REPO].update(json_repository)
+            ged_repository = Value.EMPTY.join([ged_repository, self.identifier_structure(identifier)])
+        ged_repository = Value.EMPTY.join([self.ged_repository, self.creation_date()])
         logging.info(Msg.ADDED_RECORD.format(Record.REPOSITORY, xref))
         return xref
 
@@ -1105,32 +1198,26 @@ class Chronology(Base):
         if identifiers is None:
             identifiers = []
         level: int = 0
-        xref: str = self.next_counter(self.xref_shared_note)
-        json_shared_note: dict[str, dict[str, str]] = {}
-
-        ged_shared_note: list[str] = [
-            f'{level!s} {xref} {Gedcom.SNOTE}',
-        ]
+        xref: str = self.next_counter(self.shared_note_xreflist)
+        ged_shared_note: str = f'{level!s} {xref} {Gedcom.SNOTE}\n'
         if mime != Value.EMPTY and mime in Enum.MEDIA_TYPE:
-            ged_shared_note.extend(f'1 {Gedcom.MIME} {mime}')
+            ged_shared_note = Value.EMPTY.join([ged_shared_note, f'1 {Gedcom.MIME} {mime}\n'])
         if language != Value.EMPTY:
-            ged_shared_note.extend(f'1 {Gedcom.LANG} {language}')
+            ged_shared_note = Value.EMPTY.join([ged_shared_note, f'1 {Gedcom.LANG} {language}\n'])
         for translation in translations:
-            ged_shared_note.extend(self.add_translation(translation))
+            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.add_translation(translation)])
         for source in sources:
-            ged_shared_note.extend(self.source_citation(source))
+            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.source_citation(source)])
         for identifier in identifiers:
-            ged_shared_note.extend(self.identifier_structure(identifier))
-        ged_shared_note.extend(self.creation_date())
-        self.ged_shared_note.extend(ged_shared_note)
-
-        self.chron[Gedcom.SNOTE].update(json_shared_note)
+            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.identifier_structure(identifier)])
+        ged_shared_note = Value.EMPTY.join([ged_shared_note, self.creation_date()])
+        self.ged_shared_note = Value.EMPTY.join([self.ged_shared_note, ged_shared_note])
         logging.info(Msg.ADDED_RECORD.format(Record.SHARED_NOTE, xref))
         return xref
 
     def source_record(
         self,
-        data: list[Any] | None = None,
+        events: list[Any] | None = None,
         author: str = Value.EMPTY,
         title: str = Value.EMPTY,
         abbreviation: str = Value.EMPTY,
@@ -1143,8 +1230,8 @@ class Chronology(Base):
         notes: list[Any] | None = None,
         multimedia: list[Any] | None = None,
     ) -> str:
-        if data is None:
-            data = []
+        if events is None:
+            events = []
         if identifiers is None:
             identifiers = []
         if multimedia is None:
@@ -1153,41 +1240,61 @@ class Chronology(Base):
             notes = []
         if sources is None:
             sources = []
+        if mime != Value.EMPTY and mime not in Enum.MEDIA_TYPE:
+            raise ValueError(
+                Msg.NOT_VALID_ENUM.format(mime, EnumName.MEDIA_TYPE)
+            )
+        if len(multimedia) > 0:
+            for media in multimedia:
+                if media[0] not in self.multimedia_xreflist:
+                    raise ValueError(
+                        Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA)
+                    )
+        if len(identifiers) > 0:
+            for id in identifiers:
+                if id[0] not in Enum.ID:
+                    raise ValueError(
+                        Msg.NOT_VALID_ENUM.format(mime, EnumName.ID)
+                    )
         level: int = 0
-        xref: str = self.next_counter(self.xref_source)
-        json_source: dict[str, dict[str, str]] = {}
-
-        ged_source: list[str] = [
-            f'{level!s} {xref} {Gedcom.SOUR}',
-        ]
-        for item in data:
-            ged_source.extend(self.add_data(item))
+        xref: str = self.next_counter(self.source_xreflist)
+        ged_source: str = f'{level!s} {xref} {Gedcom.SOUR}\n'
+        if len(events) > 0:
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.DATA}\n'])
+            for event in events:
+                ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.EVEN} {event[0]}\n'])
+                if len(event) > 1:
+                    ged_source = Value.EMPTY.join([ged_source, f'3 {Gedcom.DATE} {event[1]}\n'])
+                if len(event) > 2:
+                    ged_source = Value.EMPTY.join([ged_source, f'4 {Gedcom.PHRASE} {event[2]}\n'])
+                if len(event) > 3:
+                    ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.AGNC} {event[3]}\n'])
+                if len(event) > 4:
+                    ged_source = Value.EMPTY.join([ged_source, self.note_structure(event[4])])
         if author != Value.EMPTY:
-            ged_source.extend([f'1 {Gedcom.AUTH} {author}'])
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.AUTH} {author}\n'])
         if title != Value.EMPTY:
-            ged_source.extend([f'1 {Gedcom.TITL} {title}'])
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.TITL} {title}\n'])
         if abbreviation != Value.EMPTY:
-            ged_source.extend([f'1 {Gedcom.ABBR} {abbreviation}'])
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.ABBR} {abbreviation}\n'])
         if publisher != Value.EMPTY:
-            ged_source.extend([f'1 {Gedcom.PUBL} {publisher}'])
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.PUBL} {publisher}\n'])
         if text != Value.EMPTY:
-            ged_source.extend([f'1 {Gedcom.TEXT} {text}'])
+            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.TEXT} {text}\n'])
         if mime != Value.EMPTY and mime in Enum.MEDIA_TYPE:
-            ged_source.extend([f'2 {Gedcom.MIME} {mime}'])
+            ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.MIME} {mime}\n'])
         if language != Value.EMPTY:
-            ged_source.extend([f'2 {Gedcom.LANG} {language}'])
+            ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.LANG} {language}\n'])
         for source in sources:
-            ged_source.extend(self.source_repository_citation(source))
+            ged_source = Value.EMPTY.join([ged_source, self.source_repository_citation(source)])
         for identifier in identifiers:
-            ged_source.extend(self.identifier_structure(identifier))
+            ged_source = Value.EMPTY.join([ged_source, self.identifier_structure(identifier)])
         for note in notes:
-            ged_source.extend(self.note_structure(note))
+            ged_source = Value.EMPTY.join([ged_source, self.note_structure(note)])
         for media in multimedia:
-            ged_source.extend(self.multimedia_link(media))
-        ged_source.extend(self.creation_date())
-        self.ged_source.extend(ged_source)
-
-        self.chron[Gedcom.SOUR].update(json_source)
+            ged_source = Value.EMPTY.join([ged_source, self.multimedia_link(media)])
+        ged_source = Value.EMPTY.join([ged_source, self.creation_date()])
+        self.ged_source = Value.EMPTY.join([self.ged_source, ged_source])
         logging.info(Msg.ADDED_RECORD.format(Record.SOURCE, xref))
         return xref
 
@@ -1223,34 +1330,30 @@ class Chronology(Base):
         if notes is None:
             notes = []
         level: int = 0
-        xref: str = self.next_counter(self.xref_submitter)
-        json_submitter: dict[str, dict[str, str]] = {}
-
-        ged_submitter: list[str] = [
-            f'{level!s} {xref} {Gedcom.SUBM}',
-        ]
-        ged_submitter.extend([f'1 {Gedcom.NAME} {name}'])
-        ged_submitter.extend(self.address_structure(address))
+        xref: str = self.next_counter(self.submitter_xreflist)
+        ged_submitter: str = f'{level!s} {xref} {Gedcom.SUBM}\n'
+        ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.NAME} {name}\n'])
+        ged_submitter = Value.EMPTY.join([ged_submitter, self.address_structure(address)])
         for phone in phones:
-            ged_submitter.extend([f'1 {Gedcom.PHON} {phone}'])
+            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.PHON} {phone}\n'])
         for email in emails:
-            ged_submitter.extend([f'1 {Gedcom.EMAIL} {email}'])
+            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.EMAIL} {email}\n'])
         for fax in faxes:
-            ged_submitter.extend([f'1 {Gedcom.FAX} {fax}'])
+            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.FAX} {fax}\n'])
         for www in wwws:
-            ged_submitter.extend([f'1 {Gedcom.WWW} {www}'])
+            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.WWW} {www}\n'])
         for media in multimedia:
-            ged_submitter.extend(self.multimedia_link(media))
+            ged_submitter = Value.EMPTY.join([ged_submitter, self.multimedia_link(media)])
         for language in languages:
-            ged_submitter.extend([f'1 {Gedcom.LANG} {language}'])
+            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.LANG} {language}\n'])
         for identifier in identifiers:
-            ged_submitter.extend(self.identifier_structure(identifier))
+            ged_submitter = Value.EMPTY.join([ged_submitter, self.identifier_structure(identifier)])
         for note in notes:
-            ged_submitter.extend(self.note_structure(note))
-        ged_submitter.extend(self.creation_date())
-        self.ged_submitter.extend(ged_submitter)
-
-        self.chron[Gedcom.SUBM].update(json_submitter)
+            ged_submitter = Value.EMPTY.join([ged_submitter, self.note_structure(note)])
+        ged_submitter = Value.EMPTY.join([ged_submitter, self.creation_date()])
+        self.ged_submitter = Value.EMPTY.join(
+            [self.ged_submitter, ged_submitter]
+        )
         logging.info(Msg.ADDED_RECORD.format(Record.SUBMITTER, xref))
         return xref
 
@@ -1278,7 +1381,10 @@ class Chronology(Base):
         place: list[Any] | None = None,
         note: list[Any] | None = None,
     ) -> None:
-        if submitter != Value.EMPTY and submitter not in self.xref_submitter:
+        if (
+            submitter != Value.EMPTY
+            and submitter not in self.submitter_xreflist
+        ):
             raise ValueError(Msg.NOT_RECORD.format(submitter, Record.SUBMITTER))
         if schemas is None:
             schemas = []
@@ -1296,53 +1402,85 @@ class Chronology(Base):
             place = []
         if note is None:
             note = []
-        ged_header: list[str] = [
-            f'0 {Gedcom.HEAD}',
-            f'1 {Gedcom.GEDC}',
-            f'2 {Gedcom.VERS} {GEDSpecial.VERSION}',
-        ]
+        ged_header: str = (
+            f'0 {Gedcom.HEAD}\n'
+            f'1 {Gedcom.GEDC}\n'
+            f'2 {Gedcom.VERS} {GEDSpecial.VERSION}\n'
+        )
         if len(schemas) > 0:
-            ged_header.extend([f'1 {Gedcom.SCHMA}'])
+            ged_header = Value.EMPTY.join([ged_header, f'1 {Gedcom.SCHMA}\n'])
             for schema in schemas:
-                ged_header.extend(f'2 {Gedcom.TAG} {schema}')
+                ged_header = Value.EMPTY.join(
+                    [ged_header, f'2 {Gedcom.TAG} {schema}\n']
+                )
         if source != Value.EMPTY:
-            ged_header.extend([f'1 {Gedcom.SOUR} {source}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'1 {Gedcom.SOUR} {source}\n']
+            )
         if vers != Value.EMPTY:
-            ged_header.extend([f'2 {Gedcom.VERS} {vers}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'2 {Gedcom.VERS} {vers}\n']
+            )
         if name != Value.EMPTY:
-            ged_header.extend([f'2 {Gedcom.NAME} {name}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'2 {Gedcom.NAME} {name}\n']
+            )
         if corp != Value.EMPTY:
-            ged_header.extend([f'2 {Gedcom.CORP} {corp}'])
-        ged_header.extend(self.address_structure(address, level=3))
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'2 {Gedcom.CORP} {corp}\n']
+            )
+        address_out = self.address_structure(address, level=3)
+        ged_header = Value.EMPTY.join([ged_header, address_out])
         for phone in phones:
-            ged_header.extend([f'3 {Gedcom.PHON} {phone}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'3 {Gedcom.PHON} {phone}\n']
+            )
         for email in emails:
-            ged_header.extend([f'3 {Gedcom.EMAIL} {email}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'3 {Gedcom.EMAIL} {email}\n']
+            )
         for fax in faxes:
-            ged_header.extend([f'3 {Gedcom.FAX} {fax}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'3 {Gedcom.FAX} {fax}\n']
+            )
         for www in wwws:
-            ged_header.extend([f'3 {Gedcom.WWW} {www}'])
+            ged_header = Value.EMPTY.join([f'3 {Gedcom.WWW} {www}\n'])
         if data != Value.EMPTY:
-            ged_header.extend(f'2 {Gedcom.DATA} {source[9]}')
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'2 {Gedcom.DATA} {source[9]}\n']
+            )
         if date != Value.EMPTY:
-            ged_header.extend(f'3 {Gedcom.DATE} {date}')
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'3 {Gedcom.DATE} {date}\n']
+            )
         if time != Value.EMPTY:
-            ged_header.extend(f'4 {Gedcom.TIME} {time}')
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'4 {Gedcom.TIME} {time}\n']
+            )
         if dest != Value.EMPTY:
-            ged_header.extend([f'1 {Gedcom.DEST} {dest}'])
-        ged_header.extend(self.now(level=1))
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'1 {Gedcom.DEST} {dest}\n']
+            )
+        now_out = self.now(level=1)
+        ged_header = Value.EMPTY.join([ged_header, now_out])
         if submitter != Value.EMPTY:
-            ged_header.extend([f'1 {Gedcom.SUBM} {submitter}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'1 {Gedcom.SUBM} {submitter}\n']
+            )
         if copr != Value.EMPTY:
-            ged_header.extend([f'1 {Gedcom.COPR} {copr}'])
+            ged_header = Value.EMPTY.join([f'1 {Gedcom.COPR} {copr}\n'])
         if language != Value.EMPTY:
-            ged_header.extend([f'1 {Gedcom.LANG} {language}'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'1 {Gedcom.LANG} {language}\n']
+            )
         if len(place) > 0:
-            ged_header.extend(
+            ged_header = Value.EMPTY.join(
                 [
-                    f'1 {Gedcom.PLAC} {place[0]}',
-                    f'2 {Gedcom.FORM} {place[1]}',
+                    ged_header,
+                    f'1 {Gedcom.PLAC} {place[0]}\n',
+                    f'2 {Gedcom.FORM} {place[1]}\n',
                 ]
             )
-        ged_header.extend(self.note_structure(note))
-        self.ged_header.extend(ged_header)
+        note_out: str = self.note_structure(note)
+        ged_header = Value.EMPTY.join([ged_header, note_out])
+        self.ged_header = ged_header

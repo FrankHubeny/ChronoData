@@ -17,7 +17,7 @@ from chronodata.constants import (
     Unit,
     Value,
 )
-from chronodata.g7 import Gedcom, Line
+from chronodata.g7 import Gedcom
 from chronodata.messages import Issue, Msg
 
 
@@ -47,15 +47,15 @@ class Base:
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
-        self.ged_header: list[str] = []
-        self.ged_trailer: list[str] = [Line.TAIL]
-        self.ged_family: list[str] = []
-        self.ged_individual: list[str] = []
-        self.ged_multimedia: list[str] = []
-        self.ged_repository: list[str] = []
-        self.ged_shared_note: list[str] = []
-        self.ged_source: list[str] = []
-        self.ged_submitter: list[str] = []
+        self.ged_header: str = Value.EMPTY
+        self.ged_trailer: str = f'0 {Gedcom.TRLR}\n'
+        self.ged_family: str = Value.EMPTY
+        self.ged_individual: str = Value.EMPTY
+        self.ged_multimedia: str = Value.EMPTY
+        self.ged_repository: str = Value.EMPTY
+        self.ged_shared_note: str = Value.EMPTY
+        self.ged_source: str = Value.EMPTY
+        self.ged_submitter: str = Value.EMPTY
         self.post: str = calendar[Key.POST]
         self.postlen: int = len(self.post)
         self.pre: str = calendar[Key.PRE]
@@ -185,16 +185,20 @@ class Base:
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
                 case Arg.GED:
+                    output: str = Value.EMPTY.join(
+                        [
+                            self.ged_header,
+                            self.ged_family,
+                            self.ged_individual,
+                            self.ged_multimedia,
+                            self.ged_shared_note,
+                            self.ged_source,
+                            self.ged_submitter,
+                            self.ged_trailer,
+                        ]
+                    )
                     with Path.open(Path(filename), Arg.WRITE) as file:
-                        file.write(self.ged_header)
-                        file.write(self.ged_family)
-                        file.write(self.ged_individual)
-                        file.write(self.ged_multimedia)
-                        file.write(self.ged_repository)
-                        file.write(self.ged_shared_note)
-                        file.write(self.ged_source)
-                        file.write(self.ged_submitter)
-                        file.write(Line.TAIL)
+                        file.write(output)
                         file.close()
                     logging.info(
                         Msg.SAVED.format(self.chron_name, self.filename)
