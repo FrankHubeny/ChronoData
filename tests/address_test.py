@@ -19,7 +19,7 @@ testdata = [
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_date(test_input: str, expected: str | int | bool) -> None:
     a = Chronology(name='testing')
-    address = a.address_structure(['123 Here Street\nMy Town\nUSA'])
-    address2 = a.address_structure(['someplace', 'My City', 'My State', 'My Postal', 'My Country'])
+    address = a.address_structure(['123 Here Street\nMy Town\nUSA']).split('\n')
+    address2 = a.address_structure(['someplace', 'My City', 'My State', 'My Postal', 'My Country']).split('\n')
     
     assert eval(test_input) == expected

@@ -340,15 +340,6 @@ class Chronology(Base):
 
     ###### Methods to Assisting Building GEDCOM Records
 
-    def next_counter(self, record: list[str]) -> str:
-        counter: int = self.xref_counter
-        xref: str = Value.EMPTY.join(
-            [GEDSpecial.ATSIGN, str(counter), GEDSpecial.ATSIGN]
-        )
-        record.append(xref)
-        self.xref_counter += 1
-        return xref
-
     def address_structure(self, address: list[Any], level: int = 1) -> str:
         """Add address information.
 
@@ -594,7 +585,38 @@ class Chronology(Base):
 
     def note_structure(self, note: list[Any], level: int = 1) -> str:
         """Add note information."""
+        if len(note) > 1 and note[1] not in Enum.MEDIA_TYPE:
+            raise ValueError(
+                Msg.NOT_VALID_ENUM.format(note[1], EnumName.MEDIA_TYPE)
+            )
         lines: str = Value.EMPTY
+        if len(note) > 0:
+            lines = Value.EMPTY.join([lines, f'1 {Gedcom.NOTE} {note[0]}\n'])
+        if len(note) > 1:
+            lines = Value.EMPTY.join([lines, f'2 {Gedcom.MIME} {note[1]}\n'])
+        if len(note) > 2:
+            lines = Value.EMPTY.join([lines, f'2 {Gedcom.LANG} {note[2]}\n'])
+        if len(note) > 3 and len(note[3]) > 0:
+            for translation in note[3]:
+                lines = Value.EMPTY.join(
+                    [lines, f'1 {Gedcom.TRAN} {translation[0]}\n']
+                )
+                if len(translation) > 1:
+                    if translation[1] not in Enum.MEDIA_TYPE:
+                        raise ValueError(
+                            Msg.NOT_VALID_ENUM.format(
+                                translation[1], EnumName.MEDIA_TYPE
+                            )
+                        )
+                    lines = Value.EMPTY.join(
+                        [lines, f'2 {Gedcom.MIME} {translation[1]}\n']
+                    )
+                if len(translation) > 2:
+                    lines = Value.EMPTY.join(
+                        [lines, f'2 {Gedcom.LANG} {translation[2]}\n']
+                    )
+        if len(note) > 4:
+            lines = Value.EMPTY.join([lines, self.source_citation(note[4])])
         return lines
 
     def personal_name_pieces(self, note: list[Any], level: int = 1) -> str:
@@ -626,7 +648,23 @@ class Chronology(Base):
 
     ###### GEDCOM Records
 
-    def family_xref(self) -> str:
+    def next_counter(self, record: list[str], name: str = Value.EMPTY) -> str:
+        xref: str = Value.EMPTY
+        if name != Value.EMPTY:
+            xref = Value.EMPTY.join(
+                [GEDSpecial.ATSIGN, str(name), GEDSpecial.ATSIGN]
+            )
+            record.append(xref)
+            return xref
+        counter: int = self.xref_counter
+        xref = Value.EMPTY.join(
+            [GEDSpecial.ATSIGN, str(counter), GEDSpecial.ATSIGN]
+        )
+        record.append(xref)
+        self.xref_counter += 1
+        return xref
+
+    def family_xref(self, name: str = Value.EMPTY) -> str:
         """Create a cross reference identifier for a family.
 
         A family may reference many individuals.  An individual
@@ -658,9 +696,9 @@ class Chronology(Base):
         For an example of how ChronoData was used to compare various such
         chronologies, see
         """
-        return self.next_counter(self.family_xreflist)
+        return self.next_counter(record=self.family_xreflist, name=name)
 
-    def individual_xref(self) -> str:
+    def individual_xref(self, name: str = Value.EMPTY) -> str:
         """Create a cross reference identifier for an individual.
 
         A individual may reference different families one where
@@ -757,7 +795,7 @@ class Chronology(Base):
 
 
         """
-        return self.next_counter(self.individual_xreflist)
+        return self.next_counter(record=self.individual_xreflist, name=name)
 
     def family_record(
         self,
@@ -876,37 +914,69 @@ class Chronology(Base):
         level: int = 0
         ged_family: str = f'{level!s} {xref} {Gedcom.FAM}\n'
         if resn != Value.EMPTY and resn in Enum.RESN:
-            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.RESN} {resn}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, f'1 {Gedcom.RESN} {resn}\n']
+            )
         for attribute in family_attributes:
-            ged_family = Value.EMPTY.join([ged_family, self.family_attribute_structure(attribute)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.family_attribute_structure(attribute)]
+            )
         for event in family_events:
-            ged_family = Value.EMPTY.join([ged_family, self.family_event_structure(event)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.family_event_structure(event)]
+            )
         for non_event in family_non_events:
-            ged_family = Value.EMPTY.join([ged_family, self.non_event_structure(non_event)])
-        ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.HUSB} {husband}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.non_event_structure(non_event)]
+            )
+        ged_family = Value.EMPTY.join(
+            [ged_family, f'1 {Gedcom.HUSB} {husband}\n']
+        )
         if husband_phrase != Value.EMPTY:
-            ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {husband_phrase}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, f'2 {Gedcom.PHRASE} {husband_phrase}\n']
+            )
         ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.WIFE} {wife}\n'])
         if wife_phrase != Value.EMPTY:
-            ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {wife_phrase}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, f'2 {Gedcom.PHRASE} {wife_phrase}\n']
+            )
         for child, phrase in children:
-            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.CHIL} {child}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, f'1 {Gedcom.CHIL} {child}\n']
+            )
             if phrase != Value.EMPTY:
-                ged_family = Value.EMPTY.join([ged_family, f'2 {Gedcom.PHRASE} {phrase}\n'])
+                ged_family = Value.EMPTY.join(
+                    [ged_family, f'2 {Gedcom.PHRASE} {phrase}\n']
+                )
         for association in associations:
-            ged_family = Value.EMPTY.join([ged_family, self.association_structure(association)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.association_structure(association)]
+            )
         for submitter in submitters:
-            ged_family = Value.EMPTY.join([ged_family, f'1 {Gedcom.SUBM} {submitter}\n'])
+            ged_family = Value.EMPTY.join(
+                [ged_family, f'1 {Gedcom.SUBM} {submitter}\n']
+            )
         for spouse in lds_spouse_sealing:
-            ged_family = Value.EMPTY.join([ged_family, self.lds_spouse_sealing(spouse)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.lds_spouse_sealing(spouse)]
+            )
         for identifier in identifiers:
-            ged_family = Value.EMPTY.join([ged_family, self.identifier_structure(identifier)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.identifier_structure(identifier)]
+            )
         for note in notes:
-            ged_family = Value.EMPTY.join([ged_family, self.note_structure(note)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.note_structure(note)]
+            )
         for source in sources:
-            ged_family = Value.EMPTY.join([ged_family, self.source_citation(source)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.source_citation(source)]
+            )
         for media in multimedia:
-            ged_family = Value.EMPTY.join([ged_family, self.multimedia_link(media)])
+            ged_family = Value.EMPTY.join(
+                [ged_family, self.multimedia_link(media)]
+            )
         ged_family = Value.EMPTY.join([ged_family, self.creation_date()])
         self.ged_family = Value.EMPTY.join([self.ged_family, ged_family])
         logging.info(Msg.ADDED_RECORD.format(Record.FAMILY, xref))
@@ -1003,68 +1073,113 @@ class Chronology(Base):
         level: int = 0
         ged_individual: str = f'{level!s} {xref} {Gedcom.INDI}\n'
         if resn != Value.EMPTY and resn in Enum.RESN:
-            ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.RESN} {resn}\n'])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, f'1 {Gedcom.RESN} {resn}\n']
+            )
         for name in personal_names:
-            ged_individual = Value.EMPTY.join([ged_individual, self.personal_name_structure(name)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.personal_name_structure(name)]
+            )
         if sex != Value.EMPTY and sex in Enum.SEX:
-            ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.SEX} {sex}\n'])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, f'1 {Gedcom.SEX} {sex}\n']
+            )
         for attribute in attributes:
-            ged_individual = Value.EMPTY.join([ged_individual, self.individual_attribute_structure(attribute)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.individual_attribute_structure(attribute)]
+            )
         for event in events:
-            ged_individual = Value.EMPTY.join([ged_individual, self.individual_event_structure(event)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.individual_event_structure(event)]
+            )
         for non_event in non_events:
-            ged_individual = Value.EMPTY.join([ged_individual, self.non_event_structure(non_event)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.non_event_structure(non_event)]
+            )
         for ordinance in lds_individual_ordinances:
-            ged_individual = Value.EMPTY.join([ged_individual, self.lds_individual_ordinance(ordinance)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.lds_individual_ordinance(ordinance)]
+            )
         for family in families_child:
             if family[0] in self.family_xreflist:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.FAMC} {family[0]}\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.FAMC} {family[0]}\n']
+                )
                 if len(family) > 1:
-                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.PEDI} {family[1]}\n'])
+                    ged_individual = Value.EMPTY.join(
+                        [ged_individual, f'2 {Gedcom.PEDI} {family[1]}\n']
+                    )
                     if len(family) > 2:
                         ged_individual = Value.EMPTY.join(
-                            [
-                                ged_individual, 
-                                f'3 {Gedcom.PHRASE} {family[2]}\n'
-                            ]
+                            [ged_individual, f'3 {Gedcom.PHRASE} {family[2]}\n']
                         )
                 if len(family) > 3:
-                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.STAT} {family[2]}\n'])
+                    ged_individual = Value.EMPTY.join(
+                        [ged_individual, f'2 {Gedcom.STAT} {family[2]}\n']
+                    )
                     if len(family) > 4:
                         ged_individual = Value.EMPTY.join(
                             [ged_individual, f'3 {Gedcom.PHRASE} {family[3]}\n']
                         )
         for family in families_spouse:
             if family[0] in self.family_xreflist:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.FAMS} {family[0]}\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.FAMS} {family[0]}\n']
+                )
                 if len(family) > 1:
-                    ged_individual = Value.EMPTY.join([ged_individual, self.note_structure(family[1])])
+                    ged_individual = Value.EMPTY.join(
+                        [ged_individual, self.note_structure(family[1])]
+                    )
         for submitter in submitters:
             if submitter in self.xref_submitter:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.SUBM} {submitter}\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.SUBM} {submitter}\n']
+                )
         for association in associations:
-            ged_individual = Value.EMPTY.join([ged_individual, self.association_structure(association)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.association_structure(association)]
+            )
         for alias in aliases:
             if alias[0] in self.individual_xreflist:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.ALIA} {alias[0]}\n\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.ALIA} {alias[0]}\n\n']
+                )
                 if len(alias) > 1 and alias[1] != Value.EMPTY:
-                    ged_individual = Value.EMPTY.join([ged_individual, f'2 {Gedcom.PHRASE} {alias[1]}\n'])
+                    ged_individual = Value.EMPTY.join(
+                        [ged_individual, f'2 {Gedcom.PHRASE} {alias[1]}\n']
+                    )
         for interest in ancestor_interest:
             if interest in self.submitter_xreflist:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.ANCI} {interest}\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.ANCI} {interest}\n']
+                )
         for interest in descendent_interest:
             if interest in self.submitter_xreflist:
-                ged_individual = Value.EMPTY.join([ged_individual, f'1 {Gedcom.DESI} {interest}\n'])
+                ged_individual = Value.EMPTY.join(
+                    [ged_individual, f'1 {Gedcom.DESI} {interest}\n']
+                )
         for identifier in identifiers:
-            ged_individual = Value.EMPTY.join([ged_individual, self.identifier_structure(identifier)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.identifier_structure(identifier)]
+            )
         for note in notes:
-            ged_individual = Value.EMPTY.join([ged_individual, self.note_structure(note)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.note_structure(note)]
+            )
         for source in sources:
-            ged_individual = Value.EMPTY.join([ged_individual, self.source_citation(source)])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.source_citation(source)]
+            )
         for media in multimedia:
-            ged_individual = Value.EMPTY.join([ged_individual, self.multimedia_link(media)])
-        ged_individual = Value.EMPTY.join([ged_individual, self.creation_date()])
-        self.ged_individual = Value.EMPTY.join([self.ged_individual, ged_individual])
+            ged_individual = Value.EMPTY.join(
+                [ged_individual, self.multimedia_link(media)]
+            )
+        ged_individual = Value.EMPTY.join(
+            [ged_individual, self.creation_date()]
+        )
+        self.ged_individual = Value.EMPTY.join(
+            [self.ged_individual, ged_individual]
+        )
         logging.info(Msg.ADDED_RECORD.format(Record.INDIVIDUAL, xref))
 
     def multimedia_record(
@@ -1104,35 +1219,57 @@ class Chronology(Base):
         xref: str = self.next_counter(self.multimedia_xreflist)
         ged_multimedia: str = f'{level!s} {xref} {Gedcom.OBJE}'
         if resn != Value.EMPTY:
-            ged_multimedia = Value.EMPTY.join([ged_multimedia, f'1 {Gedcom.RESN} {resn}\n'])
+            ged_multimedia = Value.EMPTY.join(
+                [ged_multimedia, f'1 {Gedcom.RESN} {resn}\n']
+            )
         for file in files:
-            ged_multimedia = Value.EMPTY.join([ged_multimedia, 
+            ged_multimedia = Value.EMPTY.join(
+                [
+                    ged_multimedia,
                     f'1 {Gedcom.FILE} {file[0]}\n',
                     f'2 {Gedcom.FORM} {file[1]}\n',
                 ]
             )
             if len(file) > 2 and file[2] != Value.EMPTY:
-                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'3 {Gedcom.MEDI} {file[2]}\n'])
+                ged_multimedia = Value.EMPTY.join(
+                    [ged_multimedia, f'3 {Gedcom.MEDI} {file[2]}\n']
+                )
             if len(file) > 3 and file[3] != Value.EMPTY:
-                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'4 {Gedcom.PHRASE} {file[3]}\n'])
+                ged_multimedia = Value.EMPTY.join(
+                    [ged_multimedia, f'4 {Gedcom.PHRASE} {file[3]}\n']
+                )
             if len(file) > 4 and file[4] != Value.EMPTY:
-                ged_multimedia = Value.EMPTY.join([ged_multimedia, f'2 {Gedcom.TITL} {file[4]}\n'])
+                ged_multimedia = Value.EMPTY.join(
+                    [ged_multimedia, f'2 {Gedcom.TITL} {file[4]}\n']
+                )
             if len(file) > 5 and len(file[5]) > 0:
                 for translation in file[5]:
-                    ged_multimedia = Value.EMPTY.join([ged_multimedia, 
+                    ged_multimedia = Value.EMPTY.join(
+                        [
+                            ged_multimedia,
                             f'2 {Gedcom.TRAN} {translation[0]}\n',
                             f'3 {Gedcom.FORM} {translation[1]}\n',
                         ]
                     )
 
         for identifier in identifiers:
-            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.identifier_structure(identifier)])
+            ged_multimedia = Value.EMPTY.join(
+                [ged_multimedia, self.identifier_structure(identifier)]
+            )
         for note in notes:
-            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.note_structure(note)])
+            ged_multimedia = Value.EMPTY.join(
+                [ged_multimedia, self.note_structure(note)]
+            )
         for source in sources:
-            ged_multimedia = Value.EMPTY.join([ged_multimedia, self.source_citation(source)])
-        ged_multimedia = Value.EMPTY.join([ged_multimedia, self.creation_date()])
-        self.ged_multimedia = Value.EMPTY.join([self.ged_multimedia, ged_multimedia])
+            ged_multimedia = Value.EMPTY.join(
+                [ged_multimedia, self.source_citation(source)]
+            )
+        ged_multimedia = Value.EMPTY.join(
+            [ged_multimedia, self.creation_date()]
+        )
+        self.ged_multimedia = Value.EMPTY.join(
+            [self.ged_multimedia, ged_multimedia]
+        )
         logging.info(Msg.ADDED_RECORD.format(Record.MULTIMEDIA, xref))
         return xref
 
@@ -1164,22 +1301,40 @@ class Chronology(Base):
         level: int = 0
         xref: str = self.next_counter(self.repository_xreflist)
         ged_repository: str = f'{level!s} {xref} {Gedcom.REPO}\n'
-        ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.NAME} {name}\n'])
+        ged_repository = Value.EMPTY.join(
+            [ged_repository, f'1 {Gedcom.NAME} {name}\n']
+        )
         for addr in address:
-            ged_repository = Value.EMPTY.join([ged_repository, self.address_structure(addr)])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, self.address_structure(addr)]
+            )
         for phone in phones:
-            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.PHON} {phone}\n'])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, f'1 {Gedcom.PHON} {phone}\n']
+            )
         for email in emails:
-            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.EMAIL} {email}\n'])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, f'1 {Gedcom.EMAIL} {email}\n']
+            )
         for fax in faxes:
-            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.FAX} {fax}\n'])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, f'1 {Gedcom.FAX} {fax}\n']
+            )
         for www in wwws:
-            ged_repository = Value.EMPTY.join([ged_repository, f'1 {Gedcom.WWW} {www}\n'])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, f'1 {Gedcom.WWW} {www}\n']
+            )
         for note in notes:
-            ged_repository = Value.EMPTY.join([ged_repository, self.note_structure(note)])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, self.note_structure(note)]
+            )
         for identifier in identifiers:
-            ged_repository = Value.EMPTY.join([ged_repository, self.identifier_structure(identifier)])
-        ged_repository = Value.EMPTY.join([self.ged_repository, self.creation_date()])
+            ged_repository = Value.EMPTY.join(
+                [ged_repository, self.identifier_structure(identifier)]
+            )
+        ged_repository = Value.EMPTY.join(
+            [self.ged_repository, self.creation_date()]
+        )
         logging.info(Msg.ADDED_RECORD.format(Record.REPOSITORY, xref))
         return xref
 
@@ -1201,17 +1356,31 @@ class Chronology(Base):
         xref: str = self.next_counter(self.shared_note_xreflist)
         ged_shared_note: str = f'{level!s} {xref} {Gedcom.SNOTE}\n'
         if mime != Value.EMPTY and mime in Enum.MEDIA_TYPE:
-            ged_shared_note = Value.EMPTY.join([ged_shared_note, f'1 {Gedcom.MIME} {mime}\n'])
+            ged_shared_note = Value.EMPTY.join(
+                [ged_shared_note, f'1 {Gedcom.MIME} {mime}\n']
+            )
         if language != Value.EMPTY:
-            ged_shared_note = Value.EMPTY.join([ged_shared_note, f'1 {Gedcom.LANG} {language}\n'])
+            ged_shared_note = Value.EMPTY.join(
+                [ged_shared_note, f'1 {Gedcom.LANG} {language}\n']
+            )
         for translation in translations:
-            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.add_translation(translation)])
+            ged_shared_note = Value.EMPTY.join(
+                [ged_shared_note, self.add_translation(translation)]
+            )
         for source in sources:
-            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.source_citation(source)])
+            ged_shared_note = Value.EMPTY.join(
+                [ged_shared_note, self.source_citation(source)]
+            )
         for identifier in identifiers:
-            ged_shared_note = Value.EMPTY.join([ged_shared_note, self.identifier_structure(identifier)])
-        ged_shared_note = Value.EMPTY.join([ged_shared_note, self.creation_date()])
-        self.ged_shared_note = Value.EMPTY.join([self.ged_shared_note, ged_shared_note])
+            ged_shared_note = Value.EMPTY.join(
+                [ged_shared_note, self.identifier_structure(identifier)]
+            )
+        ged_shared_note = Value.EMPTY.join(
+            [ged_shared_note, self.creation_date()]
+        )
+        self.ged_shared_note = Value.EMPTY.join(
+            [self.ged_shared_note, ged_shared_note]
+        )
         logging.info(Msg.ADDED_RECORD.format(Record.SHARED_NOTE, xref))
         return xref
 
@@ -1262,37 +1431,69 @@ class Chronology(Base):
         if len(events) > 0:
             ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.DATA}\n'])
             for event in events:
-                ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.EVEN} {event[0]}\n'])
+                ged_source = Value.EMPTY.join(
+                    [ged_source, f'2 {Gedcom.EVEN} {event[0]}\n']
+                )
                 if len(event) > 1:
-                    ged_source = Value.EMPTY.join([ged_source, f'3 {Gedcom.DATE} {event[1]}\n'])
+                    ged_source = Value.EMPTY.join(
+                        [ged_source, f'3 {Gedcom.DATE} {event[1]}\n']
+                    )
                 if len(event) > 2:
-                    ged_source = Value.EMPTY.join([ged_source, f'4 {Gedcom.PHRASE} {event[2]}\n'])
+                    ged_source = Value.EMPTY.join(
+                        [ged_source, f'4 {Gedcom.PHRASE} {event[2]}\n']
+                    )
                 if len(event) > 3:
-                    ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.AGNC} {event[3]}\n'])
+                    ged_source = Value.EMPTY.join(
+                        [ged_source, f'2 {Gedcom.AGNC} {event[3]}\n']
+                    )
                 if len(event) > 4:
-                    ged_source = Value.EMPTY.join([ged_source, self.note_structure(event[4])])
+                    ged_source = Value.EMPTY.join(
+                        [ged_source, self.note_structure(event[4])]
+                    )
         if author != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.AUTH} {author}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'1 {Gedcom.AUTH} {author}\n']
+            )
         if title != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.TITL} {title}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'1 {Gedcom.TITL} {title}\n']
+            )
         if abbreviation != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.ABBR} {abbreviation}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'1 {Gedcom.ABBR} {abbreviation}\n']
+            )
         if publisher != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.PUBL} {publisher}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'1 {Gedcom.PUBL} {publisher}\n']
+            )
         if text != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'1 {Gedcom.TEXT} {text}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'1 {Gedcom.TEXT} {text}\n']
+            )
         if mime != Value.EMPTY and mime in Enum.MEDIA_TYPE:
-            ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.MIME} {mime}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'2 {Gedcom.MIME} {mime}\n']
+            )
         if language != Value.EMPTY:
-            ged_source = Value.EMPTY.join([ged_source, f'2 {Gedcom.LANG} {language}\n'])
+            ged_source = Value.EMPTY.join(
+                [ged_source, f'2 {Gedcom.LANG} {language}\n']
+            )
         for source in sources:
-            ged_source = Value.EMPTY.join([ged_source, self.source_repository_citation(source)])
+            ged_source = Value.EMPTY.join(
+                [ged_source, self.source_repository_citation(source)]
+            )
         for identifier in identifiers:
-            ged_source = Value.EMPTY.join([ged_source, self.identifier_structure(identifier)])
+            ged_source = Value.EMPTY.join(
+                [ged_source, self.identifier_structure(identifier)]
+            )
         for note in notes:
-            ged_source = Value.EMPTY.join([ged_source, self.note_structure(note)])
+            ged_source = Value.EMPTY.join(
+                [ged_source, self.note_structure(note)]
+            )
         for media in multimedia:
-            ged_source = Value.EMPTY.join([ged_source, self.multimedia_link(media)])
+            ged_source = Value.EMPTY.join(
+                [ged_source, self.multimedia_link(media)]
+            )
         ged_source = Value.EMPTY.join([ged_source, self.creation_date()])
         self.ged_source = Value.EMPTY.join([self.ged_source, ged_source])
         logging.info(Msg.ADDED_RECORD.format(Record.SOURCE, xref))
@@ -1302,13 +1503,13 @@ class Chronology(Base):
         self,
         name: str,
         address: list[Any] | None = None,
-        phones: list[Any] | None = None,
-        emails: list[Any] | None = None,
-        faxes: list[Any] | None = None,
-        wwws: list[Any] | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
         multimedia: list[Any] | None = None,
-        languages: list[Any] | None = None,
-        identifiers: list[Any] | None = None,
+        languages: list[str] | None = None,
+        identifiers: list[str] | None = None,
         notes: list[Any] | None = None,
     ) -> str:
         if address is None:
@@ -1331,25 +1532,45 @@ class Chronology(Base):
             notes = []
         level: int = 0
         xref: str = self.next_counter(self.submitter_xreflist)
-        ged_submitter: str = f'{level!s} {xref} {Gedcom.SUBM}\n'
-        ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.NAME} {name}\n'])
-        ged_submitter = Value.EMPTY.join([ged_submitter, self.address_structure(address)])
+        ged_submitter: str = f'{level} {xref} {Gedcom.SUBM}\n'
+        ged_submitter = Value.EMPTY.join(
+            [ged_submitter, f'1 {Gedcom.NAME} {name}\n']
+        )
+        ged_submitter = Value.EMPTY.join(
+            [ged_submitter, self.address_structure(address)]
+        )
         for phone in phones:
-            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.PHON} {phone}\n'])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'{level + 1} {Gedcom.PHON} {phone}\n']
+            )
         for email in emails:
-            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.EMAIL} {email}\n'])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'{level + 1} {Gedcom.EMAIL} {email}\n']
+            )
         for fax in faxes:
-            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.FAX} {fax}\n'])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'{level + 1} {Gedcom.FAX} {fax}\n']
+            )
         for www in wwws:
-            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.WWW} {www}\n'])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'{level + 1} {Gedcom.WWW} {www}\n']
+            )
         for media in multimedia:
-            ged_submitter = Value.EMPTY.join([ged_submitter, self.multimedia_link(media)])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, self.multimedia_link(media)]
+            )
         for language in languages:
-            ged_submitter = Value.EMPTY.join([ged_submitter, f'1 {Gedcom.LANG} {language}\n'])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'{level + 1} {Gedcom.LANG} {language}\n']
+            )
         for identifier in identifiers:
-            ged_submitter = Value.EMPTY.join([ged_submitter, self.identifier_structure(identifier)])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, self.identifier_structure(identifier)]
+            )
         for note in notes:
-            ged_submitter = Value.EMPTY.join([ged_submitter, self.note_structure(note)])
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, self.note_structure(note)]
+            )
         ged_submitter = Value.EMPTY.join([ged_submitter, self.creation_date()])
         self.ged_submitter = Value.EMPTY.join(
             [self.ged_submitter, ged_submitter]
@@ -1365,13 +1586,13 @@ class Chronology(Base):
         source: str = Value.EMPTY,
         vers: str = Value.EMPTY,
         name: str = Value.EMPTY,
-        corp: str = Value.EMPTY,
-        address: list[Any] | None = None,
-        phones: list[str] | None = None,
-        emails: list[str] | None = None,
-        faxes: list[str] | None = None,
-        wwws: list[str] | None = None,
-        data: str = Value.EMPTY,
+        corp: list[Any] | None = None,
+        # address: list[Any] | None = None,
+        # phones: list[str] | None = None,
+        # emails: list[str] | None = None,
+        # faxes: list[str] | None = None,
+        # wwws: list[str] | None = None,
+        data: list[str] | None = None,
         date: str = Value.EMPTY,
         time: str = Value.EMPTY,
         dest: str = Value.EMPTY,
@@ -1380,6 +1601,7 @@ class Chronology(Base):
         language: str = Value.EMPTY,
         place: list[Any] | None = None,
         note: list[Any] | None = None,
+        shared_note: str = Value.EMPTY,
     ) -> None:
         if (
             submitter != Value.EMPTY
@@ -1388,99 +1610,118 @@ class Chronology(Base):
             raise ValueError(Msg.NOT_RECORD.format(submitter, Record.SUBMITTER))
         if schemas is None:
             schemas = []
-        if address is None:
-            address = []
-        if phones is None:
-            phones = []
-        if emails is None:
-            emails = []
-        if faxes is None:
-            faxes = []
-        if wwws is None:
-            wwws = []
+        if corp is None:
+            corp = []
+        if data is None:
+            data = []
         if place is None:
             place = []
         if note is None:
             note = []
+        level = 0
         ged_header: str = (
-            f'0 {Gedcom.HEAD}\n'
-            f'1 {Gedcom.GEDC}\n'
-            f'2 {Gedcom.VERS} {GEDSpecial.VERSION}\n'
+            f'{level} {Gedcom.HEAD}\n'
+            f'{level + 1} {Gedcom.GEDC}\n'
+            f'{level + 2} {Gedcom.VERS} {GEDSpecial.VERSION}\n'
         )
         if len(schemas) > 0:
             ged_header = Value.EMPTY.join([ged_header, f'1 {Gedcom.SCHMA}\n'])
             for schema in schemas:
+                tag, ref = schema
                 ged_header = Value.EMPTY.join(
-                    [ged_header, f'2 {Gedcom.TAG} {schema}\n']
+                    [ged_header, f'{level + 2} {Gedcom.TAG} {tag} {ref}\n']
                 )
         if source != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'1 {Gedcom.SOUR} {source}\n']
+                [ged_header, f'{level + 1} {Gedcom.SOUR} {source}\n']
             )
-        if vers != Value.EMPTY:
+            if vers != Value.EMPTY:
+                ged_header = Value.EMPTY.join(
+                    [ged_header, f'{level + 2} {Gedcom.VERS} {vers}\n']
+                )
+            if name != Value.EMPTY:
+                ged_header = Value.EMPTY.join(
+                    [ged_header, f'{level + 2} {Gedcom.NAME} {name}\n']
+                )
+            if len(corp) > 0:
+                ged_header = Value.EMPTY.join(
+                    [ged_header, f'{level + 2} {Gedcom.CORP} {corp[0]}\n']
+                )
+                if len(corp) > 1:
+                    ged_header = Value.EMPTY.join(
+                        [ged_header, self.address_structure(corp[1], level=3)]
+                    )
+                if len(corp) > 2:
+                    for phone in corp[2]:
+                        ged_header = Value.EMPTY.join(
+                            [ged_header, f'{level + 3} {Gedcom.PHON} {phone}\n']
+                        )
+                if len(corp) > 3:
+                    for email in corp[3]:
+                        ged_header = Value.EMPTY.join(
+                            [ged_header, f'{level + 3} {Gedcom.EMAIL} {email}\n']
+                        )
+                if len(corp) > 4:
+                    for fax in corp[4]:
+                        ged_header = Value.EMPTY.join(
+                            [ged_header, f'{level + 3} {Gedcom.FAX} {fax}\n']
+                        )
+                if len(corp) > 5:
+                    for www in corp[5]:
+                        ged_header = Value.EMPTY.join(
+                            [ged_header, f'{level + 3} {Gedcom.WWW} {www}\n']
+                        )
+            if len(data) > 0:
+                ged_header = Value.EMPTY.join(
+                    [ged_header, f'{level + 2} {Gedcom.DATA} {data[0]}\n']
+                )
+                if len(data) > 1:
+                    ged_header = Value.EMPTY.join(
+                        [ged_header, f'{level + 3} {Gedcom.DATE} {data[1]}\n']
+                    )
+                if len(data) > 2:
+                    ged_header = Value.EMPTY.join(
+                        [ged_header, f'{level + 4} {Gedcom.TIME} {data[2]}\n']
+                    )
+                if len(data) > 3:
+                    ged_header = Value.EMPTY.join(
+                        [ged_header, f'{level + 2} {Gedcom.COPR} {data[3]}\n']
+                    )
+        if dest != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'2 {Gedcom.VERS} {vers}\n']
-            )
-        if name != Value.EMPTY:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'2 {Gedcom.NAME} {name}\n']
-            )
-        if corp != Value.EMPTY:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'2 {Gedcom.CORP} {corp}\n']
-            )
-        address_out = self.address_structure(address, level=3)
-        ged_header = Value.EMPTY.join([ged_header, address_out])
-        for phone in phones:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'3 {Gedcom.PHON} {phone}\n']
-            )
-        for email in emails:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'3 {Gedcom.EMAIL} {email}\n']
-            )
-        for fax in faxes:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'3 {Gedcom.FAX} {fax}\n']
-            )
-        for www in wwws:
-            ged_header = Value.EMPTY.join([f'3 {Gedcom.WWW} {www}\n'])
-        if data != Value.EMPTY:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'2 {Gedcom.DATA} {source[9]}\n']
+                [ged_header, f'{level + 1} {Gedcom.DEST} {dest}\n']
             )
         if date != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'3 {Gedcom.DATE} {date}\n']
+                [ged_header, f'{level + 1} {Gedcom.DATE} {date}\n']
             )
         if time != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'4 {Gedcom.TIME} {time}\n']
+                [ged_header, f'{level + 2} {Gedcom.TIME} {time}\n']
             )
-        if dest != Value.EMPTY:
-            ged_header = Value.EMPTY.join(
-                [ged_header, f'1 {Gedcom.DEST} {dest}\n']
-            )
-        now_out = self.now(level=1)
-        ged_header = Value.EMPTY.join([ged_header, now_out])
         if submitter != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'1 {Gedcom.SUBM} {submitter}\n']
+                [ged_header, f'{level + 1} {Gedcom.SUBM} {submitter}\n']
             )
         if copr != Value.EMPTY:
-            ged_header = Value.EMPTY.join([f'1 {Gedcom.COPR} {copr}\n'])
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'{level + 1} {Gedcom.COPR} {copr}\n']
+            )
         if language != Value.EMPTY:
             ged_header = Value.EMPTY.join(
-                [ged_header, f'1 {Gedcom.LANG} {language}\n']
+                [ged_header, f'{level + 1} {Gedcom.LANG} {language}\n']
             )
         if len(place) > 0:
             ged_header = Value.EMPTY.join(
                 [
                     ged_header,
-                    f'1 {Gedcom.PLAC} {place[0]}\n',
-                    f'2 {Gedcom.FORM} {place[1]}\n',
+                    f'{level + 1} {Gedcom.PLAC} {place[0]}\n',
+                    f'{level + 2} {Gedcom.FORM} {place[1]}\n',
                 ]
             )
-        note_out: str = self.note_structure(note)
-        ged_header = Value.EMPTY.join([ged_header, note_out])
+        if shared_note != Value.EMPTY:
+            ged_header = Value.EMPTY.join(
+                [ged_header, f'1 {Gedcom.SNOTE} {shared_note}\n']
+            )
+        ged_header = Value.EMPTY.join([ged_header, self.note_structure(note)])
         self.ged_header = ged_header

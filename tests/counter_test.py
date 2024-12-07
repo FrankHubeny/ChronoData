@@ -19,6 +19,10 @@ testdata = [
     ('a.shared_note_xreflist[0]', '@7@'),
     ('adam', '@8@'),
     ('adam_eve', '@9@'),
+    ('adam_xref', '@Adam@'),
+    ('eve_xref', '@Eve@'),
+    ('adam_eve_xref', '@AdamEve@'),
+    ('eve_adam_xref', '@EveAdam@'),
    
 ]
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
@@ -35,5 +39,10 @@ def test_counter(test_input: str, expected: str | int | bool) -> None:
     xref_shared_note = a.next_counter(a.shared_note_xreflist)
     adam = a.individual_xref()
     adam_eve = a.family_xref()
+    b = Chronology(name='test name')
+    adam_xref = a.next_counter(a.individual_xreflist, name='Adam')
+    adam_eve_xref = a.next_counter(a.family_xreflist, name='AdamEve')
+    eve_xref = a.individual_xref(name='Eve')
+    eve_adam_xref = a.family_xref(name='EveAdam')
     
     assert eval(test_input) == expected
