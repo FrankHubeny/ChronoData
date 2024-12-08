@@ -7,7 +7,7 @@ import pytest
 from chronodata.constants import (
     Arg,  # noqa: F401
     Calendar,  # noqa: F401
-   # Column,  # noqa: F401
+    # Column,  # noqa: F401
     Key,  # noqa: F401
     String,  # noqa: F401
     Unit,  # noqa: F401
@@ -113,7 +113,7 @@ testdata = [
     ('Msg.ADD_ACTOR.format("0")', 'The actor "0" has been added.'),
     ('Msg.ADD_CHALLENGE.format("0")', 'The challenge "0" has been added.'),
     ('Msg.ADD_COMMENT.format("0")', 'The comment "0" has been added.'),
-    #('Msg.ADD_EVENT.format("0")', 'The event "0" has been added.'),
+    # ('Msg.ADD_EVENT.format("0")', 'The event "0" has been added.'),
     ('Msg.ADD_MARKER.format("0")', 'The marker "0" has been added.'),
     ('Msg.ADD_PERIOD.format("0")', 'The period "0" has been added.'),
     ('Msg.ADD_SOURCE.format("0")', 'The source "0" has been added.'),

@@ -1,5 +1,11 @@
 """------------------------------------------------------------------------------
                             Counter Tests
+
+    This set of tests covers the following methods individually and how they
+    are expected to be used together.:
+    - `family_xref`
+    - `individual_xref`
+    - `next_counter`
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -23,26 +29,27 @@ testdata = [
     ('eve_xref', '@Eve@'),
     ('adam_eve_xref', '@AdamEve@'),
     ('eve_adam_xref', '@EveAdam@'),
-   
 ]
+
+
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_counter(test_input: str, expected: str | int | bool) -> None:
     a = Chronology(name='testing')
-    oldxref = a.xref_counter
-    xref = a.next_counter(a.individual_xreflist)
-    newxref = a.xref_counter
-    xref_family = a.next_counter(a.family_xreflist)
-    xref_multimedia = a.next_counter(a.multimedia_xreflist)
-    xref_repository = a.next_counter(a.repository_xreflist)
-    xref_source = a.next_counter(a.source_xreflist)
-    xref_submitter = a.next_counter(a.submitter_xreflist)
-    xref_shared_note = a.next_counter(a.shared_note_xreflist)
-    adam = a.individual_xref()
-    adam_eve = a.family_xref()
+    oldxref = a.xref_counter  # noqa: F841
+    xref = a.next_counter(a.individual_xreflist)  # noqa: F841
+    newxref = a.xref_counter  # noqa: F841
+    xref_family = a.next_counter(a.family_xreflist)  # noqa: F841
+    xref_multimedia = a.next_counter(a.multimedia_xreflist)  # noqa: F841
+    xref_repository = a.next_counter(a.repository_xreflist)  # noqa: F841
+    xref_source = a.next_counter(a.source_xreflist)  # noqa: F841
+    xref_submitter = a.next_counter(a.submitter_xreflist)  # noqa: F841
+    xref_shared_note = a.next_counter(a.shared_note_xreflist)  # noqa: F841
+    adam = a.individual_xref()  # noqa: F841
+    adam_eve = a.family_xref()  # noqa: F841
     b = Chronology(name='test name')
-    adam_xref = a.next_counter(a.individual_xreflist, name='Adam')
-    adam_eve_xref = a.next_counter(a.family_xreflist, name='AdamEve')
-    eve_xref = a.individual_xref(name='Eve')
-    eve_adam_xref = a.family_xref(name='EveAdam')
-    
+    adam_xref = a.next_counter(a.individual_xreflist, name='Adam')  # noqa: F841
+    adam_eve_xref = a.next_counter(a.family_xreflist, name='AdamEve')  # noqa: F841
+    eve_xref = a.individual_xref(name='Eve')  # noqa: F841
+    eve_adam_xref = a.family_xref(name='EveAdam')  # noqa: F841
+
     assert eval(test_input) == expected

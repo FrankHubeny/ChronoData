@@ -73,7 +73,10 @@ log_cli_level = "INFO"
 testpaths = ["tests"]
 
 [tool.mypy]
-mypy_path = ["chronodata"]
+mypy_path = [
+    "chronodata", 
+    "tests",
+]
 files = [
   "chronodata/chrono.py", 
   "chronodata/constants.py", 

@@ -18,20 +18,20 @@ testdata = [
     ('datetime_result[3][0:6]', f'1 {Gedcom.DATE}'),
     ('datetime_result[4][0:6]', f'2 {Gedcom.TIME}'),
     ('len(datetime_result)', 6),
-	('schema_result[3]', f'1 {Gedcom.SCHMA}'),
-	('schema_result[4]', f'2 {Gedcom.TAG} _LOC http:something.blog'),
-	('schema_result[5]', f'2 {Gedcom.TAG} _EASY http:here.it.is.blog'), 
+    ('schema_result[3]', f'1 {Gedcom.SCHMA}'),
+    ('schema_result[4]', f'2 {Gedcom.TAG} _LOC http:something.blog'),
+    ('schema_result[5]', f'2 {Gedcom.TAG} _EASY http:here.it.is.blog'),
     ('len(schema_result)', 7),
     ('source_result[3]', f'1 {Gedcom.SOUR} me'),
     ('source_result[4]', f'2 {Gedcom.VERS} you'),
-    ('source_result[5]', f'2 {Gedcom.NAME} hi'), 
+    ('source_result[5]', f'2 {Gedcom.NAME} hi'),
     ('len(source_result)', 7),
-    ('corp_result[4]', f'2 {Gedcom.CORP} mine'), 
-    ('corp_result[5]', f'3 {Gedcom.ADDR} 1234 Here Street'), 
-    ('corp_result[6]', f'3 {Gedcom.CONT} There, CA 22222'), 
-    ('corp_result[7]', f'3 {Gedcom.CONT} usa'), 
-    ('corp_result[8]', f'3 {Gedcom.PHON} 1-234-456-7654'), 
-    ('corp_result[9]', f'3 {Gedcom.PHON} 1-333-567-5432'), 
+    ('corp_result[4]', f'2 {Gedcom.CORP} mine'),
+    ('corp_result[5]', f'3 {Gedcom.ADDR} 1234 Here Street'),
+    ('corp_result[6]', f'3 {Gedcom.CONT} There, CA 22222'),
+    ('corp_result[7]', f'3 {Gedcom.CONT} usa'),
+    ('corp_result[8]', f'3 {Gedcom.PHON} 1-234-456-7654'),
+    ('corp_result[9]', f'3 {Gedcom.PHON} 1-333-567-5432'),
     ('corp_result[10]', f'3 {Gedcom.EMAIL} abc@her.com'),
     ('corp_result[11]', f'3 {Gedcom.EMAIL} rrr@there.com'),
     ('corp_result[12]', f'3 {Gedcom.FAX} 1-333-222-3333'),
@@ -65,46 +65,58 @@ testdata = [
     ('note_translation_result[11]', f'2 {Gedcom.LANG} sp'),
     ('shared_note_result[3]', f'1 {Gedcom.SNOTE} @1@'),
     ('len(shared_note_result)', 5),
-    
 ]
+
+
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_header(test_input: str, expected: str | int | bool) -> None:
     # Run header() without arguments.
     base = Chronology(name='base header')
     base.header()
     baseresult = base.ged_header.split('\n')
-    
+
     # Run header with date and time arguments.
     a = Chronology(name='date and time')
     a.header(date='1 JAN 2000', time='01:01:01')
     datetime_result = a.ged_header.split('\n')
-    
+
     # Run header which schema argument.
     b = Chronology(name='schemas')
-    b.header(schemas=[['_LOC', 'http:something.blog'], ['_EASY', 'http:here.it.is.blog']])
+    b.header(
+        schemas=[
+            ['_LOC', 'http:something.blog'],
+            ['_EASY', 'http:here.it.is.blog'],
+        ]
+    )
     schema_result = b.ged_header.split('\n')
-    
+
     # Run header with source, vers and name arguments.
     c = Chronology(name='source')
-    c.header(source='me',vers='you',name='hi')
+    c.header(source='me', vers='you', name='hi')
     source_result = c.ged_header.split('\n')
-    
+
     # Run header with  corp list argument.
     d = Chronology(name='corp')
     d.header(
-        source='abc', 
+        source='abc',
         corp='mine',
-        address=['1234 Here Street\nThere, CA 22222\nusa'],
-        phones=['1-234-456-7654','1-333-567-5432'],
+        address='1234 Here Street\nThere, CA 22222\nusa',
+        phones=['1-234-456-7654', '1-333-567-5432'],
         emails=['abc@her.com', 'rrr@there.com'],
-        faxes=['1-333-222-3333','1-665-789-2345'],
-        wwws=['https://www.one.com','www.go.here.com'],
+        faxes=['1-333-222-3333', '1-665-789-2345'],
+        wwws=['https://www.one.com', 'www.go.here.com'],
     )
     corp_result = d.ged_header.split('\n')
-    
+
     # Run header with data list argument.
     e = Chronology(name='data')
-    e.header(source='datasource', data=['datatext','2 DEC 2024','01:01:01','copr'])
+    e.header(
+        source='datasource',
+        data='datatext',
+        data_date='2 DEC 2024',
+        data_time='01:01:01',
+        data_copr='copr',
+    )
     data_result = e.ged_header.split('\n')
 
     # Run header with submitter.
@@ -135,7 +147,15 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
 
     # Run header with note and translation.
     k = Chronology(name='note translation')
-    k.header(note=['some note', 'text/html', 'en', [['sss', 'text/html', 'en'], ['ddd', 'text/plain', 'sp']], []])
+    k.header(
+        note=[
+            'some note',
+            'text/html',
+            'en',
+            [['sss', 'text/html', 'en'], ['ddd', 'text/plain', 'sp']],
+            [],
+        ]
+    )
     note_translation_result = k.ged_header.split('\n')
 
     # Run header with shared note.
@@ -143,7 +163,5 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
     shared_note_xref = l.shared_note_record('note')
     l.header(shared_note=shared_note_xref)
     shared_note_result = l.ged_header.split('\n')
-    
-    
-    
+
     assert eval(test_input) == expected
