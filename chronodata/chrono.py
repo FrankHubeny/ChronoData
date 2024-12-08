@@ -508,11 +508,11 @@ class Chronology(Base):
         ):
             if len(identifier) > 1:
                 lines = Value.EMPTY.join(
-                    [lines, f'{level} {identifier[0][0]} {identifier[0][1]}\n']
+                    [lines, f'{level} {identifier[0]} {identifier[1]}\n']
                 )
             if len(identifier) > 2:
                 lines = Value.EMPTY.join(
-                    [lines, f'{level + 1} {Gedcom.TYPE} {identifier[0][2]}\n']
+                    [lines, f'{level + 1} {Gedcom.TYPE} {identifier[2]}\n']
                 )
         return lines
 
@@ -555,27 +555,26 @@ class Chronology(Base):
     def multimedia_link(self, media: list[Any], level: int = 1) -> str:
         """Add multimedia information."""
         lines: str = Value.EMPTY
-        if len(media) > 0 and media[0] in self.multimedia_xreflist:
+        if len(media) > 0:
             lines = Value.EMPTY.join(
                 [lines, f'{level} {Gedcom.OBJE} {media[0]}\n']
             )
-            if len(media[1]) == 4:
+            if len(media) == 6:
                 lines = Value.EMPTY.join(
                     [
                         lines,
                         f'{level + 1} {Gedcom.CROP}\n',
-                        f'{level + 2} {Gedcom.TOP} {media[1][0]}\n',
-                        f'{level + 2} {Gedcom.LEFT} {media[1][1]}\n',
-                        f'{level + 2} {Gedcom.HEIGHT} {media[1][2]}\n',
-                        f'{level + 2} {Gedcom.WIDTH} {media[1][3]}\n',
+                        f'{level + 2} {Gedcom.TOP} {media[1]}\n',
+                        f'{level + 2} {Gedcom.LEFT} {media[2]}\n',
+                        f'{level + 2} {Gedcom.HEIGHT} {media[3]}\n',
+                        f'{level + 2} {Gedcom.WIDTH} {media[4]}\n',
+                        f'{level + 1} {Gedcom.TITL} {media[5]}\n',
                     ]
                 )
-            if len(media) == 3:
+            if len(media) == 2:
                 lines = Value.EMPTY.join(
-                    [lines, f'{level + 1} {Gedcom.TITL} {media[2]}\n']
+                    [lines, f'{level + 1} {Gedcom.TITL} {media[1]}\n']
                 )
-        elif media[0] not in Enum.MEDI:
-            raise ValueError(Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA))
         return lines
 
     def non_event_structure(self, event: list[Any], level: int = 1) -> str:
@@ -647,6 +646,29 @@ class Chronology(Base):
         return lines
 
     ###### GEDCOM Records
+
+    def contact(
+        self,
+        phones: list[str],
+        emails: list[str],
+        faxes: list[str],
+        wwws: list[str],
+        level: int = 1,
+    ) -> str:
+        lines: str = Value.EMPTY
+        for phone in phones:
+            lines = Value.EMPTY.join(
+                [lines, f'{level} {Gedcom.PHON} {phone}\n']
+            )
+        for email in emails:
+            lines = Value.EMPTY.join(
+                [lines, f'{level} {Gedcom.EMAIL} {email}\n']
+            )
+        for fax in faxes:
+            lines = Value.EMPTY.join([lines, f'{level} {Gedcom.FAX} {fax}\n'])
+        for www in wwws:
+            lines = Value.EMPTY.join([lines, f'{level} {Gedcom.WWW} {www}\n'])
+        return lines
 
     def next_counter(self, record: list[str], name: str = Value.EMPTY) -> str:
         xref: str = Value.EMPTY
@@ -1298,6 +1320,9 @@ class Chronology(Base):
             identifiers = []
         if notes is None:
             notes = []
+        for id in identifiers:
+            if id[0] not in Enum.ID:
+                raise ValueError(Msg.NOT_VALID_ENUM.format(id[0], EnumName.ID))
         level: int = 0
         xref: str = self.next_counter(self.repository_xreflist)
         ged_repository: str = f'{level!s} {xref} {Gedcom.REPO}\n'
@@ -1308,22 +1333,25 @@ class Chronology(Base):
             ged_repository = Value.EMPTY.join(
                 [ged_repository, self.address_structure(addr)]
             )
-        for phone in phones:
-            ged_repository = Value.EMPTY.join(
-                [ged_repository, f'1 {Gedcom.PHON} {phone}\n']
-            )
-        for email in emails:
-            ged_repository = Value.EMPTY.join(
-                [ged_repository, f'1 {Gedcom.EMAIL} {email}\n']
-            )
-        for fax in faxes:
-            ged_repository = Value.EMPTY.join(
-                [ged_repository, f'1 {Gedcom.FAX} {fax}\n']
-            )
-        for www in wwws:
-            ged_repository = Value.EMPTY.join(
-                [ged_repository, f'1 {Gedcom.WWW} {www}\n']
-            )
+        ged_repository = Value.EMPTY.join(
+            [ged_repository, self.contact(phones, emails, faxes, wwws)]
+        )
+        # for phone in phones:
+        #     ged_repository = Value.EMPTY.join(
+        #         [ged_repository, f'1 {Gedcom.PHON} {phone}\n']
+        #     )
+        # for email in emails:
+        #     ged_repository = Value.EMPTY.join(
+        #         [ged_repository, f'1 {Gedcom.EMAIL} {email}\n']
+        #     )
+        # for fax in faxes:
+        #     ged_repository = Value.EMPTY.join(
+        #         [ged_repository, f'1 {Gedcom.FAX} {fax}\n']
+        #     )
+        # for www in wwws:
+        #     ged_repository = Value.EMPTY.join(
+        #         [ged_repository, f'1 {Gedcom.WWW} {www}\n']
+        #     )
         for note in notes:
             ged_repository = Value.EMPTY.join(
                 [ged_repository, self.note_structure(note)]
@@ -1340,6 +1368,7 @@ class Chronology(Base):
 
     def shared_note_record(
         self,
+        note: str,
         mime: str = Value.EMPTY,
         language: str = Value.EMPTY,
         translations: list[Any] | None = None,
@@ -1352,9 +1381,23 @@ class Chronology(Base):
             sources = []
         if identifiers is None:
             identifiers = []
+        if mime != Value.EMPTY and mime not in Enum.MEDIA_TYPE:
+            raise ValueError(
+                Msg.NOT_VALID_ENUM.format(mime, EnumName.MEDIA_TYPE)
+            )
+        for translation in translations:
+            if len(translation) > 1 and translation[1] not in Enum.MEDIA_TYPE:
+                raise ValueError(
+                    Msg.NOT_VALID_ENUM.format(
+                        translation[1], EnumName.MEDIA_TYPE
+                    )
+                )
+        for id in identifiers:
+            if id[0] not in Enum.ID:
+                raise ValueError(Msg.NOT_VALID_ENUM.format(id[0], EnumName.ID))
         level: int = 0
         xref: str = self.next_counter(self.shared_note_xreflist)
-        ged_shared_note: str = f'{level!s} {xref} {Gedcom.SNOTE}\n'
+        ged_shared_note: str = f'{level!s} {xref} {Gedcom.SNOTE} {note}\n'
         if mime != Value.EMPTY and mime in Enum.MEDIA_TYPE:
             ged_shared_note = Value.EMPTY.join(
                 [ged_shared_note, f'1 {Gedcom.MIME} {mime}\n']
@@ -1365,8 +1408,16 @@ class Chronology(Base):
             )
         for translation in translations:
             ged_shared_note = Value.EMPTY.join(
-                [ged_shared_note, self.add_translation(translation)]
+                [ged_shared_note, f'1 {Gedcom.TRAN} {translation[0]}\n']
             )
+            if len(translation) > 1:
+                ged_shared_note = Value.EMPTY.join(
+                    [ged_shared_note, f'2 {Gedcom.MIME} {translation[1]}']
+                )
+            if len(translation) > 2:
+                ged_shared_note = Value.EMPTY.join(
+                    [ged_shared_note, f'2 {Gedcom.LANG} {translation[2]}']
+                )
         for source in sources:
             ged_shared_note = Value.EMPTY.join(
                 [ged_shared_note, self.source_citation(source)]
@@ -1413,18 +1464,14 @@ class Chronology(Base):
             raise ValueError(
                 Msg.NOT_VALID_ENUM.format(mime, EnumName.MEDIA_TYPE)
             )
-        if len(multimedia) > 0:
-            for media in multimedia:
-                if media[0] not in self.multimedia_xreflist:
-                    raise ValueError(
-                        Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA)
-                    )
-        if len(identifiers) > 0:
-            for id in identifiers:
-                if id[0] not in Enum.ID:
-                    raise ValueError(
-                        Msg.NOT_VALID_ENUM.format(mime, EnumName.ID)
-                    )
+        for media in multimedia:
+            if media[0] not in self.multimedia_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA)
+                )
+        for id in identifiers:
+            if id[0] not in Enum.ID:
+                raise ValueError(Msg.NOT_VALID_ENUM.format(mime, EnumName.ID))
         level: int = 0
         xref: str = self.next_counter(self.source_xreflist)
         ged_source: str = f'{level!s} {xref} {Gedcom.SOUR}\n'
@@ -1511,6 +1558,7 @@ class Chronology(Base):
         languages: list[str] | None = None,
         identifiers: list[str] | None = None,
         notes: list[Any] | None = None,
+        shared_note: str = Value.EMPTY,
     ) -> str:
         if address is None:
             address = []
@@ -1530,6 +1578,14 @@ class Chronology(Base):
             identifiers = []
         if notes is None:
             notes = []
+        for id in identifiers:
+            if id[0] not in Enum.ID:
+                raise ValueError(Msg.NOT_VALID_ENUM.format(id[0], EnumName.ID))
+        for media in multimedia:
+            if media[0] not in self.multimedia_xreflist:
+                raise ValueError(
+                    Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA)
+                )
         level: int = 0
         xref: str = self.next_counter(self.submitter_xreflist)
         ged_submitter: str = f'{level} {xref} {Gedcom.SUBM}\n'
@@ -1539,22 +1595,25 @@ class Chronology(Base):
         ged_submitter = Value.EMPTY.join(
             [ged_submitter, self.address_structure(address)]
         )
-        for phone in phones:
-            ged_submitter = Value.EMPTY.join(
-                [ged_submitter, f'{level + 1} {Gedcom.PHON} {phone}\n']
-            )
-        for email in emails:
-            ged_submitter = Value.EMPTY.join(
-                [ged_submitter, f'{level + 1} {Gedcom.EMAIL} {email}\n']
-            )
-        for fax in faxes:
-            ged_submitter = Value.EMPTY.join(
-                [ged_submitter, f'{level + 1} {Gedcom.FAX} {fax}\n']
-            )
-        for www in wwws:
-            ged_submitter = Value.EMPTY.join(
-                [ged_submitter, f'{level + 1} {Gedcom.WWW} {www}\n']
-            )
+        ged_submitter = Value.EMPTY.join(
+            [ged_submitter, self.contact(phones, emails, faxes, wwws)]
+        )
+        # for phone in phones:
+        #     ged_submitter = Value.EMPTY.join(
+        #         [ged_submitter, f'{level + 1} {Gedcom.PHON} {phone}\n']
+        #     )
+        # for email in emails:
+        #     ged_submitter = Value.EMPTY.join(
+        #         [ged_submitter, f'{level + 1} {Gedcom.EMAIL} {email}\n']
+        #     )
+        # for fax in faxes:
+        #     ged_submitter = Value.EMPTY.join(
+        #         [ged_submitter, f'{level + 1} {Gedcom.FAX} {fax}\n']
+        #     )
+        # for www in wwws:
+        #     ged_submitter = Value.EMPTY.join(
+        #         [ged_submitter, f'{level + 1} {Gedcom.WWW} {www}\n']
+        #     )
         for media in multimedia:
             ged_submitter = Value.EMPTY.join(
                 [ged_submitter, self.multimedia_link(media)]
@@ -1571,6 +1630,10 @@ class Chronology(Base):
             ged_submitter = Value.EMPTY.join(
                 [ged_submitter, self.note_structure(note)]
             )
+        if shared_note != Value.EMPTY:
+            ged_submitter = Value.EMPTY.join(
+                [ged_submitter, f'1 {Gedcom.SNOTE} {shared_note}\n']
+            )
         ged_submitter = Value.EMPTY.join([ged_submitter, self.creation_date()])
         self.ged_submitter = Value.EMPTY.join(
             [self.ged_submitter, ged_submitter]
@@ -1586,12 +1649,12 @@ class Chronology(Base):
         source: str = Value.EMPTY,
         vers: str = Value.EMPTY,
         name: str = Value.EMPTY,
-        corp: list[Any] | None = None,
-        # address: list[Any] | None = None,
-        # phones: list[str] | None = None,
-        # emails: list[str] | None = None,
-        # faxes: list[str] | None = None,
-        # wwws: list[str] | None = None,
+        corp: str = Value.EMPTY,
+        address: list[Any] | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
         data: list[str] | None = None,
         date: str = Value.EMPTY,
         time: str = Value.EMPTY,
@@ -1610,8 +1673,16 @@ class Chronology(Base):
             raise ValueError(Msg.NOT_RECORD.format(submitter, Record.SUBMITTER))
         if schemas is None:
             schemas = []
-        if corp is None:
-            corp = []
+        if address is None:
+            address = []
+        if phones is None:
+            phones = []
+        if emails is None:
+            emails = []
+        if faxes is None:
+            faxes = []
+        if wwws is None:
+            wwws = []
         if data is None:
             data = []
         if place is None:
@@ -1643,34 +1714,39 @@ class Chronology(Base):
                 ged_header = Value.EMPTY.join(
                     [ged_header, f'{level + 2} {Gedcom.NAME} {name}\n']
                 )
-            if len(corp) > 0:
+            if corp != Value.EMPTY:
                 ged_header = Value.EMPTY.join(
-                    [ged_header, f'{level + 2} {Gedcom.CORP} {corp[0]}\n']
+                    [ged_header, f'{level + 2} {Gedcom.CORP} {corp}\n']
                 )
-                if len(corp) > 1:
-                    ged_header = Value.EMPTY.join(
-                        [ged_header, self.address_structure(corp[1], level=3)]
-                    )
-                if len(corp) > 2:
-                    for phone in corp[2]:
-                        ged_header = Value.EMPTY.join(
-                            [ged_header, f'{level + 3} {Gedcom.PHON} {phone}\n']
-                        )
-                if len(corp) > 3:
-                    for email in corp[3]:
-                        ged_header = Value.EMPTY.join(
-                            [ged_header, f'{level + 3} {Gedcom.EMAIL} {email}\n']
-                        )
-                if len(corp) > 4:
-                    for fax in corp[4]:
-                        ged_header = Value.EMPTY.join(
-                            [ged_header, f'{level + 3} {Gedcom.FAX} {fax}\n']
-                        )
-                if len(corp) > 5:
-                    for www in corp[5]:
-                        ged_header = Value.EMPTY.join(
-                            [ged_header, f'{level + 3} {Gedcom.WWW} {www}\n']
-                        )
+            ged_header = Value.EMPTY.join(
+                [ged_header, self.address_structure(address, level=3)]
+            )
+            ged_header = Value.EMPTY.join(
+                [ged_header, self.contact(phones, emails, faxes, wwws, level=3)]
+            )
+            # if len(corp) > 2:
+            #     for phone in corp[2]:
+            #         ged_header = Value.EMPTY.join(
+            #             [ged_header, f'{level + 3} {Gedcom.PHON} {phone}\n']
+            #         )
+            # if len(corp) > 3:
+            #     for email in corp[3]:
+            #         ged_header = Value.EMPTY.join(
+            #             [
+            #                 ged_header,
+            #                 f'{level + 3} {Gedcom.EMAIL} {email}\n',
+            #             ]
+            #         )
+            # if len(corp) > 4:
+            #     for fax in corp[4]:
+            #         ged_header = Value.EMPTY.join(
+            #             [ged_header, f'{level + 3} {Gedcom.FAX} {fax}\n']
+            #         )
+            # if len(corp) > 5:
+            #     for www in corp[5]:
+            #         ged_header = Value.EMPTY.join(
+            #             [ged_header, f'{level + 3} {Gedcom.WWW} {www}\n']
+            #         )
             if len(data) > 0:
                 ged_header = Value.EMPTY.join(
                     [ged_header, f'{level + 2} {Gedcom.DATA} {data[0]}\n']

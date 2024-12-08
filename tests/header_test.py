@@ -93,14 +93,12 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
     d = Chronology(name='corp')
     d.header(
         source='abc', 
-        corp=[
-            'mine', # name
-            ['1234 Here Street\nThere, CA 22222\nusa'], # address
-            ['1-234-456-7654','1-333-567-5432'], # phones
-            ['abc@her.com', 'rrr@there.com'],# email
-            ['1-333-222-3333','1-665-789-2345'], # fax
-            ['https://www.one.com','www.go.here.com'] # www
-        ]
+        corp='mine',
+        address=['1234 Here Street\nThere, CA 22222\nusa'],
+        phones=['1-234-456-7654','1-333-567-5432'],
+        emails=['abc@her.com', 'rrr@there.com'],
+        faxes=['1-333-222-3333','1-665-789-2345'],
+        wwws=['https://www.one.com','www.go.here.com'],
     )
     corp_result = d.ged_header.split('\n')
     
@@ -142,7 +140,7 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
 
     # Run header with shared note.
     l = Chronology(name='shared note')
-    shared_note_xref = l.shared_note_record()
+    shared_note_xref = l.shared_note_record('note')
     l.header(shared_note=shared_note_xref)
     shared_note_result = l.ged_header.split('\n')
     
