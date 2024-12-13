@@ -590,7 +590,7 @@ class EnumName:
     ADOP: str = 'ADOP'
     EVEN: str = 'EVEN (Event)'
     EVENATTR: str = 'EVENATTR'
-    FAMC: str = 'FAMC'
+    FAMC_STAT: str = 'FAMC_STAT'
     FAM_ATTR: str = 'family attributes'
     FAM_EVEN: str = 'family events'
     ID: str = 'ID'

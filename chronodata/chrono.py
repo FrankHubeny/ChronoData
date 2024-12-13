@@ -60,30 +60,33 @@ class Defs:
 
         """
 
-        if extra == Value.EMPTY:
-            if info == Value.EMPTY:
+        if extra == '':
+            if info == '':
                 return f'{level} {tag}\n'
             return f'{level} {tag} {info}\n'
         return f'{level} {tag} {info} {extra}\n'
 
     @staticmethod
-    def verify_tuple_type(name: tuple[Any], tuple_type: Any) -> None:
-        """Check if each member of the tuple has the specified type."""
-        for value in name:
-            if not isinstance(value, tuple_type):
-                raise TypeError(Msg.WRONG_TYPE.format(value, type(value), tuple_type))
-    
-    @staticmethod
-    def verify_enum(value: str, enum: frozenset, name: str) -> None:
-        """Check if the value is in the proper enumation."""
-        if not value in enum:
-            raise ValueError(Msg.NOT_VALID_ENUM.format(value, name))
-    
-    @staticmethod
     def verify_type(value: Any, type_value: Any) -> None:
         """Check if the value has the specified type."""
         if not isinstance(value, type_value):
             raise TypeError(Msg.WRONG_TYPE.format(value, type(value), type_value))
+        
+    @staticmethod
+    def verify_tuple_type(name: tuple[Any], tuple_type: Any) -> None:
+        """Check if each member of the tuple has the specified type."""
+        for value in name:
+            Defs.verify_type(value, tuple_type)
+            # if not isinstance(value, tuple_type):
+            #     raise TypeError(Msg.WRONG_TYPE.format(value, type(value), tuple_type))
+    
+    @staticmethod
+    def verify_enum(value: str, enum: frozenset, name: str) -> None:
+        """Check if the value is in the proper enumation."""
+        if value not in enum:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(value, name))
+    
+    
 
 
 class PersonalName(NamedTuple):
@@ -135,36 +138,71 @@ class NoteCitation(NamedTuple):
 
 
 class Citation(NamedTuple):
-    xref: str
-    page: str
-    datetime: str
-    text: str
-    mime: str
-    language: str
-    event: str
-    phrase: str
-    role: str
-    role_phrase: str
-    quality: str
-    multimedia: str
-    note: tuple[NoteCitation] | None = None
+    xref: str = ''
+    page: str = ''
+    datetime: str = ''
+    text: str = ''
+    mime: str = ''
+    language: str = ''
+    event: str = ''
+    phrase: str = ''
+    role: str = ''
+    role_phrase: str = ''
+    quality: str = ''
+    multimedia: str = ''
+    notes: tuple[NoteCitation] | None = None
+
+    def validate(self) -> bool:
+        Defs.verify_type(self.xref, str)
+        Defs.verify_type(self.page, str)
+        Defs.verify_type(self.datetime, str)
+        Defs.verify_type(self.text, str)
+        Defs.verify_type(self.mime, str)
+        Defs.verify_type(self.language, str)
+        Defs.verify_type(self.event, str)
+        Defs.verify_type(self.phrase, str)
+        Defs.verify_type(self.role, str)
+        Defs.verify_type(self.role_phrase, str)
+        Defs.verify_type(self.quality, str)
+        Defs.verify_type(self.multimedia, str)
+        Defs.verify_tuple_type(self.notes, NoteCitation)
+        return True
 
 
 class Note(NamedTuple):
-    text: str = Value.EMPTY
-    mime: str = Value.EMPTY
-    language: str = Value.EMPTY
+    text: str = ''
+    mime: str = ''
+    language: str = ''
     translation: tuple[NoteTranslation] | None = None
-    citation: tuple[Citation] | None = None
+    citations: tuple[Citation] | None = None
+
+    def validate(self) -> bool:
+        Defs.verify_type(self.text, str)
+        Defs.verify_type(self.mime, str)
+        Defs.verify_type(self.language, str)
+        Defs.verify_tuple_type(self.translation, NoteTranslation)
+        Defs.verify_type(self.citations, Citation)
+        return True
 
 
 class Association(NamedTuple):
     xref: str
     role: str
-    association_phrase: str = Value.EMPTY
-    role_phrase: str = Value.EMPTY
+    association_phrase: str = ''
+    role_phrase: str = ''
     notes: tuple[Note] | None = None
     citations: tuple[Citation] | None = None
+
+    def validate(self) -> bool:
+        Defs.verify_type(self.xref, str)
+        Defs.verify_type(self.role, str)
+        Defs.verify_type(self.association_phrase, str)
+        Defs.verify_type(self.role_phrase, str)
+        Defs.verify_tuple_type(self.notes, Note)
+        Defs.verify_tuple_type(self.citations, Citation)
+        return True
+
+    
 
 
 class MultimediaLink(NamedTuple):
@@ -175,15 +213,34 @@ class MultimediaLink(NamedTuple):
     width: int = 0
     title: str = 0
 
+    def validate(self) -> bool:
+        Defs.verify_type(self.crop, str)
+        Defs.verify_type(self.top, int)
+        Defs.verify_type(self.left, int)
+        Defs.verify_type(self.height, int)
+        Defs.verify_type(self.width, int)
+        Defs.verify_type(self.title, str)
+        return True
+
 
 class Exid(NamedTuple):
     exid: str
     exid_type: str
 
+    def validate(self) -> bool:
+        Defs.verify_type(self.exid, str)
+        Defs.verify_type(self.exid_type, str)
+        return True
+
 
 class PlaceTranslation(NamedTuple):
-    text: str
-    language: str
+    text: str = ''
+    language: str = ''
+
+    def validate(self) -> bool:
+        Defs.verify_type(self.text, str)
+        Defs.verify_type(self.language, str)
+        return True
 
 
 class Map(NamedTuple):
@@ -439,10 +496,11 @@ class Date(NamedTuple):
 class Time(NamedTuple):
     """Validate and display time data in various formats.
 
-    Times are entered based on a Gregorian calendar day.
+    The standard does not permit leap seconds nor end of day instant (24:00:00).
 
-    A default value of `0` for any time component means that the component
-    will not be displayed.
+    Reference
+    ---------
+    - [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
     """
 
     hour: int = 0
@@ -456,18 +514,14 @@ class Time(NamedTuple):
         Defs.verify_type(self.minute, int)
         Defs.verify_type(self.second, int | float)
         Defs.verify_type(self.UTC, bool)
-        # if not isinstance(self.second, float) and not isinstance(
-        #     self.second, int
-        # ):
-        #     raise ValueError(
-        #         Msg.NOT_INTEGER_FLOAT.format(self.second, type(self.second))
-        #     )
         if not 0 <= self.hour < 24:
             raise ValueError(Msg.RANGE.format(self.hour, 0, 24))
         if not 0 <= self.minute < 60:
             raise ValueError(Msg.RANGE.format(self.minute, 0, 60))
-        if not 0.0 <= self.second < 60.0:
-            raise ValueError(Msg.RANGE.format(self.minute, 0.0, 60.0))
+        if isinstance(self.second, float) and not 0.0 <= self.second < 60.0:
+            raise ValueError(Msg.RANGE.format(self.second, 0.0, 60.0))
+        if isinstance(self.second, int) and not 0 <= self.second < 60:
+            raise ValueError(Msg.RANGE.format(self.second, 0, 60))
         return True
     
     def ged(
@@ -476,12 +530,12 @@ class Time(NamedTuple):
         hour_str: str = str(self.hour)
         minute_str: str = str(self.minute)
         second_str: str = str(self.second)
-        if self.validate() and self.hour != 0:
-            if 0 < self.hour < 10:
+        if self.validate():
+            if 0 <= self.hour < 10:
                 hour_str = ''.join(['0', hour_str])
-            if 0 < self.minute < 10:
+            if 0 <= self.minute < 10:
                 minute_str = ''.join(['0', minute_str])
-            if 0 < self.second < 10:
+            if 0 <= self.second < 10:
                 second_str = ''.join(['0', second_str])
             if self.UTC:
                 second_str = ''.join([second_str, 'Z'])
