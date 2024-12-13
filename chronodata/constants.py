@@ -10,6 +10,8 @@ class Arg:
     """The following constants are used as arguments to procedure calls
     such as Pandas DataFrames or NumPy."""
 
+    CSV: str = '.csv'
+    CSVLEN: int = 4
     GED: str = '.ged'
     GEDLEN: int = 4
     GRAMPS: str = '.gramps'
@@ -35,9 +37,51 @@ class Value:
     CE: str = ' CE'
     DATETIME_EPOCH: int = 1970
     EMPTY: str = ''
+    EPOCH: str = 'Epoch'
     EXPERIMENT: str = 'EXPERIMENT'
     GREGORIAN: str = 'GREGORIAN'
+    MAX_MONTHS: str = 'Max Months'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
     SECULAR: str = 'SECULAR'
+
+class Cal:
+    """GEDCOM Month codes for various calendars."""
+
+    CALENDARS: ClassVar = {
+        Value.GREGORIAN: {
+            Value.MAX_MONTHS : 12,
+            Value.MONTH_NAMES : {
+                '01': 'JAN',
+                '02': 'FEB',
+                '03': 'MAR',
+                '04': 'APR',
+                '05': 'MAY',
+                '06': 'JUN',
+                '07': 'JUL',
+                '08': 'AUG',
+                '09': 'SEP',
+                '10': 'OCT',
+                '11': 'NOV',
+                '12': 'DEC',
+            },
+            Value.MONTH_MAX_DAYS: {
+                '01': 31,
+                '02': 29,
+                '03': 31,
+                '04': 30,
+                '05': 31,
+                '06': 30,
+                '07': 31,
+                '08': 31,
+                '09': 30,
+                '10': 31,
+                '11': 30,
+                '12': 31,
+            },
+            Value.EPOCH: ' BCE'
+        }
+    }
 
 
 @dataclass(frozen=True)

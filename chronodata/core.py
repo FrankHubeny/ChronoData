@@ -1,6 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """Read and write files for chronology files."""
 
+import csv
 import json
 import logging
 from pathlib import Path
@@ -17,7 +18,7 @@ from chronodata.constants import (
     Unit,
     Value,
 )
-from chronodata.g7 import Gedcom
+from chronodata.g7 import Gedcom, GEDSpecial
 from chronodata.messages import Issue, Msg
 
 
@@ -28,7 +29,7 @@ class Base:
         self,
         name: str = Value.EMPTY,
         filename: str = Value.EMPTY,
-        calendar: dict[str, Any] = Calendar.GREGORIAN,
+        calendar: str = GEDSpecial.GREGORIAN,
         log: bool = True,
     ) -> None:
         self.chron: dict[str, Any] = {
@@ -42,7 +43,8 @@ class Base:
             Gedcom.SUBM: {},
         }
         self.chron_name: str = name
-        self.strict: bool = calendar[Key.STRICT]
+        self.calendar: str = calendar
+        #self.strict: bool = calendar[Key.STRICT]
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
@@ -56,10 +58,11 @@ class Base:
         self.ged_shared_note: str = Value.EMPTY
         self.ged_source: str = Value.EMPTY
         self.ged_submitter: str = Value.EMPTY
-        self.post: str = calendar[Key.POST]
-        self.postlen: int = len(self.post)
-        self.pre: str = calendar[Key.PRE]
-        self.prelen: int = len(self.pre)
+        self.named_xreflist: list[list[str]] = []
+        # self.post: str = calendar[Key.POST]
+        # self.postlen: int = len(self.post)
+        # self.pre: str = calendar[Key.PRE]
+        # self.prelen: int = len(self.pre)
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         match self.filename_type:
@@ -78,6 +81,10 @@ class Base:
                 self.read_ged()
                 if log:
                     logging.info(Msg.LOADED.format(self.chron_name, filename))
+            case Arg.CSV:
+                self.read_csv()
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
             case _:
                 logging.warning(Msg.UNRECOGNIZED.format(self.filename))
 
@@ -92,16 +99,23 @@ class Base:
             filename_type = Arg.GED
         return filename_type
 
+    def read_csv(self) -> None:
+        with Path.open(Path(self.filename), Arg.READ) as file:
+            data = file.readlines()
+            file.close()
+        self.cal_name = self.chron[Key.CAL][Key.NAME]
+        self.chron_name = self.chron[Key.NAME]
+
     def read_json(self) -> None:
         with Path.open(Path(self.filename), Arg.READ) as file:
             self.chron = json.load(file)
             file.close()
         self.cal_name = self.chron[Key.CAL][Key.NAME]
         self.chron_name = self.chron[Key.NAME]
-        self.post = self.chron[Key.CAL][Key.POST]
-        self.postlen = len(self.post)
-        self.pre = self.chron[Key.CAL][Key.PRE]
-        self.prelen = len(self.pre)
+        # self.post = self.chron[Key.CAL][Key.POST]
+        # self.postlen = len(self.post)
+        # self.pre = self.chron[Key.CAL][Key.PRE]
+        # self.prelen = len(self.pre)
 
     def read_ged(self) -> None:
         """Read and validate the GEDCOM file."""
@@ -177,6 +191,14 @@ class Base:
             logging.info(Msg.FILE_EXISTS.format(filename))
         else:
             match self.filename_type:
+                # https://stackoverflow.com/questions/10373247/how-do-i-write-a-python-dictionary-to-a-csv-file
+                case Arg.CSV:
+                    with Path.open(Path(self.filename), Arg.WRITE) as file:
+                        w = csv.DictWriter(file, self.chron.keys())
+                        w.writerows(self.chron)
+                    logging.info(
+                        Msg.SAVED.format(self.chron_name, self.filename)
+                    )
                 case Arg.JSON:
                     with Path.open(Path(self.filename), Arg.WRITE) as file:
                         json.dump(self.chron, file)

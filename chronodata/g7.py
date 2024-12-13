@@ -10,6 +10,7 @@ References
 
 from dataclasses import dataclass
 from typing import ClassVar
+from chronodata.constants import Value
 
 
 @dataclass(frozen=True)
@@ -48,7 +49,10 @@ class GEDSpecial:
     HYPHEN: str = '-'
     JULIAN: str = 'JULIAN'
     LESS_THAN: str = '<'
+    MAX_MONTHS: str = 'Max Months'
     MONTH: str = 'm'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
     NEWLINE: str = '\n'
     NOW: str = 'now'
     SPACE: str = ' '
@@ -61,26 +65,44 @@ class GEDSpecial:
 
 
 # @dataclass(frozen=True)
-class GEDMonths:
+class GEDDateTime:
     """GEDCOM Month codes for various calendars."""
 
     CALENDARS: ClassVar = {
-        'GREGORIAN': {
-            '01': 'JAN',
-            '02': 'FEB',
-            '03': 'MAR',
-            '04': 'APR',
-            '05': 'MAY',
-            '06': 'JUN',
-            '07': 'JUL',
-            '08': 'AUG',
-            '09': 'SEP',
-            '10': 'OCT',
-            '11': 'NOV',
-            '12': 'DEC',
+        GEDSpecial.GREGORIAN: {
+            GEDSpecial.MAX_MONTHS : 12,
+            GEDSpecial.MONTH_NAMES : {
+                '01': 'JAN',
+                '02': 'FEB',
+                '03': 'MAR',
+                '04': 'APR',
+                '05': 'MAY',
+                '06': 'JUN',
+                '07': 'JUL',
+                '08': 'AUG',
+                '09': 'SEP',
+                '10': 'OCT',
+                '11': 'NOV',
+                '12': 'DEC',
+            },
+            GEDSpecial.MONTH_MAX_DAYS: {
+                '01': 31,
+                '02': 29,
+                '03': 31,
+                '04': 30,
+                '05': 31,
+                '06': 30,
+                '07': 31,
+                '08': 31,
+                '09': 30,
+                '10': 31,
+                '11': 30,
+                '12': 31,
+            }
         }
     }
 
+# @dataclass(frozen=True)
 
 class ISOMonths:
     """ISO month values for GEDCOM month codes."""
@@ -498,8 +520,29 @@ class Enum:
             Gedcom.OTHER,
         ]
     )
+    PERSONAL_NAME: frozenset[str] = frozenset(
+        [
+            Gedcom.NPFX,
+            Gedcom.GIVN,
+            Gedcom.NICK,
+            Gedcom.SPFX,
+            Gedcom.SURN,
+            Gedcom.NSFX,
+        ]
+    )
     QUAY: frozenset[str] = frozenset(
         [Gedcom.QUAY0, Gedcom.QUAY1, Gedcom.QUAY2, Gedcom.QUAY3]
+    )
+    RECORDS: frozenset[str] = frozenset(
+        [
+            Gedcom.FAM,
+            Gedcom.INDI,
+            Gedcom.OBJE,
+            Gedcom.REPO,
+            Gedcom.SNOTE,
+            Gedcom.SOUR,
+            Gedcom.SUBM,
+        ]
     )
     RESN: frozenset[str] = frozenset(
         [Gedcom.CONFIDENTIAL, Gedcom.LOCKED, Gedcom.PRIVACY]

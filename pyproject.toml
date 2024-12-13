@@ -74,8 +74,8 @@ testpaths = ["tests"]
 
 [tool.mypy]
 mypy_path = [
-    "chronodata", 
-    "tests",
+    "ChronoData", 
+#    "tests",
 ]
 files = [
   "chronodata/chrono.py", 
