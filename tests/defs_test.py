@@ -50,7 +50,7 @@ def test_tuple_type_time() -> None:
 
 
 def test_tuple_of_types_str_error() -> None:
-    t: tuple[Any] = (
+    t: tuple[Any] = (  # type: ignore[assignment]
         Date(2000, 1, 1),
         Date(3000, 1, 10),
         Date(-100, 1, 10),
@@ -64,7 +64,7 @@ def test_tuple_of_types_str_error() -> None:
 
 
 def test_tuple_of_types_time_error() -> None:
-    t: tuple[Date] = (
+    t: tuple[Date] = (  # type: ignore[assignment]
         Date(2000, 1, 1),
         Date(3000, 1, 10),
         Date(-100, 1, 10),
@@ -207,3 +207,10 @@ def test_stat_enum() -> None:
         ValueError, match=Msg.NOT_VALID_ENUM.format(Gedcom.INDI, EnumName.STAT)
     ):
         Defs.verify_enum(Gedcom.INDI, Enum.STAT, EnumName.STAT)
+
+
+def test_empty_string_enum() -> None:
+    with pytest.raises(
+        ValueError, match=Msg.NOT_VALID_ENUM.format('', EnumName.STAT)
+    ):
+        Defs.verify_enum('', Enum.STAT, EnumName.STAT)

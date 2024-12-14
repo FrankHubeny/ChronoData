@@ -38,50 +38,51 @@ def test_time(test_input: str, expected: str | int | bool) -> None:
     assert eval(test_input) == expected
 
 
-def test_time_not_int_hour():
+def test_time_not_int_hour() -> None:
     with pytest.raises(TypeError):
-        Time('10', 10, 10).validate()
+        Time('10', 10, 10).validate()  # type: ignore[arg-type]
 
-def test_time_not_int_minute():
+
+def test_time_not_int_minute() -> None:
     with pytest.raises(TypeError):
-        Time(10, '10', 10).validate()
+        Time(10, '10', 10).validate()  # type: ignore[arg-type]
 
 
-def test_time_not_int_nor_float_second():
+def test_time_not_int_nor_float_second() -> None:
     with pytest.raises(TypeError):
-        Time(10, 10, '10').validate()
+        Time(10, 10, '10').validate()  # type: ignore[arg-type]
 
 
-def test_time_hour_value():
+def test_time_hour_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(24, 0, 24)):
         Time(24, 0, 0).validate()
 
 
-def test_time_minute_value():
+def test_time_minute_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(60, 0, 60)):
         Time(0, 60, 0).validate()
 
 
-def test_time_second_value():
+def test_time_second_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(60, 0, 60)):
         Time(0, 0, 60).validate()
 
 
-def test_time_second_float_value():
+def test_time_second_float_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(60.0, 0.0, 60.0)):
         Time(0, 0, 60.0).validate()
 
 
-def test_time_hour_negative_value():
+def test_time_hour_negative_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(-20, 0, 24)):
         Time(-20, 0, 0).validate()
 
 
-def test_time_minute_negative_value():
+def test_time_minute_negative_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(-10, 0, 60)):
         Time(0, -10, 0.0).validate()
 
 
-def test_time_second_negative_value():
+def test_time_second_negative_value() -> None:
     with pytest.raises(ValueError, match=Msg.RANGE.format(-10.1230, 0.0, 60.0)):
         Time(0, 0, -10.1230).validate()
