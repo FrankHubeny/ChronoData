@@ -7,7 +7,7 @@
 
 import pytest
 
-from chronodata.chrono import *
+from chronodata.chrono import Address
 
 testdata = [
     ('address[0]', '1 ADDR 123 Here Street'),
@@ -45,13 +45,13 @@ testdata = [
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_address(test_input: str, expected: str | int | bool) -> None:
-    address = Address('123 Here Street\nMy Town\nUSA').ged().split('\n')
-    address2 = (
+    address: list[str] = Address('123 Here Street\nMy Town\nUSA').ged().split('\n')  # noqa: F841
+    address2: list[str] = (  # noqa: F841
         Address('someplace', 'My City', 'My State', 'My Postal', 'My Country')
         .ged()
         .split('\n')
     )
-    address3 = (
+    address3: list[str] = (  # noqa: F841
         Address(
             """123 Here Street
 My Town
@@ -61,7 +61,7 @@ USA""",
         .ged()
         .split('\n')
     )
-    address4 = (
+    address4: list[str] = (  # noqa: F841
         Address(
             """123 Here Street
 My Town
@@ -74,7 +74,7 @@ USA""",
         .ged()
         .split('\n')
     )
-    address5 = (
+    address5: list[str] = (
         Address("""
 123 Here Street
 My Town
@@ -83,7 +83,7 @@ USA
         .ged()
         .split('\n')
     )
-    address6 = (
+    address6: list[str] = (
         Address("""
 
 123 Here Street
@@ -96,7 +96,7 @@ USA
         .ged()
         .split('\n')
     )
-    address7 = (
+    address7: list[str] = (  # noqa: F841
         Address("""
 
         123 Here Street
@@ -107,31 +107,31 @@ USA
         .ged()
         .split('\n')
     )
-    ap1 = Address('', 'city', 'state', 'postal', 'country')
+    ap1: Address = Address('', 'city', 'state', 'postal', 'country')  # noqa: F841
 
     assert eval(test_input) == expected
 
 
-def test_address_not_string():
-    with pytest.raises(TypeError) as e_info:
-        Address(3456).validate()
+def test_address_not_string() -> None:
+    with pytest.raises(TypeError):
+        Address(3456).validate()  # type: ignore[arg-type]
 
 
-def test_city_not_string():
-    with pytest.raises(TypeError) as e_info:
-        Address('3456', 1).validate()
+def test_city_not_string() -> None:
+    with pytest.raises(TypeError):
+        Address('3456', 1).validate()  # type: ignore[arg-type]
 
 
-def test_state_not_string():
-    with pytest.raises(TypeError) as e_info:
-        Address('3456', '1', 2).validate()
+def test_state_not_string() -> None:
+    with pytest.raises(TypeError):
+        Address('3456', '1', 2).validate()  # type: ignore[arg-type]
 
 
-def test_postal_not_string():
-    with pytest.raises(TypeError) as e_info:
-        Address('3456', '1', '2', 3).validate()
+def test_postal_not_string() -> None:
+    with pytest.raises(TypeError):
+        Address('3456', '1', '2', 3).validate()  # type: ignore[arg-type]
 
 
-def test_country_not_string():
-    with pytest.raises(TypeError) as e_info:
-        Address('3456', '1', '2', '3', 4).validate()
+def test_country_not_string() -> None:
+    with pytest.raises(TypeError):
+        Address('3456', '1', '2', '3', 4).validate()  # type: ignore[arg-type]

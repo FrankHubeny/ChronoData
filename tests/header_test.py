@@ -4,7 +4,12 @@
 
 import pytest
 
-from chronodata.chrono import Chronology
+from chronodata.chrono import (
+    Chronology,
+    Note,
+    Name_Translation,
+    Note_Translation,
+)
 from chronodata.g7 import Gedcom, GEDSpecial
 
 testdata = [
@@ -142,19 +147,21 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
 
     # Run header with note.
     j = Chronology(name='note')
-    j.header(note=['some note', 'text/html', 'en', [], []])
+    j.header(note=Note('some note', 'text/html', 'en'))
     note_result = j.ged_header.split('\n')
 
     # Run header with note and translation.
     k = Chronology(name='note translation')
     k.header(
-        note=[
+        note=Note(
             'some note',
             'text/html',
             'en',
-            [['sss', 'text/html', 'en'], ['ddd', 'text/plain', 'sp']],
-            [],
-        ]
+            (
+                Note_Translation('sss', 'text/html', 'en'),
+                Note_Translation('ddd', 'text/plain', 'sp'),
+            ),
+        )
     )
     note_translation_result = k.ged_header.split('\n')
 

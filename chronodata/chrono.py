@@ -16,10 +16,9 @@ Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
 import logging
-from typing import Any, NamedTuple, Optional
+from typing import Any, NamedTuple
 
 import numpy as np
-import pandas as pd
 
 from chronodata.constants import (
     Cal,
@@ -67,21 +66,21 @@ class Defs:
         return f'{level} {tag} {info} {extra}\n'
 
     @staticmethod
-    def verify_type(value: Any, type_value: Any) -> None:
+    def verify_type(value: Any, value_type: Any) -> None:
         """Check if the value has the specified type."""
-        if not isinstance(value, type_value):
-            raise TypeError(Msg.WRONG_TYPE.format(value, type(value), type_value))
+        if not isinstance(value, value_type):
+            raise TypeError(Msg.WRONG_TYPE.format(value, type(value), value_type))
         
     @staticmethod
-    def verify_tuple_type(name: tuple[Any], tuple_type: Any) -> None:
+    def verify_tuple_type(name: tuple[Any], value_type: Any) -> None:
         """Check if each member of the tuple has the specified type."""
         for value in name:
-            Defs.verify_type(value, tuple_type)
+            Defs.verify_type(value, value_type)
             # if not isinstance(value, tuple_type):
             #     raise TypeError(Msg.WRONG_TYPE.format(value, type(value), tuple_type))
     
     @staticmethod
-    def verify_enum(value: str, enum: frozenset, name: str) -> None:
+    def verify_enum(value: str, enum: frozenset[str], name: str) -> None:
         """Check if the value is in the proper enumation."""
         if value not in enum:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, name))
@@ -124,10 +123,10 @@ class NoteTranslation(NamedTuple):
 
 
 class NoteCitation(NamedTuple):
-    text: str = Value.EMPTY
-    mime: str = Value.EMPTY
-    language: str = Value.EMPTY
-    translations: tuple[NoteTranslation] | None = None
+    text: str = ''
+    mime: str = ''
+    language: str = ''
+    translations: Any = None
 
     def validate(self) -> bool:
         Defs.verify_type(self.text, str)
@@ -150,7 +149,7 @@ class Citation(NamedTuple):
     role_phrase: str = ''
     quality: str = ''
     multimedia: str = ''
-    notes: tuple[NoteCitation] | None = None
+    notes: Any = None
 
     def validate(self) -> bool:
         Defs.verify_type(self.xref, str)
@@ -173,8 +172,8 @@ class Note(NamedTuple):
     text: str = ''
     mime: str = ''
     language: str = ''
-    translation: tuple[NoteTranslation] | None = None
-    citations: tuple[Citation] | None = None
+    translation: Any = None
+    citations: Any = None
 
     def validate(self) -> bool:
         Defs.verify_type(self.text, str)
@@ -190,8 +189,8 @@ class Association(NamedTuple):
     role: str
     association_phrase: str = ''
     role_phrase: str = ''
-    notes: tuple[Note] | None = None
-    citations: tuple[Citation] | None = None
+    notes: Any = None
+    citations: Any = None
 
     def validate(self) -> bool:
         Defs.verify_type(self.xref, str)
@@ -211,7 +210,7 @@ class MultimediaLink(NamedTuple):
     left: int = 0
     height: int = 0
     width: int = 0
-    title: str = 0
+    title: str = ''
 
     def validate(self) -> bool:
         Defs.verify_type(self.crop, str)
@@ -255,8 +254,8 @@ class Map(NamedTuple):
 
 class Place(NamedTuple):
     text: str
-    form: str = Value.EMPTY
-    language: str = Value.EMPTY
+    form: str = ''
+    language: str = ''
     translation: tuple[PlaceTranslation] | None = None
     map: Map | None = None
     exid: tuple[Exid] | None = None
@@ -336,7 +335,7 @@ class Address(NamedTuple):
     >should not be added to new files.
     """
 
-    address: str | None = None
+    address: str = ''
     city: str = ''
     state: str = ''
     postal: str = ''
@@ -352,7 +351,7 @@ class Address(NamedTuple):
 
     def ged(self, level: int = 1) -> str | None:
         lines: str = ''
-        if self.validate() and self.address is not None and self.address != '':
+        if self.validate() and self.address != '':
             address_lines = self.address.split('\n')
             for line in address_lines:
                 if line == '':
@@ -428,6 +427,7 @@ class Date(NamedTuple):
     month: int = 0
     day: int = 0
     week: int = 0
+    calendar: str = Value.GREGORIAN
 
     def validate(self) -> bool:
         """Validate date information provided by the user."""
@@ -439,11 +439,13 @@ class Date(NamedTuple):
             raise ValueError(Msg.RANGE.format(self.week, 0, 52))
         if not 0 <= self.month <= 12:
             raise ValueError(Msg.RANGE.format(self.month, 0, 12))
+        if self.year == 0:
+            raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
         return True
 
     def ged(
         self, level: int = 1, calendar: str = Value.GREGORIAN
-    ) -> str | None:
+    ) -> str:
         """Display the validated date in GEDCOM format.
 
         Reference
@@ -478,7 +480,7 @@ class Date(NamedTuple):
             if self.year != 0:
                 output = ''.join([output, f' {year_str}\n'])
             return output
-        return None
+        return ''
 
     def iso(self) -> str | None:
         """Return the validated ISO format for the date.
@@ -556,28 +558,64 @@ class Time(NamedTuple):
         return None
 
 
+class Age(NamedTuple):
+    """Implement the Age data type in the GEDCOM specification.
+    
+    Reference
+    ---------
+    [GEDCOM Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age)
+    """
+    duration: int
+    unit: str = 'y'
+    modifier: str = ''
+
+    def validate(self) -> bool:
+        Defs.verify_type(self.duration, int)
+        Defs.verify_type(self.unit, str)
+        Defs.verify_type(self.modifier, str)
+        return True
+
+    def ged(self) -> str:
+        return f'{self.modifier} {self.duration!s}{self.unit}'
+
+
 class DateValue(NamedTuple):
-    date: Date
-    time: Time | None = None
+    """Construct a DATE_VALUE structure according to the GEDCOM standard.
+    
+    Example
+    -------
+
+    
+    Reference
+    ---------
+    >n DATE <DateValue>                         {1:1}  g7:DATE
+    >  +1 TIME <Time>                           {0:1}  g7:TIME
+    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE"""
+    date: Date = Date(0, 0, 0)
+    time: Time = Time(0, 0, 0)
     phrase: str = ''
 
     def validate(self) -> bool:
-        Date.validate()
-        Time.validate()
         Defs.verify_type(self.phrase, str)
-        return True
+        return self.date.validate() and self.time.validate()  
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = self.date.ged(level)
+        if self.time != Time(0, 0, 0):
+            lines = ''.join([lines, self.time.ged(level+1)])
+        if self.phrase != '':
+            lines = ''.join([lines, Defs.taginfo(level+1, Gedcom.PHRASE, self.phrase )])
+        return lines
 
 
 class StatusDateTime(NamedTuple):
-    date: Date
-    time: Time | None = None
+    date: Date = Date(0, 0, 0)
+    time: Time = Time(0, 0, 0)
     status: str = ''
 
     def validate(self) -> bool:
-        Date.validate()
-        Time.validate()
         Defs.verify_type(self.status, str)
-        return True
+        return self.date.validate() and self.time.validate()  
 
 
 class EventDetail(NamedTuple):
@@ -615,9 +653,10 @@ class HusbandWife(NamedTuple):
         Defs.verify_type(self.event_detail, EventDetail)
         return True
     
-    def ged(self, level: int = 1):
+    def ged(self, level: int = 1) -> str:
         if self.validate():
             pass
+        return ''
 
 
 class FamilyEventDetail(NamedTuple):
@@ -1730,7 +1769,7 @@ class Chronology(Base):
                         self.taginfo(level + 1, Gedcom.LANG, trans.language),
                     ]
                 )
-        for cite in note.citation:
+        for cite in note.citations:
             lines = Value.EMPTY.join([lines, self.source_citation(cite)])
         return lines
 
@@ -1745,10 +1784,10 @@ class Chronology(Base):
         name: str,
         type_name: str,
         phrase: str,
-        pieces: tuple[PersonalName] = (),
-        translations: tuple[Name_Translation] = (),
-        notes: tuple[Note] = (),
-        sources: tuple[Citation] = (),
+        pieces: Any = None,
+        translations: Any = None,
+        notes: Any = None,
+        sources: Any = None,
         level: int = 1,
     ) -> str:
         """Add note information."""
@@ -1762,13 +1801,13 @@ class Chronology(Base):
                 self.taginfo(level + 1, Gedcom.TYPE, type_name),
             ]
         )
-        if phrase != Value.EMPTY:
-            lines = Value.EMPTY.join(
+        if phrase != '':
+            lines = ''.join(
                 [lines, self.taginfo(level + 2, Gedcom.PHRASE, phrase)]
             )
         if len(pieces) > 0:
             for piece in pieces:
-                lines = Value.EMPTY.join(
+                lines = ''.join(
                     [lines, self.personal_name_pieces(piece, level + 1)]
                 )
         if len(translations) > 0:
@@ -1781,23 +1820,23 @@ class Chronology(Base):
     def place_structure(self, place: list[Any], level: int = 1) -> str:
         """Add note information."""
 
-        lines: str = Value.EMPTY
+        lines: str = ''
         return lines
 
     def source_citation(self, source: Citation, level: int = 1) -> str:
         """Add source citation information."""
-        lines: str = Value.EMPTY
+        lines: str = ''
         return lines
 
     def source_repository_citation(
-        self, repository: list[Any], level: int = 1
+        self, repository: Any, level: int = 1
     ) -> str:
         """Add source repository information."""
-        lines: str = Value.EMPTY
+        lines: str = ''
         return lines
 
     def translation(self, trans: Name_Translation, level: int = 1) -> str:
-        lines: str = Value.EMPTY.join(
+        lines: str = ''.join(
             [
                 self.taginfo(level, Gedcom.TRAN, trans.text),
                 self.taginfo(level + 1, Gedcom.LANG, trans.language),

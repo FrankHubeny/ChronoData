@@ -10,7 +10,6 @@ References
 
 from dataclasses import dataclass
 from typing import ClassVar
-from chronodata.constants import Value
 
 
 @dataclass(frozen=True)
@@ -33,6 +32,26 @@ class Record:
     SOURCE: str = 'source'
     SUBMITTER: str = 'submitter'
 
+
+#@dataclass(frozen=True)
+class Age:
+    """Age enumerations for the Age NamedTuple."""
+    UNIT: ClassVar = {
+        'y': 'y',
+        'year': 'y',
+        'm': 'month',
+        'month': 'm',
+        'd': 'd',
+        'day': 'd',
+        'w': 'w',
+        'week': 'w'
+    }
+    BOUND: ClassVar = {
+
+    }
+    NAME: ClassVar = {
+        'U'
+    }
 
 @dataclass(frozen=True)
 class GEDSpecial:

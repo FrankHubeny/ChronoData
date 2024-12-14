@@ -11,8 +11,7 @@
 
 import pytest
 
-from chronodata.chrono import Date, DateValue, Defs, Time
-from chronodata.g7 import Gedcom
+from chronodata.chrono import Date, DateValue, Time
 from chronodata.messages import Msg
 
 testdata = [
