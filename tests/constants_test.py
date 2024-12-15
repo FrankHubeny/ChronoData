@@ -62,7 +62,7 @@ testdata = [
     ('Value.BP', ' BP'),
     ('Value.CE', ' CE'),
     ('Value.DATETIME_EPOCH', 1970),
-    ('Value.EMPTY', ''),
+    #('''', ''),
     ('Value.EXPERIMENT', 'EXPERIMENT'),
     ('Value.GREGORIAN', 'GREGORIAN'),
     ('Value.SECULAR', 'SECULAR'),

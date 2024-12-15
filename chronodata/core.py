@@ -27,8 +27,8 @@ class Base:
 
     def __init__(
         self,
-        name: str = Value.EMPTY,
-        filename: str = Value.EMPTY,
+        name: str = '',
+        filename: str = '',
         calendar: str = GEDSpecial.GREGORIAN,
         log: bool = True,
     ) -> None:
@@ -49,15 +49,15 @@ class Base:
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
-        self.ged_header: str = Value.EMPTY
+        self.ged_header: str = ''
         self.ged_trailer: str = f'0 {Gedcom.TRLR}\n'
-        self.ged_family: str = Value.EMPTY
-        self.ged_individual: str = Value.EMPTY
-        self.ged_multimedia: str = Value.EMPTY
-        self.ged_repository: str = Value.EMPTY
-        self.ged_shared_note: str = Value.EMPTY
-        self.ged_source: str = Value.EMPTY
-        self.ged_submitter: str = Value.EMPTY
+        self.ged_family: str = ''
+        self.ged_individual: str = ''
+        self.ged_multimedia: str = ''
+        self.ged_repository: str = ''
+        self.ged_shared_note: str = ''
+        self.ged_source: str = ''
+        self.ged_submitter: str = ''
         self.named_xreflist: list[list[str]] = []
         # self.post: str = calendar[Key.POST]
         # self.postlen: int = len(self.post)
@@ -66,7 +66,7 @@ class Base:
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         match self.filename_type:
-            case Value.EMPTY:
+            case '':
                 self.chron = {
                     Key.NAME: name,
                     Key.CAL: calendar,
@@ -92,7 +92,7 @@ class Base:
         return json.dumps(self.chron)
 
     def _get_filename_type(self, filename: str) -> str:
-        filename_type: str = Value.EMPTY
+        filename_type: str = ''
         if filename[-Arg.JSONLEN :] == Arg.JSON:
             filename_type = Arg.JSON
         if filename[-Arg.GEDLEN :] == Arg.GED:
@@ -172,7 +172,7 @@ class Base:
         # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
 
     def save(
-        self, filename: str = Value.EMPTY, overwrite: bool = False
+        self, filename: str = '', overwrite: bool = False
     ) -> None:
         """Save the current chronology.
 
@@ -182,7 +182,7 @@ class Base:
             The name of the file. If empty it will use the name
         """
 
-        if filename == Value.EMPTY:
+        if filename == '':
             filename = self.filename
         else:
             self.filename = filename
@@ -207,7 +207,7 @@ class Base:
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
                 case Arg.GED:
-                    output: str = Value.EMPTY.join(
+                    output: str = ''.join(
                         [
                             self.ged_header,
                             self.ged_family,
@@ -355,7 +355,7 @@ class Base:
             except ValueError:
                 return formatted_date
             else:
-                return Value.EMPTY.join([formatted_date, self.post])
+                return ''.join([formatted_date, self.post])
         else:
             return formatted_date
 
@@ -394,7 +394,7 @@ class Base:
                 end = len(nolabeldate)
             oldyear = nolabeldate[0:end]
             newyear = str(int(oldyear) - 1)
-            newdate = Value.EMPTY.join(
+            newdate = ''.join(
                 [String.NEGATIVE, newyear, nolabeldate[len(oldyear) :]]
             )
         else:

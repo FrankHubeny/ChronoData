@@ -26,10 +26,10 @@ class Challenge:
 
     def __init__(
         self,
-        name: str = Value.EMPTY,
-        filename: str = Value.EMPTY,
-        begin_event: str = Value.EMPTY,
-        end_event: str = Value.EMPTY,
+        name: str = '',
+        filename: str = '',
+        begin_event: str = '',
+        end_event: str = '',
         chrons: list[str] | None = None,
         test_cases: list[list[Any]] | None = None,
     ):
@@ -57,7 +57,7 @@ class Challenge:
         ]
         self.chron_columns: list[str] = []
         today = datetime.now()
-        if end_event == Value.EMPTY:
+        if end_event == '':
             self.chron_columns = [
                 begin_event,
                 Column.YEARS_SINCE.format(str(today.year)),
@@ -76,7 +76,7 @@ class Challenge:
             begin_years_since = chronology.date_diff(
                 begin_event_date, str(today)
             )
-            if end_event != Value.EMPTY:
+            if end_event != '':
                 end_event_date = chronology.chron[Gedcom.EVEN][end_event][
                     Gedcom.DATE
                 ]
@@ -99,9 +99,9 @@ class Challenge:
             Tag.DATA: self.chron_data,
             Tag.CHRON_NAMES: self.chron_names,
         }
-        if self.name == Value.EMPTY and self.filename == Value.EMPTY:
+        if self.name == '' and self.filename == '':
             logging.info(Msg.NAME_OR_FILENAME)
-        elif self.filename != Value.EMPTY:
+        elif self.filename != '':
             with Path.open(Path(self.filename), Arg.READ) as file:
                 self.challenge = json.load(file)
                 file.close()
@@ -149,9 +149,9 @@ class Challenge:
         logging.info(Msg.ITEM_ADDED.format(item))
 
     def save(
-        self, filename: str = Value.EMPTY, overwrite: bool = False
+        self, filename: str = '', overwrite: bool = False
     ) -> None:
-        if filename == Value.EMPTY:
+        if filename == '':
             filename = self.filename
         else:
             self.filename = filename
@@ -238,7 +238,7 @@ class Challenge:
     ) -> None:
         """Display a chart comparing the chronologies with tests cases."""
         # Collect data for the chart.
-        if self.end_event == Value.EMPTY:
+        if self.end_event == '':
             bar_heights = [year[1] for year in self.chron_data]
         else:
             bar_heights = [year[2] for year in self.chron_data]

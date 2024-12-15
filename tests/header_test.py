@@ -6,9 +6,9 @@ import pytest
 
 from chronodata.chrono import (
     Chronology,
-    Note,
     Name_Translation,
-    Note_Translation,
+    Note,
+    NoteTranslation,
 )
 from chronodata.g7 import Gedcom, GEDSpecial
 
@@ -78,12 +78,12 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
     # Run header() without arguments.
     base = Chronology(name='base header')
     base.header()
-    baseresult = base.ged_header.split('\n')
+    baseresult = base.ged_header.split('\n')  # noqa: F841
 
     # Run header with date and time arguments.
     a = Chronology(name='date and time')
     a.header(date='1 JAN 2000', time='01:01:01')
-    datetime_result = a.ged_header.split('\n')
+    datetime_result = a.ged_header.split('\n')  # noqa: F841
 
     # Run header which schema argument.
     b = Chronology(name='schemas')
@@ -93,12 +93,12 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
             ['_EASY', 'http:here.it.is.blog'],
         ]
     )
-    schema_result = b.ged_header.split('\n')
+    schema_result = b.ged_header.split('\n')  # noqa: F841
 
     # Run header with source, vers and name arguments.
     c = Chronology(name='source')
     c.header(source='me', vers='you', name='hi')
-    source_result = c.ged_header.split('\n')
+    source_result = c.ged_header.split('\n')  # noqa: F841
 
     # Run header with  corp list argument.
     d = Chronology(name='corp')
@@ -111,7 +111,7 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
         faxes=['1-333-222-3333', '1-665-789-2345'],
         wwws=['https://www.one.com', 'www.go.here.com'],
     )
-    corp_result = d.ged_header.split('\n')
+    corp_result = d.ged_header.split('\n')  # noqa: F841
 
     # Run header with data list argument.
     e = Chronology(name='data')
@@ -122,33 +122,33 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
         data_time='01:01:01',
         data_copr='copr',
     )
-    data_result = e.ged_header.split('\n')
+    data_result = e.ged_header.split('\n')  # noqa: F841
 
     # Run header with submitter.
     f = Chronology(name='submitter')
     submitter_xref = f.submitter_record(name='frank')
     f.header(submitter=submitter_xref)
-    submitter_result = f.ged_header.split('\n')
+    submitter_result = f.ged_header.split('\n')  # noqa: F841
 
     # Run header with copr
     g = Chronology(name='copr')
     g.header(copr='yes')
-    copr_result = g.ged_header.split('\n')
+    copr_result = g.ged_header.split('\n')  # noqa: F841
 
     # Run header with language.
     h = Chronology(name='language')
     h.header(language='en')
-    language_result = h.ged_header.split('\n')
+    language_result = h.ged_header.split('\n')  # noqa: F841
 
     # Run header with place.
     i = Chronology(name='place')
     i.header(place=['here', 'there'])
-    place_result = i.ged_header.split('\n')
+    place_result = i.ged_header.split('\n')  # noqa: F841
 
     # Run header with note.
     j = Chronology(name='note')
     j.header(note=Note('some note', 'text/html', 'en'))
-    note_result = j.ged_header.split('\n')
+    note_result = j.ged_header.split('\n')  # noqa: F841
 
     # Run header with note and translation.
     k = Chronology(name='note translation')
@@ -158,17 +158,17 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
             'text/html',
             'en',
             (
-                Note_Translation('sss', 'text/html', 'en'),
-                Note_Translation('ddd', 'text/plain', 'sp'),
+                NoteTranslation('sss', 'text/html', 'en'),
+                NoteTranslation('ddd', 'text/plain', 'sp'),
             ),
         )
     )
-    note_translation_result = k.ged_header.split('\n')
+    note_translation_result = k.ged_header.split('\n')  # noqa: F841
 
     # Run header with shared note.
     l = Chronology(name='shared note')
     shared_note_xref = l.shared_note_record('note')
     l.header(shared_note=shared_note_xref)
-    shared_note_result = l.ged_header.split('\n')
+    shared_note_result = l.ged_header.split('\n')  # noqa: F841
 
     assert eval(test_input) == expected

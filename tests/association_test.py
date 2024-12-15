@@ -4,8 +4,8 @@
 
 import pytest
 
-from chronodata.chrono import Chronology, Association, Citation, Note
-from chronodata.g7 import Gedcom, GEDSpecial
+from chronodata.chrono import Association, Chronology
+from chronodata.g7 import Gedcom, Record
 
 testdata = [
     (

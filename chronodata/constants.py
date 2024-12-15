@@ -216,15 +216,15 @@ class Calendar:
 
     BEFORE_PRESENT: ClassVar = {
         Key.NAME: Value.BEFORE_PRESENT,
-        Key.POST: Value.EMPTY,
+        Key.POST: '',
         Key.PRE: Value.BP,
         Key.STRICT: True,
         Key.ZERO: False,
     }
     EXPERIMENT: ClassVar = {
         Key.NAME: Value.EXPERIMENT,
-        Key.POST: Value.EMPTY,
-        Key.PRE: Value.EMPTY,
+        Key.POST: '',
+        Key.PRE: '',
         Key.STRICT: True,
         Key.ZERO: False,
     }
