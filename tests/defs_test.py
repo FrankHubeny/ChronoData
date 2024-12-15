@@ -9,8 +9,8 @@ from typing import Any
 
 import pytest
 
-from chronodata.chrono import Chronology, Date, Defs, Time
-from chronodata.g7 import Enum, EnumName, Gedcom, Record
+from chronodata.chrono import Date, Defs, Time
+from chronodata.g7 import Enum, EnumName, Gedcom
 from chronodata.messages import Msg
 
 testdata = [
@@ -18,6 +18,16 @@ testdata = [
     ('taginfo2', '2 DATA\n'),
     ('taginit1', '0 @1@ INDI\n'),
     ('taginit2', '0 @1@ INDI someone\n'),
+    ('Defs.verify_type(1,int)', True),
+    ('Defs.verify_type("a",str)', True),
+    ('Defs.verify_tuple_type(("b","a"),str)', True),
+    ('Defs.verify_tuple_type((1,2),int)', True),
+    ('Defs.verify_range(1,0,2)', True),
+    ('Defs.verify_range(1,1,2)', True),
+    ('Defs.verify_range(2,1,2)', True),
+    ('Defs.verify_range(59.9999999999,50.0,59.9999999999)', True),
+    ('Defs.verify_not_negative(2)', True),
+    ('enum', True),
 ]
 
 
@@ -27,6 +37,7 @@ def test_time(test_input: str, expected: str | int | bool) -> None:
     taginfo2 = Defs.taginfo(2, Gedcom.DATA)  # noqa: F841
     taginit1 = Defs.taginit('@1@', Gedcom.INDI)  # noqa: F841
     taginit2 = Defs.taginit('@1@', Gedcom.INDI, 'someone')  # noqa: F841
+    enum = Defs.verify_enum(Gedcom.HUSB, Enum.ADOP, EnumName.ADOP)  # noqa: F841
 
     assert eval(test_input) == expected
 
@@ -60,7 +71,7 @@ def test_tuple_of_types_str_error() -> None:
         Date(1000, 8, 4),
     )
     with pytest.raises(
-        TypeError, match=Msg.WRONG_TYPE.format(t[3], type(t[3]), Date)
+        TypeError, match=Msg.WRONG_TYPE.format(t, type(t[3]), Date)
     ):
         Defs.verify_tuple_type(t, Date)
 

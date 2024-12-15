@@ -72,38 +72,43 @@ class Defs:
         return f'{level} {tag} {info} {extra}\n'
 
     @staticmethod
-    def verify_type(value: Any, value_type: Any) -> None:
+    def verify_type(value: Any, value_type: Any) -> bool:
         """Check if the value has the specified type."""
         if not isinstance(value, value_type):
             raise TypeError(
                 Msg.WRONG_TYPE.format(value, type(value), value_type)
             )
+        return True
 
     @staticmethod
-    def verify_tuple_type(name: tuple[Any], value_type: Any) -> None:
+    def verify_tuple_type(name: tuple[Any], value_type: Any) -> bool:
         """Check if each member of the tuple has the specified type."""
         for value in name:
             Defs.verify_type(value, value_type)
+        return True
 
     @staticmethod
-    def verify_enum(value: str, enum: frozenset[str], name: str) -> None:
+    def verify_enum(value: str, enum: frozenset[str], name: str) -> bool:
         """Check if the value is in the proper enumation."""
         if value not in enum:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, name))
+        return True
 
     @staticmethod
     def verify_range(
         value: int | float, low: int | float, high: int | float
-    ) -> None:
+    ) -> bool:
         """Check if the value is inclusively between low and high boundaries."""
         if not low <= value <= high:
             raise ValueError(Msg.RANGE_ERROR.format(value, low, high))
+        return True
 
     @staticmethod
-    def verify_not_negative(value: int | float) -> None:
+    def verify_not_negative(value: int | float) -> bool:
         """Check if the value is a positive number."""
         if value < 0:
             raise ValueError(Msg.NEGATIVE_ERROR.format(value))
+        return True
 
     # @staticmethod
     # def verify_not_empty(value: str | None, name: str) -> None:
@@ -216,7 +221,7 @@ class Note(NamedTuple):
 
 
 class Association(NamedTuple):
-    xref: str
+    # xref: str
     role: str
     association_phrase: str = ''
     role_phrase: str = ''
@@ -224,7 +229,7 @@ class Association(NamedTuple):
     citations: Any = None
 
     def validate(self) -> bool:
-        #Defs.verify_type(self.xref, str)
+        # Defs.verify_type(self.xref, str)
         Defs.verify_type(self.role, str)
         Defs.verify_type(self.association_phrase, str)
         Defs.verify_type(self.role_phrase, str)
@@ -233,58 +238,42 @@ class Association(NamedTuple):
         Defs.verify_enum(self.role, Enum.ROLE, EnumName.ROLE)
         return True
 
-    def ged(self, xref: str, level: int = 1) -> str:
-        line: str = ''
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
         if self.validate():
-            pass
-        return line
-    
-    # lines: str = ''
-    #     if association.xref in self.individual_xreflist:
-    #         lines = ''.join(
-    #             [lines, Defs.taginfo(level, Gedcom.ASSO, association.xref)]
-    #         )
-    #         if association.association_phrase != '':
-    #             lines = ''.join(
-    #                 [
-    #                     lines,
-    #                     Defs.taginfo(
-    #                         level + 1,
-    #                         Gedcom.PHRASE,
-    #                         association.association_phrase,
-    #                     ),
-    #                 ]
-    #             )
-    #         if association.role in Enum.ROLE:
-    #             lines = ''.join(
-    #                 [
-    #                     lines,
-    #                     Defs.taginfo(level + 2, Gedcom.ROLE, association.role),
-    #                 ]
-    #             )
-    #             if association.role_phrase != '':
-    #                 lines = ''.join(
-    #                     [
-    #                         lines,
-    #                         Defs.taginfo(
-    #                             level + 2,
-    #                             Gedcom.PHRASE,
-    #                             association.role_phrase,
-    #                         ),
-    #                     ]
-    #                 )
-    #         else:
-    #             raise ValueError(
-    #                 Msg.NOT_VALID_ENUM.format(association.role, EnumName.ROLE)
-    #             )
-    #         for note in association.notes:
-    #             lines = ''.join([lines, self.note_structure(note)])
-    #         for citation in association.citations:
-    #             lines = ''.join([lines, self.source_citation(citation)])
-    #     else:
-    #         raise ValueError(
-    #             Msg.NOT_RECORD.format(association.xref, Record.INDIVIDUAL)
-    #         )
+            if self.association_phrase != '':
+                lines = ''.join(
+                    [
+                        lines,
+                        Defs.taginfo(
+                            level + 1,
+                            Gedcom.PHRASE,
+                            self.association_phrase,
+                        ),
+                    ]
+                )
+            lines = ''.join(
+                [
+                    lines,
+                    Defs.taginfo(level + 2, Gedcom.ROLE, self.role),
+                ]
+            )
+            if self.role_phrase != '':
+                lines = ''.join(
+                    [
+                        lines,
+                        Defs.taginfo(
+                            level + 2,
+                            Gedcom.PHRASE,
+                            self.role_phrase,
+                        ),
+                    ]
+                )
+            for note in self.notes:
+                lines = ''.join([lines, note.ged(1)])
+            for citation in self.citations:
+                lines = ''.join([lines, citation.ged(1)])
+        return lines
 
 
 class MultimediaLink(NamedTuple):
@@ -307,12 +296,20 @@ class MultimediaLink(NamedTuple):
 
 class Exid(NamedTuple):
     exid: str
-    exid_type: str = ''
+    exid_type: str
 
     def validate(self) -> bool:
         Defs.verify_type(self.exid, str)
         Defs.verify_type(self.exid_type, str)
         return True
+
+    def ged(self, level: int = 1):
+        return ''.join(
+            [
+                Defs.taginfo(level, Gedcom.EXID, self.exid),
+                Defs.taginfo(level + 1, Gedcom.TYPE, self.exid_type),
+            ]
+        )
 
 
 class PlaceTranslation(NamedTuple):
@@ -1185,8 +1182,8 @@ class Individual(NamedTuple):
         Defs.verify_tuple_type(self.ancestor_interest, str)
         Defs.verify_tuple_type(self.descendent_interest, str)
         Defs.verify_tuple_type(self.identifiers, Identifier)
-        Defs.verify_tuple_type(self.notes, tuple | None)
-        Defs.verify_tuple_type(self.sources, tuple | None)
+        Defs.verify_tuple_type(self.notes, Note)
+        Defs.verify_tuple_type(self.sources, Source)
         Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
         return True
 
@@ -1314,13 +1311,12 @@ class Chronology(Base):
     #         return f'{level} {tag} {info}\n'
     #     return f'{level} {tag} {info} {extra}\n'
 
-
     def verify_xref(self, xref: str, xreflist: list[str], name: str) -> bool:
         """Check if an xref value in in the proper xreflist."""
         if xref not in xreflist:
             raise ValueError(Msg.NOT_RECORD.format(xref, name))
         return True
-        
+
     def ged_date(
         self,
         iso_date: str = GEDSpecial.NOW,
@@ -1607,161 +1603,159 @@ class Chronology(Base):
 
     ###### Methods to Assisting Building GEDCOM Records
 
-    def address_structure(
-        self,
-        address: str = '',
-        city: str = '',
-        state: str = '',
-        postal: str = '',
-        country: str = '',
-        level: int = 1,
-    ) -> str:
-        """Add address information.
+    # def address_structure(
+    #     self,
+    #     address: str = '',
+    #     city: str = '',
+    #     state: str = '',
+    #     postal: str = '',
+    #     country: str = '',
+    #     level: int = 1,
+    # ) -> str:
+    # """Add address information.
 
-        Each address line is a list of five strings:
-        - Mailing Address: Each line of the mailing label is separated by `\n`.
-        - City: The city or and empty string to leave this blank.
-        - State: The state or an empty string to leave this blank.
-        - Postal Code: The postal code or an empty string to leave this blank.
-        - Country: The country or an empty string to leave this blank.
+    # Each address line is a list of five strings:
+    # - Mailing Address: Each line of the mailing label is separated by `\n`.
+    # - City: The city or and empty string to leave this blank.
+    # - State: The state or an empty string to leave this blank.
+    # - Postal Code: The postal code or an empty string to leave this blank.
+    # - Country: The country or an empty string to leave this blank.
 
-        One does not have to call this method directly.  The GEDCOM record methods
-        call it when creating a chronology.  However, one can use it to
-        see what the address information one provides would look like
-        in a GEDCOM file.
+    # One does not have to call this method directly.  The GEDCOM record methods
+    # call it when creating a chronology.  However, one can use it to
+    # see what the address information one provides would look like
+    # in a GEDCOM file.
 
-        Example
-        -------
-        In the first example note the five strings in the list.  Also note
-        that the country was not specified but nonetheless an empty string
-        was added as a placeholder for the absent country information.
-        Note the `\n` to separate the two address lines.
-        [
-            '12345 ABC Street\nSouth North City, My State 23456',
-            'South North City',
-            'My State',
-            '23456',
-            ''
-        ]
+    # Example
+    # -------
+    # In the first example note the five strings in the list.  Also note
+    # that the country was not specified but nonetheless an empty string
+    # was added as a placeholder for the absent country information.
+    # Note the `\n` to separate the two address lines.
+    # [
+    #     '12345 ABC Street\nSouth North City, My State 23456',
+    #     'South North City',
+    #     'My State',
+    #     '23456',
+    #     ''
+    # ]
 
-        The GEDCOM record would appear as the following:
+    # The GEDCOM record would appear as the following:
 
-        1 ADDR 12345 ABC Street
-        1 CONT South North City, My State 23456
-        2 CITY South North City
-        2 STAE My State
-        2 POST 23456
+    # 1 ADDR 12345 ABC Street
+    # 1 CONT South North City, My State 23456
+    # 2 CITY South North City
+    # 2 STAE My State
+    # 2 POST 23456
 
-        The following is the minimum amount of information for an address.
-        [
-            '12345 ABC Street\nSouth North City, My State 23456',
-        ]
+    # The following is the minimum amount of information for an address.
+    # [
+    #     '12345 ABC Street\nSouth North City, My State 23456',
+    # ]
 
-        If one does not want to use the `\n` one can write the following
-        provided one imports the GEDSpecial class.  One way to do that is
-        by adding the following line at the top of the cell:
+    # If one does not want to use the `\n` one can write the following
+    # provided one imports the GEDSpecial class.  One way to do that is
+    # by adding the following line at the top of the cell:
 
+    # The GEDCOM record would appear as the following:
 
-        The GEDCOM record would appear as the following:
+    # 1 ADDR 12345 ABC Street
+    # 1 CONT South North City, My State 23456
 
-        1 ADDR 12345 ABC Street
-        1 CONT South North City, My State 23456
+    # If the list is empty the method returns the empty list.
 
-        If the list is empty the method returns the empty list.
-
-        """
-        lines: str = ''
-        if address != '':
-            address_lines = address.split('\n')
-            for line in address_lines:
-                if line == '':
-                    address_lines.remove(line)
-            lines = ''.join(
-                [
-                    lines,
-                    Defs.taginfo(level, Gedcom.ADDR, address_lines[0].strip()),
-                ]
-            )
-            for line in address_lines[1:]:
-                lines = ''.join(
-                    [lines, Defs.taginfo(level, Gedcom.CONT, line.strip())]
-                )
-            if city != '':
-                lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.CITY, city.strip())]
-                )
-            if state != '':
-                lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.STAE, state.strip())]
-                )
-            if postal != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        Defs.taginfo(
-                            level + 1, Gedcom.POST, str(postal).strip()
-                        ),
-                    ]
-                )
-            if country != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        Defs.taginfo(level + 1, Gedcom.CTRY, country.strip()),
-                    ]
-                )
-        return lines
+    # """
+    # lines: str = ''
+    # if address != '':
+    #     address_lines = address.split('\n')
+    #     for line in address_lines:
+    #         if line == '':
+    #             address_lines.remove(line)
+    #     lines = ''.join(
+    #         [
+    #             lines,
+    #             Defs.taginfo(level, Gedcom.ADDR, address_lines[0].strip()),
+    #         ]
+    #     )
+    #     for line in address_lines[1:]:
+    #         lines = ''.join(
+    #             [lines, Defs.taginfo(level, Gedcom.CONT, line.strip())]
+    #         )
+    #     if city != '':
+    #         lines = ''.join(
+    #             [lines, Defs.taginfo(level + 1, Gedcom.CITY, city.strip())]
+    #         )
+    #     if state != '':
+    #         lines = ''.join(
+    #             [lines, Defs.taginfo(level + 1, Gedcom.STAE, state.strip())]
+    #         )
+    #     if postal != '':
+    #         lines = ''.join(
+    #             [
+    #                 lines,
+    #                 Defs.taginfo(
+    #                     level + 1, Gedcom.POST, str(postal).strip()
+    #                 ),
+    #             ]
+    #         )
+    #     if country != '':
+    #         lines = ''.join(
+    #             [
+    #                 lines,
+    #                 Defs.taginfo(level + 1, Gedcom.CTRY, country.strip()),
+    #             ]
+    #         )
+    # return lines
 
     def association_structure(
-        self, association: Association, level: int = 1
+        self, xref: str, association: Association, level: int = 1
     ) -> str:
         """Add association information."""
         lines: str = ''
-        if association.xref in self.individual_xreflist:
-            lines = ''.join(
-                [lines, Defs.taginfo(level, Gedcom.ASSO, association.xref)]
-            )
-            if association.association_phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        Defs.taginfo(
-                            level + 1,
-                            Gedcom.PHRASE,
-                            association.association_phrase,
-                        ),
-                    ]
-                )
-            if association.role in Enum.ROLE:
-                lines = ''.join(
-                    [
-                        lines,
-                        Defs.taginfo(level + 2, Gedcom.ROLE, association.role),
-                    ]
-                )
-                if association.role_phrase != '':
-                    lines = ''.join(
-                        [
-                            lines,
-                            Defs.taginfo(
-                                level + 2,
-                                Gedcom.PHRASE,
-                                association.role_phrase,
-                            ),
-                        ]
-                    )
-            else:
-                raise ValueError(
-                    Msg.NOT_VALID_ENUM.format(association.role, EnumName.ROLE)
-                )
-            for note in association.notes:
-                lines = ''.join([lines, self.note_structure(note)])
-            for citation in association.citations:
-                lines = ''.join([lines, self.source_citation(citation)])
-        else:
-            raise ValueError(
-                Msg.NOT_RECORD.format(association.xref, Record.INDIVIDUAL)
-            )
+        if self.verify_xref(xref, self.individual_xreflist, Record.INDIVIDUAL):
+            lines = ''.join([lines, Defs.taginfo(level, Gedcom.ASSO, xref)])
+            association.ged(1)
+        #     if association.association_phrase != '':
+        #         lines = ''.join(
+        #             [
+        #                 lines,
+        #                 Defs.taginfo(
+        #                     level + 1,
+        #                     Gedcom.PHRASE,
+        #                     association.association_phrase,
+        #                 ),
+        #             ]
+        #         )
+        #     if association.role in Enum.ROLE:
+        #         lines = ''.join(
+        #             [
+        #                 lines,
+        #                 Defs.taginfo(level + 2, Gedcom.ROLE, association.role),
+        #             ]
+        #         )
+        #         if association.role_phrase != '':
+        #             lines = ''.join(
+        #                 [
+        #                     lines,
+        #                     Defs.taginfo(
+        #                         level + 2,
+        #                         Gedcom.PHRASE,
+        #                         association.role_phrase,
+        #                     ),
+        #                 ]
+        #             )
+        #     else:
+        #         raise ValueError(
+        #             Msg.NOT_VALID_ENUM.format(association.role, EnumName.ROLE)
+        #         )
+        #     for note in association.notes:
+        #         lines = ''.join([lines, self.note_structure(note)])
+        #     for citation in association.citations:
+        #         lines = ''.join([lines, self.source_citation(citation)])
+        # else:
+        #     raise ValueError(
+        #         Msg.NOT_RECORD.format(association.xref, Record.INDIVIDUAL)
+        #     )
         return lines
 
     def event_detail(self, event: list[Any], level: int = 1) -> str:
@@ -2734,7 +2728,7 @@ class Chronology(Base):
         ged_repository = ''.join(
             [
                 ged_repository,
-                self.address_structure(address, city, state, postal, country),
+                Address(address, city, state, postal, country),
             ]
         )
         ged_repository = ''.join(
@@ -3097,9 +3091,7 @@ class Chronology(Base):
             ged_header = ''.join(
                 [
                     ged_header,
-                    self.address_structure(
-                        address, city, state, postal, country, level=3
-                    ),
+                    Address(address, city, state, postal, country, level=3),
                 ]
             )
             ged_header = ''.join(
