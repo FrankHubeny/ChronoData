@@ -21,13 +21,13 @@ from chronodata.enums import (
     Pedi,
     PersonalNamePiece,
     RangeDate,
-    Records,
+    Record,
     RestrictDate,
     Role,
     Sex,
     Stat,
+    Tag,
 )
-from chronodata.g7 import Gedcom
 from chronodata.methods import Defs
 
 
@@ -130,18 +130,18 @@ class Address(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(level, Gedcom.ADDR, address_lines[0].strip()),
+                    Defs.taginfo(level, Tag.ADDR, address_lines[0].strip()),
                 ]
             )
             for line in address_lines[1:]:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level, Gedcom.CONT, line.strip())]
+                    [lines, Defs.taginfo(level, Tag.CONT, line.strip())]
                 )
             if self.city != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Gedcom.CITY, self.city.strip()),
+                        Defs.taginfo(level + 1, Tag.CITY, self.city.strip()),
                     ]
                 )
             if self.state != '':
@@ -149,7 +149,7 @@ class Address(NamedTuple):
                     [
                         lines,
                         Defs.taginfo(
-                            level + 1, Gedcom.STAE, self.state.strip()
+                            level + 1, Tag.STAE, self.state.strip()
                         ),
                     ]
                 )
@@ -158,7 +158,7 @@ class Address(NamedTuple):
                     [
                         lines,
                         Defs.taginfo(
-                            level + 1, Gedcom.POST, self.postal.strip()
+                            level + 1, Tag.POST, self.postal.strip()
                         ),
                     ]
                 )
@@ -167,7 +167,7 @@ class Address(NamedTuple):
                     [
                         lines,
                         Defs.taginfo(
-                            level + 1, Gedcom.CTRY, self.country.strip()
+                            level + 1, Tag.CTRY, self.country.strip()
                         ),
                     ]
                 )
@@ -265,12 +265,12 @@ class Age(NamedTuple):
                 info = ''.join([info, f' {self.days!s}d'])
             line = Defs.taginfo(
                 level,
-                Gedcom.AGE,
+                Tag.AGE,
                 info.replace('  ', ' ').replace('  ', ' ').strip(),
             )
             if self.phrase != '':
                 line = ''.join(
-                    [line, Defs.taginfo(level + 1, Gedcom.PHRASE, self.phrase)]
+                    [line, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return line
 
@@ -413,7 +413,7 @@ class Association(NamedTuple):
             and Defs.verify_tuple_type(self.citations, Citation)
             and Defs.verify_enum(self.role, Role)
         )
-        return True
+        return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
@@ -424,7 +424,7 @@ class Association(NamedTuple):
                         lines,
                         Defs.taginfo(
                             level + 1,
-                            Gedcom.PHRASE,
+                            Tag.PHRASE,
                             self.association_phrase,
                         ),
                     ]
@@ -432,7 +432,7 @@ class Association(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(level + 2, Gedcom.ROLE, self.role),
+                    Defs.taginfo(level + 2, Tag.ROLE, self.role),
                 ]
             )
             if self.role_phrase != '':
@@ -441,7 +441,7 @@ class Association(NamedTuple):
                         lines,
                         Defs.taginfo(
                             level + 2,
-                            Gedcom.PHRASE,
+                            Tag.PHRASE,
                             self.role_phrase,
                         ),
                     ]
@@ -486,8 +486,8 @@ class Exid(NamedTuple):
     def ged(self, level: int = 1) -> str:
         return ''.join(
             [
-                Defs.taginfo(level, Gedcom.EXID, self.exid),
-                Defs.taginfo(level + 1, Gedcom.TYPE, self.exid_type),
+                Defs.taginfo(level, Tag.EXID, self.exid),
+                Defs.taginfo(level + 1, Tag.TYPE, self.exid_type),
             ]
         )
 
@@ -597,7 +597,7 @@ class Date(NamedTuple):
                 year_str = ''.join(
                     [str(-self.year), Cal.CALENDARS[calendar][Value.EPOCH]]
                 )
-            output: str = f'{level} {Gedcom.DATE}'
+            output: str = f'{level} {Tag.DATE}'
             if self.day != 0:
                 output = ''.join([output, f' {day_str}'])
             if self.month != 0:
@@ -667,7 +667,7 @@ class Time(NamedTuple):
             if self.UTC:
                 second_str = ''.join([second_str, 'Z'])
             return Defs.taginfo(
-                level, Gedcom.TIME, f'{hour_str}:{minute_str}:{second_str}'
+                level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
             )
         return ''
 
@@ -718,7 +718,7 @@ class DateExact(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.PHRASE, self.phrase)]
+                    [lines, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -758,7 +758,7 @@ class DateValue(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.PHRASE, self.phrase)]
+                    [lines, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -918,7 +918,7 @@ class LDSOrdinanceDetail(NamedTuple):
 
 
 class LDSSpouseSealing(NamedTuple):
-    tag: str = Gedcom.SLGS
+    tag: str = Tag.SLGS
     detail: LDSOrdinanceDetail | None = None
 
     def validate(self) -> bool:

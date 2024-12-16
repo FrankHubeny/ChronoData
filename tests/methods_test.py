@@ -27,14 +27,15 @@ from chronodata.enums import (
     PersonalNamePiece,
     Quay,
     RangeDate,
-    Records,
+    Record,
     Resn,
     RestrictDate,
     Role,
     Sex,
     Stat,
+    Tag,
 )
-from chronodata.g7 import Gedcom
+#from chronodata.g7 import Gedcom
 from chronodata.messages import Msg
 from chronodata.methods import Defs
 from chronodata.tuples import Date, Time
@@ -59,11 +60,11 @@ testdata = [
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_time(test_input: str, expected: str | int | bool) -> None:
-    taginfo1 = Defs.taginfo(1, Gedcom.TIME, '01:01:01Z')  # noqa: F841
-    taginfo2 = Defs.taginfo(2, Gedcom.DATA)  # noqa: F841
-    taginit1 = Defs.taginit('@1@', Gedcom.INDI)  # noqa: F841
-    taginit2 = Defs.taginit('@1@', Gedcom.INDI, 'someone')  # noqa: F841
-    enum = Defs.verify_enum(Gedcom.HUSB, Adop)  # noqa: F841
+    taginfo1 = Defs.taginfo(1, Tag.TIME, '01:01:01Z')  # noqa: F841
+    taginfo2 = Defs.taginfo(2, Tag.DATA)  # noqa: F841
+    taginit1 = Defs.taginit('@1@', Record.INDI)  # noqa: F841
+    taginit2 = Defs.taginit('@1@', Record.INDI, 'someone')  # noqa: F841
+    enum = Defs.verify_enum(Adop.HUSB, Adop)  # noqa: F841
 
     assert eval(test_input) == expected
 
@@ -142,11 +143,11 @@ def test_rangedate_enum() -> None:
     ):
         Defs.verify_enum('hello', RangeDate)
 
-def test_records_enum() -> None:
+def test_record_enum() -> None:
     with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Records)
+        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Record)
     ):
-        Defs.verify_enum('hello', Records)
+        Defs.verify_enum('hello', Record)
 
 def test_restrictdate_enum() -> None:
     with pytest.raises(

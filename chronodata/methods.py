@@ -3,31 +3,7 @@
 
 from typing import Any
 
-from chronodata.enums import (
-    Adop,
-    ApproxDate,
-    EvenAttr,
-    FamAttr,
-    FamcStat,
-    FamEven,
-    GreaterLessThan,
-    Id,
-    IndiAttr,
-    IndiEven,
-    Medi,
-    MediaType,
-    NameType,
-    Pedi,
-    PersonalNamePiece,
-    Quay,
-    RangeDate,
-    Records,
-    Resn,
-    RestrictDate,
-    Role,
-    Sex,
-    Stat,
-)
+from chronodata.enums import Record, Tag
 from chronodata.messages import Msg
 
 
@@ -35,15 +11,15 @@ class Defs:
     """Provide a namespace container for global methods."""
 
     @staticmethod
-    def taginit(xref: str, tag: str, info: str = '') -> str:
+    def taginit(xref: str, tag: Record, info: str = '') -> str:
         if info == '':
-            return f'0 {xref} {tag}\n'
-        return f'0 {xref} {tag} {str(info).strip()}\n'
+            return f'0 {xref} {tag.name}\n'
+        return f'0 {xref} {tag.name} {str(info).strip()}\n'
 
     @staticmethod
     def taginfo(
         level: int,
-        tag: str,
+        tag: Tag,
         info: str = '',
         extra: str = '',
     ) -> str:
@@ -61,9 +37,10 @@ class Defs:
 
         if extra == '':
             if info == '':
-                return f'{level} {tag}\n'
-            return f'{level} {tag} {info}\n'
-        return f'{level} {tag} {info} {extra}\n'
+                return f'{level} {tag.name}\n'
+            return f'{level} {tag.name} {info}\n'
+        return f'{level} {tag.name} {info} {extra}\n'
+
 
     @staticmethod
     def verify_type(value: Any, value_type: Any) -> bool:
@@ -87,7 +64,7 @@ class Defs:
     #     if value not in enum:
     #         raise ValueError(Msg.NOT_VALID_ENUM.format(value, name))
     #     return True
-    def verify_enum(value: str, enumeration: Any) -> bool:
+    def verify_enum(value: Any, enumeration: Any) -> bool:
         """Check if the value is in the proper enumation."""
         if value not in enumeration:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
