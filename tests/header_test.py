@@ -4,13 +4,12 @@
 
 import pytest
 
-from chronodata.chrono import (
-    Chronology,
-    Name_Translation,
+from chronodata.chrono import Chronology
+from chronodata.g7 import Gedcom, GEDSpecial
+from chronodata.tuples import (
     Note,
     NoteTranslation,
 )
-from chronodata.g7 import Gedcom, GEDSpecial
 
 testdata = [
     ('baseresult[0]', f'0 {Gedcom.HEAD}'),
@@ -166,9 +165,9 @@ def test_header(test_input: str, expected: str | int | bool) -> None:
     note_translation_result = k.ged_header.split('\n')  # noqa: F841
 
     # Run header with shared note.
-    l = Chronology(name='shared note')
-    shared_note_xref = l.shared_note_record('note')
-    l.header(shared_note=shared_note_xref)
-    shared_note_result = l.ged_header.split('\n')  # noqa: F841
+    lastchron = Chronology(name='shared note')
+    shared_note_xref = lastchron.shared_note_record('note')
+    lastchron.header(shared_note=shared_note_xref)
+    shared_note_result = lastchron.ged_header.split('\n')  # noqa: F841
 
     assert eval(test_input) == expected

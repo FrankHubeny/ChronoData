@@ -7,7 +7,8 @@
 
 import pytest
 
-from chronodata.chrono import Address
+#from chronodata.chrono import Address
+from chronodata.tuples import Address
 
 testdata = [
     ('address[0]', '1 ADDR 123 Here Street'),
