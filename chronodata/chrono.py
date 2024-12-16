@@ -119,31 +119,43 @@ class Defs:
 
 class PersonalName(NamedTuple):
     tag: str
-    text: str = ''
+    text: str
 
     def validate(self) -> bool:
-        Defs.verify_type(self.tag, str)
-        Defs.verify_type(self.text, str)
-        Defs.verify_enum(self.tag, Enum.PERSONAL_NAME, EnumName.PERSONAL_NAME)
-        return True
+        check: bool = (
+            Defs.verify_type(self.tag, str)
+            and Defs.verify_type(self.text, str)
+            and Defs.verify_enum(
+                self.tag, Enum.PERSONAL_NAME, EnumName.PERSONAL_NAME
+            )
+        )
+        return check
 
-    def ged(self, level=1) -> str:
+    def ged(self, level: int = 1) -> str:
         personal_name: str = ''
         if self.validate():
             personal_name = Defs.taginfo(level, self.tag, self.text.strip())
         return personal_name
 
 
-class Name_Translation(NamedTuple):
+class NameTranslation(NamedTuple):
     text: str
     language: str = ''
     piece: Any = None
 
     def validate(self) -> bool:
-        Defs.verify_type(self.text, str)
-        Defs.verify_type(self.language, str)
-        Defs.verify_type(self.piece, PersonalName)
-        return True
+        check: bool = (
+            Defs.verify_type(self.text, str)
+            and Defs.verify_type(self.language, str)
+            and Defs.verify_type(self.piece, PersonalName)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        name_translation: str = ''
+        if self.validate():
+            name_translation = f'{level} {Gedcom.TRAN} {self.text}\n{level+1} {Gedcom.LANG} {self.lang}\n'
+        return name_translation
 
 
 class NoteTranslation(NamedTuple):
@@ -152,10 +164,12 @@ class NoteTranslation(NamedTuple):
     language: str = ''
 
     def validate(self) -> bool:
-        Defs.verify_type(self.text, str)
-        Defs.verify_type(self.mime, str)
-        Defs.verify_type(self.language, str)
-        return True
+        check: bool = (
+            Defs.verify_type(self.text, str)
+            and Defs.verify_type(self.mime, str)
+            and Defs.verify_type(self.language, str)
+        )
+        return check
 
 
 class NoteCitation(NamedTuple):
@@ -165,11 +179,13 @@ class NoteCitation(NamedTuple):
     translations: Any = None
 
     def validate(self) -> bool:
-        Defs.verify_type(self.text, str)
-        Defs.verify_type(self.mime, str)
-        Defs.verify_type(self.language, str)
-        Defs.verify_tuple_type(self.translations, NoteTranslation)
-        return True
+        check: bool = (
+            Defs.verify_type(self.text, str)
+            and Defs.verify_type(self.mime, str)
+            and Defs.verify_type(self.language, str)
+            and Defs.verify_tuple_type(self.translations, NoteTranslation)
+        )
+        return check
 
 
 class Citation(NamedTuple):
@@ -604,10 +620,6 @@ class Time(NamedTuple):
         Defs.verify_range(self.hour, 0, 23)
         Defs.verify_range(self.minute, 0, 59)
         Defs.verify_range(self.second, 0, 59.999999999999)
-        # if isinstance(self.second, float) and not 0.0 <= self.second < 60.0:
-        #     raise ValueError(Msg.RANGE.format(self.second, 0.0, 60.0))
-        # if isinstance(self.second, int):
-        #     Defs.verify_range(self.second, 0, 59)
         return True
 
     def ged(self, level: int = 1) -> str:
@@ -647,28 +659,47 @@ class Age(NamedTuple):
     Parameters
     ----------
     - greater_less_than
-        The default is ``, which means that the age is exact
+        The default is '', which means that the age is exact
         to the day.  The option `>` means that the actual age
         is greater than the one provided.  The option `<` means
         that the actual age is less than the one provided.
     - years
-        The number of who years in the age.
+        The number of whole years in the age. The specification
+        requires this to be rounded down.  Here an error is thrown
+        if an integer is not used. One can add information in the
+        phrase parameter to clarify the year.
     - months
-        The number of months in addition to the years.
-    = weeks
+        The number of months in addition to the years. The specification
+        requires this to be rounded down.  Here an error is thrown
+        if an integer is not used. One can add information in the
+        phrase parameter to clarify the year.
+    - weeks
         The number of weeks in addition to the years and months.
+        The specification
+        requires this to be rounded down.  Here an error is thrown
+        if an integer is not used. One can add information in the
+        phrase parameter to clarify the year.
     - days
         The number of days in addition to any years, months, or weeks provided.
+        The specification requires this to be rounded down.  Here an error is thrown
+        if an integer is not used. One can add information in the
+        phrase parameter to clarify the year.
 
-    The default values for these parameters is 0.  A 0 value or a value less
-    than 0 will be stored.
+    The default values for these parameters is 0 for the integers and '' for the
+    strings.
+
+    Exceptions
+    ----------
+    - If greater_less_than is not one of {'', '<', '>'} a ValueError will be issued.
+    - If any value (except `phrase`) is not an integer, a ValueError will be issued.
+    - If any value (except `phrase`) is less than 0, a ValueError will be issued.
 
     Examples
     --------
-    >>> Age('>', 10)
-    >>> > 10y
-    >>> Age(10, 2, 1, 2)
-    >>> 10y 2m 1w 2d
+    >>> Age('>', 10).ged(1)
+    >>> 1 AGE > 10y\n
+    >>> Age(10, 2, 1, 2).ged(2)
+    >>> 2 AGE 10y 2m 1w 2d\n
 
     Reference
     ---------
@@ -680,36 +711,51 @@ class Age(NamedTuple):
     months: int = 0
     weeks: int = 0
     days: int = 0
+    phrase: str = ''
 
     def validate(self) -> bool:
-        Defs.verify_enum(
-            self.greater_less_than,
-            Enum.GREATER_LESS_THAN,
-            EnumName.GREATER_LESS_THAN,
+        check: bool = (
+            Defs.verify_enum(
+                self.greater_less_than,
+                Enum.GREATER_LESS_THAN,
+                EnumName.GREATER_LESS_THAN,
+            )
+            and Defs.verify_type(self.years, int)
+            and Defs.verify_type(self.months, int)
+            and Defs.verify_type(self.weeks, int)
+            and Defs.verify_type(self.days, int)
+            and Defs.verify_type(self.phrase, str)
+            and Defs.verify_not_negative(self.years)
+            and Defs.verify_not_negative(self.months)
+            and Defs.verify_not_negative(self.weeks)
+            and Defs.verify_not_negative(self.days)
         )
-        Defs.verify_type(self.years, int)
-        Defs.verify_type(self.months, int)
-        Defs.verify_type(self.weeks, int)
-        Defs.verify_type(self.days, int)
-        Defs.verify_not_negative(self.years)
-        Defs.verify_not_negative(self.months)
-        Defs.verify_not_negative(self.weeks)
-        Defs.verify_not_negative(self.days)
-        return True
+        return check
 
-    def ged(self) -> str:
+    def ged(self, level: int = 1) -> str:
         """Format the GEDCOM Age data type."""
-        line: str = self.greater_less_than
-        if self.years > 0:
-            line = ''.join([line, f' {self.years!s}y'])
-        if self.months > 0:
-            line = ''.join([line, f' {self.months!s}m'])
-        if self.weeks > 0:
-            line = ''.join([line, f' {self.weeks!s}w'])
-        if self.days > 0:
-            line = ''.join([line, f' {self.days!s}d'])
 
-        return line.replace('  ', ' ').replace('  ', ' ').strip()
+        line: str = ''
+        info: str = self.greater_less_than
+        if self.validate():
+            if self.years > 0:
+                info = ''.join([info, f' {self.years!s}y'])
+            if self.months > 0:
+                info = ''.join([info, f' {self.months!s}m'])
+            if self.weeks > 0:
+                info = ''.join([info, f' {self.weeks!s}w'])
+            if self.days > 0:
+                info = ''.join([info, f' {self.days!s}d'])
+            line: str = Defs.taginfo(
+                level,
+                Gedcom.AGE,
+                info.replace('  ', ' ').replace('  ', ' ').strip(),
+            )
+            if self.phrase != '':
+                line = ''.join(
+                    [line, Defs.taginfo(level + 1, Gedcom.PHRASE, self.phrase)]
+                )
+        return line
 
 
 class DateValue(NamedTuple):
@@ -1976,7 +2022,7 @@ class Chronology(Base):
         lines: str = ''
         return lines
 
-    def translation(self, trans: Name_Translation, level: int = 1) -> str:
+    def translation(self, trans: NameTranslation, level: int = 1) -> str:
         lines: str = ''.join(
             [
                 Defs.taginfo(level, Gedcom.TRAN, trans.text),
