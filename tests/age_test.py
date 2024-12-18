@@ -9,8 +9,8 @@
 
 import pytest  # type: ignore  # noqa: PGH003
 
-from chronodata.chrono import Age
-from chronodata.g7 import EnumName
+from chronodata.tuples import Age
+from chronodata.enums import GreaterLessThan
 from chronodata.messages import Msg
 
 testdata = [
@@ -63,6 +63,6 @@ def test_phrase() -> None:
 def test_greater_less_than() -> None:
     with pytest.raises(
         ValueError,
-        match=Msg.NOT_VALID_ENUM.format('10', EnumName.GREATER_LESS_THAN),
+        match=Msg.NOT_VALID_ENUM.format('10', GreaterLessThan),
     ):
         Age('10', 1, 1, 1, 1).validate()
