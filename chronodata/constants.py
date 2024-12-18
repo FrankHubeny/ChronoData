@@ -5,11 +5,59 @@ from dataclasses import dataclass
 from typing import ClassVar, Literal
 
 
+class AgeConstants:
+    """Age enumerations for the Age NamedTuple."""
+
+    UNIT: ClassVar = {
+        'y': 'y',
+        'year': 'y',
+        'm': 'month',
+        'month': 'm',
+        'd': 'd',
+        'day': 'd',
+        'w': 'w',
+        'week': 'w',
+    }
+    BOUND: ClassVar = {'<', '>'}
+    NAME: ClassVar = {'U'}
+
+
+@dataclass(frozen=True)
+class GEDSpecial:
+    """Constant definitions for special GEDCOM string."""
+
+    ATSIGN: str = '@'
+    BC: str = 'BCE'
+    COLON: str = ':'
+    DAY: str = 'd'
+    FRENCH_R: str = 'FRENCH_R'
+    GREATER_THAN: str = '>'
+    GREGORIAN: str = 'GREGORIAN'
+    HEBREW: str = 'HEBREW'
+    HYPHEN: str = '-'
+    JULIAN: str = 'JULIAN'
+    LESS_THAN: str = '<'
+    MAX_MONTHS: str = 'Max Months'
+    MONTH: str = 'm'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
+    NEWLINE: str = '\n'
+    NOW: str = 'now'
+    SPACE: str = ' '
+    T: str = 'T'
+    VERSION: str = '7.0'
+    VOID: str = '@VOID@'
+    WEEK: str = 'w'
+    YEAR: str = 'y'
+    Z: str = 'Z'
+
+
 @dataclass(frozen=True)
 class Nul:
     """Constants for null or empty class instances."""
+
     STR: str = ''
-    
+
 
 @dataclass(frozen=True)
 class Arg:
@@ -46,18 +94,20 @@ class Value:
     EPOCH: str = 'Epoch'
     EXPERIMENT: str = 'EXPERIMENT'
     GREGORIAN: str = 'GREGORIAN'
+    ISO: str = 'ISO'
     MAX_MONTHS: str = 'Max Months'
     MONTH_NAMES: str = 'Month Names'
     MONTH_MAX_DAYS: str = 'Month Max Days'
     SECULAR: str = 'SECULAR'
 
+
 class Cal:
-    """GEDCOM Month codes for various calendars."""
+    """GEDCOM codes for various calendars."""
 
     CALENDARS: ClassVar = {
         Value.GREGORIAN: {
-            Value.MAX_MONTHS : 12,
-            Value.MONTH_NAMES : {
+            Value.MAX_MONTHS: 12,
+            Value.MONTH_NAMES: {
                 '01': 'JAN',
                 '02': 'FEB',
                 '03': 'MAR',
@@ -70,6 +120,20 @@ class Cal:
                 '10': 'OCT',
                 '11': 'NOV',
                 '12': 'DEC',
+            },
+            Value.ISO: {
+                'JAN': '01',
+                'FEB': '02',
+                'MAR': '03',
+                'APR': '04',
+                'MAY': '05',
+                'JUN': '06',
+                'JUL': '07',
+                'AUG': '08',
+                'SEP': '09',
+                'OCT': '10',
+                'NOV': '11',
+                'DEC': '12',
             },
             Value.MONTH_MAX_DAYS: {
                 '01': 31,
@@ -85,7 +149,7 @@ class Cal:
                 '11': 30,
                 '12': 31,
             },
-            Value.EPOCH: ' BCE'
+            Value.EPOCH: ' BCE',
         }
     }
 
@@ -208,10 +272,6 @@ class Tag:
     EVENT: str = 'EVENT'
     NAME: str = 'NAME'
     TESTCASES: str = 'TEST CASES'
-
-
-
-
 
 
 @dataclass(frozen=True)

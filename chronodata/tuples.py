@@ -276,13 +276,13 @@ class Age(NamedTuple):
 
 
 class PersonalName(NamedTuple):
-    tag: str
+    tag: Tag
     text: str
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.tag, str)
-            and Defs.verify_type(self.text, str)
+            Defs.verify_type(self.tag, Tag)
+            and Defs.verify_type(self.text, Tag)
             and Defs.verify_enum(self.tag, PersonalNamePiece)
         )
         return check
@@ -737,11 +737,11 @@ class Time(NamedTuple):
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
     
-    def ged(self, level: int = 1) -> str:
-        lines: str = ''
-        if self.validate():
-            pass
-        return lines
+        # def ged(self, level: int = 1) -> str:
+        #     lines: str = ''
+        #     if self.validate():
+        #         pass
+        #     return lines
 
 
 class DateExact(NamedTuple):
@@ -1030,7 +1030,7 @@ class LDSOrdinanceDetail(NamedTuple):
 
 
 class LDSSpouseSealing(NamedTuple):
-    tag: str = Tag.SLGS
+    tag: Tag = Tag.SLGS
     detail: LDSOrdinanceDetail | None = None
 
     def validate(self) -> bool:

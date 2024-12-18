@@ -8,19 +8,19 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore[import-untyped]
 
 from chronodata.constants import (
     Arg,
     Calendar,
+    GEDSpecial,
     Key,
     String,
     Unit,
-    Value,
 )
 from chronodata.enums import Tag
-from chronodata.g7 import GEDSpecial
 from chronodata.messages import Issue, Msg
+from chronodata.methods import Defs
 
 
 class Base:
@@ -58,6 +58,7 @@ class Base:
         self.ged_shared_note: str = ''
         self.ged_source: str = ''
         self.ged_submitter: str = ''
+        self.csv_data: str = ''
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         match self.filename_type:
@@ -97,7 +98,8 @@ class Base:
     def read_csv(self) -> None:
         try:
             with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
-                data = file.readlines()
+                data: Any = file.readlines()
+                self.csv_data = ''.join([self.csv_data, Defs.clean_input(data)])
                 file.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -109,6 +111,7 @@ class Base:
         try:
             with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
                 self.chron = json.load(file)
+                #self.chron = Defs.clean_input(self.chron)
                 file.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -120,7 +123,8 @@ class Base:
         """Read and validate the GEDCOM file."""
         try:
             with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
-                data = file.readlines()
+                data: Any = file.readlines()
+                self.ged_data.append(Defs.clean_input(data))
                 file.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -407,12 +411,12 @@ class Base:
             newdate = date
         return newdate
 
-    def date_diff(
-        self, older: str, younger: str, unit: str = Unit.YEAR
-    ) -> float:
-        olderdate = np.datetime64(self.to_datetime64(older), unit)
-        youngerdate = np.datetime64(self.to_datetime64(younger), unit)
-        return int((youngerdate - olderdate) / np.timedelta64(1, unit))
+    # def date_diff(
+    #     self, older: str, younger: str, unit: str = Unit.YEAR
+    # ) -> float:
+    #     olderdate = np.datetime64(self.to_datetime64(older), unit)
+    #     youngerdate = np.datetime64(self.to_datetime64(younger), unit)
+    #     return int((youngerdate - olderdate) / np.timedelta64(1, unit))
 
     def daysinyear(self, date: Any) -> int:
         """A procedure to count number of days in a Gregorian year

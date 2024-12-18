@@ -12,838 +12,109 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 
-@dataclass(frozen=True)
-class ExtTag:
-    """Constant definitions for extention tags."""
+# @dataclass(frozen=True)
+# class AgeConstants:
+#     """Age enumerations for the Age NamedTuple."""
 
-    _DATE: str = '_DATE'
-    _LOC: str = '_LOC'
-    _PARTNER: str = 'PARTNER'
-    _POP: str = '_POP'
-
-
-@dataclass(frozen=True)
-class Record:
-    FAMILY: str = 'family'
-    INDIVIDUAL: str = 'individual'
-    MULTIMEDIA: str = 'multimedia'
-    REPOSITORY: str = 'repository'
-    SHARED_NOTE: str = 'shared note'
-    SOURCE: str = 'source'
-    SUBMITTER: str = 'submitter'
+#     UNIT: ClassVar = {
+#         'y': 'y',
+#         'year': 'y',
+#         'm': 'month',
+#         'month': 'm',
+#         'd': 'd',
+#         'day': 'd',
+#         'w': 'w',
+#         'week': 'w',
+#     }
+#     BOUND: ClassVar = {'<', '>'}
+#     NAME: ClassVar = {'U'}
 
 
 # @dataclass(frozen=True)
-class AgeConstants:
-    """Age enumerations for the Age NamedTuple."""
+# class GEDSpecial:
+#     """Constant definitions for special GEDCOM string."""
 
-    UNIT: ClassVar = {
-        'y': 'y',
-        'year': 'y',
-        'm': 'month',
-        'month': 'm',
-        'd': 'd',
-        'day': 'd',
-        'w': 'w',
-        'week': 'w',
-    }
-    BOUND: ClassVar = {'<', '>'}
-    NAME: ClassVar = {'U'}
-
-
-@dataclass(frozen=True)
-class GEDSpecial:
-    """Constant definitions for special GEDCOM string."""
-
-    ATSIGN: str = '@'
-    BC: str = 'BCE'
-    COLON: str = ':'
-    DAY: str = 'd'
-    FRENCH_R: str = 'FRENCH_R'
-    GREATER_THAN: str = '>'
-    GREGORIAN: str = 'GREGORIAN'
-    HEBREW: str = 'HEBREW'
-    HYPHEN: str = '-'
-    JULIAN: str = 'JULIAN'
-    LESS_THAN: str = '<'
-    MAX_MONTHS: str = 'Max Months'
-    MONTH: str = 'm'
-    MONTH_NAMES: str = 'Month Names'
-    MONTH_MAX_DAYS: str = 'Month Max Days'
-    NEWLINE: str = '\n'
-    NOW: str = 'now'
-    SPACE: str = ' '
-    T: str = 'T'
-    VERSION: str = '7.0'
-    VOID: str = '@VOID@'
-    WEEK: str = 'w'
-    YEAR: str = 'y'
-    Z: str = 'Z'
+#     ATSIGN: str = '@'
+#     BC: str = 'BCE'
+#     COLON: str = ':'
+#     DAY: str = 'd'
+#     FRENCH_R: str = 'FRENCH_R'
+#     GREATER_THAN: str = '>'
+#     GREGORIAN: str = 'GREGORIAN'
+#     HEBREW: str = 'HEBREW'
+#     HYPHEN: str = '-'
+#     JULIAN: str = 'JULIAN'
+#     LESS_THAN: str = '<'
+#     MAX_MONTHS: str = 'Max Months'
+#     MONTH: str = 'm'
+#     MONTH_NAMES: str = 'Month Names'
+#     MONTH_MAX_DAYS: str = 'Month Max Days'
+#     NEWLINE: str = '\n'
+#     NOW: str = 'now'
+#     SPACE: str = ' '
+#     T: str = 'T'
+#     VERSION: str = '7.0'
+#     VOID: str = '@VOID@'
+#     WEEK: str = 'w'
+#     YEAR: str = 'y'
+#     Z: str = 'Z'
 
 
 # @dataclass(frozen=True)
-class GEDDateTime:
-    """GEDCOM Month codes for various calendars."""
+# class GEDDateTime:
+#     """GEDCOM Month codes for various calendars."""
 
-    CALENDARS: ClassVar = {
-        GEDSpecial.GREGORIAN: {
-            GEDSpecial.MAX_MONTHS: 12,
-            GEDSpecial.MONTH_NAMES: {
-                '01': 'JAN',
-                '02': 'FEB',
-                '03': 'MAR',
-                '04': 'APR',
-                '05': 'MAY',
-                '06': 'JUN',
-                '07': 'JUL',
-                '08': 'AUG',
-                '09': 'SEP',
-                '10': 'OCT',
-                '11': 'NOV',
-                '12': 'DEC',
-            },
-            GEDSpecial.MONTH_MAX_DAYS: {
-                '01': 31,
-                '02': 29,
-                '03': 31,
-                '04': 30,
-                '05': 31,
-                '06': 30,
-                '07': 31,
-                '08': 31,
-                '09': 30,
-                '10': 31,
-                '11': 30,
-                '12': 31,
-            },
-        }
-    }
-
-
-# @dataclass(frozen=True)
+#     CALENDARS: ClassVar = {
+#         GEDSpecial.GREGORIAN: {
+#             GEDSpecial.MAX_MONTHS: 12,
+#             GEDSpecial.MONTH_NAMES: {
+#                 '01': 'JAN',
+#                 '02': 'FEB',
+#                 '03': 'MAR',
+#                 '04': 'APR',
+#                 '05': 'MAY',
+#                 '06': 'JUN',
+#                 '07': 'JUL',
+#                 '08': 'AUG',
+#                 '09': 'SEP',
+#                 '10': 'OCT',
+#                 '11': 'NOV',
+#                 '12': 'DEC',
+#             },
+#             GEDSpecial.MONTH_MAX_DAYS: {
+#                 '01': 31,
+#                 '02': 29,
+#                 '03': 31,
+#                 '04': 30,
+#                 '05': 31,
+#                 '06': 30,
+#                 '07': 31,
+#                 '08': 31,
+#                 '09': 30,
+#                 '10': 31,
+#                 '11': 30,
+#                 '12': 31,
+#             },
+#         }
+#     }
 
 
-class ISOMonths:
-    """ISO month values for GEDCOM month codes."""
+# class ISOMonths:
+#     """ISO month values for GEDCOM month codes."""
 
-    CALENDARS: ClassVar = {
-        'GREGORIAN': {
-            'JAN': '01',
-            'FEB': '02',
-            'MAR': '03',
-            'APR': '04',
-            'MAY': '05',
-            'JUN': '06',
-            'JUL': '07',
-            'AUG': '08',
-            'SEP': '09',
-            'OCT': '10',
-            'NOV': '11',
-            'DEC': '12',
-        }
-    }
-
-#@dataclass(frozen=True)
-class Lang:
-    """ISO 639-1 codes for languages.
-
-    The GEDCOM standard requires the use of ISO 639-1 codes for
-    languages. These are identified with names and then placed
-    in an enumeration list.  There are less than 200 of these
-    codes.  A pandas display is provided to view them
-    along with the other enumations.
-    
-    Reference
-    ---------
-    - [ISO 639-1 List](https://www.science.co.il/language/Codes.php)
-    - [GEDCOM Standard]()
-    """
-    CODE: ClassVar = {
-        'Afar': 'aa',
-        'Abkhazian': 'ab',
-        'Avestan': 'ae',
-        'Afrikaans': 'af',
-        'Akan': 'ak',
-        'Amharic': 'am',
-        'Aragonese': 'an',
-        'Arabic': 'ar',
-        'Assamese': 'as',
-        'Avaric': 'av',
-        'Aymara': 'ay',
-        'Azerbaijani': 'az',
-        'Bashkir': 'ba',
-        'Belarusian': 'be',
-        'Bulgarian': 'bg',
-        'Bihari languages': 'bh',
-        'Bislama': 'bi',
-        'Bambara': 'bm',
-        'Bengali': 'bn',
-        'Tibetan': 'bo',
-        'Breton': 'br',
-        'Bosnian': 'bs',
-        'Catalan': 'ca', 
-        'Valencian': 'ca',
-        'Chechen': 'ce',
-        'Chamorro': 'ch',
-        'Corsican': 'co',
-        'Cree': 'cr',
-        'Czech': 'cs',
-        'Church Slavic': 'cu',
-        'Slavonic': 'cu',
-        'Old Bulgarian': 'cu',
-        'vieux bulgare Chuvash': 'cv',
-        'Welsh': 'cy',
-        'Danish': 'da',
-        'German': 'de',
-        'Divehi': 'dv', 
-        'Dhivehi': 'dv', 
-        'Maldivian': 'dv',
-        'Dzongkha': 'dz',
-        'Ewe': 'ee',
-        'Greek, Modern (1453-)': 'el',
-        'English': 'en',
-        'Esperanto': 'eo',
-        'Spanish; Castilian': 'es',
-        'Estonian': 'et',
-        'Basque': 'eu',
-        'Persian': 'fa',
-        'Fulah': 'ff',
-        'Finnish': 'fi',
-        'Fijian': 'fj',
-        'Faroese': 'fo',
-        'French': 'fr',
-        'Western Frisian': 'fy',
-        'Irish': 'ga',
-        'Gaelic': 'gd', 
-        'Scottish Gaelic': 'gd',
-        'Galician': 'gl',
-        'Guarani': 'gn',
-        'Gujarati': 'gu',
-        'Manx': 'gv',
-        'Hausa': 'ha',
-        'Hebrew': 'he',
-        'Hindi': 'hi',
-        'Hiri Motu': 'ho',
-        'Croatian': 'hr',
-        'Haitian': 'ht', 
-        'Haitian Creole': 'ht',
-        'Hungarian': 'hu',
-        'Armenian': 'hy',
-        'Herero': 'hz',
-        'Interlingua': 'ia',
-        'Indonesian': 'id',
-        'Interlingue; Occidental': 'ie',
-        'Igbo': 'ig',
-        'Sichuan Yi; Nuosu': 'ii',
-        'Inupiaq': 'ik',
-        'Ido': 'io',
-        'Icelandic': 'is',
-        'Italian': 'it',
-        'Inuktitut': 'iu',
-        'Japanese': 'ja',
-        'Javanese': 'jv',
-        'Georgian': 'ka',
-        'Kongo': 'kg',
-        'Kikuyu; Gikuyu': 'ki',
-        'Kuanyama; Kwanyama': 'kj',
-        'Kazakh': 'kk',
-        'Kalaallisut; Greenlandic': 'kl',
-        'Central Khmer': 'km',
-        'Kannada': 'kn',
-        'Korean': 'ko',
-        'Kanuri': 'kr',
-        'Kashmiri': 'ks',
-        'Kurdish': 'ku',
-        'Komi': 'kv',
-        'Cornish': 'kw',
-        'Kirghiz; Kyrgyz': 'ky',
-        'Latin': 'la',
-        'Luxembourgish; Letzeburgesch': 'lb',
-        'Ganda': 'lg',
-        'Limburgan; Limburger; Limburgish': 'li',
-        'Lingala': 'ln',
-        'Lao': 'lo',
-        'Lithuanian': 'lt',
-        'Luba-Katanga': 'lu',
-        'Latvian': 'lv',
-        'Malagasy': 'mg',
-        'Marshallese': 'mh',
-        'Maori': 'mi',
-        'Macedonian': 'mk',
-        'Malayalam': 'ml',
-        'Mongolian': 'mn',
-        'Marathi': 'mr',
-        'Malay': 'ms',
-        'Maltese': 'mt',
-        'Burmese': 'my',
-        'Nauru': 'na',
-        'Norwegian Bokmål': 'nb',
-        'Ndebele, North': 'nd', 
-        'North Ndebele': 'nd',
-        'Nepali': 'ne',
-        'Ndonga': 'ng',
-        'Dutch': 'nl', 
-        'Flemish': 'nl',
-        'Norwegian Nynorsk': 'nn',
-        'Norwegian': 'no',
-        'Ndebele, South': 'nr', 
-        'South Ndebele': 'nr',
-        'Navajo; Navaho': 'nv',
-        'Chichewa': 'ny', 
-        'Chewa': 'ny', 
-        'Nyanja': 'ny',
-        'Occitan (post 1500)': 'oc',
-        'Ojibwa': 'oj',
-        'Oromo': 'om',
-        'Oriya': 'or',
-        'Ossetian; Ossetic': 'os',
-        'Panjabi; Punjabi': 'pa',
-        'Pali': 'pi',
-        'Polish': 'pl',
-        'Pushto; Pashto': 'ps',
-        'Portuguese': 'pt',
-        'Quechua': 'qu',
-        'Romansh': 'rm',
-        'Rundi': 'rn',
-        'Romanian': 'ro', 
-        'Moldavian': 'ro',
-        'Moldovan': 'ro',
-        'Russian': 'ru',
-        'Kinyarwanda': 'rw',
-        'Sanskrit': 'sa',
-        'Sardinian': 'sc',
-        'Sindhi': 'sd',
-        'Northern Sami': 'se',
-        'Sango': 'sg',
-        'Sinhala': 'si', 
-        'Sinhalese': 'si',
-        'Slovak': 'sk',
-        'Slovenian': 'sl',
-        'Samoan': 'sm',
-        'Shona': 'sn',
-        'Somali': 'so',
-        'Albanian': 'sq',
-        'Serbian': 'sr',
-        'Swati': 'ss',
-        'Sotho, Southern': 'st',
-        'Sundanese': 'su',
-        'Swedish': 'sv',
-        'Swahili': 'sw',
-        'Tamil': 'ta',
-        'Telugu': 'te',
-        'Tajik': 'tg',
-        'Thai': 'th',
-        'Tigrinya': 'ti',
-        'Turkmen': 'tk',
-        'Tagalog': 'tl',
-        'Tswana': 'tn',
-        'Tonga (Tonga Islands)': 'to',
-        'Turkish': 'tr',
-        'Tsonga': 'ts',
-        'Tatar': 'tt',
-        'Twi': 'tw',
-        'Tahitian': 'ty',
-        'Uighur': 'ug', 
-        'Uyghur': 'ug',
-        'Ukrainian': 'uk',
-        'Urdu': 'ur',
-        'Uzbek': 'uz',
-        'Venda': 've',
-        'Vietnamese': 'vi',
-        'Volapük': 'vo',
-        'Walloon': 'wa',
-        'Wolof': 'wo',
-        'Xhosa': 'xh',
-        'Yiddish': 'yi',
-        'Yoruba': 'yo',
-        'Zhuang': 'za',
-        'Chuang': 'za',
-        'Chinese': 'zh',
-        'Zulu': 'zu',
-    }
-
-@dataclass(frozen=True)
-class Gedcom:
-    """Constant definitions of GEDCOM tags."""
-
-    ABBR: str = 'ABBR'
-    ADDR: str = 'ADDR'
-    ADOP: str = 'ADOP'
-    ADOP_FAMC: str = 'ADOPT-FAMC'
-    ADOPTED: str = 'ADOPTED'  # ?#
-    ADR1: str = 'ADR1'
-    ADR2: str = 'ADR2'
-    ADR3: str = 'ADR3'
-    AFN: str = 'AFN'
-    AGE: str = 'AGE'
-    AGNC: str = 'AGNC'
-    AKA: str = 'AKA'  # ?#
-    ALIA: str = 'ALIA'
-    ANCI: str = 'ANCI'
-    ANUL: str = 'ANUL'
-    ASSO: str = 'ASSO'
-    AUDIO: str = 'AUDIO'  # ?#
-    AUTH: str = 'AUTH'
-    BAPL: str = 'BAPL'
-    BAPM: str = 'BAPM'
-    BARM: str = 'BARM'
-    BASM: str = 'BASM'
-    BIRT: str = 'BIRT'
-    BIRTH: str = 'BIRTH'  # ?#
-    BLES: str = 'BLES'
-    BOTH: str = 'BOTH'  # ?#
-    BTC: str = 'BTC'  # ?#
-    BURI: str = 'BURI'
-    CALN: str = 'CALN'
-    CANCELED: str = 'CANCELED'  # ?#
-    CARD: str = 'CARD'  # ?#
-    CAST: str = 'CAST'
-    CAUS: str = 'CAUS'
-    CENS: str = 'CENS'  # ?#
-    CHALLENGED: str = 'CHALLENGED'  # ?#
-    CHAN: str = 'CHAN'
-    CHIL: str = 'CHIL'
-    CHILD: str = 'CHILD'  # ?#
-    CHALLENGE: str = 'CHALLENGE'
-    CHR: str = 'CHR'
-    CHRON_NAMES: str = 'CHRON NAMES'
-    CHRONS: str = 'CHRONOS'
-    CHRA: str = 'CHRA'
-    CITY: str = 'CITY'
-    CLERGY: str = 'CLERGY'  # ?#
-    COMPLETED: str = 'COMPLETED'  # ?#
-    CONF: str = 'CONF'
-    CONFIDENTIAL: str = 'CONFIDENTIAL'  # ?#
-    CONL: str = 'CONL'
-    CONT: str = 'CONT'
-    COPR: str = 'COPR'
-    CORP: str = 'CORP'
-    CREA: str = 'CREA'
-    CREM: str = 'CREM'
-    CROP: str = 'CROP'
-    CTRY: str = 'CTRY'
-    DATA: str = 'DATA'
-    DATA_EVEN: str = 'DATA-EVEN'
-    DATA_EVEN_DATE: str = 'DATA-EVEN-DATE'
-    DATE: str = 'DATE'
-    DATE_exact: str = 'DATA-exact'
-    DEAT: str = 'DEAT'
-    DESI: str = 'DESI'
-    DEST: str = 'DEST'
-    DISPROVEN: str = 'DISPROVEN'  # ?#
-    DIV: str = 'DIV'
-    DIVF: str = 'DIVF'
-    DNS: str = 'DNS'  # ?#
-    DNS_CAN: str = 'DNS_CAN'  # ?#
-    DSCR: str = 'DSCR'
-    EDUC: str = 'EDUC'
-    ELECTRONIC: str = 'ELECTRONIC'  # ?#
-    EMAIL: str = 'EMAIL'
-    EMIG: str = 'EMIG'
-    ENDL: str = 'ENDL'
-    ENGA: str = 'ENGA'
-    EVEN: str = 'EVEN'  # ?#
-    EXCLUDED: str = 'EXCLUDED'  # ?#
-    EXID: str = 'EXID'
-    EXID_TYPE: str = 'EXID-TYPE'
-    F: str = 'F'  # ?#
-    FACT: str = 'FACT'  # ?#
-    FAM: str = 'FAM'  # ?#
-    FATH: str = 'FATH'  # ?#
-    FAM_CENS: str = 'FAM-CENS'
-    FAM_EVEN: str = 'FAM-EVEN'
-    FAM_FACT: str = 'FAM-FACT'
-    FAM_HUSB: str = 'FAM-HUSB'
-    FAM_NCHI: str = 'FAM-NCHI'
-    FAM_RESI: str = 'FAM-RESI'
-    FAM_WIFE: str = 'FAM-WIFE'
-    FAMC: str = 'FAMC'
-    FAMC_ADOPT: str = 'FAMC-ADOPT'
-    FAMC_STAT: str = 'FAMC-STAT'
-    FAMS: str = 'FAMS'
-    FAX: str = 'FAX'
-    FCOM: str = 'FCOM'
-    FICHE: str = 'FICHE'  # ?#
-    FILE: str = 'FILE'
-    FILE_TRAN: str = 'FILE-TRAN'
-    FILM: str = 'FILM'  # ?#
-    FORM: str = 'FORM'
-    FOSTER: str = 'FOSTER'  # ?#
-    FRIEND: str = 'FRIEND'  # ?#
-    GEDC: str = 'GEDC'
-    GIVN: str = 'GIVN'
-    GODP: str = 'GODP'  # ?#
-    GRAD: str = 'GRAD'
-    HEAD: str = 'HEAD'
-    HEAD_DATE: str = 'HEAD-DATE'
-    HEAD_LANG: str = 'HEAD-LANG'
-    HEAD_PLAC: str = 'HEAD-PLAC'
-    HEAD_PLAC_FORM: str = 'HEAD-PLAC-FORM'
-    HEAD_SOUR: str = 'HEAD-SOUR'
-    HEAD_SOUR_DATA: str = 'HEAD-SOUR-DATA'
-    HEIGHT: str = 'HEIGHT'
-    HUSB: str = 'HUSB'
-    IDNO: str = 'IDNO'
-    IMMI: str = 'IMMI'
-    IMMIGRANT: str = 'IMMIGRANT'  # ?#
-    INDI: str = 'INDI'
-    INDI_CENS: str = 'INDI-CENS'
-    INDI_EVEN: str = 'INDI-EVEN'
-    INDI_FACT: str = 'INDI-FACT'
-    INDI_FAMC: str = 'INDI-FAMC'
-    INDI_NAME: str = 'INDI-NAME'
-    INDI_NCHI: str = 'INDI-NCHI'
-    INDI_RELI: str = 'INDI-RELI'
-    INDI_RESI: str = 'INDI-RESI'
-    INDI_TITL: str = 'INDI-TITLE'
-    INFANT: str = 'INFANT'  # ?#
-    INIL: str = 'INIL'
-    LANG: str = 'LANG'
-    LATI: str = 'LATI'
-    LEFT: str = 'LEFT'
-    LOCKED: str = 'LOCKED'  # ?#
-    LONG: str = 'LONG'
-    M: str = 'M'  # ?#
-    MAGAZINE: str = 'MAGAZINE'  # ?#
-    MAIDEN: str = 'MAIDEN'  # ?#
-    MAP: str = 'MAP'
-    MARB: str = 'MARB'
-    MARC: str = 'MARC'
-    MARL: str = 'MARL'
-    MARR: str = 'MARR'
-    MARRIED: str = 'MARRIED'  # ?#
-    MARS: str = 'MARS'
-    MEDI: str = 'MEDI'
-    MIME: str = 'MIME'
-    MOTH: str = 'MOTH'  # ?#
-    MULTIPLE: str = 'MULTIPLE'  # ?#
-    NAME: str = 'NAME'
-    NAME_TRAN: str = 'NAME-TRAN'
-    NAME_TYPE: str = 'NAME-TYPE'
-    NATI: str = 'NATI'
-    NATU: str = 'NATU'
-    NCHI: str = 'NCHI'
-    NEWSPAPER: str = 'NEWSPAPER'  # ?#
-    NGHBR: str = 'NEIGHBOR'  # ?#
-    NICK: str = 'NICK'
-    NMR: str = 'NMR'
-    NO: str = 'NO'
-    NO_DATE: str = 'NO-DATE'
-    NOTE: str = 'NOTE'
-    NOTE_TRAN: str = 'NOTE-TRAN'
-    NPFX: str = 'NPFX'
-    NSFX: str = 'NSFX'
-    OBJE: str = 'OBJE'
-    OCCU: str = 'OCCU'
-    OFFICIATOR: str = 'OFFICIATOR'  # ?#
-    ORDN: str = 'ORDN'
-    OTHER: str = 'OTHER'  # ?#
-    PAGE: str = 'PAGE'
-    PEDI: str = 'PEDI'
-    PARENT: str = 'PARENT'  # ?#
-    PHON: str = 'PHON'
-    PHOTO: str = 'PHOTO'  # ?#
-    PHRASE: str = 'PHRASE'
-    PLAC: str = 'PLAC'
-    PLAC_FORM: str = 'PLAC-FORM'
-    PLAC_TRAN: str = 'PLAC-TRAN'
-    POST: str = 'POST'
-    PRE_1970: str = 'PRE_1970'  # ?#
-    PRIVACY: str = 'PRIVACY'  # ?#
-    PROB: str = 'PROB'
-    PROFESSIONAL: str = 'PROFESSIONAL'  # ?#
-    PROP: str = 'PROP'
-    PROVEN: str = 'PROVEN'
-    PUBL: str = 'PUBL'
-    QUAY: str = 'QUAY'
-    QUAY0: str = '0'  # ?#
-    QUAY1: str = '1'  # ?#
-    QUAY2: str = '2'  # ?#
-    QUAY3: str = '3'  # ?#
-    REFN: str = 'REFN'
-    RELI: str = 'RELI'
-    REPO: str = 'REPO'
-    RESN: str = 'RESN'
-    RETI: str = 'RETI'
-    RIN: str = 'RIN'
-    ROLE: str = 'ROLE'
-    SCHMA: str = 'SCHMA'
-    SDATE: str = 'SDATE'
-    SEALING: str = 'SEALING'  # ?#
-    SEX: str = 'SEX'
-    SLGC: str = 'SLGC'
-    SLGS: str = 'SLGS'
-    SNOTE: str = 'SNOTE'
-    SOUR: str = 'SOUR'
-    SOUR_DATA: str = 'SOUR-DATA'
-    SOUR_EVEN: str = 'SOUR-EVEN'
-    SPFX: str = 'SPFX'
-    SPOU: str = 'SPOU'  # ?#
-    STILLBORN: str = 'STILLBORN'  # ?#
-    SUBMITTED: str = 'SUBMITTED'  # ?#
-    SSN: str = 'SSN'
-    STAE: str = 'STAE'
-    STAT: str = 'STAT'  # ?#
-    SUBM: str = 'SUBM'
-    SUBM_LANG: str = 'SUBM-LANG'
-    SURN: str = 'SURN'
-    TAG: str = 'TAG'
-    TEMP: str = 'TEMP'
-    TESTCASES: str = 'TEST CASES'
-    TEXT: str = 'TEXT'
-    TEXT_HTML: str = 'text/html'
-    TEXT_PLAIN: str = 'text/plain'
-    TIME: str = 'TIME'
-    TITL: str = 'TITL'
-    TOMBSTONE: str = 'TOMBSTONE'  # ?#
-    TOP: str = 'TOP'
-    TRAN: str = 'TRAN'  # ?#
-    TRLR: str = 'TRLR'
-    TYPE: str = 'TYPE'
-    U: str = 'U'  # ?#
-    UNCLEARED: str = 'UNCLEARED'  # ?#
-    UID: str = 'UID'
-    VERS: str = 'VERS'
-    VIDEO: str = 'VIDEO'  # ?#
-    WIDTH: str = 'WIDTH'
-    WIFE: str = 'WIFE'
-    WILL: str = 'WILL'
-    WITN: str = 'WITN'  # ?#
-    WWW: str = 'WWW'
-    X: str = 'X'  # ?#
-    FRENCH_R: str = 'FRENCH_R'
-    GREGORIAN: str = 'GREGORIAN'
-    HEBREW: str = 'HEBREW'
-    JULIAN: str = 'JULIAN'
-    N_0: str = '0'
-    N_1: str = '1'
-    N_2: str = '2'
-    N_3: str = '3'
-    ADOP_HUSB: str = 'enum-ADOP-HUSB'
-    ADOP_WIFE: str = 'enum-ADOP-WIFE'
-    BIC: str = 'enum-BIC'
-    BOOK: str = 'BOOK'
-    MANUSCRIPT: str = 'MANUSCRIPT'
-    RESI: str = 'RESI'
-
-
-@dataclass(frozen=True)
-class Enum:
-    """Sets of GEDCOM tags that are valid for specific structures.
-
-    Reference
-    ---------
-    - [Individual Events (EVEN)](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#events)
-
-    """
-
-    ADOP: frozenset[str] = frozenset([Gedcom.HUSB, Gedcom.WIFE, Gedcom.BOTH])
-    EVEN: frozenset[str] = frozenset([Gedcom.CENS])
-    EVENATTR: frozenset[str] = frozenset(
-        [Gedcom.CENS, Gedcom.NCHI, Gedcom.RESI, Gedcom.FACT, Gedcom.EVEN]
-    )
-    FAMC_STAT: frozenset[str] = frozenset(
-        [Gedcom.CHALLENGED, Gedcom.DISPROVEN, Gedcom.PROVEN]
-    )
-    FAM_ATTR: frozenset[str] = frozenset(
-        [
-            Gedcom.NCHI,
-            Gedcom.RESI,
-            Gedcom.FACT,
-        ]
-    )
-    FAM_EVEN: frozenset[str] = frozenset(
-        [
-            Gedcom.ANUL,
-            Gedcom.CENS,
-            Gedcom.DIV,
-            Gedcom.DIVF,
-            Gedcom.ENGA,
-            Gedcom.MARB,
-            Gedcom.MARC,
-            Gedcom.MARL,
-            Gedcom.MARR,
-            Gedcom.MARS,
-            Gedcom.EVEN,
-        ]
-    )
-    GREATER_LESS_THAN: frozenset[str] = frozenset(
-        ['', GEDSpecial.GREATER_THAN, GEDSpecial.LESS_THAN]
-    )
-    ID: frozenset[str] = frozenset([Gedcom.REFN, Gedcom.UID, Gedcom.EXID])
-    INDI_ATTR: frozenset[str] = frozenset(
-        [
-            Gedcom.CAST,
-            Gedcom.DSCR,
-            Gedcom.EDUC,
-            Gedcom.IDNO,
-            Gedcom.NATI,
-            Gedcom.NCHI,
-            Gedcom.NMR,
-            Gedcom.OCCU,
-            Gedcom.PROP,
-            Gedcom.RELI,
-            Gedcom.RESI,
-            Gedcom.SSN,
-            Gedcom.TITL,
-            Gedcom.FACT,
-        ]
-    )
-    INDI_EVEN: frozenset[str] = frozenset(
-        [
-            Gedcom.ADOP,
-            Gedcom.BAPM,
-            Gedcom.BARM,
-            Gedcom.BASM,
-            Gedcom.BIRT,
-            Gedcom.BLES,
-            Gedcom.BURI,
-            Gedcom.CENS,
-            Gedcom.CHR,
-            Gedcom.CHRA,
-            Gedcom.CONF,
-            Gedcom.CREM,
-            Gedcom.DEAT,
-            Gedcom.EMIG,
-            Gedcom.FCOM,
-            Gedcom.GRAD,
-            Gedcom.IMMI,
-            Gedcom.NATU,
-            Gedcom.ORDN,
-            Gedcom.PROB,
-            Gedcom.RETI,
-            Gedcom.WILL,
-            Gedcom.EVEN,
-        ]
-    )
-    MEDI: frozenset[str] = frozenset(
-        [
-            Gedcom.AUDIO,
-            Gedcom.BOOK,
-            Gedcom.CARD,
-            Gedcom.ELECTRONIC,
-            Gedcom.FICHE,
-            Gedcom.FILM,
-            Gedcom.MAGAZINE,
-            Gedcom.MANUSCRIPT,
-            Gedcom.MAP,
-            Gedcom.NEWSPAPER,
-            Gedcom.PHOTO,
-            Gedcom.TOMBSTONE,
-            Gedcom.VIDEO,
-            Gedcom.OTHER,
-        ]
-    )
-    MEDIA_TYPE: frozenset[str] = frozenset(
-        [
-            Gedcom.TEXT_HTML,
-            Gedcom.TEXT_PLAIN,
-        ]
-    )
-    NAME_TYPE: frozenset[str] = frozenset(
-        [
-            Gedcom.AKA,
-            Gedcom.BIRTH,
-            Gedcom.IMMIGRANT,
-            Gedcom.MAIDEN,
-            Gedcom.MARRIED,
-            Gedcom.PROFESSIONAL,
-            Gedcom.OTHER,
-        ]
-    )
-    PEDI: frozenset[str] = frozenset(
-        [
-            Gedcom.ADOPTED,
-            Gedcom.BIRTH,
-            Gedcom.FOSTER,
-            Gedcom.SEALING,
-            Gedcom.OTHER,
-        ]
-    )
-    PERSONAL_NAME: frozenset[str] = frozenset(
-        [
-            Gedcom.NPFX,
-            Gedcom.GIVN,
-            Gedcom.NICK,
-            Gedcom.SPFX,
-            Gedcom.SURN,
-            Gedcom.NSFX,
-        ]
-    )
-    QUAY: frozenset[str] = frozenset(
-        [Gedcom.QUAY0, Gedcom.QUAY1, Gedcom.QUAY2, Gedcom.QUAY3]
-    )
-    RECORDS: frozenset[str] = frozenset(
-        [
-            Gedcom.FAM,
-            Gedcom.INDI,
-            Gedcom.OBJE,
-            Gedcom.REPO,
-            Gedcom.SNOTE,
-            Gedcom.SOUR,
-            Gedcom.SUBM,
-        ]
-    )
-    RESN: frozenset[str] = frozenset(
-        [Gedcom.CONFIDENTIAL, Gedcom.LOCKED, Gedcom.PRIVACY]
-    )
-    ROLE: frozenset[str] = frozenset(
-        [
-            Gedcom.CHIL,
-            Gedcom.CLERGY,
-            Gedcom.FATH,
-            Gedcom.FRIEND,
-            Gedcom.GODP,
-            Gedcom.HUSB,
-            Gedcom.MOTH,
-            Gedcom.MULTIPLE,
-            Gedcom.NGHBR,
-            Gedcom.OFFICIATOR,
-            Gedcom.PARENT,
-            Gedcom.SPOU,
-            Gedcom.WIFE,
-            Gedcom.WITN,
-            Gedcom.OTHER,
-        ]
-    )
-    SEX: frozenset[str] = frozenset([Gedcom.M, Gedcom.F, Gedcom.X, Gedcom.U])
-    STAT: frozenset[str] = frozenset(
-        [
-            Gedcom.BIC,
-            Gedcom.CANCELED,
-            Gedcom.CHILD,
-            Gedcom.COMPLETED,
-            Gedcom.EXCLUDED,
-            Gedcom.DNS,
-            Gedcom.DNS_CAN,
-            Gedcom.INFANT,
-            Gedcom.PRE_1970,
-            Gedcom.STILLBORN,
-            Gedcom.SUBMITTED,
-            Gedcom.UNCLEARED,
-        ]
-    )
-
-
-@dataclass(frozen=True)
-class EnumName:
-    ADOP: str = 'ADOP'
-    EVEN: str = 'EVEN'
-    EVENATTR: str = 'EVENATTR'
-    FAMC_STAT: str = 'FAMC_STAT'
-    FAM_ATTR: str = 'family attributes'
-    FAM_EVEN: str = 'family events'
-    GREATER_LESS_THAN: str = '> or <'
-    ID: str = 'ID'
-    INDI_ATTR: str = 'individual attributes'
-    INDI_EVEN: str = 'individual events'
-    MEDI: str = 'MEDI'
-    MEDIA_TYPE: str = 'MEDIA_TYPE'
-    NAME_TYPE: str = 'NAME_TYPE'
-    PEDI: str = 'PEDI'
-    PERSONAL_NAME: str = 'PERSONAL_NAME'
-    QUAY: str = 'QUAY'
-    RESN: str = 'RESN'
-    ROLE: str = 'ROLE'
-    SEX: str = 'SEX'
-    STAT: str = 'STAT'
+#     CALENDARS: ClassVar = {
+#         'GREGORIAN': {
+#             'JAN': '01',
+#             'FEB': '02',
+#             'MAR': '03',
+#             'APR': '04',
+#             'MAY': '05',
+#             'JUN': '06',
+#             'JUL': '07',
+#             'AUG': '08',
+#             'SEP': '09',
+#             'OCT': '10',
+#             'NOV': '11',
+#             'DEC': '12',
+#         }
+#     }
