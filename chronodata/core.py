@@ -18,7 +18,8 @@ from chronodata.constants import (
     Unit,
     Value,
 )
-from chronodata.g7 import Gedcom, GEDSpecial
+from chronodata.enums import Tag
+from chronodata.g7 import GEDSpecial
 from chronodata.messages import Issue, Msg
 
 
@@ -32,25 +33,24 @@ class Base:
         calendar: str = GEDSpecial.GREGORIAN,
         log: bool = True,
     ) -> None:
-        self.chron: dict[str, Any] = {
-            Gedcom.FAM: {},
-            Gedcom.INDI: {},
-            Gedcom.OBJE: {},
-            Gedcom.REPO: {},
-            Gedcom.SNOTE: {},
-            Gedcom.SOUR: {},
-            Gedcom.SUBM: {},
-            Gedcom.SUBM: {},
+        self.chron: dict[Any, Any] = {
+            Tag.FAM: {},
+            Tag.INDI: {},
+            Tag.OBJE: {},
+            Tag.REPO: {},
+            Tag.SNOTE: {},
+            Tag.SOUR: {},
+            Tag.SUBM: {},
+            Tag.SUBM: {},
         }
         self.chron_name: str = name
         self.calendar: str = calendar
-        #self.strict: bool = calendar[Key.STRICT]
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
         self.ged_header: str = ''
-        self.ged_trailer: str = f'0 {Gedcom.TRLR}\n'
+        self.ged_trailer: str = f'0 {Tag.TRLR}\n'
         self.ged_family: str = ''
         self.ged_individual: str = ''
         self.ged_multimedia: str = ''
@@ -58,17 +58,12 @@ class Base:
         self.ged_shared_note: str = ''
         self.ged_source: str = ''
         self.ged_submitter: str = ''
-        self.named_xreflist: list[list[str]] = []
-        # self.post: str = calendar[Key.POST]
-        # self.postlen: int = len(self.post)
-        # self.pre: str = calendar[Key.PRE]
-        # self.prelen: int = len(self.pre)
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         match self.filename_type:
             case '':
                 self.chron = {
-                    Key.NAME: name,
+                    Tag.NAME: name,
                     Key.CAL: calendar,
                 }
                 if log:
@@ -100,29 +95,36 @@ class Base:
         return filename_type
 
     def read_csv(self) -> None:
-        with Path.open(Path(self.filename), Arg.READ) as file:
-            data = file.readlines()
-            file.close()
+        try:
+            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
+                data = file.readlines()
+                file.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
         self.cal_name = self.chron[Key.CAL][Key.NAME]
         self.chron_name = self.chron[Key.NAME]
 
     def read_json(self) -> None:
-        with Path.open(Path(self.filename), Arg.READ) as file:
-            self.chron = json.load(file)
-            file.close()
+        try:
+            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
+                self.chron = json.load(file)
+                file.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
         self.cal_name = self.chron[Key.CAL][Key.NAME]
         self.chron_name = self.chron[Key.NAME]
-        # self.post = self.chron[Key.CAL][Key.POST]
-        # self.postlen = len(self.post)
-        # self.pre = self.chron[Key.CAL][Key.PRE]
-        # self.prelen = len(self.pre)
 
     def read_ged(self) -> None:
         """Read and validate the GEDCOM file."""
-
-        with Path.open(Path(self.filename), Arg.READ) as file:
-            data = file.readlines()
-            file.close()
+        try:
+            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
+                data = file.readlines()
+                file.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
         # Split each line into components and remove terminator.
         for i in data:
             self.ged_splitdata.append(i.replace('\n', '').split(' ', 2))
@@ -171,9 +173,7 @@ class Base:
             #     tags.append(line[1])
         # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
 
-    def save(
-        self, filename: str = '', overwrite: bool = False
-    ) -> None:
+    def save(self, filename: str = '', overwrite: bool = False) -> None:
         """Save the current chronology.
 
         Parameters
@@ -193,14 +193,18 @@ class Base:
             match self.filename_type:
                 # https://stackoverflow.com/questions/10373247/how-do-i-write-a-python-dictionary-to-a-csv-file
                 case Arg.CSV:
-                    with Path.open(Path(self.filename), Arg.WRITE) as file:
+                    with Path.open(
+                        Path(self.filename), encoding='utf-8', mode=Arg.WRITE
+                    ) as file:
                         w = csv.DictWriter(file, self.chron.keys())
                         w.writerows(self.chron)
                     logging.info(
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
                 case Arg.JSON:
-                    with Path.open(Path(self.filename), Arg.WRITE) as file:
+                    with Path.open(
+                        Path(self.filename), encoding='utf-8', mode=Arg.WRITE
+                    ) as file:
                         json.dump(self.chron, file)
                         file.close()
                     logging.info(
@@ -219,7 +223,9 @@ class Base:
                             self.ged_trailer,
                         ]
                     )
-                    with Path.open(Path(filename), Arg.WRITE) as file:
+                    with Path.open(
+                        Path(filename), encoding='utf-8', mode=Arg.WRITE
+                    ) as file:
                         file.write(output)
                         file.close()
                     logging.info(

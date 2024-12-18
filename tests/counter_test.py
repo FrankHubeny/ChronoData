@@ -11,7 +11,7 @@
 import pytest
 
 from chronodata.chrono import Chronology
-from chronodata.g7 import Gedcom
+from chronodata.enums import Record
 
 testdata = [
     ('oldxref', 1),
@@ -24,12 +24,12 @@ testdata = [
     ('a.source_xreflist[0]', '@5@'),
     ('a.submitter_xreflist[0]', '@6@'),
     ('a.shared_note_xreflist[0]', '@7@'),
-    ('adam', '@8@'),
-    ('adam_eve', '@9@'),
+    ('adam.fullname', '@8@'),
+    ('adam_eve.fullname', '@9@'),
     ('adam_xref', '@ADAM@'),
-    ('eve_xref', '@EVE@'),
+    ('eve_xref.fullname', '@EVE@'),
     ('adam_eve_xref', '@ADAMEVE@'),
-    ('eve_adam_xref', '@EVE_ADAM@'),
+    ('eve_adam_xref.fullname', '@EVE_ADAM@'),
 ]
 
 
@@ -37,23 +37,19 @@ testdata = [
 def test_counter(test_input: str, expected: str | int | bool) -> None:
     a = Chronology(name='testing')
     oldxref = a.xref_counter  # noqa: F841
-    xref = a.next_counter(a.individual_xreflist, Gedcom.INDI)  # noqa: F841
+    xref = a.next_counter(a.individual_xreflist)  # noqa: F841
     newxref = a.xref_counter  # noqa: F841
-    xref_family = a.next_counter(a.family_xreflist, Gedcom.FAM)  # noqa: F841
-    xref_multimedia = a.next_counter(a.multimedia_xreflist, Gedcom.OBJE)  # noqa: F841
-    xref_repository = a.next_counter(a.repository_xreflist, Gedcom.REPO)  # noqa: F841
-    xref_source = a.next_counter(a.source_xreflist, Gedcom.SOUR)  # noqa: F841
-    xref_submitter = a.next_counter(a.submitter_xreflist, Gedcom.SUBM)  # noqa: F841
-    xref_shared_note = a.next_counter(a.shared_note_xreflist, Gedcom.SNOTE)  # noqa: F841
+    xref_family = a.next_counter(a.family_xreflist)  # noqa: F841
+    xref_multimedia = a.next_counter(a.multimedia_xreflist)  # noqa: F841
+    xref_repository = a.next_counter(a.repository_xreflist)  # noqa: F841
+    xref_source = a.next_counter(a.source_xreflist)  # noqa: F841
+    xref_submitter = a.next_counter(a.submitter_xreflist)  # noqa: F841
+    xref_shared_note = a.next_counter(a.shared_note_xreflist)  # noqa: F841
     adam = a.individual_xref()  # noqa: F841
     adam_eve = a.family_xref()  # noqa: F841
     b = Chronology(name='test name')
-    adam_xref = a.next_counter(
-        a.individual_xreflist, Gedcom.INDI, xref_name=' Adam   '
-    )  # noqa: F841
-    adam_eve_xref = a.next_counter(
-        a.family_xreflist, Gedcom.FAM, xref_name='AdamEve'
-    )  # noqa: F841
+    adam_xref = a.next_counter(a.individual_xreflist, xref_name=' Adam   ')  # noqa: F841
+    adam_eve_xref = a.next_counter(a.family_xreflist, xref_name='AdamEve')  # noqa: F841
     eve_xref = a.individual_xref(xref_name=' Eve ')  # noqa: F841
     eve_adam_xref = a.family_xref(xref_name='Eve Adam')  # noqa: F841
 

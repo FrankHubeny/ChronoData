@@ -66,6 +66,7 @@ addopts = [
   "--strict-config",
   "--import-mode=importlib",	
   "--cov=chronodata",
+  "--cov-report=term-missing",
 ]
 xfail_strict = true
 filterwarnings = ["error"]

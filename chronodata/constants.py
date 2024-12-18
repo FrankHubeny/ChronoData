@@ -6,6 +6,12 @@ from typing import ClassVar, Literal
 
 
 @dataclass(frozen=True)
+class Nul:
+    """Constants for null or empty class instances."""
+    STR: str = ''
+    
+
+@dataclass(frozen=True)
 class Arg:
     """The following constants are used as arguments to procedure calls
     such as Pandas DataFrames or NumPy."""

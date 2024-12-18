@@ -306,6 +306,12 @@ class NameTranslation(NamedTuple):
             and Defs.verify_type(self.piece, PersonalName)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
     # def ged(self, level: int = 1) -> str:
     #     name_translation: str = ''
@@ -326,6 +332,12 @@ class NoteTranslation(NamedTuple):
             and Defs.verify_type(self.language, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class NoteCitation(NamedTuple):
@@ -342,6 +354,12 @@ class NoteCitation(NamedTuple):
             and Defs.verify_tuple_type(self.translations, NoteTranslation)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Citation(NamedTuple):
@@ -376,6 +394,12 @@ class Citation(NamedTuple):
             and Defs.verify_tuple_type(self.notes, NoteCitation)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Note(NamedTuple):
@@ -394,6 +418,12 @@ class Note(NamedTuple):
             and Defs.verify_tuple_type(self.citations, Citation)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Association(NamedTuple):
@@ -471,6 +501,12 @@ class MultimediaLink(NamedTuple):
             and Defs.verify_type(self.title, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Exid(NamedTuple):
@@ -501,6 +537,12 @@ class PlaceTranslation(NamedTuple):
             self.language, str
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Map(NamedTuple):
@@ -512,6 +554,12 @@ class Map(NamedTuple):
             self.latitude, float
         ) and Defs.verify_type(self.longitude, float)
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Place(NamedTuple):
@@ -533,6 +581,12 @@ class Place(NamedTuple):
             and Defs.verify_tuple_type(self.notes, Note)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Date(NamedTuple):
@@ -671,7 +725,7 @@ class Time(NamedTuple):
             )
         return ''
 
-    def iso(self) -> str | None:
+    def iso(self) -> str:
         """Return the validated ISO format for the time.
 
         References
@@ -681,7 +735,13 @@ class Time(NamedTuple):
         """
         if self.validate():
             return f'{self.hour}:{self.minute}:{self.second}'
-        return None
+        return ''
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class DateExact(NamedTuple):
@@ -801,6 +861,16 @@ class EventDetail(NamedTuple):
     multimedia_links: tuple[MultimediaLink] | None = None
     utd: tuple[str] | None = None
 
+    def validate(self) -> bool:
+        check: bool = True
+        return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
+
 
 class HusbandWife(NamedTuple):
     husband_age: int = 0
@@ -831,6 +901,12 @@ class FamilyEventDetail(NamedTuple):
     def validate(self) -> bool:
         check: bool = Defs.verify_type(self.husband_wife_ages, HusbandWife)
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class FamilyAttribute(NamedTuple):
@@ -845,6 +921,12 @@ class FamilyAttribute(NamedTuple):
             and Defs.verify_type(self.family_event_detail, FamilyEventDetail | None)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class FamilyEvent(NamedTuple):
@@ -859,6 +941,12 @@ class FamilyEvent(NamedTuple):
             and Defs.verify_type(self.event_detail, FamilyEventDetail | None)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Husband(NamedTuple):
@@ -871,6 +959,12 @@ class Husband(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Wife(NamedTuple):
@@ -883,6 +977,12 @@ class Wife(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Child(NamedTuple):
@@ -895,6 +995,12 @@ class Child(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class LDSOrdinanceDetail(NamedTuple):
@@ -915,6 +1021,12 @@ class LDSOrdinanceDetail(NamedTuple):
             and Defs.verify_tuple_type(self.sources, Citation)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class LDSSpouseSealing(NamedTuple):
@@ -927,6 +1039,12 @@ class LDSSpouseSealing(NamedTuple):
             and Defs.verify_type(self.detail, LDSOrdinanceDetail | None)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class LDSIndividualOrdinances(NamedTuple):
@@ -941,6 +1059,12 @@ class LDSIndividualOrdinances(NamedTuple):
             and Defs.verify_type(self.family_xref, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Identifier(NamedTuple):
@@ -953,6 +1077,12 @@ class Identifier(NamedTuple):
             and Defs.verify_type(self.tag_type, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class IndividualEventDetail(NamedTuple):
@@ -967,6 +1097,12 @@ class IndividualEventDetail(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class IndividualAttribute(NamedTuple):
@@ -981,6 +1117,12 @@ class IndividualAttribute(NamedTuple):
             and Defs.verify_type(self.event_detail, IndividualEventDetail | None)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class IndividualEvent(NamedTuple):
@@ -1001,6 +1143,12 @@ class IndividualEvent(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Alias(NamedTuple):
@@ -1013,6 +1161,12 @@ class Alias(NamedTuple):
             and Defs.verify_type(self.phrase, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class FamilyChild(NamedTuple):
@@ -1033,6 +1187,12 @@ class FamilyChild(NamedTuple):
             and Defs.verify_tuple_type(self.notes, Note)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class FamilySpouse(NamedTuple):
@@ -1045,6 +1205,12 @@ class FamilySpouse(NamedTuple):
             and Defs.verify_tuple_type(self.notes, Note)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class FileTranslations(NamedTuple):
@@ -1057,6 +1223,12 @@ class FileTranslations(NamedTuple):
             and Defs.verify_type(self.media_type, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Text(NamedTuple):
@@ -1071,6 +1243,12 @@ class Text(NamedTuple):
             and Defs.verify_type(self.language, str)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class File(NamedTuple):
@@ -1091,6 +1269,12 @@ class File(NamedTuple):
             and Defs.verify_tuple_type(self.file_translations, FileTranslations)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class SourceEvent(NamedTuple):
@@ -1111,6 +1295,12 @@ class SourceEvent(NamedTuple):
             and Defs.verify_tuple_type(self.notes, Note)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class NonEvent(NamedTuple):
@@ -1129,6 +1319,12 @@ class NonEvent(NamedTuple):
             and Defs.verify_tuple_type(self.sources, SourceEvent)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Family(NamedTuple):
@@ -1165,6 +1361,12 @@ class Family(NamedTuple):
             and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Repository(NamedTuple):
@@ -1188,6 +1390,12 @@ class Repository(NamedTuple):
             and Defs.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Source(NamedTuple):
@@ -1216,6 +1424,12 @@ class Source(NamedTuple):
             and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Individual(NamedTuple):
@@ -1258,6 +1472,12 @@ class Individual(NamedTuple):
             and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Multimedia(NamedTuple):
@@ -1274,6 +1494,12 @@ class Multimedia(NamedTuple):
             and Defs.verify_tuple_type(self.sources, Source)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class SharedNote(NamedTuple):
@@ -1294,6 +1520,12 @@ class SharedNote(NamedTuple):
             and Defs.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines
 
 
 class Submitter(NamedTuple):
@@ -1322,3 +1554,9 @@ class Submitter(NamedTuple):
             and Defs.verify_tuple_type(self.notes, Note)
         )
         return check
+    
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            pass
+        return lines

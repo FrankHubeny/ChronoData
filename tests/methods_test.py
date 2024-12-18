@@ -5,37 +5,9 @@
 
 ------------------------------------------------------------------------------"""
 
-#from typing import Any
-
 import pytest
 
-from chronodata.enums import (
-    Adop,
-    ApproxDate,
-    EvenAttr,
-    FamAttr,
-    FamcStat,
-    FamEven,
-    GreaterLessThan,
-    Id,
-    IndiAttr,
-    IndiEven,
-    Medi,
-    MediaType,
-    NameType,
-    Pedi,
-    PersonalNamePiece,
-    Quay,
-    RangeDate,
-    Record,
-    Resn,
-    RestrictDate,
-    Role,
-    Sex,
-    Stat,
-    Tag,
-)
-#from chronodata.g7 import Gedcom
+from chronodata.enums import Record, Tag
 from chronodata.messages import Msg
 from chronodata.methods import Defs
 from chronodata.tuples import Date, Time
@@ -45,8 +17,10 @@ testdata = [
     ('taginfo2', '2 DATA\n'),
     ('taginit1', '0 @1@ INDI\n'),
     ('taginit2', '0 @1@ INDI someone\n'),
+    ('taginfo3', '1 TIME 01:01:01Z hello\n'),
     ('Defs.verify_type(1,int)', True),
     ('Defs.verify_type("a",str)', True),
+    ('Defs.verify_type(1.5,float)', True),
     ('Defs.verify_tuple_type(("b","a"),str)', True),
     ('Defs.verify_tuple_type((1,2),int)', True),
     ('Defs.verify_range(1,0,2)', True),
@@ -55,16 +29,42 @@ testdata = [
     ('Defs.verify_range(59.9999999999,50.0,59.9999999999)', True),
     ('Defs.verify_not_negative(2)', True),
     ('enum', True),
+    ('clean1', 'hello to you'),
+    ('clean2', 'ABCDEFG'),
+    ('clean3', 'ABCDEFG'),
+    ('clean4', 'ABCDEFG'),
+    ('clean5', ''),
 ]
 
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
-def test_time(test_input: str, expected: str | int | bool) -> None:
+def test_defs_tags_classes(test_input: str, expected: str | int | bool) -> None:
+    # Test the taginfo method.
     taginfo1 = Defs.taginfo(1, Tag.TIME, '01:01:01Z')  # noqa: F841
     taginfo2 = Defs.taginfo(2, Tag.DATA)  # noqa: F841
+    taginfo3 = Defs.taginfo(1, Tag.TIME, '01:01:01Z', 'hello')  # noqa: F841
+
+    # Test the taginit method.
     taginit1 = Defs.taginit('@1@', Record.INDI)  # noqa: F841
     taginit2 = Defs.taginit('@1@', Record.INDI, 'someone')  # noqa: F841
-    enum = Defs.verify_enum(Adop.HUSB, Adop)  # noqa: F841
+
+    # Test the verify_enum method.
+    enum = Defs.verify_enum(Tag.HUSB, Tag)  # noqa: F841
+
+    # test the clean_input method.
+    clean1 = Defs.clean_input('hell\u0000o to you')  # noqa: F841
+    clean2 = Defs.clean_input(  # noqa: F841
+        'A\uffffB\ufffeC\udfffD\ud800E\u007fF\u001fG\u0000'
+    )
+    clean3 = Defs.clean_input(  # noqa: F841
+        'A\u0001B\u0002C\u0003D\u0004E\u0005F\u0006G\u0007'
+    )
+    clean4 = Defs.clean_input(  # noqa: F841
+        'A\u0001B\u0001C\u0001D\u0001E\u0001F\u0001G\u0001'
+    )
+    clean5 = Defs.clean_input(  # noqa: F841
+        '\u0009\u0009\u0009'
+    )
 
     assert eval(test_input) == expected
 
@@ -113,181 +113,6 @@ def test_tuple_of_types_time_error() -> None:
         Defs.verify_tuple_type(t, Date)
 
 
-def test_adop_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Adop)
-    ):
-        Defs.verify_enum('hello', Adop)
-
-def test_approxdate_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', ApproxDate)
-    ):
-        Defs.verify_enum('hello', ApproxDate)
-
-def test_greaterlessthan_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', GreaterLessThan)
-    ):
-        Defs.verify_enum('hello', GreaterLessThan)
-
-def test_personalnamepiece_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', PersonalNamePiece)
-    ):
-        Defs.verify_enum('hello', PersonalNamePiece)
-
-def test_rangedate_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', RangeDate)
-    ):
-        Defs.verify_enum('hello', RangeDate)
-
-def test_record_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Record)
-    ):
-        Defs.verify_enum('hello', Record)
-
-def test_restrictdate_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', RestrictDate)
-    ):
-        Defs.verify_enum('hello', RestrictDate)
-
-def test_even_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', EvenAttr)
-    ):
-        Defs.verify_enum('hello', EvenAttr)
-
-
-def test_evenattr_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', EvenAttr),
-    ):
-        Defs.verify_enum('hello', EvenAttr)
-
-
-def test_famc_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', FamcStat),
-    ):
-        Defs.verify_enum('hello', FamcStat)
-
-
-def test_fam_attr_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', FamAttr),
-    ):
-        Defs.verify_enum('hello', FamAttr)
-
-
-def test_fam_even_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', FamEven),
-    ):
-        Defs.verify_enum('hello', FamEven)
-
-
-def test_id_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', Id),
-    ):
-        Defs.verify_enum('hello', Id)
-
-
-def test_indi_attr_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', IndiAttr),
-    ):
-        Defs.verify_enum('hello', IndiAttr)
-
-
-def test_indi_even_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', IndiEven),
-    ):
-        Defs.verify_enum('hello', IndiEven)
-
-
-def test_medi_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Medi)
-    ):
-        Defs.verify_enum('hello', Medi)
-
-
-def test_media_type_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', MediaType),
-    ):
-        Defs.verify_enum('hello', MediaType)
-
-
-def test_name_type_enum() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_ENUM.format('hello', NameType),
-    ):
-        Defs.verify_enum('hello', NameType)
-
-
-def test_pedi_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Pedi)
-    ):
-        Defs.verify_enum('hello', Pedi)
-
-
-def test_quay_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Quay)
-    ):
-        Defs.verify_enum('hello', Quay)
-
-
-def test_resn_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Resn)
-    ):
-        Defs.verify_enum('hello', Resn)
-
-
-def test_role_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Role)
-    ):
-        Defs.verify_enum('hello', Role)
-
-
-def test_sex_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Sex)
-    ):
-        Defs.verify_enum('hello', Sex)
-
-
-def test_stat_enum() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Stat)
-    ):
-        Defs.verify_enum('hello', Stat)
-
-
-def test_empty_string_enum() -> None:
-    with pytest.raises(ValueError, match=Msg.NOT_VALID_ENUM.format('', Stat)):
-        Defs.verify_enum('', Stat)
-
-
 def test_not_negative_int() -> None:
     with pytest.raises(ValueError, match=Msg.NEGATIVE_ERROR.format(-1)):
         Defs.verify_not_negative(-1)
@@ -322,44 +147,8 @@ def test_range_float_high() -> None:
         Defs.verify_range(11.5, 5.1, 10.9)
 
 
-# def test_xref_individual() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.INDIVIDUAL)):
-#         Defs.verify_xref('rec', a.individual_xreflist, Record.INDIVIDUAL)
-
-# def test_xref_family() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.FAMILY)):
-#         Defs.verify_xref('rec', a.family_xreflist, Record.FAMILY)
-
-# def test_xref_medialink() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.MULTIMEDIA)):
-#         Defs.verify_xref('rec', a.multimedia_xreflist, Record.MULTIMEDIA)
-
-# def test_xref_source() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.SOURCE)):
-#         Defs.verify_xref('rec', a.source_xreflist, Record.SOURCE)
-
-# def test_xref_repository() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.REPOSITORY)):
-#         Defs.verify_xref('rec', a.repository_xreflist, Record.REPOSITORY)
-
-# def test_xref_submitter() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.SUBMITTER)):
-#         Defs.verify_xref('rec', a.submitter_xreflist, Record.SUBMITTER)
-
-# def test_xref_shared_note() -> None:
-#     a = Chronology('test')
-#     with pytest.raises(
-#         ValueError, match=Msg.NOT_RECORD.format('rec', Record.SHARED_NOTE)):
-#         Defs.verify_xref('rec', a.shared_note_xreflist, Record.SHARED_NOTE)
+def test_tag_enum() -> None:
+    with pytest.raises(
+        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Tag)
+    ):
+        Defs.verify_enum('hello', Tag)

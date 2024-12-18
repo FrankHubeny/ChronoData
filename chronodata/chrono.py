@@ -20,46 +20,27 @@ from typing import Any
 
 import numpy as np
 
-# from chronodata.constants import (
-#     Cal,
-#     Value,
-# )
 from chronodata.core import Base
-
-# from chronodata.enums import (
-#     Adop,
-#     ApproxDate,
-#     EvenAttr,
-#     FamAttr,
-#     FamcStat,
-#     FamEven,
-#     GreaterLessThan,
-#     Id,
-#     IndiAttr,
-#     IndiEven,
-#     Medi,
-#     MediaType,
-#     NameType,
-#     Pedi,
-#     PersonalNamePiece,
-#     RangeDate,
-#     Records,
-#     RestrictDate,
-#     Role,
-#     Sex,
-#     Stat,
-# )
+from chronodata.enums import Tag
 from chronodata.g7 import (
-    Enum,
-    EnumName,
-    Gedcom,
+    #Enum,
+    #EnumName,
     GEDDateTime,
     GEDSpecial,
     ISOMonths,
-    Record,
+    #Record,
 )
 from chronodata.messages import Msg
 from chronodata.methods import Defs
+from chronodata.records import (
+    FamilyXref,
+    IndividualXref,
+    MultimediaXref,
+    RepositoryXref,
+    SharedNoteXref,
+    SourceXref,
+    SubmitterXref,
+)
 from chronodata.tuples import (
     Address,
     Age,
@@ -92,50 +73,20 @@ class Chronology(Base):
         self.source_xreflist: list[str] = []
         self.submitter_xreflist: list[str] = []
 
-    def _check_tag(
-        self, tag: str, dictionary: dict[str, Any] | None = None
-    ) -> None:
-        if dictionary is None:
-            dictionary = self.chron
-        if tag not in dictionary:
-            dictionary.update({tag: {}})
+    # def _check_tag(
+    #     self, tag: Tag, dictionary: dict[str, Any] | None = None
+    # ) -> None:
+    #     if dictionary is None:
+    #         dictionary = self.chron
+    #     if tag not in dictionary:
+    #         dictionary.update({tag: {}})
 
     def add_event(self, name: str, when: str) -> None:
-        self._check_tag(Gedcom.EVEN)
-        self.chron[Gedcom.EVEN].update({name: {Gedcom.DATE: when}})
+        #self._check_tag(Tag.EVEN)
+        self.chron[Tag.EVEN.value].update({name: {Tag.DATE.value: when}})
         logging.info(Msg.ADD_EVENT.format(name, self.chron_name))
 
     ###### GEDCOM Substructures
-
-    # def taginit(self, xref: str, tag: str, info: str = '') -> str:
-    #     if info == '':
-    #         return f'0 {xref} {tag}\n'
-    #     return f'0 {xref} {tag} {str(info).strip()}\n'
-
-    # def taginfo(
-    #     self,
-    #     level: int,
-    #     tag: str,
-    #     info: str = '',
-    #     extra: str = '',
-    # ) -> str:
-    #     """Return a GEDCOM formatted line for the information and level.
-
-    #     This is suitable for most tagged lines to guarantee it is uniformly
-    #     formatted.  Although the user need not worry about calling this line,
-    #     it is provided so the user can see the GEDCOM formatted output
-    #     that would result.
-
-    #     See Also
-    #     --------
-
-    #     """
-
-    #     if extra == '':
-    #         if info == '':
-    #             return f'{level} {tag}\n'
-    #         return f'{level} {tag} {info}\n'
-    #     return f'{level} {tag} {info} {extra}\n'
 
     def verify_xref(self, xref: str, xreflist: list[str], name: str) -> bool:
         """Check if an xref value in in the proper xreflist."""
@@ -283,8 +234,8 @@ class Chronology(Base):
         date, time = self.ged_date()
         return ''.join(
             [
-                Defs.taginfo(level, Gedcom.DATE, date),
-                Defs.taginfo(level + 1, Gedcom.TIME, time),
+                Defs.taginfo(level, Tag.DATE, date),
+                Defs.taginfo(level + 1, Tag.TIME, time),
             ]
         )
 
@@ -309,13 +260,13 @@ class Chronology(Base):
             # note = Note('', '', '', [], [])
             return ''.join(
                 [
-                    Defs.taginfo(1, Gedcom.CHAN),
+                    Defs.taginfo(1, Tag.CHAN),
                     self.now(),
                 ]
             )
         return ''.join(
             [
-                Defs.taginfo(1, Gedcom.CHAN),
+                Defs.taginfo(1, Tag.CHAN),
                 self.now(),
                 self.note_structure(note),
             ]
@@ -338,7 +289,7 @@ class Chronology(Base):
         - `source`: the method creating the source record (SOUR)
         - `submitter`: the method creating the submitter record (SUBM)
         """
-        return ''.join([Defs.taginfo(1, Gedcom.CREA), self.now()])
+        return ''.join([Defs.taginfo(1, Tag.CREA), self.now()])
 
     def date_value(
         self,
@@ -404,134 +355,30 @@ class Chronology(Base):
         #     logging.error(Msg.NO_VALUE)
         #     raise ValueError(Msg.NO_VALUE)
         if time == Time(0, 0, 0) and phrase == '':
-            return Defs.taginfo(level, Gedcom.DATE, date_str)
+            return Defs.taginfo(level, Tag.DATE, date_str)
         if time != Time(0, 0, 0) and phrase == '':
             return ''.join(
                 [
-                    Defs.taginfo(level, Gedcom.DATE, date_str),
-                    Defs.taginfo(level + 1, Gedcom.TIME, time_str),
+                    Defs.taginfo(level, Tag.DATE, date_str),
+                    Defs.taginfo(level + 1, Tag.TIME, time_str),
                 ]
             )
         if time == Time(0, 0, 0) and phrase != '':
             return ''.join(
                 [
-                    Defs.taginfo(level, Gedcom.DATE, date_str),
-                    Defs.taginfo(level + 1, Gedcom.PHRASE, phrase),
+                    Defs.taginfo(level, Tag.DATE, date_str),
+                    Defs.taginfo(level + 1, Tag.PHRASE, phrase),
                 ]
             )
         return ''.join(
             [
-                Defs.taginfo(level, Gedcom.DATE, date_str),
-                Defs.taginfo(level + 1, Gedcom.TIME, time_str),
-                Defs.taginfo(level + 1, Gedcom.PHRASE, phrase),
+                Defs.taginfo(level, Tag.DATE, date_str),
+                Defs.taginfo(level + 1, Tag.TIME, time_str),
+                Defs.taginfo(level + 1, Tag.PHRASE, phrase),
             ]
         )
 
     ###### Methods to Assisting Building GEDCOM Records
-
-    # def address_structure(
-    #     self,
-    #     address: str = '',
-    #     city: str = '',
-    #     state: str = '',
-    #     postal: str = '',
-    #     country: str = '',
-    #     level: int = 1,
-    # ) -> str:
-    # """Add address information.
-
-    # Each address line is a list of five strings:
-    # - Mailing Address: Each line of the mailing label is separated by `\n`.
-    # - City: The city or and empty string to leave this blank.
-    # - State: The state or an empty string to leave this blank.
-    # - Postal Code: The postal code or an empty string to leave this blank.
-    # - Country: The country or an empty string to leave this blank.
-
-    # One does not have to call this method directly.  The GEDCOM record methods
-    # call it when creating a chronology.  However, one can use it to
-    # see what the address information one provides would look like
-    # in a GEDCOM file.
-
-    # Example
-    # -------
-    # In the first example note the five strings in the list.  Also note
-    # that the country was not specified but nonetheless an empty string
-    # was added as a placeholder for the absent country information.
-    # Note the `\n` to separate the two address lines.
-    # [
-    #     '12345 ABC Street\nSouth North City, My State 23456',
-    #     'South North City',
-    #     'My State',
-    #     '23456',
-    #     ''
-    # ]
-
-    # The GEDCOM record would appear as the following:
-
-    # 1 ADDR 12345 ABC Street
-    # 1 CONT South North City, My State 23456
-    # 2 CITY South North City
-    # 2 STAE My State
-    # 2 POST 23456
-
-    # The following is the minimum amount of information for an address.
-    # [
-    #     '12345 ABC Street\nSouth North City, My State 23456',
-    # ]
-
-    # If one does not want to use the `\n` one can write the following
-    # provided one imports the GEDSpecial class.  One way to do that is
-    # by adding the following line at the top of the cell:
-
-    # The GEDCOM record would appear as the following:
-
-    # 1 ADDR 12345 ABC Street
-    # 1 CONT South North City, My State 23456
-
-    # If the list is empty the method returns the empty list.
-
-    # """
-    # lines: str = ''
-    # if address != '':
-    #     address_lines = address.split('\n')
-    #     for line in address_lines:
-    #         if line == '':
-    #             address_lines.remove(line)
-    #     lines = ''.join(
-    #         [
-    #             lines,
-    #             Defs.taginfo(level, Gedcom.ADDR, address_lines[0].strip()),
-    #         ]
-    #     )
-    #     for line in address_lines[1:]:
-    #         lines = ''.join(
-    #             [lines, Defs.taginfo(level, Gedcom.CONT, line.strip())]
-    #         )
-    #     if city != '':
-    #         lines = ''.join(
-    #             [lines, Defs.taginfo(level + 1, Gedcom.CITY, city.strip())]
-    #         )
-    #     if state != '':
-    #         lines = ''.join(
-    #             [lines, Defs.taginfo(level + 1, Gedcom.STAE, state.strip())]
-    #         )
-    #     if postal != '':
-    #         lines = ''.join(
-    #             [
-    #                 lines,
-    #                 Defs.taginfo(
-    #                     level + 1, Gedcom.POST, str(postal).strip()
-    #                 ),
-    #             ]
-    #         )
-    #     if country != '':
-    #         lines = ''.join(
-    #             [
-    #                 lines,
-    #                 Defs.taginfo(level + 1, Gedcom.CTRY, country.strip()),
-    #             ]
-    #         )
-    # return lines
 
     def association_structure(
         self, xref: str, association: Association, level: int = 1
@@ -539,7 +386,7 @@ class Chronology(Base):
         """Add association information."""
         lines: str = ''
         if self.verify_xref(xref, self.individual_xreflist, Record.INDIVIDUAL):
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.ASSO, xref)])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.ASSO, xref)])
             association.ged(1)
         #     if association.association_phrase != '':
         #         lines = ''.join(
@@ -584,27 +431,27 @@ class Chronology(Base):
         #     )
         return lines
 
-    def event_detail(self, event: list[Any], level: int = 1) -> str:
-        """Add event detail information."""
-        lines: str = ''
-        return lines
+    # def event_detail(self, event: list[Any], level: int = 1) -> str:
+    #     """Add event detail information."""
+    #     lines: str = ''
+    #     return lines
 
-    def family_attribute_structure(
-        self, attribute: list[Any], level: int = 1
-    ) -> str:
-        """Add attribute information."""
-        lines: str = ''
-        return lines
+    # def family_attribute_structure(
+    #     self, attribute: list[Any], level: int = 1
+    # ) -> str:
+    #     """Add attribute information."""
+    #     lines: str = ''
+    #     return lines
 
-    def family_event_detail(self, detail: list[Any], level: int = 1) -> str:
-        """Add family event detail information."""
-        lines: str = ''
-        return lines
+    # def family_event_detail(self, detail: list[Any], level: int = 1) -> str:
+    #     """Add family event detail information."""
+    #     lines: str = ''
+    #     return lines
 
-    def family_event_structure(self, event: list[Any], level: int = 1) -> str:
-        """Add family event information."""
-        lines: str = ''
-        return lines
+    # def family_event_structure(self, event: list[Any], level: int = 1) -> str:
+    #     """Add family event information."""
+    #     lines: str = ''
+    #     return lines
 
     def identifier_structure(
         self, identifier: list[str], level: int = 1
@@ -628,73 +475,73 @@ class Chronology(Base):
                 )
             if len(identifier) > 2:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.TYPE, identifier[2])]
+                    [lines, Defs.taginfo(level + 1, Tag.TYPE, identifier[2])]
                 )
         return lines
 
-    def individual_attribute_structure(
-        self, attribute: list[Any], level: int = 1
-    ) -> str:
-        """Add individual attribute information."""
-        lines: str = ''
-        return lines
+    # def individual_attribute_structure(
+    #     self, attribute: list[Any], level: int = 1
+    # ) -> str:
+    #     """Add individual attribute information."""
+    #     lines: str = ''
+    #     return lines
 
-    def individual_event_detail(self, detail: list[Any], level: int = 1) -> str:
-        """Add individual event detail information."""
-        lines: str = ''
-        return lines
+    # def individual_event_detail(self, detail: list[Any], level: int = 1) -> str:
+    #     """Add individual event detail information."""
+    #     lines: str = ''
+    #     return lines
 
-    def individual_event_structure(
-        self, event: list[Any], level: int = 1
-    ) -> str:
-        """Add individual event information."""
-        lines: str = ''
-        return lines
+    # def individual_event_structure(
+    #     self, event: list[Any], level: int = 1
+    # ) -> str:
+    #     """Add individual event information."""
+    #     lines: str = ''
+    #     return lines
 
-    def lds_individual_ordinance(
-        self, ordinance: list[Any], level: int = 1
-    ) -> str:
-        """Add LDS individual ordinance information."""
-        lines: str = ''
-        return lines
+    # def lds_individual_ordinance(
+    #     self, ordinance: list[Any], level: int = 1
+    # ) -> str:
+    #     """Add LDS individual ordinance information."""
+    #     lines: str = ''
+    #     return lines
 
-    def lds_ordinance_detail(self, detail: list[Any], level: int = 1) -> str:
-        """Add LDS ordinance detail information."""
-        lines: str = ''
-        return lines
+    # def lds_ordinance_detail(self, detail: list[Any], level: int = 1) -> str:
+    #     """Add LDS ordinance detail information."""
+    #     lines: str = ''
+    #     return lines
 
-    def lds_spouse_sealing(self, spouse: list[Any], level: int = 1) -> str:
-        """Add LDS spouse sealing information."""
-        lines: str = ''
-        return lines
+    # def lds_spouse_sealing(self, spouse: list[Any], level: int = 1) -> str:
+    #     """Add LDS spouse sealing information."""
+    #     lines: str = ''
+    #     return lines
 
     def multimedia_link(self, media: list[Any], level: int = 1) -> str:
         """Add multimedia information."""
         lines: str = ''
         if len(media) > 0:
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.OBJE, media[0])])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.OBJE, media[0])])
             if len(media) == 6:
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Gedcom.CROP),
-                        Defs.taginfo(level + 2, Gedcom.TOP, media[1]),
-                        Defs.taginfo(level + 2, Gedcom.LEFT, media[2]),
-                        Defs.taginfo(level + 2, Gedcom.HEIGHT, media[3]),
-                        Defs.taginfo(level + 2, Gedcom.WIDTH, media[4]),
-                        Defs.taginfo(level + 1, Gedcom.TITL, media[5]),
+                        Defs.taginfo(level + 1, Tag.CROP),
+                        Defs.taginfo(level + 2, Tag.TOP, media[1]),
+                        Defs.taginfo(level + 2, Tag.LEFT, media[2]),
+                        Defs.taginfo(level + 2, Tag.HEIGHT, media[3]),
+                        Defs.taginfo(level + 2, Tag.WIDTH, media[4]),
+                        Defs.taginfo(level + 1, Tag.TITL, media[5]),
                     ]
                 )
             if len(media) == 2:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.TITL, media[1])]
+                    [lines, Defs.taginfo(level + 1, Tag.TITL, media[1])]
                 )
         return lines
 
-    def non_event_structure(self, event: list[Any], level: int = 1) -> str:
-        """Add non event information."""
-        lines: str = ''
-        return lines
+    # def non_event_structure(self, event: list[Any], level: int = 1) -> str:
+    #     """Add non event information."""
+    #     lines: str = ''
+    #     return lines
 
     def note_structure(self, note: Note, level: int = 1) -> str:
         """Add note information."""
@@ -707,20 +554,18 @@ class Chronology(Base):
                 Msg.NOT_VALID_ENUM.format(note.mime, EnumName.MEDIA_TYPE)
             )
         if note.text != '':
-            lines = ''.join(
-                [lines, Defs.taginfo(level, Gedcom.NOTE, note.text)]
-            )
+            lines = ''.join([lines, Defs.taginfo(level, Tag.NOTE, note.text)])
             if note.mime != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.MIME, note.mime)]
+                    [lines, Defs.taginfo(level + 1, Tag.MIME, note.mime)]
                 )
             if note.language != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.LANG, note.language)]
+                    [lines, Defs.taginfo(level + 1, Tag.LANG, note.language)]
                 )
             for trans in note.translation:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level, Gedcom.TRAN, trans.text)]
+                    [lines, Defs.taginfo(level, Tag.TRAN, trans.text)]
                 )
 
                 if trans.mime not in Enum.MEDIA_TYPE:
@@ -730,12 +575,12 @@ class Chronology(Base):
                         )
                     )
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Gedcom.MIME, trans.mime)]
+                    [lines, Defs.taginfo(level + 1, Tag.MIME, trans.mime)]
                 )
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Gedcom.LANG, trans.language),
+                        Defs.taginfo(level + 1, Tag.LANG, trans.language),
                     ]
                 )
         for cite in note.citations:
@@ -763,13 +608,13 @@ class Chronology(Base):
         Defs.verify_enum(type_name, Enum.NAME_TYPE)
         lines: str = ''.join(
             [
-                Defs.taginfo(level, Gedcom.NAME, name),
-                Defs.taginfo(level + 1, Gedcom.TYPE, type_name),
+                Defs.taginfo(level, Tag.NAME, name),
+                Defs.taginfo(level + 1, Tag.TYPE, type_name),
             ]
         )
         if phrase != '':
             lines = ''.join(
-                [lines, Defs.taginfo(level + 2, Gedcom.PHRASE, phrase)]
+                [lines, Defs.taginfo(level + 2, Tag.PHRASE, phrase)]
             )
         if pieces is not None and len(pieces) > 0:
             for piece in pieces:
@@ -784,29 +629,29 @@ class Chronology(Base):
                 )
         return lines
 
-    def place_structure(self, place: list[Any], level: int = 1) -> str:
-        """Add note information."""
+    # def place_structure(self, place: list[Any], level: int = 1) -> str:
+    #     """Add note information."""
 
-        lines: str = ''
-        return lines
+    #     lines: str = ''
+    #     return lines
 
     def source_citation(self, source: Citation, level: int = 1) -> str:
         """Add source citation information."""
         lines: str = ''
         return lines
 
-    def source_repository_citation(
-        self, repository: Any, level: int = 1
-    ) -> str:
-        """Add source repository information."""
-        lines: str = ''
-        return lines
+    # def source_repository_citation(
+    #     self, repository: Any, level: int = 1
+    # ) -> str:
+    #     """Add source repository information."""
+    #     lines: str = ''
+    #     return lines
 
     def translation(self, trans: NameTranslation, level: int = 1) -> str:
         lines: str = ''.join(
             [
-                Defs.taginfo(level, Gedcom.TRAN, trans.text),
-                Defs.taginfo(level + 1, Gedcom.LANG, trans.language),
+                Defs.taginfo(level, Tag.TRAN, trans.text),
+                Defs.taginfo(level + 1, Tag.LANG, trans.language),
                 Defs.taginfo(level + 1, trans.piece.tag, trans.piece.text),
             ]
         )
@@ -841,25 +686,22 @@ class Chronology(Base):
             wwws = []
         lines: str = ''
         for phone in phones:
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.PHON, phone)])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.PHON, phone)])
         for email in emails:
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.EMAIL, email)])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.EMAIL, email)])
         for fax in faxes:
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.FAX, fax)])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.FAX, fax)])
         for www in wwws:
-            lines = ''.join([lines, Defs.taginfo(level, Gedcom.WWW, www)])
+            lines = ''.join([lines, Defs.taginfo(level, Tag.WWW, www)])
         return lines
 
-    def next_counter(
-        self, xref_list: list[str], xref_type: str, xref_name: str = ''
-    ) -> str:
+    def next_counter(self, xref_list: list[str], xref_name: str = '') -> str:
         """Allows one to override a numeric counter for a name as identifier for a record.
 
         This overriding works for family and individual records.
 
         The identifier name can be composed of upper case letters, digits or the underscore
-        based on the
-        [GEDCOM Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#cb3-5).
+        based on the GEDCOM specification.
 
         The value of naming individuals and families is for comparison purposes
         between two different chronologies that reference the same individuals or
@@ -871,27 +713,30 @@ class Chronology(Base):
         - `individual_xref`
         - `named_family_xref`
         - `named_individual_xref`
-        """
-        xref: str = ''
-        if xref_name != '':
-            modified_name = str(xref_name).strip().upper().replace(' ', '_')
-            xref = ''.join(
-                [
-                    GEDSpecial.ATSIGN,
-                    modified_name,
-                    GEDSpecial.ATSIGN,
-                ]
-            )
-            self.named_xreflist.append([xref_type, modified_name])
-            xref_list.append(xref)
-            return xref
-        counter: int = self.xref_counter
-        xref = ''.join([GEDSpecial.ATSIGN, str(counter), GEDSpecial.ATSIGN])
-        xref_list.append(xref)
-        self.xref_counter += 1
-        return xref
 
-    def family_xref(self, xref_name: str = '') -> str:
+        Reference
+        ---------
+        - [GEDCOM Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#cb3-5)
+        """
+        modified_xref: str = ''
+        if xref_name == '':
+            modified_xref = str(self.xref_counter)
+            self.xref_counter += 1
+        else:
+            modified_xref = str(xref_name).strip().upper().replace(' ', '_')
+        modified_xref = ''.join(
+            [
+                GEDSpecial.ATSIGN,
+                modified_xref,
+                GEDSpecial.ATSIGN,
+            ]
+        )
+        if modified_xref in xref_list:
+            raise ValueError(Msg.XREF_EXISTS.format(xref_name))
+        xref_list.append(modified_xref)
+        return modified_xref
+
+    def family_xref(self, xref_name: str = '') -> FamilyXref:
         """Create a cross reference identifier for a family.
 
         A family may reference many individuals.  An individual
@@ -923,11 +768,46 @@ class Chronology(Base):
         For an example of how ChronoData was used to compare various such
         chronologies, see
         """
-        return self.next_counter(
-            xref_list=self.family_xreflist,
-            xref_type=Gedcom.FAM,
-            xref_name=xref_name,
+        family_xref = self.next_counter(
+            self.family_xreflist,
+            xref_name,
         )
+        return FamilyXref(family_xref)
+    
+    def multimedia_xref(self, xref_name: str = '') -> MultimediaXref:
+        multimedia_xref = self.next_counter(
+            self.multimedia_xreflist,
+            xref_name,
+        )
+        return MultimediaXref(multimedia_xref)
+    
+    def repository_xref(self, xref_name: str = '') -> RepositoryXref:
+        repository_xref = self.next_counter(
+            self.repository_xreflist,
+            xref_name,
+        )
+        return RepositoryXref(repository_xref)
+    
+    def shared_note_xref(self, xref_name: str = '') -> SharedNoteXref:
+        shared_note_xref = self.next_counter(
+            self.shared_note_xreflist,
+            xref_name,
+        )
+        return SharedNoteXref(shared_note_xref)
+    
+    def source_xref(self, xref_name: str = '') -> SourceXref:
+        source_xref = self.next_counter(
+            self.source_xreflist,
+            xref_name,
+        )
+        return SourceXref(source_xref)
+    
+    def submitter_xref(self, xref_name: str = '') -> SubmitterXref:
+        submitter_xref = self.next_counter(
+            self.submitter_xreflist,
+            xref_name,
+        )
+        return SubmitterXref(submitter_xref)
 
     # def named_xref(self, search_for: str = '', pandas: bool = True) -> pd.DataFrame | list[list[str]]:
     #     """Report on the family and individuals with named identifiers."""
@@ -940,7 +820,7 @@ class Chronology(Base):
     #         )
     #     return self.named_
 
-    def individual_xref(self, xref_name: str = '') -> str:
+    def individual_xref(self, xref_name: str = '') -> IndividualXref:
         """Create a cross reference identifier for an individual.
 
         A individual may reference different families one where
@@ -1037,15 +917,15 @@ class Chronology(Base):
 
 
         """
-        return self.next_counter(
+        individual_xref: str = self.next_counter(
             xref_list=self.individual_xreflist,
-            xref_type=Gedcom.INDI,
             xref_name=xref_name,
         )
+        return IndividualXref(individual_xref)
 
     def family_record(
         self,
-        xref: str,
+        xref: FamilyXref,
         resn: str = '',
         family_attributes: Any = None,
         family_events: Any = None,
@@ -1157,11 +1037,9 @@ class Chronology(Base):
                 raise ValueError(
                     Msg.NOT_RECORD.format(child, Record.INDIVIDUAL)
                 )
-        ged_family: str = Defs.taginit(xref, Gedcom.FAM)
+        ged_family: str = Defs.taginit(xref, Tag.FAM)
         if resn != '' and resn in Enum.RESN:
-            ged_family = ''.join(
-                [ged_family, Defs.taginfo(1, Gedcom.RESN, resn)]
-            )
+            ged_family = ''.join([ged_family, Defs.taginfo(1, Tag.RESN, resn)])
         for attribute in family_attributes:
             ged_family = ''.join(
                 [ged_family, self.family_attribute_structure(attribute)]
@@ -1174,25 +1052,21 @@ class Chronology(Base):
             ged_family = ''.join(
                 [ged_family, self.non_event_structure(non_event)]
             )
-        ged_family = ''.join(
-            [ged_family, Defs.taginfo(1, Gedcom.HUSB, husband)]
-        )
+        ged_family = ''.join([ged_family, Defs.taginfo(1, Tag.HUSB, husband)])
         if husband_phrase != '':
             ged_family = ''.join(
-                [ged_family, Defs.taginfo(2, Gedcom.PHRASE, husband_phrase)]
+                [ged_family, Defs.taginfo(2, Tag.PHRASE, husband_phrase)]
             )
-        ged_family = ''.join([ged_family, Defs.taginfo(1, Gedcom.WIFE, wife)])
+        ged_family = ''.join([ged_family, Defs.taginfo(1, Tag.WIFE, wife)])
         if wife_phrase != '':
             ged_family = ''.join(
-                [ged_family, Defs.taginfo(2, Gedcom.PHRASE, wife_phrase)]
+                [ged_family, Defs.taginfo(2, Tag.PHRASE, wife_phrase)]
             )
         for child, phrase in children:
-            ged_family = ''.join(
-                [ged_family, Defs.taginfo(1, Gedcom.CHIL, child)]
-            )
+            ged_family = ''.join([ged_family, Defs.taginfo(1, Tag.CHIL, child)])
             if phrase != '':
                 ged_family = ''.join(
-                    [ged_family, Defs.taginfo(2, Gedcom.PHRASE, phrase)]
+                    [ged_family, Defs.taginfo(2, Tag.PHRASE, phrase)]
                 )
         for association in associations:
             ged_family = ''.join(
@@ -1200,7 +1074,7 @@ class Chronology(Base):
             )
         for submitter in submitters:
             ged_family = ''.join(
-                [ged_family, Defs.taginfo(1, Gedcom.SUBM, submitter)]
+                [ged_family, Defs.taginfo(1, Tag.SUBM, submitter)]
             )
         for spouse in lds_spouse_sealing:
             ged_family = ''.join([ged_family, self.lds_spouse_sealing(spouse)])
@@ -1307,10 +1181,10 @@ class Chronology(Base):
                 raise ValueError(
                     Msg.NOT_RECORD.format(submitter, Record.SUBMITTER)
                 )
-        ged_individual: str = Defs.taginit(xref, Gedcom.INDI)
+        ged_individual: str = Defs.taginit(xref, Tag.INDI)
         if resn != '' and resn in Enum.RESN:
             ged_individual = ''.join(
-                [ged_individual, Defs.taginfo(1, Gedcom.RESN, resn)]
+                [ged_individual, Defs.taginfo(1, Tag.RESN, resn)]
             )
         for name in personal_names:
             ged_individual = ''.join(
@@ -1318,7 +1192,7 @@ class Chronology(Base):
             )
         if sex != '' and sex in Enum.SEX:
             ged_individual = ''.join(
-                [ged_individual, Defs.taginfo(1, Gedcom.SEX, sex)]
+                [ged_individual, Defs.taginfo(1, Tag.SEX, sex)]
             )
         for attribute in attributes:
             ged_individual = ''.join(
@@ -1339,40 +1213,40 @@ class Chronology(Base):
         for family in families_child:
             if family[0] in self.family_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.FAMC, family[0])]
+                    [ged_individual, Defs.taginfo(1, Tag.FAMC, family[0])]
                 )
                 if len(family) > 1:
                     ged_individual = ''.join(
                         [
                             ged_individual,
-                            Defs.taginfo(2, Gedcom.PEDI, family[1]),
+                            Defs.taginfo(2, Tag.PEDI, family[1]),
                         ]
                     )
                     if len(family) > 2:
                         ged_individual = ''.join(
                             [
                                 ged_individual,
-                                Defs.taginfo(3, Gedcom.PHRASE, family[2]),
+                                Defs.taginfo(3, Tag.PHRASE, family[2]),
                             ]
                         )
                 if len(family) > 3:
                     ged_individual = ''.join(
                         [
                             ged_individual,
-                            Defs.taginfo(2, Gedcom.STAT, family[2]),
+                            Defs.taginfo(2, Tag.STAT, family[2]),
                         ]
                     )
                     if len(family) > 4:
                         ged_individual = ''.join(
                             [
                                 ged_individual,
-                                Defs.taginfo(3, Gedcom.PHRASE, family[3]),
+                                Defs.taginfo(3, Tag.PHRASE, family[3]),
                             ]
                         )
         for family in families_spouse:
             if family[0] in self.family_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.FAMS, family[0])]
+                    [ged_individual, Defs.taginfo(1, Tag.FAMS, family[0])]
                 )
                 if len(family) > 1:
                     ged_individual = ''.join(
@@ -1381,7 +1255,7 @@ class Chronology(Base):
         for submitter in submitters:
             if submitter in self.submitter_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.SUBM, submitter)]
+                    [ged_individual, Defs.taginfo(1, Tag.SUBM, submitter)]
                 )
         for association in associations:
             ged_individual = ''.join(
@@ -1390,24 +1264,24 @@ class Chronology(Base):
         for alias in aliases:
             if alias[0] in self.individual_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.ALIA, alias[0])]
+                    [ged_individual, Defs.taginfo(1, Tag.ALIA, alias[0])]
                 )
                 if len(alias) > 1 and alias[1] != '':
                     ged_individual = ''.join(
                         [
                             ged_individual,
-                            Defs.taginfo(2, Gedcom.PHRASE, alias[1]),
+                            Defs.taginfo(2, Tag.PHRASE, alias[1]),
                         ]
                     )
         for interest in ancestor_interest:
             if interest in self.submitter_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.ANCI, interest)]
+                    [ged_individual, Defs.taginfo(1, Tag.ANCI, interest)]
                 )
         for interest in descendent_interest:
             if interest in self.submitter_xreflist:
                 ged_individual = ''.join(
-                    [ged_individual, Defs.taginfo(1, Gedcom.DESI, interest)]
+                    [ged_individual, Defs.taginfo(1, Tag.DESI, interest)]
                 )
         for identifier in identifiers:
             ged_individual = ''.join(
@@ -1460,40 +1334,40 @@ class Chronology(Base):
         if len(file) > 3 and file[3] != '' and file[3] not in Enum.MEDI:
             raise ValueError(Msg.NOT_VALID_ENUM.format(file[3], EnumName.MEDI))
         xref: str = self.next_counter(
-            self.multimedia_xreflist, Gedcom.OBJE, xref_name
+            self.multimedia_xreflist, Tag.OBJE, xref_name
         )
-        ged_multimedia: str = Defs.taginit(xref, Gedcom.OBJE)
+        ged_multimedia: str = Defs.taginit(xref, Tag.OBJE)
         if resn != '':
             ged_multimedia = ''.join(
-                [ged_multimedia, Defs.taginfo(1, Gedcom.RESN, resn)]
+                [ged_multimedia, Defs.taginfo(1, Tag.RESN, resn)]
             )
         for file in files:
             ged_multimedia = ''.join(
                 [
                     ged_multimedia,
-                    Defs.taginfo(1, Gedcom.FILE, file[0]),
-                    Defs.taginfo(2, Gedcom.FORM, file[1]),
+                    Defs.taginfo(1, Tag.FILE, file[0]),
+                    Defs.taginfo(2, Tag.FORM, file[1]),
                 ]
             )
             if len(file) > 2 and file[2] != '':
                 ged_multimedia = ''.join(
-                    [ged_multimedia, Defs.taginfo(3, Gedcom.MEDI, file[2])]
+                    [ged_multimedia, Defs.taginfo(3, Tag.MEDI, file[2])]
                 )
             if len(file) > 3 and file[3] != '':
                 ged_multimedia = ''.join(
-                    [ged_multimedia, Defs.taginfo(4, Gedcom.PHRASE, file[3])]
+                    [ged_multimedia, Defs.taginfo(4, Tag.PHRASE, file[3])]
                 )
             if len(file) > 4 and file[4] != '':
                 ged_multimedia = ''.join(
-                    [ged_multimedia, Defs.taginfo(2, Gedcom.TITL, file[4])]
+                    [ged_multimedia, Defs.taginfo(2, Tag.TITL, file[4])]
                 )
             if len(file) > 5 and len(file[5]) > 0:
                 for translation in file[5]:
                     ged_multimedia = ''.join(
                         [
                             ged_multimedia,
-                            Defs.taginfo(2, Gedcom.TRAN, translation[0]),
-                            Defs.taginfo(3, Gedcom.FORM, translation[1]),
+                            Defs.taginfo(2, Tag.TRAN, translation[0]),
+                            Defs.taginfo(3, Tag.FORM, translation[1]),
                         ]
                     )
         for identifier in identifiers:
@@ -1545,11 +1419,11 @@ class Chronology(Base):
             if id[0] not in Enum.ID:
                 raise ValueError(Msg.NOT_VALID_ENUM.format(id[0], EnumName.ID))
         xref: str = self.next_counter(
-            self.repository_xreflist, Gedcom.REPO, xref_name
+            self.repository_xreflist, Tag.REPO, xref_name
         )
-        ged_repository: str = Defs.taginit(xref, Gedcom.REPO)
+        ged_repository: str = Defs.taginit(xref, Tag.REPO)
         ged_repository = ''.join(
-            [ged_repository, Defs.taginfo(1, Gedcom.NAME, name)]
+            [ged_repository, Defs.taginfo(1, Tag.NAME, name)]
         )
         ged_repository = ''.join(
             [
@@ -1603,33 +1477,33 @@ class Chronology(Base):
             if id[0] not in Enum.ID:
                 raise ValueError(Msg.NOT_VALID_ENUM.format(id[0], EnumName.ID))
         xref: str = self.next_counter(
-            self.shared_note_xreflist, Gedcom.SNOTE, xref_name
+            self.shared_note_xreflist, Tag.SNOTE, xref_name
         )
-        ged_shared_note: str = Defs.taginit(xref, Gedcom.SNOTE, note)
+        ged_shared_note: str = Defs.taginit(xref, Tag.SNOTE, note)
         if mime != '' and mime in Enum.MEDIA_TYPE:
             ged_shared_note = ''.join(
-                [ged_shared_note, Defs.taginfo(1, Gedcom.MIME, mime)]
+                [ged_shared_note, Defs.taginfo(1, Tag.MIME, mime)]
             )
         if language != '':
             ged_shared_note = ''.join(
-                [ged_shared_note, Defs.taginfo(1, Gedcom.LANG, language)]
+                [ged_shared_note, Defs.taginfo(1, Tag.LANG, language)]
             )
         for translation in translations:
             ged_shared_note = ''.join(
-                [ged_shared_note, Defs.taginfo(1, Gedcom.TRAN, translation[0])]
+                [ged_shared_note, Defs.taginfo(1, Tag.TRAN, translation[0])]
             )
             if len(translation) > 1:
                 ged_shared_note = ''.join(
                     [
                         ged_shared_note,
-                        Defs.taginfo(2, Gedcom.MIME, translation[1]),
+                        Defs.taginfo(2, Tag.MIME, translation[1]),
                     ]
                 )
             if len(translation) > 2:
                 ged_shared_note = ''.join(
                     [
                         ged_shared_note,
-                        Defs.taginfo(2, Gedcom.LANG, translation[2]),
+                        Defs.taginfo(2, Tag.LANG, translation[2]),
                     ]
                 )
         for source in sources:
@@ -1683,27 +1557,25 @@ class Chronology(Base):
         for id in identifiers:
             if id[0] not in Enum.ID:
                 raise ValueError(Msg.NOT_VALID_ENUM.format(mime, EnumName.ID))
-        xref: str = self.next_counter(
-            self.source_xreflist, Gedcom.SOUR, xref_name
-        )
-        ged_source: str = Defs.taginit(xref, Gedcom.SOUR)
+        xref: str = self.next_counter(self.source_xreflist, Tag.SOUR, xref_name)
+        ged_source: str = Defs.taginit(xref, Tag.SOUR)
         if len(events) > 0:
-            ged_source = ''.join([ged_source, Defs.taginfo(1, Gedcom.DATA)])
+            ged_source = ''.join([ged_source, Defs.taginfo(1, Tag.DATA)])
             for event in events:
                 ged_source = ''.join(
-                    [ged_source, Defs.taginfo(2, Gedcom.EVEN, event[0])]
+                    [ged_source, Defs.taginfo(2, Tag.EVEN, event[0])]
                 )
                 if len(event) > 1:
                     ged_source = ''.join(
-                        [ged_source, Defs.taginfo(3, Gedcom.DATE, event[1])]
+                        [ged_source, Defs.taginfo(3, Tag.DATE, event[1])]
                     )
                 if len(event) > 2:
                     ged_source = ''.join(
-                        [ged_source, Defs.taginfo(4, Gedcom.PHRASE, event[2])]
+                        [ged_source, Defs.taginfo(4, Tag.PHRASE, event[2])]
                     )
                 if len(event) > 3:
                     ged_source = ''.join(
-                        [ged_source, Defs.taginfo(2, Gedcom.AGNC, event[3])]
+                        [ged_source, Defs.taginfo(2, Tag.AGNC, event[3])]
                     )
                 if len(event) > 4:
                     ged_source = ''.join(
@@ -1711,31 +1583,25 @@ class Chronology(Base):
                     )
         if author != '':
             ged_source = ''.join(
-                [ged_source, Defs.taginfo(1, Gedcom.AUTH, author)]
+                [ged_source, Defs.taginfo(1, Tag.AUTH, author)]
             )
         if title != '':
-            ged_source = ''.join(
-                [ged_source, Defs.taginfo(1, Gedcom.TITL, title)]
-            )
+            ged_source = ''.join([ged_source, Defs.taginfo(1, Tag.TITL, title)])
         if abbreviation != '':
             ged_source = ''.join(
-                [ged_source, Defs.taginfo(1, Gedcom.ABBR, abbreviation)]
+                [ged_source, Defs.taginfo(1, Tag.ABBR, abbreviation)]
             )
         if publisher != '':
             ged_source = ''.join(
-                [ged_source, Defs.taginfo(1, Gedcom.PUBL, publisher)]
+                [ged_source, Defs.taginfo(1, Tag.PUBL, publisher)]
             )
         if text != '':
-            ged_source = ''.join(
-                [ged_source, Defs.taginfo(1, Gedcom.TEXT, text)]
-            )
+            ged_source = ''.join([ged_source, Defs.taginfo(1, Tag.TEXT, text)])
         if mime != '' and mime in Enum.MEDIA_TYPE:
-            ged_source = ''.join(
-                [ged_source, Defs.taginfo(2, Gedcom.MIME, mime)]
-            )
+            ged_source = ''.join([ged_source, Defs.taginfo(2, Tag.MIME, mime)])
         if language != '':
             ged_source = ''.join(
-                [ged_source, Defs.taginfo(2, Gedcom.LANG, language)]
+                [ged_source, Defs.taginfo(2, Tag.LANG, language)]
             )
         for source in sources:
             ged_source = ''.join(
@@ -1798,11 +1664,11 @@ class Chronology(Base):
                     Msg.NOT_RECORD.format(media[0], Record.MULTIMEDIA)
                 )
         xref: str = self.next_counter(
-            self.submitter_xreflist, Gedcom.SUBM, xref_name
+            self.submitter_xreflist, Tag.SUBM, xref_name
         )
-        ged_submitter: str = Defs.taginit(xref, Gedcom.SUBM)
+        ged_submitter: str = Defs.taginit(xref, Tag.SUBM)
         ged_submitter = ''.join(
-            [ged_submitter, Defs.taginfo(1, Gedcom.NAME, name)]
+            [ged_submitter, Defs.taginfo(1, Tag.NAME, name)]
         )
         ged_submitter = ''.join(
             [
@@ -1819,7 +1685,7 @@ class Chronology(Base):
             )
         for language in languages:
             ged_submitter = ''.join(
-                [ged_submitter, Defs.taginfo(1, Gedcom.LANG, language)]
+                [ged_submitter, Defs.taginfo(1, Tag.LANG, language)]
             )
         for identifier in identifiers:
             ged_submitter = ''.join(
@@ -1829,7 +1695,7 @@ class Chronology(Base):
             ged_submitter = ''.join([ged_submitter, self.note_structure(note)])
         if shared_note != '':
             ged_submitter = ''.join(
-                [ged_submitter, Defs.taginfo(1, Gedcom.SNOTE, shared_note)]
+                [ged_submitter, Defs.taginfo(1, Tag.SNOTE, shared_note)]
             )
         ged_submitter = ''.join([ged_submitter, self.creation_date()])
         self.ged_submitter = ''.join([self.ged_submitter, ged_submitter])
@@ -1886,33 +1752,33 @@ class Chronology(Base):
             note = Note('', '', '', [], [])
         ged_header: str = ''.join(
             [
-                Defs.taginfo(0, Gedcom.HEAD),
-                Defs.taginfo(1, Gedcom.GEDC),
-                Defs.taginfo(2, Gedcom.VERS, GEDSpecial.VERSION),
+                Defs.taginfo(0, Tag.HEAD),
+                Defs.taginfo(1, Tag.GEDC),
+                Defs.taginfo(2, Tag.VERS, GEDSpecial.VERSION),
             ]
         )
         if len(schemas) > 0:
-            ged_header = ''.join([ged_header, Defs.taginfo(1, Gedcom.SCHMA)])
+            ged_header = ''.join([ged_header, Defs.taginfo(1, Tag.SCHMA)])
             for schema in schemas:
                 tag, ref = schema
                 ged_header = ''.join(
-                    [ged_header, Defs.taginfo(2, Gedcom.TAG, tag, ref)]
+                    [ged_header, Defs.taginfo(2, Tag.TAG, tag, ref)]
                 )
         if source != '':
             ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.SOUR, source)]
+                [ged_header, Defs.taginfo(1, Tag.SOUR, source)]
             )
             if vers != '':
                 ged_header = ''.join(
-                    [ged_header, Defs.taginfo(2, Gedcom.VERS, vers)]
+                    [ged_header, Defs.taginfo(2, Tag.VERS, vers)]
                 )
             if name != '':
                 ged_header = ''.join(
-                    [ged_header, Defs.taginfo(2, Gedcom.NAME, name)]
+                    [ged_header, Defs.taginfo(2, Tag.NAME, name)]
                 )
             if corp != '':
                 ged_header = ''.join(
-                    [ged_header, Defs.taginfo(2, Gedcom.CORP, corp)]
+                    [ged_header, Defs.taginfo(2, Tag.CORP, corp)]
                 )
             ged_header = ''.join(
                 [
@@ -1925,55 +1791,47 @@ class Chronology(Base):
             )
             if data != '':
                 ged_header = ''.join(
-                    [ged_header, Defs.taginfo(2, Gedcom.DATA, data)]
+                    [ged_header, Defs.taginfo(2, Tag.DATA, data)]
                 )
                 if data_date != '':
                     ged_header = ''.join(
-                        [ged_header, Defs.taginfo(3, Gedcom.DATE, data_date)]
+                        [ged_header, Defs.taginfo(3, Tag.DATE, data_date)]
                     )
                 if data_time != '':
                     ged_header = ''.join(
-                        [ged_header, Defs.taginfo(4, Gedcom.TIME, data_time)]
+                        [ged_header, Defs.taginfo(4, Tag.TIME, data_time)]
                     )
                 if data_copr != '':
                     ged_header = ''.join(
-                        [ged_header, Defs.taginfo(2, Gedcom.COPR, data_copr)]
+                        [ged_header, Defs.taginfo(2, Tag.COPR, data_copr)]
                     )
         if dest != '':
-            ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.DEST, dest)]
-            )
+            ged_header = ''.join([ged_header, Defs.taginfo(1, Tag.DEST, dest)])
         if date != '':
-            ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.DATE, date)]
-            )
+            ged_header = ''.join([ged_header, Defs.taginfo(1, Tag.DATE, date)])
         if time != '':
-            ged_header = ''.join(
-                [ged_header, Defs.taginfo(2, Gedcom.TIME, time)]
-            )
+            ged_header = ''.join([ged_header, Defs.taginfo(2, Tag.TIME, time)])
         if submitter != '':
             ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.SUBM, submitter)]
+                [ged_header, Defs.taginfo(1, Tag.SUBM, submitter)]
             )
         if copr != '':
-            ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.COPR, copr)]
-            )
+            ged_header = ''.join([ged_header, Defs.taginfo(1, Tag.COPR, copr)])
         if language != '':
             ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.LANG, language)]
+                [ged_header, Defs.taginfo(1, Tag.LANG, language)]
             )
         if len(place) > 0:
             ged_header = ''.join(
                 [
                     ged_header,
-                    Defs.taginfo(1, Gedcom.PLAC, place[0]),
-                    Defs.taginfo(2, Gedcom.FORM, place[1]),
+                    Defs.taginfo(1, Tag.PLAC, place[0]),
+                    Defs.taginfo(2, Tag.FORM, place[1]),
                 ]
             )
         if shared_note != '':
             ged_header = ''.join(
-                [ged_header, Defs.taginfo(1, Gedcom.SNOTE, shared_note)]
+                [ged_header, Defs.taginfo(1, Tag.SNOTE, shared_note)]
             )
         ged_header = ''.join([ged_header, self.note_structure(note)])
         self.ged_header = ged_header

@@ -14,6 +14,7 @@ References
 from enum import Enum
 
 
+
 class ApproxDate(Enum):
     """Enumeration values for date approximations.
 
