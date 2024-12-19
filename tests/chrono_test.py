@@ -1,5 +1,5 @@
-# $Id:$
-# Author: Frank Hubeny
+# $Id$
+# Author: Frank Hubeny <frankhubeny@protonmail.com>
 # Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
 
 """These tests completely cover the `chrono` module."""
