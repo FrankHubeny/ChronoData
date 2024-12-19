@@ -1,11 +1,8 @@
-"""------------------------------------------------------------------------------
-                            Chrono(logy) Tests
+# $Id:$
+# Author: Frank Hubeny
+# Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
 
-    These texts cover the `chrono` module which gathers together the data
-    constructed from the `tuples` module and sends it to the `core` module for
-    storing.
-
-------------------------------------------------------------------------------"""
+"""These tests completely cover the `chrono` module."""
 
 import pytest
 
@@ -22,11 +19,11 @@ from chronodata.records import (
 from chronodata.tuples import (
     Child,
     Family,
+    FamilyChild,
     Husband,
     Individual,
     Sex,
     Wife,
-    FamilyChild,
 )
 
 testdata = [
@@ -47,7 +44,7 @@ testdata = [
     # Validate the objects.
     ('joe.validate()', True),
     ('mary.validate()', True),
-    ('jesus.validate()', True),  
+    ('jesus.validate()', True),
     ('joe_mary.validate()', True),
     # Check type of Joseph, Mary and Jesus within their family.
     ('joe_husband_type', True),
@@ -67,7 +64,6 @@ testdata = [
     ('family[5]', '1 CHIL @JESUS@'),
     ('family[6]', '2 PHRASE Jesus is the child.'),
 ]
-
 
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
@@ -116,6 +112,6 @@ def test_chrono(test_input: str, expected: str | int | bool) -> None:
     joe_mary_type = Defs.verify_type(joe_mary, Family)  # noqa: F841
 
     # Create the display at this point.
-    family = joe_mary.ged().split('\n')  # noqa: F841
+    family = joe_mary.ged().splitlines()  # noqa: F841
 
     assert eval(test_input) == expected

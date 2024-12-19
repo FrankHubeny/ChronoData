@@ -1,4 +1,6 @@
-# Licensed under a 3-clause BSD style license - see LICENSE.md
+# $Id:$
+# Author: Frank Hubeny
+# Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
 """Global methods to build a chronology based on the GEDCOM standard."""
 
 import contextlib
