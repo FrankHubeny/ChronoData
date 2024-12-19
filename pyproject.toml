@@ -72,7 +72,10 @@ addopts = [
 xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "INFO"
-testpaths = ["tests"]
+testpaths = [
+  "tests",
+  "chronodata",
+]
 
 [tool.mypy]
 mypy_path = [
