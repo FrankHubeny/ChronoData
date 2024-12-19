@@ -961,15 +961,28 @@ class Husband(NamedTuple):
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = Defs.verify_type(self.xref, str) and Defs.verify_type(
-            self.phrase, str
-        )
+        check: bool = True
+        if self.xref is not None:
+            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+                self.xref, IndividualXref
+            )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
         if self.validate():
-            pass
+            lines = ''.join(
+                [lines, Defs.taginfo(level, Tag.HUSB, str(self.xref))]
+            )
+            if self.phrase != '':
+                lines = ''.join(
+                    [
+                        lines,
+                        Defs.taginfo(
+                            level + 1, Tag.PHRASE, Defs.clean_input(self.phrase)
+                        ),
+                    ]
+                )
         return lines
 
 
@@ -978,15 +991,28 @@ class Wife(NamedTuple):
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = Defs.verify_type(self.xref, str) and Defs.verify_type(
-            self.phrase, str
-        )
+        check: bool = True
+        if self.xref is not None:
+            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+                self.xref, IndividualXref
+            )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
         if self.validate():
-            pass
+            lines = ''.join(
+                [lines, Defs.taginfo(level, Tag.WIFE, str(self.xref))]
+            )
+            if self.phrase != '':
+                lines = ''.join(
+                    [
+                        lines,
+                        Defs.taginfo(
+                            level + 1, Tag.PHRASE, Defs.clean_input(self.phrase)
+                        ),
+                    ]
+                )
         return lines
 
 
@@ -995,15 +1021,28 @@ class Child(NamedTuple):
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = Defs.verify_type(self.xref, str) and Defs.verify_type(
-            self.phrase, str
-        )
+        check: bool = True
+        if self.xref is not None:
+            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+                self.xref, IndividualXref
+            )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
         if self.validate():
-            pass
+            lines = ''.join(
+                [lines, Defs.taginfo(level, Tag.CHIL, str(self.xref))]
+            )
+            if self.phrase != '':
+                lines = ''.join(
+                    [
+                        lines,
+                        Defs.taginfo(
+                            level + 1, Tag.PHRASE, Defs.clean_input(self.phrase)
+                        ),
+                    ]
+                )
         return lines
 
 
@@ -1177,7 +1216,7 @@ class Alias(NamedTuple):
 
 
 class FamilyChild(NamedTuple):
-    family_xref: str
+    family_xref: FamilyXref
     pedigree: str = ''
     pedigree_phrase: str = ''
     status: str = ''
@@ -1333,13 +1372,13 @@ class NonEvent(NamedTuple):
 
 
 class Family(NamedTuple):
-    xref: str = ''
+    xref: FamilyXref
     resn: str = ''
     attributes: Any = None
     events: Any = None
     husband: Husband | None = None
     wife: Wife | None = None
-    children: tuple[Child] | None = None
+    children: Any = None
     associations: Any = None
     submitters: Any = None
     lds_spouse_sealings: Any = None
@@ -1350,15 +1389,15 @@ class Family(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.xref, str)
+            Defs.verify_type(self.xref, FamilyXref)
             and Defs.verify_type(self.resn, str)
             and Defs.verify_tuple_type(self.attributes, FamilyAttribute)
             and Defs.verify_tuple_type(self.events, FamilyEvent)
             and Defs.verify_type(self.husband, Husband | None)
             and Defs.verify_type(self.wife, Wife | None)
-            and Defs.verify_type(self.children, tuple | None)
+            and Defs.verify_tuple_type(self.children, Child)
             and Defs.verify_tuple_type(self.associations, Association)
-            and Defs.verify_tuple_type(self.submitters, str)
+            and Defs.verify_tuple_type(self.submitters, SubmitterXref)
             and Defs.verify_tuple_type(
                 self.lds_spouse_sealings, LDSSpouseSealing
             )
@@ -1370,13 +1409,49 @@ class Family(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = ''
+        lines: str = Defs.taginit(self.xref, Record.FAM)
         if self.validate():
-            pass
+            if self.resn != '':
+                lines = ''.join([lines, Defs.taginfo(level, Tag.RESN, Defs.clean_input(self.resn))])
+            if self.attributes is not None:
+                for attribute in self.attributes:
+                    lines = ''.join([lines, attribute.ged(level)])
+            if self.events is not None:
+                for event in self.events:
+                    lines = ''.join([lines, event.ged(level)])
+            if self.husband is not None:
+                lines = ''.join([lines, self.husband.ged(level)])
+            if self.wife is not None:
+                lines = ''.join([lines, self.wife.ged(level)])
+            if self.children is not None:
+                for child in self.children:
+                    lines = ''.join([lines, child.ged(level)])
+            if self.associations is not None:
+                for association in self.associations:
+                    lines = ''.join([lines, association.ged(level)])
+            if self.submitters is not None:
+                for submitter in self.submitters:
+                    lines = ''.join([lines, Defs.taginfo(level, Tag.SUBM, submitter)])
+            if self.lds_spouse_sealings is not None:
+                for sealing in self.lds_spouse_sealings:
+                    lines = ''.join([lines, sealing.ged(level)])
+            if self.identifiers is not None:
+                for identifier in self.identifiers:
+                    lines = ''.join([lines, identifier.ged(level)])
+            if self.notes is not None:
+                for note in self.notes:
+                    lines = ''.join([lines, note.ged(level)])
+            if self.citations is not None:
+                for citation in self.citations:
+                    lines = ''.join([lines, citation.ged(level)])
+            if self.multimedia_links is not None:
+                for multimedia_link in self.multimedia_links:
+                    lines = ''.join([lines, multimedia_link.ged(level)])
         return lines
 
 
 class Repository(NamedTuple):
+    xref: RepositoryXref
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -1388,7 +1463,8 @@ class Repository(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.name, str)
+            Defs.verify_type(self.xref, RepositoryXref)
+            and Defs.verify_type(self.name, str)
             and Defs.verify_type(self.address, Address | None)
             and Defs.verify_tuple_type(self.emails, str)
             and Defs.verify_tuple_type(self.faxes, str)
@@ -1406,6 +1482,7 @@ class Repository(NamedTuple):
 
 
 class Source(NamedTuple):
+    xref: SourceXref
     author: str = ''
     title: str = ''
     abbreviation: str = ''
@@ -1419,7 +1496,8 @@ class Source(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.author, str)
+            Defs.verify_type(self.xref, SourceXref)
+            and Defs.verify_type(self.author, str)
             and Defs.verify_type(self.title, str)
             and Defs.verify_type(self.abbreviation, str)
             and Defs.verify_type(self.published, str)
@@ -1440,7 +1518,7 @@ class Source(NamedTuple):
 
 
 class Individual(NamedTuple):
-    xref: str
+    xref: IndividualXref
     personal_names: Any = None
     sex: Sex = Sex.U
     attributes: Any = None
@@ -1459,9 +1537,9 @@ class Individual(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.xref, str)
+            Defs.verify_type(self.xref, IndividualXref)
             and Defs.verify_tuple_type(self.personal_names, PersonalName)
-            and Defs.verify_type(self.sex, str)
+            and Defs.verify_type(self.sex, Sex)
             and Defs.verify_tuple_type(self.attributes, IndividualAttribute)
             and Defs.verify_tuple_type(self.events, IndividualEvent)
             and Defs.verify_tuple_type(
@@ -1488,6 +1566,7 @@ class Individual(NamedTuple):
 
 
 class Multimedia(NamedTuple):
+    xref: MultimediaXref
     files: Any = None
     identifiers: Any = None
     notes: Any = None
@@ -1495,7 +1574,8 @@ class Multimedia(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_tuple_type(self.files, File)
+            Defs.verify_type(self.xref, MultimediaXref)
+            and Defs.verify_tuple_type(self.files, File)
             and Defs.verify_tuple_type(self.identifiers, Identifier)
             and Defs.verify_tuple_type(self.notes, Note)
             and Defs.verify_tuple_type(self.sources, Source)
@@ -1510,6 +1590,7 @@ class Multimedia(NamedTuple):
 
 
 class SharedNote(NamedTuple):
+    xref: SharedNoteXref
     text: str = ''
     mime: str = ''
     language: str = ''
@@ -1519,7 +1600,8 @@ class SharedNote(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.text, str)
+            Defs.verify_type(self.xref, SharedNoteXref)
+            and Defs.verify_type(self.text, str)
             and Defs.verify_type(self.mime, str)
             and Defs.verify_type(self.language, str)
             and Defs.verify_tuple_type(self.translations, NoteTranslation)
@@ -1536,6 +1618,7 @@ class SharedNote(NamedTuple):
 
 
 class Submitter(NamedTuple):
+    xref: SubmitterXref
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -1549,7 +1632,8 @@ class Submitter(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.name, str)
+            Defs.verify_type(self.xref, SubmitterXref)
+            and Defs.verify_type(self.name, str)
             and Defs.verify_type(self.address, Address | None)
             and Defs.verify_tuple_type(self.phones, str)
             and Defs.verify_tuple_type(self.emails, str)
@@ -1567,3 +1651,63 @@ class Submitter(NamedTuple):
         if self.validate():
             pass
         return lines
+
+
+class Header(NamedTuple):
+    """Hold data for the GEDCOM header special record.
+
+    Reference
+    ---------
+    - [GEDCOM Header](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
+
+    >n HEAD                                     {1:1}  g7:HEAD
+    >  +1 GEDC                                  {1:1}  g7:GEDC
+    >     +2 VERS <Special>                     {1:1}  g7:GEDC-VERS
+    >  +1 SCHMA                                 {0:1}  g7:SCHMA
+    >     +2 TAG <Special>                      {0:M}  g7:TAG
+    >  +1 SOUR <Special>                        {0:1}  g7:HEAD-SOUR
+    >     +2 VERS <Special>                     {0:1}  g7:VERS
+    >     +2 NAME <Text>                        {0:1}  g7:NAME
+    >     +2 CORP <Text>                        {0:1}  g7:CORP
+    >        +3 <<ADDRESS_STRUCTURE>>           {0:1}
+    >        +3 PHON <Special>                  {0:M}  g7:PHON
+    >        +3 EMAIL <Special>                 {0:M}  g7:EMAIL
+    >        +3 FAX <Special>                   {0:M}  g7:FAX
+    >        +3 WWW <Special>                   {0:M}  g7:WWW
+    >     +2 DATA <Text>                        {0:1}  g7:HEAD-SOUR-DATA
+    >        +3 DATE <DateExact>                {0:1}  g7:DATE-exact
+    >           +4 TIME <Time>                  {0:1}  g7:TIME
+    >        +3 COPR <Text>                     {0:1}  g7:COPR
+    >  +1 DEST <Special>                        {0:1}  g7:DEST
+    >  +1 DATE <DateExact>                      {0:1}  g7:HEAD-DATE
+    >     +2 TIME <Time>                        {0:1}  g7:TIME
+    >  +1 SUBM @<XREF:SUBM>@                    {0:1}  g7:SUBM
+    >  +1 COPR <Text>                           {0:1}  g7:COPR
+    >  +1 LANG <Language>                       {0:1}  g7:HEAD-LANG
+    >  +1 PLAC                                  {0:1}  g7:HEAD-PLAC
+    >     +2 FORM <List:Text>                   {1:1}  g7:HEAD-PLAC-FORM
+    >  +1 <<NOTE_STRUCTURE>>                    {0:1}
+    """
+
+    schemas: Any = None  # noqa: RUF012
+    source: str = ''
+    vers: str = ''
+    name: str = ''
+    corp: str = ''
+    address: Any = None
+    phones: Any = None
+    emails: Any = None
+    faxes: Any = None
+    wwws: Any = None
+    data: str = ''
+    dest: str = ''
+    date: Date = Date(0, 0, 0)
+    time: Time = Time(0, 0, 0)
+    copr: str = ''
+    language: str = ''
+    place: Any = None
+    note: Any = None
+
+    def validate(self) -> bool:
+        check: bool = ()
+        return check

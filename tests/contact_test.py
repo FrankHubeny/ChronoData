@@ -8,7 +8,7 @@
 
 import pytest
 
-from chronodata.chrono import Chronology
+from chronodata.tuples import 
 
 testdata = [
     ('empty[0]', ''),
@@ -25,7 +25,6 @@ testdata = [
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_contact(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology(name='testing')
     empty = a.contact(None, None, None, None).split('\n')
     phones = a.contact(phones=['123', '456', '789']).split('\n')
     all = a.contact(

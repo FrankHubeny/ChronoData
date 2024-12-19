@@ -1,11 +1,22 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """Global methods to build a chronology based on the GEDCOM standard."""
 
+import contextlib
 import re
+from enum import Enum
 from typing import Any
 
 from chronodata.enums import Record, Tag
 from chronodata.messages import Msg
+from chronodata.records import (
+    FamilyXref,
+    IndividualXref,
+    MultimediaXref,
+    RepositoryXref,
+    SharedNoteXref,
+    SourceXref,
+    SubmitterXref,
+)
 
 
 class Defs:
@@ -26,7 +37,17 @@ class Defs:
     """
 
     @staticmethod
-    def taginit(xref: str, tag: Record, info: str = '') -> str:
+    def taginit(
+        xref: FamilyXref
+        | IndividualXref
+        | MultimediaXref
+        | RepositoryXref
+        | SharedNoteXref
+        | SourceXref
+        | SubmitterXref,
+        tag: Record,
+        info: str = '',
+    ) -> str:
         if info == '':
             return f'0 {xref} {tag.value}\n'
         return f'0 {xref} {tag.value} {str(info).strip()}\n'
@@ -60,8 +81,8 @@ class Defs:
     def clean_input(input: str) -> str:
         """Remove banned GEDCOM unicode characters from input strings.
 
-        The control characters U+0000 - U+001F and the delete character U+007F 
-        are listed in the 
+        The control characters U+0000 - U+001F and the delete character U+007F
+        are listed in the
         [C0 Controls and Basic Latin](https://www.unicode.org/charts/PDF/U0000.pdf)
         chart.
 
@@ -73,36 +94,40 @@ class Defs:
 
         The code points U+FFFE and U+FFFF are noncharacters as described in the
         [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
-        
+
         Reference
         ---------
         - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
         - [Unicode Specification](https://www.unicode.org/versions/Unicode16.0.0/#Summary)
         - [Python re Module](https://docs.python.org/3/library/re.html)
         """
-        
-        return re.sub(r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]', '', input)
+
+        return re.sub(
+            r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]', '', input
+        )
 
     @staticmethod
-    def verify_type(value: Any, value_type: Any) -> bool:
+    def verify_type(
+        value: Any | None, value_type: Any, validate: bool = True
+    ) -> bool:
         """Check if the value has the specified type."""
-        if not isinstance(value, value_type):
-            raise TypeError(
-                Msg.WRONG_TYPE.format(value, type(value), value_type)
-            )
-        # if isinstance(value, str):
-        #     Defs.verify_string_input(value)
-        # if isinstance(value, int):
-        #     Defs.verify_numeric_input(value)
-        # if isinstance(value, float):
-        #     Defs.verify_numeric_input(value)
-        return True
+        check: bool = True
+        if value is not None:
+            if not isinstance(value, value_type):
+                raise TypeError(
+                    Msg.WRONG_TYPE.format(value, type(value), value_type)
+                )
+            if not isinstance(value, int | float | str | Enum) and validate:
+                with contextlib.suppress(Exception):
+                    check = value.validate()
+        return check
 
     @staticmethod
-    def verify_tuple_type(name: tuple[Any], value_type: Any) -> bool:
+    def verify_tuple_type(name: tuple[Any] | None, value_type: Any) -> bool:
         """Check if each member of the tuple has the specified type."""
-        for value in name:
-            Defs.verify_type(value, value_type)
+        if name is not None:
+            for value in name:
+                Defs.verify_type(value, value_type)
         return True
 
     @staticmethod
@@ -127,4 +152,3 @@ class Defs:
         if value < 0:
             raise ValueError(Msg.NEGATIVE_ERROR.format(value))
         return True
-

@@ -7,7 +7,6 @@
 
 import pytest
 
-#from chronodata.chrono import Address
 from chronodata.tuples import Address
 
 testdata = [

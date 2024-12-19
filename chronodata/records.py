@@ -20,7 +20,7 @@ class FamilyXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 class IndividualXref:
     """Assign a type to an individual xref string
@@ -36,7 +36,7 @@ class IndividualXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 
 class MultimediaXref:
@@ -53,7 +53,7 @@ class MultimediaXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 
 class RepositoryXref:
@@ -70,7 +70,7 @@ class RepositoryXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 
 class SharedNoteXref:
@@ -87,7 +87,7 @@ class SharedNoteXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 
 class SourceXref:
@@ -104,7 +104,7 @@ class SourceXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
 
 
 class SubmitterXref:
@@ -121,4 +121,4 @@ class SubmitterXref:
         self.name: str = name.replace('@', '').replace('_', ' ')
 
     def __str__(self) -> str:
-        return self.name
+        return self.fullname
