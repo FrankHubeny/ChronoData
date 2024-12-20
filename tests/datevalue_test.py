@@ -11,7 +11,7 @@
 
 import pytest
 
-from chronodata.chrono import Date, DateValue, Time
+from chronodata.build import Date, DateValue, Time
 from chronodata.messages import Msg
 
 testdata = [

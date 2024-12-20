@@ -6,7 +6,7 @@
 
 import pytest
 
-from chronodata.chrono import Chronology
+from chronodata.build import Chronology
 from chronodata.g7 import Gedcom
 
 testdata = [('adameve', '@ADAM_FAMILY@')]

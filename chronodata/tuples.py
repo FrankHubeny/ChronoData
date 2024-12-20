@@ -4,7 +4,7 @@
 import logging
 from typing import Any, NamedTuple
 
-from chronodata.constants import Cal, Value
+from chronodata.constants import Cal, Nul, Value
 from chronodata.enums import (
     Adop,
     ApproxDate,
@@ -963,20 +963,18 @@ class FamilyEvent(NamedTuple):
 
 
 class Husband(NamedTuple):
-    xref: IndividualXref = IndividualXref('@0@')
+    xref: IndividualXref = IndividualXref(Nul.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = True
-        if self.xref is not None:
-            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-                self.xref, IndividualXref
-            )
+        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+            self.xref, IndividualXref
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
-        if self.validate():
+        if str(self.xref) != self.xref.empty and self.validate():
             lines = ''.join(
                 [lines, Defs.taginfo(level, Tag.HUSB, str(self.xref))]
             )
@@ -993,20 +991,18 @@ class Husband(NamedTuple):
 
 
 class Wife(NamedTuple):
-    xref: IndividualXref = IndividualXref('@0@')
+    xref: IndividualXref = IndividualXref(Nul.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = True
-        if self.xref is not None:
-            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-                self.xref, IndividualXref
-            )
+        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+            self.xref, IndividualXref
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
-        if self.validate():
+        if str(self.xref) != self.xref.empty and self.validate():
             lines = ''.join(
                 [lines, Defs.taginfo(level, Tag.WIFE, str(self.xref))]
             )
@@ -1023,20 +1019,18 @@ class Wife(NamedTuple):
 
 
 class Child(NamedTuple):
-    xref: IndividualXref = IndividualXref('@0@')
+    xref: IndividualXref = IndividualXref(Nul.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
-        check: bool = True
-        if self.xref is not None:
-            check = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-                self.xref, IndividualXref
-            )
+        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
+            self.xref, IndividualXref
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
         lines: str = ''
-        if self.validate():
+        if str(self.xref) != self.xref.empty and self.validate():
             lines = ''.join(
                 [lines, Defs.taginfo(level, Tag.CHIL, str(self.xref))]
             )
@@ -1120,16 +1114,17 @@ class LDSIndividualOrdinances(NamedTuple):
 class Identifier(NamedTuple):
     """Construct GEDCOM data for the Identifier Structure.
 
-    There are three valid identifier structures.  They will be illustrated in 
+    There are three valid identifier structures.  They will be illustrated in
     the examples.
 
     Examples:
 
-    
-    
+
+
     Reference:
-    
+
     - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)"""
+
     tag: Id = Id.NONE
     tag_info: str = ''
     tag_type: str = ''
@@ -1411,12 +1406,12 @@ class Family(NamedTuple):
     - `attributes`: a tuple of type Attribute.
     """
 
-    xref: FamilyXref = FamilyXref('@0@')
+    xref: FamilyXref = FamilyXref(Nul.RECORD)
     resn: Resn = Resn.NONE
     attributes: Any = None
     events: Any = None
-    husband: Husband = Husband(IndividualXref('@0@'), '')
-    wife: Wife = Wife(IndividualXref('@0@'), '')
+    husband: Husband = Husband(IndividualXref(Nul.RECORD), '')
+    wife: Wife = Wife(IndividualXref(Nul.RECORD), '')
     children: Any = None
     associations: Any = None
     submitters: Any = None
@@ -1460,9 +1455,9 @@ class Family(NamedTuple):
             if self.events is not None:
                 for event in self.events:
                     lines = ''.join([lines, event.ged(level)])
-            if self.husband != Husband(IndividualXref('@0@'), ''):
+            if self.husband != Husband(IndividualXref(Nul.RECORD), ''):
                 lines = ''.join([lines, self.husband.ged(level)])
-            if self.wife != Wife(IndividualXref('@0@'), ''):
+            if self.wife != Wife(IndividualXref(Nul.RECORD), ''):
                 lines = ''.join([lines, self.wife.ged(level)])
             if self.children is not None:
                 for child in self.children:
@@ -1494,7 +1489,7 @@ class Family(NamedTuple):
 
 
 class Repository(NamedTuple):
-    xref: RepositoryXref = RepositoryXref('@0@')
+    xref: RepositoryXref = RepositoryXref(Nul.RECORD)
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -1525,7 +1520,7 @@ class Repository(NamedTuple):
 
 
 class Source(NamedTuple):
-    xref: SourceXref = SourceXref('@0@')
+    xref: SourceXref = SourceXref(Nul.RECORD)
     author: str = ''
     title: str = ''
     abbreviation: str = ''
@@ -1561,7 +1556,7 @@ class Source(NamedTuple):
 
 
 class Individual(NamedTuple):
-    xref: IndividualXref = IndividualXref('@0@')
+    xref: IndividualXref = IndividualXref(Nul.RECORD)
     resn: Resn = Resn.NONE
     personal_names: Any = None
     sex: Sex = Sex.NONE
@@ -1611,7 +1606,7 @@ class Individual(NamedTuple):
 
 
 class Multimedia(NamedTuple):
-    xref: MultimediaXref = MultimediaXref('@0@')
+    xref: MultimediaXref = MultimediaXref(Nul.RECORD)
     resn: Resn = Resn.NONE
     files: Any = None
     identifiers: Any = None
@@ -1637,7 +1632,7 @@ class Multimedia(NamedTuple):
 
 
 class SharedNote(NamedTuple):
-    xref: SharedNoteXref = SharedNoteXref('@0@')
+    xref: SharedNoteXref = SharedNoteXref(Nul.RECORD)
     text: str = ''
     mime: MediaType = MediaType.NONE
     language: Lang = Lang.CODE['NONE']
@@ -1665,7 +1660,7 @@ class SharedNote(NamedTuple):
 
 
 class Submitter(NamedTuple):
-    xref: SubmitterXref = SubmitterXref('@0@')
+    xref: SubmitterXref = SubmitterXref(Nul.RECORD)
     name: str = ''
     address: Address | None = None
     phones: Any = None

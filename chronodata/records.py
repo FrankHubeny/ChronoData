@@ -37,6 +37,8 @@ and constructing the GEDCOM records in the `tuples` module.
 
 __docformat__ = 'restructuredtext'
 
+from chronodata.constants import Nul
+
 
 class FamilyXref:
     """
@@ -50,7 +52,7 @@ class FamilyXref:
     Examples:
 
     This example verifies that the type has been assigned to the 'my family' string.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> family_xref = a.family_xref('my family')
     >>> (
@@ -84,6 +86,7 @@ class FamilyXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -108,7 +111,7 @@ class IndividualXref:
     This example verifies that the IndividualXref type has been assigned to the
     identifier of the record associated with the name "Joe Smith".
     If a name is not specified an integer will be used to represent the record.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> joe = a.individual_xref('Joe Smith')
     >>> isinstance(joe, IndividualXref), joe.name, str(joe)
@@ -141,6 +144,7 @@ class IndividualXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -160,7 +164,7 @@ class MultimediaXref:
 
     Although a specific name could be assigned, because only needs to be identified
     within a single chronology, an incremented number will do.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> multi = a.multimedia_xref()
     >>> isinstance(multi, MultimediaXref), multi.name, str(multi)
@@ -191,6 +195,7 @@ class MultimediaXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -210,7 +215,7 @@ class RepositoryXref:
 
     Multiple records records of each type may be created in the same chronology.
     The following example shows the comparison of two repository record identifiers.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> one = a.repository_xref()
     >>> two = a.repository_xref()
@@ -245,6 +250,7 @@ class RepositoryXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -264,7 +270,7 @@ class SharedNoteXref:
     The following example shows that the type structure is distinguishing
     the "smith" string as a SharedNoteXref rather than some other type
     such as an IndividualXref type.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> smith = a.shared_note_xref('some smith')
     >>> (str(smith), smith.name)
@@ -301,6 +307,7 @@ class SharedNoteXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -319,7 +326,7 @@ class SourceXref:
     Examples:
 
     The following example shows that the string is no longer of `str` type.
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> source = a.source_xref()
     >>> report = f'Is {str(source)} still a string? {isinstance(source, str)}'
@@ -350,6 +357,7 @@ class SourceXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -366,7 +374,7 @@ class SubmitterXref:
 
     Examples:
 
-    >>> from chronodata.chrono import Chronology
+    >>> from chronodata.build import Chronology
     >>> a = Chronology('testing')
     >>> me = a.submitter_xref('my own name')
     >>> print(f'{me.name} or {str(me)}')
@@ -396,6 +404,7 @@ class SubmitterXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
+        self.empty: str = Nul.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""

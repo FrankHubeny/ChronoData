@@ -9,7 +9,7 @@
 
 import pytest
 
-from chronodata.chrono import Chronology
+from chronodata.build import Chronology
 from chronodata.g7 import Gedcom
 
 testdata = [('ussher_mankind', '@MANKIND@')]

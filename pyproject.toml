@@ -76,6 +76,9 @@ testpaths = [
   "tests",
   "chronodata",
 ]
+markers = [
+  "description",
+]
 
 [tool.mypy]
 mypy_path = [

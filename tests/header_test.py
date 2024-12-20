@@ -4,7 +4,7 @@
 
 import pytest
 
-from chronodata.chrono import Chronology
+from chronodata.build import Chronology
 from chronodata.g7 import Gedcom, GEDSpecial
 from chronodata.tuples import (
     Note,

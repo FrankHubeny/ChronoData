@@ -57,6 +57,7 @@ class Nul:
     """Constants for null or empty class instances."""
 
     STR: str = ''
+    RECORD: str = '@0@'
 
 
 @dataclass(frozen=True)

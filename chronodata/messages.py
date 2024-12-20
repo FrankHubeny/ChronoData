@@ -80,7 +80,6 @@ class Msg:
     COUNT_RESERVED: str = '{0} reserved keys were used.'
     EMPTY_ERROR: str = 'The value for "{0}" cannot be the empty string or None.'
     EXID_TYPE: str = 'The EXID tag will require a type in the future.'
-    XREF_EXISTS: str = 'The identifier "{0}" already exists.'
     # DAY_TOO_LONG: str = '"{0}" is too long for the day of a month.'
     FILE_EXISTS: str = 'The file "{0}" exists. Use `save` with `overwrite=True` to overwrite the file.'
     FILE_SAVED: str = 'The file "{0}" has been saved.'
@@ -131,3 +130,4 @@ class Msg:
     TOO_MANY_MONTHS: str = '"{0}" is more than the number of months.'
     UNRECOGNIZED: str = 'The file "{0}" has an unrecognized extension.'
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
+    XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'

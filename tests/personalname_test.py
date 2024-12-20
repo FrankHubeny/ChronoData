@@ -4,7 +4,7 @@
 
 import pytest
 
-from chronodata.chrono import (
+from chronodata.build import (
     Chronology,
     PersonalName,
 )

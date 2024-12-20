@@ -9,7 +9,7 @@
 
 import pytest
 
-from chronodata.chrono import Time
+from chronodata.build import Time
 from chronodata.messages import Msg
 
 testdata = [
