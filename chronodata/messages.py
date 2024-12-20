@@ -79,6 +79,7 @@ class Msg:
     COMMENT_REMOVED: str = 'Comment {0} "{1}" has been removed.'
     COUNT_RESERVED: str = '{0} reserved keys were used.'
     EMPTY_ERROR: str = 'The value for "{0}" cannot be the empty string or None.'
+    EXID_TYPE: str = 'The EXID tag will require a type in the future.'
     XREF_EXISTS: str = 'The identifier "{0}" already exists.'
     # DAY_TOO_LONG: str = '"{0}" is too long for the day of a month.'
     FILE_EXISTS: str = 'The file "{0}" exists. Use `save` with `overwrite=True` to overwrite the file.'

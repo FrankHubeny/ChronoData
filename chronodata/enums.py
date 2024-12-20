@@ -25,6 +25,7 @@ class ApproxDate(Enum):
     ABT = 'ABT'
     CAL = 'CAL'
     EST = 'EST'
+    NONE = ''
 
 
 class GreaterLessThan(Enum):
@@ -34,10 +35,11 @@ class GreaterLessThan(Enum):
 
 
 class RangeDate(Enum):
-    """Enumeration values for date ranges.
+    """
+    Enumeration values for date ranges.
 
-    Reference
-    ---------
+    Reference:
+
     [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
     """
 
@@ -45,13 +47,14 @@ class RangeDate(Enum):
     AND = 'AND'
     AFT = 'AFT'
     BEF = 'BEF'
+    NONE = ''
 
 
 class RestrictDate(Enum):
     """Enumeration values for all date restrictions.
 
-    Reference
-    ---------
+    Reference:
+
     [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
     """
 
@@ -63,6 +66,7 @@ class RestrictDate(Enum):
     AFT = 'AFT'
     CAL = 'CAL'
     EST = 'EST'
+    NONE = ''
 
 
 class Sex(Enum):
@@ -70,12 +74,14 @@ class Sex(Enum):
     F = 'F'
     X = 'X'
     U = 'U'
+    NONE = ''
 
 
 class Adop(Enum):
     HUSB = 'HUSB'
     WIFE = 'WIFE'
     BOTH = 'BOTH'
+    NONE = ''
 
 
 class EvenAttr(Enum):
@@ -84,18 +90,21 @@ class EvenAttr(Enum):
     RESI = 'RESI'
     FACT = 'FACT'
     EVEN = 'EVEN'
+    NONE = ''
 
 
 class FamcStat(Enum):
     CHALLENGED = 'CHALLENGED'
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
+    NONE = ''
 
 
 class FamAttr(Enum):
     NCHI = 'NCHI'
     RESI = 'RESI'
     FACT = 'FACT'
+    NONE = ''
 
 
 class FamEven(Enum):
@@ -110,12 +119,14 @@ class FamEven(Enum):
     MARR = 'MARR'
     MARS = 'MARS'
     EVEN = 'EVEN'
+    NONE = ''
 
 
 class Id(Enum):
     REFN = 'REFN'
     UID = 'UID'
     EXID = 'EXID'
+    NONE = ''
 
 
 class IndiAttr(Enum):
@@ -133,6 +144,7 @@ class IndiAttr(Enum):
     SSN = 'SSN'
     TITL = 'TITL'
     FACT = 'FACT'
+    NONE = ''
 
 
 class IndiEven(Enum):
@@ -159,6 +171,7 @@ class IndiEven(Enum):
     RETI = 'RETI'
     WILL = 'WILL'
     EVEN = 'EVEN'
+    NONE = ''
 
 
 class Medi(Enum):
@@ -176,11 +189,13 @@ class Medi(Enum):
     TOMBSTONE = 'TOMBSTONE'
     VIDEO = 'VIDEO'
     OTHER = 'OTHER'
+    NONE = ''
 
 
 class MediaType(Enum):
     TEXT_HTML = 'TEXT_HTML'
     TEXT_PLAIN = 'TEXT_PLAIN'
+    NONE = ''
 
 
 class NameType(Enum):
@@ -191,6 +206,7 @@ class NameType(Enum):
     MARRIED = 'MARRIED'
     PROFESSIONAL = 'PROFESSIONAL'
     OTHER = 'OTHER'
+    NONE = ''
 
 
 class Pedi(Enum):
@@ -199,6 +215,7 @@ class Pedi(Enum):
     FOSTER = 'FOSTER'
     SEALING = 'SEALING'
     OTHER = 'OTHER'
+    NONE = ''
 
 
 class PersonalNamePiece(Enum):
@@ -208,12 +225,16 @@ class PersonalNamePiece(Enum):
     SPFX = 'SPFX'
     SURN = 'SURN'
     NSFX = 'NSFX'
+    NONE = ''
+
 
 class Quay(Enum):
     QUAY0 = '0'
     QUAY1 = '1'
     QUAY2 = '2'
     QUAY3 = '3'
+    NONE = ''
+
 
 class Record(str, Enum):
     FAM = 'FAM'
@@ -223,11 +244,24 @@ class Record(str, Enum):
     SNOTE = 'SNOTE'
     SOUR = 'SOUR'
     SUBM = 'SUBM'
+    NONE = ''
+
 
 class Resn(Enum):
+    """
+    Restriction codes or NONE for no restriction.
+
+    Reference:
+
+    - [GEDCOM RESN Enumeration](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#RESN)
+    - [GEDCOM RESN Codes](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-RESN)
+    """
+
     CONFIDENTIAL = 'CONFIDENTIAL'
     LOCKED = 'LOCKED'
     PRIVACY = 'PRIVACY'
+    NONE = ''
+
 
 class Role(Enum):
     CHIL = 'CHIL'
@@ -245,6 +279,7 @@ class Role(Enum):
     WIFE = 'WIFE'
     WITN = 'WITN'
     OTHER = 'OTHER'
+    NONE = ''
 
 
 class Stat(Enum):
@@ -260,14 +295,17 @@ class Stat(Enum):
     STILLBORN = 'STILLBORN'
     SUBMITTED = 'SUBMITTED'
     UNCLEARED = 'UNCLEARED'
+    NONE = ''
+
 
 class Tag(Enum):
     """Tags used for various structure types in the GEDCOM standard.
-    
+
     Reference
     ---------
     - [GEDCOM Structure Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#structure-types)
     """
+
     ABBR = 'ABBR'
     ADDR = 'ADDR'
     ADOP = 'ADOP'
@@ -319,17 +357,17 @@ class Tag(Enum):
     EMIG = 'EMIG'
     ENDL = 'ENDL'
     ENGA = 'ENGA'
-    EVEN = 'EVEN'  
+    EVEN = 'EVEN'
     EXID = 'EXID'
-    FACT = 'FACT'  
-    FAM = 'FAM'  
-    FATH = 'FATH'  
+    FACT = 'FACT'
+    FAM = 'FAM'
+    FATH = 'FATH'
     FAMC = 'FAMC'
     FAMS = 'FAMS'
     FAX = 'FAX'
     FCOM = 'FCOM'
     FILE = 'FILE'
-    FILM = 'FILM'  
+    FILM = 'FILM'
     FORM = 'FORM'
     GEDC = 'GEDC'
     GIVN = 'GIVN'
@@ -338,12 +376,12 @@ class Tag(Enum):
     HEIGHT = 'HEIGHT'
     HUSB = 'HUSB'
     IDNO = 'IDNO'
-    IMMI = 'IMMI' 
+    IMMI = 'IMMI'
     INDI = 'INDI'
     INIL = 'INIL'
     LANG = 'LANG'
     LATI = 'LATI'
-    LEFT = 'LEFT' 
+    LEFT = 'LEFT'
     LONG = 'LONG'
     MAP = 'MAP'
     MARB = 'MARB'
@@ -356,7 +394,7 @@ class Tag(Enum):
     NAME = 'NAME'
     NATI = 'NATI'
     NATU = 'NATU'
-    NCHI = 'NCHI' 
+    NCHI = 'NCHI'
     NICK = 'NICK'
     NMR = 'NMR'
     NO = 'NO'
@@ -368,10 +406,10 @@ class Tag(Enum):
     ORDN = 'ORDN'
     PAGE = 'PAGE'
     PEDI = 'PEDI'
-    PHON = 'PHON' 
+    PHON = 'PHON'
     PHRASE = 'PHRASE'
     PLAC = 'PLAC'
-    POST = 'POST' 
+    POST = 'POST'
     PROB = 'PROB'
     PROP = 'PROP'
     PUBL = 'PUBL'
@@ -384,26 +422,26 @@ class Tag(Enum):
     RETI = 'RETI'
     ROLE = 'ROLE'
     SCHMA = 'SCHMA'
-    SDATE = 'SDATE' 
+    SDATE = 'SDATE'
     SEX = 'SEX'
     SLGC = 'SLGC'
     SLGS = 'SLGS'
     SNOTE = 'SNOTE'
     SOUR = 'SOUR'
     SPFX = 'SPFX'
-    SPOU = 'SPOU'  
+    SPOU = 'SPOU'
     SSN = 'SSN'
     STAE = 'STAE'
-    STAT = 'STAT'  
+    STAT = 'STAT'
     SUBM = 'SUBM'
     SURN = 'SURN'
     TAG = 'TAG'
     TEMP = 'TEMP'
     TEXT = 'TEXT'
     TIME = 'TIME'
-    TITL = 'TITL' 
+    TITL = 'TITL'
     TOP = 'TOP'
-    TRAN = 'TRAN'  
+    TRAN = 'TRAN'
     TRLR = 'TRLR'
     TYPE = 'TYPE'
     UID = 'UID'
@@ -412,3 +450,4 @@ class Tag(Enum):
     WIFE = 'WIFE'
     WILL = 'WILL'
     WWW = 'WWW'
+    NONE = ''

@@ -221,4 +221,5 @@ class Lang:
         'Chuang': 'za',
         'Chinese': 'zh',
         'Zulu': 'zu',
+        'NONE': '',
     }

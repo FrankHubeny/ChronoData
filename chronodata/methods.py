@@ -50,6 +50,20 @@ class Defs:
         tag: Record,
         info: str = '',
     ) -> str:
+        """
+        Add the first line to a GEDCOM record with record type and identifier.
+
+        The user will not need to run this method, but it is provided
+        so the user can see what the initial lines of a GEDCOM record looks like.
+
+        Examples:
+
+        
+        
+        See Also:
+        
+        - `taginfo`: format a GEDCOM file line with level, tag, and information.
+        """
         if info == '':
             return f'0 {xref} {tag.value}\n'
         return f'0 {xref} {tag.value} {str(info).strip()}\n'
@@ -68,8 +82,9 @@ class Defs:
         it is provided so the user can see the GEDCOM formatted output
         that would result.
 
-        See Also
-        --------
+        See Also:
+        
+        - `taginit`: initializes the first line of a GEDCOM record at level 0.
 
         """
 
