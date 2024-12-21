@@ -111,7 +111,6 @@ class Base:
         try:
             with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
                 self.chron = json.load(file)
-                #self.chron = Defs.clean_input(self.chron)
                 file.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))

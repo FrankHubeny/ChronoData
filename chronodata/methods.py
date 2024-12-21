@@ -8,6 +8,7 @@ import re
 from enum import Enum
 from typing import Any
 
+from chronodata.constants import GEDSpecial
 from chronodata.enums import Record, Tag
 from chronodata.messages import Msg
 from chronodata.records import (
@@ -19,6 +20,8 @@ from chronodata.records import (
     SourceXref,
     SubmitterXref,
 )
+
+#from chronodata.tuples import PersonalNamePiece
 
 
 class Defs:
@@ -58,7 +61,7 @@ class Defs:
 
         Examples:
 
-        
+
         
         See Also:
         
@@ -71,7 +74,7 @@ class Defs:
     @staticmethod
     def taginfo(
         level: int,
-        tag: Tag,
+        tag: Any,
         info: str = '',
         extra: str = '',
     ) -> str:
@@ -119,9 +122,7 @@ class Defs:
         - [Python re Module](https://docs.python.org/3/library/re.html)
         """
 
-        return re.sub(
-            r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]', '', input
-        )
+        return re.sub(GEDSpecial.BANNED, '', input)
 
     @staticmethod
     def verify_type(

@@ -27,6 +27,7 @@ class GEDSpecial:
     """Constant definitions for special GEDCOM string."""
 
     ATSIGN: str = '@'
+    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
     COLON: str = ':'
     DAY: str = 'd'

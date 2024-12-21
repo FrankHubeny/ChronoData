@@ -15,7 +15,6 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
-import logging
 
 from chronodata.constants import GEDSpecial
 from chronodata.core import Base
@@ -158,7 +157,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.family_xref('family')
             Traceback (most recent call last):
-            ValueError: The identifier "family" already exists.
+            ValueError: The identifier "@FAMILY@" built from "family" already exists.
 
         See Also:
             - `individual_xref`: create a typed identifier for an individual record.
@@ -223,7 +222,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.individual_xref('joe')
             Traceback (most recent call last):
-            ValueError: The identifier "joe" already exists.
+            ValueError: The identifier "@JOE@" built from "joe" already exists.
 
         See Also:
             - `family_xref`: create a typed identifier for a family record.
@@ -289,7 +288,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.multimedia_xref('film')
             Traceback (most recent call last):
-            ValueError: The identifier "film" already exists.
+            ValueError: The identifier "@FILM@" built from "film" already exists.
 
         See Also:
             - `family_xref`: create a typed identifier for a family record.
@@ -355,7 +354,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.repository_xref('repo')
             Traceback (most recent call last):
-            ValueError: The identifier "repo" already exists.
+            ValueError: The identifier "@REPO@" built from "repo" already exists.
 
         See Also:
             - `family_xref`: create a typed identifier for a family record.
@@ -414,7 +413,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.shared_note_xref('sn')
             Traceback (most recent call last):
-            ValueError: The identifier "sn" already exists.
+            ValueError: The identifier "@SN@" built from "sn" already exists.
 
         See Also:
             - `family_xref`: create a typed identifier for a family record.
@@ -473,7 +472,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.source_xref('source')
             Traceback (most recent call last):
-            ValueError: The identifier "source" already exists.
+            ValueError: The identifier "@SOURCE@" built from "source" already exists.
 
         See Also:
             - `family_xref`: create a typed identifier for a family record.
@@ -532,7 +531,7 @@ class Chronology(Base):
             creating that name again.
             >>> a.submitter_xref('sub')
             Traceback (most recent call last):
-            ValueError: The identifier "sub" already exists.
+            ValueError: The identifier "@SUB@" built from "sub" already exists.
 
 
         See Also:
@@ -615,6 +614,34 @@ class Chronology(Base):
         Args:
             records (tuple[Individual]): a tuple of all Individual tuples.
 
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import Individual
+            >>> a = Chronology('test')
+            >>> individual_id = a.individual_xref()
+            >>> individual = Individual(xref=individual_id)
+            >>> a.individuals((individual,))
+            >>> print(a.ged_individual)
+            0 @1@ INDI
+            <BLANKLINE>
+
+            There may be more than one family.  This example creates a second
+            family and them runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> individual_id2 = a.individual_xref()
+            >>> individual2 = Individual(xref=individual_id2)
+            >>> a.individuals(
+            ...     (
+            ...         individual,
+            ...         individual2,
+            ...     )
+            ... )
+            >>> print(a.ged_individual)
+            0 @1@ INDI
+            0 @2@ INDI
+            <BLANKLINE>
+
         See Also:
             - `families`: collect and store family records.
             - `multimedia`: collect and store multimedia records.
@@ -632,6 +659,29 @@ class Chronology(Base):
 
         Args:
             records (tuple[Multimedia]): a tuple of all Multimedia tuples.
+
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import Multimedia
+            >>> a = Chronology('test')
+            >>> mm_id = a.multimedia_xref()
+            >>> mm = Multimedia(xref=mm_id)
+            >>> a.multimedia((mm,))
+            >>> print(a.ged_multimedia)
+            0 @1@ OBJE
+            <BLANKLINE>
+
+            There may be more than one multimedia record.  This example creates a second
+            one and then runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> mm_id2 = a.multimedia_xref()
+            >>> mm2 = Multimedia(xref=mm_id2)
+            >>> a.multimedia((mm, mm2,))
+            >>> print(a.ged_multimedia)
+            0 @1@ OBJE
+            0 @2@ OBJE
+            <BLANKLINE>
 
         See Also:
             - `families`: collect and store family records.
@@ -651,6 +701,29 @@ class Chronology(Base):
         Args:
             records (tuple[Repository]): a tuple of all Repository tuples.
 
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import Repository
+            >>> a = Chronology('test')
+            >>> repo_id = a.repository_xref()
+            >>> repo = Repository(xref=repo_id)
+            >>> a.repositories((repo,))
+            >>> print(a.ged_repository)
+            0 @1@ REPO
+            <BLANKLINE>
+
+            There may be more than one repository record.  This example creates a second
+            one and then runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> repo_id2 = a.repository_xref()
+            >>> repo2 = Repository(xref=repo_id2)
+            >>> a.repositories((repo, repo2,))
+            >>> print(a.ged_repository)
+            0 @1@ REPO
+            0 @2@ REPO
+            <BLANKLINE>
+
         See Also:
             - `families`: collect and store family records.
             - `individuals`: collect and store individual records.
@@ -659,7 +732,7 @@ class Chronology(Base):
             - `sources`: collect and store source records.
             - `submitters`: collect and store submitter records.
         """
-        self.ged_repository = []
+        self.ged_repository = ''
         for record in records:
             self.ged_repository = ''.join([self.ged_repository, record.ged()])
 
@@ -668,6 +741,29 @@ class Chronology(Base):
 
         Args:
             records (tuple[SharedNote]): a tuple of all SharedNote tuples.
+
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import SharedNote
+            >>> a = Chronology('test')
+            >>> sn_id = a.shared_note_xref()
+            >>> sn = SharedNote(xref=sn_id)
+            >>> a.shared_notes((sn,))
+            >>> print(a.ged_shared_note)
+            0 @1@ SNOTE
+            <BLANKLINE>
+
+            There may be more than one shared note record.  This example creates a second
+            one and then runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> sn_id2 = a.shared_note_xref()
+            >>> sn2 = SharedNote(xref=sn_id2)
+            >>> a.shared_notes((sn, sn2,))
+            >>> print(a.ged_shared_note)
+            0 @1@ SNOTE
+            0 @2@ SNOTE
+            <BLANKLINE>
 
         See Also:
             - `families`: collect and store family records.
@@ -687,6 +783,29 @@ class Chronology(Base):
         Args:
             records (tuple[Source]): a tuple of all Source tuples.
 
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import Source
+            >>> a = Chronology('test')
+            >>> source_id = a.source_xref()
+            >>> source = Source(xref=source_id)
+            >>> a.sources((source,))
+            >>> print(a.ged_source)
+            0 @1@ SOUR
+            <BLANKLINE>
+
+            There may be more than one source record.  This example creates a second
+            one and then runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> source_id2 = a.source_xref()
+            >>> source2 = Source(xref=source_id2)
+            >>> a.sources((source, source2,))
+            >>> print(a.ged_source)
+            0 @1@ SOUR
+            0 @2@ SOUR
+            <BLANKLINE>
+
         See Also:
             - `families`: collect and store family records.
             - `individuals`: collect and store individual records.
@@ -705,6 +824,29 @@ class Chronology(Base):
         Args:
             records (tuple[Submitter]): a tuple of all Submitter tuples.
 
+        Examples:
+            This is a minimal example illustrating the process.
+            >>> from chronodata.build import Chronology
+            >>> from chronodata.tuples import Submitter
+            >>> a = Chronology('test')
+            >>> sub_id = a.submitter_xref()
+            >>> sub = Submitter(xref=sub_id)
+            >>> a.submitters((sub,))
+            >>> print(a.ged_submitter)
+            0 @1@ SUBM
+            <BLANKLINE>
+
+            There may be more than one submitter record.  This example creates a second
+            one and then runs the method.  This second run overwrites
+            what was entered earlier.
+            >>> sub_id2 = a.submitter_xref()
+            >>> sub2 = Submitter(xref=sub_id2)
+            >>> a.submitters((sub, sub2,))
+            >>> print(a.ged_submitter)
+            0 @1@ SUBM
+            0 @2@ SUBM
+            <BLANKLINE>
+
         See Also:
             - `families`: collect and store family records.
             - `individuals`: collect and store individual records.
@@ -722,5 +864,18 @@ class Chronology(Base):
 
         Args:
             ged_header (str): is the text of the header record.
+
+        Example:
+            This example provides the minimum data for a GEDCOM version 7.0 file.
+            Nothing else has been added to it.
+            >>> from chronodata.build import Chronology
+            >>> a = Chronology('test')
+            >>> a.header(Header())
+            >>> print(a.ged_header)
+            0 HEAD
+            1 GEDC
+            2 VERS 7.0
+            <BLANKLINE>
+
         """
         self.ged_header = ged_header.ged()

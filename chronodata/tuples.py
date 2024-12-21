@@ -4,7 +4,7 @@
 import logging
 from typing import Any, NamedTuple
 
-from chronodata.constants import Cal, Nul, Value
+from chronodata.constants import Cal, GEDSpecial, Nul, Value
 from chronodata.enums import (
     Adop,
     ApproxDate,
@@ -298,9 +298,7 @@ class PersonalName(NamedTuple):
     def ged(self, level: int = 1) -> str:
         personal_name: str = ''
         if self.validate():
-            personal_name = Defs.taginfo(
-                level, self.tag.value, self.text.strip()
-            )
+            personal_name = Defs.taginfo(level, self.tag, self.text.strip())
         return personal_name
 
 
@@ -472,7 +470,7 @@ class Association(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(level + 2, Tag.ROLE, self.role),
+                    Defs.taginfo(level + 2, Tag.ROLE, self.role.value),
                 ]
             )
             if self.role_phrase != '':
@@ -1174,13 +1172,13 @@ class IndividualEventDetail(NamedTuple):
 
 
 class IndividualAttribute(NamedTuple):
-    tag: str
+    tag: IndiAttr
     tag_type: str = ''
     event_detail: IndividualEventDetail | None = None
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.tag, str)
+            Defs.verify_enum(self.tag, IndiAttr)
             and Defs.verify_type(self.tag_type, str)
             and Defs.verify_type(
                 self.event_detail, IndividualEventDetail | None
@@ -1488,73 +1486,6 @@ class Family(NamedTuple):
         return lines
 
 
-class Repository(NamedTuple):
-    xref: RepositoryXref = RepositoryXref(Nul.RECORD)
-    name: str = ''
-    address: Address | None = None
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
-    notes: Any = None
-    identifiers: Any = None
-
-    def validate(self) -> bool:
-        check: bool = (
-            Defs.verify_type(self.xref, RepositoryXref)
-            and Defs.verify_type(self.name, str)
-            and Defs.verify_type(self.address, Address | None)
-            and Defs.verify_tuple_type(self.emails, str)
-            and Defs.verify_tuple_type(self.faxes, str)
-            and Defs.verify_tuple_type(self.wwws, str)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        lines: str = ''
-        if self.validate():
-            pass
-        return lines
-
-
-class Source(NamedTuple):
-    xref: SourceXref = SourceXref(Nul.RECORD)
-    author: str = ''
-    title: str = ''
-    abbreviation: str = ''
-    published: str = ''
-    events: Any = None
-    text: Any = None
-    repositories: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    multimedia_links: Any = None
-
-    def validate(self) -> bool:
-        check: bool = (
-            Defs.verify_type(self.xref, SourceXref)
-            and Defs.verify_type(self.author, str)
-            and Defs.verify_type(self.title, str)
-            and Defs.verify_type(self.abbreviation, str)
-            and Defs.verify_type(self.published, str)
-            and Defs.verify_tuple_type(self.events, SourceEvent)
-            and Defs.verify_tuple_type(self.text, Text)
-            and Defs.verify_tuple_type(self.repositories, Repository)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        lines: str = ''
-        if self.validate():
-            pass
-        return lines
-
-
 class Individual(NamedTuple):
     xref: IndividualXref = IndividualXref(Nul.RECORD)
     resn: Resn = Resn.NONE
@@ -1599,7 +1530,7 @@ class Individual(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = ''
+        lines: str = Defs.taginit(self.xref, Record.INDI)
         if self.validate():
             pass
         return lines
@@ -1625,7 +1556,38 @@ class Multimedia(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = ''
+        lines: str = Defs.taginit(self.xref, Record.OBJE)
+        if self.validate():
+            pass
+        return lines
+
+
+class Repository(NamedTuple):
+    xref: RepositoryXref = RepositoryXref(Nul.RECORD)
+    name: str = ''
+    address: Address | None = None
+    phones: Any = None
+    emails: Any = None
+    faxes: Any = None
+    wwws: Any = None
+    notes: Any = None
+    identifiers: Any = None
+
+    def validate(self) -> bool:
+        check: bool = (
+            Defs.verify_type(self.xref, RepositoryXref)
+            and Defs.verify_type(self.name, str)
+            and Defs.verify_type(self.address, Address | None)
+            and Defs.verify_tuple_type(self.emails, str)
+            and Defs.verify_tuple_type(self.faxes, str)
+            and Defs.verify_tuple_type(self.wwws, str)
+            and Defs.verify_tuple_type(self.notes, Note)
+            and Defs.verify_tuple_type(self.identifiers, Identifier)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        lines: str = Defs.taginit(self.xref, Record.REPO)
         if self.validate():
             pass
         return lines
@@ -1653,7 +1615,43 @@ class SharedNote(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = ''
+        lines: str = Defs.taginit(self.xref, Record.SNOTE)
+        if self.validate():
+            pass
+        return lines
+
+
+class Source(NamedTuple):
+    xref: SourceXref = SourceXref(Nul.RECORD)
+    author: str = ''
+    title: str = ''
+    abbreviation: str = ''
+    published: str = ''
+    events: Any = None
+    text: Any = None
+    repositories: Any = None
+    identifiers: Any = None
+    notes: Any = None
+    multimedia_links: Any = None
+
+    def validate(self) -> bool:
+        check: bool = (
+            Defs.verify_type(self.xref, SourceXref)
+            and Defs.verify_type(self.author, str)
+            and Defs.verify_type(self.title, str)
+            and Defs.verify_type(self.abbreviation, str)
+            and Defs.verify_type(self.published, str)
+            and Defs.verify_tuple_type(self.events, SourceEvent)
+            and Defs.verify_tuple_type(self.text, Text)
+            and Defs.verify_tuple_type(self.repositories, Repository)
+            and Defs.verify_tuple_type(self.identifiers, Identifier)
+            and Defs.verify_tuple_type(self.notes, Note)
+            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        lines: str = Defs.taginit(self.xref, Record.SOUR)
         if self.validate():
             pass
         return lines
@@ -1689,8 +1687,8 @@ class Submitter(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = ''
-        if self.validate():
+        lines: str = Defs.taginit(self.xref, Record.SUBM)
+        if str(self.xref) != self.xref.empty and self.validate():
             pass
         return lines
 
@@ -1731,7 +1729,7 @@ class Header(NamedTuple):
     >  +1 <<NOTE_STRUCTURE>>                    {0:1}
     """
 
-    schemas: Any = None  # noqa: RUF012
+    schemas: Any = None  
     source: str = ''
     vers: str = ''
     name: str = ''
@@ -1753,3 +1751,13 @@ class Header(NamedTuple):
     def validate(self) -> bool:
         check: bool = True
         return check
+
+    def ged(self, level: int = 0) -> str:
+        lines: str = ''.join(
+            [
+                Defs.taginfo(level, Tag.HEAD),
+                Defs.taginfo(level + 1, Tag.GEDC),
+                Defs.taginfo(level + 2, Tag.VERS, GEDSpecial.VERSION),
+            ]
+        )
+        return lines
