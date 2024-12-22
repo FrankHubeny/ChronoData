@@ -14,6 +14,13 @@ References
 from enum import Enum
 
 
+class Adop(Enum):
+    HUSB = 'HUSB'
+    WIFE = 'WIFE'
+    BOTH = 'BOTH'
+    NONE = ''
+
+
 class ApproxDate(Enum):
     """Enumeration values for date approximations.
 
@@ -28,61 +35,6 @@ class ApproxDate(Enum):
     NONE = ''
 
 
-class GreaterLessThan(Enum):
-    EQUAL = ''
-    GREATER = '>'
-    LESS = '<'
-
-
-class RangeDate(Enum):
-    """
-    Enumeration values for date ranges.
-
-    Reference:
-
-    [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
-    """
-
-    BET = 'BET'
-    AND = 'AND'
-    AFT = 'AFT'
-    BEF = 'BEF'
-    NONE = ''
-
-
-class RestrictDate(Enum):
-    """Enumeration values for all date restrictions.
-
-    Reference:
-
-    [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
-    """
-
-    FROM = 'FROM'
-    TO = 'TO'
-    BET = 'BET'
-    AND = 'AND'
-    BEF = 'BEF'
-    AFT = 'AFT'
-    CAL = 'CAL'
-    EST = 'EST'
-    NONE = ''
-
-
-class Sex(Enum):
-    M = 'M'
-    F = 'F'
-    X = 'X'
-    U = 'U'
-    NONE = ''
-
-
-class Adop(Enum):
-    HUSB = 'HUSB'
-    WIFE = 'WIFE'
-    BOTH = 'BOTH'
-    NONE = ''
-
 
 class EvenAttr(Enum):
     CENS = 'CENS'
@@ -92,18 +44,52 @@ class EvenAttr(Enum):
     EVEN = 'EVEN'
     NONE = ''
 
-
-class FamcStat(Enum):
-    CHALLENGED = 'CHALLENGED'
-    DISPROVEN = 'DISPROVEN'
-    PROVEN = 'PROVEN'
+class Event(Enum):
+    ADOP = 'ADOP'
+    ANUL = 'ANUL'
+    BAPM = 'BAPM'
+    BARM = 'BARM'
+    BASM = 'BASM'
+    BIRT = 'BIRT'
+    BLES = 'BLES'
+    BURI = 'BURI'
+    CENS = 'CENS'
+    CHR = 'CHR'
+    CHRA = 'CHRA'
+    CONF = 'CONF'
+    CREM = 'CREM'
+    DEAT = 'DEAT'
+    DIV = 'DIV'
+    DIVF = 'DIVF'
+    EMIG = 'EMIG'
+    ENGA = 'ENGA'
+    EVEN = 'EVEN'
+    FCOM = 'FCOM'
+    GRAD = 'GRAD'
+    IMMI = 'IMMI'
+    MARB = 'MARB'
+    MARC = 'MARC'
+    MARL = 'MARL'
+    MARR = 'MARR'
+    MARS = 'MARS'
+    NATU = 'NATU'
+    ORDN = 'ORDN'
+    PROB = 'PROB'
+    RETI = 'RETI'
+    WILL = 'WILL'
     NONE = ''
-
 
 class FamAttr(Enum):
     NCHI = 'NCHI'
     RESI = 'RESI'
     FACT = 'FACT'
+    NONE = ''
+
+
+class FamcStat(Enum):
+    CHALLENGED = 'CHALLENGED'
+    DISPROVEN = 'DISPROVEN'
+    PROVEN = 'PROVEN'
     NONE = ''
 
 
@@ -120,6 +106,12 @@ class FamEven(Enum):
     MARS = 'MARS'
     EVEN = 'EVEN'
     NONE = ''
+
+
+class GreaterLessThan(Enum):
+    EQUAL = ''
+    GREATER = '>'
+    LESS = '<'
 
 
 class Id(Enum):
@@ -218,7 +210,7 @@ class Pedi(Enum):
     NONE = ''
 
 
-class PersonalNamePiece(Enum):
+class PersonalNamePieceTag(Enum):
     NPFX = 'NPFX'
     GIVN = 'GIVN'
     NICK = 'NICK'
@@ -233,6 +225,22 @@ class Quay(Enum):
     QUAY1 = '1'
     QUAY2 = '2'
     QUAY3 = '3'
+    NONE = ''
+
+
+class RangeDate(Enum):
+    """
+    Enumeration values for date ranges.
+
+    Reference:
+
+    [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    """
+
+    BET = 'BET'
+    AND = 'AND'
+    AFT = 'AFT'
+    BEF = 'BEF'
     NONE = ''
 
 
@@ -263,6 +271,25 @@ class Resn(Enum):
     NONE = ''
 
 
+class RestrictDate(Enum):
+    """Enumeration values for all date restrictions.
+
+    Reference:
+
+    [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    """
+
+    FROM = 'FROM'
+    TO = 'TO'
+    BET = 'BET'
+    AND = 'AND'
+    BEF = 'BEF'
+    AFT = 'AFT'
+    CAL = 'CAL'
+    EST = 'EST'
+    NONE = ''
+
+
 class Role(Enum):
     CHIL = 'CHIL'
     CLERGY = 'CLERGY'
@@ -279,6 +306,14 @@ class Role(Enum):
     WIFE = 'WIFE'
     WITN = 'WITN'
     OTHER = 'OTHER'
+    NONE = ''
+
+
+class Sex(Enum):
+    M = 'M'
+    F = 'F'
+    X = 'X'
+    U = 'U'
     NONE = ''
 
 

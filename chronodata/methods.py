@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Any
 
 from chronodata.constants import GEDSpecial
-from chronodata.enums import Record, Tag
+from chronodata.enums import Record
 from chronodata.messages import Msg
 from chronodata.records import (
     FamilyXref,
@@ -69,7 +69,7 @@ class Defs:
         """
         if info == '':
             return f'0 {xref} {tag.value}\n'
-        return f'0 {xref} {tag.value} {str(info).strip()}\n'
+        return f'0 {xref} {tag.value} {Defs.clean_input(info)}\n'
 
     @staticmethod
     def taginfo(
@@ -94,8 +94,8 @@ class Defs:
         if extra == '':
             if info == '':
                 return f'{level} {tag.value}\n'
-            return f'{level} {tag.value} {info}\n'
-        return f'{level} {tag.value} {info} {extra}\n'
+            return f'{level} {tag.value} {Defs.clean_input(info)}\n'
+        return f'{level} {tag.value} {Defs.clean_input(info)} {Defs.clean_input(extra)}\n'
 
     @staticmethod
     def clean_input(input: str) -> str:
@@ -122,7 +122,7 @@ class Defs:
         - [Python re Module](https://docs.python.org/3/library/re.html)
         """
 
-        return re.sub(GEDSpecial.BANNED, '', input)
+        return re.sub(GEDSpecial.BANNED, '', input).strip()
 
     @staticmethod
     def verify_type(
@@ -149,10 +149,25 @@ class Defs:
         return True
 
     @staticmethod
-    def verify_enum(value: Any, enumeration: Any) -> bool:
+    def verify_enum(value: str, enumeration: Any) -> bool:
         """Check if the value is in the proper enumation."""
         if value not in enumeration:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
+        return True
+    
+    @staticmethod
+    def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
+        """Check if the value is in the proper dictionary."""
+        Defs.verify_type(value, str)
+        if value != '' and value not in dictionary:
+            raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
+        return True
+    
+    @staticmethod
+    def verify_not_default(value: Any, default: Any) -> bool:
+        """Check that the value is not the default value."""
+        if value == default:
+            raise ValueError(Msg.NOT_DEFAULT.format(value, default))
         return True
 
     @staticmethod
