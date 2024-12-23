@@ -13,7 +13,7 @@ import pandas as pd  # type: ignore[import-untyped]
 from chronodata.constants import (
     Arg,
     Calendar,
-    GEDSpecial,
+    String,
     Key,
     String,
     Unit,
@@ -30,7 +30,7 @@ class Base:
         self,
         name: str = '',
         filename: str = '',
-        calendar: str = GEDSpecial.GREGORIAN,
+        calendar: str = String.GREGORIAN,
         log: bool = True,
     ) -> None:
         self.chron: dict[Any, Any] = {

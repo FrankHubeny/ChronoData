@@ -113,6 +113,7 @@ class Msg:
     NOT_REMOVABLE: str = 'The name "{0}" is a reserved key.'
     NOT_STRING: str = 'The {1} value "{0}" is not a string.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
+    NOT_VALID_CHOICE: str = 'The value "{0}" is not in the {1} category.'
     NOT_VALID_ENUM: str = 'The value "{0}" is not in the {1} enumeration.'
     NOT_VALID_KEY: str = 'The value "{0}" is not in the {1} dictionary.'
     ONE: str = 'One reserved key was used.'

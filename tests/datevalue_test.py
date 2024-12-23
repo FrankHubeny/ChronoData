@@ -11,8 +11,8 @@
 
 import pytest
 
-from chronodata.build import Date, DateValue, Time
 from chronodata.messages import Msg
+from chronodata.store import Date, DateValue, Time
 
 testdata = [
     ('dv1.ged(1)', '1 DATE 01 DEC 2000\n2 TIME 10:10:10\n'),

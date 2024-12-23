@@ -17,7 +17,7 @@ from chronodata.records import (
     SourceXref,
     SubmitterXref,
 )
-from chronodata.tuples import (
+from chronodata.store import (
     Child,
     Family,
     FamilyChild,

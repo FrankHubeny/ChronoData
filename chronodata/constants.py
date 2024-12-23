@@ -1,3 +1,4 @@
+# chronodata/constants.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """This module provides a namespace for typed constants."""
 
@@ -23,42 +24,194 @@ class AgeConstants:
 
 
 @dataclass(frozen=True)
-class GEDSpecial:
-    """Constant definitions for special GEDCOM string."""
-
-    ATSIGN: str = '@'
-    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
-    BC: str = 'BCE'
-    COLON: str = ':'
-    DAY: str = 'd'
-    FRENCH_R: str = 'FRENCH_R'
-    GREATER_THAN: str = '>'
-    GREGORIAN: str = 'GREGORIAN'
-    HEBREW: str = 'HEBREW'
-    HYPHEN: str = '-'
-    JULIAN: str = 'JULIAN'
-    LESS_THAN: str = '<'
-    MAX_MONTHS: str = 'Max Months'
-    MONTH: str = 'm'
-    MONTH_NAMES: str = 'Month Names'
-    MONTH_MAX_DAYS: str = 'Month Max Days'
-    NEWLINE: str = '\n'
-    NOW: str = 'now'
-    SPACE: str = ' '
-    T: str = 'T'
-    VERSION: str = '7.0'
-    VOID: str = '@VOID@'
-    WEEK: str = 'w'
-    YEAR: str = 'y'
-    Z: str = 'Z'
-
-
-@dataclass(frozen=True)
-class Nul:
-    """Constants for null or empty class instances."""
-
-    STR: str = ''
-    RECORD: str = '@0@'
+class Choice:
+    ADOP: frozenset[str] = frozenset({'HUSB', 'WIFE', 'BOTH'})
+    APPROXIMATE_DATE: frozenset[str] = frozenset({'ABT', 'CAL', 'EST'})
+    EVENT: frozenset[str] = frozenset(
+        {
+            'ADOP',
+            'ANUL',
+            'BAPM',
+            'BARM',
+            'BASM',
+            'BIRT',
+            'BLES',
+            'BURI',
+            'CENS',
+            'CHR',
+            'CHRA',
+            'CONF',
+            'CREM',
+            'DEAT',
+            'DIV',
+            'DIVF',
+            'EMIG',
+            'ENGA',
+            'EVEN',
+            'FCOM',
+            'GRAD',
+            'IMMI',
+            'MARB',
+            'MARC',
+            'MARL',
+            'MARR',
+            'MARS',
+            'NATU',
+            'ORDN',
+            'PROB',
+            'RETI',
+            'WILL',
+        }
+    )
+    EVENT_ATTRIBUTE: frozenset[str] = frozenset(
+        {'CENS', 'NCHI', 'RESI', 'FACT', 'EVEN'}
+    )
+    FAMC_STAT: frozenset[str] = frozenset({'CHALLENGED', 'DISPROVEN', 'PROVEN'})
+    FAMILY_ATTRIBUTE: frozenset[str] = frozenset({'NCHI', 'RESI', 'FACT'})
+    FAMILY_EVENT: frozenset[str] = frozenset(
+        {
+            'CENS',
+            'DIV',
+            'DIVF',
+            'ENGA',
+            'MARB',
+            'MARC',
+            'MARL',
+            'MARR',
+            'MARS',
+            'EVEN',
+        }
+    )
+    GREATER_LESS_THAN: frozenset[str] = frozenset({'', '<', '>'})
+    ID: frozenset[str] = frozenset({'EXID', 'REFN', 'UID'})
+    INDIVIDUAL_ATTRIBUTE: frozenset[str] = frozenset(
+        {
+            'CAST',
+            'DSCR',
+            'EDUC',
+            'IDNO',
+            'NATI',
+            'NCHI',
+            'NMR',
+            'OCCU',
+            'PROP',
+            'RELI',
+            'RESI',
+            'SSN',
+            'TITL',
+            'FACT',
+        }
+    )
+    INDIVIDUAL_EVENT: frozenset[str] = frozenset(
+        {
+            'ADOP',
+            'BAPM',
+            'BARM',
+            'BASM',
+            'BIRT',
+            'BLES',
+            'BURI',
+            'CENS',
+            'CHR',
+            'CHRA',
+            'CONF',
+            'CREM',
+            'DEAT',
+            'EMIG',
+            'FCOM',
+            'GRAD',
+            'IMMI',
+            'NATU',
+            'ORDN',
+            'PROB',
+            'RETI',
+            'WILL',
+            'EVEN',
+        }
+    )
+    MEDI: frozenset[str] = frozenset(
+        {
+            'AUDIO',
+            'BOOK',
+            'CARD',
+            'ELECTRONIC',
+            'FICHE',
+            'FILM',
+            'MAGAZINE',
+            'MANUSCRIPT',
+            'MAP',
+            'NEWSPAPER',
+            'PHOTO',
+            'TOMBSTONE',
+            'VIDEO',
+            'OTHER',
+        }
+    )
+    MEDIA_TYPE: frozenset[str] = frozenset({'TEXT_HTML', 'TEXT_PLAIN'})
+    NAME_TYPE: frozenset[str] = frozenset(
+        {
+            'AKA',
+            'BIRTH',
+            'IMMIGRANT',
+            'MAIDEN',
+            'MARRIED',
+            'PROFESSIONAL',
+            'OTHER',
+        }
+    )
+    PEDI: frozenset[str] = frozenset(
+        {'ADOPTED', 'BIRTH', 'FOSTER', 'SEALING', 'OTHER'}
+    )
+    PERSONAL_NAME_PIECE: frozenset[str] = frozenset(
+        {'GIVN', 'NICK', 'NPFX', 'NSFX', 'SPFX', 'SURN'}
+    )
+    QUALITY: frozenset[str] = frozenset({'0', '1', '2', '3'})
+    RANGE_DATE: frozenset[str] = frozenset({'AFT', 'AND', 'BEF', 'BET'})
+    RECORD: frozenset[str] = frozenset(
+        {'FAM', 'INDI', 'OBJE', 'REPO', 'SNOTE', 'SOUR', 'SUBM'}
+    )
+    RESTRICT_DATE: frozenset[str] = frozenset(
+        {'AFT', 'AND', 'BEF', 'BET', 'CAL', 'EST', 'FROM', 'TO'}
+    )
+    RESTRICTION: frozenset[str] = frozenset(
+        {'CONFIDENTIAL', 'LOCKED', 'PRIVACY'}
+    )
+    ROLE: frozenset[str] = frozenset(
+        {
+            'CHIL',
+            'CLERGY',
+            'FATH',
+            'FRIEND',
+            'GODP',
+            'HUSB',
+            'MOTH',
+            'MULTIPLE',
+            'NGHBR',
+            'OFFICIATOR',
+            'PARENT',
+            'SPOU',
+            'WIFE',
+            'WITN',
+            'OTHER',
+        }
+    )
+    SEX: frozenset[str] = frozenset({'F', 'M', 'U', 'X'})
+    STAT: frozenset[str] = frozenset(
+        {
+            'BIC',
+            'CANCELED',
+            'CHILD',
+            'COMPLETED',
+            'EXCLUDED',
+            'DNS',
+            'DNS_CAN',
+            'INFANT',
+            'PRE_1970',
+            'STILLBORN',
+            'SUBMITTED',
+            'UNCLEARED',
+        }
+    )
 
 
 @dataclass(frozen=True)
@@ -164,8 +317,34 @@ class String:
     """
 
     NEGATIVE: str = '-'
+    # NEWLINE: str = '\n'
+    # SPACE: str = ' '
+    ATSIGN: str = '@'
+    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    BC: str = 'BCE'
+    COLON: str = ':'
+    DAY: str = 'd'
+    FRENCH_R: str = 'FRENCH_R'
+    GREATER_THAN: str = '>'
+    GREGORIAN: str = 'GREGORIAN'
+    HEBREW: str = 'HEBREW'
+    HYPHEN: str = '-'
+    JULIAN: str = 'JULIAN'
+    LESS_THAN: str = '<'
+    MAX_MONTHS: str = 'Max Months'
+    MONTH: str = 'm'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
     NEWLINE: str = '\n'
+    NOW: str = 'now'
+    RECORD: str = '@0@'
     SPACE: str = ' '
+    T: str = 'T'
+    VERSION: str = '7.0'
+    VOID: str = '@VOID@'
+    WEEK: str = 'w'
+    YEAR: str = 'y'
+    Z: str = 'Z'
 
 
 @dataclass(frozen=True)

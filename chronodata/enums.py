@@ -1,20 +1,33 @@
+# chronodata/enums.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """Enumeration classes to build a dataset formatted according
 to the GEDCOM standard.
 
-References
-----------
+Some of these enumerations came from the GEDCOM specifications.
+Others were added to aid in setting up the NamedTuples for the
+users to fill with data.
 
-- [Date Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
-- [Python Enum Support](https://docs.python.org/3/library/enum.html#)
-- [PEP 435](https://peps.python.org/pep-0435/)
-- [RealPython Tutorial](https://realpython.com/python-enum/)
+All of them have a `NONE` element as a default for an empty string value.
+This NONE value is not part of the GEDCOM standard and does not
+appear in the output.
+
+References:
+    - [Date Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    - [Python Enum Support](https://docs.python.org/3/library/enum.html#)
+    - [PEP 435](https://peps.python.org/pep-0435/)
+    - [RealPython Tutorial](https://realpython.com/python-enum/)
 """
 
 from enum import Enum
 
 
 class Adop(Enum):
+    """Tags for who made the adoption of the person into the family.
+
+    Reference:
+        - [GEDCOM Adop Enumeration](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-ADOP)
+    """
+
     HUSB = 'HUSB'
     WIFE = 'WIFE'
     BOTH = 'BOTH'
@@ -24,9 +37,8 @@ class Adop(Enum):
 class ApproxDate(Enum):
     """Enumeration values for date approximations.
 
-    Reference
-    ---------
-    [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    Reference:
+        - [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
     """
 
     ABT = 'ABT'
@@ -35,8 +47,11 @@ class ApproxDate(Enum):
     NONE = ''
 
 
-
 class EvenAttr(Enum):
+    """Tags for an event or attribute information.
+    
+    Reference:
+        - [GEDCOM Event Attribute Enumeration](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-EVENATTR)"""
     CENS = 'CENS'
     NCHI = 'NCHI'
     RESI = 'RESI'
@@ -44,7 +59,9 @@ class EvenAttr(Enum):
     EVEN = 'EVEN'
     NONE = ''
 
+
 class Event(Enum):
+    """Tags for events."""
     ADOP = 'ADOP'
     ANUL = 'ANUL'
     BAPM = 'BAPM'
@@ -79,6 +96,7 @@ class Event(Enum):
     WILL = 'WILL'
     NONE = ''
 
+
 class FamAttr(Enum):
     NCHI = 'NCHI'
     RESI = 'RESI'
@@ -108,10 +126,10 @@ class FamEven(Enum):
     NONE = ''
 
 
-class GreaterLessThan(Enum):
-    EQUAL = ''
-    GREATER = '>'
-    LESS = '<'
+# class GreaterLessThan(Enum):
+#     EQUAL = ''
+#     GREATER = '>'
+#     LESS = '<'
 
 
 class Id(Enum):
@@ -166,7 +184,7 @@ class IndiEven(Enum):
     NONE = ''
 
 
-class Medi(Enum):
+class Media(Enum):
     AUDIO = 'AUDIO'
     BOOK = 'BOOK'
     CARD = 'CARD'
@@ -210,14 +228,14 @@ class Pedi(Enum):
     NONE = ''
 
 
-class PersonalNamePieceTag(Enum):
-    NPFX = 'NPFX'
-    GIVN = 'GIVN'
-    NICK = 'NICK'
-    SPFX = 'SPFX'
-    SURN = 'SURN'
-    NSFX = 'NSFX'
-    NONE = ''
+# class PersonalNamePieceTag(Enum):
+#     NPFX = 'NPFX'
+#     GIVN = 'GIVN'
+#     NICK = 'NICK'
+#     SPFX = 'SPFX'
+#     SURN = 'SURN'
+#     NSFX = 'NSFX'
+#     NONE = ''
 
 
 class Quay(Enum):
@@ -340,7 +358,6 @@ class Tag(Enum):
     ---------
     - [GEDCOM Structure Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#structure-types)
     """
-
     ABBR = 'ABBR'
     ADDR = 'ADDR'
     ADOP = 'ADOP'
@@ -486,3 +503,4 @@ class Tag(Enum):
     WILL = 'WILL'
     WWW = 'WWW'
     NONE = ''
+

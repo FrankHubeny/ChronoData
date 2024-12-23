@@ -1,32 +1,34 @@
+# chronodata/tuples.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-"""NamedTuples to build a chronology based on the GEDCOM standard."""
+"""NamedTuples to store, validate and display data
+entered by the user for a chronology.
+
+The NamedTuples are based on the GEDCOM standard with others
+added to aid the user in collecting the data.
+
+Each of the NamedTuples have two methods:
+    validate: Return True if the data can be used or
+        an error message otherwise.
+    ged: Display the data in the GEDCOM format.
+
+Examples:
+
+
+"""
 
 import logging
 from typing import Any, NamedTuple
 
-from chronodata.constants import Cal, GEDSpecial, Nul, Value
+from chronodata.constants import Cal, Choice, String, Value
 from chronodata.enums import (
-    Adop,
-    ApproxDate,
-    EvenAttr,
     Event,
-    FamAttr,
-    FamcStat,
-    FamEven,
-    GreaterLessThan,
     Id,
     IndiAttr,
-    IndiEven,
-    Medi,
+    Media,
     MediaType,
-    NameType,
-    Pedi,
-    PersonalNamePieceTag,
     Quay,
-    RangeDate,
     Record,
     Resn,
-    RestrictDate,
     Role,
     Sex,
     Stat,
@@ -47,18 +49,11 @@ from chronodata.records import (
 
 
 class Address(NamedTuple):
-    """Add address information.
-
-    Args:
-        - address (str): Each line of the mailing label is separated by `\n`.
-        - city (str): The city or and empty string to leave this blank.
-        - state (str): The state or an empty string to leave this blank.
-        - postal (str): The postal code or an empty string to leave this blank.
-        - country (str): The country or an empty string to leave this blank.
+    """Store, validate and format address information to be saved to a ged file.
 
     Example:
         The following is the minimum amount of information for an address.
-        >>> from chronodata.tuples import Address
+        >>> from chronodata.store import Address
         >>> mailing_address = Address(
         ...     ['12345 ABC Street', 'South North City, My State 23456']
         ... )
@@ -68,7 +63,7 @@ class Address(NamedTuple):
         <BLANKLINE>
 
         There are five named strings stored in this NamedTuple.
-        >>> from chronodata.tuples import Address
+        >>> from chronodata.store import Address
         >>> full_address = Address(
         ...     ['12345 ABC Street', 'South North City, My State 23456'],
         ...     'South North City',
@@ -86,7 +81,7 @@ class Address(NamedTuple):
         <BLANKLINE>
 
         Lines with empty ('') strings are moved.
-        >>> from chronodata.tuples import Address
+        >>> from chronodata.store import Address
         >>> blanks_address = Address(
         ...     [
         ...         '',
@@ -107,6 +102,15 @@ class Address(NamedTuple):
         >>> blanks_address.validate()
         True
 
+    Args:
+        address: Each line of the mailing label is separated by `\n`.
+        city: The city or and empty string to leave this blank.
+        state: The state or an empty string to leave this blank.
+        postal: The postal code or an empty string to leave this blank.
+        country: The country or an empty string to leave this blank.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#substructures)
@@ -166,22 +170,14 @@ class Address(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 1,
-                            Tag.POST,
-                            self.postal
-                        ),
+                        Defs.taginfo(level + 1, Tag.POST, self.postal),
                     ]
                 )
             if self.country != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 1,
-                            Tag.CTRY,
-                            self.country
-                        ),
+                        Defs.taginfo(level + 1, Tag.CTRY, self.country),
                     ]
                 )
         return lines
@@ -190,49 +186,17 @@ class Address(NamedTuple):
 class Age(NamedTuple):
     """Implement the Age data type in the GEDCOM specification.
 
-    Args:
-        - greater_less_than
-        The default is '', which means that the age is exact
-        to the day.  The option `>` means that the actual age
-        is greater than the one provided.  The option `<` means
-        that the actual age is less than the one provided.
-        - years
-        The number of whole years in the age. The specification
-        requires this to be rounded down.  Here an error is thrown
-        if an integer is not used. One can add information in the
-        phrase parameter to clarify the year.
-        - months
-        The number of months in addition to the years. The specification
-        requires this to be rounded down.  Here an error is thrown
-        if an integer is not used. One can add information in the
-        phrase parameter to clarify the year.
-        - weeks
-        The number of weeks in addition to the years and months.
-        The specification
-        requires this to be rounded down.  Here an error is thrown
-        if an integer is not used. One can add information in the
-        phrase parameter to clarify the year.
-        - days
-        The number of days in addition to any years, months, or weeks provided.
-        The specification requires this to be rounded down.  Here an error is thrown
-        if an integer is not used. One can add information in the
-        phrase parameter to clarify the year.
-
-    The default values for these parameters is 0 for the integers and '' for the
-    strings.
-
-    Exceptions:
-        - If greater_less_than is not one of {'', '<', '>'} a ValueError will be issued.
-        - If any value (except `phrase`) is not an integer, a ValueError will be issued.
-        - If any value (except `phrase`) is less than 0, a ValueError will be issued.
+    The GEDCOM specification requires that these age components be
+    rounded down. The `phrase` parameter allows the user to
+    add information about the data provided.
 
     Examples:
-        >>> from chronodata.tuples import Age
-        >>> from chronodata.enums import GreaterLessThan
+        >>> from chronodata.store import Age
+        >>> from chronodata.constants import String
         >>> print(
         ...     Age(
         ...         10,
-        ...         greater_less_than=GreaterLessThan.GREATER,
+        ...         greater_less_than='>',
         ...         phrase='Estimated',
         ...     ).ged(1)
         ... )
@@ -243,6 +207,25 @@ class Age(NamedTuple):
         2 AGE 10y 2m 1w 2d
         <BLANKLINE>
 
+    Args:
+        greater_less_than: The default is '', which means that the age is exact
+            to the day.  The option `>` means that the actual age
+            is greater than the one provided.  The option `<` means
+            that the actual age is less than the one provided.
+        years: The number of whole years in the age.
+        months: The number of months in addition to the years.
+        weeks: The number of weeks in addition to the years and months.
+        days: The number of days in addition to any years, months, or weeks provided.
+        phrase: Addition information to clarify the data added.
+
+    Returns:
+        A GEDCOM string storing this data.
+
+    Exceptions:
+        ValueError: If greater_less_than is not one of {'', '<', '>'}.
+        ValueError: If any value (except `phrase`) is not an integer.
+        ValueError: If any value (except `phrase`) is less than 0.
+
     Reference:
         [GEDCOM Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age)
     """
@@ -251,13 +234,13 @@ class Age(NamedTuple):
     months: int = 0
     weeks: int = 0
     days: int = 0
-    greater_less_than: GreaterLessThan = GreaterLessThan.EQUAL
+    greater_less_than: str = ''
     phrase: str = ''
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_enum(self.greater_less_than.value, GreaterLessThan)
+            Defs.verify_choice(self.greater_less_than, Choice.GREATER_LESS_THAN)
             and Defs.verify_type(self.years, int)
             and Defs.verify_type(self.months, int)
             and Defs.verify_type(self.weeks, int)
@@ -273,7 +256,7 @@ class Age(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format the GEDCOM Age data type."""
         line: str = ''
-        info: str = self.greater_less_than.value
+        info: str = self.greater_less_than
         if self.validate():
             if self.years > 0:
                 info = ''.join([info, f' {self.years!s}y'])
@@ -314,15 +297,9 @@ class PersonalNamePiece(NamedTuple):
     - [NSFX]():
         a surname suffix for the person.
 
-
-    Args:
-        tag (PersonalNamePieceTag): One of six tags used for a personal name pieces.
-        text (str): The string value associated with that tag.
-
-
     Example:
         This example includes all six of the Personal Name Piece tags.
-        >>> from chronodata.tuples import PersonalNamePiece
+        >>> from chronodata.store import PersonalNamePiece  # doctest: +ELLIPSIS
         >>> from chronodata.enums import Tag
         >>> prefix = PersonalNamePiece(Tag.NPFX, 'Mr.')
         >>> given = PersonalNamePiece(Tag.GIVN, 'Joseph')
@@ -350,61 +327,52 @@ class PersonalNamePiece(NamedTuple):
         <BLANKLINE>
 
         If one of these tags is not used, an ValueError would display.
-        >>> bad_piece = PersonalNamePiece(Tag.NAME, 'Tom')
+        >>> bad_piece = PersonalNamePiece(Tag.NAME, 'Tom') 
         >>> bad_piece.ged(1)
         Traceback (most recent call last):
-        ValueError: The value "NAME" is not in the <enum 'PersonalNamePieceTag'> enumeration.
+        ValueError: The value "NAME" is not in the ...
 
         The error in the above example did not occur immediately, but one had to
         attempt to use the NamedTuple by displaying it as a GEDCOM line.  One could
         also run the `validate` method on `bad piece` to trigger the error.  This
         method is called by `ged` prior to displaying the GEDCOM line.
-        >>> bad_piece.validate()
+        >>> bad_piece.validate() 
         Traceback (most recent call last):
-        ValueError: The value "NAME" is not in the <enum 'PersonalNamePieceTag'> enumeration.
+        ValueError: The value "NAME" is not in the ...
+
+    Args:
+        tag: One of six tags used for a personal name pieces.
+        text: The string value associated with that tag.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Personal Name Pieces](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES)
     """
 
-    tag: PersonalNamePieceTag = PersonalNamePieceTag.NONE
+    tag: Tag = Tag.NONE
     text: str = ''
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_enum(
-            self.tag.value, PersonalNamePieceTag
-        ) and Defs.verify_type(self.text, str)
+        check: bool = (
+            Defs.verify_type(self.tag, Tag)
+            and Defs.verify_choice(self.tag.value, Choice.PERSONAL_NAME_PIECE)
+            and Defs.verify_type(self.text, str)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         name_piece: str = ''
         if self.validate():
-            name_piece = Defs.taginfo(
-                level, self.tag, self.text
-            )
+            name_piece = Defs.taginfo(level, self.tag, self.text)
         return name_piece
 
 
 class PersonalName(NamedTuple):
     """Store, validate and display a personal name.
-
-    Args:
-        name (str): the person's name.
-        type (str): the type of name. There are seven types to choose from:
-            - NameType.AKA or also known as.
-            - NameType.BIRTH or birth name.
-            - NameType.IMMIGRANT or immigrant name.
-            - NameType.MAIDEN or maiden name.
-            - NameType.MARRIED or married name.
-            - NameType.PROFESSIONAL or professional name
-            - NameType.OTHER or another type not listed above.
-        phrase (str): a place for uncategorized information about the name.
-        pieces (tuple[PersonNamePieces]): an alternate way to split the name.
-        translations (tuple[NameTranslation]): an optional tuple of translations of the name.
-        notes (tuple[Note]): a tuple of optional notes regarding the name.
-        sources (tuple[SourceCitation]): a tuple of citations regarding the name.
 
     Example:
         The first example will not only test ChronoData but also the extend
@@ -420,16 +388,16 @@ class PersonalName(NamedTuple):
         Note the trailing "," in the `translations` parameter.  Even though there
         is only one translation, this is required to guarantee the tuple
         is not interpreted as a string of letters.
-        >>> from chronodata.tuples import (
+        >>> from chronodata.store import (
         ...     NameTranslation,
         ...     Note,
         ...     PersonalName,
         ...     PersonalNamePiece,
         ...     SourceCitation,
         ... )
-        >>> from chronodata.enums import NameType, PersonalNamePieceTag
+        >>> from chronodata.enums import NameType
         >>> adam_note = Note('Here is a place to add more information.')
-        >>> adam_nickname = PersonalNamePiece(PersonalNamePieceTag.NICK, 'הָֽאָדָ֖ם')
+        >>> adam_nickname = PersonalNamePiece(Tag.NICK, 'הָֽאָדָ֖ם')
         >>> adam_english = NameTranslation('Adam', 'English')
         >>> adam_english_nickname = NameTranslation('the man', 'English')
         >>> adam = PersonalName(
@@ -454,13 +422,31 @@ class PersonalName(NamedTuple):
         2 NOTE Here is a place to add more information.
         <BLANKLINE>
 
+    Args:
+        name: the person's name.
+        type: the type of name. There are seven types to choose from:
+            - NameType.AKA or also known as.
+            - NameType.BIRTH or birth name.
+            - NameType.IMMIGRANT or immigrant name.
+            - NameType.MAIDEN or maiden name.
+            - NameType.MARRIED or married name.
+            - NameType.PROFESSIONAL or professional name
+            - NameType.OTHER or another type not listed above.
+        phrase: a place for uncategorized information about the name.
+        pieces: an alternate way to split the name.
+        translations: an optional tuple of translations of the name.
+        notes: a tuple of optional notes regarding the name.
+        sources: a tuple of citations regarding the name.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Person Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
     """
 
     name: str = ''
-    type: NameType = NameType.NONE
+    type: Tag = Tag.NONE
     phrase: str = ''
     pieces: Any = None
     translations: Any = None
@@ -471,7 +457,7 @@ class PersonalName(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Defs.verify_not_default(self.name, '')
-            and Defs.verify_enum(self.type.value, NameType)
+            and Defs.verify_choice(self.type.value, Choice.NAME_TYPE)
             and Defs.verify_type(self.phrase, str)
             and Defs.verify_tuple_type(self.pieces, PersonalNamePiece)
             and Defs.verify_tuple_type(self.translations, NameTranslation)
@@ -508,17 +494,12 @@ class PersonalName(NamedTuple):
 class NameTranslation(NamedTuple):
     """Store, validate and display name translations.
 
-    Args:
-        translation (str): the text of the translation.
-        language (str): the name of the language.
-        name_pieces (tuple): an optional tuple of PersonalNamePieces.
-
     Example:
         In this example, the name "Joe" will be translated as "喬" in Chinese.
         Although the `ged` method to display preforms a validation first,
         this example will show that and then display the data using
         the GEDCOM standard.  No personal name pieces will be displayed.
-        >>> from chronodata.tuples import NameTranslation
+        >>> from chronodata.store import NameTranslation
         >>> joe_in_chinese = '喬'
         >>> language = 'Chinese'
         >>> nt = NameTranslation(joe_in_chinese, language)
@@ -528,6 +509,14 @@ class NameTranslation(NamedTuple):
         1 TRAN 喬
         2 LANG zh
         <BLANKLINE>
+
+    Args:
+        translation: the text of the translation.
+        language: the name of the language.
+        name_pieces: an optional tuple of PersonalNamePieces.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Pesonal Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
@@ -554,9 +543,7 @@ class NameTranslation(NamedTuple):
         if self.validate():
             lines = ''.join(
                 [
-                    Defs.taginfo(
-                        level, Tag.TRAN, self.translation
-                    ),
+                    Defs.taginfo(level, Tag.TRAN, self.translation),
                     Defs.taginfo(level + 1, Tag.LANG, Lang.CODE[self.language]),
                 ]
             )
@@ -572,7 +559,7 @@ class NoteTranslation(NamedTuple):
 
     Example:
         This example will translation "This is a note." into the Arabic "هذه ملاحظة.".
-        >>> from chronodata.tuples import NoteTranslation
+        >>> from chronodata.store import NoteTranslation
         >>> from chronodata.enums import MediaType
         >>> arabic_text = 'هذه ملاحظة.'
         >>> mime = MediaType.TEXT_HTML
@@ -587,11 +574,12 @@ class NoteTranslation(NamedTuple):
         <BLANKLINE>
 
     Args:
-        translation (str): the text of the translation for the note.
-        mime (str): the mime type of the translation.
-        language (str): the language of the translation.
+        translation: the text of the translation for the note.
+        mime: the mime type of the translation.
+        language: the language of the translation.
 
-    Example
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)]
@@ -618,9 +606,7 @@ class NoteTranslation(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(
-                        level, Tag.TRAN, self.translation
-                    ),
+                    Defs.taginfo(level, Tag.TRAN, self.translation),
                     Defs.taginfo(level + 1, Tag.MIME, self.mime.value),
                     Defs.taginfo(level + 1, Tag.LANG, Lang.CODE[self.language]),
                 ]
@@ -635,7 +621,7 @@ class CallNumber(NamedTuple):
     Example:
         This example assumes there is a call number "1111" which is the
         minimal amount of information needed to use this optional feature.
-        >>> from chronodata.tuples import CallNumber
+        >>> from chronodata.store import CallNumber
         >>> cn = CallNumber('1111')
         >>> cn.validate()
         True
@@ -644,13 +630,19 @@ class CallNumber(NamedTuple):
         <BLANKLINE>
 
         This next example uses all of the optional positions.
-        >>> from chronodata.enums import Medi
-        >>> cn_all = CallNumber('1111', Medi.BOOK, 'New Testament')
+        >>> from chronodata.enums import Media
+        >>> cn_all = CallNumber('1111', Media.BOOK, 'New Testament')
         >>> print(cn_all.ged(1))
         1 CALN 1111
         2 MEDI BOOK
         3 PHRASE New Testament
         <BLANKLINE>
+
+    Args:
+
+
+    Returns:
+        A GEDCOM string storing this data.
 
     See Also:
         `SourceRepositoryCitation`: the superstructure of this NamedTuple.
@@ -658,7 +650,7 @@ class CallNumber(NamedTuple):
     """
 
     call_number: str = ''
-    medi: Medi = Medi.NONE
+    media: Media = Media.NONE
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -666,7 +658,7 @@ class CallNumber(NamedTuple):
         check: bool = (
             Defs.verify_type(self.call_number, str)
             and Defs.verify_not_default(self.call_number, '')
-            and Defs.verify_enum(self.medi.value, Medi)
+            and Defs.verify_enum(self.media.value, Media)
             and Defs.verify_type(self.phrase, str)
         )
         return check
@@ -675,20 +667,16 @@ class CallNumber(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(
-                level, Tag.CALN, self.call_number
-            )
-            if self.medi != Medi.NONE:
+            lines = Defs.taginfo(level, Tag.CALN, self.call_number)
+            if self.media != Media.NONE:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.MEDI, self.medi.value)]
+                    [lines, Defs.taginfo(level + 1, Tag.MEDI, self.media.value)]
                 )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 2, Tag.PHRASE, self.phrase
-                        ),
+                        Defs.taginfo(level + 2, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -698,10 +686,15 @@ class SourceRepositoryCitation(NamedTuple):
     """Store, validate and display the optional Source Repository Citation
      substructure of the GEDCOM standard.
 
+    Examples:
+
     Args:
-        repo (RepositoryXref): the reference identifier for the repository.
-        notes (tuple[Note]): a tuple of Notes.
-        call_numbers (tuple[CallNumber]): a tuple of call numbers.
+        repo: the reference identifier for the repository.
+        notes: a tuple of Notes.
+        call_numbers: a tuple of call numbers.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
@@ -715,7 +708,9 @@ class SourceRepositoryCitation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Defs.verify_type(self.repo, RepositoryXref)
-            and Defs.verify_not_default(self.repo, RepositoryXref(Nul.RECORD))
+            and Defs.verify_not_default(
+                self.repo, RepositoryXref(String.RECORD)
+            )
             and Defs.verify_tuple_type(self.notes, Note)
             and Defs.verify_type(self.call_numbers, CallNumber)
         )
@@ -736,29 +731,67 @@ class SourceRepositoryCitation(NamedTuple):
 
 
 class Text(NamedTuple):
+    """_summary_
+
+    Examples:
+
+    Args:
+        text: the text being added.
+        mime: the media type of the text.
+        language: the language the text is in.
+
+    Returns:
+        A GEDCOM string storing this data.
+
+    Reference:
+        []()
+    """
+
     text: str = ''
     mime: MediaType = MediaType.NONE
     language: str = ''
 
 
 class SourceData(NamedTuple):
+    """_summary_
+
+    Examples:
+
+
+    Args:
+        date_value:
+        texts: a list of texts associated with this source.
+
+    Returns:
+        A GEDCOM string storing this data.
+
+    Reference:
+        []()
+    """
+
     date_value: str = ''
     texts: Any = None
 
 
 class SourceCitation(NamedTuple):
     """Store, validate and display the Source Citation
-     substructure of the GEDCOM standard.
+    substructure of the GEDCOM standard.
+
+    Examples:
+
 
     Args:
-        xref (SourceXref): the source identifier
-        page (str):
+        xref: the source identifier
+        page:
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
     """
 
-    xref: SourceXref = SourceXref(Nul.RECORD)
+    xref: SourceXref = SourceXref(String.RECORD)
     page: str = ''
     texts: Any = None
     event: Event = Event.NONE
@@ -772,7 +805,7 @@ class SourceCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_not_default(str(self.xref), Nul.RECORD)
+            Defs.verify_not_default(str(self.xref), String.RECORD)
             and Defs.verify_type(self.xref, SourceXref)
             and Defs.verify_type(self.page, str)
             and Defs.verify_tuple_type(self.texts, Text)
@@ -800,9 +833,6 @@ class SourceCitation(NamedTuple):
 class SNote(NamedTuple):
     """Use an already defined shared note in a GEDCOM structure.
 
-    Args:
-        shared_note (SharedNoteXref): the identifier of the shared note record.
-
     Example:
         If one has already defined a shared note record then one can reference it
         in a note substructure of a GEDCOM structure.  Here is an example of
@@ -810,13 +840,19 @@ class SNote(NamedTuple):
         reference id.  Then we will use it in a note.  The details of the note
         will not be included in the example.
         >>> from chronodata.build import Chronology
-        >>> from chronodata.tuples import SNote
+        >>> from chronodata.store import SNote
         >>> a = Chronology('illustrating shared notes usage')
         >>> sn = a.shared_note_xref()
         >>> referenced_sn = SNote(sn)
         >>> print(referenced_sn.ged(1))
         1 SNOTE @1@
         <BLANKLINE>
+
+    Args:
+        shared_note: the identifier of the shared note record.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
@@ -840,16 +876,9 @@ class SNote(NamedTuple):
 class Note(NamedTuple):
     """Store, validate and display a note substructure of the GEDCOM standard.
 
-    Args:
-        text (str): the text of the note.
-        mime (str): the optional media type of the note.
-        language (str): the optional language used in the note.
-        translations (tuple): an optional tuple of translations of the text.
-        citations (tuple): an optional tuple of translations of the text.
-
     Example:
         This example is a note without other information.
-        >>> from chronodata.tuples import Note
+        >>> from chronodata.store import Note
         >>> note = Note('This is my note.')
         >>> print(note.ged(1))
         1 NOTE This is my note.
@@ -890,6 +919,15 @@ class Note(NamedTuple):
         3 LANG ur
         <BLANKLINE>
 
+    Args:
+        text: the text of the note.
+        mime: the optional media type of the note.
+        language: the optional language used in the note.
+        translations: an optional tuple of translations of the text.
+        citations: an optional tuple of translations of the text.
+
+    Returns:
+        A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
@@ -940,6 +978,23 @@ class Note(NamedTuple):
 
 
 class Association(NamedTuple):
+    """_summary_
+
+    Examples:
+
+
+    Args:
+        xref: the identifier of the individual in this association.
+        role: the role of this individual.
+        association_phrase: a description of the association.
+        role_phrase: a description of the role.
+        notes: a collection of notes related to this association.
+        citations: a collection of citations related to this association.
+
+    Returns:
+        A GEDCOM string storing this data.
+    """
+
     xref: IndividualXref
     role: Role = Role.NONE
     association_phrase: str = ''
@@ -999,6 +1054,18 @@ class Association(NamedTuple):
 
 
 class MultimediaLink(NamedTuple):
+    """_summary_
+
+    Examples:
+
+
+    Args:
+        NamedTuple (_type_): _description_
+
+    Returns:
+        A GEDCOM string storing this data.
+    """
+
     crop: str = ''
     top: int = 0
     left: int = 0
@@ -1492,7 +1559,7 @@ class FamilyEvent(NamedTuple):
 
 
 class Husband(NamedTuple):
-    xref: IndividualXref = IndividualXref(Nul.RECORD)
+    xref: IndividualXref = IndividualXref(String.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1513,16 +1580,14 @@ class Husband(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 1, Tag.PHRASE, self.phrase
-                        ),
+                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
 
 
 class Wife(NamedTuple):
-    xref: IndividualXref = IndividualXref(Nul.RECORD)
+    xref: IndividualXref = IndividualXref(String.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1543,16 +1608,14 @@ class Wife(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 1, Tag.PHRASE, self.phrase
-                        ),
+                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
 
 
 class Child(NamedTuple):
-    xref: IndividualXref = IndividualXref(Nul.RECORD)
+    xref: IndividualXref = IndividualXref(String.RECORD)
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1573,9 +1636,7 @@ class Child(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
-                            level + 1, Tag.PHRASE, self.phrase
-                        ),
+                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -1684,9 +1745,7 @@ class Identifier(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.tag != Id.NONE:
-                lines = Defs.taginfo(
-                    level, self.tag.value, self.tag_info
-                )
+                lines = Defs.taginfo(level, self.tag.value, self.tag_info)
             if self.tag != Id.UID:
                 lines = ''.join(
                     [lines, Defs.taginfo(level + 1, Tag.TYPE, self.tag_type)]
@@ -1698,7 +1757,7 @@ class Identifier(NamedTuple):
 
 class IndividualEventDetail(NamedTuple):
     event_detail: EventDetail
-    age: Age = Age(0, 0, 0, 0, GreaterLessThan.EQUAL, '')
+    age: Age = Age(0, 0, 0, 0, '', '')
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1971,12 +2030,12 @@ class Family(NamedTuple):
     - `attributes`: a tuple of type Attribute.
     """
 
-    xref: FamilyXref = FamilyXref(Nul.RECORD)
+    xref: FamilyXref = FamilyXref(String.RECORD)
     resn: Resn = Resn.NONE
     attributes: Any = None
     events: Any = None
-    husband: Husband = Husband(IndividualXref(Nul.RECORD), '')
-    wife: Wife = Wife(IndividualXref(Nul.RECORD), '')
+    husband: Husband = Husband(IndividualXref(String.RECORD), '')
+    wife: Wife = Wife(IndividualXref(String.RECORD), '')
     children: Any = None
     associations: Any = None
     submitters: Any = None
@@ -2022,9 +2081,9 @@ class Family(NamedTuple):
             if self.events is not None:
                 for event in self.events:
                     lines = ''.join([lines, event.ged(level)])
-            if self.husband != Husband(IndividualXref(Nul.RECORD), ''):
+            if self.husband != Husband(IndividualXref(String.RECORD), ''):
                 lines = ''.join([lines, self.husband.ged(level)])
-            if self.wife != Wife(IndividualXref(Nul.RECORD), ''):
+            if self.wife != Wife(IndividualXref(String.RECORD), ''):
                 lines = ''.join([lines, self.wife.ged(level)])
             if self.children is not None:
                 for child in self.children:
@@ -2056,7 +2115,7 @@ class Family(NamedTuple):
 
 
 class Individual(NamedTuple):
-    xref: IndividualXref = IndividualXref(Nul.RECORD)
+    xref: IndividualXref = IndividualXref(String.RECORD)
     resn: Resn = Resn.NONE
     personal_names: Any = None
     sex: Sex = Sex.NONE
@@ -2108,7 +2167,7 @@ class Individual(NamedTuple):
 
 
 class Multimedia(NamedTuple):
-    xref: MultimediaXref = MultimediaXref(Nul.RECORD)
+    xref: MultimediaXref = MultimediaXref(String.RECORD)
     resn: Resn = Resn.NONE
     files: Any = None
     identifiers: Any = None
@@ -2136,7 +2195,7 @@ class Multimedia(NamedTuple):
 
 
 class Repository(NamedTuple):
-    xref: RepositoryXref = RepositoryXref(Nul.RECORD)
+    xref: RepositoryXref = RepositoryXref(String.RECORD)
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -2169,7 +2228,7 @@ class Repository(NamedTuple):
 
 
 class SharedNote(NamedTuple):
-    xref: SharedNoteXref = SharedNoteXref(Nul.RECORD)
+    xref: SharedNoteXref = SharedNoteXref(String.RECORD)
     text: str = ''
     mime: MediaType = MediaType.NONE
     language: Lang = Lang.CODE['NONE']
@@ -2199,7 +2258,7 @@ class SharedNote(NamedTuple):
 
 
 class Source(NamedTuple):
-    xref: SourceXref = SourceXref(Nul.RECORD)
+    xref: SourceXref = SourceXref(String.RECORD)
     author: str = ''
     title: str = ''
     abbreviation: str = ''
@@ -2237,7 +2296,7 @@ class Source(NamedTuple):
 
 
 class Submitter(NamedTuple):
-    xref: SubmitterXref = SubmitterXref(Nul.RECORD)
+    xref: SubmitterXref = SubmitterXref(String.RECORD)
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -2340,7 +2399,7 @@ class Header(NamedTuple):
             [
                 Defs.taginfo(level, Tag.HEAD),
                 Defs.taginfo(level + 1, Tag.GEDC),
-                Defs.taginfo(level + 2, Tag.VERS, GEDSpecial.VERSION),
+                Defs.taginfo(level + 2, Tag.VERS, String.VERSION),
             ]
         )
         return lines

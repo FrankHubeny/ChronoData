@@ -4,7 +4,7 @@
 
 import pytest
 
-from chronodata.dates import DT
+from chronodata.methods import Defs
 
 testdata = [
     ('creation_pieces[0][0]', '1'),
@@ -18,6 +18,6 @@ testdata = [
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_date(test_input: str, expected: str | int | bool) -> None:
-    creation_pieces: list[str] = DT.creation_date().split('\n')  # noqa: F841
+    creation_pieces: list[str] = Defs.creation_date().split('\n')  # noqa: F841
 
     assert eval(test_input) == expected

@@ -37,7 +37,7 @@ and constructing the GEDCOM records in the `tuples` module.
 
 __docformat__ = 'restructuredtext'
 
-from chronodata.constants import Nul
+from chronodata.constants import String
 
 
 class FamilyXref:
@@ -86,7 +86,7 @@ class FamilyXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -144,7 +144,7 @@ class IndividualXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -195,7 +195,7 @@ class MultimediaXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -250,7 +250,7 @@ class RepositoryXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -307,7 +307,7 @@ class SharedNoteXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -357,7 +357,7 @@ class SourceXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -404,7 +404,7 @@ class SubmitterXref:
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = Nul.RECORD
+        self.empty: str = String.RECORD
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""

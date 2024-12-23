@@ -7,11 +7,12 @@
 
 ------------------------------------------------------------------------------"""
 
-import pytest  # type: ignore  # noqa: PGH003
 
-from chronodata.tuples import Age
-from chronodata.enums import GreaterLessThan
+import pytest
+
+from chronodata.constants import Choice
 from chronodata.messages import Msg
+from chronodata.store import Age
 
 testdata = [
     ('a1.ged(1)', '1 AGE 10y\n'),
@@ -26,11 +27,11 @@ testdata = [
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_time(test_input: str, expected: str | int | bool) -> None:
     a1 = Age(years=10)  # noqa: F841
-    a2 = Age('>', days=5)  # noqa: F841
-    a3 = Age('<', weeks=1)  # noqa: F841
-    a4 = Age('', 1, 1, 1, 1)  # noqa: F841
-    a5 = Age('<', months=2)  # noqa: F841
-    a6 = Age('<', months=2, phrase='not sure about the age')  # noqa: F841
+    a2 = Age(greater_less_than='>', days=5)  # noqa: F841
+    a3 = Age(greater_less_than='<', weeks=1)  # noqa: F841
+    a4 = Age(1, 1, 1, 1, greater_less_than='')  # noqa: F841
+    a5 = Age(greater_less_than='<', months=2)  # noqa: F841
+    a6 = Age(greater_less_than='<', months=2, phrase='not sure about the age')  # noqa: F841
 
     assert eval(test_input) == expected
 
@@ -63,6 +64,6 @@ def test_phrase() -> None:
 def test_greater_less_than() -> None:
     with pytest.raises(
         ValueError,
-        match=Msg.NOT_VALID_ENUM.format('10', GreaterLessThan),
+        match=Msg.NOT_VALID_CHOICE.format('10', Choice.GREATER_LESS_THAN),
     ):
-        Age('10', 1, 1, 1, 1).validate()
+        Age(1, 1, 1, 1, '10').validate()  

@@ -16,9 +16,9 @@ Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
 
-from chronodata.constants import GEDSpecial
-from chronodata.core import Base
+from chronodata.constants import String
 from chronodata.messages import Msg
+from chronodata.readwrite import Base
 from chronodata.records import (
     FamilyXref,
     IndividualXref,
@@ -28,7 +28,7 @@ from chronodata.records import (
     SourceXref,
     SubmitterXref,
 )
-from chronodata.tuples import (
+from chronodata.store import (
     Family,
     Header,
     Individual,
@@ -47,7 +47,7 @@ class Chronology(Base):
         self,
         name: str = '',
         filename: str = '',
-        calendar: str = GEDSpecial.GREGORIAN,
+        calendar: str = String.GREGORIAN,
         log: bool = True,
     ) -> None:
         super().__init__(name, filename, calendar, log)
@@ -108,9 +108,9 @@ class Chronology(Base):
             modified_xref = str(xref_name).strip().upper().replace(' ', '_')
         modified_xref = ''.join(
             [
-                GEDSpecial.ATSIGN,
+                String.ATSIGN,
                 modified_xref,
-                GEDSpecial.ATSIGN,
+                String.ATSIGN,
             ]
         )
         if modified_xref in xref_list:
@@ -555,7 +555,7 @@ class Chronology(Base):
     def families(self, records: tuple[Family]) -> None:
         """Collect and store all family records for the chronology.
 
-        After importing `chronodata.build` and `chronodata.tuples`
+        After importing `chronodata.build` and `chronodata.store`
         one can instantiate a `Chronology` and create a family
         identifier to be used in forming a GEDCOM family record.
         The `tuples.Family` NamedTuple will hold all of this
@@ -571,7 +571,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Family
+            >>> from chronodata.store import Family
             >>> a = Chronology('test')
             >>> family_id = a.family_xref()
             >>> family = Family(xref=family_id)
@@ -617,7 +617,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Individual
+            >>> from chronodata.store import Individual
             >>> a = Chronology('test')
             >>> individual_id = a.individual_xref()
             >>> individual = Individual(xref=individual_id)
@@ -663,7 +663,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Multimedia
+            >>> from chronodata.store import Multimedia
             >>> a = Chronology('test')
             >>> mm_id = a.multimedia_xref()
             >>> mm = Multimedia(xref=mm_id)
@@ -704,7 +704,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Repository
+            >>> from chronodata.store import Repository
             >>> a = Chronology('test')
             >>> repo_id = a.repository_xref()
             >>> repo = Repository(xref=repo_id)
@@ -745,7 +745,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import SharedNote
+            >>> from chronodata.store import SharedNote
             >>> a = Chronology('test')
             >>> sn_id = a.shared_note_xref()
             >>> sn = SharedNote(xref=sn_id)
@@ -786,7 +786,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Source
+            >>> from chronodata.store import Source
             >>> a = Chronology('test')
             >>> source_id = a.source_xref()
             >>> source = Source(xref=source_id)
@@ -827,7 +827,7 @@ class Chronology(Base):
         Examples:
             This is a minimal example illustrating the process.
             >>> from chronodata.build import Chronology
-            >>> from chronodata.tuples import Submitter
+            >>> from chronodata.store import Submitter
             >>> a = Chronology('test')
             >>> sub_id = a.submitter_xref()
             >>> sub = Submitter(xref=sub_id)

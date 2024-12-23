@@ -13,12 +13,11 @@ import pandas as pd
 
 from chronodata.constants import (
     Arg,
-    Tag,
-    Value,
+    String,
 )
-from chronodata.core import Base
-from chronodata.g7 import Gedcom
-from chronodata.messages import Column, Label, Msg
+from chronodata.enums import Tag
+from chronodata.messages import Msg
+from chronodata.readwrite import Base
 
 
 class Challenge:
@@ -70,15 +69,15 @@ class Challenge:
             ]
         self.chron_data: list[list[Any]] = []
         for chronology in self.chronologies:
-            begin_event_date = chronology.chron[Gedcom.EVEN][begin_event][
-                Gedcom.DATE
+            begin_event_date = chronology.chron[Tag.EVEN][begin_event][
+                Tag.DATE
             ]
             begin_years_since = chronology.date_diff(
                 begin_event_date, str(today)
             )
             if end_event != '':
-                end_event_date = chronology.chron[Gedcom.EVEN][end_event][
-                    Gedcom.DATE
+                end_event_date = chronology.chron[Tag.EVEN][end_event][
+                    Tag.DATE
                 ]
                 begin_end_duration = chronology.date_diff(
                     begin_event_date, end_event_date
@@ -218,7 +217,7 @@ class Challenge:
                 return pd.DataFrame(
                     data=centers,
                     columns=[self.name],
-                    index=[Column.MEAN, Column.STD, Column.MEDIAN, Column.SKEW],
+                    #index=[Column.MEAN, Column.STD, Column.MEDIAN, Column.SKEW],
                 )
 
     def chronology_data(self) -> pd.DataFrame:
@@ -256,9 +255,9 @@ class Challenge:
         ]
         plt.figure(figsize=(figure_height, figure_width))
         plt.bar(keys, bar_heights, color=colors, width=bar_width)
-        plt.xlabel(Label.CHRONOLOGIES, fontweight='bold', fontsize=15)
-        plt.ylabel(Label.YEARS, fontweight='bold', fontsize=15)
-        plt.title(Label.TEST.format(self.name), fontweight='bold', fontsize=20)
+        # plt.xlabel(Label.CHRONOLOGIES, fontweight='bold', fontsize=15)
+        # plt.ylabel(Label.YEARS, fontweight='bold', fontsize=15)
+        # plt.title(Label.TEST.format(self.name), fontweight='bold', fontsize=20)
 
         # Add in the tests as horizontal lines with a legend
         for test in self.test_cases:

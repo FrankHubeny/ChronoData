@@ -10,17 +10,16 @@
 import pytest
 
 from chronodata.build import Chronology
-from chronodata.g7 import Gedcom
 
 testdata = [('ussher_mankind', '@MANKIND@')]
 
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
-def test_address(test_input: str, expected: str | int | bool) -> None:
+def test_flood_comparisons(test_input: str, expected: str | int | bool) -> None:
     a = Chronology(name='ussher')
-    ussher_mankind = a.family_xref(' Mankind ')
+    ussher_mankind = str(a.family_xref(' Mankind '))  # noqa: F841
 
     b = Chronology(name='smith')
-    smith_mankind = a.family_xref('Mankind')
+    smith_mankind = str(b.family_xref('Mankind'))  # noqa: F841
 
     assert eval(test_input) == expected
