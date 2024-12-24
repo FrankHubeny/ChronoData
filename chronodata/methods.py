@@ -11,17 +11,8 @@ from typing import Any
 import numpy as np
 
 from chronodata.constants import Cal, String
-from chronodata.enums import Record, Tag
+from chronodata.enums import Tag
 from chronodata.messages import Msg
-from chronodata.records import (
-    FamilyXref,
-    IndividualXref,
-    MultimediaXref,
-    RepositoryXref,
-    SharedNoteXref,
-    SourceXref,
-    SubmitterXref,
-)
 
 
 class Defs:
@@ -41,34 +32,6 @@ class Defs:
     - [Python 3 string](https://docs.python.org/3/library/string.html)
     """
 
-    @staticmethod
-    def taginit(
-        xref: FamilyXref
-        | IndividualXref
-        | MultimediaXref
-        | RepositoryXref
-        | SharedNoteXref
-        | SourceXref
-        | SubmitterXref,
-        tag: Record,
-        info: str = '',
-    ) -> str:
-        """
-        Add the first line to a GEDCOM record with record type and identifier.
-
-        The user will not need to run this method, but it is provided
-        so the user can see what the initial lines of a GEDCOM record looks like.
-
-        Examples:
-
-
-
-        See Also:
-            - `taginfo`: format a GEDCOM file line with level, tag, and information.
-        """
-        if info == '':
-            return f'0 {xref} {tag.value}\n'
-        return f'0 {xref} {tag.value} {Defs.clean_input(info)}\n'
 
     @staticmethod
     def taginfo(
@@ -89,8 +52,8 @@ class Defs:
             Note how the initial and ending spaces have been stripped from
             the input value.
             >>> from chronodata.enums import Tag
-            >>> print(Defs.taginfo(1, Tag.NAME, '  Some Name      '))
-            1 NAME Some Name
+            >>> print(Defs.taginfo(1, Tag.NAME, '  Some Name'))
+            1 NAME   Some Name
             <BLANKLINE>
 
             There can also be an extra parameter.
@@ -98,9 +61,6 @@ class Defs:
             >>> print(Defs.taginfo(1, Tag.NAME, 'SomeName', 'Other info'))
             1 NAME SomeName Other info
             <BLANKLINE>
-
-        See Also:
-            - `taginit`: initializes the first line of a GEDCOM record at level 0.
 
         """
 
@@ -134,7 +94,7 @@ class Defs:
             - [Python re Module](https://docs.python.org/3/library/re.html)
         """
 
-        return re.sub(String.BANNED, '', input).strip()
+        return re.sub(String.BANNED, '', input)
 
     @staticmethod
     def verify_type(

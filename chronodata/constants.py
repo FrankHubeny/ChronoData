@@ -27,6 +27,7 @@ class AgeConstants:
 class Choice:
     ADOP: frozenset[str] = frozenset({'HUSB', 'WIFE', 'BOTH'})
     APPROXIMATE_DATE: frozenset[str] = frozenset({'ABT', 'CAL', 'EST'})
+    EAST_WEST: frozenset[str] = frozenset({'E', 'W'})
     EVENT: frozenset[str] = frozenset(
         {
             'ADOP',
@@ -159,6 +160,7 @@ class Choice:
             'OTHER',
         }
     )
+    NORTH_SOUTH: frozenset[str] = frozenset({'N', 'S'})
     PEDI: frozenset[str] = frozenset(
         {'ADOPTED', 'BIRTH', 'FOSTER', 'SEALING', 'OTHER'}
     )

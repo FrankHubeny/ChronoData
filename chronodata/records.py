@@ -1,9 +1,5 @@
-# $Id$ $Format:%ci$ ($Format:%h$)
-# Author: Frank Hubeny
-# Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
-
-"""
-Add a type to each generated GEDCOM record identification string.
+# chronodata/records.py
+"""Add a type to a GEDCOM record identification string.
 
 There are seven GEDCOM records. The identifiers in each these seven
 record categories are assigned their own type based on record category.
@@ -21,391 +17,188 @@ Record identifier classes:
 - SubmitterXref, a submitter record identifier receives the SubmitterXref type.
 
 References:
-
-- [GEDCOM Records](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#records)
+    [GEDCOM Records](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#records)
 
 How To Use This Module
 ======================
 
 This module is used through the `Chronology` class and the various
-classes in the `tuples` module.  It is not used directly.
+classes in the `store` module.  It is not used directly.
 
-See the instructions on building a chronology in the `chrono` module
-and constructing the GEDCOM records in the `tuples` module.
-
+See the instructions on building a chronology in the `build` module
+where an empty Chronology is instantiated and the `store` module
+where data is added to it through the seven GEDCOM records.
 """
 
-__docformat__ = 'restructuredtext'
+import re
 
 from chronodata.constants import String
+from chronodata.enums import Tag
 
 
-class FamilyXref:
-    """
-    Assign the FamilyXref type to a string.
-
-    Parameters:
-
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
-
-    Examples:
-
-    This example verifies that the type has been assigned to the 'my family' string.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> family_xref = a.family_xref('my family')
-    >>> (
-    ...     isinstance(family_xref, FamilyXref),
-    ...     family_xref.name,
-    ...     str(family_xref),
-    ... )
-    (True, 'MY FAMILY', '@MY_FAMILY@')
-
-    See Also:
-
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
-
-    Reference:
-
-    - [GEDCOM FAMILY Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
-    """
-
+class Xref:
     def __init__(self, name: str):
-        """
-        Initialize an instance of the FamilyXref class.
+        """Initialize an instance of the class.
 
-        Parameters:
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
+        Args:
+        - `name`: The name of the identifier.
         """
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
+        self.tag: Tag = Tag.NONE
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
         return self.fullname
 
+    def ged(self, level: int = 0, info: str = '') -> str:
+        """Return the identifier formatted according to the GEDCOM standard."""
+        if level > 0:
+            cleaned_info: str = re.sub(String.BANNED, '', info).strip()
+            if info == '':
+                return f'{level} {self.tag.value} {self.fullname}\n'
+            return f'{level} {self.tag.value} {self.fullname} {cleaned_info}\n'
+        return f'{level} {self.fullname} {self.tag.value}\n'
 
-class IndividualXref:
-    """
-    Assign the IndividualXref type to string.
 
-    A specific name need not be assigned, but for the purposes of comparing
-    different chronologies it is helpful to have the same name for the individual
-    across all chronologies under comparison.
+class FamilyXref(Xref):
+    """Assign the FamilyXref type to a string.
 
-    Parameters:
-
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
-
-    Examples:
-
-    This example verifies that the IndividualXref type has been assigned to the
-    identifier of the record associated with the name "Joe Smith".
-    If a name is not specified an integer will be used to represent the record.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> joe = a.individual_xref('Joe Smith')
-    >>> isinstance(joe, IndividualXref), joe.name, str(joe)
-    (True, 'JOE SMITH', '@JOE_SMITH@')
-
-    Using this identifier for any of the other records would generate
-    a type error because the required type is not the same.
+    This class is not instantiated directly, but only through
+    the `chronodata.build.family_xref()` method.
+    
+    Args:
+        name: The name of the identifier.
 
     See Also:
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
+        chronodata.build.family_xref()
+    """
+    def __init__(self, name: str):
+        super().__init__(name)
+        self.tag = Tag.FAM
+
+
+class IndividualXref(Xref):
+    """Assign the IndividualXref type to a string.
+
+    This class is not instantiated directly, but only through
+    the `chronodata.build.individual_xref()` method.
+
+    Args:
+        name: The name of the identifier.
+
+    See Also:
+        `chronodata.build.individual_xref()`
 
     Reference:
-
-    - [GEDCOM INDIVIDUAL Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
+        [GEDCOM INDIVIDUAL Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the IndividualXref class.
-
-        Parameters:
-
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.INDI
 
 
-class MultimediaXref:
-    """
-    Assign the MultimediaXref type to a media xref string of a GEDCOM Multimedia Record.
+class MultimediaXref(Xref):
+    """Assign Assign the MultimediaXref type to a string.
 
-    Parameters:
+    This class is not instantiated directly, but only through
+    the `chronodata.build.multimedia_xref()` method.
 
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
-
-    Examples:
-
-    Although a specific name could be assigned, because only needs to be identified
-    within a single chronology, an incremented number will do.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> multi = a.multimedia_xref()
-    >>> isinstance(multi, MultimediaXref), multi.name, str(multi)
-    (True, '1', '@1@')
+    Args:
+        name: The name of the identifier.
 
     See Also:
-
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
+        `chronodata.build.multimedia_xref()`
 
     Reference:
-
-    - [GEDCOM MULTIMEDIA Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
+        [GEDCOM MULTIMEDIA Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the MultimediaXref class.
-
-        Parameters:
-
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.OBJE
 
 
-class RepositoryXref:
-    """
-    Assign the RepositoryXref type to a string.
+class RepositoryXref(Xref):
+    """Assign the RepositoryXref type to a string.
 
-    Parameters:
+    This class is not instantiated directly, but only through
+    the `chronodata.build.repository_xref()` method.
 
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
-
-    Examples:
-
-    Multiple records records of each type may be created in the same chronology.
-    The following example shows the comparison of two repository record identifiers.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> one = a.repository_xref()
-    >>> two = a.repository_xref()
-    >>> report_one = f'{one}: Alternate Name {one.name}, Instance Check {isinstance(one, RepositoryXref)}'
-    >>> report_two = f'{two}: Alternate Name {two.name}, Instance Check {isinstance(two, RepositoryXref)}'
-    >>> print(report_one)
-    @1@: Alternate Name 1, Instance Check True
-    >>> print(report_two)
-    @2@: Alternate Name 2, Instance Check True
+    Args:
+        name: The name of the identifier.
 
     See Also:
-
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
+        `chronodata.build.repository_xref()`
 
     Reference:
-
-    - https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD
+        https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the RepositoryXref class.
-
-        Parameters:
-            fullname (str): The name used by the GEDCOM standard.
-            name (str): The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.REPO
 
 
-class SharedNoteXref:
-    """
-    Assign the SharedNoteXref type to a string.
+class SharedNoteXref(Xref):
+    """Assign the SharedNoteXref type to a string.
 
-    Parameters:
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
+    This class is not instantiated directly, but only through
+    the `chronodata.build.shared_note_xref()` method.
 
-    Examples:
-
-    The following example shows that the type structure is distinguishing
-    the "smith" string as a SharedNoteXref rather than some other type
-    such as an IndividualXref type.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> smith = a.shared_note_xref('some smith')
-    >>> (str(smith), smith.name)
-    ('@SOME_SMITH@', 'SOME SMITH')
-    >>> type(smith)
-    <class 'chronodata.records.SharedNoteXref'>
-    >>> isinstance(smith, IndividualXref)
-    False
-    >>> isinstance(smith, SharedNoteXref)
-    True
+    Args:
+        name: The name of the identifier.
 
     See Also:
-
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
+        `chronodata.build.shared_note_xref()`
 
     Reference:
-
-    - [GEDCOM SHARED_NOTE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
+        - [GEDCOM SHARED_NOTE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the SharedNoteXref class.
-
-        Parameters:
-
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.SNOTE
 
 
-class SourceXref:
-    """
-    Assign the SourceXref type to a string.
+class SourceXref(Xref):
+    """Assign the SourceXref type to a string.
 
-    Parameters:
+    This class is not instantiated directly, but only through
+    the `chronodata.build.source_xref()` method.
 
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
-
-    Examples:
-
-    The following example shows that the string is no longer of `str` type.
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> source = a.source_xref()
-    >>> report = f'Is {str(source)} still a string? {isinstance(source, str)}'
-    >>> print(report)
-    Is @1@ still a string? False
+    Args:
+        name: The name of the identifier.
 
     See Also:
-
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SubmitterXref`: the class for GEDCOM Submitter Record identifiers.
+        `chronodata.build.source_xref()`
 
     Reference:
-
-    - [GEDCOM SOURCE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
+        [GEDCOM SOURCE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the SourceXref class.
-
-        Parameters:
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.SOUR
 
 
-class SubmitterXref:
-    """
-    Assign the SubmitterXref type to a string.
+class SubmitterXref(Xref):
+    """Assign the SubmitterXref type to a string.
 
-    Parameters:
-    - `fullname`: The name that is used in the GEDCOM file.
-    - `name`: The name the user entered except that it is now capitalized.
+    This class is not instantiated directly, but only through
+    the `chronodata.build.submitter_xref()` method.
 
-    Examples:
-
-    >>> from chronodata.build import Chronology
-    >>> a = Chronology('testing')
-    >>> me = a.submitter_xref('my own name')
-    >>> print(f'{me.name} or {str(me)}')
-    MY OWN NAME or @MY_OWN_NAME@
+    Args:
+        name: The name of the identifier.
 
     See Also:
-
-    - `FamilyXref`: the class for GEDCOM Family Record identifiers.
-    - `IndividualXref`: the class for GEDCOM Individual Record identifiers.
-    - `MultimediaXref`: the class for GEDCOM Multimedia Record identifiers.
-    - `RepositoryXref`: the class for GEDCOM Repository Record identifiers.
-    - `SharedNoteXref`: the class for GEDCOM Shared Note Record identifiers.
-    - `SourceXref`: the class for GEDCOM Source Record identifiers.
+        chronodata.build.submitter_xref()
 
     Reference:
-
-    - [GEDCOM SUBMITTER Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
+        [GEDCOM SUBMITTER Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
     """
 
     def __init__(self, name: str):
-        """
-        Initialize an instance of the SubmitterXref class.
-
-        Parameters:
-        - `fullname`: The name used by the GEDCOM standard.
-        - `name`: The name used for comparison across chronologies.
-        """
-        self.fullname: str = name
-        self.name: str = name.replace('@', '').replace('_', ' ')
-        self.empty: str = String.RECORD
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
+        super().__init__(name)
+        self.tag = Tag.SUBM

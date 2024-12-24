@@ -1,0 +1,14 @@
+site_name: ChronoData
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings
+
+nav:
+  - ChronoData: index.md
+  - tutorials.md
+  - How-To Guides: how-to-guides.md
+  - reference.md
+  - explanation.md

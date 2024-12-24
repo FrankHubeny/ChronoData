@@ -8,7 +8,6 @@
 import pytest
 
 from chronodata.build import Chronology
-from chronodata.g7 import Gedcom
 
 testdata = [('joe_someone', '@JOE_SOMEONE@')]
 
@@ -17,16 +16,16 @@ testdata = [('joe_someone', '@JOE_SOMEONE@')]
 def test_address(test_input: str, expected: str | int | bool) -> None:
     a = Chronology(name='genesis5')
     # first generation
-    joe_someone = a.individual_xref(' Joe Someone ')
-    jill_someone = a.individual_xref('Jill Someone')
+    joe_someone = str(a.individual_xref(' Joe Someone '))  # noqa: F841
+    jill_someone = str(a.individual_xref('Jill Someone'))  # noqa: F841
     # second generation
-    betty_someone = a.individual_xref('betty someone')
-    tom_someone = a.individual_xref('tom someone')
+    betty_someone = str(a.individual_xref('betty someone'))  # noqa: F841
+    tom_someone = str(a.individual_xref('tom someone'))  # noqa: F841
     # third generation
-    steve_someoneelse = a.individual_xref('steve someoneelse')
-    nancy_another = a.individual_xref('nancy another')
-    jim_someonelse = a.individual_xref('jim someoneelse')
-    joe_someoneelse = a.individual_xref('joe_someoneelse')
-    cathy_someone = a.individual_xref('cathy someone')
+    steve_someoneelse = str(a.individual_xref('steve someoneelse'))  # noqa: F841
+    nancy_another = str(a.individual_xref('nancy another'))  # noqa: F841
+    jim_someonelse = str(a.individual_xref('jim someoneelse'))  # noqa: F841
+    joe_someoneelse = str(a.individual_xref('joe_someoneelse'))  # noqa: F841
+    cathy_someone = str(a.individual_xref('cathy someone'))  # noqa: F841
 
     assert eval(test_input) == expected

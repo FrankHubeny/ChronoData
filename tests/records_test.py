@@ -29,156 +29,230 @@ from chronodata.records import (
     SubmitterXref,
 )
 
-testdata = [
-    # IndividualXref
-    ('indi1', True),
-    ('indi2', '1'),
-    ('indi3', '@1@'),
-    ('indi4', 'INDIVIDUAL'),
-    ('indi5', '@INDIVIDUAL@'),
-    ('indi6', 'NAME WITH SPACES'),
-    ('indi7', '@NAME_WITH_SPACES@'),
-    # FamilyXref
-    ('fam1', True),
-    ('fam2', 'A FAMILY'),
-    ('fam3', '@A_FAMILY@'),
-    # MultimediaXref
-    ('mm1', True),
-    ('mm2', '2'),
-    ('mm3', '@2@'),
-    # RepositoryXref
-    ('repo1', True),
-    ('repo2', 'SAME NAME'),
-    ('repo3', '@SAME_NAME@'),
-    # SharedNoteXref
-    ('sn1', True),
-    ('sn2', 'SAME NAME'),
-    ('sn3', '@SAME_NAME@'),
-    # SourceXref
-    ('source1', True),
-    ('source2', 'SAME NAME'),
-    ('source3', '@SAME_NAME@'),
-    # SubmitterXref
-    ('sub1', True),
-    ('sub2', '3'),
-    ('sub3', '@3@'),
+testdata_individual = [
+    ('indi_type', True),
+    ('indi_name', '1'),
+    ('indi_fullname', '@1@'),
+    ('indi_string', '@1@'),
+    ('indi_named_name', 'INDIVIDUAL'),
+    ('indi_named_fullname', '@INDIVIDUAL@'),
+    ('indi_named_string', '@INDIVIDUAL@'),
+    ('indi_spaces_name', 'NAME WITH SPACES'),
+    ('indi_spaces_fullname', '@NAME_WITH_SPACES@'),
+    ('indi_spaces_string', '@NAME_WITH_SPACES@'),
+    ('indi_ged0', '0 @1@ INDI\n'),
+    ('indi_ged1', '1 INDI @1@\n'),
+    ('indi_ged1_info', '1 INDI @1@ info\n')
 ]
 
 
-@pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
-def test_defs_tags_classes(test_input: str, expected: str | int | bool) -> None:
+@pytest.mark.parametrize('test_input,expected', testdata_individual)  # noqa: PT006
+def test_individual(test_input: str, expected: str | int | bool) -> None:
     a = Chronology('test')
 
     # Test creation of the IndividualXref type without names.
-    indi_xref1 = a.individual_xref()
-    indi1 = Defs.verify_type(indi_xref1, IndividualXref)  # noqa: F841
-    indi2 = indi_xref1.name  # noqa: F841
-    indi3 = indi_xref1.fullname  # noqa: F841
+    individual = a.individual_xref()
+    indi_type = Defs.verify_type(individual, IndividualXref)  # noqa: F841
+    indi_name = individual.name  # noqa: F841
+    indi_fullname = individual.fullname  # noqa: F841
+    indi_string = str(individual)  # noqa: F841
+    indi_ged0 = individual.ged(0)  # noqa: F841
+    indi_ged1 = individual.ged(1)  # noqa: F841
+    indi_ged1_info = individual.ged(1, 'info')  # noqa: F841
 
     # Test creation of IndividualXref type with a name.
-    indi_xref2 = a.individual_xref('individual')
-    indi4 = str(indi_xref2)  # noqa: F841
-    indi5 = indi_xref2.fullname  # noqa: F841
+    indi_named = a.individual_xref('individual')
+    indi_named_name = indi_named.name  # noqa: F841
+    indi_named_fullname = indi_named.fullname  # noqa: F841
+    indi_named_string = str(indi_named)  # noqa: F841
 
     # Test creation of IndividualXref type with spaces.
-    indi_xref3 = a.individual_xref('name with spaces')
-    indi6 = indi_xref3.name  # noqa: F841
-    indi7 = indi_xref3.fullname  # noqa: F841
-
-    # Test creation of the FamilyXref type.
-    fam_xref = a.family_xref('a family')
-    fam1 = Defs.verify_type(fam_xref, FamilyXref)  # noqa: F841
-    fam2 = str(fam_xref)  # noqa: F841
-    fam3 = fam_xref.fullname  # noqa: F841
-
-    # Test creation of the MultimediaXref type.
-    mm_xref = a.multimedia_xref()
-    mm1 = Defs.verify_type(mm_xref, MultimediaXref)  # noqa: F841
-    mm2 = str(mm_xref)  # noqa: F841
-    mm3 = mm_xref.fullname  # noqa: F841
-
-    # Test creation of the RepositoryXref type.
-    repo_xref = a.repository_xref('same NamE')
-    repo1 = Defs.verify_type(repo_xref, RepositoryXref)  # noqa: F841
-    repo2 = str(repo_xref)  # noqa: F841
-    repo3 = repo_xref.fullname  # noqa: F841
-
-    # Test creation of the SharedNoteXref type.
-    sn_xref = a.shared_note_xref('SaMe NaMe')
-    sn1 = Defs.verify_type(sn_xref, SharedNoteXref)  # noqa: F841
-    sn2 = str(sn_xref)  # noqa: F841
-    sn3 = sn_xref.fullname  # noqa: F841
-
-    # Test creation of the SourceXref type.
-    source_xref = a.source_xref('Same Name')
-    source1 = Defs.verify_type(source_xref, SourceXref)  # noqa: F841
-    source2 = str(source_xref)  # noqa: F841
-    source3 = source_xref.fullname  # noqa: F841
-
-    # Test creation of the SubmitterXref type.
-    sub_xref = a.submitter_xref()
-    sub1 = Defs.verify_type(sub_xref, SubmitterXref)  # noqa: F841
-    sub2 = str(sub_xref)  # noqa: F841
-    sub3 = sub_xref.fullname  # noqa: F841
+    indi_spaces = a.individual_xref('name with spaces')
+    indi_spaces_name = indi_spaces.name  # noqa: F841
+    indi_spaces_fullname = indi_spaces.fullname  # noqa: F841
+    indi_spaces_string = str(indi_spaces)  # noqa: F841
 
     assert eval(test_input) == expected
 
 
-"""The next tests check for duplicate record names. This tests
-the chrono module's `next_counter` method for these record types."""
-
-
-def test_family_dup() -> None:
-    xref_name = 'hello1'
-    a = Chronology('tttt')
-    name1 = a.family_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
-        name2 = a.family_xref(xref_name)  # noqa: F841
-
-
 def test_individual_dup() -> None:
-    xref_name = 'hello2'
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello individual'
     a = Chronology('tttt')
-    name1 = a.individual_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    name1 = a.individual_xref(xref_name)
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.individual_xref(xref_name)  # noqa: F841
 
 
-def test_multimedia_dup() -> None:
-    xref_name = 'hello3'
+testdata_family = [
+    ('family_type', True),
+    ('family_name', 'A FAMILY'),
+    ('family_fullname', '@A_FAMILY@'),
+    ('family_string', '@A_FAMILY@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_family)  # noqa: PT006
+def test_family(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    family = a.family_xref('a family')
+    family_type = Defs.verify_type(family, FamilyXref)  # noqa: F841
+    family_name = family.name  # noqa: F841
+    family_fullname = family.fullname  # noqa: F841
+    family_string = str(family)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
+def test_family_dup() -> None:
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello family'
     a = Chronology('tttt')
-    name1 = a.multimedia_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    name1 = a.family_xref(xref_name)
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
+        name2 = a.family_xref(xref_name)  # noqa: F841
+
+
+testdata_multimedia = [
+    ('multimedia_type', True),
+    ('multimedia_name', '1'),
+    ('multimedia_fullname', '@1@'),
+    ('multimedia_string', '@1@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_multimedia)  # noqa: PT006
+def test_multimedia(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    multimedia = a.multimedia_xref()
+    multimedia_type = Defs.verify_type(multimedia, MultimediaXref)  # noqa: F841
+    multimedia_name = multimedia.name  # noqa: F841
+    multimedia_fullname = multimedia.fullname  # noqa: F841
+    multimedia_string = str(multimedia)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
+def test_multimedia_dup() -> None:
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello multimedia'
+    a = Chronology('tttt')
+    name1 = a.multimedia_xref(xref_name)
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.multimedia_xref(xref_name)  # noqa: F841
 
 
+testdata_repository = [
+    ('repository_type', True),
+    ('repository_name', '1'),
+    ('repository_fullname', '@1@'),
+    ('repository_string', '@1@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_repository)  # noqa: PT006
+def test_repository(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    repository = a.repository_xref()
+    repository_type = Defs.verify_type(repository, RepositoryXref)  # noqa: F841
+    repository_name = repository.name  # noqa: F841
+    repository_fullname = repository.fullname  # noqa: F841
+    repository_string = str(repository)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
 def test_repository_dup() -> None:
-    xref_name = 'hello4'
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello repository'
     a = Chronology('tttt')
-    name1 = a.repository_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    name1 = a.repository_xref(xref_name)  
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.repository_xref(xref_name)  # noqa: F841
 
 
+testdata_shared_note = [
+    ('shared_note_type', True),
+    ('shared_note_name', '1'),
+    ('shared_note_fullname', '@1@'),
+    ('shared_note_string', '@1@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_shared_note)  # noqa: PT006
+def test_shared_note(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    shared_note = a.shared_note_xref()
+    shared_note_type = Defs.verify_type(shared_note, SharedNoteXref)  # noqa: F841
+    shared_note_name = shared_note.name  # noqa: F841
+    shared_note_fullname = shared_note.fullname  # noqa: F841
+    shared_note_string = str(shared_note)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
 def test_shared_note_dup() -> None:
-    xref_name = 'hello5'
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello shared note'
     a = Chronology('tttt')
-    name1 = a.shared_note_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    name1 = a.shared_note_xref(xref_name)  
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.shared_note_xref(xref_name)  # noqa: F841
 
 
+testdata_source = [
+    ('source_type', True),
+    ('source_name', '1'),
+    ('source_fullname', '@1@'),
+    ('source_string', '@1@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_source)  # noqa: PT006
+def test_source(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    source = a.source_xref()
+    source_type = Defs.verify_type(source, SourceXref)  # noqa: F841
+    source_name = source.name  # noqa: F841
+    source_fullname = source.fullname  # noqa: F841
+    source_string = str(source)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
 def test_source_dup() -> None:
-    xref_name = 'hello6'
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello source'
     a = Chronology('tttt')
-    name1 = a.source_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    name1 = a.source_xref(xref_name)  
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.source_xref(xref_name)  # noqa: F841
 
 
+testdata_submitter = [
+    ('submitter_type', True),
+    ('submitter_name', '1'),
+    ('submitter_fullname', '@1@'),
+    ('submitter_string', '@1@'),
+]
+
+
+@pytest.mark.parametrize('test_input,expected', testdata_submitter)  # noqa: PT006
+def test_submitter(test_input: str, expected: str | int | bool) -> None:
+    a = Chronology('test')
+    submitter = a.submitter_xref()
+    submitter_type = Defs.verify_type(submitter, SubmitterXref)  # noqa: F841
+    submitter_name = submitter.name  # noqa: F841
+    submitter_fullname = submitter.fullname  # noqa: F841
+    submitter_string = str(submitter)  # noqa: F841
+
+    assert eval(test_input) == expected
+
+
 def test_submitter_dup() -> None:
-    xref_name = 'hello7'
-    a = Chronology('tttt')
-    name1 = a.submitter_xref(xref_name)  # noqa: F841
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(xref_name)):
+    """Test whether a duplicate record can be created."""
+    xref_name = 'hello submitter'
+    a = Chronology('submitter')
+    name1 = a.submitter_xref(xref_name)  
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.submitter_xref(xref_name)  # noqa: F841

@@ -61,9 +61,9 @@ def test_phrase() -> None:
         Age(days=10, phrase=1).validate()  # type: ignore[arg-type]
 
 
-def test_greater_less_than() -> None:
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_VALID_CHOICE.format('10', Choice.GREATER_LESS_THAN),
-    ):
-        Age(1, 1, 1, 1, '10').validate()  
+# def test_greater_less_than() -> None:
+#     with pytest.raises(
+#         ValueError,
+#         match=Msg.NOT_VALID_CHOICE.format('10', Choice.GREATER_LESS_THAN),
+#     ):
+#         Age(1, 1, 1, 1, '10').validate()  

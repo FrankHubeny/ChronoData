@@ -1,8 +1,4 @@
-# $Id$
-# $Format:%ci$ ($Format:%h$)
-# Author: Frank Hubeny <frankhubeny@protonmail.com>
-# Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
-
+# test/chrono_test.py
 """These tests completely cover the `chrono` module."""
 
 import pytest

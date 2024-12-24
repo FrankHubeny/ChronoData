@@ -9,8 +9,8 @@
 
 import pytest
 
-from chronodata.build import Time
 from chronodata.messages import Msg
+from chronodata.store import Time
 
 testdata = [
     ('t1.ged(1)', '1 TIME 04:30:10\n'),
@@ -54,35 +54,35 @@ def test_time_not_int_nor_float_second() -> None:
 
 
 def test_time_hour_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(24, 0, 24)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(24, 0, 23)):
         Time(24, 0, 0).validate()
 
 
 def test_time_minute_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(60, 0, 60)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(60, 0, 59)):
         Time(0, 60, 0).validate()
 
 
 def test_time_second_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(60, 0, 60)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(60, 0, 59.999999999999)):
         Time(0, 0, 60).validate()
 
 
 def test_time_second_float_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(60.0, 0.0, 60.0)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(60.0, 0, 59.999999999999)):
         Time(0, 0, 60.0).validate()
 
 
 def test_time_hour_negative_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(-20, 0, 24)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(-20, 0, 23)):
         Time(-20, 0, 0).validate()
 
 
 def test_time_minute_negative_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(-10, 0, 60)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(-10, 0, 59)):
         Time(0, -10, 0.0).validate()
 
 
 def test_time_second_negative_value() -> None:
-    with pytest.raises(ValueError, match=Msg.RANGE.format(-10.1230, 0.0, 60.0)):
+    with pytest.raises(ValueError, match=Msg.RANGE_ERROR.format(-10.1230, 0, 59.999999999999)):
         Time(0, 0, -10.1230).validate()

@@ -10,13 +10,11 @@ import pytest
 from chronodata.enums import Record, Tag
 from chronodata.messages import Msg
 from chronodata.methods import Defs
-from chronodata.tuples import Date, Time
+from chronodata.store import Date, Time
 
 testdata = [
     ('taginfo1', '1 TIME 01:01:01Z\n'),
     ('taginfo2', '2 DATA\n'),
-    ('taginit1', '0 @1@ INDI\n'),
-    ('taginit2', '0 @1@ INDI someone\n'),
     ('taginfo3', '1 TIME 01:01:01Z hello\n'),
     ('Defs.verify_type(1,int)', True),
     ('Defs.verify_type("a",str)', True),
@@ -43,10 +41,6 @@ def test_defs_tags_classes(test_input: str, expected: str | int | bool) -> None:
     taginfo1 = Defs.taginfo(1, Tag.TIME, '01:01:01Z')  # noqa: F841
     taginfo2 = Defs.taginfo(2, Tag.DATA)  # noqa: F841
     taginfo3 = Defs.taginfo(1, Tag.TIME, '01:01:01Z', 'hello')  # noqa: F841
-
-    # Test the taginit method.
-    taginit1 = Defs.taginit('@1@', Record.INDI)  # noqa: F841
-    taginit2 = Defs.taginit('@1@', Record.INDI, 'someone')  # noqa: F841
 
     # Test the verify_enum method.
     enum = Defs.verify_enum(Tag.HUSB, Tag)  # noqa: F841
