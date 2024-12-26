@@ -32,7 +32,6 @@ class Defs:
     - [Python 3 string](https://docs.python.org/3/library/string.html)
     """
 
-
     @staticmethod
     def taginfo(
         level: int,
@@ -69,6 +68,42 @@ class Defs:
                 return f'{level} {tag.value}\n'
             return f'{level} {tag.value} {Defs.clean_input(info)}\n'
         return f'{level} {tag.value} {Defs.clean_input(info)} {Defs.clean_input(extra)}\n'
+
+    @staticmethod
+    def contact_info(
+        level: int = 1,
+        phones: Any = None,
+        emails: Any = None,
+        faxes: Any = None,
+        wwws: Any = None
+    ) -> str:
+        lines: str = ''
+        if phones is not None:
+            for phone in phones:
+                lines = ''.join([lines, Defs.taginfo(level, Tag.PHON, phone)])
+        if emails is not None:
+            for email in emails:
+                lines = ''.join([lines, Defs.taginfo(level, Tag.EMAIL, email)])
+        if faxes is not None:
+            for fax in faxes:
+                lines = ''.join([lines, Defs.taginfo(level, Tag.FAX, fax)])
+        if wwws is not None:
+            for www in wwws:
+                lines = ''.join([lines, Defs.taginfo(level, Tag.WWW, www)])
+        return lines
+
+    @staticmethod
+    def list_to_str(lines: str, level: int, items: list[Any]) -> str:
+        if len(items) > 0:
+            for item in items:
+                lines = ''.join([lines, item.ged(level)])
+        return lines
+    
+    @staticmethod
+    def str_to_str(lines: str, level: int, tag: Tag, info: str, extra: str = '') -> str:
+        if info != '':
+            lines = ''.join([lines, Defs.taginfo(level, tag, info, extra)])
+        return lines
 
     @staticmethod
     def clean_input(input: str) -> str:
@@ -113,9 +148,9 @@ class Defs:
         return check
 
     @staticmethod
-    def verify_tuple_type(name: tuple[Any] | None, value_type: Any) -> bool:
+    def verify_tuple_type(name: list[Any], value_type: Any) -> bool:
         """Check if each member of the tuple has the specified type."""
-        if name is not None:
+        if name != []:
             for value in name:
                 Defs.verify_type(value, value_type)
         return True
@@ -126,7 +161,7 @@ class Defs:
         if value not in enumeration:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
         return True
-    
+
     @staticmethod
     def verify_choice(value: str, choice: frozenset[str]) -> bool:
         """Check if the value is one to choose from."""
@@ -200,9 +235,7 @@ class Defs:
             month = date_pieces[2]
             day = date_pieces[3]
         ged_time: str = ''.join([time, String.Z])
-        good_calendar: str | bool = Cal.CALENDARS.get(
-            String.GREGORIAN, False
-        )
+        good_calendar: str | bool = Cal.CALENDARS.get(String.GREGORIAN, False)
         if not good_calendar:
             logging.critical(Msg.BAD_CALENDAR.format(calendar))
             raise ValueError(Msg.BAD_CALENDAR.format(calendar))

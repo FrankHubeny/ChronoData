@@ -26,12 +26,12 @@ testdata = [
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_address(test_input: str, expected: str | int | bool) -> None:
-    address: list[str] = Address(['123 Here Street', 'My Town', 'USA',]).ged().split('\n')  # noqa: F841
+    address: list[str] = Address('123 Here Street\nMy Town\nUSA').ged().split('\n')  # noqa: F841
     address2: list[str] = (  # noqa: F841
-        Address(['someplace',], 'My City', 'My State', 'My Postal', 'My Country')
+        Address('someplace', 'My City', 'My State', 'My Postal', 'My Country')
         .ged().split('\n')
     )
-    ap1: Address = Address(['',], 'city', 'state', 'postal', 'country')  # noqa: F841
+    ap1: Address = Address('', 'city', 'state', 'postal', 'country')  # noqa: F841
 
     assert eval(test_input) == expected
 

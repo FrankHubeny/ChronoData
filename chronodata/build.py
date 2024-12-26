@@ -15,7 +15,6 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
-
 from chronodata.constants import String
 from chronodata.messages import Msg
 from chronodata.readwrite import Base
@@ -60,6 +59,28 @@ class Chronology(Base):
         self.source_xreflist: list[str] = ['@0@']
         self.submitter_xreflist: list[str] = ['@0@']
 
+    def _get_counter(self) -> str:
+        counter = str(self.xref_counter)
+        self.xref_counter += 1
+        return str(counter)
+
+    def _set_xref(
+        self, xref_list: list[str], xref: str, xref_name: str = ''
+    ) -> None:
+        if xref in xref_list:
+            raise ValueError(Msg.XREF_EXISTS.format(xref, xref_name))
+        xref_list.append(xref)
+
+    def _format_name(self, name: str = '', counter: str = '') -> str:
+        return ''.join(
+                [
+                    String.ATSIGN,
+                    name.strip().upper().replace(' ', '_'),
+                    counter,
+                    String.ATSIGN,
+                ]
+            )
+
     def _counter(
         self, xref_list: list[str], xref_name: str = '', initial: bool = False
     ) -> str:
@@ -95,28 +116,17 @@ class Chronology(Base):
 
         - [GEDCOM Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#cb3-5)
         """
-        modified_xref: str = ''
-        if xref_name == '' or initial:
-            modified_xref = ''.join(
-                [
-                    str(xref_name).strip().upper().replace(' ', '_'),
-                    str(self.xref_counter),
-                ]
-            )
-            self.xref_counter += 1
+        xref: str = ''
+        if xref_name == '':
+            xref = self._format_name(counter=self._get_counter())
+            self._set_xref(xref_list, xref)
+            return xref
+        if initial:
+            xref = self._format_name(xref_name, self._get_counter())
         else:
-            modified_xref = str(xref_name).strip().upper().replace(' ', '_')
-        modified_xref = ''.join(
-            [
-                String.ATSIGN,
-                modified_xref,
-                String.ATSIGN,
-            ]
-        )
-        if modified_xref in xref_list:
-            raise ValueError(Msg.XREF_EXISTS.format(modified_xref, xref_name))
-        xref_list.append(modified_xref)
-        return modified_xref
+            xref = self._format_name(xref_name)
+        self._set_xref(xref_list, xref, xref_name)
+        return xref
 
     def family_xref(
         self, xref_name: str = '', initial: bool = False
@@ -677,7 +687,12 @@ class Chronology(Base):
             what was entered earlier.
             >>> mm_id2 = a.multimedia_xref()
             >>> mm2 = Multimedia(xref=mm_id2)
-            >>> a.multimedia((mm, mm2,))
+            >>> a.multimedia(
+            ...     (
+            ...         mm,
+            ...         mm2,
+            ...     )
+            ... )
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
             0 @2@ OBJE
@@ -718,7 +733,12 @@ class Chronology(Base):
             what was entered earlier.
             >>> repo_id2 = a.repository_xref()
             >>> repo2 = Repository(xref=repo_id2)
-            >>> a.repositories((repo, repo2,))
+            >>> a.repositories(
+            ...     (
+            ...         repo,
+            ...         repo2,
+            ...     )
+            ... )
             >>> print(a.ged_repository)
             0 @1@ REPO
             0 @2@ REPO
@@ -759,7 +779,12 @@ class Chronology(Base):
             what was entered earlier.
             >>> sn_id2 = a.shared_note_xref()
             >>> sn2 = SharedNote(xref=sn_id2)
-            >>> a.shared_notes((sn, sn2,))
+            >>> a.shared_notes(
+            ...     (
+            ...         sn,
+            ...         sn2,
+            ...     )
+            ... )
             >>> print(a.ged_shared_note)
             0 @1@ SNOTE
             0 @2@ SNOTE
@@ -800,7 +825,12 @@ class Chronology(Base):
             what was entered earlier.
             >>> source_id2 = a.source_xref()
             >>> source2 = Source(xref=source_id2)
-            >>> a.sources((source, source2,))
+            >>> a.sources(
+            ...     (
+            ...         source,
+            ...         source2,
+            ...     )
+            ... )
             >>> print(a.ged_source)
             0 @1@ SOUR
             0 @2@ SOUR
@@ -841,7 +871,12 @@ class Chronology(Base):
             what was entered earlier.
             >>> sub_id2 = a.submitter_xref()
             >>> sub2 = Submitter(xref=sub_id2)
-            >>> a.submitters((sub, sub2,))
+            >>> a.submitters(
+            ...     (
+            ...         sub,
+            ...         sub2,
+            ...     )
+            ... )
             >>> print(a.ged_submitter)
             0 @1@ SUBM
             0 @2@ SUBM
