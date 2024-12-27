@@ -33,6 +33,12 @@ class Defs:
     """
 
     @staticmethod
+    def unique_xref(tuples: tuple[Any], xref: Any, name: Any) -> bool:
+        values = {getattr(t, str(xref)) for t in tuples}
+        values.add(str(name))
+        return len(values) == len(tuples)
+
+    @staticmethod
     def taginfo(
         level: int,
         tag: Tag,
@@ -100,10 +106,8 @@ class Defs:
         return lines
     
     @staticmethod
-    def str_to_str(lines: str, level: int, tag: Tag, info: str, extra: str = '') -> str:
-        if info != '':
-            lines = ''.join([lines, Defs.taginfo(level, tag, info, extra)])
-        return lines
+    def str_to_str(lines: str, level: int, tag: Tag, info: str = '', extra: str = '') -> str:
+        return ''.join([lines, Defs.taginfo(level, tag, info, extra)])
 
     @staticmethod
     def clean_input(input: str) -> str:
@@ -150,7 +154,7 @@ class Defs:
     @staticmethod
     def verify_tuple_type(name: list[Any], value_type: Any) -> bool:
         """Check if each member of the tuple has the specified type."""
-        if name != []:
+        if name != [] and name is not None:
             for value in name:
                 Defs.verify_type(value, value_type)
         return True

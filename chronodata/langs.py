@@ -10,13 +10,14 @@ class Lang:
     The GEDCOM standard requires the use of ISO 639-1 codes for
     languages. These are identified with names and then placed
     in an enumeration list.  There are less than 200 of these
-    codes.  A pandas display is provided to view them
-    along with the other enumations.
+    codes.  
 
-    Reference
-    ---------
-    - [ISO 639-1 List](https://www.science.co.il/language/Codes.php)
-    - [GEDCOM Standard]()
+    Reference:
+        - [Library of Congress Data](https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt)
+        - [ISO 639-1 and 639-2 Library of Congress](https://www.loc.gov/standards/iso639-2/langhome.html#top)
+        - [ISO-1 Maintenance Agency](http://www.infoterm.info/standardization/iso_639_1_2002.php)
+        - [ISO Language Standards](https://www.iso.org/iso-639-language-code)
+        - [GEDCOM Standard]()
     """
 
     CODE: ClassVar = {

@@ -319,8 +319,6 @@ class String:
     """
 
     NEGATIVE: str = '-'
-    # NEWLINE: str = '\n'
-    # SPACE: str = ' '
     ATSIGN: str = '@'
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
@@ -342,6 +340,7 @@ class String:
     RECORD: str = '@0@'
     SPACE: str = ' '
     T: str = 'T'
+    UNDERLINE: str = '_'
     VERSION: str = '7.0'
     VOID: str = '@VOID@'
     WEEK: str = 'w'

@@ -17,7 +17,6 @@ Examples:
 """
 
 import logging
-import re
 from typing import Any, Literal, NamedTuple
 
 from chronodata.constants import Cal, Choice, String, Value
@@ -53,25 +52,25 @@ class Address(NamedTuple):
 
     Example:
         The following is the minimum amount of information for an address.
-        >>> from chronodata.store import Address
-        >>> mailing_address = Address(
-        ...     '12345 ABC Street\nSouth North City, My State 22222'
-        ... )
-        >>> print(mailing_address.ged(1))
+        >> from chronodata.store import Address
+        >> mailing_address = Address(
+        ..     '12345 ABC Street\nSouth North City, My State 22222'
+        .. )
+        >> print(mailing_address.ged(1))
         1 ADDR 12345 ABC Street
         1 CONT South North City, My State 22222
         <BLANKLINE>
 
         There are five named strings stored in this NamedTuple.
-        >>> from chronodata.store import Address
-        >>> full_address = Address(
-        ...     '12345 ABC Street\nSouth North City, My State 23456',
-        ...     'South North City',
-        ...     'My State',
-        ...     '23456',
-        ...     'USA',
-        ... )
-        >>> print(full_address.ged(1))
+        >> from chronodata.store import Address
+        >> full_address = Address(
+        .. '12345 ABC Street\nSouth North City, My State 23456',
+        .. 'South North City',
+        .. 'My State',
+        .. '23456',
+        .. 'USA',
+        .. )
+        >> print(full_address.ged(1))
         1 ADDR 12345 ABC Street
         1 CONT South North City, My State 23456
         2 CITY South North City
@@ -1056,29 +1055,63 @@ class Exid(NamedTuple):
 
 
 class PlaceTranslation(NamedTuple):
-    text: str
+    """Store, validate and display a place translation.
+
+    A place is a series of named regions in increasing order of size.  These regions
+    are assigned a name.  By default, the regions are 'City', 'County', 'State' and
+    'Country'.
+
+    For the translations the forms are the same as for the original language, but
+    the names of the regions are translated into a different language.
+
+    Examples:
+
+
+    Reference:
+        [GEDCOM Place Translation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-TRAN)
+    """
+
+    translation: str = ''
     language: str = ''
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.text, str) and Defs.verify_type(
-            self.language, str
-        )
+        check: bool = Defs.verify_type(
+            self.translation, str
+        ) and Defs.verify_type(self.language, str)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = f'{level}'
+        lines: str = ''
         if self.validate():
-            pass
+            lines = Defs.str_to_str(lines, level, Tag.TRAN, self.translation)
+            lines = Defs.str_to_str(
+                lines, level + 1, Tag.LANG, Lang.CODE[self.language]
+            )
         return lines
 
 
 class Map(NamedTuple):
-    """Store, validate and save a GEDCOM map structure."""
+    """Store, validate and save a GEDCOM map structure.
+
+    Examples:
+    >>> from chronodata.store import Map
+    >>> location = Map('N', 49.297222, 'E', 14.470833)
+    >>> print(location.ged(1))
+    1 MAP
+    2 LATI N49.297222
+    2 LONG E14.470833
+    <BLANKLINE>
+
+    Reference:
+        - [GEDCOM Map Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MAP)
+        - [GEDCOM Latitude Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LATI)
+        - [GEDCOM Longitude Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LONG)
+    """
 
     north_south: Literal['N', 'S'] = 'N'
-    latitude: float = 0.0
+    latitude: float = 90.0
     east_west: Literal['E', 'W'] = 'W'
     longitude: float = 0.0
 
@@ -1097,53 +1130,85 @@ class Map(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
+        latitude: str = ''.join([self.north_south, str(self.latitude)])
+        longitude: str = ''.join([self.east_west, str(self.longitude)])
         if self.validate():
-            lines = ''.join(
-                [
-                    lines,
-                    Defs.taginfo(level, Tag.MAP),
-                    Defs.taginfo(
-                        level + 1,
-                        Tag.LATI,
-                        ''.join([self.north_south, str(self.latitude)]),
-                    ),
-                    Defs.taginfo(
-                        level + 1,
-                        Tag.LONG,
-                        ''.join([self.east_west, str(self.longitude)]),
-                    ),
-                ]
-            )
+            lines = Defs.str_to_str(lines, level, Tag.MAP)
+            lines = Defs.str_to_str(lines, level + 1, Tag.LATI, latitude)
+            lines = Defs.str_to_str(lines, level + 1, Tag.LONG, longitude)
         return lines
 
 
 class Place(NamedTuple):
     """Store, validate and return a GEDCOM place structure.
 
+    A place is a dictionary of locations or regions going from smallest to largest.
+    The default is an empty dictionary {'City': '', 'County': '', 'State': '', 'Country': ''}.
+    One would fill in the values for city, county, state and country or assign other
+    regions with their names if the default is not relevant.
+
     Example:
+        Below are a couple of place names.  The first uses the default form names.
+        The second alters some of the form names to fit the place and provides a translation
+        from Czech to English.
+        >>> from chronodata.store import Map, Place, PlaceTranslation
+        >>> from chronodata.langs import Lang
+        >>> bechyne_cs = 'Bechyně, okres Tábor, Jihočeský kraj, Česká republika'
+        >>> bechyne_en = (
+        ...     'Bechyně, Tábor District, South Bohemian Region, Czech Republic'
+        ... )
+        >>> place = Place(
+        ...     place=bechyne_cs,
+        ...     language='Czech',
+        ...     translations=[
+        ...         PlaceTranslation(bechyne_en, 'English'),
+        ...     ],
+        ...     map=Map('N', 49.297222, 'E', 14.470833)
+        ... )
+        >>> place.validate()
+        True
+        >>> print(place.ged(2))
+        2 PLAC Bechyně, okres Tábor, Jihočeský kraj, Česká republika
+        3 FORM City, Country, State, Country
+        3 LANG cs
+        3 TRAN Bechyně, Tábor District, South Bohemian Region, Czech Republic
+        4 LANG en
+        3 MAP
+        4 LATI N49.297222
+        4 LONG E14.470833
+        <BLANKLINE>
+
 
     Args:
-        text: The required name of the place.
+        place_form: A dictionary representing the place from smallest to largest area.
+        language: The language of the place names.
+        translation: A list of translations of the place names.
+        maps: A list of references to maps of the place.
+        exid: Identifiers associated with the place.
+        notes: Notes associated with the place.
 
 
     Reference:
+        [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
     """
 
-    place_form: dict[str, str] = {}  # noqa: RUF012
+    place: str = ''
+    form: str = 'City, Country, State, Country'
     language: str = ''
     translations: list[str] = []  # noqa: RUF012
-    maps: list[Map] = []  # noqa: RUF012
+    map: Map = Map('N', 90, 'E', 0)
     exids: list[Exid] = []  # noqa: RUF012
     notes: list[Note] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            # Defs.verify_type(self.text, str)
-            # and Defs.verify_type(self.form, str)
-            Defs.verify_tuple_type(self.translations, PlaceTranslation)
-            and Defs.verify_tuple_type(self.maps, Map)
+            Defs.verify_type(self.place, str)
+            and Defs.verify_type(self.form, str)
+            and Defs.verify_dict_key(self.language, Lang.CODE)
+            and Defs.verify_tuple_type(self.translations, PlaceTranslation)
+            and Defs.verify_type(self.map, Map)
             and Defs.verify_tuple_type(self.exids, Exid)
             and Defs.verify_tuple_type(self.notes, Note)
         )
@@ -1153,17 +1218,15 @@ class Place(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.language != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        Defs.taginfo(level, Tag.PLAC, Lang.CODE[self.language]),
-                    ]
-                )
-            lines = Defs.list_to_str(lines, level, self.translations)
-            lines = Defs.list_to_str(lines, level, self.maps)
-            lines = Defs.list_to_str(lines, level, self.exids)
-            lines = Defs.list_to_str(lines, level, self.notes)
+            lines = Defs.str_to_str(lines, level, Tag.PLAC, self.place)
+            lines = Defs.str_to_str(lines, level + 1, Tag.FORM, self.form)
+            lines = Defs.str_to_str(
+                lines, level + 1, Tag.LANG, Lang.CODE[self.language]
+            )
+            lines = Defs.list_to_str(lines, level + 1, self.translations)
+            lines = ''.join([lines, self.map.ged(3)])
+            lines = Defs.list_to_str(lines, level + 1, self.exids)
+            lines = Defs.list_to_str(lines, level + 1, self.notes)
         return lines
 
 

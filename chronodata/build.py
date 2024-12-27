@@ -15,6 +15,8 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
+from collections import OrderedDict
+
 from chronodata.constants import String
 from chronodata.messages import Msg
 from chronodata.readwrite import Base
@@ -73,13 +75,13 @@ class Chronology(Base):
 
     def _format_name(self, name: str = '', counter: str = '') -> str:
         return ''.join(
-                [
-                    String.ATSIGN,
-                    name.strip().upper().replace(' ', '_'),
-                    counter,
-                    String.ATSIGN,
-                ]
-            )
+            [
+                String.ATSIGN,
+                name.strip().upper().replace(' ', '_'),
+                counter,
+                String.ATSIGN,
+            ]
+        )
 
     def _counter(
         self, xref_list: list[str], xref_name: str = '', initial: bool = False
@@ -562,7 +564,17 @@ class Chronology(Base):
         )
         return SubmitterXref(submitter_xref)
 
-    def families(self, records: tuple[Family]) -> None:
+    # def _gather(
+    #     self,
+    #     records: Any,
+    #     destination: str,
+    # ) -> None:
+    #     destination = ''
+    #     unique_list = list(OrderedDict.fromkeys(records))
+    #     for record in unique_list:
+    #         destination = ''.join([destination, record.ged()])
+
+    def families(self, records: list[Family]) -> None:
         """Collect and store all family records for the chronology.
 
         After importing `chronodata.build` and `chronodata.store`
@@ -576,7 +588,7 @@ class Chronology(Base):
         to a file.
 
         Args:
-            records (tuple[Family]): a tuple of all Family tuples.
+            records: a list of all Family records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -585,7 +597,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> family_id = a.family_xref()
             >>> family = Family(xref=family_id)
-            >>> a.families((family,))
+            >>> a.families(
+            ...     [
+            ...         family,
+            ...     ]
+            ... )
             >>> print(a.ged_family)
             0 @1@ FAM
             <BLANKLINE>
@@ -596,10 +612,10 @@ class Chronology(Base):
             >>> family_id2 = a.family_xref()
             >>> family2 = Family(xref=family_id2)
             >>> a.families(
-            ...     (
+            ...     [
             ...         family,
             ...         family2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_family)
             0 @1@ FAM
@@ -607,22 +623,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `individuals`: collect and store individual records.
-            - `multimedia`: collect and store multimedia records.
-            - `repositories`: collect and store repository records.
-            - `shared_notes`: collect and store shared notes records.
-            - `sources`: collect and store source records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_family)
         self.ged_family = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_family = ''.join([self.ged_family, record.ged()])
 
-    def individuals(self, records: tuple[Individual]) -> None:
+    def individuals(self, records: list[Individual]) -> None:
         """Collect and store all individual records for the chronology.
 
         Args:
-            records (tuple[Individual]): a tuple of all Individual tuples.
+            records: a list of all Individual records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -631,7 +649,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> individual_id = a.individual_xref()
             >>> individual = Individual(xref=individual_id)
-            >>> a.individuals((individual,))
+            >>> a.individuals(
+            ...     [
+            ...         individual,
+            ...     ]
+            ... )
             >>> print(a.ged_individual)
             0 @1@ INDI
             <BLANKLINE>
@@ -642,10 +664,10 @@ class Chronology(Base):
             >>> individual_id2 = a.individual_xref()
             >>> individual2 = Individual(xref=individual_id2)
             >>> a.individuals(
-            ...     (
+            ...     [
             ...         individual,
             ...         individual2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_individual)
             0 @1@ INDI
@@ -653,22 +675,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `multimedia`: collect and store multimedia records.
-            - `repositories`: collect and store repository records.
-            - `shared_notes`: collect and store shared notes records.
-            - `sources`: collect and store source records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_individual)
         self.ged_individual = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_individual = ''.join([self.ged_individual, record.ged()])
 
-    def multimedia(self, records: tuple[Multimedia]) -> None:
+    def multimedia(self, records: list[Multimedia]) -> None:
         """Collect and store all multimedia records for the chronology.
 
         Args:
-            records (tuple[Multimedia]): a tuple of all Multimedia tuples.
+            records: a list of all Multimedia records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -677,7 +701,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> mm_id = a.multimedia_xref()
             >>> mm = Multimedia(xref=mm_id)
-            >>> a.multimedia((mm,))
+            >>> a.multimedia(
+            ...     [
+            ...         mm,
+            ...     ]
+            ... )
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
             <BLANKLINE>
@@ -688,10 +716,10 @@ class Chronology(Base):
             >>> mm_id2 = a.multimedia_xref()
             >>> mm2 = Multimedia(xref=mm_id2)
             >>> a.multimedia(
-            ...     (
+            ...     [
             ...         mm,
             ...         mm2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
@@ -699,22 +727,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `individuals`: collect and store individual records.
-            - `repositories`: collect and store repository records.
-            - `shared_notes`: collect and store shared notes records.
-            - `sources`: collect and store source records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_multimedia)
         self.ged_multimedia = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_multimedia = ''.join([self.ged_multimedia, record.ged()])
 
-    def repositories(self, records: tuple[Repository]) -> None:
+    def repositories(self, records: list[Repository]) -> None:
         """Collect and store all repository records for the chronology.
 
         Args:
-            records (tuple[Repository]): a tuple of all Repository tuples.
+            records: a list of all Repository records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -723,7 +753,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> repo_id = a.repository_xref()
             >>> repo = Repository(xref=repo_id)
-            >>> a.repositories((repo,))
+            >>> a.repositories(
+            ...     [
+            ...         repo,
+            ...     ]
+            ... )
             >>> print(a.ged_repository)
             0 @1@ REPO
             <BLANKLINE>
@@ -734,10 +768,10 @@ class Chronology(Base):
             >>> repo_id2 = a.repository_xref()
             >>> repo2 = Repository(xref=repo_id2)
             >>> a.repositories(
-            ...     (
+            ...     [
             ...         repo,
             ...         repo2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_repository)
             0 @1@ REPO
@@ -745,22 +779,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `individuals`: collect and store individual records.
-            - `multimedia`: collect and store multimedia records.
-            - `shared_notes`: collect and store shared notes records.
-            - `sources`: collect and store source records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_repository)
         self.ged_repository = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_repository = ''.join([self.ged_repository, record.ged()])
 
-    def shared_notes(self, records: tuple[SharedNote]) -> None:
+    def shared_notes(self, records: list[SharedNote]) -> None:
         """Collect and store all shared note records for the chronology.
 
         Args:
-            records (tuple[SharedNote]): a tuple of all SharedNote tuples.
+            records: a tuple of all SharedNote records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -769,7 +805,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> sn_id = a.shared_note_xref()
             >>> sn = SharedNote(xref=sn_id)
-            >>> a.shared_notes((sn,))
+            >>> a.shared_notes(
+            ...     [
+            ...         sn,
+            ...     ]
+            ... )
             >>> print(a.ged_shared_note)
             0 @1@ SNOTE
             <BLANKLINE>
@@ -780,10 +820,10 @@ class Chronology(Base):
             >>> sn_id2 = a.shared_note_xref()
             >>> sn2 = SharedNote(xref=sn_id2)
             >>> a.shared_notes(
-            ...     (
+            ...     [
             ...         sn,
             ...         sn2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_shared_note)
             0 @1@ SNOTE
@@ -791,22 +831,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `individuals`: collect and store individual records.
-            - `multimedia`: collect and store multimedia records.
-            - `repositories`: collect and store repository records.
-            - `sources`: collect and store source records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_shared_note)
         self.ged_shared_note = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_shared_note = ''.join([self.ged_shared_note, record.ged()])
 
-    def sources(self, records: tuple[Source]) -> None:
+    def sources(self, records: list[Source]) -> None:
         """Collect and store all source records for the chronology.
 
         Args:
-            records (tuple[Source]): a tuple of all Source tuples.
+            records: a list of all Source records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -815,7 +857,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> source_id = a.source_xref()
             >>> source = Source(xref=source_id)
-            >>> a.sources((source,))
+            >>> a.sources(
+            ...     [
+            ...         source,
+            ...     ]
+            ... )
             >>> print(a.ged_source)
             0 @1@ SOUR
             <BLANKLINE>
@@ -826,10 +872,10 @@ class Chronology(Base):
             >>> source_id2 = a.source_xref()
             >>> source2 = Source(xref=source_id2)
             >>> a.sources(
-            ...     (
+            ...     [
             ...         source,
             ...         source2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_source)
             0 @1@ SOUR
@@ -837,22 +883,24 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `individuals`: collect and store individual records.
-            - `multimedia`: collect and store multimedia records.
-            - `repositories`: collect and store repository records.
-            - `shared_notes`: collect and store shared notes records.
-            - `submitters`: collect and store submitter records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_source)
         self.ged_source = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_source = ''.join([self.ged_source, record.ged()])
 
-    def submitters(self, records: tuple[Submitter]) -> None:
+    def submitters(self, records: list[Submitter]) -> None:
         """Collect and store all submitter records for the chronology.
 
         Args:
-            records (tuple[Submitter]): a tuple of all Submitter tuples.
+            records: a list of all Submitter records.
 
         Examples:
             This is a minimal example illustrating the process.
@@ -861,7 +909,11 @@ class Chronology(Base):
             >>> a = Chronology('test')
             >>> sub_id = a.submitter_xref()
             >>> sub = Submitter(xref=sub_id)
-            >>> a.submitters((sub,))
+            >>> a.submitters(
+            ...     [
+            ...         sub,
+            ...     ]
+            ... )
             >>> print(a.ged_submitter)
             0 @1@ SUBM
             <BLANKLINE>
@@ -872,10 +924,10 @@ class Chronology(Base):
             >>> sub_id2 = a.submitter_xref()
             >>> sub2 = Submitter(xref=sub_id2)
             >>> a.submitters(
-            ...     (
+            ...     [
             ...         sub,
             ...         sub2,
-            ...     )
+            ...     ]
             ... )
             >>> print(a.ged_submitter)
             0 @1@ SUBM
@@ -883,15 +935,17 @@ class Chronology(Base):
             <BLANKLINE>
 
         See Also:
-            - `families`: collect and store family records.
-            - `individuals`: collect and store individual records.
-            - `multimedia`: collect and store multimedia records.
-            - `repositories`: collect and store repository records.
-            - `shared_notes`: collect and store shared notes records.
-            - `sources`: collect and store source records.
+            - `families`: gather family records.
+            - `individuals`: gather individual records.
+            - `multimedia`: gather multimedia records.
+            - `repositories`: gather repository records.
+            - `shared_notes`: gather shared notes records.
+            - `sources`: gather source records.
         """
+        # self._gather(records, self.ged_submitter)
         self.ged_submitter = ''
-        for record in records:
+        unique_list = list(OrderedDict.fromkeys(records))
+        for record in unique_list:
             self.ged_submitter = ''.join([self.ged_submitter, record.ged()])
 
     def header(self, ged_header: Header) -> None:
