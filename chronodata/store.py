@@ -1133,7 +1133,7 @@ class Map(NamedTuple):
         latitude: str = ''.join([self.north_south, str(self.latitude)])
         longitude: str = ''.join([self.east_west, str(self.longitude)])
         if self.validate():
-            lines = Defs.str_to_str(lines, level, Tag.MAP)
+            lines = Defs.empty_to_str(lines, level, Tag.MAP)
             lines = Defs.str_to_str(lines, level + 1, Tag.LATI, latitude)
             lines = Defs.str_to_str(lines, level + 1, Tag.LONG, longitude)
         return lines

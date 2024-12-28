@@ -4,6 +4,7 @@
 
 import contextlib
 import logging
+import math
 import re
 from enum import Enum
 from typing import Any
@@ -31,6 +32,56 @@ class Defs:
     - [Python 3 UTF How To](https://docs.python.org/3/howto/unicode.html)
     - [Python 3 string](https://docs.python.org/3/library/string.html)
     """
+
+    @staticmethod
+    def to_decimal(
+        degrees: int, minutes: int, seconds: float, precision: int = 6
+    ) -> float:
+        """Convert degrees, minutes and seconds to a decimal.
+        
+        Example:
+            >>> from chronodata.methods import Defs
+            >>> to_decimal(49, 17, 50, 10)
+            49.2972222222
+
+        See Also:
+            - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
+
+        """
+        sign: int = -1 if degrees < 0 else 1
+        degrees = abs(degrees)
+        minutes_per_degree = 60
+        seconds_per_degree = 3600
+        return round(
+            sign * degrees
+            + (minutes / minutes_per_degree)
+            + (seconds / seconds_per_degree),
+            precision,
+        )
+
+    @staticmethod
+    def to_dms(
+        position: float, precision: int = 6
+    ) -> tuple[int, int, float]:
+        """Convert a measurment in decimals to one showing degrees, minutes
+        and sconds.
+        
+        >>> from chronodata.methods import Defs
+        >>> to_dms(49.29722222222, 10)
+        (49, 17, 49.999999992)
+
+        See Also:
+            - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
+
+        """
+        minutes_per_degree = 60
+        seconds_per_degree = 3600
+        degrees: int = math.floor(position)
+        minutes: int = math.floor((position - degrees) * minutes_per_degree)
+        seconds: float = round((
+            position - degrees - (minutes / minutes_per_degree)
+        ) * seconds_per_degree, precision)
+        return (degrees, minutes, seconds)
 
     @staticmethod
     def unique_xref(tuples: tuple[Any], xref: Any, name: Any) -> bool:
@@ -81,7 +132,7 @@ class Defs:
         phones: Any = None,
         emails: Any = None,
         faxes: Any = None,
-        wwws: Any = None
+        wwws: Any = None,
     ) -> str:
         lines: str = ''
         if phones is not None:
@@ -106,8 +157,18 @@ class Defs:
         return lines
     
     @staticmethod
-    def str_to_str(lines: str, level: int, tag: Tag, info: str = '', extra: str = '') -> str:
-        return ''.join([lines, Defs.taginfo(level, tag, info, extra)])
+    def empty_to_str(
+        lines: str, level: int, tag: Tag
+    ) -> str:
+        return ''.join([lines, Defs.taginfo(level, tag)])
+
+    @staticmethod
+    def str_to_str(
+        lines: str, level: int, tag: Tag, info: str, extra: str = ''
+    ) -> str:
+        if info != '':
+            return ''.join([lines, Defs.taginfo(level, tag, info, extra)])
+        return ''
 
     @staticmethod
     def clean_input(input: str) -> str:
