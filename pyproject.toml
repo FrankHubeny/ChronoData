@@ -82,38 +82,10 @@ markers = [
 
 [tool.mypy]
 mypy_path = [
-    "ChronoData", 
+    "ChronoData/chronodata", 
+    "ChronoData/tests",
 ]
 files = [
-  "chronodata/chrono.py", 
-  "chronodata/constants.py", 
-  "chronodata/core.py",
-  "chronodata/g7.py",
-  "chronodata/compare.py",
-  "tests/address_test.py",
-  "tests/association_test.py",
-  "tests/contact_test.py",
-  "tests/counter_test.py",
-  "tests/date_test.py",
-  "tests/datevalue_test.py",
-  "tests/defs_test.py",
-  "tests/dna_test.py",
-  "tests/family_individual_test.py",
-  "tests/flood_comparison_test.py",
-  "tests/genesis5_test.py",
-  "tests/header_test.py",
-  "tests/matplotlib_test.py",
-  "tests/multimedia_test.py",
-  "tests/pandas_test.py",
-  "tests/personal_name_test.py",
-  "tests/read_write_test.py",
-  "tests/repository_test.py",
-  "tests/source_test.py",
-  "tests/submitter_test.py",
-  "tests/taginfo_test.py",
-  "tests/three_generation_test.py",
-  "tests/time_test.py",
-  "tests/uranium_test.py",
   
 ]
 python_version = "3.12"

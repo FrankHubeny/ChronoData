@@ -216,24 +216,24 @@ class Choice:
     )
 
 
-@dataclass(frozen=True)
-class Arg:
-    """The following constants are used as arguments to procedure calls
-    such as Pandas DataFrames or NumPy."""
+# @dataclass(frozen=True)
+# class Arg:
+#     """The following constants are used as arguments to procedure calls
+#     such as Pandas DataFrames or NumPy."""
 
-    CSV: str = '.csv'
-    CSVLEN: int = 4
-    GED: str = '.ged'
-    GEDLEN: int = 4
-    GRAMPS: str = '.gramps'
-    GRAMPSLEN: int = 7
-    JSON: str = '.json'
-    JSONLEN: int = 5
-    INDEX: str = 'index'
-    INT: str = 'int'
-    LOCATION: str = 'lower right'
-    WRITE: str = 'w'
-    READ: str = 'r'
+#     CSV: str = '.csv'
+#     CSVLEN: int = 4
+#     GED: str = '.ged'
+#     GEDLEN: int = 4
+#     GRAMPS: str = '.gramps'
+#     GRAMPSLEN: int = 7
+#     JSON: str = '.json'
+#     JSONLEN: int = 5
+#     INDEX: str = 'index'
+#     INT: str = 'int'
+#     LOCATION: str = 'lower right'
+#     WRITE: str = 'w'
+#     READ: str = 'r'
 
 
 @dataclass(frozen=True)
@@ -310,6 +310,12 @@ class Cal:
         }
     }
 
+@dataclass(frozen=True)
+class Number:
+    CSVLEN: int = 4
+    GEDLEN: int = 4
+    GRAMPSLEN: int = 7
+    JSONLEN: int = 5
 
 @dataclass(frozen=True)
 class String:
@@ -318,34 +324,55 @@ class String:
     formatting numbers or other processes.
     """
 
-    NEGATIVE: str = '-'
     ATSIGN: str = '@'
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
+    CHRON_NAMES: str = 'CHRON NAMES'
+    CHRONS: str = 'CHRONS'
     COLON: str = ':'
+    CSV: str = '.csv'
+    DATA: str = 'DATA'
+    DATE: str = 'DATE'
     DAY: str = 'd'
+    EVENT: str = 'EVENT'
     FRENCH_R: str = 'FRENCH_R'
+    GED: str = '.ged'
+    GRAMPS: str = '.gramps'
     GREATER_THAN: str = '>'
     GREGORIAN: str = 'GREGORIAN'
     HEBREW: str = 'HEBREW'
     HYPHEN: str = '-'
+    INDEX: str = 'index'
+    INT: str = 'int'
+    JSON: str = '.json'
     JULIAN: str = 'JULIAN'
     LESS_THAN: str = '<'
+    LOCATION: str = 'lower right'
     MAX_MONTHS: str = 'Max Months'
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
     MONTH_MAX_DAYS: str = 'Month Max Days'
+    NAME: str = 'NAME'
+    NEGATIVE: str = '-'
     NEWLINE: str = '\n'
     NOW: str = 'now'
+    READ: str = 'r'
     RECORD: str = '@0@'
     SPACE: str = ' '
     T: str = 'T'
+    TESTCASES: str = 'TEST CASES'
     UNDERLINE: str = '_'
     VERSION: str = '7.0'
     VOID: str = '@VOID@'
     WEEK: str = 'w'
+    WRITE: str = 'w'
     YEAR: str = 'y'
     Z: str = 'Z'
+    
+    
+    
+    
+    
 
 
 @dataclass(frozen=True)

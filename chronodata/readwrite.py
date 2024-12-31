@@ -11,16 +11,15 @@ import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
 from chronodata.constants import (
-    Arg,
     Calendar,
-    String,
     Key,
+    Number,
     String,
     Unit,
 )
 from chronodata.enums import Tag
 from chronodata.messages import Issue, Msg
-from chronodata.methods import Defs
+from chronodata.methods import DefTag
 
 
 class Base:
@@ -69,15 +68,15 @@ class Base:
                 }
                 if log:
                     logging.info(Msg.STARTED.format(self.chron_name))
-            case Arg.JSON:
+            case String.JSON:
                 self.read_json()
                 if log:
                     logging.info(Msg.LOADED.format(self.chron_name, filename))
-            case Arg.GED:
+            case String.GED:
                 self.read_ged()
                 if log:
                     logging.info(Msg.LOADED.format(self.chron_name, filename))
-            case Arg.CSV:
+            case String.CSV:
                 self.read_csv()
                 if log:
                     logging.info(Msg.LOADED.format(self.chron_name, filename))
@@ -89,18 +88,20 @@ class Base:
 
     def _get_filename_type(self, filename: str) -> str:
         filename_type: str = ''
-        if filename[-Arg.JSONLEN :] == Arg.JSON:
-            filename_type = Arg.JSON
-        if filename[-Arg.GEDLEN :] == Arg.GED:
-            filename_type = Arg.GED
+        if filename[-Number.JSONLEN:] == String.JSON:
+            filename_type = String.JSON
+        if filename[-Number.GEDLEN:] == String.GED:
+            filename_type = String.GED
         return filename_type
 
     def read_csv(self) -> None:
         try:
-            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
-                data: Any = file.readlines()
-                self.csv_data = ''.join([self.csv_data, Defs.clean_input(data)])
-                file.close()
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                data: Any = infile.readlines()
+                self.csv_data = ''.join([self.csv_data, DefTag.clean_input(data)])
+                infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
             raise
@@ -109,9 +110,11 @@ class Base:
 
     def read_json(self) -> None:
         try:
-            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
-                self.chron = json.load(file)
-                file.close()
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                self.chron = json.load(infile)
+                infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
             raise
@@ -121,10 +124,12 @@ class Base:
     def read_ged(self) -> None:
         """Read and validate the GEDCOM file."""
         try:
-            with Path.open(Path(self.filename), encoding='utf-8', mode=Arg.READ) as file:
-                data: Any = file.readlines()
-                self.ged_data.append(Defs.clean_input(data))
-                file.close()
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                data: Any = infile.readlines()
+                self.ged_data.append(DefTag.clean_input(data))
+                infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
             raise
@@ -195,25 +200,25 @@ class Base:
         else:
             match self.filename_type:
                 # https://stackoverflow.com/questions/10373247/how-do-i-write-a-python-dictionary-to-a-csv-file
-                case Arg.CSV:
+                case String.CSV:
                     with Path.open(
-                        Path(self.filename), encoding='utf-8', mode=Arg.WRITE
+                        Path(self.filename), encoding='utf-8', mode=String.WRITE
                     ) as file:
                         w = csv.DictWriter(file, self.chron.keys())
                         w.writerows(self.chron)
                     logging.info(
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
-                case Arg.JSON:
+                case String.JSON:
                     with Path.open(
-                        Path(self.filename), encoding='utf-8', mode=Arg.WRITE
+                        Path(self.filename), encoding='utf-8', mode=String.WRITE
                     ) as file:
                         json.dump(self.chron, file)
                         file.close()
                     logging.info(
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
-                case Arg.GED:
+                case String.GED:
                     output: str = ''.join(
                         [
                             self.ged_header,
@@ -227,7 +232,7 @@ class Base:
                         ]
                     )
                     with Path.open(
-                        Path(filename), encoding='utf-8', mode=Arg.WRITE
+                        Path(filename), encoding='utf-8', mode=String.WRITE
                     ) as file:
                         file.write(output)
                         file.close()
@@ -431,11 +436,10 @@ class Base:
 
         """
         if isinstance(date, str):
-            year = np.datetime64(date, Unit.YEAR).astype(Arg.INT) + 1970
+            year = np.datetime64(date, Unit.YEAR).astype(String.INT) + 1970
         else:
             year = (
-                np.datetime_as_string(date, unit=Unit.YEAR).astype(Arg.INT)
-                + 1970
+                np.datetime_as_string(date, unit=Unit.YEAR).astype(String.INT) + 1970
             )
         if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
             days = 366

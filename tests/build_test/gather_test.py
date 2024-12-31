@@ -253,97 +253,15 @@ def test_duplicates(test_input: str, expected: str | int | bool) -> None:
     assert eval(test_input) == expected
 
 
-# testdata_reuse_xref: list[tuple[str, int]] = [
-#     ('a.ged_family.count(String.NEWLINE)', 1),
-#     # ('a.ged_individual.count(String.NEWLINE)', 1),
-#     # ('a.ged_multimedia.count(String.NEWLINE)', 1),
-#     # ('a.ged_repository.count(String.NEWLINE)', 1),
-#     # ('a.ged_shared_note.count(String.NEWLINE)', 1),
-#     # ('a.ged_source.count(String.NEWLINE)', 1),
-#     # ('a.ged_submitter.count(String.NEWLINE)', 1),
-# ]
-
-
-# @pytest.mark.parametrize(
-#     'test_input,expected',  
-#     testdata_reuse_xref,  
-# )
-# def test_reuse_xref(
-#     test_input: str, expected: str | int | bool
-# ) -> None:
-#     a = Chronology('test')
-#     husband_xref = a.individual_xref()
-#     husband1 = Individual(husband_xref)
-#     husband2 = Individual(husband_xref)
-#     h1 = Husband(husband1)
-#     fam_xref = a.family_xref()
-#     fam1 = Family(fam_xref)
-#     fam2 = Family(fam_xref)
-    
-#     # obje_xref = a.multimedia_xref()
-#     # obje1 = Multimedia(obje_xref)
-#     # obje2 = Multimedia(obje_xref)
-#     # repo_xref = a.repository_xref()
-#     # repo1 = Repository(repo_xref)
-#     # repo2 = Repository(repo_xref)
-#     # snote_xref = a.shared_note_xref()
-#     # snote1 = SharedNote(snote_xref)
-#     # snote2 = SharedNote(snote_xref)
-#     # sour_xref = a.source_xref()
-#     # sour1 = Source(sour_xref)
-#     # sour2 = Source(sour_xref)
-#     # subm_xref = a.submitter_xref()
-#     # subm1 = Submitter(subm_xref)
-#     # subm2 = Submitter(subm_xref)
-#     a.families(
-#         [
-#             fam1,
-#             fam2,
-#         ]
-#     )
-#     a.individuals([indi1, indi2])
-#     a.multimedia(
-#         [
-#             obje1,
-#             obje2,
-#         ]
-#     )
-#     a.repositories(
-#         [
-#             repo1,
-#             repo2,
-#         ]
-#     )
-#     a.shared_notes(
-#         [
-#             snote1,
-#             snote2,
-#         ]
-#     )
-#     a.sources(
-#         [
-#             sour1,
-#             sour2,
-#         ]
-#     )
-#     a.submitters([subm1, subm2])
-
-#     assert eval(test_input) == expected
-
-
 testdata_same_xref_different_record: list[tuple[str, int | str]] = [
     ('a.ged_family.count(String.NEWLINE)', 1),
-    ('a.ged_family','0 FAM @3@\n1 HUSB @1@\n'),
-    # ('a.ged_individual.count(String.NEWLINE)', 1),
-    # ('a.ged_multimedia.count(String.NEWLINE)', 1),
-    # ('a.ged_repository.count(String.NEWLINE)', 1),
-    # ('a.ged_shared_note.count(String.NEWLINE)', 1),
-    # ('a.ged_source.count(String.NEWLINE)', 1),
-    # ('a.ged_submitter.count(String.NEWLINE)', 1),
+    ('a.ged_family', '0 FAM @3@\n1 HUSB @1@\n'),
 ]
 
 
-@pytest.mark.parametrize('test_input,expected', testdata_same_xref_different_record)  # noqa: PT006
+@pytest.mark.parametrize(
+    'test_input,expected', testdata_same_xref_different_record  # noqa: PT006
+)  
 def test_same_xref_different_record(
     test_input: str, expected: str | int | bool
 ) -> None:
@@ -355,53 +273,11 @@ def test_same_xref_different_record(
     fam_xref = a.family_xref()
     fam1 = Family(fam_xref, husband=indi1)
     fam2 = Family(fam_xref, husband=indi2)
-    
-    # obje_xref = a.multimedia_xref()
-    # obje1 = Multimedia(obje_xref)
-    # obje2 = Multimedia(obje_xref)
-    # repo_xref = a.repository_xref()
-    # repo1 = Repository(repo_xref)
-    # repo2 = Repository(repo_xref)
-    # snote_xref = a.shared_note_xref()
-    # snote1 = SharedNote(snote_xref)
-    # snote2 = SharedNote(snote_xref)
-    # sour_xref = a.source_xref()
-    # sour1 = Source(sour_xref)
-    # sour2 = Source(sour_xref)
-    # subm_xref = a.submitter_xref()
-    # subm1 = Submitter(subm_xref)
-    # subm2 = Submitter(subm_xref)
     a.families(
         [
             fam1,
             fam2,
         ]
     )
-    # a.individuals([indi1, indi2])
-    # a.multimedia(
-    #     [
-    #         obje1,
-    #         obje2,
-    #     ]
-    # )
-    # a.repositories(
-    #     [
-    #         repo1,
-    #         repo2,
-    #     ]
-    # )
-    # a.shared_notes(
-    #     [
-    #         snote1,
-    #         snote2,
-    #     ]
-    # )
-    # a.sources(
-    #     [
-    #         sour1,
-    #         sour2,
-    #     ]
-    # )
-    # a.submitters([subm1, subm2])
 
     assert eval(test_input) == expected

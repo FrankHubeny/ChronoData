@@ -35,7 +35,7 @@ from chronodata.enums import (
 )
 from chronodata.langs import Lang
 from chronodata.messages import Msg
-from chronodata.methods import Defs
+from chronodata.methods import DefCheck, DefTag
 from chronodata.records import (
     FamilyXref,
     IndividualXref,
@@ -101,26 +101,27 @@ class Address(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            Defs.verify_type(self.address, str)
-            and Defs.verify_type(self.city, str)
-            and Defs.verify_type(self.state, str)
-            and Defs.verify_type(self.postal, str)
-            and Defs.verify_type(self.country, str)
+            DefCheck.verify_type(self.address, str)
+            and DefCheck.verify_type(self.city, str)
+            and DefCheck.verify_type(self.state, str)
+            and DefCheck.verify_type(self.postal, str)
+            and DefCheck.verify_type(self.country, str)
         )
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate() and self.address != '':
-            split_address: list[str] = self.address.split('\n')
-            lines = Defs.str_to_str(lines, level, Tag.ADDR, split_address[0])
-            for line in split_address[1:]:
-                lines = Defs.str_to_str(lines, level, Tag.CONT, line)
-            lines = Defs.str_to_str(lines, level + 1, Tag.CITY, self.city)
-            lines = Defs.str_to_str(lines, level + 1, Tag.STAE, self.state)
-            lines = Defs.str_to_str(lines, level + 1, Tag.POST, self.postal)
-            lines = Defs.str_to_str(lines, level + 1, Tag.CTRY, self.country)
+        if self.validate():
+            if self.address != '':
+                split_address: list[str] = self.address.split('\n')
+                lines = DefTag.str_to_str(lines, level, Tag.ADDR, split_address[0])
+                for line in split_address[1:]:
+                    lines = DefTag.str_to_str(lines, level, Tag.CONT, line)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.CITY, self.city)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.STAE, self.state)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.POST, self.postal)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.CTRY, self.country)
         return lines
 
 
@@ -181,16 +182,18 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_choice(self.greater_less_than, Choice.GREATER_LESS_THAN)
-            and Defs.verify_type(self.years, int)
-            and Defs.verify_type(self.months, int)
-            and Defs.verify_type(self.weeks, int)
-            and Defs.verify_type(self.days, int)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_not_negative(self.years)
-            and Defs.verify_not_negative(self.months)
-            and Defs.verify_not_negative(self.weeks)
-            and Defs.verify_not_negative(self.days)
+            DefCheck.verify_choice(
+                self.greater_less_than, Choice.GREATER_LESS_THAN
+            )
+            and DefCheck.verify_type(self.years, int)
+            and DefCheck.verify_type(self.months, int)
+            and DefCheck.verify_type(self.weeks, int)
+            and DefCheck.verify_type(self.days, int)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_not_negative(self.years)
+            and DefCheck.verify_not_negative(self.months)
+            and DefCheck.verify_not_negative(self.weeks)
+            and DefCheck.verify_not_negative(self.days)
         )
         return check
 
@@ -207,14 +210,14 @@ class Age(NamedTuple):
                 info = ''.join([info, f' {self.weeks!s}w'])
             if self.days > 0:
                 info = ''.join([info, f' {self.days!s}d'])
-            line = Defs.taginfo(
+            line = DefTag.taginfo(
                 level,
                 Tag.AGE,
                 info.replace('  ', ' ').replace('  ', ' ').strip(),
             )
             if self.phrase != '':
                 line = ''.join(
-                    [line, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [line, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return line
 
@@ -298,9 +301,11 @@ class PersonalNamePiece(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.tag, Tag)
-            and Defs.verify_choice(self.tag.value, Choice.PERSONAL_NAME_PIECE)
-            and Defs.verify_type(self.text, str)
+            DefCheck.verify_type(self.tag, Tag)
+            and DefCheck.verify_choice(
+                self.tag.value, Choice.PERSONAL_NAME_PIECE
+            )
+            and DefCheck.verify_type(self.text, str)
         )
         return check
 
@@ -308,7 +313,7 @@ class PersonalNamePiece(NamedTuple):
         """Format to meet GEDCOM standards."""
         name_piece: str = ''
         if self.validate():
-            name_piece = Defs.taginfo(level, self.tag, self.text)
+            name_piece = DefTag.taginfo(level, self.tag, self.text)
         return name_piece
 
 
@@ -397,13 +402,13 @@ class PersonalName(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_not_default(self.name, '')
-            and Defs.verify_choice(self.type.value, Choice.NAME_TYPE)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_tuple_type(self.pieces, PersonalNamePiece)
-            and Defs.verify_tuple_type(self.translations, NameTranslation)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.sources, SourceCitation)
+            DefCheck.verify_not_default(self.name, '')
+            and DefCheck.verify_choice(self.type.value, Choice.NAME_TYPE)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_tuple_type(self.pieces, PersonalNamePiece)
+            and DefCheck.verify_tuple_type(self.translations, NameTranslation)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, SourceCitation)
         )
         return check
 
@@ -413,8 +418,8 @@ class PersonalName(NamedTuple):
         if self.validate():
             lines = ''.join(
                 [
-                    Defs.taginfo(level, Tag.NAME, self.name),
-                    Defs.taginfo(level + 1, Tag.TYPE, self.type.value),
+                    DefTag.taginfo(level, Tag.NAME, self.name),
+                    DefTag.taginfo(level + 1, Tag.TYPE, self.type.value),
                 ]
             )
             if self.pieces is not None:
@@ -470,11 +475,11 @@ class NameTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.translation, str)
-            and Defs.verify_not_default(self.translation, '')
-            and Defs.verify_dict_key(self.language, Lang.CODE)
-            and Defs.verify_not_default(self.language, '')
-            and Defs.verify_tuple_type(self.name_pieces, PersonalNamePiece)
+            DefCheck.verify_type(self.translation, str)
+            and DefCheck.verify_not_default(self.translation, '')
+            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            and DefCheck.verify_not_default(self.language, '')
+            and DefCheck.verify_tuple_type(self.name_pieces, PersonalNamePiece)
         )
         return check
 
@@ -484,8 +489,10 @@ class NameTranslation(NamedTuple):
         if self.validate():
             lines = ''.join(
                 [
-                    Defs.taginfo(level, Tag.TRAN, self.translation),
-                    Defs.taginfo(level + 1, Tag.LANG, Lang.CODE[self.language]),
+                    DefTag.taginfo(level, Tag.TRAN, self.translation),
+                    DefTag.taginfo(
+                        level + 1, Tag.LANG, Lang.CODE[self.language]
+                    ),
                 ]
             )
             if self.name_pieces is not None:
@@ -533,10 +540,10 @@ class NoteTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.translation, str)
-            and Defs.verify_not_default(self.translation, '')
-            and Defs.verify_enum(self.mime.value, MediaType)
-            and Defs.verify_dict_key(self.language, Lang.CODE)
+            DefCheck.verify_type(self.translation, str)
+            and DefCheck.verify_not_default(self.translation, '')
+            and DefCheck.verify_enum(self.mime.value, MediaType)
+            and DefCheck.verify_dict_key(self.language, Lang.CODE)
         )
         return check
 
@@ -547,9 +554,11 @@ class NoteTranslation(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(level, Tag.TRAN, self.translation),
-                    Defs.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    Defs.taginfo(level + 1, Tag.LANG, Lang.CODE[self.language]),
+                    DefTag.taginfo(level, Tag.TRAN, self.translation),
+                    DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
+                    DefTag.taginfo(
+                        level + 1, Tag.LANG, Lang.CODE[self.language]
+                    ),
                 ]
             )
         return lines
@@ -597,10 +606,10 @@ class CallNumber(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.call_number, str)
-            and Defs.verify_not_default(self.call_number, '')
-            and Defs.verify_enum(self.media.value, Media)
-            and Defs.verify_type(self.phrase, str)
+            DefCheck.verify_type(self.call_number, str)
+            and DefCheck.verify_not_default(self.call_number, '')
+            and DefCheck.verify_enum(self.media.value, Media)
+            and DefCheck.verify_type(self.phrase, str)
         )
         return check
 
@@ -608,16 +617,19 @@ class CallNumber(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(level, Tag.CALN, self.call_number)
+            lines = DefTag.taginfo(level, Tag.CALN, self.call_number)
             if self.media != Media.NONE:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.MEDI, self.media.value)]
+                    [
+                        lines,
+                        DefTag.taginfo(level + 1, Tag.MEDI, self.media.value),
+                    ]
                 )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 2, Tag.PHRASE, self.phrase),
+                        DefTag.taginfo(level + 2, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -648,12 +660,12 @@ class SourceRepositoryCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.repo, RepositoryXref)
-            and Defs.verify_not_default(
+            DefCheck.verify_type(self.repo, RepositoryXref)
+            and DefCheck.verify_not_default(
                 self.repo, RepositoryXref(String.RECORD)
             )
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_type(self.call_numbers, CallNumber)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_type(self.call_numbers, CallNumber)
         )
         return check
 
@@ -661,7 +673,7 @@ class SourceRepositoryCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(level, Tag.SOUR, str(self.repo))
+            lines = DefTag.taginfo(level, Tag.SOUR, str(self.repo))
             if self.notes is not None:
                 for note in self.notes:
                     lines = ''.join([lines, note.ged(level + 1)])
@@ -746,17 +758,17 @@ class SourceCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_not_default(str(self.xref), String.RECORD)
-            and Defs.verify_type(self.xref, SourceXref)
-            and Defs.verify_type(self.page, str)
-            and Defs.verify_tuple_type(self.texts, Text)
-            and Defs.verify_enum(self.event.value, Event)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_enum(self.role.value, Role)
-            and Defs.verify_type(self.role_phrase, str)
-            and Defs.verify_enum(self.quality.value, Quay)
-            and Defs.verify_tuple_type(self.multimedia, MultimediaLink)
-            and Defs.verify_tuple_type(self.notes, Note)
+            DefCheck.verify_not_default(str(self.xref), String.RECORD)
+            and DefCheck.verify_type(self.xref, SourceXref)
+            and DefCheck.verify_type(self.page, str)
+            and DefCheck.verify_tuple_type(self.texts, Text)
+            and DefCheck.verify_enum(self.event.value, Event)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_enum(self.role.value, Role)
+            and DefCheck.verify_type(self.role_phrase, str)
+            and DefCheck.verify_enum(self.quality.value, Quay)
+            and DefCheck.verify_tuple_type(self.multimedia, MultimediaLink)
+            and DefCheck.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -764,9 +776,9 @@ class SourceCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(level, Tag.SOUR, str(self.xref))
+            lines = DefTag.taginfo(level, Tag.SOUR, str(self.xref))
             if self.page != '':
-                lines = Defs.taginfo(level + 1, Tag.PAGE, self.page)
+                lines = DefTag.taginfo(level + 1, Tag.PAGE, self.page)
 
         return lines
 
@@ -803,14 +815,14 @@ class SNote(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.shared_note, SharedNoteXref)
+        check: bool = DefCheck.verify_type(self.shared_note, SharedNoteXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(level, Tag.SNOTE, str(self.shared_note))
+            lines = DefTag.taginfo(level, Tag.SNOTE, str(self.shared_note))
         return lines
 
 
@@ -883,11 +895,11 @@ class Note(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_not_default(self.text, '')
-            and Defs.verify_enum(self.mime.value, MediaType)
-            and Defs.verify_dict_key(self.language, Lang.CODE)
-            and Defs.verify_tuple_type(self.translations, NoteTranslation)
-            and Defs.verify_tuple_type(self.citations, SourceCitation)
+            DefCheck.verify_not_default(self.text, '')
+            and DefCheck.verify_enum(self.mime.value, MediaType)
+            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
+            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
         )
         return check
 
@@ -895,16 +907,19 @@ class Note(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.taginfo(level, Tag.NOTE, self.text)
+            lines = DefTag.taginfo(level, Tag.NOTE, self.text)
             if self.mime != MediaType.NONE:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.MIME, self.mime.value)]
+                    [
+                        lines,
+                        DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
+                    ]
                 )
             if self.language != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
+                        DefTag.taginfo(
                             level + 1, Tag.LANG, Lang.CODE[self.language]
                         ),
                     ]
@@ -946,12 +961,12 @@ class Association(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_enum(self.role.value, Role)
-            and Defs.verify_type(self.association_phrase, str)
-            and Defs.verify_type(self.role_phrase, str)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.citations, SourceCitation)
-            and Defs.verify_enum(self.role.value, Role)
+            DefCheck.verify_enum(self.role.value, Role)
+            and DefCheck.verify_type(self.association_phrase, str)
+            and DefCheck.verify_type(self.role_phrase, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
+            and DefCheck.verify_enum(self.role.value, Role)
         )
         return check
 
@@ -963,7 +978,7 @@ class Association(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
+                        DefTag.taginfo(
                             level + 1,
                             Tag.PHRASE,
                             self.association_phrase,
@@ -973,14 +988,14 @@ class Association(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    Defs.taginfo(level + 2, Tag.ROLE, self.role.value),
+                    DefTag.taginfo(level + 2, Tag.ROLE, self.role.value),
                 ]
             )
             if self.role_phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(
+                        DefTag.taginfo(
                             level + 2,
                             Tag.PHRASE,
                             self.role_phrase,
@@ -1017,12 +1032,12 @@ class MultimediaLink(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.crop, str)
-            and Defs.verify_type(self.top, int)
-            and Defs.verify_type(self.left, int)
-            and Defs.verify_type(self.height, int)
-            and Defs.verify_type(self.width, int)
-            and Defs.verify_type(self.title, str)
+            DefCheck.verify_type(self.crop, str)
+            and DefCheck.verify_type(self.top, int)
+            and DefCheck.verify_type(self.left, int)
+            and DefCheck.verify_type(self.height, int)
+            and DefCheck.verify_type(self.width, int)
+            and DefCheck.verify_type(self.title, str)
         )
         return check
 
@@ -1039,17 +1054,17 @@ class Exid(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.exid, str) and Defs.verify_type(
-            self.exid_type, str
-        )
+        check: bool = DefCheck.verify_type(
+            self.exid, str
+        ) and DefCheck.verify_type(self.exid_type, str)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         return ''.join(
             [
-                Defs.taginfo(level, Tag.EXID, self.exid),
-                Defs.taginfo(level + 1, Tag.TYPE, self.exid_type),
+                DefTag.taginfo(level, Tag.EXID, self.exid),
+                DefTag.taginfo(level + 1, Tag.TYPE, self.exid_type),
             ]
         )
 
@@ -1076,17 +1091,17 @@ class PlaceTranslation(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(
+        check: bool = DefCheck.verify_type(
             self.translation, str
-        ) and Defs.verify_type(self.language, str)
+        ) and DefCheck.verify_type(self.language, str)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.str_to_str(lines, level, Tag.TRAN, self.translation)
-            lines = Defs.str_to_str(
+            lines = DefTag.str_to_str(lines, level, Tag.TRAN, self.translation)
+            lines = DefTag.str_to_str(
                 lines, level + 1, Tag.LANG, Lang.CODE[self.language]
             )
         return lines
@@ -1118,12 +1133,12 @@ class Map(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.latitude, float)
-            and Defs.verify_choice(self.north_south, Choice.NORTH_SOUTH)
-            and Defs.verify_type(self.longitude, float)
-            and Defs.verify_choice(self.east_west, Choice.EAST_WEST)
-            and Defs.verify_range(self.latitude, 0.0, 360.0)
-            and Defs.verify_range(self.longitude, -90.0, 90.0)
+            DefCheck.verify_type(self.latitude, float)
+            and DefCheck.verify_choice(self.north_south, Choice.NORTH_SOUTH)
+            and DefCheck.verify_type(self.longitude, float)
+            and DefCheck.verify_choice(self.east_west, Choice.EAST_WEST)
+            and DefCheck.verify_range(self.latitude, 0.0, 360.0)
+            and DefCheck.verify_range(self.longitude, -90.0, 90.0)
         )
         return check
 
@@ -1133,9 +1148,9 @@ class Map(NamedTuple):
         latitude: str = ''.join([self.north_south, str(self.latitude)])
         longitude: str = ''.join([self.east_west, str(self.longitude)])
         if self.validate():
-            lines = Defs.empty_to_str(lines, level, Tag.MAP)
-            lines = Defs.str_to_str(lines, level + 1, Tag.LATI, latitude)
-            lines = Defs.str_to_str(lines, level + 1, Tag.LONG, longitude)
+            lines = DefTag.empty_to_str(lines, level, Tag.MAP)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.LATI, latitude)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.LONG, longitude)
         return lines
 
 
@@ -1163,7 +1178,7 @@ class Place(NamedTuple):
         ...     translations=[
         ...         PlaceTranslation(bechyne_en, 'English'),
         ...     ],
-        ...     map=Map('N', 49.297222, 'E', 14.470833)
+        ...     map=Map('N', 49.297222, 'E', 14.470833),
         ... )
         >>> place.validate()
         True
@@ -1204,13 +1219,13 @@ class Place(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.place, str)
-            and Defs.verify_type(self.form, str)
-            and Defs.verify_dict_key(self.language, Lang.CODE)
-            and Defs.verify_tuple_type(self.translations, PlaceTranslation)
-            and Defs.verify_type(self.map, Map)
-            and Defs.verify_tuple_type(self.exids, Exid)
-            and Defs.verify_tuple_type(self.notes, Note)
+            DefCheck.verify_type(self.place, str)
+            and DefCheck.verify_type(self.form, str)
+            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            and DefCheck.verify_tuple_type(self.translations, PlaceTranslation)
+            and DefCheck.verify_type(self.map, Map)
+            and DefCheck.verify_tuple_type(self.exids, Exid)
+            and DefCheck.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -1218,15 +1233,15 @@ class Place(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Defs.str_to_str(lines, level, Tag.PLAC, self.place)
-            lines = Defs.str_to_str(lines, level + 1, Tag.FORM, self.form)
-            lines = Defs.str_to_str(
+            lines = DefTag.str_to_str(lines, level, Tag.PLAC, self.place)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, self.form)
+            lines = DefTag.str_to_str(
                 lines, level + 1, Tag.LANG, Lang.CODE[self.language]
             )
-            lines = Defs.list_to_str(lines, level + 1, self.translations)
+            lines = DefTag.list_to_str(lines, level + 1, self.translations)
             lines = ''.join([lines, self.map.ged(3)])
-            lines = Defs.list_to_str(lines, level + 1, self.exids)
-            lines = Defs.list_to_str(lines, level + 1, self.notes)
+            lines = DefTag.list_to_str(lines, level + 1, self.exids)
+            lines = DefTag.list_to_str(lines, level + 1, self.notes)
         return lines
 
 
@@ -1259,12 +1274,12 @@ class Date(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.year, int)
-            and Defs.verify_type(self.month, int)
-            and Defs.verify_type(self.day, int)
-            and Defs.verify_type(self.week, int)
-            and Defs.verify_range(self.week, 0, 52)
-            and Defs.verify_range(self.month, 0, 12)
+            DefCheck.verify_type(self.year, int)
+            and DefCheck.verify_type(self.month, int)
+            and DefCheck.verify_type(self.day, int)
+            and DefCheck.verify_type(self.week, int)
+            and DefCheck.verify_range(self.week, 0, 52)
+            and DefCheck.verify_range(self.month, 0, 12)
             # and if self.year == 0:
             #     raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
         )
@@ -1338,13 +1353,13 @@ class Time(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.hour, int)
-            and Defs.verify_type(self.minute, int)
-            and Defs.verify_type(self.second, int | float)
-            and Defs.verify_type(self.UTC, bool)
-            and Defs.verify_range(self.hour, 0, 23)
-            and Defs.verify_range(self.minute, 0, 59)
-            and Defs.verify_range(self.second, 0, 59.999999999999)
+            DefCheck.verify_type(self.hour, int)
+            and DefCheck.verify_type(self.minute, int)
+            and DefCheck.verify_type(self.second, int | float)
+            and DefCheck.verify_type(self.UTC, bool)
+            and DefCheck.verify_range(self.hour, 0, 23)
+            and DefCheck.verify_range(self.minute, 0, 59)
+            and DefCheck.verify_range(self.second, 0, 59.999999999999)
         )
         return check
 
@@ -1362,7 +1377,7 @@ class Time(NamedTuple):
                 second_str = ''.join(['0', second_str])
             if self.UTC:
                 second_str = ''.join([second_str, 'Z'])
-            return Defs.taginfo(
+            return DefTag.taginfo(
                 level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
             )
         return ''
@@ -1408,7 +1423,7 @@ class DateExact(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.phrase, str)
+            DefCheck.verify_type(self.phrase, str)
             and self.date.validate()
             and self.time.validate()
         )
@@ -1422,7 +1437,7 @@ class DateExact(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [lines, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -1449,7 +1464,7 @@ class DateValue(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.phrase, str)
+            DefCheck.verify_type(self.phrase, str)
             and self.date.validate()
             and self.time.validate()
         )
@@ -1464,7 +1479,7 @@ class DateValue(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [lines, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -1476,7 +1491,7 @@ class DateValue(NamedTuple):
 
 #     def validate(self) -> bool:
 #         check: bool = (
-#             Defs.verify_type(self.status, str)
+#             DefCheck.verify_type(self.status, str)
 #             and self.date.validate()
 #             and self.time.validate()
 #         )
@@ -1528,35 +1543,35 @@ class EventDetail(NamedTuple):
                 lines = ''.join([lines, self.place.ged(level)])
             if self.address != Address('', '', '', '', ''):
                 lines = ''.join([lines, self.address.ged(level)])
-            contacts: str = Defs.contact_info(
+            contacts: str = DefTag.contact_info(
                 level, self.phones, self.emails, self.faxes, self.wwws
             )
             lines = ''.join([lines, contacts])
-            lines = Defs.str_to_str(lines, level, Tag.AGNC, self.agency)
-            lines = Defs.str_to_str(lines, level, Tag.RELI, self.religion)
-            lines = Defs.str_to_str(lines, level, Tag.CAUS, self.cause)
-            lines = Defs.str_to_str(lines, level, Tag.RESN, self.resn)
+            lines = DefTag.str_to_str(lines, level, Tag.AGNC, self.agency)
+            lines = DefTag.str_to_str(lines, level, Tag.RELI, self.religion)
+            lines = DefTag.str_to_str(lines, level, Tag.CAUS, self.cause)
+            lines = DefTag.str_to_str(lines, level, Tag.RESN, self.resn)
             # if self.agency != '':
             #     lines = ''.join(
-            #         [lines, Defs.taginfo(level, Tag.AGNC, self.agency)]
+            #         [lines, DefTag.taginfo(level, Tag.AGNC, self.agency)]
             #     )
             # if self.religion != '':
             #     lines = ''.join(
-            #         [lines, Defs.taginfo(level, Tag.RELI, self.religion)]
+            #         [lines, DefTag.taginfo(level, Tag.RELI, self.religion)]
             #     )
             # if self.cause != '':
             #     lines = ''.join(
-            #         [lines, Defs.taginfo(level, Tag.CAUS, self.cause)]
+            #         [lines, DefTag.taginfo(level, Tag.CAUS, self.cause)]
             #     )
             # if self.resn != '':
             #     lines = ''.join(
-            #         [lines, Defs.taginfo(level, Tag.RESN, self.resn)]
+            #         [lines, DefTag.taginfo(level, Tag.RESN, self.resn)]
             #     )
-            lines = Defs.list_to_str(lines, level, self.associations)
-            lines = Defs.list_to_str(lines, level, self.notes)
-            lines = Defs.list_to_str(lines, level, self.sources)
-            lines = Defs.list_to_str(lines, level, self.multimedia_links)
-            lines = Defs.list_to_str(lines, level, self.uids)
+            lines = DefTag.list_to_str(lines, level, self.associations)
+            lines = DefTag.list_to_str(lines, level, self.notes)
+            lines = DefTag.list_to_str(lines, level, self.sources)
+            lines = DefTag.list_to_str(lines, level, self.multimedia_links)
+            lines = DefTag.list_to_str(lines, level, self.uids)
             # if self.associations is not None:
             #     for association in self.associations:
             #         lines = ''.join([lines, association.ged(level)])
@@ -1586,11 +1601,11 @@ class HusbandWife(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.husband_age, int)
-            and Defs.verify_type(self.wife_age, int)
-            and Defs.verify_type(self.husband_phrase, str)
-            and Defs.verify_type(self.wife_phrase, str)
-            and Defs.verify_type(self.event_detail, EventDetail)
+            DefCheck.verify_type(self.husband_age, int)
+            and DefCheck.verify_type(self.wife_age, int)
+            and DefCheck.verify_type(self.husband_phrase, str)
+            and DefCheck.verify_type(self.wife_phrase, str)
+            and DefCheck.verify_type(self.event_detail, EventDetail)
         )
         return check
 
@@ -1606,7 +1621,7 @@ class FamilyEventDetail(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.husband_wife_ages, HusbandWife)
+        check: bool = DefCheck.verify_type(self.husband_wife_ages, HusbandWife)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -1625,9 +1640,9 @@ class FamilyAttribute(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.tag, str)
-            and Defs.verify_type(self.attribute_type, str)
-            and Defs.verify_type(
+            DefCheck.verify_type(self.tag, str)
+            and DefCheck.verify_type(self.attribute_type, str)
+            and DefCheck.verify_type(
                 self.family_event_detail, FamilyEventDetail | None
             )
         )
@@ -1649,9 +1664,11 @@ class FamilyEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.event, str)
-            and Defs.verify_type(self.event_type, str)
-            and Defs.verify_type(self.event_detail, FamilyEventDetail | None)
+            DefCheck.verify_type(self.event, str)
+            and DefCheck.verify_type(self.event_type, str)
+            and DefCheck.verify_type(
+                self.event_detail, FamilyEventDetail | None
+            )
         )
         return check
 
@@ -1669,9 +1686,9 @@ class Husband(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-            self.xref, IndividualXref
-        )
+        check: bool = DefCheck.verify_type(
+            self.phrase, str
+        ) and DefCheck.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -1679,13 +1696,13 @@ class Husband(NamedTuple):
         lines: str = ''
         if str(self.xref) != String.RECORD and self.validate():
             lines = ''.join(
-                [lines, Defs.taginfo(level, Tag.HUSB, str(self.xref))]
+                [lines, DefTag.taginfo(level, Tag.HUSB, str(self.xref))]
             )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
+                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -1697,9 +1714,9 @@ class Wife(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-            self.xref, IndividualXref
-        )
+        check: bool = DefCheck.verify_type(
+            self.phrase, str
+        ) and DefCheck.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -1707,13 +1724,13 @@ class Wife(NamedTuple):
         lines: str = ''
         if str(self.xref) != String.RECORD and self.validate():
             lines = ''.join(
-                [lines, Defs.taginfo(level, Tag.WIFE, str(self.xref))]
+                [lines, DefTag.taginfo(level, Tag.WIFE, str(self.xref))]
             )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
+                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -1725,9 +1742,9 @@ class Child(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.phrase, str) and Defs.verify_type(
-            self.xref, IndividualXref
-        )
+        check: bool = DefCheck.verify_type(
+            self.phrase, str
+        ) and DefCheck.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -1735,13 +1752,13 @@ class Child(NamedTuple):
         lines: str = ''
         if str(self.xref) != String.RECORD and self.validate():
             lines = ''.join(
-                [lines, Defs.taginfo(level, Tag.CHIL, str(self.xref))]
+                [lines, DefTag.taginfo(level, Tag.CHIL, str(self.xref))]
             )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        Defs.taginfo(level + 1, Tag.PHRASE, self.phrase),
+                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -1758,12 +1775,12 @@ class LDSOrdinanceDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.date_value, DateValue | None)
-            and Defs.verify_type(self.temp, str)
-            and Defs.verify_type(self.place, Place | None)
-            and Defs.verify_enum(self.status.value, Stat)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.sources, SourceCitation)
+            DefCheck.verify_type(self.date_value, DateValue | None)
+            and DefCheck.verify_type(self.temp, str)
+            and DefCheck.verify_type(self.place, Place | None)
+            and DefCheck.verify_enum(self.status.value, Stat)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, SourceCitation)
         )
         return check
 
@@ -1781,9 +1798,9 @@ class LDSSpouseSealing(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.tag, str) and Defs.verify_type(
-            self.detail, LDSOrdinanceDetail | None
-        )
+        check: bool = DefCheck.verify_type(
+            self.tag, str
+        ) and DefCheck.verify_type(self.detail, LDSOrdinanceDetail | None)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -1802,11 +1819,11 @@ class LDSIndividualOrdinances(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.tag, str)
-            and Defs.verify_type(
+            DefCheck.verify_type(self.tag, str)
+            and DefCheck.verify_type(
                 self.ordinance_detail, LDSOrdinanceDetail | None
             )
-            and Defs.verify_type(self.family_xref, str)
+            and DefCheck.verify_type(self.family_xref, str)
         )
         return check
 
@@ -1839,9 +1856,9 @@ class Identifier(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_enum(self.tag.value, Id)
-            and Defs.verify_type(self.tag_info, str)
-            and Defs.verify_type(self.tag_type, str)
+            DefCheck.verify_enum(self.tag.value, Id)
+            and DefCheck.verify_type(self.tag_info, str)
+            and DefCheck.verify_type(self.tag_type, str)
         )
         return check
 
@@ -1850,10 +1867,10 @@ class Identifier(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.tag != Id.NONE:
-                lines = Defs.taginfo(level, self.tag.value, self.tag_info)
+                lines = DefTag.taginfo(level, self.tag.value, self.tag_info)
             if self.tag != Id.UID:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level + 1, Tag.TYPE, self.tag_type)]
+                    [lines, DefTag.taginfo(level + 1, Tag.TYPE, self.tag_type)]
                 )
             if self.tag == Id.EXID and self.tag_type == '':
                 logging.warning(Msg.EXID_TYPE)
@@ -1868,9 +1885,9 @@ class IndividualEventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.event_detail, EventDetail)
-            and Defs.verify_type(self.age, str)
-            and Defs.verify_type(self.phrase, str)
+            DefCheck.verify_type(self.event_detail, EventDetail)
+            and DefCheck.verify_type(self.age, str)
+            and DefCheck.verify_type(self.phrase, str)
         )
         return check
 
@@ -1890,9 +1907,9 @@ class IndividualAttribute(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_enum(self.tag.value, IndiAttr)
-            and Defs.verify_type(self.tag_type, str)
-            and Defs.verify_type(
+            DefCheck.verify_enum(self.tag.value, IndiAttr)
+            and DefCheck.verify_type(self.tag_type, str)
+            and DefCheck.verify_type(
                 self.event_detail, IndividualEventDetail | None
             )
         )
@@ -1917,14 +1934,14 @@ class IndividualEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.tag, str)
-            and Defs.verify_type(self.tag_type, str)
-            and Defs.verify_type(
+            DefCheck.verify_type(self.tag, str)
+            and DefCheck.verify_type(self.tag_type, str)
+            and DefCheck.verify_type(
                 self.event_detail, IndividualEventDetail | None
             )
-            and Defs.verify_type(self.family_child, str)
-            and Defs.verify_type(self.adoption, str)
-            and Defs.verify_type(self.phrase, str)
+            and DefCheck.verify_type(self.family_child, str)
+            and DefCheck.verify_type(self.adoption, str)
+            and DefCheck.verify_type(self.phrase, str)
         )
         return check
 
@@ -1942,9 +1959,9 @@ class Alias(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.xref, str) and Defs.verify_type(
-            self.phrase, str
-        )
+        check: bool = DefCheck.verify_type(
+            self.xref, str
+        ) and DefCheck.verify_type(self.phrase, str)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -1966,12 +1983,12 @@ class FamilyChild(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.family_xref, str)
-            and Defs.verify_type(self.pedigree, str)
-            and Defs.verify_type(self.pedigree_phrase, str)
-            and Defs.verify_type(self.status, str)
-            and Defs.verify_type(self.status_phrase, str)
-            and Defs.verify_tuple_type(self.notes, Note)
+            DefCheck.verify_type(self.family_xref, str)
+            and DefCheck.verify_type(self.pedigree, str)
+            and DefCheck.verify_type(self.pedigree_phrase, str)
+            and DefCheck.verify_type(self.status, str)
+            and DefCheck.verify_type(self.status_phrase, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -1989,9 +2006,9 @@ class FamilySpouse(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(
+        check: bool = DefCheck.verify_type(
             self.family_xref, str
-        ) and Defs.verify_tuple_type(self.notes, Note)
+        ) and DefCheck.verify_tuple_type(self.notes, Note)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -2008,9 +2025,9 @@ class FileTranslations(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Defs.verify_type(self.path, str) and Defs.verify_type(
-            self.media_type, str
-        )
+        check: bool = DefCheck.verify_type(
+            self.path, str
+        ) and DefCheck.verify_type(self.media_type, str)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -2029,9 +2046,9 @@ class FileTranslations(NamedTuple):
 #     def validate(self) -> bool:
 #         """Validate the stored value."""
 #         check: bool = (
-#             Defs.verify_type(self.text, str)
-#             and Defs.verify_type(self.mime, MediaType)
-#             and Defs.verify_type(self.language, Lang)
+#             DefCheck.verify_type(self.text, str)
+#             and DefCheck.verify_type(self.mime, MediaType)
+#             and DefCheck.verify_type(self.language, Lang)
 #         )
 #         return check
 
@@ -2054,12 +2071,14 @@ class File(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.path, str)
-            and Defs.verify_type(self.media_type, str)
-            and Defs.verify_type(self.media, str)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_type(self.title, str)
-            and Defs.verify_tuple_type(self.file_translations, FileTranslations)
+            DefCheck.verify_type(self.path, str)
+            and DefCheck.verify_type(self.media_type, str)
+            and DefCheck.verify_type(self.media, str)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_type(self.title, str)
+            and DefCheck.verify_tuple_type(
+                self.file_translations, FileTranslations
+            )
         )
         return check
 
@@ -2082,12 +2101,12 @@ class SourceEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.event, str)
-            and Defs.verify_type(self.date_period, str)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_type(self.place, str)
-            and Defs.verify_type(self.agency, str)
-            and Defs.verify_tuple_type(self.notes, Note)
+            DefCheck.verify_type(self.event, str)
+            and DefCheck.verify_type(self.date_period, str)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_type(self.place, str)
+            and DefCheck.verify_type(self.agency, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -2109,11 +2128,11 @@ class NonEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.no, str)
-            and Defs.verify_type(self.date, Date | None)
-            and Defs.verify_type(self.phrase, str)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.sources, SourceEvent)
+            DefCheck.verify_type(self.no, str)
+            and DefCheck.verify_type(self.date, Date | None)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, SourceEvent)
         )
         return check
 
@@ -2153,22 +2172,24 @@ class Family(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, FamilyXref)
-            and Defs.verify_enum(self.resn.value, Resn)
-            and Defs.verify_tuple_type(self.attributes, FamilyAttribute)
-            and Defs.verify_tuple_type(self.events, FamilyEvent)
-            and Defs.verify_type(self.husband, Husband)
-            and Defs.verify_type(self.wife, Wife)
-            and Defs.verify_tuple_type(self.children, Child)
-            and Defs.verify_tuple_type(self.associations, Association)
-            and Defs.verify_tuple_type(self.submitters, SubmitterXref)
-            and Defs.verify_tuple_type(
+            DefCheck.verify_type(self.xref, FamilyXref)
+            and DefCheck.verify_enum(self.resn.value, Resn)
+            and DefCheck.verify_tuple_type(self.attributes, FamilyAttribute)
+            and DefCheck.verify_tuple_type(self.events, FamilyEvent)
+            and DefCheck.verify_type(self.husband, Husband)
+            and DefCheck.verify_type(self.wife, Wife)
+            and DefCheck.verify_tuple_type(self.children, Child)
+            and DefCheck.verify_tuple_type(self.associations, Association)
+            and DefCheck.verify_tuple_type(self.submitters, SubmitterXref)
+            and DefCheck.verify_tuple_type(
                 self.lds_spouse_sealings, LDSSpouseSealing
             )
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.citations, SourceCitation)
-            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
         )
         return check
 
@@ -2178,7 +2199,7 @@ class Family(NamedTuple):
         if self.validate():
             if self.resn != Resn.NONE:
                 lines = ''.join(
-                    [lines, Defs.taginfo(level, Tag.RESN, self.resn.value)]
+                    [lines, DefTag.taginfo(level, Tag.RESN, self.resn.value)]
                 )
             if self.attributes is not None:
                 for attribute in self.attributes:
@@ -2199,7 +2220,7 @@ class Family(NamedTuple):
             if self.submitters is not None:
                 for submitter in self.submitters:
                     lines = ''.join(
-                        [lines, Defs.taginfo(level, Tag.SUBM, submitter)]
+                        [lines, DefTag.taginfo(level, Tag.SUBM, submitter)]
                     )
             if self.lds_spouse_sealings is not None:
                 for sealing in self.lds_spouse_sealings:
@@ -2241,25 +2262,29 @@ class Individual(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, IndividualXref)
-            and Defs.verify_enum(self.resn.value, Resn)
-            and Defs.verify_tuple_type(self.personal_names, PersonalNamePiece)
-            and Defs.verify_enum(self.sex.value, Sex)
-            and Defs.verify_tuple_type(self.attributes, IndividualAttribute)
-            and Defs.verify_tuple_type(self.events, IndividualEvent)
-            and Defs.verify_tuple_type(
+            DefCheck.verify_type(self.xref, IndividualXref)
+            and DefCheck.verify_enum(self.resn.value, Resn)
+            and DefCheck.verify_tuple_type(
+                self.personal_names, PersonalNamePiece
+            )
+            and DefCheck.verify_enum(self.sex.value, Sex)
+            and DefCheck.verify_tuple_type(self.attributes, IndividualAttribute)
+            and DefCheck.verify_tuple_type(self.events, IndividualEvent)
+            and DefCheck.verify_tuple_type(
                 self.lds_individual_ordinances, LDSIndividualOrdinances
             )
-            and Defs.verify_tuple_type(self.families_child, FamilyChild)
-            and Defs.verify_tuple_type(self.submitters, str)
-            and Defs.verify_tuple_type(self.associations, Association)
-            and Defs.verify_tuple_type(self.aliases, Alias)
-            and Defs.verify_tuple_type(self.ancestor_interest, str)
-            and Defs.verify_tuple_type(self.descendent_interest, str)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.sources, Source)
-            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and DefCheck.verify_tuple_type(self.families_child, FamilyChild)
+            and DefCheck.verify_tuple_type(self.submitters, str)
+            and DefCheck.verify_tuple_type(self.associations, Association)
+            and DefCheck.verify_tuple_type(self.aliases, Alias)
+            and DefCheck.verify_tuple_type(self.ancestor_interest, str)
+            and DefCheck.verify_tuple_type(self.descendent_interest, str)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, Source)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
         )
         return check
 
@@ -2282,12 +2307,12 @@ class Multimedia(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, MultimediaXref)
-            and Defs.verify_enum(self.resn.value, Resn)
-            and Defs.verify_tuple_type(self.files, File)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.sources, Source)
+            DefCheck.verify_type(self.xref, MultimediaXref)
+            and DefCheck.verify_enum(self.resn.value, Resn)
+            and DefCheck.verify_tuple_type(self.files, File)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, Source)
         )
         return check
 
@@ -2313,14 +2338,14 @@ class Repository(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, RepositoryXref)
-            and Defs.verify_type(self.name, str)
-            and Defs.verify_type(self.address, Address | None)
-            and Defs.verify_tuple_type(self.emails, str)
-            and Defs.verify_tuple_type(self.faxes, str)
-            and Defs.verify_tuple_type(self.wwws, str)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
+            DefCheck.verify_type(self.xref, RepositoryXref)
+            and DefCheck.verify_type(self.name, str)
+            and DefCheck.verify_type(self.address, Address | None)
+            and DefCheck.verify_tuple_type(self.emails, str)
+            and DefCheck.verify_tuple_type(self.faxes, str)
+            and DefCheck.verify_tuple_type(self.wwws, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
 
@@ -2344,13 +2369,13 @@ class SharedNote(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, SharedNoteXref)
-            and Defs.verify_type(self.text, str)
-            and Defs.verify_enum(self.mime.value, MediaType)
-            and Defs.verify_type(self.language, str)
-            and Defs.verify_tuple_type(self.translations, NoteTranslation)
-            and Defs.verify_tuple_type(self.sources, Source)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
+            DefCheck.verify_type(self.xref, SharedNoteXref)
+            and DefCheck.verify_type(self.text, str)
+            and DefCheck.verify_enum(self.mime.value, MediaType)
+            and DefCheck.verify_type(self.language, str)
+            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
+            and DefCheck.verify_tuple_type(self.sources, Source)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
 
@@ -2378,17 +2403,19 @@ class Source(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, SourceXref)
-            and Defs.verify_type(self.author, str)
-            and Defs.verify_type(self.title, str)
-            and Defs.verify_type(self.abbreviation, str)
-            and Defs.verify_type(self.published, str)
-            and Defs.verify_tuple_type(self.events, SourceEvent)
-            and Defs.verify_tuple_type(self.text, Text)
-            and Defs.verify_tuple_type(self.repositories, Repository)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
-            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            DefCheck.verify_type(self.xref, SourceXref)
+            and DefCheck.verify_type(self.author, str)
+            and DefCheck.verify_type(self.title, str)
+            and DefCheck.verify_type(self.abbreviation, str)
+            and DefCheck.verify_type(self.published, str)
+            and DefCheck.verify_tuple_type(self.events, SourceEvent)
+            and DefCheck.verify_tuple_type(self.text, Text)
+            and DefCheck.verify_tuple_type(self.repositories, Repository)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
         )
         return check
 
@@ -2416,17 +2443,19 @@ class Submitter(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Defs.verify_type(self.xref, SubmitterXref)
-            and Defs.verify_type(self.name, str)
-            and Defs.verify_type(self.address, Address | None)
-            and Defs.verify_tuple_type(self.phones, str)
-            and Defs.verify_tuple_type(self.emails, str)
-            and Defs.verify_tuple_type(self.faxes, str)
-            and Defs.verify_tuple_type(self.wwws, str)
-            and Defs.verify_tuple_type(self.multimedia_links, MultimediaLink)
-            and Defs.verify_tuple_type(self.languages, str)
-            and Defs.verify_tuple_type(self.identifiers, Identifier)
-            and Defs.verify_tuple_type(self.notes, Note)
+            DefCheck.verify_type(self.xref, SubmitterXref)
+            and DefCheck.verify_type(self.name, str)
+            and DefCheck.verify_type(self.address, Address | None)
+            and DefCheck.verify_tuple_type(self.phones, str)
+            and DefCheck.verify_tuple_type(self.emails, str)
+            and DefCheck.verify_tuple_type(self.faxes, str)
+            and DefCheck.verify_tuple_type(self.wwws, str)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
+            and DefCheck.verify_tuple_type(self.languages, str)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -2502,9 +2531,9 @@ class Header(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''.join(
             [
-                Defs.taginfo(level, Tag.HEAD),
-                Defs.taginfo(level + 1, Tag.GEDC),
-                Defs.taginfo(level + 2, Tag.VERS, String.VERSION),
+                DefTag.taginfo(level, Tag.HEAD),
+                DefTag.taginfo(level + 1, Tag.GEDC),
+                DefTag.taginfo(level + 2, Tag.VERS, String.VERSION),
             ]
         )
         return lines

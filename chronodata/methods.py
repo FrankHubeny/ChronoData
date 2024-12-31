@@ -1,6 +1,20 @@
 # chronodata/methods.py
 # Copyright: Licensed under a 3-clause BSD style license - see LICENSE.md
-"""Global methods to build a chronology based on the GEDCOM standard."""
+"""Provide namespaces global methods.
+
+These functions do various forms of checks and formatting
+of output data.
+
+The GEDCOM standard only permits UTF-8 character encodings
+with a set of banned characters to explicitely eliminate
+from input sources.
+
+Reference
+---------
+- [GEDCOM UTF-8 Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
+- [Python 3 UTF How To](https://docs.python.org/3/howto/unicode.html)
+- [Python 3 string](https://docs.python.org/3/library/string.html)
+"""
 
 import contextlib
 import logging
@@ -15,33 +29,26 @@ from chronodata.constants import Cal, String
 from chronodata.enums import Tag
 from chronodata.messages import Msg
 
+__all__ = [
+    'DefCheck',
+    'DefDate',
+    'DefPlace',
+    'DefTag',
+]
 
-class Defs:
-    """Provide a namespace container for global methods.
 
-    These functions do various forms of checks and formatting
-    of output data.
-
-    The GEDCOM standard only permits UTF-8 character encodings
-    with a set of banned characters to explicitely eliminate
-    from input sources.
-
-    Reference
-    ---------
-    - [GEDCOM UTF-8 Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
-    - [Python 3 UTF How To](https://docs.python.org/3/howto/unicode.html)
-    - [Python 3 string](https://docs.python.org/3/library/string.html)
-    """
+class DefPlace:
+    """Global methods to support place data."""
 
     @staticmethod
     def to_decimal(
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> float:
         """Convert degrees, minutes and seconds to a decimal.
-        
+
         Example:
-            >>> from chronodata.methods import Defs
-            >>> to_decimal(49, 17, 50, 10)
+            >>> from chronodata.methods import DefPlace
+            >>> DefPlace.to_decimal(49, 17, 50, 10)
             49.2972222222
 
         See Also:
@@ -60,14 +67,12 @@ class Defs:
         )
 
     @staticmethod
-    def to_dms(
-        position: float, precision: int = 6
-    ) -> tuple[int, int, float]:
+    def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
         """Convert a measurment in decimals to one showing degrees, minutes
         and sconds.
-        
-        >>> from chronodata.methods import Defs
-        >>> to_dms(49.29722222222, 10)
+
+        >>> from chronodata.methods import DefPlace
+        >>> DefPlace.to_dms(49.29722222222, 10)
         (49, 17, 49.999999992)
 
         See Also:
@@ -78,10 +83,16 @@ class Defs:
         seconds_per_degree = 3600
         degrees: int = math.floor(position)
         minutes: int = math.floor((position - degrees) * minutes_per_degree)
-        seconds: float = round((
-            position - degrees - (minutes / minutes_per_degree)
-        ) * seconds_per_degree, precision)
+        seconds: float = round(
+            (position - degrees - (minutes / minutes_per_degree))
+            * seconds_per_degree,
+            precision,
+        )
         return (degrees, minutes, seconds)
+
+
+class DefTag:
+    """Global methods to construct GEDCOM output."""
 
     @staticmethod
     def unique_xref(tuples: tuple[Any], xref: Any, name: Any) -> bool:
@@ -108,13 +119,15 @@ class Defs:
             Note how the initial and ending spaces have been stripped from
             the input value.
             >>> from chronodata.enums import Tag
-            >>> print(Defs.taginfo(1, Tag.NAME, '  Some Name'))
+            >>> from chronodata.methods import DefTag
+            >>> print(DefTag.taginfo(1, Tag.NAME, '  Some Name'))
             1 NAME   Some Name
             <BLANKLINE>
 
             There can also be an extra parameter.
             >>> from chronodata.enums import Tag
-            >>> print(Defs.taginfo(1, Tag.NAME, 'SomeName', 'Other info'))
+            >>> from chronodata.methods import DefTag
+            >>> print(DefTag.taginfo(1, Tag.NAME, 'SomeName', 'Other info'))
             1 NAME SomeName Other info
             <BLANKLINE>
 
@@ -123,8 +136,8 @@ class Defs:
         if extra == '':
             if info == '':
                 return f'{level} {tag.value}\n'
-            return f'{level} {tag.value} {Defs.clean_input(info)}\n'
-        return f'{level} {tag.value} {Defs.clean_input(info)} {Defs.clean_input(extra)}\n'
+            return f'{level} {tag.value} {DefTag.clean_input(info)}\n'
+        return f'{level} {tag.value} {DefTag.clean_input(info)} {DefTag.clean_input(extra)}\n'
 
     @staticmethod
     def contact_info(
@@ -137,16 +150,18 @@ class Defs:
         lines: str = ''
         if phones is not None:
             for phone in phones:
-                lines = ''.join([lines, Defs.taginfo(level, Tag.PHON, phone)])
+                lines = ''.join([lines, DefTag.taginfo(level, Tag.PHON, phone)])
         if emails is not None:
             for email in emails:
-                lines = ''.join([lines, Defs.taginfo(level, Tag.EMAIL, email)])
+                lines = ''.join(
+                    [lines, DefTag.taginfo(level, Tag.EMAIL, email)]
+                )
         if faxes is not None:
             for fax in faxes:
-                lines = ''.join([lines, Defs.taginfo(level, Tag.FAX, fax)])
+                lines = ''.join([lines, DefTag.taginfo(level, Tag.FAX, fax)])
         if wwws is not None:
             for www in wwws:
-                lines = ''.join([lines, Defs.taginfo(level, Tag.WWW, www)])
+                lines = ''.join([lines, DefTag.taginfo(level, Tag.WWW, www)])
         return lines
 
     @staticmethod
@@ -155,19 +170,17 @@ class Defs:
             for item in items:
                 lines = ''.join([lines, item.ged(level)])
         return lines
-    
+
     @staticmethod
-    def empty_to_str(
-        lines: str, level: int, tag: Tag
-    ) -> str:
-        return ''.join([lines, Defs.taginfo(level, tag)])
+    def empty_to_str(lines: str, level: int, tag: Tag) -> str:
+        return ''.join([lines, DefTag.taginfo(level, tag)])
 
     @staticmethod
     def str_to_str(
         lines: str, level: int, tag: Tag, info: str, extra: str = ''
     ) -> str:
         if info != '':
-            return ''.join([lines, Defs.taginfo(level, tag, info, extra)])
+            return ''.join([lines, DefTag.taginfo(level, tag, info, extra)])
         return ''
 
     @staticmethod
@@ -196,6 +209,10 @@ class Defs:
 
         return re.sub(String.BANNED, '', input)
 
+
+class DefCheck:
+    """Global methods supporting validation of data."""
+
     @staticmethod
     def verify_type(
         value: Any | None, value_type: Any, validate: bool = True
@@ -217,7 +234,7 @@ class Defs:
         """Check if each member of the tuple has the specified type."""
         if name != [] and name is not None:
             for value in name:
-                Defs.verify_type(value, value_type)
+                DefCheck.verify_type(value, value_type)
         return True
 
     @staticmethod
@@ -237,7 +254,7 @@ class Defs:
     @staticmethod
     def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
         """Check if the value is in the proper dictionary."""
-        Defs.verify_type(value, str)
+        DefCheck.verify_type(value, str)
         if value != '' and value not in dictionary:
             raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
         return True
@@ -264,6 +281,10 @@ class Defs:
         if value < 0:
             raise ValueError(Msg.NEGATIVE_ERROR.format(value))
         return True
+
+
+class DefDate:
+    """Global methods supporting date processing."""
 
     @staticmethod
     def ged_date(
@@ -384,15 +405,15 @@ class Defs:
 
         Example
         -------
-        >>> from chronodata.methods import Defs  # doctest: +ELLIPSIS
-        >>> print(Defs.now())
+        >>> from chronodata.methods import DefDate  # doctest: +ELLIPSIS
+        >>> print(DefDate.now())
         2 DATE ...
         3 TIME ...
         <BLANKLINE>
 
         Changing the level adjusts the level numbers for the two returned strings.
 
-        >>> print(Defs.now(level=5))
+        >>> print(DefDate.now(level=5))
         5 DATE ...
         6 TIME ...
         <BLANKLINE>
@@ -405,11 +426,11 @@ class Defs:
         """
         date: str
         time: str
-        date, time = Defs.ged_date()
+        date, time = DefDate.ged_date()
         return ''.join(
             [
-                Defs.taginfo(level, Tag.DATE, date),
-                Defs.taginfo(level + 1, Tag.TIME, time),
+                DefTag.taginfo(level, Tag.DATE, date),
+                DefTag.taginfo(level + 1, Tag.TIME, time),
             ]
         )
 
@@ -431,4 +452,4 @@ class Defs:
         - `source`: the method creating the source record (SOUR)
         - `submitter`: the method creating the submitter record (SUBM)
         """
-        return ''.join([Defs.taginfo(1, Tag.CREA), Defs.now()])
+        return ''.join([DefTag.taginfo(1, Tag.CREA), DefDate.now()])

@@ -9,14 +9,10 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore[import-untyped]  
 
-from chronodata.constants import (
-    Arg,
-    String,
-)
-from chronodata.enums import Tag
-from chronodata.messages import Msg
+from chronodata.constants import String
+from chronodata.messages import Column, Msg
 from chronodata.readwrite import Base
 
 
@@ -68,51 +64,47 @@ class Challenge:
                 Column.DURATION,
             ]
         self.chron_data: list[list[Any]] = []
-        for chronology in self.chronologies:
-            begin_event_date = chronology.chron[Tag.EVEN][begin_event][
-                Tag.DATE
-            ]
-            begin_years_since = chronology.date_diff(
-                begin_event_date, str(today)
-            )
-            if end_event != '':
-                end_event_date = chronology.chron[Tag.EVEN][end_event][
-                    Tag.DATE
-                ]
-                begin_end_duration = chronology.date_diff(
-                    begin_event_date, end_event_date
-                )
-                self.chron_data.append(
-                    [
-                        begin_event_date,
-                        end_event_date,
-                        begin_end_duration,
-                    ]
-                )
-            else:
-                self.chron_data.append([begin_event_date, begin_years_since])
+        # for chronology in self.chronologies:
+        #     begin_event_date = chronology.chron[Tag.EVEN][begin_event][Tag.DATE]
+        #     #begin_years_since = chronology.date_diff(
+        #     #    begin_event_date, str(today)
+        #     #)
+        #     if end_event != '':
+        #         end_event_date = chronology.chron[Tag.EVEN][end_event][Tag.DATE]
+        #         #begin_end_duration = chronology.date_diff(
+        #         #    begin_event_date, end_event_date
+        #         #)
+        #         # self.chron_data.append(
+        #         #     [
+        #         #         begin_event_date,
+        #         #         end_event_date,
+        #         #         begin_end_duration,
+        #         #     ]
+        #         # )
+        #     else:
+        #         self.chron_data.append([begin_event_date, begin_years_since])
         self.challenge: dict[str, Any] = {
-            Tag.NAME: self.name,
-            Tag.CHRONS: self.chrons,
-            Tag.TESTCASES: self.test_cases,
-            Tag.DATA: self.chron_data,
-            Tag.CHRON_NAMES: self.chron_names,
+            String.NAME: self.name,
+            String.CHRONS: self.chrons,
+            String.TESTCASES: self.test_cases,
+            String.DATA: self.chron_data,
+            String.CHRON_NAMES: self.chron_names,
         }
         if self.name == '' and self.filename == '':
             logging.info(Msg.NAME_OR_FILENAME)
         elif self.filename != '':
-            with Path.open(Path(self.filename), Arg.READ) as file:
-                self.challenge = json.load(file)
-                file.close()
-            self.name = self.challenge[Tag.NAME]
-            for file in self.challenge[Tag.CHRONS]:
+            with Path.open(Path(self.filename), String.READ) as openfile:
+                self.challenge = json.load(openfile)
+                openfile.close()
+            self.name = self.challenge[String.NAME]
+            for file in self.challenge[String.CHRONS]:
                 self.chrons.append(file)
                 self.chronologies.append(Base(filename=file, log=False))
-            for test_item in self.challenge[Tag.TESTCASES]:
+            for test_item in self.challenge[String.TESTCASES]:
                 self.test_cases.append(test_item)
-            for data_list in self.challenge[Tag.DATA]:
+            for data_list in self.challenge[String.DATA]:
                 self.chron_data.append(data_list)
-            for chron_name in self.challenge[Tag.CHRON_NAMES]:
+            for chron_name in self.challenge[String.CHRON_NAMES]:
                 self.chron_names.append(chron_name)
             logging.info(
                 Msg.CHALLENGE_LOADED.format(self.name, self.chron_names)
@@ -147,9 +139,7 @@ class Challenge:
         self.test_cases.append([item, age, color, line])
         logging.info(Msg.ITEM_ADDED.format(item))
 
-    def save(
-        self, filename: str = '', overwrite: bool = False
-    ) -> None:
+    def save(self, filename: str = '', overwrite: bool = False) -> None:
         if filename == '':
             filename = self.filename
         else:
@@ -157,7 +147,7 @@ class Challenge:
         if Path.exists(Path(filename)) and not overwrite:
             logging.info(Msg.FILE_EXISTS.format(filename))
         else:
-            with Path.open(Path(self.filename), Arg.WRITE) as file:
+            with Path.open(Path(self.filename), String.WRITE) as file:
                 json.dump(self.challenge, file)
                 file.close()
             logging.info(Msg.CHALLENGE_SAVED.format(self.name, self.filename))
@@ -217,7 +207,7 @@ class Challenge:
                 return pd.DataFrame(
                     data=centers,
                     columns=[self.name],
-                    #index=[Column.MEAN, Column.STD, Column.MEDIAN, Column.SKEW],
+                    # index=[Column.MEAN, Column.STD, Column.MEDIAN, Column.SKEW],
                 )
 
     def chronology_data(self) -> pd.DataFrame:
@@ -264,7 +254,7 @@ class Challenge:
             plt.axhline(
                 y=test[1], color=test[2], linestyle=test[3], label=test[0]
             )
-        plt.legend(loc=Arg.LOCATION)
+        plt.legend(loc=String.LOCATION)
 
         # Display the chart with both bars and tests
         plt.show()
