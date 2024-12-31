@@ -140,15 +140,11 @@ class DefTag:
         return f'{level} {tag.value} {DefTag.clean_input(info)} {DefTag.clean_input(extra)}\n'
 
     @staticmethod
-    def taglanguage(
-        level: int,
-        language: str,
-        dictname: dict[str, str]
-    ) -> str:
+    def taglanguage(level: int, language: str, dictname: dict[str, str]) -> str:
         if language in dictname.values():
             return DefTag.taginfo(level, Tag.LANG, language)
         return DefTag.taginfo(level, Tag.LANG, dictname[language])
-        
+
     @staticmethod
     def contact_info(
         level: int = 1,
@@ -272,6 +268,21 @@ class DefCheck:
         ):
             raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
         return True
+    
+    @staticmethod
+    def get_dict_key_values(query: str, dictionary: dict[str, str]) -> list[str]:
+        """Return all items found in the dictionary matching either key or value."""
+        found: list[str] = []
+        if query in dictionary:
+            found.append(''.join([query, ': ', dictionary[query]]))
+        for item in dictionary.items():
+            if query == item[1]:
+                found.append(''.join([item[0], ': ', item[1]]))
+        # if query in dictionary.values():
+        #     for key in dictionary.items():
+        #         if dictionary[key] == query:
+        #             found.append(''.join([str(key), ': ', str(query)]))
+        return found
 
     @staticmethod
     def verify_not_default(value: Any, default: Any) -> bool:
