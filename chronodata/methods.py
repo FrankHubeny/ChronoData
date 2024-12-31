@@ -140,6 +140,16 @@ class DefTag:
         return f'{level} {tag.value} {DefTag.clean_input(info)} {DefTag.clean_input(extra)}\n'
 
     @staticmethod
+    def taglanguage(
+        level: int,
+        language: str,
+        dictname: dict[str, str]
+    ) -> str:
+        if language in dictname.values():
+            return DefTag.taginfo(level, Tag.LANG, language)
+        return DefTag.taginfo(level, Tag.LANG, dictname[language])
+        
+    @staticmethod
     def contact_info(
         level: int = 1,
         phones: Any = None,
@@ -255,7 +265,11 @@ class DefCheck:
     def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
         """Check if the value is in the proper dictionary."""
         DefCheck.verify_type(value, str)
-        if value != '' and value not in dictionary:
+        if (
+            value != ''
+            and value not in dictionary
+            and value not in dictionary.values()
+        ):
             raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
         return True
 

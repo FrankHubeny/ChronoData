@@ -115,7 +115,9 @@ class Address(NamedTuple):
         if self.validate():
             if self.address != '':
                 split_address: list[str] = self.address.split('\n')
-                lines = DefTag.str_to_str(lines, level, Tag.ADDR, split_address[0])
+                lines = DefTag.str_to_str(
+                    lines, level, Tag.ADDR, split_address[0]
+                )
                 for line in split_address[1:]:
                     lines = DefTag.str_to_str(lines, level, Tag.CONT, line)
             lines = DefTag.str_to_str(lines, level + 1, Tag.CITY, self.city)
@@ -490,9 +492,7 @@ class NameTranslation(NamedTuple):
             lines = ''.join(
                 [
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
-                    DefTag.taginfo(
-                        level + 1, Tag.LANG, Lang.CODE[self.language]
-                    ),
+                    DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                 ]
             )
             if self.name_pieces is not None:
@@ -556,9 +556,7 @@ class NoteTranslation(NamedTuple):
                     lines,
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
                     DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    DefTag.taginfo(
-                        level + 1, Tag.LANG, Lang.CODE[self.language]
-                    ),
+                    DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                 ]
             )
         return lines
@@ -919,9 +917,7 @@ class Note(NamedTuple):
                 lines = ''.join(
                     [
                         lines,
-                        DefTag.taginfo(
-                            level + 1, Tag.LANG, Lang.CODE[self.language]
-                        ),
+                        DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                     ]
                 )
             if self.translations is not None:
