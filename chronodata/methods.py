@@ -24,6 +24,7 @@ from enum import Enum
 from typing import Any
 
 import numpy as np
+import pandas as pd  # type: ignore[import-untyped]
 
 from chronodata.constants import Cal, String
 from chronodata.enums import Tag
@@ -269,6 +270,11 @@ class DefCheck:
             raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
         return True
     
+    @staticmethod
+    def display_dictionary(dictionary: dict[str, str]) -> pd.DataFrame:
+        pd.set_option('display.max_rows', None)
+        return pd.DataFrame.from_dict(dictionary, orient='index', columns=['Value'])
+
     @staticmethod
     def get_dict_key_values(query: str, dictionary: dict[str, str]) -> list[str]:
         """Return all items found in the dictionary matching either key or value."""

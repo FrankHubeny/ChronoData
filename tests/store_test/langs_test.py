@@ -11,12 +11,15 @@ from chronodata.langs import Lang
 from chronodata.methods import DefCheck, DefTag
 
 testdata = [
-    ('english', 'en'),
+    ('english1', 'en'),
+    ('english2', 'eng'),
     ('compare', True),
     ('code', '1 LANG en\n'),
     ('language', '1 LANG en\n'),
-    ('english_keyvalues[0]', 'English: en'),
+    ('english_keyvalues1[0]', 'English: en'),
     ('english_keyvalues2[0]', 'English: en'),
+    ('english_keyvalues3[0]', 'English: eng'),
+    ('english_keyvalues4[0]', 'English: eng'),
     ('len(cu_keyvalues)', 5),
     ('len(none_keyvalues)', 0),
 ]
@@ -25,7 +28,8 @@ testdata = [
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_langs(test_input: str, expected: str | int | bool) -> None:
     # Retrieve the code for English.
-    english = Lang.CODE['English']  # noqa: F841
+    english1 = Lang.CODE['English']  # noqa: F841
+    english2 = Lang.CODE3['English']  # noqa: F841
 
     # Some keys have the same value.
     compare: bool = Lang.CODE['Church Slavic'] == Lang.CODE['Old Slavonic']  # noqa: F841
@@ -35,8 +39,10 @@ def test_langs(test_input: str, expected: str | int | bool) -> None:
     language: str = DefTag.taglanguage(1, 'English', Lang.CODE)  # noqa: F841
     
     # Check dictionary query method.
-    english_keyvalues = DefCheck.get_dict_key_values('English', Lang.CODE)  # noqa: F841
+    english_keyvalues1 = DefCheck.get_dict_key_values('English', Lang.CODE)  # noqa: F841
     english_keyvalues2 = DefCheck.get_dict_key_values('en', Lang.CODE)  # noqa: F841
+    english_keyvalues3 = DefCheck.get_dict_key_values('English', Lang.CODE3)  # noqa: F841
+    english_keyvalues4 = DefCheck.get_dict_key_values('eng', Lang.CODE3)  # noqa: F841
     cu_keyvalues = DefCheck.get_dict_key_values('cu', Lang.CODE)  # noqa: F841
     none_keyvalues = DefCheck.get_dict_key_values('cccccc', Lang.CODE)  # noqa: F841
 
