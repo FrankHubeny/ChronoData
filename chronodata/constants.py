@@ -28,6 +28,7 @@ class Choice:
     ADOP: frozenset[str] = frozenset({'HUSB', 'WIFE', 'BOTH'})
     APPROXIMATE_DATE: frozenset[str] = frozenset({'ABT', 'CAL', 'EST'})
     EAST_WEST: frozenset[str] = frozenset({'E', 'W'})
+    EXTENSION_TAG: frozenset[str] = frozenset({'LANG_',})
     EVENT: frozenset[str] = frozenset(
         {
             'ADOP',
@@ -346,6 +347,7 @@ class String:
     INT: str = 'int'
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
+    LANG_URI: str = 'http://'
     LESS_THAN: str = '<'
     LOCATION: str = 'lower right'
     MAX_MONTHS: str = 'Max Months'
@@ -362,6 +364,7 @@ class String:
     T: str = 'T'
     TESTCASES: str = 'TEST CASES'
     UNDERLINE: str = '_'
+    UNDETERMINED: str = 'und'
     VERSION: str = '7.0'
     VOID: str = '@VOID@'
     WEEK: str = 'w'

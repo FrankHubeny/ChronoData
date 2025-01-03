@@ -14,11 +14,15 @@ class Lang:
     ISO 639-2 codes.  This is available in the CODE3 dictionary.
 
     Reference:
+        - [Github JSON version](https://github.com/mattcg/language-subtag-registry)
         - [Library of Congress Data](https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt)
         - [ISO 639-1 and 639-2 Library of Congress](https://www.loc.gov/standards/iso639-2/langhome.html#top)
         - [ISO-1 Maintenance Agency](http://www.infoterm.info/standardization/iso_639_1_2002.php)
         - [ISO Language Standards](https://www.iso.org/iso-639-language-code)
-        - [GEDCOM Standard]()
+        - [IANA Language-Subtag Registry](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) 
+        - [BCP-47](https://www.rfc-editor.org/info/bcp47)
+        - [GEDCOM HEAD-LANG](https://gedcom.io/terms/v7/HEAD-LANG)
+        - [GEDCOM LANG](https://gedcom.io/terms/v7/LANG)
     """
 
     CODE: ClassVar = {

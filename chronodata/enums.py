@@ -432,6 +432,7 @@ class Tag(Enum):
     INDI = 'INDI'
     INIL = 'INIL'
     LANG = 'LANG'
+    LANG_ = '_LANG'
     LATI = 'LATI'
     LEFT = 'LEFT'
     LONG = 'LONG'

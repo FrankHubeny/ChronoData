@@ -140,11 +140,11 @@ class DefTag:
             return f'{level} {tag.value} {DefTag.clean_input(info)}\n'
         return f'{level} {tag.value} {DefTag.clean_input(info)} {DefTag.clean_input(extra)}\n'
 
-    @staticmethod
-    def taglanguage(level: int, language: str, dictname: dict[str, str]) -> str:
-        if language in dictname.values():
-            return DefTag.taginfo(level, Tag.LANG, language)
-        return DefTag.taginfo(level, Tag.LANG, dictname[language])
+    # @staticmethod
+    # def taglanguage(level: int, language: str, dictname: dict[str, str]) -> str:
+    #     if language in dictname.values():
+    #         return DefTag.taginfo(level, Tag.LANG, language)
+    #     return DefTag.taginfo(level, Tag.LANG, dictname[language])
 
     @staticmethod
     def contact_info(

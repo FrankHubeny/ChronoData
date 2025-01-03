@@ -33,7 +33,6 @@ from chronodata.enums import (
     Stat,
     Tag,
 )
-from chronodata.langs import Lang
 from chronodata.messages import Msg
 from chronodata.methods import DefCheck, DefTag
 from chronodata.records import (
@@ -346,8 +345,8 @@ class PersonalName(NamedTuple):
         >>> from chronodata.enums import NameType
         >>> adam_note = Note('Here is a place to add more information.')
         >>> adam_nickname = PersonalNamePiece(Tag.NICK, 'הָֽאָדָ֖ם')
-        >>> adam_english = NameTranslation('Adam', 'English')
-        >>> adam_english_nickname = NameTranslation('the man', 'English')
+        >>> adam_english = NameTranslation('Adam', 'en')
+        >>> adam_english_nickname = NameTranslation('the man', 'en')
         >>> adam = PersonalName(
         ...     name='אָדָ֛ם',
         ...     type=NameType.OTHER,
@@ -442,6 +441,12 @@ class PersonalName(NamedTuple):
 class NameTranslation(NamedTuple):
     """Store, validate and display name translations.
 
+    The BCP 47 language tag is a hyphenated list of subtags.  
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use. 
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
     Example:
         In this example, the name "Joe" will be translated as "喬" in Chinese.
         Although the `ged` method to display preforms a validation first,
@@ -449,29 +454,31 @@ class NameTranslation(NamedTuple):
         the GEDCOM standard.  No personal name pieces will be displayed.
         >>> from chronodata.store import NameTranslation
         >>> joe_in_chinese = '喬'
-        >>> language = 'Chinese'
+        >>> language = 'cmn'
         >>> nt = NameTranslation(joe_in_chinese, language)
         >>> nt.validate()
         True
         >>> print(nt.ged(1))
         1 TRAN 喬
-        2 LANG zh
+        2 LANG cmn
         <BLANKLINE>
 
     Args:
         translation: the text of the translation.
-        language: the name of the language.
+        language: the BCP 47 language tag.
         name_pieces: an optional tuple of PersonalNamePieces.
 
     Returns:
         A GEDCOM string storing this data.
 
     Reference:
+        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Pesonal Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
     """
 
     translation: str = ''
-    language: str = ''
+    language: str = String.UNDETERMINED
     name_pieces: Any = None
 
     def validate(self) -> bool:
@@ -479,8 +486,8 @@ class NameTranslation(NamedTuple):
         check: bool = (
             DefCheck.verify_type(self.translation, str)
             and DefCheck.verify_not_default(self.translation, '')
-            and DefCheck.verify_dict_key(self.language, Lang.CODE)
-            and DefCheck.verify_not_default(self.language, '')
+            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            # and DefCheck.verify_not_default(self.language, '')
             and DefCheck.verify_tuple_type(self.name_pieces, PersonalNamePiece)
         )
         return check
@@ -492,7 +499,7 @@ class NameTranslation(NamedTuple):
             lines = ''.join(
                 [
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
-                    DefTag.taglanguage(level + 1, self.language, Lang.CODE),
+                    DefTag.taginfo(level + 1, Tag.LANG, self.language),
                 ]
             )
             if self.name_pieces is not None:
@@ -505,37 +512,45 @@ class NoteTranslation(NamedTuple):
     """Store, validate and display the optional note tranlation section of
     the GEDCOM Note Structure.
 
+    The BCP 47 language tag is a hyphenated list of subtags.  
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use. 
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
     Example:
         This example will translation "This is a note." into the Arabic "هذه ملاحظة.".
         >>> from chronodata.store import NoteTranslation
         >>> from chronodata.enums import MediaType
         >>> arabic_text = 'هذه ملاحظة.'
         >>> mime = MediaType.TEXT_HTML
-        >>> language = 'Arabic'
+        >>> language = 'afb'
         >>> nt = NoteTranslation(arabic_text, mime, language)
         >>> nt.validate()
         True
         >>> print(nt.ged(1))
         1 TRAN هذه ملاحظة.
         2 MIME TEXT_HTML
-        2 LANG ar
+        2 LANG afb
         <BLANKLINE>
 
     Args:
         translation: the text of the translation for the note.
         mime: the mime type of the translation.
-        language: the language of the translation.
+        language: the BCP 47 language tag of the translation.
 
     Returns:
         A GEDCOM string storing this data.
 
     Reference:
+        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)]
     """
 
     translation: str = ''
     mime: MediaType = MediaType.NONE
-    language: str = ''
+    language: str = String.UNDETERMINED
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -543,7 +558,7 @@ class NoteTranslation(NamedTuple):
             DefCheck.verify_type(self.translation, str)
             and DefCheck.verify_not_default(self.translation, '')
             and DefCheck.verify_enum(self.mime.value, MediaType)
-            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
         )
         return check
 
@@ -556,7 +571,8 @@ class NoteTranslation(NamedTuple):
                     lines,
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
                     DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    DefTag.taglanguage(level + 1, self.language, Lang.CODE),
+                    DefTag.taginfo(level + 1, Tag.LANG, self.language)
+                    # DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                 ]
             )
         return lines
@@ -684,23 +700,30 @@ class SourceRepositoryCitation(NamedTuple):
 class Text(NamedTuple):
     """_summary_
 
+    The BCP 47 language tag is a hyphenated list of subtags.  
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use. 
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
     Examples:
 
     Args:
         text: the text being added.
         mime: the media type of the text.
-        language: the language the text is in.
+        language: the BCP 47 language tag for the text.
 
     Returns:
         A GEDCOM string storing this data.
 
     Reference:
-        []()
+        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     """
 
     text: str = ''
     mime: MediaType = MediaType.NONE
-    language: str = ''
+    language: str = String.UNDETERMINED
 
 
 class SourceData(NamedTuple):
@@ -827,6 +850,12 @@ class SNote(NamedTuple):
 class Note(NamedTuple):
     """Store, validate and display a note substructure of the GEDCOM standard.
 
+    The BCP 47 language tag is a hyphenated list of subtags.  
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use. 
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
     Example:
         This example is a note without other information.
         >>> from chronodata.store import Note
@@ -837,7 +866,7 @@ class Note(NamedTuple):
 
         This example uses the Hebrew language translating "This is my note." as "זו ההערה שלי."
         The translation comes from [Google Translate](https://translate.google.com/?sl=en&tl=iw&text=This%20is%20my%20note.&op=translate).
-        >>> hebrew_note = Note('זו ההערה שלי.', language='Hebrew')
+        >>> hebrew_note = Note('זו ההערה שלי.', language='he')
         >>> print(hebrew_note.ged(1))
         1 NOTE זו ההערה שלי.
         2 LANG he
@@ -846,14 +875,14 @@ class Note(NamedTuple):
         The next example adds translations of the previous example to the note.
         >>> from chronodata.enums import MediaType
         >>> english_translation = NoteTranslation(
-        ...     'This is my note.', MediaType.TEXT_PLAIN, 'English'
+        ...     'This is my note.', MediaType.TEXT_PLAIN, 'en'
         ... )
         >>> urdu_translation = NoteTranslation(
-        ...     'یہ میرا نوٹ ہے۔', MediaType.TEXT_PLAIN, 'Urdu'
+        ...     'یہ میرا نوٹ ہے۔', MediaType.TEXT_PLAIN, 'ur'
         ... )
         >>> hebrew_note_with_translations = Note(
         ...     'זו ההערה שלי.',
-        ...     language='Hebrew',
+        ...     language='he',
         ...     translations=(
         ...         english_translation,
         ...         urdu_translation,
@@ -873,7 +902,7 @@ class Note(NamedTuple):
     Args:
         text: the text of the note.
         mime: the optional media type of the note.
-        language: the optional language used in the note.
+        language: the optional BCP 47 language tag for the note.
         translations: an optional tuple of translations of the text.
         citations: an optional tuple of translations of the text.
 
@@ -881,12 +910,14 @@ class Note(NamedTuple):
         A GEDCOM string storing this data.
 
     Reference:
+        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
     """  # noqa: RUF002
 
     text: str = ''
     mime: MediaType = MediaType.NONE
-    language: str = ''
+    language: str = String.UNDETERMINED
     translations: Any = None
     citations: Any = None
 
@@ -895,7 +926,7 @@ class Note(NamedTuple):
         check: bool = (
             DefCheck.verify_not_default(self.text, '')
             and DefCheck.verify_enum(self.mime.value, MediaType)
-            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
             and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
             and DefCheck.verify_tuple_type(self.citations, SourceCitation)
         )
@@ -913,13 +944,8 @@ class Note(NamedTuple):
                         DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
                     ]
                 )
-            if self.language != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taglanguage(level + 1, self.language, Lang.CODE),
-                    ]
-                )
+            if self.language != String.UNDETERMINED:
+                lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
             if self.translations is not None:
                 for translation in self.translations:
                     lines = ''.join([lines, translation.ged(level + 1)])
@@ -1083,7 +1109,7 @@ class PlaceTranslation(NamedTuple):
     """
 
     translation: str = ''
-    language: str = ''
+    language: str = String.UNDETERMINED
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1097,9 +1123,7 @@ class PlaceTranslation(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = DefTag.str_to_str(lines, level, Tag.TRAN, self.translation)
-            lines = DefTag.str_to_str(
-                lines, level + 1, Tag.LANG, Lang.CODE[self.language]
-            )
+            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
         return lines
 
 
@@ -1158,6 +1182,12 @@ class Place(NamedTuple):
     One would fill in the values for city, county, state and country or assign other
     regions with their names if the default is not relevant.
 
+    The BCP 47 language tag is a hyphenated list of subtags.  
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use. 
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
     Example:
         Below are a couple of place names.  The first uses the default form names.
         The second alters some of the form names to fit the place and provides a translation
@@ -1170,9 +1200,9 @@ class Place(NamedTuple):
         ... )
         >>> place = Place(
         ...     place=bechyne_cs,
-        ...     language='Czech',
+        ...     language='cs',
         ...     translations=[
-        ...         PlaceTranslation(bechyne_en, 'English'),
+        ...         PlaceTranslation(bechyne_en, 'en'),
         ...     ],
         ...     map=Map('N', 49.297222, 'E', 14.470833),
         ... )
@@ -1192,7 +1222,7 @@ class Place(NamedTuple):
 
     Args:
         place_form: A dictionary representing the place from smallest to largest area.
-        language: The language of the place names.
+        language: The BCP 47 langauage tag of the place names.
         translation: A list of translations of the place names.
         maps: A list of references to maps of the place.
         exid: Identifiers associated with the place.
@@ -1200,13 +1230,15 @@ class Place(NamedTuple):
 
 
     Reference:
+        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
     """
 
     place: str = ''
     form: str = 'City, Country, State, Country'
-    language: str = ''
+    language: str = String.UNDETERMINED
     translations: list[str] = []  # noqa: RUF012
     map: Map = Map('N', 90, 'E', 0)
     exids: list[Exid] = []  # noqa: RUF012
@@ -1217,7 +1249,7 @@ class Place(NamedTuple):
         check: bool = (
             DefCheck.verify_type(self.place, str)
             and DefCheck.verify_type(self.form, str)
-            and DefCheck.verify_dict_key(self.language, Lang.CODE)
+            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
             and DefCheck.verify_tuple_type(self.translations, PlaceTranslation)
             and DefCheck.verify_type(self.map, Map)
             and DefCheck.verify_tuple_type(self.exids, Exid)
@@ -1231,9 +1263,7 @@ class Place(NamedTuple):
         if self.validate():
             lines = DefTag.str_to_str(lines, level, Tag.PLAC, self.place)
             lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, self.form)
-            lines = DefTag.str_to_str(
-                lines, level + 1, Tag.LANG, Lang.CODE[self.language]
-            )
+            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
             lines = DefTag.list_to_str(lines, level + 1, self.translations)
             lines = ''.join([lines, self.map.ged(3)])
             lines = DefTag.list_to_str(lines, level + 1, self.exids)
@@ -2357,7 +2387,7 @@ class SharedNote(NamedTuple):
     xref: SharedNoteXref = SharedNoteXref(String.RECORD)
     text: str = ''
     mime: MediaType = MediaType.NONE
-    language: Lang = Lang.CODE['NONE']
+    language: str = String.UNDETERMINED
     translations: Any = None
     sources: Any = None
     identifiers: Any = None
@@ -2463,6 +2493,33 @@ class Submitter(NamedTuple):
         return lines
 
 
+class Schema(NamedTuple):
+    """Store, validate and display schema information.
+
+    Examples:
+
+
+    Args:
+        tag: The tag used for the schema information.
+        url: The url defining the payload of the tag.
+
+    Returns:
+        A string representing a GEDCOM line for this tag.
+
+    """
+
+    tag: Tag = Tag.NONE
+    url: str = ''
+
+    def validate(self) -> bool:
+        check: bool = (
+            DefCheck.verify_type(self.tag, Tag)
+            and DefCheck.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
+            and DefCheck.verify_type(self.url, str)
+        )
+        return check
+
+
 class Header(NamedTuple):
     """Hold data for the GEDCOM header special record.
 
@@ -2514,7 +2571,7 @@ class Header(NamedTuple):
     date: Date = Date(0, 0, 0)
     time: Time = Time(0, 0, 0)
     copr: str = ''
-    language: Lang = Lang.CODE['NONE']
+    language: str = ''
     place: Any = None
     note: Any = None
 
@@ -2532,4 +2589,7 @@ class Header(NamedTuple):
                 DefTag.taginfo(level + 2, Tag.VERS, String.VERSION),
             ]
         )
-        return lines
+        if self.schemas is not None:
+            lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
+            #lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
+        return lines  
