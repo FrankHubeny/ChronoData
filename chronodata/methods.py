@@ -172,10 +172,13 @@ class DefTag:
         return lines
 
     @staticmethod
-    def list_to_str(lines: str, level: int, items: list[Any]) -> str:
+    def list_to_str(lines: str, level: int, items: list[Any], flag: bool = False) -> str:
         if len(items) > 0:
             for item in items:
-                lines = ''.join([lines, item.ged(level)])
+                if flag:
+                    lines = ''.join([lines, item.ged(level, flag)])
+                else:
+                    lines = ''.join([lines, item.ged(level)])
         return lines
 
     @staticmethod

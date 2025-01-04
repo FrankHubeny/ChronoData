@@ -441,9 +441,9 @@ class PersonalName(NamedTuple):
 class NameTranslation(NamedTuple):
     """Store, validate and display name translations.
 
-    The BCP 47 language tag is a hyphenated list of subtags.  
+    The BCP 47 language tag is a hyphenated list of subtags.
     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use. 
+    guide will help one make a decision on which tags to use.
     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     can assist with finding and checking the language tag one would like to use.
 
@@ -512,9 +512,9 @@ class NoteTranslation(NamedTuple):
     """Store, validate and display the optional note tranlation section of
     the GEDCOM Note Structure.
 
-    The BCP 47 language tag is a hyphenated list of subtags.  
+    The BCP 47 language tag is a hyphenated list of subtags.
     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use. 
+    guide will help one make a decision on which tags to use.
     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     can assist with finding and checking the language tag one would like to use.
 
@@ -571,7 +571,7 @@ class NoteTranslation(NamedTuple):
                     lines,
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
                     DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    DefTag.taginfo(level + 1, Tag.LANG, self.language)
+                    DefTag.taginfo(level + 1, Tag.LANG, self.language),
                     # DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                 ]
             )
@@ -700,9 +700,9 @@ class SourceRepositoryCitation(NamedTuple):
 class Text(NamedTuple):
     """_summary_
 
-    The BCP 47 language tag is a hyphenated list of subtags.  
+    The BCP 47 language tag is a hyphenated list of subtags.
     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use. 
+    guide will help one make a decision on which tags to use.
     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     can assist with finding and checking the language tag one would like to use.
 
@@ -850,9 +850,9 @@ class SNote(NamedTuple):
 class Note(NamedTuple):
     """Store, validate and display a note substructure of the GEDCOM standard.
 
-    The BCP 47 language tag is a hyphenated list of subtags.  
+    The BCP 47 language tag is a hyphenated list of subtags.
     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use. 
+    guide will help one make a decision on which tags to use.
     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     can assist with finding and checking the language tag one would like to use.
 
@@ -915,7 +915,7 @@ class Note(NamedTuple):
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
     """  # noqa: RUF002
 
-    text: str = ''
+    text: str = String.EMPTY
     mime: MediaType = MediaType.NONE
     language: str = String.UNDETERMINED
     translations: Any = None
@@ -945,7 +945,9 @@ class Note(NamedTuple):
                     ]
                 )
             if self.language != String.UNDETERMINED:
-                lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.LANG, self.language
+                )
             if self.translations is not None:
                 for translation in self.translations:
                     lines = ''.join([lines, translation.ged(level + 1)])
@@ -1091,7 +1093,7 @@ class Exid(NamedTuple):
         )
 
 
-class PlaceTranslation(NamedTuple):
+class PlaceName(NamedTuple):
     """Store, validate and display a place translation.
 
     A place is a series of named regions in increasing order of size.  These regions
@@ -1108,21 +1110,63 @@ class PlaceTranslation(NamedTuple):
         [GEDCOM Place Translation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-TRAN)
     """
 
-    translation: str = ''
+    place1: str = String.EMPTY
+    place2: str = String.EMPTY
+    place3: str = String.EMPTY
+    place4: str = String.EMPTY
+    form1: str = String.FORM_DEFAULT1
+    form2: str = String.FORM_DEFAULT2
+    form3: str = String.FORM_DEFAULT3
+    form4: str = String.FORM_DEFAULT4
     language: str = String.UNDETERMINED
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
-            self.translation, str
-        ) and DefCheck.verify_type(self.language, str)
+        check: bool = (
+            DefCheck.verify_type(self.place1, str)
+            and DefCheck.verify_type(self.place2, str)
+            and DefCheck.verify_type(self.place3, str)
+            and DefCheck.verify_type(self.place4, str)
+            and DefCheck.verify_type(self.form1, str)
+            and DefCheck.verify_type(self.form2, str)
+            and DefCheck.verify_type(self.form3, str)
+            and DefCheck.verify_type(self.form4, str)
+            and DefCheck.verify_type(self.language, str)
+        )
         return check
 
-    def ged(self, level: int = 1) -> str:
+    def ged(self, level: int = 1, translation_flag: bool = False) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.TRAN, self.translation)
+            place: str = ''.join(
+                [
+                    self.place1,
+                    ', ',
+                    self.place2,
+                    ', ',
+                    self.place3,
+                    ', ',
+                    self.place4,
+                ]
+            )
+            form: str = ''.join(
+                [
+                    self.form1,
+                    ', ',
+                    self.form2,
+                    ', ',
+                    self.form3,
+                    ', ',
+                    self.form4,
+                ]
+            )
+            if translation_flag:
+                lines = DefTag.str_to_str(lines, level, Tag.TRAN, place)
+                # lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
+            else:
+                lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
+                lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
             lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
         return lines
 
@@ -1177,14 +1221,14 @@ class Map(NamedTuple):
 class Place(NamedTuple):
     """Store, validate and return a GEDCOM place structure.
 
-    A place is a dictionary of locations or regions going from smallest to largest.
+    A place is a comma separated string of named locations or regions going from smallest to largest.
     The default is an empty dictionary {'City': '', 'County': '', 'State': '', 'Country': ''}.
     One would fill in the values for city, county, state and country or assign other
     regions with their names if the default is not relevant.
 
-    The BCP 47 language tag is a hyphenated list of subtags.  
+    The BCP 47 language tag is a hyphenated list of subtags.
     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use. 
+    guide will help one make a decision on which tags to use.
     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
     can assist with finding and checking the language tag one would like to use.
 
@@ -1192,17 +1236,26 @@ class Place(NamedTuple):
         Below are a couple of place names.  The first uses the default form names.
         The second alters some of the form names to fit the place and provides a translation
         from Czech to English.
-        >>> from chronodata.store import Map, Place, PlaceTranslation
+        >>> from chronodata.store import Map, Place, PlaceName
         >>> from chronodata.langs import Lang
-        >>> bechyne_cs = 'Bechyně, okres Tábor, Jihočeský kraj, Česká republika'
-        >>> bechyne_en = (
-        ...     'Bechyně, Tábor District, South Bohemian Region, Czech Republic'
+        >>> bechyne_cs = PlaceName(
+        ...     place1='Bechyně',
+        ...     place2='okres Tábor',
+        ...     place3='Jihočeský kraj',
+        ...     place4='Česká republika',
+        ...     language='cs',
+        ... )
+        >>> bechyne_en = PlaceName(
+        ...     place1='Bechyně',
+        ...     place2='Tábor District',
+        ...     place3='South Bohemian Region',
+        ...     place4='Czech Republic',
+        ...     language='en',
         ... )
         >>> place = Place(
         ...     place=bechyne_cs,
-        ...     language='cs',
         ...     translations=[
-        ...         PlaceTranslation(bechyne_en, 'en'),
+        ...         bechyne_en,
         ...     ],
         ...     map=Map('N', 49.297222, 'E', 14.470833),
         ... )
@@ -1210,7 +1263,7 @@ class Place(NamedTuple):
         True
         >>> print(place.ged(2))
         2 PLAC Bechyně, okres Tábor, Jihočeský kraj, Česká republika
-        3 FORM City, Country, State, Country
+        3 FORM City, County, State, Country
         3 LANG cs
         3 TRAN Bechyně, Tábor District, South Bohemian Region, Czech Republic
         4 LANG en
@@ -1221,7 +1274,8 @@ class Place(NamedTuple):
 
 
     Args:
-        place_form: A dictionary representing the place from smallest to largest area.
+        place: A comma separated string of four areas from smallest to largest.
+        form: A comma separated string of the names of those areas.
         language: The BCP 47 langauage tag of the place names.
         translation: A list of translations of the place names.
         maps: A list of references to maps of the place.
@@ -1236,21 +1290,17 @@ class Place(NamedTuple):
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
     """
 
-    place: str = ''
-    form: str = 'City, Country, State, Country'
-    language: str = String.UNDETERMINED
-    translations: list[str] = []  # noqa: RUF012
-    map: Map = Map('N', 90, 'E', 0)
+    place: PlaceName = PlaceName(String.EMPTY)
+    translations: list[PlaceName] = []  # noqa: RUF012
+    map: Map = Map('N', 0, 'W', 0)
     exids: list[Exid] = []  # noqa: RUF012
     notes: list[Note] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.place, str)
-            and DefCheck.verify_type(self.form, str)
-            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
-            and DefCheck.verify_tuple_type(self.translations, PlaceTranslation)
+            DefCheck.verify_type(self.place, PlaceName)
+            and DefCheck.verify_tuple_type(self.translations, PlaceName)
             and DefCheck.verify_type(self.map, Map)
             and DefCheck.verify_tuple_type(self.exids, Exid)
             and DefCheck.verify_tuple_type(self.notes, Note)
@@ -1261,11 +1311,9 @@ class Place(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.PLAC, self.place)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, self.form)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
-            lines = DefTag.list_to_str(lines, level + 1, self.translations)
-            lines = ''.join([lines, self.map.ged(3)])
+            lines = ''.join([lines, self.place.ged(level)])
+            lines = DefTag.list_to_str(lines, level + 1, self.translations, flag=True)
+            lines = ''.join([lines, self.map.ged(level + 1)])
             lines = DefTag.list_to_str(lines, level + 1, self.exids)
             lines = DefTag.list_to_str(lines, level + 1, self.notes)
         return lines
@@ -1411,10 +1459,9 @@ class Time(NamedTuple):
     def iso(self) -> str:
         """Return the validated ISO format for the time.
 
-        References
-        ----------
-        - [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
-        - [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
+        References:
+            [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
+            [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
         """
         if self.validate():
             return f'{self.hour}:{self.minute}:{self.second}'
@@ -1534,7 +1581,8 @@ class EventDetail(NamedTuple):
     """
 
     Reference:
-        [GEDCOM Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL)"""
+        [GEDCOM Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL)
+    """
 
     date_value: DateValue | None = None
     place: Place | None = None
@@ -1577,22 +1625,6 @@ class EventDetail(NamedTuple):
             lines = DefTag.str_to_str(lines, level, Tag.RELI, self.religion)
             lines = DefTag.str_to_str(lines, level, Tag.CAUS, self.cause)
             lines = DefTag.str_to_str(lines, level, Tag.RESN, self.resn)
-            # if self.agency != '':
-            #     lines = ''.join(
-            #         [lines, DefTag.taginfo(level, Tag.AGNC, self.agency)]
-            #     )
-            # if self.religion != '':
-            #     lines = ''.join(
-            #         [lines, DefTag.taginfo(level, Tag.RELI, self.religion)]
-            #     )
-            # if self.cause != '':
-            #     lines = ''.join(
-            #         [lines, DefTag.taginfo(level, Tag.CAUS, self.cause)]
-            #     )
-            # if self.resn != '':
-            #     lines = ''.join(
-            #         [lines, DefTag.taginfo(level, Tag.RESN, self.resn)]
-            #     )
             lines = DefTag.list_to_str(lines, level, self.associations)
             lines = DefTag.list_to_str(lines, level, self.notes)
             lines = DefTag.list_to_str(lines, level, self.sources)
@@ -1617,11 +1649,34 @@ class EventDetail(NamedTuple):
         return lines
 
 
-class HusbandWife(NamedTuple):
+class FamilyEventDetail(NamedTuple):
+    """Store, validate and display GEDCOM family event detail structure.
+
+    Examples:
+        >>> from chronodata.store import FamilyEventDetail
+        >>> family_detail = FamilyEventDetail(
+        ...     husband_age=25,
+        ...     wife_age=24,
+        ...     husband_phrase='Happy',
+        ...     wife_phrase='Very happy',
+        ... )
+        >>> print(family_detail.ged(1))
+        1 HUSB
+        2 AGE 25
+        3 PHRASE Happy
+        1 WIFE
+        2 AGE 24
+        3 PHRASE Very happy
+        <BLANKLINE>
+
+    References:
+        [GEDCOM Family Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL)
+    """
+
     husband_age: int = 0
     wife_age: int = 0
-    husband_phrase: str = ''
-    wife_phrase: str = ''
+    husband_phrase: str = String.EMPTY
+    wife_phrase: str = String.EMPTY
     event_detail: Any = None
 
     def validate(self) -> bool:
@@ -1635,26 +1690,30 @@ class HusbandWife(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            pass
-        return ''
-
-
-class FamilyEventDetail(NamedTuple):
-    husband_wife_ages: HusbandWife
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = DefCheck.verify_type(self.husband_wife_ages, HusbandWife)
-        return check
-
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            if self.husband_age > 0:
+                lines = DefTag.empty_to_str(lines, level, Tag.HUSB)
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.AGE, str(self.husband_age)
+                )
+                if self.husband_phrase != String.EMPTY:
+                    lines = DefTag.str_to_str(
+                        lines, level + 2, Tag.PHRASE, self.husband_phrase
+                    )
+            if self.wife_age > 0:
+                lines = DefTag.empty_to_str(lines, level, Tag.WIFE)
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.AGE, str(self.wife_age)
+                )
+                if self.wife_phrase != String.EMPTY:
+                    lines = DefTag.str_to_str(
+                        lines, level + 2, Tag.PHRASE, self.wife_phrase
+                    )
+            if self.event_detail is not None:
+                lines = ''.join([lines, self.event_detail.ged(level)])
         return lines
 
 
@@ -2571,9 +2630,9 @@ class Header(NamedTuple):
     date: Date = Date(0, 0, 0)
     time: Time = Time(0, 0, 0)
     copr: str = ''
-    language: str = ''
-    place: Any = None
-    note: Any = None
+    language: str = String.UNDETERMINED
+    place: PlaceName = PlaceName(String.EMPTY)
+    note: Note = Note(String.EMPTY)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2591,5 +2650,5 @@ class Header(NamedTuple):
         )
         if self.schemas is not None:
             lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
-            #lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
-        return lines  
+            # lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
+        return lines
