@@ -32,18 +32,18 @@ testdata = [
 def test_address(test_input: str, expected: str | int | bool) -> None:
     # Test with only mailing address having a value.
     address: list[str] = ( # noqa: F841
-        Address(address='123 Here Street\nMy Town\nUSA').ged().split('\n')
+        Address(address=['123 Here Street','My Town','USA']).ged().split('\n')
     )  
 
     # Test with all parameters with nonempty values.
     address2: list[str] = (  # noqa: F841
-        Address('someplace', 'My City', 'My State', 'My Postal', 'My Country')
+        Address(['someplace',], 'My City', 'My State', 'My Postal', 'My Country')
         .ged()
         .split('\n')
     )
 
     # Test with empty address.
-    address3: list[str] = Address('', 'city', 'state', 'postal', 'country').ged().split('\n')  # noqa: F841
+    address3: list[str] = Address([], 'city', 'state', 'postal', 'country').ged().split('\n')  # noqa: F841
 
     assert eval(test_input) == expected
 

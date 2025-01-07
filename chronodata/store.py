@@ -16,14 +16,26 @@ Examples:
 
 """
 
+__all__ = [
+    'Family',
+    'Individual',
+    'Multimedia',
+    'Repository',
+    'SharedNote',
+    'Source',
+    'Submitter',
+]
+
 import logging
 from typing import Any, Literal, NamedTuple
 
 from chronodata.constants import Cal, Choice, String, Value
 from chronodata.enums import (
+    Adop,
     Event,
     Id,
     IndiAttr,
+    IndiEven,
     Media,
     MediaType,
     Quay,
@@ -43,6 +55,7 @@ from chronodata.records import (
     SharedNoteXref,
     SourceXref,
     SubmitterXref,
+    Void,
 )
 
 
@@ -51,25 +64,27 @@ class Address(NamedTuple):
 
     Example:
         The following is the minimum amount of information for an address.
-        >> from chronodata.store import Address
-        >> mailing_address = Address(
-        ..     '12345 ABC Street\nSouth North City, My State 22222'
-        .. )
-        >> print(mailing_address.ged(1))
+        >>> from chronodata.store import Address
+        >>> mailing_address = Address(
+        ...     ['12345 ABC Street', 'South North City, My State 22222'],
+        ... )
+        >>> mailing_address.validate()
+        True
+        >>> print(mailing_address.ged(1))
         1 ADDR 12345 ABC Street
         1 CONT South North City, My State 22222
         <BLANKLINE>
 
         There are five named strings stored in this NamedTuple.
-        >> from chronodata.store import Address
-        >> full_address = Address(
-        .. '12345 ABC Street\nSouth North City, My State 23456',
-        .. 'South North City',
-        .. 'My State',
-        .. '23456',
-        .. 'USA',
-        .. )
-        >> print(full_address.ged(1))
+        >>> from chronodata.store import Address
+        >>> full_address = Address(
+        ...     ['12345 ABC Street', 'South North City, My State 23456'],
+        ...     'South North City',
+        ...     'My State',
+        ...     '23456',
+        ...     'USA',
+        ... )
+        >>> print(full_address.ged(1))
         1 ADDR 12345 ABC Street
         1 CONT South North City, My State 23456
         2 CITY South North City
@@ -79,7 +94,7 @@ class Address(NamedTuple):
         <BLANKLINE>
 
     Args:
-        address: The mailing address with each line separated by '\n'.
+        address: The mailing address with each line being one item of a list.
         city: The city or and empty string to leave this blank.
         state: The state or an empty string to leave this blank.
         postal: The postal code or an empty string to leave this blank.
@@ -92,7 +107,7 @@ class Address(NamedTuple):
         [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#substructures)
     """
 
-    address: str = ''
+    address: list[str] = []  # noqa: RUF012
     city: str = ''
     state: str = ''
     postal: str = ''
@@ -100,7 +115,7 @@ class Address(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            DefCheck.verify_type(self.address, str)
+            DefCheck.verify_tuple_type(self.address, str)
             and DefCheck.verify_type(self.city, str)
             and DefCheck.verify_type(self.state, str)
             and DefCheck.verify_type(self.postal, str)
@@ -112,12 +127,10 @@ class Address(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.address != '':
-                split_address: list[str] = self.address.split('\n')
-                lines = DefTag.str_to_str(
-                    lines, level, Tag.ADDR, split_address[0]
-                )
-                for line in split_address[1:]:
+            if len(self.address) > 0:
+                # split_address: list[str] = self.address.split('\n')
+                lines = DefTag.taginfo(level, Tag.ADDR, self.address[0])
+                for line in self.address[1:]:
                     lines = DefTag.str_to_str(lines, level, Tag.CONT, line)
             lines = DefTag.str_to_str(lines, level + 1, Tag.CITY, self.city)
             lines = DefTag.str_to_str(lines, level + 1, Tag.STAE, self.state)
@@ -486,8 +499,6 @@ class NameTranslation(NamedTuple):
         check: bool = (
             DefCheck.verify_type(self.translation, str)
             and DefCheck.verify_not_default(self.translation, '')
-            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
-            # and DefCheck.verify_not_default(self.language, '')
             and DefCheck.verify_tuple_type(self.name_pieces, PersonalNamePiece)
         )
         return check
@@ -558,7 +569,6 @@ class NoteTranslation(NamedTuple):
             DefCheck.verify_type(self.translation, str)
             and DefCheck.verify_not_default(self.translation, '')
             and DefCheck.verify_enum(self.mime.value, MediaType)
-            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
         )
         return check
 
@@ -675,9 +685,7 @@ class SourceRepositoryCitation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             DefCheck.verify_type(self.repo, RepositoryXref)
-            and DefCheck.verify_not_default(
-                self.repo, RepositoryXref(String.RECORD)
-            )
+            and DefCheck.verify_not_default(self.repo, Void.REPO)
             and DefCheck.verify_tuple_type(self.notes, Note)
             and DefCheck.verify_type(self.call_numbers, CallNumber)
         )
@@ -765,7 +773,7 @@ class SourceCitation(NamedTuple):
         [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
     """
 
-    xref: SourceXref = SourceXref(String.RECORD)
+    xref: SourceXref = Void.SOUR
     page: str = ''
     texts: Any = None
     event: Event = Event.NONE
@@ -779,7 +787,7 @@ class SourceCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_not_default(str(self.xref), String.RECORD)
+            DefCheck.verify_not_default(str(self.xref), Void.SOUR)
             and DefCheck.verify_type(self.xref, SourceXref)
             and DefCheck.verify_type(self.page, str)
             and DefCheck.verify_tuple_type(self.texts, Text)
@@ -926,7 +934,6 @@ class Note(NamedTuple):
         check: bool = (
             DefCheck.verify_not_default(self.text, '')
             and DefCheck.verify_enum(self.mime.value, MediaType)
-            # and DefCheck.verify_dict_key(self.language, Lang.CODE)
             and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
             and DefCheck.verify_tuple_type(self.citations, SourceCitation)
         )
@@ -958,39 +965,110 @@ class Note(NamedTuple):
 
 
 class Association(NamedTuple):
-    """_summary_
+    """Store, validate and display a GEDCOM Association structure.
+
+
 
     Examples:
+        This example comes from the GEDCOM specification referenced below.
+        The specification displays the GEDCOM lines as follows:
 
+        > 0 @I1@ INDI
+        > 1 ASSO @VOID@
+        > 2 PHRASE Mr Stockdale
+        > 2 ROLE OTHER
+        > 3 PHRASE Teacher
+        > 1 BAPM
+        > 2 DATE 1930
+        > 2 ASSO @I2@
+        > 3 ROLE CLERGY
+
+        This differs from the outcome produced by ChronoData which displays the event
+        association before the individual association because the event association
+        precedes the association in the specification's argument list.
+
+        First import the required classes.
+        >>> from chronodata.build import Chronology
+        >>> from chronodata.enums import Role
+        >>> from chronodata.store import Association, Individual
+
+        Next, create a chronology and the two individuals references.
+        >>> chron = Chronology('test')
+        >>> individual = chron.individual_xref('I', initial=True)
+        >>> clergy = chron.individual_xref('I', initial=True)
+
+        Next, create two associations, one for the individual and one for a baptism
+        event.
+        >>> individual_association = Association(
+        ...     phrase='Mr Stockdale',
+        ...     role=Role.OTHER,
+        ...     role_phrase='Teacher',
+        ... )
+        >>> event_association = Association(xref=clergy, role=Role.CLERGY)
+
+        Finally construct the individual record and display it.
+        >>> indi = Individual(
+        ...     xref=individual,
+        ...     associations=[individual_association],
+        ...     events=[
+        ...         IndividualEvent(
+        ...             tag=Tag.BAPM,
+        ...             payload='',
+        ...             event_detail=IndividualEventDetail(
+        ...                 event_detail=EventDetail(
+        ...                     date_value=DateValue(
+        ...                         Date(year=1930),
+        ...                     ),
+        ...                     associations=[event_association],
+        ...                 )
+        ...             ),
+        ...         )
+        ...     ],
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 BAPM
+        2 DATE 1930
+        2 ASSO @I2@
+        3 ROLE CLERGY
+        1 ASSO @VOID@
+        2 PHRASE Mr Stockdale
+        2 ROLE OTHER
+        3 PHRASE Teacher
+        <BLANKLINE>
 
     Args:
         xref: the identifier of the individual in this association.
+        phrase: a description of the association.
         role: the role of this individual.
-        association_phrase: a description of the association.
         role_phrase: a description of the role.
         notes: a collection of notes related to this association.
         citations: a collection of citations related to this association.
 
     Returns:
         A GEDCOM string storing this data.
+
+    Reference:
+        [GEDCOM Association Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ASSOCIATION_STRUCTURE)
     """
 
-    xref: IndividualXref
+    xref: IndividualXref = Void.INDI
+    phrase: str = String.EMPTY
     role: Role = Role.NONE
-    association_phrase: str = ''
-    role_phrase: str = ''
-    notes: Any = None
-    citations: Any = None
+    role_phrase: str = String.EMPTY
+    notes: list[Note] = []  # noqa: RUF012
+    citations: list[SourceCitation] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_enum(self.role.value, Role)
-            and DefCheck.verify_type(self.association_phrase, str)
+            DefCheck.verify_type(self.xref, IndividualXref)
+            and DefCheck.verify_type(self.role, Role)
+            # and DefCheck.verify_enum(self.role.value, Role)
+            and DefCheck.verify_type(self.phrase, str)
             and DefCheck.verify_type(self.role_phrase, str)
             and DefCheck.verify_tuple_type(self.notes, Note)
             and DefCheck.verify_tuple_type(self.citations, SourceCitation)
-            and DefCheck.verify_enum(self.role.value, Role)
         )
         return check
 
@@ -998,38 +1076,19 @@ class Association(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.association_phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(
-                            level + 1,
-                            Tag.PHRASE,
-                            self.association_phrase,
-                        ),
-                    ]
-                )
-            lines = ''.join(
-                [
-                    lines,
-                    DefTag.taginfo(level + 2, Tag.ROLE, self.role.value),
-                ]
+            # if self.xref == '':
+            #     lines = DefTag.str_to_str(lines, level, Tag.ASSO, Void.NAME)
+            # else:
+            lines = DefTag.str_to_str(lines, level, Tag.ASSO, str(self.xref))
+            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = DefTag.str_to_str(
+                lines, level + 1, Tag.ROLE, self.role.value
             )
-            if self.role_phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(
-                            level + 2,
-                            Tag.PHRASE,
-                            self.role_phrase,
-                        ),
-                    ]
-                )
-            for note in self.notes:
-                lines = ''.join([lines, note.ged(1)])
-            for citation in self.citations:
-                lines = ''.join([lines, citation.ged(1)])
+            lines = DefTag.str_to_str(
+                lines, level + 2, Tag.PHRASE, self.role_phrase
+            )
+            lines = DefTag.list_to_str(lines, level + 1, self.notes)
+            lines = DefTag.list_to_str(lines, level + 1, self.citations)
         return lines
 
 
@@ -1096,15 +1155,69 @@ class Exid(NamedTuple):
 class PlaceName(NamedTuple):
     """Store, validate and display a place translation.
 
-    A place is a series of named regions in increasing order of size.  These regions
-    are assigned a name.  By default, the regions are 'City', 'County', 'State' and
-    'Country'.
+    A place is a series of named jurisdictions associated with political,
+    ecclesiastical or geographic regions.  They are listed in increasing order of size.
+    These jurisdictions are assigned a name in the form arguments.
+    By default, the jusisdictions are 'City', 'County', 'State' and
+    'Country'.  Only four are available, but not all four need be used.
 
     For the translations the forms are the same as for the original language, but
-    the names of the regions are translated into a different language.
+    the names of the jurisdictions are translated into a different language.
 
     Examples:
+    The first example takes advantage of the four form defaults.
+    >>> chicago = PlaceName(
+    ...     place1='Chicago',
+    ...     place2='Cook County',
+    ...     place3='Illinois',
+    ...     place4='USA',
+    ...     language='en',
+    ... )
+    >>> print(chicago.ged(1))
+    1 PLAC Chicago, Cook County, Illinois, USA
+    2 FORM City, County, State, Country
+    2 LANG en
+    <BLANKLINE>
 
+    The second example adds in specific form values.
+    >>> chicago = PlaceName(
+    ...     place1='Chicago',
+    ...     place2='Cook County',
+    ...     place3='Illinois',
+    ...     place4='USA',
+    ...     form1='City2',
+    ...     form2='County2',
+    ...     form3='State2',
+    ...     form4='Country2',
+    ...     language='en',
+    ... )
+    >>> print(chicago.ged(1))
+    1 PLAC Chicago, Cook County, Illinois, USA
+    2 FORM City2, County2, State2, Country2
+    2 LANG en
+    <BLANKLINE>
+
+    The third example uses only three of the four jurisdictions accepting
+    the defaults for the unspecified values.
+    >>> chicago = PlaceName(
+    ...     place1='Chicago', place3='Illinois', place4='USA', language='en'
+    ... )
+    >>> print(chicago.ged(1))
+    1 PLAC Chicago, , Illinois, USA
+    2 FORM City, County, State, Country
+    2 LANG en
+    <BLANKLINE>
+
+    Args:
+        place1: The smallest region associated with a place, such as, the city.
+        place2: The next region larger than `place1` associated with a place, such as, county.
+        place3: The next region larger than `place2` associated with a place, such as, state.
+        place4: The next region larger than `place3` associated with a place, such as, country.
+        form1: The name of the `place1` region. (Default 'City')
+        form2: The name of the `place2` region. (Default 'County')
+        form3: The name of the `place3` region. (Default 'State')
+        form4: The name of the `place4` region. (Default 'Country')
+        language: The BCP 47 language tag for the langues of this information.
 
     Reference:
         [GEDCOM Place Translation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-TRAN)
@@ -1135,7 +1248,7 @@ class PlaceName(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1, translation_flag: bool = False) -> str:
+    def ged(self, level: int = 1, style: str = String.PLACE_FULL) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
@@ -1161,13 +1274,21 @@ class PlaceName(NamedTuple):
                     self.form4,
                 ]
             )
-            if translation_flag:
-                lines = DefTag.str_to_str(lines, level, Tag.TRAN, place)
-                # lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
-            else:
-                lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
-                lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
+            match style:
+                case String.PLACE_FULL:
+                    lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
+                    lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
+                    lines = DefTag.str_to_str(
+                        lines, level + 1, Tag.LANG, self.language
+                    )
+                case String.PLACE_SHORT:
+                    lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
+                    lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
+                case String.PLACE_TRANSLATION:
+                    lines = DefTag.str_to_str(lines, level, Tag.TRAN, place)
+                    lines = DefTag.str_to_str(
+                        lines, level + 1, Tag.LANG, self.language
+                    )
         return lines
 
 
@@ -1233,16 +1354,25 @@ class Place(NamedTuple):
     can assist with finding and checking the language tag one would like to use.
 
     Example:
-        Below are a couple of place names.  The first uses the default form names.
-        The second alters some of the form names to fit the place and provides a translation
-        from Czech to English.
+        Below are two `PlaceName` tuples for a place.
+        The first is in Czech and the second English.
+        A `Map` tuple provides latitude and longitude values for the place.
+        A couple of simple `Note` tuples are added as well.
+        These tuples form the structure of a `Place` tuple.
+
+        Normally one would not call `validate` or `ged` unless one wanted
+        to see if the substructure is valid or how it would display
+        in the final GEDCOM file.
         >>> from chronodata.store import Map, Place, PlaceName
-        >>> from chronodata.langs import Lang
         >>> bechyne_cs = PlaceName(
         ...     place1='Bechyně',
         ...     place2='okres Tábor',
         ...     place3='Jihočeský kraj',
         ...     place4='Česká republika',
+        ...     form1='Město',
+        ...     form2='Okres',
+        ...     form3='Stát',
+        ...     form4='Země',
         ...     language='cs',
         ... )
         >>> bechyne_en = PlaceName(
@@ -1258,27 +1388,32 @@ class Place(NamedTuple):
         ...         bechyne_en,
         ...     ],
         ...     map=Map('N', 49.297222, 'E', 14.470833),
+        ...     notes=[
+        ...         Note('A place in the Czech Republic.', language='en'),
+        ...         Note('Místo v České republice.', language='cs'),
+        ...     ],
         ... )
         >>> place.validate()
         True
         >>> print(place.ged(2))
         2 PLAC Bechyně, okres Tábor, Jihočeský kraj, Česká republika
-        3 FORM City, County, State, Country
+        3 FORM Město, Okres, Stát, Země
         3 LANG cs
         3 TRAN Bechyně, Tábor District, South Bohemian Region, Czech Republic
         4 LANG en
         3 MAP
         4 LATI N49.297222
         4 LONG E14.470833
+        3 NOTE A place in the Czech Republic.
+        4 LANG en
+        3 NOTE Místo v České republice.
+        4 LANG cs
         <BLANKLINE>
 
-
     Args:
-        place: A comma separated string of four areas from smallest to largest.
-        form: A comma separated string of the names of those areas.
-        language: The BCP 47 langauage tag of the place names.
-        translation: A list of translations of the place names.
-        maps: A list of references to maps of the place.
+        place: A `PlaceName` tuple containing four place names, four forms and language tag.
+        translation: A list of `PlaceName` tuples used as translations.
+        maps: A list of `Map` tuples for the place.
         exid: Identifiers associated with the place.
         notes: Notes associated with the place.
 
@@ -1312,7 +1447,12 @@ class Place(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = ''.join([lines, self.place.ged(level)])
-            lines = DefTag.list_to_str(lines, level + 1, self.translations, flag=True)
+            lines = DefTag.list_to_str(
+                lines,
+                level + 1,
+                self.translations,
+                flag=String.PLACE_TRANSLATION,
+            )
             lines = ''.join([lines, self.map.ged(level + 1)])
             lines = DefTag.list_to_str(lines, level + 1, self.exids)
             lines = DefTag.list_to_str(lines, level + 1, self.notes)
@@ -1366,7 +1506,7 @@ class Date(NamedTuple):
         ---------
         - [GEDCOM Standard V 7.0](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
         """
-
+        lines: str = ''
         if self.validate():
             day_str: str = (
                 str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
@@ -1381,20 +1521,20 @@ class Date(NamedTuple):
                 year_str = ''.join(
                     [str(-self.year), Cal.CALENDARS[calendar][Value.EPOCH]]
                 )
-            output: str = f'{level} {Tag.DATE}'
+            formatted_date: str = ''
             if self.day != 0:
-                output = ''.join([output, f' {day_str}'])
+                formatted_date = ''.join([formatted_date, f' {day_str}'])
             if self.month != 0:
-                output = ''.join(
+                formatted_date = ''.join(
                     [
-                        output,
+                        formatted_date,
                         f' {Cal.CALENDARS[calendar][Value.MONTH_NAMES][str(month_str)]}',
                     ]
                 )
             if self.year != 0:
-                output = ''.join([output, f' {year_str}\n'])
-            return output
-        return ''
+                formatted_date = ''.join([formatted_date, f'{year_str}\n'])
+            lines = DefTag.str_to_str(lines, level, Tag.DATE, formatted_date)
+        return lines
 
     def iso(self) -> str:
         """Return the validated ISO format for the date.
@@ -1586,21 +1726,21 @@ class EventDetail(NamedTuple):
 
     date_value: DateValue | None = None
     place: Place | None = None
-    address: Address = Address('', '', '', '', '')
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
+    address: Address = Address([], '', '', '', '')
+    phones: list[str] = []  # noqa: RUF012
+    emails: list[str] = []  # noqa: RUF012
+    faxes: list[str] = []  # noqa: RUF012
+    wwws: list[str] = []  # noqa: RUF012
     agency: str = ''
     religion: str = ''
     cause: str = ''
     resn: str = ''
     # sort_date: SortDate = ()
-    associations: Any = None
-    notes: Any = None
-    sources: Any = None
-    multimedia_links: Any = None
-    uids: Any = None
+    associations: list[Association] = []  # noqa: RUF012
+    notes: list[Note] = []  # noqa: RUF012
+    sources: list[SourceCitation] = []  # noqa: RUF012
+    multimedia_links: list[MultimediaLink] = []  # noqa: RUF012
+    uids: list[Id] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1615,12 +1755,16 @@ class EventDetail(NamedTuple):
                 lines = ''.join([lines, self.date_value.ged(level)])
             if self.place is not None:
                 lines = ''.join([lines, self.place.ged(level)])
-            if self.address != Address('', '', '', '', ''):
+            if self.address != Address([], '', '', '', ''):
                 lines = ''.join([lines, self.address.ged(level)])
-            contacts: str = DefTag.contact_info(
-                level, self.phones, self.emails, self.faxes, self.wwws
-            )
-            lines = ''.join([lines, contacts])
+            for phone in self.phones:
+                lines = DefTag.str_to_str(lines, level, Tag.PHON, phone)
+            for email in self.emails:
+                lines = DefTag.str_to_str(lines, level, Tag.EMAIL, email)
+            for fax in self.faxes:
+                lines = DefTag.str_to_str(lines, level, Tag.FAX, fax)
+            for www in self.wwws:
+                lines = DefTag.str_to_str(lines, level, Tag.WWW, www)
             lines = DefTag.str_to_str(lines, level, Tag.AGNC, self.agency)
             lines = DefTag.str_to_str(lines, level, Tag.RELI, self.religion)
             lines = DefTag.str_to_str(lines, level, Tag.CAUS, self.cause)
@@ -1630,22 +1774,6 @@ class EventDetail(NamedTuple):
             lines = DefTag.list_to_str(lines, level, self.sources)
             lines = DefTag.list_to_str(lines, level, self.multimedia_links)
             lines = DefTag.list_to_str(lines, level, self.uids)
-            # if self.associations is not None:
-            #     for association in self.associations:
-            #         lines = ''.join([lines, association.ged(level)])
-            # if self.notes is not None:
-            #     for note in self.notes:
-            #         lines = ''.join([lines, note.ged(level)])
-            # if self.sources is not None:
-            #     for source in self.sources:
-            #         lines = ''.join([lines, source.ged(level)])
-            # if self.multimedia_links is not None:
-            #     for link in self.multimedia_links:
-            #         lines = ''.join([lines, link.ged(level)])
-            # if self.uids is not None:
-            #     for uid in self.uids:
-            #         lines = ''.join([lines, uid.ged(level)])
-
         return lines
 
 
@@ -1766,7 +1894,7 @@ class FamilyEvent(NamedTuple):
 
 
 class Husband(NamedTuple):
-    xref: IndividualXref = IndividualXref(String.RECORD)
+    xref: IndividualXref = Void.INDI
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1779,7 +1907,7 @@ class Husband(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if str(self.xref) != String.RECORD and self.validate():
+        if str(self.xref) != Void.NAME and self.validate():
             lines = ''.join(
                 [lines, DefTag.taginfo(level, Tag.HUSB, str(self.xref))]
             )
@@ -1794,7 +1922,7 @@ class Husband(NamedTuple):
 
 
 class Wife(NamedTuple):
-    xref: IndividualXref = IndividualXref(String.RECORD)
+    xref: IndividualXref = Void.INDI
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1807,7 +1935,7 @@ class Wife(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if str(self.xref) != String.RECORD and self.validate():
+        if str(self.xref) != Void.NAME and self.validate():
             lines = ''.join(
                 [lines, DefTag.taginfo(level, Tag.WIFE, str(self.xref))]
             )
@@ -1822,7 +1950,7 @@ class Wife(NamedTuple):
 
 
 class Child(NamedTuple):
-    xref: IndividualXref = IndividualXref(String.RECORD)
+    xref: IndividualXref = Void.INDI
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -1835,7 +1963,7 @@ class Child(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if str(self.xref) != String.RECORD and self.validate():
+        if str(self.xref) != Void.NAME and self.validate():
             lines = ''.join(
                 [lines, DefTag.taginfo(level, Tag.CHIL, str(self.xref))]
             )
@@ -1963,24 +2091,40 @@ class Identifier(NamedTuple):
 
 
 class IndividualEventDetail(NamedTuple):
-    event_detail: EventDetail
-    age: Age = Age(0, 0, 0, 0, '', '')
-    phrase: str = ''
+    """Store, validate and display a GEDCOM Individual Event Detail structure.
+
+    Args:
+        event_detail: A GEDCOM Event Detail structure.
+        age: The age of the individual.
+        phrase: Text describing the individual event.
+
+    Reference:
+        [GEDCOM Individual Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_DETAIL)
+    """
+
+    event_detail: EventDetail | None = None
+    age: Age | None = None  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+    phrase: str = String.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             DefCheck.verify_type(self.event_detail, EventDetail)
-            and DefCheck.verify_type(self.age, str)
+            and DefCheck.verify_type(self.age, Age)
             and DefCheck.verify_type(self.phrase, str)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            pass
+        if self.validate() and self.event_detail is not None:
+            lines = ''.join([lines, self.event_detail.ged(level)])
+            if self.age is not None:
+                lines = ''.join([lines, self.age.ged(level)])
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.PHRASE, self.phrase
+                )
         return lines
 
 
@@ -2009,32 +2153,77 @@ class IndividualAttribute(NamedTuple):
 
 
 class IndividualEvent(NamedTuple):
-    tag: str
-    tag_type: str = ''
+    """Store, validate and display a GEDCOM Individual Event Structure.
+
+    Examples:
+
+    Args:
+        tag: Specifies the kind of event.
+        payload: Specifies that the event occurred if the default 'Y' is accepted. Otherwise use ''.
+        tag_type: A text describing the event which must not be the empty string.
+        event_detail: Information about the event in an IndividualEventDetail substructure.
+        family_xref: A family xref will be displayed only for the Tag.ADOP, Tag.BIRT or Tag.CHR events.
+        adoption: A tag for the kind of adoption will be displayed only for the Tag.ADOP event.
+        phrase: A phrase describing the adoption will be displayed only for the Tag.ADOP event.
+
+    References:
+        [GEDCOM Individual Event Tags](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-events)
+        [GEDCOM Individual Event Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE)
+    """
+
+    tag: Tag = Tag.NONE
+    payload: Literal['Y', ''] = 'Y'
+    text: str = String.EMPTY
     event_detail: IndividualEventDetail | None = None
-    family_child: str = ''
-    adoption: str = ''
-    phrase: str = ''
+    family_xref: FamilyXref = Void.FAM
+    adoption: Tag = Tag.NONE
+    phrase: str = String.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.tag, str)
-            and DefCheck.verify_type(self.tag_type, str)
+            DefCheck.verify_enum(self.tag.value, IndiEven)
+            and DefCheck.verify_type(self.text, str)
+            # and DefCheck.verify_not_default(self.text, String.EMPTY)
             and DefCheck.verify_type(
                 self.event_detail, IndividualEventDetail | None
             )
-            and DefCheck.verify_type(self.family_child, str)
-            and DefCheck.verify_type(self.adoption, str)
+            and DefCheck.verify_type(self.family_xref, FamilyXref)
+            and DefCheck.verify_enum(self.adoption.value, Adop)
             and DefCheck.verify_type(self.phrase, str)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            if self.payload == String.EMPTY:
+                lines = DefTag.empty_to_str(lines, level, self.tag)
+            else:
+                lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.TYPE, self.text)
+            if self.event_detail is not None:
+                lines = ''.join([lines, self.event_detail.ged(level + 1)])
+            if (
+                self.tag.value
+                in (Tag.BIRT.value, Tag.CHR.value, Tag.ADOP.value)
+                and self.family_xref.name != Void.FAM.name
+            ):
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.FAMC, self.family_xref.fullname
+                )
+                if (
+                    self.tag.value == Tag.ADOP.value
+                    and self.family_xref.name != Void.FAM.name
+                ):
+                    lines = DefTag.str_to_str(
+                        lines, level + 2, Tag.ADOP, self.adoption.value
+                    )
+                    if self.adoption.value != Tag.NONE.value:
+                        lines = DefTag.str_to_str(
+                            lines, level + 3, Tag.PHRASE, self.phrase
+                        )
         return lines
 
 
@@ -2237,14 +2426,18 @@ class Family(NamedTuple):
     - `xref`: typed string obtained by running `chrono.family_xref()`.
     - `resn`: restriction codes with the default being no restriction.
     - `attributes`: a tuple of type Attribute.
+
+    Reference:
+        [GEDCOM record-FAM](https://gedcom.io/terms/v7/record-FAM)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
     """
 
-    xref: FamilyXref = FamilyXref(String.RECORD)
+    xref: FamilyXref = Void.FAM
     resn: Resn = Resn.NONE
     attributes: Any = None
     events: Any = None
-    husband: Husband = Husband(IndividualXref(String.RECORD), '')
-    wife: Wife = Wife(IndividualXref(String.RECORD), '')
+    husband: Husband = Husband(Void.INDI)
+    wife: Wife = Wife(Void.INDI)
     children: Any = None
     associations: Any = None
     submitters: Any = None
@@ -2278,9 +2471,9 @@ class Family(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:
+    def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
+        lines: str = self.xref.ged(level)
         if self.validate():
             if self.resn != Resn.NONE:
                 lines = ''.join(
@@ -2292,9 +2485,9 @@ class Family(NamedTuple):
             if self.events is not None:
                 for event in self.events:
                     lines = ''.join([lines, event.ged(level)])
-            if self.husband != Husband(IndividualXref(String.RECORD), ''):
+            if self.husband != Husband(Void.INDI):
                 lines = ''.join([lines, self.husband.ged(level)])
-            if self.wife != Wife(IndividualXref(String.RECORD), ''):
+            if self.wife != Wife(Void.INDI):
                 lines = ''.join([lines, self.wife.ged(level)])
             if self.children is not None:
                 for child in self.children:
@@ -2325,64 +2518,14 @@ class Family(NamedTuple):
         return lines
 
 
-class Individual(NamedTuple):
-    xref: IndividualXref = IndividualXref(String.RECORD)
-    resn: Resn = Resn.NONE
-    personal_names: Any = None
-    sex: Sex = Sex.NONE
-    attributes: Any = None
-    events: Any = None
-    lds_individual_ordinances: Any = None
-    families_child: Any = None
-    submitters: Any = None
-    associations: Any = None
-    aliases: Any = None
-    ancestor_interest: Any = None
-    descendent_interest: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    sources: Any = None
-    multimedia_links: Any = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            DefCheck.verify_type(self.xref, IndividualXref)
-            and DefCheck.verify_enum(self.resn.value, Resn)
-            and DefCheck.verify_tuple_type(
-                self.personal_names, PersonalNamePiece
-            )
-            and DefCheck.verify_enum(self.sex.value, Sex)
-            and DefCheck.verify_tuple_type(self.attributes, IndividualAttribute)
-            and DefCheck.verify_tuple_type(self.events, IndividualEvent)
-            and DefCheck.verify_tuple_type(
-                self.lds_individual_ordinances, LDSIndividualOrdinances
-            )
-            and DefCheck.verify_tuple_type(self.families_child, FamilyChild)
-            and DefCheck.verify_tuple_type(self.submitters, str)
-            and DefCheck.verify_tuple_type(self.associations, Association)
-            and DefCheck.verify_tuple_type(self.aliases, Alias)
-            and DefCheck.verify_tuple_type(self.ancestor_interest, str)
-            and DefCheck.verify_tuple_type(self.descendent_interest, str)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, Source)
-            and DefCheck.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
-        """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
-        if self.validate():
-            pass
-        return lines
-
-
 class Multimedia(NamedTuple):
-    xref: MultimediaXref = MultimediaXref(String.RECORD)
+    """
+    Reference:
+        [GEDCOM record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
+    """
+
+    xref: MultimediaXref = Void.OBJE
     resn: Resn = Resn.NONE
     files: Any = None
     identifiers: Any = None
@@ -2401,79 +2544,22 @@ class Multimedia(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
-        if self.validate():
-            pass
-        return lines
-
-
-class Repository(NamedTuple):
-    xref: RepositoryXref = RepositoryXref(String.RECORD)
-    name: str = ''
-    address: Address | None = None
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
-    notes: Any = None
-    identifiers: Any = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            DefCheck.verify_type(self.xref, RepositoryXref)
-            and DefCheck.verify_type(self.name, str)
-            and DefCheck.verify_type(self.address, Address | None)
-            and DefCheck.verify_tuple_type(self.emails, str)
-            and DefCheck.verify_tuple_type(self.faxes, str)
-            and DefCheck.verify_tuple_type(self.wwws, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
-        """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
-        if self.validate():
-            pass
-        return lines
-
-
-class SharedNote(NamedTuple):
-    xref: SharedNoteXref = SharedNoteXref(String.RECORD)
-    text: str = ''
-    mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
-    translations: Any = None
-    sources: Any = None
-    identifiers: Any = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            DefCheck.verify_type(self.xref, SharedNoteXref)
-            and DefCheck.verify_type(self.text, str)
-            and DefCheck.verify_enum(self.mime.value, MediaType)
-            and DefCheck.verify_type(self.language, str)
-            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
-            and DefCheck.verify_tuple_type(self.sources, Source)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
-        """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
+        lines: str = self.xref.ged(level)
         if self.validate():
             pass
         return lines
 
 
 class Source(NamedTuple):
-    xref: SourceXref = SourceXref(String.RECORD)
+    """
+    Reference:
+        [GEDCOM record-SOUR](https://gedcom.io/terms/v7/record-SOUR)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
+    """
+
+    xref: SourceXref = Void.SOUR
     author: str = ''
     title: str = ''
     abbreviation: str = ''
@@ -2504,16 +2590,22 @@ class Source(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
+        lines: str = self.xref.ged(level)
         if self.validate():
             pass
         return lines
 
 
 class Submitter(NamedTuple):
-    xref: SubmitterXref = SubmitterXref(String.RECORD)
+    """
+    Reference:
+        [GEDCOM record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
+    """
+
+    xref: SubmitterXref = Void.SUBM
     name: str = ''
     address: Address | None = None
     phones: Any = None
@@ -2544,10 +2636,256 @@ class Submitter(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged(0)
-        if str(self.xref) != String.RECORD and self.validate():
+        lines: str = self.xref.ged(level)
+        if str(self.xref) != Void.NAME and self.validate():
+            pass
+        return lines
+
+
+class Individual(NamedTuple):
+    """Store, validate and display the record-INDI GEDCOM structure.
+
+    Examples:
+        The GEDCOM specification offers the following example.
+
+        > The following example refers to 2 individuals, `@I1@` and `@I2@`, where `@I2@`
+        > is a godparent of `@I1@`:
+        >
+        > ```gedcom
+        > 0 @I1@ INDI
+        > 1 ASSO @I2@
+        > 2 ROLE GODP
+        > ```
+
+        This can be implemented by doing the following.
+        First import the packages.
+        >>> from chronodata.build import Chronology
+        >>> from chronodata.store import Association, Individual
+        >>> from chronodata.enums import Role
+
+        Next instantiate a Chronology which will store the information.
+        This will be named `test`.
+        >>> a = Chronology('test')
+
+        Next instantiate two IndivdiaulXref values called `I1` and `I2`.
+        >>> i1 = a.individual_xref('I1')
+        >>> i2 = a.individual_xref('I2')
+
+        Add values to the Individual NamedTuple to store this information.
+        >>> indi = Individual(
+        ...     xref=i1,
+        ...     associations=[
+        ...         Association(
+        ...             xref=i2,
+        ...             role=Role.GODP,
+        ...         ),
+        ...     ],
+        ... )
+
+        At this point one could validate the information that is stored
+        although this is not necessary since the validation occurs when
+        one displays the data.  However, it is available for these
+        structure.
+        >>> indi.validate()
+        True
+
+        Next, we could display the data to verify that it is the same as
+        the example shows.  Note that the data is the same although it
+        is formatted as a single line with newlines.
+        >>> indi.ged(0)
+        '0 @I1@ INDI\\n1 ASSO @I2@\\n2 ROLE GODP\\n'
+
+        Using `print` will format the result as in the example.  The additional
+        blankline allows the final string to concatenate with additional data.
+        >>> print(indi.ged(0))
+        0 @I1@ INDI
+        1 ASSO @I2@
+        2 ROLE GODP
+        <BLANKLINE>
+
+        This example shows the kinds of errors that the validate method
+        might produce by using a family xref for the individual xref.
+        If one has doubts about the data one has loaded into a structure
+        one can run its `validate` method to catch an error early on.
+        >>> fam = a.family_xref('my family')
+        >>> indi_error = Individual(xref=fam)
+        >>> indi_error.validate()
+        Traceback (most recent call last):
+        TypeError: "@MY_FAMILY@" has type <class 'chronodata.records.FamilyXref'> but should have type <class 'chronodata.records.IndividualXref'>.
+
+    Reference:
+        [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
+    """
+
+    xref: IndividualXref = Void.INDI
+    resn: Resn = Resn.NONE
+    personal_names: list[PersonalNamePiece] = []  # noqa: RUF012
+    sex: Sex = Sex.NONE
+    attributes: list[IndividualAttribute] = []  # noqa: RUF012
+    events: list[IndividualEvent] = []  # noqa: RUF012
+    lds_individual_ordinances: list[LDSIndividualOrdinances] = []  # noqa: RUF012
+    submitters: list[Submitter] = []  # noqa: RUF012
+    associations: list[Association] = []  # noqa: RUF012
+    aliases: list[Alias] = []  # noqa: RUF012
+    ancestor_interest: list[Submitter] = []  # noqa: RUF012
+    descendent_interest: list[Submitter] = []  # noqa: RUF012
+    identifiers: list[Identifier] = []  # noqa: RUF012
+    notes: list[Note] = []  # noqa: RUF012
+    sources: list[Source] = []  # noqa: RUF012
+    multimedia_links: list[Multimedia] = []  # noqa: RUF012
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            DefCheck.verify_type(self.xref, IndividualXref)
+            and DefCheck.verify_enum(self.resn.value, Resn)
+            and DefCheck.verify_tuple_type(
+                self.personal_names, PersonalNamePiece
+            )
+            and DefCheck.verify_enum(self.sex.value, Sex)
+            and DefCheck.verify_tuple_type(self.attributes, IndividualAttribute)
+            and DefCheck.verify_tuple_type(self.events, IndividualEvent)
+            and DefCheck.verify_tuple_type(
+                self.lds_individual_ordinances, LDSIndividualOrdinances
+            )
+            and DefCheck.verify_tuple_type(self.submitters, str)
+            and DefCheck.verify_tuple_type(self.associations, Association)
+            and DefCheck.verify_tuple_type(self.aliases, Alias)
+            and DefCheck.verify_tuple_type(self.ancestor_interest, str)
+            and DefCheck.verify_tuple_type(self.descendent_interest, str)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, Source)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
+        )
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = self.xref.ged(level)
+        if self.validate():
+            lines = DefTag.str_to_str(
+                lines, level + 1, Tag.RESN, self.resn.value
+            )
+            lines = DefTag.list_to_str(lines, level + 1, self.personal_names)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.SEX, self.sex.value)
+            lines = DefTag.list_to_str(lines, level + 1, self.attributes)
+            lines = DefTag.list_to_str(lines, level + 1, self.events)
+            lines = DefTag.list_to_str(
+                lines, level + 1, self.lds_individual_ordinances
+            )
+            lines = DefTag.list_to_str(lines, level + 1, self.submitters)
+            lines = DefTag.list_to_str(lines, level + 1, self.associations)
+            lines = DefTag.list_to_str(lines, level + 1, self.aliases)
+            lines = DefTag.list_to_str(lines, level + 1, self.ancestor_interest)
+            lines = DefTag.list_to_str(
+                lines, level + 1, self.descendent_interest
+            )
+            lines = DefTag.list_to_str(lines, level + 1, self.identifiers)
+            lines = DefTag.list_to_str(lines, level + 1, self.notes)
+            lines = DefTag.list_to_str(lines, level + 1, self.sources)
+            lines = DefTag.list_to_str(lines, level + 1, self.multimedia_links)
+        return lines
+
+    def code(
+        self, chronology_name: str = 'chron', detail: str = String.MIN
+    ) -> str:
+        preface: str = f"""
+# https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
+from chronodata.build import Chronology
+from chronodata.enums import Resn, Sex
+from chronodata.store import Individual
+
+{chronology_name} = Chronology('{chronology_name}')
+{self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
+"""
+        return f"""
+{preface if detail == String.MAX else ''}
+{self.xref.code} = Individual(
+    xref = {self.xref.code_xref},
+    resn = {self.resn},
+    personal_names = {self.personal_names},
+    sex = {self.sex},
+    attributes = {self.attributes},
+    events = {self.events},
+    lds_individual_ordinances = {self.lds_individual_ordinances},
+    submitters = {self.submitters},
+    associations = {self.associations},
+    aliases = {self.aliases},
+    ancestor_interest = {self.ancestor_interest},
+    descendent_interest = {self.descendent_interest},
+    identifiers = {self.identifiers},
+    notes = {self.notes},
+    sources = {self.sources},
+    multimedia_links = {self.multimedia_links}
+)
+"""
+
+
+class Repository(NamedTuple):
+    xref: RepositoryXref = Void.REPO
+    name: str = ''
+    address: Address | None = None
+    phones: Any = None
+    emails: Any = None
+    faxes: Any = None
+    wwws: Any = None
+    notes: Any = None
+    identifiers: Any = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            DefCheck.verify_type(self.xref, RepositoryXref)
+            and DefCheck.verify_type(self.name, str)
+            and DefCheck.verify_type(self.address, Address | None)
+            and DefCheck.verify_tuple_type(self.emails, str)
+            and DefCheck.verify_tuple_type(self.faxes, str)
+            and DefCheck.verify_tuple_type(self.wwws, str)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+        )
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = self.xref.ged(level)
+        if self.validate():
+            pass
+        return lines
+
+
+class SharedNote(NamedTuple):
+    xref: SharedNoteXref = Void.SNOTE
+    text: str = ''
+    mime: MediaType = MediaType.NONE
+    language: str = String.UNDETERMINED
+    translations: Any = None
+    sources: Any = None
+    identifiers: Any = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            DefCheck.verify_type(self.xref, SharedNoteXref)
+            and DefCheck.verify_type(self.text, str)
+            and DefCheck.verify_enum(self.mime.value, MediaType)
+            and DefCheck.verify_type(self.language, str)
+            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
+            and DefCheck.verify_tuple_type(self.sources, Source)
+            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+        )
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = self.xref.ged(level)
+        if self.validate():
             pass
         return lines
 

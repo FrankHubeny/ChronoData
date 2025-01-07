@@ -45,6 +45,7 @@ __all__ = [
     'SubmitterXref',
 ]
 
+
 class Xref:
     def __init__(self, name: str):
         """Initialize an instance of the class.
@@ -55,6 +56,8 @@ class Xref:
         self.fullname: str = name
         self.name: str = name.replace('@', '').replace('_', ' ')
         self.tag: Tag = Tag.NONE
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -75,16 +78,19 @@ class FamilyXref(Xref):
 
     This class is not instantiated directly, but only through
     the `chronodata.build.family_xref()` method.
-    
+
     Args:
         name: The name of the identifier.
 
     See Also:
         chronodata.build.family_xref()
     """
+
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.FAM
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
 
 class IndividualXref(Xref):
@@ -106,6 +112,9 @@ class IndividualXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.INDI
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
+        
 
 
 class MultimediaXref(Xref):
@@ -127,6 +136,9 @@ class MultimediaXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.OBJE
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
+        
 
 
 class RepositoryXref(Xref):
@@ -148,6 +160,8 @@ class RepositoryXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.REPO
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
 
 class SharedNoteXref(Xref):
@@ -169,6 +183,8 @@ class SharedNoteXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.SNOTE
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
 
 class SourceXref(Xref):
@@ -190,6 +206,8 @@ class SourceXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.SOUR
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
 
 class SubmitterXref(Xref):
@@ -211,3 +229,16 @@ class SubmitterXref(Xref):
     def __init__(self, name: str):
         super().__init__(name)
         self.tag = Tag.SUBM
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
+
+
+class Void:
+    NAME: str = '@VOID@'
+    FAM: FamilyXref = FamilyXref(NAME)
+    INDI: IndividualXref = IndividualXref(NAME)
+    OBJE: MultimediaXref = MultimediaXref(NAME)
+    REPO: RepositoryXref = RepositoryXref(NAME)
+    SNOTE: SharedNoteXref = SharedNoteXref(NAME)
+    SOUR: SourceXref = SourceXref(NAME)
+    SUBM: SubmitterXref = SubmitterXref(NAME)

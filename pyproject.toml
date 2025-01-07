@@ -43,7 +43,6 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  #"astropy>=6.1.6",
   "json>=2.0.9",
   "matplotlib>=3.8.4",
   "numpy>=2.0.2",
@@ -70,6 +69,7 @@ addopts = [
   "--doctest-modules",
 ]
 xfail_strict = true
+faulthandler_timeout = 5
 filterwarnings = ["error"]
 log_cli_level = "INFO"
 testpaths = [

@@ -105,7 +105,7 @@ class DefTag:
     def taginfo(
         level: int,
         tag: Tag,
-        info: str = '',
+        payload: str = '',
         extra: str = '',
     ) -> str:
         """Return a GEDCOM formatted line for the information and level.
@@ -135,47 +135,66 @@ class DefTag:
         """
 
         if extra == '':
-            if info == '':
+            if payload == '':
                 return f'{level} {tag.value}\n'
-            return f'{level} {tag.value} {DefTag.clean_input(info)}\n'
-        return f'{level} {tag.value} {DefTag.clean_input(info)} {DefTag.clean_input(extra)}\n'
+            return f'{level} {tag.value} {DefTag.clean_input(payload)}\n'
+        return f'{level} {tag.value} {DefTag.clean_input(payload)} {DefTag.clean_input(extra)}\n'
 
     # @staticmethod
-    # def taglanguage(level: int, language: str, dictname: dict[str, str]) -> str:
-    #     if language in dictname.values():
-    #         return DefTag.taginfo(level, Tag.LANG, language)
-    #     return DefTag.taginfo(level, Tag.LANG, dictname[language])
+    # def contact_info(
+    #     level: int = 1,
+    #     phones: Any = None,
+    #     emails: Any = None,
+    #     faxes: Any = None,
+    #     wwws: Any = None,
+    # ) -> str:
+    #     lines: str = ''
+    #     if phones is not None:
+    #         for phone in phones:
+    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.PHON, phone)])
+    #     if emails is not None:
+    #         for email in emails:
+    #             lines = ''.join(
+    #                 [lines, DefTag.taginfo(level, Tag.EMAIL, email)]
+    #             )
+    #     if faxes is not None:
+    #         for fax in faxes:
+    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.FAX, fax)])
+    #     if wwws is not None:
+    #         for www in wwws:
+    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.WWW, www)])
+    #     return lines
 
     @staticmethod
-    def contact_info(
-        level: int = 1,
-        phones: Any = None,
-        emails: Any = None,
-        faxes: Any = None,
-        wwws: Any = None,
+    def list_to_str(
+        lines: str, level: int, items: list[Any], flag: str = ''
     ) -> str:
-        lines: str = ''
-        if phones is not None:
-            for phone in phones:
-                lines = ''.join([lines, DefTag.taginfo(level, Tag.PHON, phone)])
-        if emails is not None:
-            for email in emails:
-                lines = ''.join(
-                    [lines, DefTag.taginfo(level, Tag.EMAIL, email)]
-                )
-        if faxes is not None:
-            for fax in faxes:
-                lines = ''.join([lines, DefTag.taginfo(level, Tag.FAX, fax)])
-        if wwws is not None:
-            for www in wwws:
-                lines = ''.join([lines, DefTag.taginfo(level, Tag.WWW, www)])
-        return lines
+        """Append the GEDCOM lines from a list of NamedTuples to the GEDCOM file.
 
-    @staticmethod
-    def list_to_str(lines: str, level: int, items: list[Any], flag: bool = False) -> str:
+        Example:
+            >>> from chronodata.methods import DefTag
+            >>> from chronodata.enums import Tag
+            >>> from chronodata.store import Note
+            >>> lines = ''
+            >>> note1 = Note('This is the first note')
+            >>> note2 = Note('This is the second note')
+            >>> notes = [note1, note2,]
+            >>> lines = DefTag.list_to_str(lines, 1, notes)
+            >>> print(lines)
+            1 NOTE This is the first note
+            1 NOTE This is the second note
+            <BLANKLINE>
+
+        Args:
+            lines: The already constructed GEDCOM file that will be appended to.
+            level: The GEDCOM level of the structure.
+            items: The list of NamedTuples to append to `lines`.
+            flag: An optional flag that will be passed to the `.ged` method of the
+                NamedTuple which will modify its processing.
+        """
         if len(items) > 0:
             for item in items:
-                if flag:
+                if flag != '':
                     lines = ''.join([lines, item.ged(level, flag)])
                 else:
                     lines = ''.join([lines, item.ged(level)])
@@ -183,15 +202,59 @@ class DefTag:
 
     @staticmethod
     def empty_to_str(lines: str, level: int, tag: Tag) -> str:
+        """Join a GEDCOM line that has only a level and a tag to a string.
+
+        This method hides the join operation.
+
+        Example:
+            >>> from chronodata.methods import DefTag
+            >>> from chronodata.enums import Tag
+            >>> lines = ''
+            >>> line = DefTag.empty_to_str(lines, 1, Tag.MAP)
+            >>> print(line)
+            1 MAP
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix of the returned string.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+        
+        """
         return ''.join([lines, DefTag.taginfo(level, tag)])
 
     @staticmethod
     def str_to_str(
-        lines: str, level: int, tag: Tag, info: str, extra: str = ''
+        lines: str, level: int, tag: Tag, payload: str, extra: str = ''
     ) -> str:
-        if info != '':
-            return ''.join([lines, DefTag.taginfo(level, tag, info, extra)])
-        return ''
+        """Join a GEDCOM line to a string.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line and the check that this should only
+        be done if the payload is not empty.
+        
+        Example:
+            >>> from chronodata.enums import Tag
+            >>> from chronodata.methods import DefTag
+            >>> lines = '1 MAP\\n'
+            >>> lines = DefTag.str_to_str(lines, 2, Tag.LATI, 'N30.0')
+            >>> lines = DefTag.str_to_str(lines, 2, Tag.LONG, 'W30.0')
+            >>> print(lines)
+            1 MAP
+            2 LATI N30.0
+            2 LONG W30.0
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            info: The payload stored in this tagged line.
+            extra: Optional extra payload to be stored on the same line.
+        """
+        if payload != '':
+            return ''.join([lines, DefTag.taginfo(level, tag, payload, extra)])
+        return lines
 
     @staticmethod
     def clean_input(input: str) -> str:
@@ -256,46 +319,101 @@ class DefCheck:
 
     @staticmethod
     def verify_choice(value: str, choice: frozenset[str]) -> bool:
-        """Check if the value is one to choose from."""
+        """Check if the value is available to choose from.
+
+        Some GEDCOM structures involve more than one tag.  The permitted
+        tags are in an enumeration set.  This method validates that
+        the choice the user made was in the enumeration set.
+
+        Example:
+            This test shows that the value of Tag.GIVN which is "GIVN" is in
+            the set of accepted values for a Personal Name Piece structure.
+            >>> from chronodata.methods import DefCheck
+            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Choice
+            >>> DefCheck.verify_choice(Tag.GIVN.value, Choice.PERSONAL_NAME_PIECE)
+            True
+
+        Args:
+            value: The value of the Tag, not the name of the Tag itself.
+            choice: The set the available choices for the value.
+
+        Returns:
+            True: If the value of the Tag is in the available choices.
+            False: If the value of the Tag is not in the available choices.
+        """
         if value not in choice:
             raise ValueError(Msg.NOT_VALID_CHOICE.format(value, choice))
         return True
 
-    @staticmethod
-    def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
-        """Check if the value is in the proper dictionary."""
-        DefCheck.verify_type(value, str)
-        if (
-            value != ''
-            and value not in dictionary
-            and value not in dictionary.values()
-        ):
-            raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
-        return True
-    
+    # @staticmethod
+    # def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
+    #     """Check if the value is in the proper dictionary."""
+    #     DefCheck.verify_type(value, str)
+    #     if (
+    #         value != ''
+    #         and value not in dictionary
+    #         and value not in dictionary.values()
+    #     ):
+    #         raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
+    #     return True
+
     @staticmethod
     def display_dictionary(dictionary: dict[str, str]) -> pd.DataFrame:
         pd.set_option('display.max_rows', None)
-        return pd.DataFrame.from_dict(dictionary, orient='index', columns=['Value'])
+        return pd.DataFrame.from_dict(
+            dictionary, orient='index', columns=['Value']
+        )
 
-    @staticmethod
-    def get_dict_key_values(query: str, dictionary: dict[str, str]) -> list[str]:
-        """Return all items found in the dictionary matching either key or value."""
-        found: list[str] = []
-        if query in dictionary:
-            found.append(''.join([query, ': ', dictionary[query]]))
-        for item in dictionary.items():
-            if query == item[1]:
-                found.append(''.join([item[0], ': ', item[1]]))
-        # if query in dictionary.values():
-        #     for key in dictionary.items():
-        #         if dictionary[key] == query:
-        #             found.append(''.join([str(key), ': ', str(query)]))
-        return found
+    # @staticmethod
+    # def get_dict_key_values(
+    #     query: str, dictionary: dict[str, str]
+    # ) -> list[str]:
+    #     """Return all items found in the dictionary matching either key or value."""
+    #     found: list[str] = []
+    #     if query in dictionary:
+    #         found.append(''.join([query, ': ', dictionary[query]]))
+    #     for item in dictionary.items():
+    #         if query == item[1]:
+    #             found.append(''.join([item[0], ': ', item[1]]))
+    #     # if query in dictionary.values():
+    #     #     for key in dictionary.items():
+    #     #         if dictionary[key] == query:
+    #     #             found.append(''.join([str(key), ': ', str(query)]))
+    #     return found
 
     @staticmethod
     def verify_not_default(value: Any, default: Any) -> bool:
-        """Check that the value is not the default value."""
+        """Check that the value is not the default value.
+
+        If the value equals the default value in certain structures,
+        the structure is empty.  Further processing on it can stop.
+        In particular the output of its `ged` method is the empty string.
+
+        Examples:
+            The first example checks that the empty string is recognized
+            as the default value of the empty string.
+            >>> from chronodata.methods import DefCheck
+            >>> DefCheck.verify_not_default('', '')
+            Traceback (most recent call last):
+            ValueError: The value "" cannot be the default value "".
+
+            The second example checks that a non-empty string
+            is not identified as the default.
+            >>> DefCheck.verify_not_default('not empty', '')
+            True
+
+        Args:
+            value: What needs to be checked against the `default` value.
+            default: The value to compare with `value`.
+
+        Exception:
+            ValueError: An exception is raised if the value is the default value.
+
+        Returns:
+            True: If the value does not equal the default value and an exception
+                has not been raised.
+        """
         if value == default:
             raise ValueError(Msg.NOT_DEFAULT.format(value, default))
         return True
@@ -329,8 +447,7 @@ class DefDate:
         """Obtain the GEDCOM date and time from an ISO date and time or the
         current UTC timestamp in GEDCOM format.
 
-        Parameters
-        ----------
+        Args:
             iso_date: The ISO date or `now` for the current date and time.
             calendar: The GEDCOM calendar to use when returning the date.
             epoch: Return the epoch, `BCE`, for the GEDCOM date if it is before

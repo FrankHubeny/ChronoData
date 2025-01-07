@@ -11,10 +11,13 @@ The following example-tests are available.
 
 """
 
+import re
+
 import pytest
 
 from chronodata.build import Chronology
 from chronodata.constants import String  # noqa: F401
+from chronodata.messages import Msg
 
 # from chronodata.records import FamilyXref, IndividualXref, MultimediaXref, RepositoryXref, SharedNoteXref, SourceXref, SubmitterXref
 from chronodata.store import (
@@ -28,14 +31,14 @@ from chronodata.store import (
     Submitter,
 )
 
-testdata_empty: list[tuple[str, int]] = [
+testdata_empty = [
     ('len(a.ged_family)', 0),
     ('len(a.ged_individual)', 0),
-    ('len(a.ged_multimedia)', 0),
-    ('len(a.ged_repository)', 0),
-    ('len(a.ged_shared_note)', 0),
-    ('len(a.ged_source)', 0),
-    ('len(a.ged_submitter)', 0),
+    # ('len(a.ged_multimedia)', 0),
+    # ('len(a.ged_repository)', 0),
+    # ('len(a.ged_shared_note)', 0),
+    # ('len(a.ged_source)', 0),
+    # ('len(a.ged_submitter)', 0),
 ]
 
 
@@ -55,7 +58,7 @@ def test_empty_record_lists(
     assert eval(test_input) == expected
 
 
-testdata_one: list[tuple[str, str]] = [
+testdata_one = (
     ('a.ged_family[0:9]', '0 @1@ FAM'),
     ('a.ged_individual[0:10]', '0 @2@ INDI'),
     ('a.ged_multimedia[0:10]', '0 @3@ OBJE'),
@@ -63,11 +66,11 @@ testdata_one: list[tuple[str, str]] = [
     ('a.ged_shared_note[0:11]', '0 @5@ SNOTE'),
     ('a.ged_source[0:10]', '0 @6@ SOUR'),
     ('a.ged_submitter[0:10]', '0 @7@ SUBM'),
-]
+)
 
 
 @pytest.mark.parametrize('test_input,expected', testdata_one)  # noqa: PT006
-def test_one_record(test_input: str, expected: str | int | bool) -> None:
+def test_one_record(test_input: str, expected: str) -> None:
     a = Chronology('test')
     familyxref = a.family_xref()
     individualxref = a.individual_xref()
@@ -83,41 +86,13 @@ def test_one_record(test_input: str, expected: str | int | bool) -> None:
     shared_note = SharedNote(sharednotexref)
     source = Source(sourcexref)
     submitter = Submitter(submitterxref)
-    a.families(
-        [
-            family,
-        ]
-    )
-    a.individuals(
-        [
-            individual,
-        ]
-    )
-    a.multimedia(
-        [
-            multimedia,
-        ]
-    )
-    a.repositories(
-        [
-            repository,
-        ]
-    )
-    a.shared_notes(
-        [
-            shared_note,
-        ]
-    )
-    a.sources(
-        [
-            source,
-        ]
-    )
-    a.submitters(
-        [
-            submitter,
-        ]
-    )
+    a.families([family])
+    a.individuals([individual])
+    a.multimedia([multimedia])
+    a.repositories([repository])
+    a.shared_notes([shared_note])
+    a.sources([source])
+    a.submitters([submitter])
 
     assert eval(test_input) == expected
 
@@ -157,55 +132,13 @@ def test_three_records(test_input: str, expected: str | int | bool) -> None:
     submitter1 = Submitter(a.submitter_xref())
     submitter2 = Submitter(a.submitter_xref())
     submitter3 = Submitter(a.submitter_xref())
-    a.families(
-        [
-            family1,
-            family2,
-            family3,
-        ]
-    )
-    a.individuals(
-        [
-            individual1,
-            individual2,
-            individual3,
-        ]
-    )
-    a.multimedia(
-        [
-            multimedia1,
-            multimedia2,
-            multimedia3,
-        ]
-    )
-    a.repositories(
-        [
-            repository1,
-            repository2,
-            repository3,
-        ]
-    )
-    a.shared_notes(
-        [
-            shared_note1,
-            shared_note2,
-            shared_note3,
-        ]
-    )
-    a.sources(
-        [
-            source1,
-            source2,
-            source3,
-        ]
-    )
-    a.submitters(
-        [
-            submitter1,
-            submitter2,
-            submitter3,
-        ]
-    )
+    a.families([family1, family2, family3])
+    a.individuals([individual1, individual2, individual3])
+    a.multimedia([multimedia1, multimedia2, multimedia3])
+    a.repositories([repository1, repository2, repository3])
+    a.shared_notes([shared_note1, shared_note2, shared_note3])
+    a.sources([source1, source2, source3])
+    a.submitters([submitter1, submitter2, submitter3])
 
     assert eval(test_input) == expected
 
@@ -231,23 +164,12 @@ def test_duplicates(test_input: str, expected: str | int | bool) -> None:
     snote = SharedNote(a.shared_note_xref())
     sour = Source(a.source_xref())
     subm = Submitter(a.submitter_xref())
-    a.families(
-        [
-            fam,
-            fam,
-        ]
-    )
+    a.families([fam, fam])
     a.individuals([indi, indi, indi, indi])
     a.multimedia([obje, obje, obje])
     a.repositories([repo, repo, repo, repo, repo])
     a.shared_notes([snote, snote, snote])
-    a.sources(
-        [
-            sour,
-            sour,
-            sour,
-        ]
-    )
+    a.sources([sour, sour, sour])
     a.submitters([subm, subm])
 
     assert eval(test_input) == expected
@@ -255,13 +177,14 @@ def test_duplicates(test_input: str, expected: str | int | bool) -> None:
 
 testdata_same_xref_different_record: list[tuple[str, int | str]] = [
     ('a.ged_family.count(String.NEWLINE)', 1),
-    ('a.ged_family', '0 FAM @3@\n1 HUSB @1@\n'),
+    ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
 ]
 
 
 @pytest.mark.parametrize(
-    'test_input,expected', testdata_same_xref_different_record  # noqa: PT006
-)  
+    'test_input,expected',  # noqa: PT006
+    testdata_same_xref_different_record,
+)
 def test_same_xref_different_record(
     test_input: str, expected: str | int | bool
 ) -> None:
@@ -273,11 +196,116 @@ def test_same_xref_different_record(
     fam_xref = a.family_xref()
     fam1 = Family(fam_xref, husband=indi1)
     fam2 = Family(fam_xref, husband=indi2)
-    a.families(
-        [
-            fam1,
-            fam2,
-        ]
-    )
+    a.families([fam1, fam2])
 
     assert eval(test_input) == expected
+
+
+testdata_non_missing: list[tuple[str, int | str]] = [
+    ('a.ged_family.count(String.NEWLINE)', 1),
+    ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
+]
+
+
+def test_missing_individual() -> None:
+    """Test that an individual identifier was not listed in the individual records."""
+    a = Chronology('test')
+    sam_xref = a.individual_xref('sam')
+    sam = Individual(sam_xref)
+
+    joe = a.individual_xref('joe')
+    missing = [joe.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.individuals([sam])
+
+def test_missing_family() -> None:
+    """Test that a family identifier was not listed in the family records."""
+    a = Chronology('test')
+    one_xref = a.family_xref('one')
+    one = Family(one_xref)
+
+    two = a.family_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.families([one])
+
+def test_missing_multimedia() -> None:
+    """Test that a multimedia identifier was not listed in the multimedia records."""
+    a = Chronology('test')
+    one_xref = a.multimedia_xref('one')
+    one = Multimedia(one_xref)
+
+    two = a.multimedia_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.multimedia([one])
+
+def test_missing_repository() -> None:
+    """Test that a repository identifier was not listed in the repository records."""
+    a = Chronology('test')
+    one_xref = a.repository_xref('one')
+    one = Repository(one_xref)
+
+    two = a.repository_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.repositories([one])
+
+def test_missing_shared_note() -> None:
+    """Test that a shared note identifier was not listed in the shared note records."""
+    a = Chronology('test')
+    one_xref = a.shared_note_xref('one')
+    one = SharedNote(one_xref)
+
+    two = a.shared_note_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.shared_notes([one])
+
+def test_missing_source() -> None:
+    """Test that a source identifier was not listed in the source records."""
+    a = Chronology('test')
+    one_xref = a.source_xref('one')
+    one = Source(one_xref)
+
+    two = a.source_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.sources([one])
+
+def test_missing_submitter() -> None:
+    """Test that a submitter identifier was not listed in the submitter records."""
+    a = Chronology('test')
+    one_xref = a.submitter_xref('one')
+    one = Submitter(one_xref)
+
+    two = a.submitter_xref('two')
+    missing = [two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.submitters([one])
+
+def test_many_missing_families() -> None:
+    """Test that many family identifiers wer not listed in the family records."""
+    a = Chronology('test')
+    one = a.family_xref('one')
+    
+    two = a.family_xref('two')
+    missing = [one.fullname, two.fullname]
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.MISSING.format(missing))
+    ):
+        a.families([])

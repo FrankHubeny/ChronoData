@@ -10,6 +10,7 @@ import pytest
 
 from chronodata.build import Chronology
 from chronodata.messages import Msg
+from chronodata.records import Void
 
 testdata = [
     # TEST Initial counter value.
@@ -78,8 +79,8 @@ def test_counter(test_input: str, expected: str | int | bool) -> None:
 def test_use_empty_identifier() -> None:
     """Test that the empty identifier cannot be used."""
     a = Chronology('test')
-    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format('@0@', '0')):
-        a._counter(a.individual_xreflist, '0')
+    with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(Void.NAME, 'VOID')):
+        a._counter(a.individual_xreflist, 'VOID')
 
 
 def test_reused_identifier() -> None:

@@ -18,6 +18,33 @@ References:
     - [RealPython Tutorial](https://realpython.com/python-enum/)
 """
 
+__all__ = [
+    'Adop',
+    'ApproxDate',
+    'EvenAttr',
+    'Event',
+    'FamAttr',
+    'FamEven',
+    'FamcStat',
+    'Id',
+    'IndiAttr',
+    'IndiEven',
+    'Media',
+    'MediaType',
+    'NameType',
+    'Pedi',
+    'Quay',
+    'RangeDate',
+    'Record',
+    'Resn',
+    'RestrictDate',
+    'Role',
+    'Sex',
+    'Stat',
+    'Tag',
+
+]
+
 from enum import Enum
 
 

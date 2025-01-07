@@ -15,7 +15,7 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
-from collections import OrderedDict
+from typing import Any
 
 from chronodata.constants import String
 from chronodata.messages import Msg
@@ -28,6 +28,7 @@ from chronodata.records import (
     SharedNoteXref,
     SourceXref,
     SubmitterXref,
+    Void,
 )
 from chronodata.store import (
     Family,
@@ -53,13 +54,13 @@ class Chronology(Base):
     ) -> None:
         super().__init__(name, filename, calendar, log)
         self.xref_counter: int = 1
-        self.family_xreflist: list[str] = ['@0@']
-        self.individual_xreflist: list[str] = ['@0@']
-        self.multimedia_xreflist: list[str] = ['@0@']
-        self.repository_xreflist: list[str] = ['@0@']
-        self.shared_note_xreflist: list[str] = ['@0@']
-        self.source_xreflist: list[str] = ['@0@']
-        self.submitter_xreflist: list[str] = ['@0@']
+        self.family_xreflist: list[str] = [Void.NAME]
+        self.individual_xreflist: list[str] = [Void.NAME]
+        self.multimedia_xreflist: list[str] = [Void.NAME]
+        self.repository_xreflist: list[str] = [Void.NAME]
+        self.shared_note_xreflist: list[str] = [Void.NAME]
+        self.source_xreflist: list[str] = [Void.NAME]
+        self.submitter_xreflist: list[str] = [Void.NAME]
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -564,15 +565,21 @@ class Chronology(Base):
         )
         return SubmitterXref(submitter_xref)
 
-    # def _gather(
-    #     self,
-    #     records: Any,
-    #     destination: str,
-    # ) -> None:
-    #     destination = ''
-    #     unique_list = list(OrderedDict.fromkeys(records))
-    #     for record in unique_list:
-    #         destination = ''.join([destination, record.ged()])
+    def _gather(self, records: list[Any], xref_list: list[str]) -> str:
+        destination = ''
+        unique_list: list[str] = []
+        for record in records:
+            if record.xref.fullname not in unique_list:
+                unique_list.append(record.xref.fullname)
+                destination = ''.join([destination, record.ged()])
+        missing = [
+            xref
+            for xref in xref_list
+            if xref not in unique_list and xref != Void.NAME
+        ]
+        if len(missing) > 0:
+            raise ValueError(Msg.MISSING.format(missing))
+        return destination
 
     def families(self, records: list[Family]) -> None:
         """Collect and store all family records for the chronology.
@@ -630,11 +637,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_family)
-        self.ged_family = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_family = ''.join([self.ged_family, record.ged()])
+        self.ged_family = self._gather(records, self.family_xreflist)
 
     def individuals(self, records: list[Individual]) -> None:
         """Collect and store all individual records for the chronology.
@@ -682,11 +685,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_individual)
-        self.ged_individual = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_individual = ''.join([self.ged_individual, record.ged()])
+        self.ged_individual = self._gather(records, self.individual_xreflist)
 
     def multimedia(self, records: list[Multimedia]) -> None:
         """Collect and store all multimedia records for the chronology.
@@ -734,11 +733,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_multimedia)
-        self.ged_multimedia = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_multimedia = ''.join([self.ged_multimedia, record.ged()])
+        self.ged_multimedia = self._gather(records, self.multimedia_xreflist)
 
     def repositories(self, records: list[Repository]) -> None:
         """Collect and store all repository records for the chronology.
@@ -786,11 +781,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_repository)
-        self.ged_repository = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_repository = ''.join([self.ged_repository, record.ged()])
+        self.ged_repository = self._gather(records, self.repository_xreflist)
 
     def shared_notes(self, records: list[SharedNote]) -> None:
         """Collect and store all shared note records for the chronology.
@@ -838,11 +829,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_shared_note)
-        self.ged_shared_note = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_shared_note = ''.join([self.ged_shared_note, record.ged()])
+        self.ged_shared_note = self._gather(records, self.shared_note_xreflist)
 
     def sources(self, records: list[Source]) -> None:
         """Collect and store all source records for the chronology.
@@ -890,11 +877,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_source)
-        self.ged_source = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_source = ''.join([self.ged_source, record.ged()])
+        self.ged_source = self._gather(records, self.source_xreflist)
 
     def submitters(self, records: list[Submitter]) -> None:
         """Collect and store all submitter records for the chronology.
@@ -942,11 +925,7 @@ class Chronology(Base):
             - `shared_notes`: gather shared notes records.
             - `sources`: gather source records.
         """
-        # self._gather(records, self.ged_submitter)
-        self.ged_submitter = ''
-        unique_list = list(OrderedDict.fromkeys(records))
-        for record in unique_list:
-            self.ged_submitter = ''.join([self.ged_submitter, record.ged()])
+        self.ged_submitter = self._gather(records, self.submitter_xreflist)
 
     def header(self, ged_header: Header) -> None:
         """Collect and store the header record.
