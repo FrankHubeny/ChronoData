@@ -983,16 +983,20 @@ class Association(NamedTuple):
         > 2 ASSO @I2@
         > 3 ROLE CLERGY
 
-        This differs from the outcome produced by ChronoData which displays the event
-        association before the individual association because the event association
-        precedes the association in the specification's argument list.
+        This differs from the outcome produced by `ChronoData` which displays the `BAPM`
+        baptismal event association with pointer `@I2@` before the individual association 
+        with pointer `@VOID@` because 
+        the event association preceded the individual association in the argument list.  
+        Both orderings record the same data under the individual with pointer `@I1@`.
 
         First import the required classes.
         >>> from chronodata.build import Chronology
         >>> from chronodata.enums import Role
         >>> from chronodata.store import Association, Individual
 
-        Next, create a chronology and the two individuals references.
+        Next, create a chronology and the two individuals references. 
+        There is no need to create an individual reference for Mr Stockdale
+        so we leave his pointer as `@VOID@`.
         >>> chron = Chronology('test')
         >>> individual = chron.individual_xref('I', initial=True)
         >>> clergy = chron.individual_xref('I', initial=True)
@@ -1470,13 +1474,15 @@ class Date(NamedTuple):
 
     The GEDCOM standard allows a week without specifying the other components.
 
-    Parameters
-    ----------
-    year
+    Parameters:
+        year
 
 
-    Example
-    -------
+    Examples:
+
+    Reference:
+        [GEDCOM DATE](https://gedcom.io/terms/v7/DATE)
+        [GEDCOM DATE type](https://gedcom.io/terms/v7/type-Date)
     """
 
     year: int = 0
@@ -1508,9 +1514,9 @@ class Date(NamedTuple):
         """
         lines: str = ''
         if self.validate():
-            day_str: str = (
-                str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
-            )
+            # day_str: str = (
+            #     str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
+            # )
             month_str: str = (
                 str(self.month)
                 if self.month > 9
@@ -1523,7 +1529,7 @@ class Date(NamedTuple):
                 )
             formatted_date: str = ''
             if self.day != 0:
-                formatted_date = ''.join([formatted_date, f' {day_str}'])
+                formatted_date = ''.join([formatted_date, f' {self.day!s}'])
             if self.month != 0:
                 formatted_date = ''.join(
                     [
@@ -1532,7 +1538,7 @@ class Date(NamedTuple):
                     ]
                 )
             if self.year != 0:
-                formatted_date = ''.join([formatted_date, f'{year_str}\n'])
+                formatted_date = ''.join([formatted_date, f' {year_str}\n']).strip()
             lines = DefTag.str_to_str(lines, level, Tag.DATE, formatted_date)
         return lines
 
@@ -2156,6 +2162,68 @@ class IndividualEvent(NamedTuple):
     """Store, validate and display a GEDCOM Individual Event Structure.
 
     Examples:
+        The GEDCOM specification offers the following example of the use of the `EVEN` event
+        tag.  Under the individual `@I1@` there are two events.  The first is a land lease
+        with a data of October 2, 1837.  The second is a lease of mining equipment with
+        a data of November 4, 1837.
+
+        > 0 @I1@ INDI
+        > 1 EVEN
+        > 2 TYPE Land Lease
+        > 2 DATE 2 OCT 1837
+        > 1 EVEN Mining equipment
+        > 2 TYPE Equipment Lease
+        > 2 DATE 4 NOV 1837
+
+        This example can be implemented as follows.
+
+        First import the needed classes.
+        >>> from chronodata.build import Chronology
+        >>> from chronodata.store import Individual, IndividualEvent
+
+        Next, create a Chronology and an individual with reference `@I1@`.
+        >>> chron = Chronology('event example')
+        >>> indi_i1_xref = chron.individual_xref('I1')
+
+        Finally, create the individual record for `@I1@` with two individual events
+        and display the results.
+        >>> indi_i1 = Individual(
+        ...     xref = indi_i1_xref,
+        ...     events = [
+        ...         IndividualEvent(
+        ...             tag = Tag.EVEN,
+        ...             text = 'Land Lease',
+        ...             event_detail = IndividualEventDetail(
+        ...                 event_detail = EventDetail(
+        ...                     date_value = DateValue(
+        ...                         Date(1837, 10, 2)
+        ...                     )
+        ...                 )
+        ...             )
+        ...         ),
+        ...         IndividualEvent(
+        ...             tag = Tag.EVEN,
+        ...             payload = 'Mining equipment',
+        ...             text = 'Equipment Lease',
+        ...             event_detail = IndividualEventDetail(
+        ...                 EventDetail(
+        ...                     date_value = DateValue(
+        ...                         Date(1837, 11, 4)
+        ...                     )
+        ...                 )
+        ...             )
+        ...         )
+        ...     ]
+        ... )
+        >>> print(indi_i1.ged(0))
+        0 @I1@ INDI
+        1 EVEN
+        2 TYPE Land Lease
+        2 DATE 2 OCT 1837
+        1 EVEN Mining equipment
+        2 TYPE Equipment Lease
+        2 DATE 4 NOV 1837
+        <BLANKLINE>
 
     Args:
         tag: Specifies the kind of event.
@@ -2167,12 +2235,13 @@ class IndividualEvent(NamedTuple):
         phrase: A phrase describing the adoption will be displayed only for the Tag.ADOP event.
 
     References:
+        [GEDCOM INDI-EVEN](https://gedcom.io/terms/v7/INDI-EVEN)
         [GEDCOM Individual Event Tags](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-events)
         [GEDCOM Individual Event Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE)
     """
 
     tag: Tag = Tag.NONE
-    payload: Literal['Y', ''] = 'Y'
+    payload: str = String.EMPTY
     text: str = String.EMPTY
     event_detail: IndividualEventDetail | None = None
     family_xref: FamilyXref = Void.FAM
@@ -2486,15 +2555,15 @@ class Family(NamedTuple):
                 for event in self.events:
                     lines = ''.join([lines, event.ged(level)])
             if self.husband != Husband(Void.INDI):
-                lines = ''.join([lines, self.husband.ged(level)])
+                lines = ''.join([lines, self.husband.ged(level+1)])
             if self.wife != Wife(Void.INDI):
-                lines = ''.join([lines, self.wife.ged(level)])
+                lines = ''.join([lines, self.wife.ged(level+1)])
             if self.children is not None:
                 for child in self.children:
-                    lines = ''.join([lines, child.ged(level)])
+                    lines = ''.join([lines, child.ged(level+1)])
             if self.associations is not None:
                 for association in self.associations:
-                    lines = ''.join([lines, association.ged(level)])
+                    lines = ''.join([lines, association.ged(level+1)])
             if self.submitters is not None:
                 for submitter in self.submitters:
                     lines = ''.join(
@@ -2502,19 +2571,19 @@ class Family(NamedTuple):
                     )
             if self.lds_spouse_sealings is not None:
                 for sealing in self.lds_spouse_sealings:
-                    lines = ''.join([lines, sealing.ged(level)])
+                    lines = ''.join([lines, sealing.ged(level+1)])
             if self.identifiers is not None:
                 for identifier in self.identifiers:
-                    lines = ''.join([lines, identifier.ged(level)])
+                    lines = ''.join([lines, identifier.ged(level+1)])
             if self.notes is not None:
                 for note in self.notes:
-                    lines = ''.join([lines, note.ged(level)])
+                    lines = ''.join([lines, note.ged(level+1)])
             if self.citations is not None:
                 for citation in self.citations:
-                    lines = ''.join([lines, citation.ged(level)])
+                    lines = ''.join([lines, citation.ged(level+1)])
             if self.multimedia_links is not None:
                 for multimedia_link in self.multimedia_links:
-                    lines = ''.join([lines, multimedia_link.ged(level)])
+                    lines = ''.join([lines, multimedia_link.ged(level+1)])
         return lines
 
 

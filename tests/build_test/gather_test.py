@@ -176,7 +176,7 @@ def test_duplicates(test_input: str, expected: str | int | bool) -> None:
 
 
 testdata_same_xref_different_record: list[tuple[str, int | str]] = [
-    ('a.ged_family.count(String.NEWLINE)', 1),
+    ('a.ged_family.count(String.NEWLINE)', 2),
     ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
 ]
 
@@ -199,12 +199,6 @@ def test_same_xref_different_record(
     a.families([fam1, fam2])
 
     assert eval(test_input) == expected
-
-
-testdata_non_missing: list[tuple[str, int | str]] = [
-    ('a.ged_family.count(String.NEWLINE)', 1),
-    ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
-]
 
 
 def test_missing_individual() -> None:
