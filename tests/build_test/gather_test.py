@@ -143,62 +143,62 @@ def test_three_records(test_input: str, expected: str | int | bool) -> None:
     assert eval(test_input) == expected
 
 
-testdata_duplicates: list[tuple[str, int]] = [
-    ('a.ged_family.count(String.NEWLINE)', 1),
-    ('a.ged_individual.count(String.NEWLINE)', 1),
-    ('a.ged_multimedia.count(String.NEWLINE)', 1),
-    ('a.ged_repository.count(String.NEWLINE)', 1),
-    ('a.ged_shared_note.count(String.NEWLINE)', 1),
-    ('a.ged_source.count(String.NEWLINE)', 1),
-    ('a.ged_submitter.count(String.NEWLINE)', 1),
-]
+# testdata_duplicates: list[tuple[str, int]] = [
+#     ('a.ged_family.count(String.NEWLINE)', 1),
+#     ('a.ged_individual.count(String.NEWLINE)', 1),
+#     ('a.ged_multimedia.count(String.NEWLINE)', 1),
+#     ('a.ged_repository.count(String.NEWLINE)', 1),
+#     ('a.ged_shared_note.count(String.NEWLINE)', 1),
+#     ('a.ged_source.count(String.NEWLINE)', 1),
+#     ('a.ged_submitter.count(String.NEWLINE)', 1),
+# ]
 
 
-@pytest.mark.parametrize('test_input,expected', testdata_duplicates)  # noqa: PT006
-def test_duplicates(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
-    fam = Family(a.family_xref())
-    indi = Individual(a.individual_xref())
-    obje = Multimedia(a.multimedia_xref())
-    repo = Repository(a.repository_xref())
-    snote = SharedNote(a.shared_note_xref())
-    sour = Source(a.source_xref())
-    subm = Submitter(a.submitter_xref())
-    a.families([fam, fam])
-    a.individuals([indi, indi, indi, indi])
-    a.multimedia([obje, obje, obje])
-    a.repositories([repo, repo, repo, repo, repo])
-    a.shared_notes([snote, snote, snote])
-    a.sources([sour, sour, sour])
-    a.submitters([subm, subm])
+# @pytest.mark.parametrize('test_input,expected', testdata_duplicates)  # noqa: PT006
+# def test_duplicates(test_input: str, expected: str | int | bool) -> None:
+#     a = Chronology('test')
+#     fam = Family(a.family_xref())
+#     indi = Individual(a.individual_xref())
+#     obje = Multimedia(a.multimedia_xref())
+#     repo = Repository(a.repository_xref())
+#     snote = SharedNote(a.shared_note_xref())
+#     sour = Source(a.source_xref())
+#     subm = Submitter(a.submitter_xref())
+#     a.families([fam, fam])
+#     a.individuals([indi, indi, indi, indi])
+#     a.multimedia([obje, obje, obje])
+#     a.repositories([repo, repo, repo, repo, repo])
+#     a.shared_notes([snote, snote, snote])
+#     a.sources([sour, sour, sour])
+#     a.submitters([subm, subm])
 
-    assert eval(test_input) == expected
-
-
-testdata_same_xref_different_record: list[tuple[str, int | str]] = [
-    ('a.ged_family.count(String.NEWLINE)', 2),
-    ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
-]
+#     assert eval(test_input) == expected
 
 
-@pytest.mark.parametrize(
-    'test_input,expected',  # noqa: PT006
-    testdata_same_xref_different_record,
-)
-def test_same_xref_different_record(
-    test_input: str, expected: str | int | bool
-) -> None:
-    a = Chronology('test')
-    indi_xref1 = a.individual_xref()
-    indi_xref2 = a.individual_xref()
-    indi1 = Husband(indi_xref1)
-    indi2 = Husband(indi_xref2)
-    fam_xref = a.family_xref()
-    fam1 = Family(fam_xref, husband=indi1)
-    fam2 = Family(fam_xref, husband=indi2)
-    a.families([fam1, fam2])
+# testdata_same_xref_different_record: list[tuple[str, int | str]] = [
+#     ('a.ged_family.count(String.NEWLINE)', 2),
+#     ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
+# ]
 
-    assert eval(test_input) == expected
+
+# @pytest.mark.parametrize(
+#     'test_input,expected',  # noqa: PT006
+#     testdata_same_xref_different_record,
+# )
+# def test_same_xref_different_record(
+#     test_input: str, expected: str | int | bool
+# ) -> None:
+#     a = Chronology('test')
+#     indi_xref1 = a.individual_xref()
+#     indi_xref2 = a.individual_xref()
+#     indi1 = Husband(indi_xref1)
+#     indi2 = Husband(indi_xref2)
+#     fam_xref = a.family_xref()
+#     fam1 = Family(fam_xref, husband=indi1)
+#     fam2 = Family(fam_xref, husband=indi2)
+#     a.families([fam1, fam2])
+
+#     assert eval(test_input) == expected
 
 
 def test_missing_individual() -> None:
@@ -214,6 +214,7 @@ def test_missing_individual() -> None:
     ):
         a.individuals([sam])
 
+
 def test_missing_family() -> None:
     """Test that a family identifier was not listed in the family records."""
     a = Chronology('test')
@@ -226,6 +227,7 @@ def test_missing_family() -> None:
         ValueError, match=re.escape(Msg.MISSING.format(missing))
     ):
         a.families([one])
+
 
 def test_missing_multimedia() -> None:
     """Test that a multimedia identifier was not listed in the multimedia records."""
@@ -240,6 +242,7 @@ def test_missing_multimedia() -> None:
     ):
         a.multimedia([one])
 
+
 def test_missing_repository() -> None:
     """Test that a repository identifier was not listed in the repository records."""
     a = Chronology('test')
@@ -252,6 +255,7 @@ def test_missing_repository() -> None:
         ValueError, match=re.escape(Msg.MISSING.format(missing))
     ):
         a.repositories([one])
+
 
 def test_missing_shared_note() -> None:
     """Test that a shared note identifier was not listed in the shared note records."""
@@ -266,6 +270,7 @@ def test_missing_shared_note() -> None:
     ):
         a.shared_notes([one])
 
+
 def test_missing_source() -> None:
     """Test that a source identifier was not listed in the source records."""
     a = Chronology('test')
@@ -278,6 +283,7 @@ def test_missing_source() -> None:
         ValueError, match=re.escape(Msg.MISSING.format(missing))
     ):
         a.sources([one])
+
 
 def test_missing_submitter() -> None:
     """Test that a submitter identifier was not listed in the submitter records."""
@@ -292,14 +298,99 @@ def test_missing_submitter() -> None:
     ):
         a.submitters([one])
 
+
 def test_many_missing_families() -> None:
     """Test that many family identifiers wer not listed in the family records."""
     a = Chronology('test')
     one = a.family_xref('one')
-    
+
     two = a.family_xref('two')
     missing = [one.fullname, two.fullname]
     with pytest.raises(
         ValueError, match=re.escape(Msg.MISSING.format(missing))
     ):
         a.families([])
+
+
+def test_duplicate_family() -> None:
+    """Test that an error is raised if a family cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    fam_one_xref = a.family_xref('one')
+    fam = Family(xref=fam_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(fam_one_xref.fullname)),
+    ):
+        a.families([fam, fam])
+
+
+def test_duplicate_individual() -> None:
+    """Test that an error is raised if an individual cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    indi_one_xref = a.individual_xref('one')
+    indi = Individual(xref=indi_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(indi_one_xref.fullname)),
+    ):
+        a.individuals([indi, indi])
+
+
+def test_duplicate_multimedia() -> None:
+    """Test that an error is raised if a multimedia cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    obje_one_xref = a.multimedia_xref('one')
+    obje = Multimedia(xref=obje_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(obje_one_xref.fullname)),
+    ):
+        a.multimedia([obje, obje])
+
+
+def test_duplicate_repository() -> None:
+    """Test that an error is raised if a repository cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    repo_one_xref = a.repository_xref('one')
+    repo = Repository(xref=repo_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(repo_one_xref.fullname)),
+    ):
+        a.repositories([repo, repo])
+
+
+def test_duplicate_shared_note() -> None:
+    """Test that an error is raised if a shared note cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    snote_one_xref = a.shared_note_xref('one')
+    snote = SharedNote(xref=snote_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(snote_one_xref.fullname)),
+    ):
+        a.shared_notes([snote, snote])
+
+
+def test_duplicate_source() -> None:
+    """Test that an error is raised if a source cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    sour_one_xref = a.source_xref('one')
+    sour = Source(xref=sour_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(sour_one_xref.fullname)),
+    ):
+        a.families([sour, sour])
+
+
+def test_duplicate_submitter() -> None:
+    """Test that an error is raised if a submitter cross-reference identifier is used twice."""
+    a = Chronology('duplicate')
+    subm_one_xref = a.submitter_xref('one')
+    subm = Submitter(xref=subm_one_xref)
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.DUPLICATE_RECORD.format(subm_one_xref.fullname)),
+    ):
+        a.families([subm, subm])

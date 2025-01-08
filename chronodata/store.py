@@ -27,6 +27,7 @@ __all__ = [
 ]
 
 import logging
+from textwrap import dedent
 from typing import Any, Literal, NamedTuple
 
 from chronodata.constants import Cal, Choice, String, Value
@@ -159,7 +160,7 @@ class Age(NamedTuple):
         1 AGE > 10y
         2 PHRASE Estimated
         <BLANKLINE>
-        >>> print(Age(10, 2, 1, 2).ged(2))
+        >>> print(Age(10, 2, 1, 2, '').ged(2))
         2 AGE 10y 2m 1w 2d
         <BLANKLINE>
 
@@ -190,7 +191,7 @@ class Age(NamedTuple):
     months: int = 0
     weeks: int = 0
     days: int = 0
-    greater_less_than: str = ''
+    greater_less_than: str = '>'
     phrase: str = ''
 
     def validate(self) -> bool:
@@ -984,9 +985,9 @@ class Association(NamedTuple):
         > 3 ROLE CLERGY
 
         This differs from the outcome produced by `ChronoData` which displays the `BAPM`
-        baptismal event association with pointer `@I2@` before the individual association 
-        with pointer `@VOID@` because 
-        the event association preceded the individual association in the argument list.  
+        baptismal event association with pointer `@I2@` before the individual association
+        with pointer `@VOID@` because
+        the event association preceded the individual association in the argument list.
         Both orderings record the same data under the individual with pointer `@I1@`.
 
         First import the required classes.
@@ -994,7 +995,7 @@ class Association(NamedTuple):
         >>> from chronodata.enums import Role
         >>> from chronodata.store import Association, Individual
 
-        Next, create a chronology and the two individuals references. 
+        Next, create a chronology and the two individuals references.
         There is no need to create an individual reference for Mr Stockdale
         so we leave his pointer as `@VOID@`.
         >>> chron = Chronology('test')
@@ -1427,6 +1428,19 @@ class Place(NamedTuple):
         [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
+
+
+    > n PLAC <List:Text>                         {1:1}  [g7:PLAC](https://gedcom.io/terms/v7/PLAC)
+    >   +1 FORM <List:Text>                      {0:1}  [g7:PLAC-FORM](https://gedcom.io/terms/v7/PLAC-FORM)
+    >   +1 LANG <Language>                       {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
+    >   +1 TRAN <List:Text>                      {0:M}  [g7:PLAC-TRAN](https://gedcom.io/terms/v7/PLAC-TRAN)
+    >      +2 LANG <Language>                    {1:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
+    >   +1 MAP                                   {0:1}  [g7:MAP](https://gedcom.io/terms/v7/MAP)
+    >      +2 LATI <Special>                     {1:1}  [g7:LATI](https://gedcom.io/terms/v7/LATI)
+    >      +2 LONG <Special>                     {1:1}  [g7:LONG](https://gedcom.io/terms/v7/LONG)
+    >   +1 EXID <Special>                        {0:M}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
+    >      +2 TYPE <Special>                     {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
 
     place: PlaceName = PlaceName(String.EMPTY)
@@ -1538,7 +1552,9 @@ class Date(NamedTuple):
                     ]
                 )
             if self.year != 0:
-                formatted_date = ''.join([formatted_date, f' {year_str}\n']).strip()
+                formatted_date = ''.join(
+                    [formatted_date, f' {year_str}\n']
+                ).strip()
             lines = DefTag.str_to_str(lines, level, Tag.DATE, formatted_date)
         return lines
 
@@ -1612,12 +1628,6 @@ class Time(NamedTuple):
         if self.validate():
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
-
-        # def ged(self, level: int = 1) -> str:
-        #     lines: str = ''
-        #     if self.validate():
-        #         pass
-        #     return lines
 
 
 class DateExact(NamedTuple):
@@ -1703,31 +1713,31 @@ class DateValue(NamedTuple):
         return lines
 
 
-# class DateTimeStatus(NamedTuple):
-#     date: Date = Date(0, 0, 0)
-#     time: Time = Time(0, 0, 0)
-#     status: str = ''
-
-#     def validate(self) -> bool:
-#         check: bool = (
-#             DefCheck.verify_type(self.status, str)
-#             and self.date.validate()
-#             and self.time.validate()
-#         )
-#         return check
-
-# def ged(self, level: int = 1) -> str:
-#     line: str = ''
-#     if self.validate():
-#         pass
-#     return line
-
-
 class EventDetail(NamedTuple):
-    """
+    """Store, validate and display a GEDCOM Event Detail.
 
     Reference:
         [GEDCOM Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL)
+
+    > n <<DATE_VALUE>>                           {0:1}
+    > n <<PLACE_STRUCTURE>>                      {0:1}
+    > n <<ADDRESS_STRUCTURE>>                    {0:1}
+    > n PHON <Special>                           {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+    > n EMAIL <Special>                          {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+    > n FAX <Special>                            {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+    > n WWW <Special>                            {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+    > n AGNC <Text>                              {0:1}  [g7:AGNC](https://gedcom.io/terms/v7/AGNC)
+    > n RELI <Text>                              {0:1}  [g7:RELI](https://gedcom.io/terms/v7/RELI)
+    > n CAUS <Text>                              {0:1}  [g7:CAUS](https://gedcom.io/terms/v7/CAUS)
+    > n RESN <List:Enum>                         {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
+    > n SDATE <DateValue>                        {0:1}  [g7:SDATE](https://gedcom.io/terms/v7/SDATE)
+    >   +1 TIME <Time>                           {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+    >   +1 PHRASE <Text>                         {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    > n <<ASSOCIATION_STRUCTURE>>                {0:M}
+    > n <<NOTE_STRUCTURE>>                       {0:M}
+    > n <<SOURCE_CITATION>>                      {0:M}
+    > n <<MULTIMEDIA_LINK>>                      {0:M}
+    > n UID <Special>                            {0:M}  [g7:UID]()
     """
 
     date_value: DateValue | None = None
@@ -1750,7 +1760,26 @@ class EventDetail(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = True
+        check: bool = (
+            DefCheck.verify_type(self.date_value, DateValue)
+            and DefCheck.verify_type(self.place, Place)
+            and DefCheck.verify_type(self.address, Address)
+            and DefCheck.verify_tuple_type(self.phones, str)
+            and DefCheck.verify_tuple_type(self.emails, str)
+            and DefCheck.verify_tuple_type(self.faxes, str)
+            and DefCheck.verify_tuple_type(self.wwws, str)
+            and DefCheck.verify_type(self.agency, str)
+            and DefCheck.verify_type(self.religion, str)
+            and DefCheck.verify_type(self.cause, str)
+            and DefCheck.verify_type(self.resn, str)
+            and DefCheck.verify_tuple_type(self.associations, Association)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(self.sources, Source)
+            and DefCheck.verify_tuple_type(
+                self.multimedia_links, MultimediaLink
+            )
+            and DefCheck.verify_tuple_type(self.uids, Id)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -1761,16 +1790,12 @@ class EventDetail(NamedTuple):
                 lines = ''.join([lines, self.date_value.ged(level)])
             if self.place is not None:
                 lines = ''.join([lines, self.place.ged(level)])
-            if self.address != Address([], '', '', '', ''):
-                lines = ''.join([lines, self.address.ged(level)])
-            for phone in self.phones:
-                lines = DefTag.str_to_str(lines, level, Tag.PHON, phone)
-            for email in self.emails:
-                lines = DefTag.str_to_str(lines, level, Tag.EMAIL, email)
-            for fax in self.faxes:
-                lines = DefTag.str_to_str(lines, level, Tag.FAX, fax)
-            for www in self.wwws:
-                lines = DefTag.str_to_str(lines, level, Tag.WWW, www)
+            # if self.address != Address([], '', '', '', ''):
+            lines = ''.join([lines, self.address.ged(level)])
+            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
             lines = DefTag.str_to_str(lines, level, Tag.AGNC, self.agency)
             lines = DefTag.str_to_str(lines, level, Tag.RELI, self.religion)
             lines = DefTag.str_to_str(lines, level, Tag.CAUS, self.cause)
@@ -1789,38 +1814,40 @@ class FamilyEventDetail(NamedTuple):
     Examples:
         >>> from chronodata.store import FamilyEventDetail
         >>> family_detail = FamilyEventDetail(
-        ...     husband_age=25,
-        ...     wife_age=24,
-        ...     husband_phrase='Happy',
-        ...     wife_phrase='Very happy',
+        ...     husband_age=Age(25, phrase='Happy'),
+        ...     wife_age=Age(24, phrase='Very happy'),
         ... )
         >>> print(family_detail.ged(1))
         1 HUSB
-        2 AGE 25
+        2 AGE > 25y
         3 PHRASE Happy
         1 WIFE
-        2 AGE 24
+        2 AGE > 24y
         3 PHRASE Very happy
         <BLANKLINE>
 
     References:
         [GEDCOM Family Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL)
+
+    > n HUSB                                     {0:1}  [g7:HUSB](https://gedcom.io/terms/v7/HUSB)
+    >   +1 AGE <Age>                             {1:1}  [g7:AGE](https://gedcom.io/terms/v7/AGE)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    > n WIFE                                     {0:1}  [g7:WIFE](https://gedcom.io/terms/v7/WIFE)
+    >   +1 AGE <Age>                             {1:1}  [g7:AGE](https://gedcom.io/terms/v7/AGE)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    > n <<EVENT_DETAIL>>                         {0:1}
     """
 
-    husband_age: int = 0
-    wife_age: int = 0
-    husband_phrase: str = String.EMPTY
-    wife_phrase: str = String.EMPTY
-    event_detail: Any = None
+    husband_age: Age | None = None
+    wife_age: Age | None = None
+    event_detail: EventDetail | None = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.husband_age, int)
-            and DefCheck.verify_type(self.wife_age, int)
-            and DefCheck.verify_type(self.husband_phrase, str)
-            and DefCheck.verify_type(self.wife_phrase, str)
-            and DefCheck.verify_type(self.event_detail, EventDetail)
+            DefCheck.verify_type(self.husband_age, Age | None)
+            and DefCheck.verify_type(self.wife_age, Age | None)
+            and DefCheck.verify_type(self.event_detail, EventDetail | None)
         )
         return check
 
@@ -1828,38 +1855,49 @@ class FamilyEventDetail(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.husband_age > 0:
+            if self.husband_age is not None:
                 lines = DefTag.empty_to_str(lines, level, Tag.HUSB)
-                lines = DefTag.str_to_str(
-                    lines, level + 1, Tag.AGE, str(self.husband_age)
-                )
-                if self.husband_phrase != String.EMPTY:
-                    lines = DefTag.str_to_str(
-                        lines, level + 2, Tag.PHRASE, self.husband_phrase
-                    )
-            if self.wife_age > 0:
+                lines = ''.join([lines, self.husband_age.ged(level + 1)])
+            if self.wife_age is not None:
                 lines = DefTag.empty_to_str(lines, level, Tag.WIFE)
-                lines = DefTag.str_to_str(
-                    lines, level + 1, Tag.AGE, str(self.wife_age)
-                )
-                if self.wife_phrase != String.EMPTY:
-                    lines = DefTag.str_to_str(
-                        lines, level + 2, Tag.PHRASE, self.wife_phrase
-                    )
+                lines = ''.join([lines, self.wife_age.ged(level + 1)])
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level)])
         return lines
 
 
 class FamilyAttribute(NamedTuple):
-    tag: str
-    attribute_type: str = ''
+    """Store, validate and display a GEDCOM Family Attribute.
+
+    Reference:
+        [GEDCOM Family Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_ATTRIBUTE_STRUCTURE)
+
+    > [
+    > n NCHI <Integer>                           {1:1}  [g7:FAM-NCHI](https://gedcom.io/terms/v7/FAM-NCHI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n RESI <Text>                              {1:1}  [g7:FAM-RESI](https://gedcom.io/terms/v7/FAM-RESI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n FACT <Text>                              {1:1}  [g7:FAM-FACT](https://gedcom.io/terms/v7/FAM-FACT)
+    >   +1 TYPE <Text>                           {1:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > ]
+    """
+
+    tag: Tag = Tag.NONE
+    payload: str = String.EMPTY
+    attribute_type: str = String.EMPTY
     family_event_detail: FamilyEventDetail | None = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.tag, str)
+            DefCheck.verify_type(self.tag, Tag)
+            and DefCheck.verify_enum(self.tag.value, Choice.FAMILY_ATTRIBUTE)
+            and DefCheck.verify_type(self.payload, str)
             and DefCheck.verify_type(self.attribute_type, str)
             and DefCheck.verify_type(
                 self.family_event_detail, FamilyEventDetail | None
@@ -1867,36 +1905,163 @@ class FamilyAttribute(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            pass
+        if self.tag.value != Tag.NONE.value and self.validate():
+            lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
+            lines = DefTag.str_to_str(
+                lines, level + 1, Tag.TYPE, self.attribute_type
+            )
+            if self.family_event_detail is not None:
+                lines = ''.join(
+                    [lines, self.family_event_detail.ged(level + 1)]
+                )
         return lines
 
 
 class FamilyEvent(NamedTuple):
-    event: str = ''
-    event_type: str = ''
+    """Store, validate and display a GEDCOM Family Event.
+
+    Examples:
+        Only the following tags can be used in this structure:
+        Tag.ANUL, Tag.CENS, Tag.DIV, Tag.DIVF, Tag.ENGA, Tag.MARB, Tag.MARC, Tag.MARL,
+        Tag.MARR, Tag.MARS, Tag.EVEN.  This example shows the error that
+        would result if a different tag is used once the NamedTuple is validated.
+        First, set up the situation for the error to occur.
+        >>> from chronodata.enums import Tag
+        >>> from chronodata.store import FamilyEvent
+        >>> event = FamilyEvent(Tag.DATE)
+
+        Next, evaluate `event`.
+        >>> event.validate()
+        Traceback (most recent call last):
+        ValueError: The tag DATE is not in the list of valid tags.
+
+        The `validate` method also checks that the Tag.EVEN cannot have an empty payload.
+        >>> event2 = FamilyEvent(Tag.EVEN)
+        >>> event2.validate()
+        Traceback (most recent call last):
+        ValueError: The event type for tag EVEN must have some value.
+
+    References:
+        [GEDCOM Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE)
+
+    > [
+    > n ANUL [Y|<NULL>]                          {1:1}  [g7:ANUL](https://gedcom.io/terms/v7/ANUL)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n CENS [Y|<NULL>]                          {1:1}  [g7:FAM-CENS](https://gedcom.io/terms/v7/FAM-CENS)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n DIV [Y|<NULL>]                           {1:1}  [g7:DIV](https://gedcom.io/terms/v7/DIV)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n DIVF [Y|<NULL>]                          {1:1}  [g7:DIVF](https://gedcom.io/terms/v7/DIVF)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n ENGA [Y|<NULL>]                          {1:1}  [g7:ENGA](https://gedcom.io/terms/v7/ENGA)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n MARB [Y|<NULL>]                          {1:1}  [g7:MARB](https://gedcom.io/terms/v7/MARB)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n MARC [Y|<NULL>]                          {1:1}  [g7:MARC](https://gedcom.io/terms/v7/MARC)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n MARL [Y|<NULL>]                          {1:1}  [g7:MARL](https://gedcom.io/terms/v7/MARL)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n MARR [Y|<NULL>]                          {1:1}  [g7:MARR](https://gedcom.io/terms/v7/MARR)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n MARS [Y|<NULL>]                          {1:1}  [g7:MARS](https://gedcom.io/terms/v7/MARS)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > |
+    > n EVEN <Text>                              {1:1}  [g7:FAM-EVEN](https://gedcom.io/terms/v7/FAM-EVEN)
+    >   +1 TYPE <Text>                           {1:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
+    > ]
+    """
+
+    tag: Tag = Tag.NONE
+    payload: str = String.OCCURRED
+    event_type: str = String.EMPTY
     event_detail: FamilyEventDetail | None = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
+        check_payload: bool = self.payload in {
+            String.OCCURRED,
+            String.EMPTY,
+        }
+        check_tag: bool = self.tag.value in {
+            Tag.ANUL.value,
+            Tag.CENS.value,
+            Tag.DIV.value,
+            Tag.DIVF.value,
+            Tag.ENGA.value,
+            Tag.MARB.value,
+            Tag.MARC.value,
+            Tag.MARL.value,
+            Tag.MARR.value,
+            Tag.MARS.value,
+        }
+        even: bool = self.event_type != String.EMPTY
         check: bool = (
-            DefCheck.verify_type(self.event, str)
+            DefCheck.verify_type(self.tag, Tag)
+            and DefCheck.verify_enum(self.tag.value, Choice.FAMILY_EVENT)
+            and DefCheck.verify_type(self.payload, str)
             and DefCheck.verify_type(self.event_type, str)
             and DefCheck.verify_type(
                 self.event_detail, FamilyEventDetail | None
             )
+            and DefCheck.verify(
+                check_tag,
+                check_payload,
+                Msg.TAG_PAYLOAD.format(self.tag.value),
+            )
+            and DefCheck.verify(
+                not check_tag, even, Msg.EMPTY_EVENT_TYPE.format(self.tag.value)
+            )
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            if self.payload == String.EMPTY:
+                lines = DefTag.empty_to_str(lines, level, self.tag)
+            else:
+                lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
+            lines = DefTag.str_to_str(
+                lines, level + 1, Tag.TYPE, self.event_type
+            )
+            if self.event_detail is not None:
+                lines = ''.join([lines, self.event_detail.ged(level + 1)])
         return lines
+
+    def code(self, detail: str = String.MIN) -> str:
+        preface: str = """
+            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE
+            from chronodata.constants import Choice
+            from chronodata.store import FamilyEvent
+
+            """
+        return dedent(f"""
+            {preface if detail == String.MAX else ''}
+        """)
 
 
 class Husband(NamedTuple):
@@ -1914,16 +2079,8 @@ class Husband(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = ''.join(
-                [lines, DefTag.taginfo(level, Tag.HUSB, str(self.xref))]
-            )
-            if self.phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
-                    ]
-                )
+            lines = DefTag.str_to_str(lines, level, Tag.HUSB, str(self.xref))
+            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -1942,16 +2099,8 @@ class Wife(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = ''.join(
-                [lines, DefTag.taginfo(level, Tag.WIFE, str(self.xref))]
-            )
-            if self.phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
-                    ]
-                )
+            lines = DefTag.str_to_str(lines, level, Tag.WIFE, str(self.xref))
+            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -1970,16 +2119,8 @@ class Child(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = ''.join(
-                [lines, DefTag.taginfo(level, Tag.CHIL, str(self.xref))]
-            )
-            if self.phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase),
-                    ]
-                )
+            lines = DefTag.str_to_str(lines, level, Tag.CHIL, str(self.xref))
+            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2106,6 +2247,10 @@ class IndividualEventDetail(NamedTuple):
 
     Reference:
         [GEDCOM Individual Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_DETAIL)
+
+    > n <<EVENT_DETAIL>>                         {1:1}
+    > n AGE <Age>                                {0:1}  [g7:AGE](https://gedcom.io/terms/v7/AGE)
+    >   +1 PHRASE <Text>                         {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
     event_detail: EventDetail | None = None
@@ -2135,6 +2280,70 @@ class IndividualEventDetail(NamedTuple):
 
 
 class IndividualAttribute(NamedTuple):
+    """Store, validate and display a GEDCOM Individual Attribute structure.
+
+    Reference:
+        [GEDCOM Individual Attribute Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_ATTRIBUTE_STRUCTURE)
+
+    > [
+    > n CAST <Text>                              {1:1}  [g7:CAST](https://gedcom.io/terms/v7/CAST)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n DSCR <Text>                              {1:1}  [g7:DSCR](https://gedcom.io/terms/v7/DSCR)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n EDUC <Text>                              {1:1}  [g7:EDUC](https://gedcom.io/terms/v7/EDUC)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n IDNO <Special>                           {1:1}  [g7:IDNO](https://gedcom.io/terms/v7/IDNO)
+    >   +1 TYPE <Text>                           {1:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n NATI <Text>                              {1:1}  [g7:NATI](https://gedcom.io/terms/v7/NATI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n NCHI <Integer>                           {1:1}  [g7:INDI-NCHI](https://gedcom.io/terms/v7/INDI-NCHI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n NMR <Integer>                            {1:1}  [g7:NMR](https://gedcom.io/terms/v7/NMR)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n OCCU <Text>                              {1:1}  [g7:OCCU](https://gedcom.io/terms/v7/OCCU)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n PROP <Text>                              {1:1}  [g7:PROP](https://gedcom.io/terms/v7/PROP)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n RELI <Text>                              {1:1}  [g7:INDI-RELI](https://gedcom.io/terms/v7/INDI-RELI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n RESI <Text>                              {1:1}  [g7:INDI-RESI](https://gedcom.io/terms/v7/INDI-RESI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n SSN <Special>                            {1:1}  [g7:SSN](https://gedcom.io/terms/v7/SSN)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n TITL <Text>                              {1:1}  [g7:INDI-TITL](https://gedcom.io/terms/v7/INDI-TITL)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n FACT <Text>                              {1:1}  [g7:INDI-FACT](https://gedcom.io/terms/v7/INDI-FACT)
+    >   +1 TYPE <Text>                           {1:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > ]
+    """
+
     tag: IndiAttr
     tag_type: str = ''
     event_detail: IndividualEventDetail | None = None
@@ -2188,32 +2397,26 @@ class IndividualEvent(NamedTuple):
         Finally, create the individual record for `@I1@` with two individual events
         and display the results.
         >>> indi_i1 = Individual(
-        ...     xref = indi_i1_xref,
-        ...     events = [
+        ...     xref=indi_i1_xref,
+        ...     events=[
         ...         IndividualEvent(
-        ...             tag = Tag.EVEN,
-        ...             text = 'Land Lease',
-        ...             event_detail = IndividualEventDetail(
-        ...                 event_detail = EventDetail(
-        ...                     date_value = DateValue(
-        ...                         Date(1837, 10, 2)
-        ...                     )
+        ...             tag=Tag.EVEN,
+        ...             text='Land Lease',
+        ...             event_detail=IndividualEventDetail(
+        ...                 event_detail=EventDetail(
+        ...                     date_value=DateValue(Date(1837, 10, 2))
         ...                 )
-        ...             )
+        ...             ),
         ...         ),
         ...         IndividualEvent(
-        ...             tag = Tag.EVEN,
-        ...             payload = 'Mining equipment',
-        ...             text = 'Equipment Lease',
-        ...             event_detail = IndividualEventDetail(
-        ...                 EventDetail(
-        ...                     date_value = DateValue(
-        ...                         Date(1837, 11, 4)
-        ...                     )
-        ...                 )
-        ...             )
-        ...         )
-        ...     ]
+        ...             tag=Tag.EVEN,
+        ...             payload='Mining equipment',
+        ...             text='Equipment Lease',
+        ...             event_detail=IndividualEventDetail(
+        ...                 EventDetail(date_value=DateValue(Date(1837, 11, 4)))
+        ...             ),
+        ...         ),
+        ...     ],
         ... )
         >>> print(indi_i1.ged(0))
         0 @I1@ INDI
@@ -2238,6 +2441,105 @@ class IndividualEvent(NamedTuple):
         [GEDCOM INDI-EVEN](https://gedcom.io/terms/v7/INDI-EVEN)
         [GEDCOM Individual Event Tags](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-events)
         [GEDCOM Individual Event Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE)
+
+    [
+    > n ADOP [Y|<NULL>]                          {1:1}  [g7:ADOP](https://gedcom.io/terms/v7/ADOP)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    >   +1 FAMC @<XREF:FAM>@                     {0:1}  [g7:ADOP-FAMC](https://gedcom.io/terms/v7/ADOP-FAMC)
+    >      +2 ADOP <Enum>                        {0:1}  [g7:FAMC-ADOP](https://gedcom.io/terms/v7/FAMC-ADOP)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    > |
+    > n BAPM [Y|<NULL>]                          {1:1}  [g7:BAPM](https://gedcom.io/terms/v7/BAPM)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n BARM [Y|<NULL>]                          {1:1}  [g7:BARM](https://gedcom.io/terms/v7/BARM)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n BASM [Y|<NULL>]                          {1:1}  [g7:BASM](https://gedcom.io/terms/v7/BASM)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n BIRT [Y|<NULL>]                          {1:1}  [g7:BIRT](https://gedcom.io/terms/v7/BIRT)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    >   +1 FAMC @<XREF:FAM>@                     {0:1}  [g7:FAMC](https://gedcom.io/terms/v7/FAMC)
+    > |
+    > n BLES [Y|<NULL>]                          {1:1}  [g7:BLES](https://gedcom.io/terms/v7/BLES)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n BURI [Y|<NULL>]                          {1:1}  [g7:BURI](https://gedcom.io/terms/v7/BURI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n CENS [Y|<NULL>]                          {1:1}  [g7:INDI-CENS](https://gedcom.io/terms/v7/INDI-CENS)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n CHR [Y|<NULL>]                           {1:1}  [g7:CHR](https://gedcom.io/terms/v7/CHR)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    >   +1 FAMC @<XREF:FAM>@                     {0:1}  [g7:FAMC](https://gedcom.io/terms/v7/FAMC)
+    > |
+    > n CHRA [Y|<NULL>]                          {1:1}  [g7:CHRA](https://gedcom.io/terms/v7/CHRA)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n CONF [Y|<NULL>]                          {1:1}  [g7:CONF](https://gedcom.io/terms/v7/CONF)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n CREM [Y|<NULL>]                          {1:1}  [g7:CREM](https://gedcom.io/terms/v7/CREM)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n DEAT [Y|<NULL>]                          {1:1}  [g7:DEAT](https://gedcom.io/terms/v7/DEAT)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n EMIG [Y|<NULL>]                          {1:1}  [g7:EMIG](https://gedcom.io/terms/v7/EMIG)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n FCOM [Y|<NULL>]                          {1:1}  [g7:FCOM](https://gedcom.io/terms/v7/FCOM)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n GRAD [Y|<NULL>]                          {1:1}  [g7:GRAD](https://gedcom.io/terms/v7/GRAD)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n IMMI [Y|<NULL>]                          {1:1}  [g7:IMMI](https://gedcom.io/terms/v7/IMMI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n NATU [Y|<NULL>]                          {1:1}  [g7:NATU](https://gedcom.io/terms/v7/NATU)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n ORDN [Y|<NULL>]                          {1:1}  [g7:ORDN](https://gedcom.io/terms/v7/ORDN)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n PROB [Y|<NULL>]                          {1:1}  [g7:PROB](https://gedcom.io/terms/v7/PROB)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n RETI [Y|<NULL>]                          {1:1}  [g7:RETI](https://gedcom.io/terms/v7/RETI)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n WILL [Y|<NULL>]                          {1:1}  [g7:WILL](https://gedcom.io/terms/v7/WILL)
+    >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > |
+    > n EVEN <Text>                              {1:1}  [g7:INDI-EVEN](https://gedcom.io/terms/v7/INDI-EVEN)
+    >   +1 TYPE <Text>                           {1:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
+    >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
+    > ]
     """
 
     tag: Tag = Tag.NONE
@@ -2297,6 +2599,8 @@ class IndividualEvent(NamedTuple):
 
 
 class Alias(NamedTuple):
+    """Store, validate and display a GEDCOM Alias structure."""
+
     xref: str
     phrase: str = ''
 
@@ -2307,11 +2611,12 @@ class Alias(NamedTuple):
         ) and DefCheck.verify_type(self.phrase, str)
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            lines = DefTag.str_to_str(lines, level, Tag.ALIA, self.xref)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2488,10 +2793,9 @@ class NonEvent(NamedTuple):
 
 
 class Family(NamedTuple):
-    """Generate a GEDCOM Family Record.
+    """Store, validate and display a GEDCOM Family Record.
 
-    Parameters:
-
+    Args:
     - `xref`: typed string obtained by running `chrono.family_xref()`.
     - `resn`: restriction codes with the default being no restriction.
     - `attributes`: a tuple of type Attribute.
@@ -2499,6 +2803,27 @@ class Family(NamedTuple):
     Reference:
         [GEDCOM record-FAM](https://gedcom.io/terms/v7/record-FAM)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
+
+    > n @XREF:FAM@ FAM                           {1:1}  [g7:record-FAM](https://gedcom.io/terms/v7/record-FAM)
+    >   +1 RESN <List:Enum>                      {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
+    >   +1 <<FAMILY_ATTRIBUTE_STRUCTURE>>        {0:M}
+    >   +1 <<FAMILY_EVENT_STRUCTURE>>            {0:M}
+    >   +1 <<NON_EVENT_STRUCTURE>>               {0:M}
+    >   +1 HUSB @<XREF:INDI>@                    {0:1}  [g7:FAM-HUSB](https://gedcom.io/terms/v7/FAM-HUSB)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >   +1 WIFE @<XREF:INDI>@                    {0:1}  [g7:FAM-WIFE](https://gedcom.io/terms/v7/FAM-WIFE)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >   +1 CHIL @<XREF:INDI>@                    {0:M}  [g7:CHIL](https://gedcom.io/terms/v7/CHIL)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >   +1 <<ASSOCIATION_STRUCTURE>>             {0:M}
+    >   +1 SUBM @<XREF:SUBM>@                    {0:M}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
+    >   +1 <<LDS_SPOUSE_SEALING>>                {0:M}
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<SOURCE_CITATION>>                   {0:M}
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
     xref: FamilyXref = Void.FAM
@@ -2555,15 +2880,15 @@ class Family(NamedTuple):
                 for event in self.events:
                     lines = ''.join([lines, event.ged(level)])
             if self.husband != Husband(Void.INDI):
-                lines = ''.join([lines, self.husband.ged(level+1)])
+                lines = ''.join([lines, self.husband.ged(level + 1)])
             if self.wife != Wife(Void.INDI):
-                lines = ''.join([lines, self.wife.ged(level+1)])
+                lines = ''.join([lines, self.wife.ged(level + 1)])
             if self.children is not None:
                 for child in self.children:
-                    lines = ''.join([lines, child.ged(level+1)])
+                    lines = ''.join([lines, child.ged(level + 1)])
             if self.associations is not None:
                 for association in self.associations:
-                    lines = ''.join([lines, association.ged(level+1)])
+                    lines = ''.join([lines, association.ged(level + 1)])
             if self.submitters is not None:
                 for submitter in self.submitters:
                     lines = ''.join(
@@ -2571,27 +2896,43 @@ class Family(NamedTuple):
                     )
             if self.lds_spouse_sealings is not None:
                 for sealing in self.lds_spouse_sealings:
-                    lines = ''.join([lines, sealing.ged(level+1)])
+                    lines = ''.join([lines, sealing.ged(level + 1)])
             if self.identifiers is not None:
                 for identifier in self.identifiers:
-                    lines = ''.join([lines, identifier.ged(level+1)])
+                    lines = ''.join([lines, identifier.ged(level + 1)])
             if self.notes is not None:
                 for note in self.notes:
-                    lines = ''.join([lines, note.ged(level+1)])
+                    lines = ''.join([lines, note.ged(level + 1)])
             if self.citations is not None:
                 for citation in self.citations:
-                    lines = ''.join([lines, citation.ged(level+1)])
+                    lines = ''.join([lines, citation.ged(level + 1)])
             if self.multimedia_links is not None:
                 for multimedia_link in self.multimedia_links:
-                    lines = ''.join([lines, multimedia_link.ged(level+1)])
+                    lines = ''.join([lines, multimedia_link.ged(level + 1)])
         return lines
 
 
 class Multimedia(NamedTuple):
-    """
+    """Store, validate and display a GECDOM Multimedia Record.
+
     Reference:
         [GEDCOM record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
+
+    > n @XREF:OBJE@ OBJE                         {1:1}  [g7:record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
+    >   +1 RESN <List:Enum>                      {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
+    >   +1 FILE <FilePath>                       {1:M}  [g7:FILE](https://gedcom.io/terms/v7/FILE)
+    >      +2 FORM <MediaType>                   {1:1}  [g7:FORM](https://gedcom.io/terms/v7/FORM)
+    >         +3 MEDI <Enum>                     {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
+    >            +4 PHRASE <Text>                {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >      +2 TITL <Text>                        {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
+    >      +2 TRAN <FilePath>                    {0:M}  [g7:FILE-TRAN](https://gedcom.io/terms/v7/FILE-TRAN)
+    >         +3 FORM <MediaType>                {1:1}  [g7:FORM](https://gedcom.io/terms/v7/FORM)
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<SOURCE_CITATION>>                   {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
     xref: MultimediaXref = Void.OBJE
@@ -2622,10 +2963,33 @@ class Multimedia(NamedTuple):
 
 
 class Source(NamedTuple):
-    """
+    """Store, validate and display a GEDCOM Source Record.
+
     Reference:
         [GEDCOM record-SOUR](https://gedcom.io/terms/v7/record-SOUR)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
+
+    > n @XREF:SOUR@ SOUR                         {1:1}  [g7:record-SOUR](https://gedcom.io/terms/v7/record-SOUR)
+    >   +1 DATA                                  {0:1}  [g7:DATA]()
+    >      +2 EVEN <List:Enum>                   {0:M}  [g7:DATA-EVEN]()
+    >         +3 DATE <DatePeriod>               {0:1}  [g7:DATA-EVEN-DATE]()
+    >            +4 PHRASE <Text>                {0:1}  [g7:PHRASE]()
+    >         +3 <<PLACE_STRUCTURE>>             {0:1}
+    >      +2 AGNC <Text>                        {0:1}  [g7:AGNC]()
+    >      +2 <<NOTE_STRUCTURE>>                 {0:M}
+    >   +1 AUTH <Text>                           {0:1}  [g7:AUTH]()
+    >   +1 TITL <Text>                           {0:1}  [g7:TITL]()
+    >   +1 ABBR <Text>                           {0:1}  [g7:ABBR]()
+    >   +1 PUBL <Text>                           {0:1}  [g7:PUBL]()
+    >   +1 TEXT <Text>                           {0:1}  [g7:TEXT]()
+    >      +2 MIME <MediaType>                   {0:1}  [g7:MIME]()
+    >      +2 LANG <Language>                    {0:1}  [g7:LANG]()
+    >   +1 <<SOURCE_REPOSITORY_CITATION>>        {0:M}
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
     xref: SourceXref = Void.SOUR
@@ -2668,10 +3032,25 @@ class Source(NamedTuple):
 
 
 class Submitter(NamedTuple):
-    """
+    """Store, validate and disply a GEDCOM Submitter Record.
+
     Reference:
         [GEDCOM record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
+
+    > n @XREF:SUBM@ SUBM                         {1:1}  [g7:record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
+    >   +1 NAME <Text>                           {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
+    >   +1 <<ADDRESS_STRUCTURE>>                 {0:1}
+    >   +1 PHON <Special>                        {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+    >   +1 EMAIL <Special>                       {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+    >   +1 FAX <Special>                         {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+    >   +1 WWW <Special>                         {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 LANG <Language>                       {0:M}  [g7:SUBM-LANG](https://gedcom.io/terms/v7/SUBM-LANG)
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
     xref: SubmitterXref = Void.SUBM
@@ -2787,6 +3166,36 @@ class Individual(NamedTuple):
     Reference:
         [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
+
+
+    > n @XREF:INDI@ INDI                         {1:1}  [g7:record-INDI](https://gedcom.io/terms/v7/record-INDI)
+    >   +1 RESN <List:Enum>                      {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
+    >   +1 <<PERSONAL_NAME_STRUCTURE>>           {0:M}
+    >   +1 SEX <Enum>                            {0:1}  [g7:SEX](https://gedcom.io/terms/v7/SEX)
+    >   +1 <<INDIVIDUAL_ATTRIBUTE_STRUCTURE>>    {0:M}
+    >   +1 <<INDIVIDUAL_EVENT_STRUCTURE>>        {0:M}
+    >   +1 <<NON_EVENT_STRUCTURE>>               {0:M}
+    >   +1 <<LDS_INDIVIDUAL_ORDINANCE>>          {0:M}
+    >   +1 FAMC @<XREF:FAM>@                     {0:M}  [g7:INDI-FAMC](https://gedcom.io/terms/v7/INDI-FAMC)
+    >      +2 PEDI <Enum>                        {0:1}  [g7:PEDI](https://gedcom.io/terms/v7/PEDI)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >      +2 STAT <Enum>                        {0:1}  [g7:FAMC-STAT](https://gedcom.io/terms/v7/FAMC-STAT)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >      +2 <<NOTE_STRUCTURE>>                 {0:M}
+    >   +1 FAMS @<XREF:FAM>@                     {0:M}  [g7:FAMS](https://gedcom.io/terms/v7/FAMS)
+    >      +2 <<NOTE_STRUCTURE>>                 {0:M}
+    >   +1 SUBM @<XREF:SUBM>@                    {0:M}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
+    >   +1 <<ASSOCIATION_STRUCTURE>>             {0:M}
+    >   +1 ALIA @<XREF:INDI>@                    {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >   +1 ANCI @<XREF:SUBM>@                    {0:M}  [g7:ANCI](https://gedcom.io/terms/v7/ANCI)
+    >   +1 DESI @<XREF:SUBM>@                    {0:M}  [g7:DESI](https://gedcom.io/terms/v7/DESI)
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<SOURCE_CITATION>>                   {0:M}
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
     xref: IndividualXref = Void.INDI
@@ -2865,38 +3274,55 @@ class Individual(NamedTuple):
         self, chronology_name: str = 'chron', detail: str = String.MIN
     ) -> str:
         preface: str = f"""
-# https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
-from chronodata.build import Chronology
-from chronodata.enums import Resn, Sex
-from chronodata.store import Individual
+            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
+            from chronodata.build import Chronology
+            from chronodata.enums import Resn, Sex
+            from chronodata.store import Individual
 
-{chronology_name} = Chronology('{chronology_name}')
-{self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
-"""
-        return f"""
-{preface if detail == String.MAX else ''}
-{self.xref.code} = Individual(
-    xref = {self.xref.code_xref},
-    resn = {self.resn},
-    personal_names = {self.personal_names},
-    sex = {self.sex},
-    attributes = {self.attributes},
-    events = {self.events},
-    lds_individual_ordinances = {self.lds_individual_ordinances},
-    submitters = {self.submitters},
-    associations = {self.associations},
-    aliases = {self.aliases},
-    ancestor_interest = {self.ancestor_interest},
-    descendent_interest = {self.descendent_interest},
-    identifiers = {self.identifiers},
-    notes = {self.notes},
-    sources = {self.sources},
-    multimedia_links = {self.multimedia_links}
-)
-"""
+            {chronology_name} = Chronology('{chronology_name}')
+            {self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
+            """
+        return dedent(f"""
+            {preface if detail == String.MAX else ''}
+            {self.xref.code} = Individual(
+                xref = {self.xref.code_xref},
+                resn = {self.resn},
+                personal_names = {self.personal_names},
+                sex = {self.sex},
+                attributes = {self.attributes},
+                events = {self.events},
+                lds_individual_ordinances = {self.lds_individual_ordinances},
+                submitters = {self.submitters},
+                associations = {self.associations},
+                aliases = {self.aliases},
+                ancestor_interest = {self.ancestor_interest},
+                descendent_interest = {self.descendent_interest},
+                identifiers = {self.identifiers},
+                notes = {self.notes},
+                sources = {self.sources},
+                multimedia_links = {self.multimedia_links}
+            )
+            """)
 
 
 class Repository(NamedTuple):
+    """
+    Reference:
+        [GEDCOM Repository](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD)
+
+    > n @XREF:REPO@ REPO                         {1:1}  [g7:record-REPO](https://gedcom.io/terms/v7/record-REPO)
+    >   +1 NAME <Text>                           {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
+    >   +1 <<ADDRESS_STRUCTURE>>                 {0:1}
+    >   +1 PHON <Special>                        {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+    >   +1 EMAIL <Special>                       {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+    >   +1 FAX <Special>                         {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+    >   +1 WWW <Special>                         {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
+    """
+
     xref: RepositoryXref = Void.REPO
     name: str = ''
     address: Address | None = None

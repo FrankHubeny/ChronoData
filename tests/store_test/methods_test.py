@@ -146,3 +146,13 @@ def test_tag_enum() -> None:
         ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Tag)
     ):
         DefCheck.verify_enum('hello', Tag)
+
+def test_verify() -> None:
+    message: str = 'Got an error'
+    when: bool = True  
+    condition: bool = False  
+    with pytest.raises(
+        ValueError, match=message
+    ):
+        DefCheck.verify(when, condition, message)
+

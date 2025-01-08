@@ -178,7 +178,10 @@ class DefTag:
             >>> lines = ''
             >>> note1 = Note('This is the first note')
             >>> note2 = Note('This is the second note')
-            >>> notes = [note1, note2,]
+            >>> notes = [
+            ...     note1,
+            ...     note2,
+            ... ]
             >>> lines = DefTag.list_to_str(lines, 1, notes)
             >>> print(lines)
             1 NOTE This is the first note
@@ -219,7 +222,7 @@ class DefTag:
             lines: The prefix of the returned string.
             level: The GEDCOM level of the structure.
             tag: The tag to apply to this line.
-        
+
         """
         return ''.join([lines, DefTag.taginfo(level, tag)])
 
@@ -232,7 +235,7 @@ class DefTag:
         This method hides the concatenation of the already constructed
         GEDCOM file with the new line and the check that this should only
         be done if the payload is not empty.
-        
+
         Example:
             >>> from chronodata.enums import Tag
             >>> from chronodata.methods import DefTag
@@ -254,6 +257,27 @@ class DefTag:
         """
         if payload != '':
             return ''.join([lines, DefTag.taginfo(level, tag, payload, extra)])
+        return lines
+
+    @staticmethod
+    def strlist_to_str(
+        lines: str, level: int, tag: Tag, records: list[str]
+    ) -> str:
+        """Join a list of GEDCOM lines to a string.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line and the check that this should only
+        be done if the payload is not empty.
+
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            records: The list of strings to tag.
+        """
+        for record in records:
+            lines = DefTag.str_to_str(lines, level, tag, record)
         return lines
 
     @staticmethod
@@ -285,6 +309,43 @@ class DefTag:
 
 class DefCheck:
     """Global methods supporting validation of data."""
+
+    @staticmethod
+    def verify(when: bool, then: bool, message: str) -> bool:
+        """Use conditional logic to test whether to raise a ValueError exception.
+
+        The only time this fails is when the `when` is True, 
+        but the `then` is False.  In that case a ValueError is raised
+        with the value in `message`.  In all other cases, True is returned.
+
+        This helps verify that more complicated GEDCOM criteria are met.
+        
+        Examples:
+            >>> from chronodata.methods import DefCheck
+            >>> message = 'Error!'
+            >>> DefCheck.verify(True, 1==2, message)
+            Traceback (most recent call last):
+            ValueError: Error!
+
+            >>> DefCheck.verify(True, 1==1, message)
+            True
+
+            When `when` is False, then True is returned no matter what the
+            value of `then` happens to be.
+            >>> DefCheck.verify(False, False, message)
+            True
+
+            >>> DefCheck.verify(False, True, message)
+            True
+            
+        Args:
+            when: If this is True then check the `then` condition, otherwise return True.
+            then: If `when` is True and this is not, raise the ValueError.
+            message: This is the message used by the ValueError.
+        """
+        if when and not then:
+            raise ValueError(message)
+        return True
 
     @staticmethod
     def verify_type(

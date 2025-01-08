@@ -72,6 +72,7 @@ class Choice:
     FAMILY_ATTRIBUTE: frozenset[str] = frozenset({'NCHI', 'RESI', 'FACT'})
     FAMILY_EVENT: frozenset[str] = frozenset(
         {
+            'ANUL',
             'CENS',
             'DIV',
             'DIVF',
@@ -363,6 +364,7 @@ class String:
     NEGATIVE: str = '-'
     NEWLINE: str = '\n'
     NOW: str = 'now'
+    OCCURRED: Literal['Y'] = 'Y'
     PLACE_FULL = 'F'
     PLACE_SHORT = 'S'
     PLACE_TRANSLATION = 'T'

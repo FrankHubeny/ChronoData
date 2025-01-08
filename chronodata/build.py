@@ -572,6 +572,8 @@ class Chronology(Base):
             if record.xref.fullname not in unique_list:
                 unique_list.append(record.xref.fullname)
                 destination = ''.join([destination, record.ged()])
+            else:
+                raise ValueError(Msg.DUPLICATE_RECORD.format(record.xref.fullname))
         missing = [
             xref
             for xref in xref_list
