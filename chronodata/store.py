@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 import logging
-from textwrap import dedent
+from textwrap import dedent, indent
 from typing import Any, Literal, NamedTuple
 
 from chronodata.constants import Cal, String, Value
@@ -35,7 +35,7 @@ from chronodata.enums import (
     Adop,
     Event,
     FamAttr,
-    #FamcStat,
+    # FamcStat,
     FamEven,
     GreaterLessThan,
     Id,
@@ -113,7 +113,7 @@ class Address(NamedTuple):
 
     Reference:
         [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#substructures)
-    
+
     > n ADDR <Special>                           {1:1}  [g7:ADDR](https://gedcom.io/terms/v7/ADDR)
     >   +1 ADR1 <Special>                        {0:1}  [g7:ADR1](https://gedcom.io/terms/v7/ADR1)
     >   +1 ADR2 <Special>                        {0:1}  [g7:ADR2](https://gedcom.io/terms/v7/ADR2)
@@ -532,7 +532,7 @@ class SourceRepositoryCitation(NamedTuple):
 
     Reference:
         [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
-    
+
     > n REPO @<XREF:REPO>@                       {1:1}  [g7:REPO](https://gedcom.io/terms/v7/REPO)
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
@@ -914,7 +914,9 @@ class PersonalName(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = DefTag.str_to_str(lines, level, Tag.NAME, self.name)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.TYPE, self.type.value)
+            lines = DefTag.str_to_str(
+                lines, level + 1, Tag.TYPE, self.type.value
+            )
             # lines = ''.join(
             #     [
             #         DefTag.taginfo(level, Tag.NAME, self.name),
@@ -1779,16 +1781,20 @@ class EventDetail(NamedTuple):
             lines = DefTag.list_to_str(lines, level, self.uids)
         return lines
 
-    def code(self, detail: str = String.MIN) -> str:
+    def code(self, level: int = 0, detail: str = String.MIN) -> str:
+        spaces: str = String.INDENT * level
         preface: str = """
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL
             from chronodata.constants import Choice
             from chronodata.store import Age, FamilyEventDetail
 
             """
-        return dedent(f"""
+        return indent(
+            dedent(f"""
             {preface if detail == String.MAX else ''}
-        """)
+        """),
+            spaces,
+        )
 
 
 class FamilyEventDetail(NamedTuple):
@@ -1848,16 +1854,20 @@ class FamilyEventDetail(NamedTuple):
                 lines = ''.join([lines, self.event_detail.ged(level)])
         return lines
 
-    def code(self, detail: str = String.MIN) -> str:
+    def code(self, level: int = 0, detail: str = String.MIN) -> str:
+        spaces: str = String.INDENT * level
         preface: str = """
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL
             from chronodata.constants import Choice
             from chronodata.store import Age, FamilyEventDetail
 
             """
-        return dedent(f"""
+        return indent(
+            dedent(f"""
             {preface if detail == String.MAX else ''}
-        """)
+        """),
+            spaces,
+        )
 
 
 class FamilyAttribute(NamedTuple):
@@ -2046,16 +2056,20 @@ class FamilyEvent(NamedTuple):
                 lines = ''.join([lines, self.event_detail.ged(level + 1)])
         return lines
 
-    def code(self, detail: str = String.MIN) -> str:
+    def code(self, level: int = 0, detail: str = String.MIN) -> str:
+        spaces: str = String.INDENT * level
         preface: str = """
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE
             from chronodata.constants import Choice
             from chronodata.store import FamilyEvent
 
             """
-        return dedent(f"""
+        return indent(
+            dedent(f"""
             {preface if detail == String.MAX else ''}
-        """)
+        """),
+            spaces,
+        )
 
 
 class Husband(NamedTuple):
@@ -3049,11 +3063,11 @@ class Submitter(NamedTuple):
 
     xref: SubmitterXref = Void.SUBM
     name: str = ''
-    address: Address | None = None
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
+    address: Address = Address([], '', '', '', '')
+    phones: list[str] = []  # noqa: RUF012
+    emails: list[str] = []  # noqa: RUF012
+    faxes: list[str] = []  # noqa: RUF012
+    wwws: list[str] = []  # noqa: RUF012
     multimedia_links: Any = None
     languages: Any = None
     identifiers: Any = None
@@ -3265,8 +3279,12 @@ class Individual(NamedTuple):
         return lines
 
     def code(
-        self, chronology_name: str = 'chron', detail: str = String.MIN
+        self,
+        level: int = 0,
+        chronology_name: str = 'chron',
+        detail: str = String.MIN,
     ) -> str:
+        spaces: str = String.INDENT * level
         preface: str = f"""
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
             from chronodata.build import Chronology
@@ -3276,7 +3294,8 @@ class Individual(NamedTuple):
             {chronology_name} = Chronology('{chronology_name}')
             {self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
             """
-        return dedent(f"""
+        return indent(
+            dedent(f"""
             {preface if detail == String.MAX else ''}
             {self.xref.code} = Individual(
                 xref = {self.xref.code_xref},
@@ -3296,7 +3315,9 @@ class Individual(NamedTuple):
                 sources = {self.sources},
                 multimedia_links = {self.multimedia_links}
             )
-            """)
+            """),
+            spaces,
+        )
 
 
 class Repository(NamedTuple):
@@ -3319,11 +3340,11 @@ class Repository(NamedTuple):
 
     xref: RepositoryXref = Void.REPO
     name: str = ''
-    address: Address | None = None
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
+    address: Address = Address([], '', '', '', '')
+    phones: list[str] = []  # noqa: RUF012
+    emails: list[str] = []  # noqa: RUF012
+    faxes: list[str] = []  # noqa: RUF012
+    wwws: list[str] = []  # noqa: RUF012
     notes: Any = None
     identifiers: Any = None
 
@@ -3345,7 +3366,11 @@ class Repository(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged(level)
         if self.validate():
-            pass
+            lines = ''.join([lines, self.address.ged(level)])
+            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
         return lines
 
 
@@ -3447,11 +3472,11 @@ class Header(NamedTuple):
     vers: str = ''
     name: str = ''
     corp: str = ''
-    address: Any = None
-    phones: Any = None
-    emails: Any = None
-    faxes: Any = None
-    wwws: Any = None
+    address: Address = Address([], '', '', '', '')
+    phones: list[str] = []  # noqa: RUF012
+    emails: list[str] = []  # noqa: RUF012
+    faxes: list[str] = []  # noqa: RUF012
+    wwws: list[str] = []  # noqa: RUF012
     data: str = ''
     dest: str = ''
     date: Date = Date(0, 0, 0)
@@ -3460,6 +3485,7 @@ class Header(NamedTuple):
     language: str = String.UNDETERMINED
     place: PlaceName | None = None
     note: Note | None = None
+
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = True
@@ -3470,16 +3496,16 @@ class Header(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = DefTag.empty_to_str(lines, level, Tag.HEAD)
-            lines = DefTag.empty_to_str(lines, level+1, Tag.GEDC)
-            lines = DefTag.str_to_str(lines, level+2, Tag.VERS, String.VERSION)
-        # lines: str = ''.join(
-        #     [
-        #         DefTag.taginfo(level, Tag.HEAD),
-        #         DefTag.taginfo(level + 1, Tag.GEDC),
-        #         DefTag.taginfo(level + 2, Tag.VERS, String.VERSION),
-        #     ]
-        #)
-        if self.schemas is not None:
-            lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
+            lines = DefTag.empty_to_str(lines, level + 1, Tag.GEDC)
+            lines = DefTag.str_to_str(
+                lines, level + 2, Tag.VERS, String.VERSION
+            )
+            if self.schemas is not None:
+                lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
+            lines = ''.join([lines, self.address.ged(level)])
+            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
             # lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
         return lines

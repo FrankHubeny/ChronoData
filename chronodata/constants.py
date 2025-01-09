@@ -349,6 +349,7 @@ class String:
     GREGORIAN: str = 'GREGORIAN'
     HEBREW: str = 'HEBREW'
     HYPHEN: str = '-'
+    INDENT: str = '    '
     INDEX: str = 'index'
     INT: str = 'int'
     JSON: str = '.json'
