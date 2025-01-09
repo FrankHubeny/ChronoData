@@ -176,8 +176,8 @@ class DefTag:
             >>> from chronodata.enums import Tag
             >>> from chronodata.store import Note
             >>> lines = ''
-            >>> note1 = Note('This is the first note')
-            >>> note2 = Note('This is the second note')
+            >>> note1 = Note(note='This is the first note')
+            >>> note2 = Note(note='This is the second note')
             >>> notes = [
             ...     note1,
             ...     note2,
@@ -185,7 +185,9 @@ class DefTag:
             >>> lines = DefTag.list_to_str(lines, 1, notes)
             >>> print(lines)
             1 NOTE This is the first note
+            2 LANG und
             1 NOTE This is the second note
+            2 LANG und
             <BLANKLINE>
 
         Args:
@@ -378,34 +380,34 @@ class DefCheck:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
         return True
 
-    @staticmethod
-    def verify_choice(value: str, choice: frozenset[str]) -> bool:
-        """Check if the value is available to choose from.
+    # @staticmethod
+    # def verify_choice(value: str, choice: frozenset[str]) -> bool:
+    #     """Check if the value is available to choose from.
 
-        Some GEDCOM structures involve more than one tag.  The permitted
-        tags are in an enumeration set.  This method validates that
-        the choice the user made was in the enumeration set.
+    #     Some GEDCOM structures involve more than one tag.  The permitted
+    #     tags are in an enumeration set.  This method validates that
+    #     the choice the user made was in the enumeration set.
 
-        Example:
-            This test shows that the value of Tag.GIVN which is "GIVN" is in
-            the set of accepted values for a Personal Name Piece structure.
-            >>> from chronodata.methods import DefCheck
-            >>> from chronodata.enums import Tag
-            >>> from chronodata.constants import Choice
-            >>> DefCheck.verify_choice(Tag.GIVN.value, Choice.PERSONAL_NAME_PIECE)
-            True
+    #     Example:
+    #         This test shows that the value of Tag.GIVN which is "GIVN" is in
+    #         the set of accepted values for a Personal Name Piece structure.
+    #         >>> from chronodata.methods import DefCheck
+    #         >>> from chronodata.enums import Tag
+    #         >>> from chronodata.constants import Choice
+    #         >>> DefCheck.verify_choice(Tag.GIVN.value, Choice.PERSONAL_NAME_PIECE)
+    #         True
 
-        Args:
-            value: The value of the Tag, not the name of the Tag itself.
-            choice: The set the available choices for the value.
+    #     Args:
+    #         value: The value of the Tag, not the name of the Tag itself.
+    #         choice: The set the available choices for the value.
 
-        Returns:
-            True: If the value of the Tag is in the available choices.
-            False: If the value of the Tag is not in the available choices.
-        """
-        if value not in choice:
-            raise ValueError(Msg.NOT_VALID_CHOICE.format(value, choice))
-        return True
+    #     Returns:
+    #         True: If the value of the Tag is in the available choices.
+    #         False: If the value of the Tag is not in the available choices.
+    #     """
+    #     if value not in choice:
+    #         raise ValueError(Msg.NOT_VALID_CHOICE.format(value, choice))
+    #     return True
 
     # @staticmethod
     # def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:

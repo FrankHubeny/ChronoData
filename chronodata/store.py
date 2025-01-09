@@ -30,15 +30,22 @@ import logging
 from textwrap import dedent
 from typing import Any, Literal, NamedTuple
 
-from chronodata.constants import Cal, Choice, String, Value
+from chronodata.constants import Cal, String, Value
 from chronodata.enums import (
     Adop,
     Event,
+    FamAttr,
+    #FamcStat,
+    FamEven,
+    GreaterLessThan,
     Id,
     IndiAttr,
     IndiEven,
+    Latitude,
+    Longitude,
     Media,
     MediaType,
+    NameType,
     Quay,
     Resn,
     Role,
@@ -106,6 +113,15 @@ class Address(NamedTuple):
 
     Reference:
         [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#substructures)
+    
+    > n ADDR <Special>                           {1:1}  [g7:ADDR](https://gedcom.io/terms/v7/ADDR)
+    >   +1 ADR1 <Special>                        {0:1}  [g7:ADR1](https://gedcom.io/terms/v7/ADR1)
+    >   +1 ADR2 <Special>                        {0:1}  [g7:ADR2](https://gedcom.io/terms/v7/ADR2)
+    >   +1 ADR3 <Special>                        {0:1}  [g7:ADR3](https://gedcom.io/terms/v7/ADR3)
+    >   +1 CITY <Special>                        {0:1}  [g7:CITY](https://gedcom.io/terms/v7/CITY)
+    >   +1 STAE <Special>                        {0:1}  [g7:STAE](https://gedcom.io/terms/v7/STAE)
+    >   +1 POST <Special>                        {0:1}  [g7:POST](https://gedcom.io/terms/v7/POST)
+    >   +1 CTRY <Special>                        {0:1}  [g7:CTRY](https://gedcom.io/terms/v7/CTRY)
     """
 
     address: list[str] = []  # noqa: RUF012
@@ -129,7 +145,6 @@ class Address(NamedTuple):
         lines: str = ''
         if self.validate():
             if len(self.address) > 0:
-                # split_address: list[str] = self.address.split('\n')
                 lines = DefTag.taginfo(level, Tag.ADDR, self.address[0])
                 for line in self.address[1:]:
                     lines = DefTag.str_to_str(lines, level, Tag.CONT, line)
@@ -197,9 +212,7 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_choice(
-                self.greater_less_than, Choice.GREATER_LESS_THAN
-            )
+            DefCheck.verify_enum(self.greater_less_than, GreaterLessThan)
             and DefCheck.verify_type(self.years, int)
             and DefCheck.verify_type(self.months, int)
             and DefCheck.verify_type(self.weeks, int)
@@ -237,193 +250,52 @@ class Age(NamedTuple):
         return line
 
 
-class PersonalNamePiece(NamedTuple):
+class PersonalNamePieces(NamedTuple):
     """Store, validate and display values for an optional GEDCOM Personal Name Piece.
-
-    This is one of the 24 substructures in the GEDCOM standard.
-
-    There are six GEDCOM tags which are formatted through this class.
-    - [NPFX]():
-        a prefix for the person, such as, "Dr" or "Mrs".
-    - [GIVN]():
-        the given, or first, name of the person, such as, "Thomas" or "Mary".
-    - [NICK]():
-        a nickname for the person, such as, "Joey".
-    - [SPFX]():
-        a surname prefix for the person.
-    - [SURN]():
-        the surname, or last name, of the person, such as, "Smith".
-    - [NSFX]():
-        a surname suffix for the person.
 
     Example:
         This example includes all six of the Personal Name Piece tags.
-        >>> from chronodata.store import PersonalNamePiece  # doctest: +ELLIPSIS
+        >>> from chronodata.store import PersonalNamePieces  # doctest: +ELLIPSIS
         >>> from chronodata.enums import Tag
-        >>> prefix = PersonalNamePiece(Tag.NPFX, 'Mr.')
-        >>> given = PersonalNamePiece(Tag.GIVN, 'Joseph')
-        >>> nickname = PersonalNamePiece(Tag.NICK, 'Joey')
-        >>> surname = PersonalNamePiece(Tag.SURN, 'Hall')
-        >>> suffix = PersonalNamePiece(Tag.NSFX, 'Jr.')
-        >>> surname_prefix = PersonalNamePiece(Tag.SPFX, 'Wall')
-        >>> print(prefix.ged(2))
-        2 NPFX Mr.
-        <BLANKLINE>
-        >>> print(given.ged(2))
-        2 GIVN Joseph
-        <BLANKLINE>
-        >>> print(nickname.ged(2))
-        2 NICK Joey
-        <BLANKLINE>
-        >>> print(surname.ged(2))
-        2 SURN Hall
-        <BLANKLINE>
-        >>> print(suffix.ged(2))
-        2 NSFX Jr.
-        <BLANKLINE>
-        >>> print(surname_prefix.ged(2))
-        2 SPFX Wall
-        <BLANKLINE>
-
-        If one of these tags is not used, an ValueError would display.
-        >>> bad_piece = PersonalNamePiece(Tag.NAME, 'Tom')
-        >>> bad_piece.ged(1)
-        Traceback (most recent call last):
-        ValueError: The value "NAME" is not in the ...
-
-        The error in the above example did not occur immediately, but one had to
-        attempt to use the NamedTuple by displaying it as a GEDCOM line.  One could
-        also run the `validate` method on `bad piece` to trigger the error.  This
-        method is called by `ged` prior to displaying the GEDCOM line.
-        >>> bad_piece.validate()
-        Traceback (most recent call last):
-        ValueError: The value "NAME" is not in the ...
 
     Args:
-        tag: One of six tags used for a personal name pieces.
-        text: The string value associated with that tag.
+        prefix: An option list of NPFX or name prefixes of the name.
+        given: An optional list of GIVN or given names of the name.
+        nickname: An optional list of NICK or nicknames for the name.
+        surname_prefix: An optional list of SPFX or surname prefixes of the name.
+        surname: An optional list of SURN or surnames or last names of the name.
+        suffix: An optional list NSFX or name suffixes of the name.
 
     Returns:
         A GEDCOM string storing this data.
 
     Reference:
         [GEDCOM Personal Name Pieces](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES)
+
+    > n NPFX <Text>                              {0:M}  [g7:NPFX](https://gedcom.io/terms/v7/NPFX)
+    > n GIVN <Text>                              {0:M}  [g7:GIVN](https://gedcom.io/terms/v7/GIVN)
+    > n NICK <Text>                              {0:M}  [g7:NICK](https://gedcom.io/terms/v7/NICK)
+    > n SPFX <Text>                              {0:M}  [g7:SPFX](https://gedcom.io/terms/v7/SPFX)
+    > n SURN <Text>                              {0:M}  [g7:SURN](https://gedcom.io/terms/v7/SURN)
+    > n NSFX <Text>                              {0:M}  [g7:NSFX](https://gedcom.io/terms/v7/NSFX)
     """
 
-    tag: Tag = Tag.NONE
-    text: str = ''
+    prefix: list[str] = []  # noqa: RUF012
+    given: list[str] = []  # noqa: RUF012
+    nickname: list[str] = []  # noqa: RUF012
+    surname_prefix: list[str] = []  # noqa: RUF012
+    surname: list[str] = []  # noqa: RUF012
+    suffix: list[str] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_choice(
-                self.tag.value, Choice.PERSONAL_NAME_PIECE
-            )
-            and DefCheck.verify_type(self.text, str)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        name_piece: str = ''
-        if self.validate():
-            name_piece = DefTag.taginfo(level, self.tag, self.text)
-        return name_piece
-
-
-class PersonalName(NamedTuple):
-    """Store, validate and display a personal name.
-
-    Example:
-        The first example will not only test ChronoData but also the extend
-        the GEDCOM standard can store various kinds of information.  I will want
-        to record the first man who was first mentioned in Genesis 1:26, Adam,
-        using the Hebrew word "אָדָ֛ם". I obtained the name from
-        [Chabad](https://www.chabad.org/library/bible_cdo/aid/8165/jewish/Chapter-1.htm)
-        which I could add in as a `SourceCitation`.  In Genesis 2:16 Adam is
-        also referred to as "הָֽאָדָ֖ם" which I will use as a nickname and translate
-        it into English as "the man".
-
-        I will validate it first to make sure it is correct, but this is not required.
-        Note the trailing "," in the `translations` parameter.  Even though there
-        is only one translation, this is required to guarantee the tuple
-        is not interpreted as a string of letters.
-        >>> from chronodata.store import (
-        ...     NameTranslation,
-        ...     Note,
-        ...     PersonalName,
-        ...     PersonalNamePiece,
-        ...     SourceCitation,
-        ... )
-        >>> from chronodata.enums import NameType
-        >>> adam_note = Note('Here is a place to add more information.')
-        >>> adam_nickname = PersonalNamePiece(Tag.NICK, 'הָֽאָדָ֖ם')
-        >>> adam_english = NameTranslation('Adam', 'en')
-        >>> adam_english_nickname = NameTranslation('the man', 'en')
-        >>> adam = PersonalName(
-        ...     name='אָדָ֛ם',
-        ...     type=NameType.OTHER,
-        ...     phrase='The first man',
-        ...     pieces=(adam_nickname,),
-        ...     translations=(
-        ...         adam_english,
-        ...         adam_english_nickname,
-        ...     ),
-        ...     notes=(adam_note,),
-        ... )
-        >>> print(adam.ged(1))
-        1 NAME אָדָ֛ם
-        2 TYPE OTHER
-        2 NICK הָֽאָדָ֖ם
-        2 TRAN Adam
-        3 LANG en
-        2 TRAN the man
-        3 LANG en
-        2 NOTE Here is a place to add more information.
-        <BLANKLINE>
-
-    Args:
-        name: the person's name.
-        type: the type of name. There are seven types to choose from:
-            - NameType.AKA or also known as.
-            - NameType.BIRTH or birth name.
-            - NameType.IMMIGRANT or immigrant name.
-            - NameType.MAIDEN or maiden name.
-            - NameType.MARRIED or married name.
-            - NameType.PROFESSIONAL or professional name
-            - NameType.OTHER or another type not listed above.
-        phrase: a place for uncategorized information about the name.
-        pieces: an alternate way to split the name.
-        translations: an optional tuple of translations of the name.
-        notes: a tuple of optional notes regarding the name.
-        sources: a tuple of citations regarding the name.
-
-    Returns:
-        A GEDCOM string storing this data.
-
-    Reference:
-        [GEDCOM Person Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
-    """
-
-    name: str = ''
-    type: Tag = Tag.NONE
-    phrase: str = ''
-    pieces: Any = None
-    translations: Any = None
-    notes: Any = None
-    sources: Any = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            DefCheck.verify_not_default(self.name, '')
-            and DefCheck.verify_choice(self.type.value, Choice.NAME_TYPE)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_tuple_type(self.pieces, PersonalNamePiece)
-            and DefCheck.verify_tuple_type(self.translations, NameTranslation)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, SourceCitation)
+            DefCheck.verify_tuple_type(self.prefix, str)
+            and DefCheck.verify_tuple_type(self.given, str)
+            and DefCheck.verify_tuple_type(self.nickname, str)
+            and DefCheck.verify_tuple_type(self.surname_prefix, str)
+            and DefCheck.verify_tuple_type(self.surname, str)
+            and DefCheck.verify_tuple_type(self.suffix, str)
         )
         return check
 
@@ -431,24 +303,14 @@ class PersonalName(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = ''.join(
-                [
-                    DefTag.taginfo(level, Tag.NAME, self.name),
-                    DefTag.taginfo(level + 1, Tag.TYPE, self.type.value),
-                ]
+            lines = DefTag.strlist_to_str(lines, level, Tag.NPFX, self.prefix)
+            lines = DefTag.strlist_to_str(lines, level, Tag.GIVN, self.given)
+            lines = DefTag.strlist_to_str(lines, level, Tag.NICK, self.nickname)
+            lines = DefTag.strlist_to_str(
+                lines, level, Tag.SPFX, self.surname_prefix
             )
-            if self.pieces is not None:
-                for piece in self.pieces:
-                    lines = ''.join([lines, piece.ged(level + 1)])
-            if self.translations is not None:
-                for translation in self.translations:
-                    lines = ''.join([lines, translation.ged(level + 1)])
-            if self.notes is not None:
-                for note in self.notes:
-                    lines = ''.join([lines, note.ged(level + 1)])
-            if self.sources is not None:
-                for source in self.sources:
-                    lines = ''.join([lines, source.ged(level + 1)])
+            lines = DefTag.strlist_to_str(lines, level, Tag.SURN, self.surname)
+            lines = DefTag.strlist_to_str(lines, level, Tag.NSFX, self.suffix)
         return lines
 
 
@@ -486,21 +348,19 @@ class NameTranslation(NamedTuple):
         A GEDCOM string storing this data.
 
     Reference:
-        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Pesonal Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
     """
 
-    translation: str = ''
+    translation: str = String.EMPTY
     language: str = String.UNDETERMINED
-    name_pieces: Any = None
+    pieces: PersonalNamePieces | None = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             DefCheck.verify_type(self.translation, str)
             and DefCheck.verify_not_default(self.translation, '')
-            and DefCheck.verify_tuple_type(self.name_pieces, PersonalNamePiece)
+            and DefCheck.verify_type(self.pieces, PersonalNamePieces)
         )
         return check
 
@@ -508,15 +368,10 @@ class NameTranslation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = ''.join(
-                [
-                    DefTag.taginfo(level, Tag.TRAN, self.translation),
-                    DefTag.taginfo(level + 1, Tag.LANG, self.language),
-                ]
-            )
-            if self.name_pieces is not None:
-                for piece in self.name_pieces:
-                    lines = ''.join([lines, piece.ged(level + 1)])
+            lines = DefTag.str_to_str(lines, level, Tag.TRAN, self.translation)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
+            if self.pieces is not None:
+                lines = ''.join([lines, self.pieces.ged(level + 1)])
         return lines
 
 
@@ -558,6 +413,8 @@ class NoteTranslation(NamedTuple):
         [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
         [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)]
+
+
     """
 
     translation: str = ''
@@ -583,7 +440,6 @@ class NoteTranslation(NamedTuple):
                     DefTag.taginfo(level, Tag.TRAN, self.translation),
                     DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
                     DefTag.taginfo(level + 1, Tag.LANG, self.language),
-                    # DefTag.taglanguage(level + 1, self.language, Lang.CODE),
                 ]
             )
         return lines
@@ -676,10 +532,16 @@ class SourceRepositoryCitation(NamedTuple):
 
     Reference:
         [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
+    
+    > n REPO @<XREF:REPO>@                       {1:1}  [g7:REPO](https://gedcom.io/terms/v7/REPO)
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
+    >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
     repo: RepositoryXref
-    notes: Any = None
+    notes: list[Any] = []  # noqa: RUF012
     call_numbers: Any = None
 
     def validate(self) -> bool:
@@ -697,12 +559,14 @@ class SourceRepositoryCitation(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = DefTag.taginfo(level, Tag.SOUR, str(self.repo))
-            if self.notes is not None:
-                for note in self.notes:
-                    lines = ''.join([lines, note.ged(level + 1)])
-            if self.call_numbers is not None:
-                for call_number in self.call_numbers:
-                    lines = ''.join([lines, call_number.ged(level + 1)])
+            lines = DefTag.list_to_str(lines, level, self.notes)
+            lines = DefTag.list_to_str(lines, level, self.call_numbers)
+            # if self.notes is not None:
+            #     for note in self.notes:
+            #         lines = ''.join([lines, note.ged(level + 1)])
+            # if self.call_numbers is not None:
+            #     for call_number in self.call_numbers:
+            #         lines = ''.join([lines, call_number.ged(level + 1)])
         return lines
 
 
@@ -813,49 +677,6 @@ class SourceCitation(NamedTuple):
         return lines
 
 
-class SNote(NamedTuple):
-    """Use an already defined shared note in a GEDCOM structure.
-
-    Example:
-        If one has already defined a shared note record then one can reference it
-        in a note substructure of a GEDCOM structure.  Here is an example of
-        how that is done.  First, we will create a chronology to get a shared note
-        reference id.  Then we will use it in a note.  The details of the note
-        will not be included in the example.
-        >>> from chronodata.build import Chronology
-        >>> from chronodata.store import SNote
-        >>> a = Chronology('illustrating shared notes usage')
-        >>> sn = a.shared_note_xref()
-        >>> referenced_sn = SNote(sn)
-        >>> print(referenced_sn.ged(1))
-        1 SNOTE @1@
-        <BLANKLINE>
-
-    Args:
-        shared_note: the identifier of the shared note record.
-
-    Returns:
-        A GEDCOM string storing this data.
-
-    Reference:
-        [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
-    """
-
-    shared_note: SharedNoteXref
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = DefCheck.verify_type(self.shared_note, SharedNoteXref)
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            lines = DefTag.taginfo(level, Tag.SNOTE, str(self.shared_note))
-        return lines
-
-
 class Note(NamedTuple):
     """Store, validate and display a note substructure of the GEDCOM standard.
 
@@ -868,14 +689,15 @@ class Note(NamedTuple):
     Example:
         This example is a note without other information.
         >>> from chronodata.store import Note
-        >>> note = Note('This is my note.')
+        >>> note = Note(note='This is my note.')
         >>> print(note.ged(1))
         1 NOTE This is my note.
+        2 LANG und
         <BLANKLINE>
 
         This example uses the Hebrew language translating "This is my note." as "זו ההערה שלי."
         The translation comes from [Google Translate](https://translate.google.com/?sl=en&tl=iw&text=This%20is%20my%20note.&op=translate).
-        >>> hebrew_note = Note('זו ההערה שלי.', language='he')
+        >>> hebrew_note = Note(note='זו ההערה שלי.', language='he')
         >>> print(hebrew_note.ged(1))
         1 NOTE זו ההערה שלי.
         2 LANG he
@@ -890,7 +712,7 @@ class Note(NamedTuple):
         ...     'یہ میرا نوٹ ہے۔', MediaType.TEXT_PLAIN, 'ur'
         ... )
         >>> hebrew_note_with_translations = Note(
-        ...     'זו ההערה שלי.',
+        ...     note='זו ההערה שלי.',
         ...     language='he',
         ...     translations=(
         ...         english_translation,
@@ -922,21 +744,37 @@ class Note(NamedTuple):
         [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
         [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
+
+    [
+    n NOTE <Text>                              {1:1}  g7:NOTE
+      +1 MIME <MediaType>                      {0:1}  g7:MIME
+      +1 LANG <Language>                       {0:1}  g7:LANG
+      +1 TRAN <Text>                           {0:M}  g7:NOTE-TRAN
+         +2 MIME <MediaType>                   {0:1}  g7:MIME
+         +2 LANG <Language>                    {0:1}  g7:LANG
+      +1 <<SOURCE_CITATION>>                   {0:M}
+    |
+    n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
+    ]
     """  # noqa: RUF002
 
-    text: str = String.EMPTY
+    snote: SharedNoteXref | None = None
+    note: str = String.EMPTY
     mime: MediaType = MediaType.NONE
     language: str = String.UNDETERMINED
-    translations: Any = None
-    citations: Any = None
+    translations: list[NoteTranslation] = []  # noqa: RUF012
+    source_citations: list[SourceCitation] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_not_default(self.text, '')
+            DefCheck.verify_type(self.snote, SharedNoteXref | None)
+            and DefCheck.verify_type(self.note, str)
             and DefCheck.verify_enum(self.mime.value, MediaType)
             and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
-            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
+            and DefCheck.verify_tuple_type(
+                self.source_citations, SourceCitation
+            )
         )
         return check
 
@@ -944,24 +782,158 @@ class Note(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.taginfo(level, Tag.NOTE, self.text)
-            if self.mime != MediaType.NONE:
-                lines = ''.join(
-                    [
-                        lines,
-                        DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    ]
+            if self.snote is not None:
+                lines = DefTag.str_to_str(
+                    lines, level, Tag.SNOTE, self.snote.fullname
                 )
-            if self.language != String.UNDETERMINED:
+            else:
+                lines = DefTag.str_to_str(lines, level, Tag.NOTE, self.note)
+                lines = DefTag.str_to_str(
+                    lines, level + 1, Tag.MIME, self.mime.value
+                )
                 lines = DefTag.str_to_str(
                     lines, level + 1, Tag.LANG, self.language
                 )
-            if self.translations is not None:
-                for translation in self.translations:
-                    lines = ''.join([lines, translation.ged(level + 1)])
-            if self.citations is not None:
-                for citation in self.citations:
-                    lines = ''.join([lines, citation.ged(level + 1)])
+                lines = DefTag.list_to_str(lines, level + 1, self.translations)
+                lines = DefTag.list_to_str(
+                    lines, level + 1, self.source_citations
+                )
+        return lines
+
+
+class PersonalName(NamedTuple):
+    """Store, validate and display a personal name.
+
+    Example:
+        The first example will not only test ChronoData but also the extend
+        the GEDCOM standard can store various kinds of information.  I will want
+        to record the first man who was first mentioned in Genesis 1:26, Adam,
+        using the Hebrew word "אָדָ֛ם". I obtained the name from
+        [Chabad](https://www.chabad.org/library/bible_cdo/aid/8165/jewish/Chapter-1.htm)
+        which I could add in as a `SourceCitation`.  In Genesis 2:16 Adam is
+        also referred to as "הָֽאָדָ֖ם" which I will use as a nickname and translate
+        it into English as "the man".
+
+        I will validate it first to make sure it is correct, but this is not required.
+        Note the trailing "," in the `translations` parameter.  Even though there
+        is only one translation, this is required to guarantee the tuple
+        is not interpreted as a string of letters.
+        >>> from chronodata.store import (
+        ...     NameTranslation,
+        ...     Note,
+        ...     PersonalName,
+        ...     PersonalNamePieces,
+        ...     SourceCitation,
+        ... )
+        >>> from chronodata.enums import NameType, PersonalNamePieceTag
+        >>> adam_note = Note(note='Here is a place to add more information.')
+        >>> adam_english = NameTranslation(
+        ...     'Adam', 'en', PersonalNamePieces(nickname=['the man'])
+        ... )
+        >>> adam = PersonalName(
+        ...     name='אָדָ֛ם',
+        ...     type=NameType.OTHER,
+        ...     phrase='The first man',
+        ...     pieces=PersonalNamePieces(nickname=['הָֽאָדָ֖ם']),
+        ...     translations=[adam_english],
+        ...     notes=[adam_note],
+        ... )
+        >>> print(adam.ged(1))
+        1 NAME אָדָ֛ם
+        2 TYPE OTHER
+        2 NICK הָֽאָדָ֖ם
+        2 TRAN Adam
+        3 LANG en
+        3 NICK the man
+        2 NOTE Here is a place to add more information.
+        3 LANG und
+        <BLANKLINE>
+
+    Args:
+        name: The full name of the person including the surname.
+        surname: Repeat the part of the name that is the surname or last name of the person.
+        type: the type of name. There are seven types to choose from:
+            - NameType.AKA or also known as.
+            - NameType.BIRTH or birth name.
+            - NameType.IMMIGRANT or immigrant name.
+            - NameType.MAIDEN or maiden name.
+            - NameType.MARRIED or married name.
+            - NameType.PROFESSIONAL or professional name
+            - NameType.OTHER or another type not listed above.
+        phrase: a place for uncategorized information about the name.
+        pieces: an alternate way to split the name.
+        translations: an optional tuple of translations of the name.
+        notes: a tuple of optional notes regarding the name.
+        sources: a tuple of citations regarding the name.
+
+    Returns:
+        A GEDCOM string storing this data.
+
+    Reference:
+        [GEDCOM Person Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
+
+    n NAME <PersonalName>                      {1:1}  g7:INDI-NAME
+      +1 TYPE <Enum>                           {0:1}  g7:NAME-TYPE
+         +2 PHRASE <Text>                      {0:1}  g7:PHRASE
+      +1 <<PERSONAL_NAME_PIECES>>              {0:1}
+      +1 TRAN <PersonalName>                   {0:M}  g7:NAME-TRAN
+         +2 LANG <Language>                    {1:1}  g7:LANG
+         +2 <<PERSONAL_NAME_PIECES>>           {0:1}
+      +1 <<NOTE_STRUCTURE>>                    {0:M}
+      +1 <<SOURCE_CITATION>>                   {0:M}
+    """
+
+    name: str = String.EMPTY
+    surname: str = String.EMPTY
+    type: Tag = Tag.NONE
+    phrase: str = String.EMPTY
+    pieces: PersonalNamePieces | None = None
+    translations: list[NameTranslation] = []  # noqa: RUF012
+    notes: list[Note] = []  # noqa: RUF012
+    source_citations: list[SourceCitation] = []  # noqa: RUF012
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            DefCheck.verify_not_default(self.name, '')
+            and DefCheck.verify_type(self.name, str)
+            and DefCheck.verify_type(self.surname, str)
+            and DefCheck.verify_enum(self.type.value, NameType)
+            and DefCheck.verify_type(self.phrase, str)
+            and DefCheck.verify_type(self.pieces, PersonalNamePieces)
+            and DefCheck.verify_tuple_type(self.translations, NameTranslation)
+            and DefCheck.verify_tuple_type(self.notes, Note)
+            and DefCheck.verify_tuple_type(
+                self.source_citations, SourceCitation
+            )
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            lines = DefTag.str_to_str(lines, level, Tag.NAME, self.name)
+            lines = DefTag.str_to_str(lines, level + 1, Tag.TYPE, self.type.value)
+            # lines = ''.join(
+            #     [
+            #         DefTag.taginfo(level, Tag.NAME, self.name),
+            #         DefTag.taginfo(level + 1, Tag.TYPE, self.type.value),
+            #     ]
+            # )
+            if self.pieces is not None:
+                lines = ''.join([lines, self.pieces.ged(level + 1)])
+            # if self.translations is not None:
+            #     for translation in self.translations:
+            lines = DefTag.list_to_str(lines, level + 1, self.translations)
+            lines = DefTag.list_to_str(lines, level + 1, self.notes)
+            lines = DefTag.list_to_str(lines, level + 1, self.source_citations)
+            # if self.notes is not None:
+            #     for note in self.notes:
+            #         lines = ''.join([lines, note.ged(level + 1)])
+            # if self.source_citations is not None:
+            #     for source in self.source_citations:
+            #         lines = ''.join([lines, source.ged(level + 1)])
         return lines
 
 
@@ -1324,9 +1296,9 @@ class Map(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             DefCheck.verify_type(self.latitude, float)
-            and DefCheck.verify_choice(self.north_south, Choice.NORTH_SOUTH)
+            and DefCheck.verify_enum(self.north_south, Latitude)
             and DefCheck.verify_type(self.longitude, float)
-            and DefCheck.verify_choice(self.east_west, Choice.EAST_WEST)
+            and DefCheck.verify_enum(self.east_west, Longitude)
             and DefCheck.verify_range(self.latitude, 0.0, 360.0)
             and DefCheck.verify_range(self.longitude, -90.0, 90.0)
         )
@@ -1394,8 +1366,8 @@ class Place(NamedTuple):
         ...     ],
         ...     map=Map('N', 49.297222, 'E', 14.470833),
         ...     notes=[
-        ...         Note('A place in the Czech Republic.', language='en'),
-        ...         Note('Místo v České republice.', language='cs'),
+        ...         Note(note='A place in the Czech Republic.', language='en'),
+        ...         Note(note='Místo v České republice.', language='cs'),
         ...     ],
         ... )
         >>> place.validate()
@@ -1807,6 +1779,17 @@ class EventDetail(NamedTuple):
             lines = DefTag.list_to_str(lines, level, self.uids)
         return lines
 
+    def code(self, detail: str = String.MIN) -> str:
+        preface: str = """
+            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL
+            from chronodata.constants import Choice
+            from chronodata.store import Age, FamilyEventDetail
+
+            """
+        return dedent(f"""
+            {preface if detail == String.MAX else ''}
+        """)
+
 
 class FamilyEventDetail(NamedTuple):
     """Store, validate and display GEDCOM family event detail structure.
@@ -1865,6 +1848,17 @@ class FamilyEventDetail(NamedTuple):
                 lines = ''.join([lines, self.event_detail.ged(level)])
         return lines
 
+    def code(self, detail: str = String.MIN) -> str:
+        preface: str = """
+            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL
+            from chronodata.constants import Choice
+            from chronodata.store import Age, FamilyEventDetail
+
+            """
+        return dedent(f"""
+            {preface if detail == String.MAX else ''}
+        """)
+
 
 class FamilyAttribute(NamedTuple):
     """Store, validate and display a GEDCOM Family Attribute.
@@ -1896,7 +1890,7 @@ class FamilyAttribute(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_enum(self.tag.value, Choice.FAMILY_ATTRIBUTE)
+            and DefCheck.verify_enum(self.tag.value, FamAttr)
             and DefCheck.verify_type(self.payload, str)
             and DefCheck.verify_type(self.attribute_type, str)
             and DefCheck.verify_type(
@@ -2020,7 +2014,7 @@ class FamilyEvent(NamedTuple):
         even: bool = self.event_type != String.EMPTY
         check: bool = (
             DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_enum(self.tag.value, Choice.FAMILY_EVENT)
+            and DefCheck.verify_enum(self.tag.value, FamEven)
             and DefCheck.verify_type(self.payload, str)
             and DefCheck.verify_type(self.event_type, str)
             and DefCheck.verify_type(
@@ -3200,7 +3194,7 @@ class Individual(NamedTuple):
 
     xref: IndividualXref = Void.INDI
     resn: Resn = Resn.NONE
-    personal_names: list[PersonalNamePiece] = []  # noqa: RUF012
+    personal_names: list[PersonalNamePieces] = []  # noqa: RUF012
     sex: Sex = Sex.NONE
     attributes: list[IndividualAttribute] = []  # noqa: RUF012
     events: list[IndividualEvent] = []  # noqa: RUF012
@@ -3221,7 +3215,7 @@ class Individual(NamedTuple):
             DefCheck.verify_type(self.xref, IndividualXref)
             and DefCheck.verify_enum(self.resn.value, Resn)
             and DefCheck.verify_tuple_type(
-                self.personal_names, PersonalNamePiece
+                self.personal_names, PersonalNamePieces
             )
             and DefCheck.verify_enum(self.sex.value, Sex)
             and DefCheck.verify_tuple_type(self.attributes, IndividualAttribute)
@@ -3406,7 +3400,7 @@ class Schema(NamedTuple):
     def validate(self) -> bool:
         check: bool = (
             DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
+            # and DefCheck.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
             and DefCheck.verify_type(self.url, str)
         )
         return check
@@ -3464,9 +3458,8 @@ class Header(NamedTuple):
     time: Time = Time(0, 0, 0)
     copr: str = ''
     language: str = String.UNDETERMINED
-    place: PlaceName = PlaceName(String.EMPTY)
-    note: Note = Note(String.EMPTY)
-
+    place: PlaceName | None = None
+    note: Note | None = None
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = True
@@ -3474,13 +3467,18 @@ class Header(NamedTuple):
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''.join(
-            [
-                DefTag.taginfo(level, Tag.HEAD),
-                DefTag.taginfo(level + 1, Tag.GEDC),
-                DefTag.taginfo(level + 2, Tag.VERS, String.VERSION),
-            ]
-        )
+        lines: str = ''
+        if self.validate():
+            lines = DefTag.empty_to_str(lines, level, Tag.HEAD)
+            lines = DefTag.empty_to_str(lines, level+1, Tag.GEDC)
+            lines = DefTag.str_to_str(lines, level+2, Tag.VERS, String.VERSION)
+        # lines: str = ''.join(
+        #     [
+        #         DefTag.taginfo(level, Tag.HEAD),
+        #         DefTag.taginfo(level + 1, Tag.GEDC),
+        #         DefTag.taginfo(level + 2, Tag.VERS, String.VERSION),
+        #     ]
+        #)
         if self.schemas is not None:
             lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
             # lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)

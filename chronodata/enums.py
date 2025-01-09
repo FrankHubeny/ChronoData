@@ -74,6 +74,7 @@ class ApproxDate(Enum):
     NONE = ''
 
 
+
 class EvenAttr(Enum):
     """Tags for an event or attribute information.
     
@@ -85,6 +86,7 @@ class EvenAttr(Enum):
     FACT = 'FACT'
     EVEN = 'EVEN'
     NONE = ''
+
 
 
 class Event(Enum):
@@ -124,11 +126,13 @@ class Event(Enum):
     NONE = ''
 
 
+
 class FamAttr(Enum):
     NCHI = 'NCHI'
     RESI = 'RESI'
     FACT = 'FACT'
     NONE = ''
+    
 
 
 class FamcStat(Enum):
@@ -136,7 +140,7 @@ class FamcStat(Enum):
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
     NONE = ''
-
+    
 
 class FamEven(Enum):
     ANUL = 'ANUL'
@@ -151,12 +155,13 @@ class FamEven(Enum):
     MARS = 'MARS'
     EVEN = 'EVEN'
     NONE = ''
+    
 
 
-# class GreaterLessThan(Enum):
-#     EQUAL = ''
-#     GREATER = '>'
-#     LESS = '<'
+class GreaterLessThan(Enum):
+    GREATER = '>'
+    LESS = '<'
+    NONE = ''
 
 
 class Id(Enum):
@@ -164,7 +169,7 @@ class Id(Enum):
     UID = 'UID'
     EXID = 'EXID'
     NONE = ''
-
+    
 
 class IndiAttr(Enum):
     CAST = 'CAST'
@@ -182,6 +187,7 @@ class IndiAttr(Enum):
     TITL = 'TITL'
     FACT = 'FACT'
     NONE = ''
+    
 
 
 class IndiEven(Enum):
@@ -209,7 +215,15 @@ class IndiEven(Enum):
     WILL = 'WILL'
     EVEN = 'EVEN'
     NONE = ''
+    
 
+class Latitude(Enum):
+    NORTH = 'N'
+    SOUTH = 'S'
+
+class Longitude(Enum):
+    EAST = 'E'
+    WEST = 'W'
 
 class Media(Enum):
     AUDIO = 'AUDIO'
@@ -227,7 +241,7 @@ class Media(Enum):
     VIDEO = 'VIDEO'
     OTHER = 'OTHER'
     NONE = ''
-
+    
 
 class MediaType(Enum):
     TEXT_HTML = 'TEXT_HTML'
@@ -255,14 +269,14 @@ class Pedi(Enum):
     NONE = ''
 
 
-# class PersonalNamePieceTag(Enum):
-#     NPFX = 'NPFX'
-#     GIVN = 'GIVN'
-#     NICK = 'NICK'
-#     SPFX = 'SPFX'
-#     SURN = 'SURN'
-#     NSFX = 'NSFX'
-#     NONE = ''
+class PersonalNamePieceTag(Enum):
+    NPFX = 'NPFX'
+    GIVN = 'GIVN'
+    NICK = 'NICK'
+    SPFX = 'SPFX'
+    SURN = 'SURN'
+    NSFX = 'NSFX'
+    NONE = ''
 
 
 class Quay(Enum):
@@ -288,7 +302,6 @@ class RangeDate(Enum):
     BEF = 'BEF'
     NONE = ''
 
-
 class Record(str, Enum):
     FAM = 'FAM'
     INDI = 'INDI'
@@ -298,6 +311,7 @@ class Record(str, Enum):
     SOUR = 'SOUR'
     SUBM = 'SUBM'
     NONE = ''
+    
 
 
 class Resn(Enum):
@@ -314,6 +328,7 @@ class Resn(Enum):
     LOCKED = 'LOCKED'
     PRIVACY = 'PRIVACY'
     NONE = ''
+    
 
 
 class RestrictDate(Enum):
@@ -333,6 +348,7 @@ class RestrictDate(Enum):
     CAL = 'CAL'
     EST = 'EST'
     NONE = ''
+    
 
 
 class Role(Enum):
@@ -352,6 +368,7 @@ class Role(Enum):
     WITN = 'WITN'
     OTHER = 'OTHER'
     NONE = ''
+    
 
 
 class Sex(Enum):
@@ -360,6 +377,7 @@ class Sex(Enum):
     X = 'X'
     U = 'U'
     NONE = ''
+    
 
 
 class Stat(Enum):
@@ -376,6 +394,7 @@ class Stat(Enum):
     SUBMITTED = 'SUBMITTED'
     UNCLEARED = 'UNCLEARED'
     NONE = ''
+    
 
 
 class Tag(Enum):
