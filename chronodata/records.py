@@ -32,8 +32,7 @@ where data is added to it through the seven GEDCOM records.
 
 import re
 
-from chronodata.constants import String
-from chronodata.enums import Tag
+from chronodata.constants import String, Tag
 
 __all__ = [
     'FamilyXref',

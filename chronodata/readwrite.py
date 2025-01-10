@@ -15,9 +15,9 @@ from chronodata.constants import (
     Key,
     Number,
     String,
+    Tag,
     Unit,
 )
-from chronodata.enums import Tag
 from chronodata.messages import Issue, Msg
 from chronodata.methods import DefTag
 

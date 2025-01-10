@@ -17,22 +17,73 @@ Examples:
 """
 
 __all__ = [
+    'Address',
+    'Age',
+    'Alias',
+    'Association',
+    'Child',
+    'Date',
+    'DateExact',
+    'DateValue',
+    'EventDetail',
+    'Exid',
     'Family',
+    'Family',
+    'FamilyAttribute',
+    'FamilyChild',
+    'FamilyEvent',
+    'FamilyEventDetail',
+    'FamilySpouse',
+    'File',
+    'FileTranslations',
+    'Header',
+    'Husband',
+    'Identifier',
     'Individual',
+    'Individual',
+    'IndividualAttribute',
+    'IndividualEvent',
+    'IndividualEventDetail',
+    'LDSIndividualOrdinances',
+    'LDSOrdinanceDetail',
+    'LDSSpouseSealing',
+    'Map',
     'Multimedia',
+    'Multimedia',
+    'MultimediaLink',
+    'NameTranslation',
+    'NonEvent',
+    'Note',
+    'NoteTranslation',
+    'PersonalName',
+    'PersonalNamePieces',
+    'Place',
+    'PlaceName',
     'Repository',
+    'Repository',
+    'Schema',
+    'SharedNote',
     'SharedNote',
     'Source',
+    'Source',
+    'SourceCitation',
+    'SourceData',
+    'SourceEvent',
+    'SourceRepositoryCitation',
     'Submitter',
+    'Submitter',
+    'Text',
+    'Time',
+    'Wife',
 ]
 
 import logging
 from textwrap import dedent, indent
 from typing import Any, Literal, NamedTuple
 
-from chronodata.constants import Cal, String, Value
-from chronodata.enums import (
+from chronodata.constants import (
     Adop,
+    Cal,
     Event,
     FamAttr,
     # FamcStat,
@@ -51,9 +102,11 @@ from chronodata.enums import (
     Role,
     Sex,
     Stat,
+    String,
     Tag,
+    Value,
 )
-from chronodata.messages import Msg
+from chronodata.messages import Example, Msg
 from chronodata.methods import DefCheck, DefTag
 from chronodata.records import (
     FamilyXref,
@@ -65,6 +118,30 @@ from chronodata.records import (
     SubmitterXref,
     Void,
 )
+
+
+class Format:
+    """Methods to support formatting strings to meet the GEDCOM standard."""
+
+    @staticmethod
+    def phone(data: str) -> str:
+        """Format a phone string to meet the GEDCOM standard."""
+        return data
+
+    @staticmethod
+    def email(data: str) -> str:
+        """Format an email string to meet the GEDCOM standard."""
+        return data
+
+    @staticmethod
+    def fax(data: str) -> str:
+        """Format a fax string to meet the GEDCOM standard."""
+        return data
+
+    @staticmethod
+    def www(data: str) -> str:
+        """Format a url string to meet the GEDCOM standard."""
+        return data
 
 
 class Address(NamedTuple):
@@ -112,7 +189,7 @@ class Address(NamedTuple):
         A string displaying stored Address data formatted to GEDCOM specifications.
 
     Reference:
-        [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#substructures)
+        [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ADDRESS_STRUCTURE)
 
     > n ADDR <Special>                           {1:1}  [g7:ADDR](https://gedcom.io/terms/v7/ADDR)
     >   +1 ADR1 <Special>                        {0:1}  [g7:ADR1](https://gedcom.io/terms/v7/ADR1)
@@ -153,6 +230,91 @@ class Address(NamedTuple):
             lines = DefTag.str_to_str(lines, level + 1, Tag.POST, self.postal)
             lines = DefTag.str_to_str(lines, level + 1, Tag.CTRY, self.country)
         return lines
+
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""address = Address(
+    address = {self.address},
+    city = '{self.city}',
+    state = '{self.state}',
+    postal = '{self.postal}',
+    country = '{self.country}',
+)""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Address
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ADDRESS_STRUCTURE'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Address(
+                    ['1600 Pennsylvania Avenue NW', 'Washington, DC 20500'],
+                    city='Washington',
+                    state='DC',
+                    postal='20500',
+                    country='USA',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Address(
+                    ['北京市东城区景山前街4号'],
+                    city='北京',
+                    state='',
+                    postal='',
+                    country='',
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Address(
+                    ['McMurdo Station', 'Antarctica'],
+                    city='McMurdo Station',
+                    state='',
+                    postal='',
+                    country='Antarctica',
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Address()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class Age(NamedTuple):
@@ -229,7 +391,9 @@ class Age(NamedTuple):
         """Format the GEDCOM Age data type."""
         line: str = ''
         info: str = self.greater_less_than
-        if self.validate():
+        if self.validate() and (
+            self.years > 0 or self.months > 0 or self.weeks > 0 or self.days > 0
+        ):
             if self.years > 0:
                 info = ''.join([info, f' {self.years!s}y'])
             if self.months > 0:
@@ -249,6 +413,98 @@ class Age(NamedTuple):
                 )
         return line
 
+    def code(self, level: int = 0, name: str = 'age') -> str:
+        """Generate the ChronoData code that would produce the GEDCOM lines."""
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = Age(
+    years = {self.years},
+    months = {self.months},
+    weeks = {self.weeks},
+    days = {self.days},
+    greater_less_than = '{self.greater_less_than}',
+    phrase = '{self.phrase}',
+)""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Age
+        gedcom_docs: str = (
+            'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age'
+        )
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Age(
+                    years=10,
+                    months=2,
+                    weeks=1,
+                    days=2,
+                    greater_less_than='',
+                    phrase='Original text read, "Ten years, two months, one week and two days."',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Age(
+                    years=0,
+                    months=2,
+                    weeks=0,
+                    days=2,
+                    greater_less_than='<',
+                    phrase='Original text read, "Under two months and two days."',
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Age(
+                    years=0,
+                    months=0,
+                    weeks=40,
+                    days=2,
+                    greater_less_than='>',
+                    phrase='Original text read, "Čtyřicet týdnů a dva dny"',
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Age()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
+
 
 class PersonalNamePieces(NamedTuple):
     """Store, validate and display values for an optional GEDCOM Personal Name Piece.
@@ -256,7 +512,7 @@ class PersonalNamePieces(NamedTuple):
     Example:
         This example includes all six of the Personal Name Piece tags.
         >>> from chronodata.store import PersonalNamePieces  # doctest: +ELLIPSIS
-        >>> from chronodata.enums import Tag
+        >>> from chronodata.constants import Tag
 
     Args:
         prefix: An option list of NPFX or name prefixes of the name.
@@ -313,6 +569,95 @@ class PersonalNamePieces(NamedTuple):
             lines = DefTag.strlist_to_str(lines, level, Tag.NSFX, self.suffix)
         return lines
 
+    def code(self, level: int = 0, name: str = 'pieces') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = PersonalNamePieces(
+    prefix = {self.prefix},
+    given = {self.given},
+    nickname = {self.nickname},
+    surname_prefix = {self.surname_prefix},
+    surname = {self.surname},
+    suffix = {self.suffix},
+)""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: PersonalNamePieces
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = PersonalNamePieces(
+                    prefix=['Mr', 'Sir'],
+                    given=['Tom', 'Thomas'],
+                    nickname=['Tommy'],
+                    surname_prefix=[],
+                    surname=['Smith'],
+                    suffix=['Jr'],
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = PersonalNamePieces(
+                    prefix=['Mr', 'Sir'],
+                    given=['Tom', 'Thomas'],
+                    nickname=['Tommy'],
+                    surname_prefix=[],
+                    surname=['Smith'],
+                    suffix=['Jr'],
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = PersonalNamePieces(
+                    prefix=['Mr', 'Sir'],
+                    given=['Tom', 'Thomas'],
+                    nickname=['Tommy'],
+                    surname_prefix=[],
+                    surname=['Smith'],
+                    suffix=['Jr'],
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = PersonalNamePieces()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
+
 
 class NameTranslation(NamedTuple):
     """Store, validate and display name translations.
@@ -353,7 +698,7 @@ class NameTranslation(NamedTuple):
 
     translation: str = String.EMPTY
     language: str = String.UNDETERMINED
-    pieces: PersonalNamePieces | None = None
+    pieces: PersonalNamePieces = PersonalNamePieces()
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -374,6 +719,17 @@ class NameTranslation(NamedTuple):
                 lines = ''.join([lines, self.pieces.ged(level + 1)])
         return lines
 
+    def code(self, level: int = 0, name: str = 'translation') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = NameTranslation(
+    translation = '{self.translation}',
+    language = '{self.language}',
+{self.pieces.code(level+1, name='pieces')},
+)""",
+            spaces,
+        )
+
 
 class NoteTranslation(NamedTuple):
     """Store, validate and display the optional note tranlation section of
@@ -388,7 +744,7 @@ class NoteTranslation(NamedTuple):
     Example:
         This example will translation "This is a note." into the Arabic "هذه ملاحظة.".
         >>> from chronodata.store import NoteTranslation
-        >>> from chronodata.enums import MediaType
+        >>> from chronodata.constants import MediaType
         >>> arabic_text = 'هذه ملاحظة.'
         >>> mime = MediaType.TEXT_HTML
         >>> language = 'afb'
@@ -461,7 +817,7 @@ class CallNumber(NamedTuple):
         <BLANKLINE>
 
         This next example uses all of the optional positions.
-        >>> from chronodata.enums import Media
+        >>> from chronodata.constants import Media
         >>> cn_all = CallNumber('1111', Media.BOOK, 'New Testament')
         >>> print(cn_all.ged(1))
         1 CALN 1111
@@ -704,7 +1060,7 @@ class Note(NamedTuple):
         <BLANKLINE>
 
         The next example adds translations of the previous example to the note.
-        >>> from chronodata.enums import MediaType
+        >>> from chronodata.constants import MediaType
         >>> english_translation = NoteTranslation(
         ...     'This is my note.', MediaType.TEXT_PLAIN, 'en'
         ... )
@@ -825,7 +1181,7 @@ class PersonalName(NamedTuple):
         ...     PersonalNamePieces,
         ...     SourceCitation,
         ... )
-        >>> from chronodata.enums import NameType, PersonalNamePieceTag
+        >>> from chronodata.constants import NameType, PersonalNamePieceTag
         >>> adam_note = Note(note='Here is a place to add more information.')
         >>> adam_english = NameTranslation(
         ...     'Adam', 'en', PersonalNamePieces(nickname=['the man'])
@@ -966,7 +1322,7 @@ class Association(NamedTuple):
 
         First import the required classes.
         >>> from chronodata.build import Chronology
-        >>> from chronodata.enums import Role
+        >>> from chronodata.constants import Role
         >>> from chronodata.store import Association, Individual
 
         Next, create a chronology and the two individuals references.
@@ -1933,7 +2289,7 @@ class FamilyEvent(NamedTuple):
         Tag.MARR, Tag.MARS, Tag.EVEN.  This example shows the error that
         would result if a different tag is used once the NamedTuple is validated.
         First, set up the situation for the error to occur.
-        >>> from chronodata.enums import Tag
+        >>> from chronodata.constants import Tag
         >>> from chronodata.store import FamilyEvent
         >>> event = FamilyEvent(Tag.DATE)
 
@@ -3119,7 +3475,7 @@ class Individual(NamedTuple):
         First import the packages.
         >>> from chronodata.build import Chronology
         >>> from chronodata.store import Association, Individual
-        >>> from chronodata.enums import Role
+        >>> from chronodata.constants import Role
 
         Next instantiate a Chronology which will store the information.
         This will be named `test`.
@@ -3288,7 +3644,7 @@ class Individual(NamedTuple):
         preface: str = f"""
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
             from chronodata.build import Chronology
-            from chronodata.enums import Resn, Sex
+            from chronodata.constants import Resn, Sex
             from chronodata.store import Individual
 
             {chronology_name} = Chronology('{chronology_name}')

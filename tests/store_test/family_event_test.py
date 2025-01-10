@@ -3,8 +3,7 @@
 
 import pytest
 
-from chronodata.constants import String
-from chronodata.enums import FamEven, Tag
+from chronodata.constants import FamEven, String, Tag
 from chronodata.messages import Msg
 from chronodata.store import FamilyEvent, FamilyEventDetail
 

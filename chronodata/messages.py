@@ -7,6 +7,16 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class Example:
+    EMPTY_CODE: str = 'Empty Example'
+    FULL: str = 'First Example'
+    ALTERNATE: str = 'Second Example'
+    LANGUAGE: str = 'Third Example'
+    EMPTY_GEDCOM: str = 'There should be no GEDCOM lines produced.'
+    GEDCOM: str = 'The following GEDCOM lines are produced.'
+
+
+@dataclass(frozen=True)
 class Column:
     """The following constants are used for column headings."""
 
@@ -79,7 +89,9 @@ class Msg:
     COMMENT_REMOVED: str = 'Comment {0} "{1}" has been removed.'
     CONDITION_NOT_MET: str = 'The condition "{0}" was not met.'
     COUNT_RESERVED: str = '{0} reserved keys were used.'
-    DUPLICATE_RECORD: str = 'The cross-reference identifier {0} has already been used.'
+    DUPLICATE_RECORD: str = (
+        'The cross-reference identifier {0} has already been used.'
+    )
     EMPTY_ERROR: str = 'The value for "{0}" cannot be the empty string or None.'
     EMPTY_EVENT_TYPE: str = 'The event type for tag {0} must have some value.'
     EXID_TYPE: str = 'The EXID tag will require a type in the future.'
@@ -133,7 +145,9 @@ class Msg:
     SAVE_FIRST: str = 'Write the chronology "{0}" to a named file first.'
     STARTED: str = 'The "{0}" chronology has been started.'
     STRICT: str = 'Strict formatting of dates has been set to "{0}".'
-    TAG_PAYLOAD: str = 'The tag {0} cannot have a payload different from "Y" or "".'
+    TAG_PAYLOAD: str = (
+        'The tag {0} cannot have a payload different from "Y" or "".'
+    )
     TOO_MANY_DAYS: str = '"{0}" is more than the number of days in the {1}.'
     TOO_MANY_MONTHS: str = '"{0}" is more than the number of months.'
     UNRECOGNIZED: str = 'The file "{0}" has an unrecognized extension.'

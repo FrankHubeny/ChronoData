@@ -7,7 +7,7 @@
 
 import pytest
 
-from chronodata.enums import Tag
+from chronodata.constants import Tag
 from chronodata.messages import Msg
 from chronodata.methods import DefCheck, DefTag
 from chronodata.store import Date, Time

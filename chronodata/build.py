@@ -15,11 +15,21 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
+import json
+import logging
+from pathlib import Path
 from typing import Any
 
-from chronodata.constants import String
-from chronodata.messages import Msg
-from chronodata.readwrite import Base
+from chronodata.constants import (
+    Key,
+    Number,
+    String,
+    Tag,
+)
+from chronodata.messages import Issue, Msg
+from chronodata.methods import DefTag
+
+# from chronodata.readwrite import Base
 from chronodata.records import (
     FamilyXref,
     IndividualXref,
@@ -42,7 +52,7 @@ from chronodata.store import (
 )
 
 
-class Chronology(Base):
+class Chronology:
     """Methods to add, update and remove a specific loaded chronology."""
 
     def __init__(
@@ -52,7 +62,24 @@ class Chronology(Base):
         calendar: str = String.GREGORIAN,
         log: bool = True,
     ) -> None:
-        super().__init__(name, filename, calendar, log)
+        self.chron_name: str = name
+        self.calendar: str = calendar
+        self.ged_data: list[str] = []
+        self.ged_splitdata: list[Any] = []
+        self.ged_issues: list[Any] = []
+        self.ged_in_version: str = ''
+        self.ged_header: str = ''
+        self.ged_trailer: str = f'0 {Tag.TRLR}\n'
+        self.ged_family: str = ''
+        self.ged_individual: str = ''
+        self.ged_multimedia: str = ''
+        self.ged_repository: str = ''
+        self.ged_shared_note: str = ''
+        self.ged_source: str = ''
+        self.ged_submitter: str = ''
+        self.csv_data: str = ''
+        self.filename: str = filename
+        self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
         self.family_xreflist: list[str] = [Void.NAME]
         self.individual_xreflist: list[str] = [Void.NAME]
@@ -61,6 +88,203 @@ class Chronology(Base):
         self.shared_note_xreflist: list[str] = [Void.NAME]
         self.source_xreflist: list[str] = [Void.NAME]
         self.submitter_xreflist: list[str] = [Void.NAME]
+        match self.filename_type:
+            case '':
+                self.chron = {
+                    Tag.NAME: name,
+                    Key.CAL: calendar,
+                }
+                if log:
+                    logging.info(Msg.STARTED.format(self.chron_name))
+            case String.JSON:
+                self.read_json()
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
+            case String.GED:
+                self.read_ged()
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
+            case String.CSV:
+                self.read_csv()
+                if log:
+                    logging.info(Msg.LOADED.format(self.chron_name, filename))
+            case _:
+                logging.warning(Msg.UNRECOGNIZED.format(self.filename))
+
+    def __str__(self) -> str:
+        return json.dumps(self.chron)
+
+    def _get_filename_type(self, filename: str) -> str:
+        filename_type: str = ''
+        if filename[-Number.JSONLEN :] == String.JSON:
+            filename_type = String.JSON
+        if filename[-Number.GEDLEN :] == String.GED:
+            filename_type = String.GED
+        return filename_type
+
+    def read_csv(self) -> None:
+        try:
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                data: Any = infile.readlines()
+                self.csv_data = ''.join(
+                    [self.csv_data, DefTag.clean_input(data)]
+                )
+                infile.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
+        # self.cal_name = self.chron[Key.CAL][Key.NAME]
+        # self.chron_name = self.chron[Key.NAME]
+
+    def read_json(self) -> None:
+        try:
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                self.chron = json.load(infile)
+                infile.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
+        # self.cal_name = self.chron[Key.CAL][Key.NAME]
+        # self.chron_name = self.chron[Key.NAME]
+
+    def read_ged(self) -> None:
+        """Read and validate the GEDCOM file."""
+        try:
+            with Path.open(
+                Path(self.filename), encoding='utf-8', mode=String.READ
+            ) as infile:
+                data: Any = infile.readlines()
+                self.ged_data.append(DefTag.clean_input(data))
+                infile.close()
+        except UnicodeDecodeError:
+            logging.error(Msg.NOT_UNICODE.format(self.filename))
+            raise
+        # Split each line into components and remove terminator.
+        for i in data:
+            self.ged_splitdata.append(i.replace('\n', '').split(' ', 2))
+        # Check the level for bad increments and starting point.
+        level: int = 0
+        for index, value in enumerate(self.ged_splitdata, start=1):
+            if index == 1 and value[0] != '0':
+                self.ged_issues.append([index, Issue.NO_ZERO])
+            elif int(value[0]) > level + 1:
+                self.ged_issues.append([index, Issue.BAD_INC])
+            elif int(value[0]) < 0:
+                self.ged_issues.append([index, Issue.LESS_ZERO])
+            else:
+                level = int(value[0])
+        # Report the validation results which exists the function.
+        # if len(issues) > 0:
+        #     #if self.log:
+        #     #logging.info(Msg.LOAD_FAILED.format(filename))
+        #     return pd.DataFrame(
+        #         data=issues, columns=[Column.LINE, Column.ISSUE]
+        #     )
+        # Find version.
+        for i in self.ged_splitdata:
+            if i[1] == 'VERS':
+                self.ged_in_version = i[2]
+                break
+        # add in the base dictionaries.
+        count: int = 0
+        tags: list[str] = []
+        for line in self.ged_splitdata:
+            if line[0] == '0' and len(line) == 3:
+                count = count + 1
+                if line[2] not in self.chron:
+                    self.chron.update({line[2]: {}})
+                # self.chron[line[2]].update({line[1]: {}})
+                tags = []
+                tags.append(line[2])
+                tags.append(line[1])
+            elif line[0] == '1' and len(line) == 3 and count > 0:
+                # t0 = tags[0]
+                # t1 = tags[1]
+                # self.chron[tags[0]][tags[1]].update({line[1]: line[2]})
+                tags.append(line[1])
+            # elif line[0] == '2' and len(line) == 3 and count > 0:
+            #     self.chron[tags[0]][tags[1]][tags[2]].update({line[1]: line[2]})
+            #     tags.append(line[1])
+        # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
+
+    def save(self, filename: str = '', overwrite: bool = False) -> None:
+        """Save the current chronology.
+
+        Parameters
+        ----------
+        filename:
+            The name of the file. If empty it will use the name
+        """
+
+        if filename == '':
+            filename = self.filename
+        else:
+            self.filename = filename
+            self.filename_type = self._get_filename_type(filename)
+        if Path.exists(Path(filename)) and not overwrite:
+            logging.info(Msg.FILE_EXISTS.format(filename))
+        else:
+            match self.filename_type:
+                # https://stackoverflow.com/questions/10373247/how-do-i-write-a-python-dictionary-to-a-csv-file
+                # case String.CSV:
+                #     with Path.open(
+                #         Path(self.filename), encoding='utf-8', mode=String.WRITE
+                #     ) as file:
+                #         w = csv.DictWriter(file, self.chron.keys())
+                #         w.writerows(self.chron)
+                #     logging.info(
+                #         Msg.SAVED.format(self.chron_name, self.filename)
+                #     )
+                case String.JSON:
+                    with Path.open(
+                        Path(self.filename), encoding='utf-8', mode=String.WRITE
+                    ) as file:
+                        json.dump(self.chron, file)
+                        file.close()
+                    logging.info(
+                        Msg.SAVED.format(self.chron_name, self.filename)
+                    )
+                case String.GED:
+                    output: str = ''.join(
+                        [
+                            self.ged_header,
+                            self.ged_family,
+                            self.ged_individual,
+                            self.ged_multimedia,
+                            self.ged_shared_note,
+                            self.ged_source,
+                            self.ged_submitter,
+                            self.ged_trailer,
+                        ]
+                    )
+                    with Path.open(
+                        Path(filename), encoding='utf-8', mode=String.WRITE
+                    ) as file:
+                        file.write(output)
+                        file.close()
+                    logging.info(
+                        Msg.SAVED.format(self.chron_name, self.filename)
+                    )
+                case _:
+                    logging.info(Msg.SAVE_FIRST.format(self.chron_name))
+
+    # def rename(self, name: str) -> None:
+    #     """Rename the chronology."""
+    #     self.chron.update({Key.NAME: name})
+    #     self.chron_name = self.chron[Key.NAME]
+    #     logging.info(Msg.RENAME.format(self.chron_name))
+    #     self.xref_counter: int = 1
+    #     self.family_xreflist: list[str] = [Void.NAME]
+    #     self.individual_xreflist: list[str] = [Void.NAME]
+    #     self.multimedia_xreflist: list[str] = [Void.NAME]
+    #     self.repository_xreflist: list[str] = [Void.NAME]
+    #     self.shared_note_xreflist: list[str] = [Void.NAME]
+    #     self.source_xreflist: list[str] = [Void.NAME]
+    #     self.submitter_xreflist: list[str] = [Void.NAME]
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -573,7 +797,9 @@ class Chronology(Base):
                 unique_list.append(record.xref.fullname)
                 destination = ''.join([destination, record.ged()])
             else:
-                raise ValueError(Msg.DUPLICATE_RECORD.format(record.xref.fullname))
+                raise ValueError(
+                    Msg.DUPLICATE_RECORD.format(record.xref.fullname)
+                )
         missing = [
             xref
             for xref in xref_list

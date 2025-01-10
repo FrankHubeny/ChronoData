@@ -26,8 +26,7 @@ from typing import Any
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
-from chronodata.constants import Cal, String
-from chronodata.enums import Tag
+from chronodata.constants import Cal, String, Tag
 from chronodata.messages import Msg
 
 __all__ = [
@@ -119,14 +118,14 @@ class DefTag:
             The main use of this method generates a GEDCOM line.
             Note how the initial and ending spaces have been stripped from
             the input value.
-            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Tag
             >>> from chronodata.methods import DefTag
             >>> print(DefTag.taginfo(1, Tag.NAME, '  Some Name'))
             1 NAME   Some Name
             <BLANKLINE>
 
             There can also be an extra parameter.
-            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Tag
             >>> from chronodata.methods import DefTag
             >>> print(DefTag.taginfo(1, Tag.NAME, 'SomeName', 'Other info'))
             1 NAME SomeName Other info
@@ -140,31 +139,6 @@ class DefTag:
             return f'{level} {tag.value} {DefTag.clean_input(payload)}\n'
         return f'{level} {tag.value} {DefTag.clean_input(payload)} {DefTag.clean_input(extra)}\n'
 
-    # @staticmethod
-    # def contact_info(
-    #     level: int = 1,
-    #     phones: Any = None,
-    #     emails: Any = None,
-    #     faxes: Any = None,
-    #     wwws: Any = None,
-    # ) -> str:
-    #     lines: str = ''
-    #     if phones is not None:
-    #         for phone in phones:
-    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.PHON, phone)])
-    #     if emails is not None:
-    #         for email in emails:
-    #             lines = ''.join(
-    #                 [lines, DefTag.taginfo(level, Tag.EMAIL, email)]
-    #             )
-    #     if faxes is not None:
-    #         for fax in faxes:
-    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.FAX, fax)])
-    #     if wwws is not None:
-    #         for www in wwws:
-    #             lines = ''.join([lines, DefTag.taginfo(level, Tag.WWW, www)])
-    #     return lines
-
     @staticmethod
     def list_to_str(
         lines: str, level: int, items: list[Any], flag: str = ''
@@ -173,7 +147,7 @@ class DefTag:
 
         Example:
             >>> from chronodata.methods import DefTag
-            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Tag
             >>> from chronodata.store import Note
             >>> lines = ''
             >>> note1 = Note(note='This is the first note')
@@ -213,7 +187,7 @@ class DefTag:
 
         Example:
             >>> from chronodata.methods import DefTag
-            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Tag
             >>> lines = ''
             >>> line = DefTag.empty_to_str(lines, 1, Tag.MAP)
             >>> print(line)
@@ -239,7 +213,7 @@ class DefTag:
         be done if the payload is not empty.
 
         Example:
-            >>> from chronodata.enums import Tag
+            >>> from chronodata.constants import Tag
             >>> from chronodata.methods import DefTag
             >>> lines = '1 MAP\\n'
             >>> lines = DefTag.str_to_str(lines, 2, Tag.LATI, 'N30.0')
@@ -316,20 +290,20 @@ class DefCheck:
     def verify(when: bool, then: bool, message: str) -> bool:
         """Use conditional logic to test whether to raise a ValueError exception.
 
-        The only time this fails is when the `when` is True, 
+        The only time this fails is when the `when` is True,
         but the `then` is False.  In that case a ValueError is raised
         with the value in `message`.  In all other cases, True is returned.
 
         This helps verify that more complicated GEDCOM criteria are met.
-        
+
         Examples:
             >>> from chronodata.methods import DefCheck
             >>> message = 'Error!'
-            >>> DefCheck.verify(True, 1==2, message)
+            >>> DefCheck.verify(True, 1 == 2, message)
             Traceback (most recent call last):
             ValueError: Error!
 
-            >>> DefCheck.verify(True, 1==1, message)
+            >>> DefCheck.verify(True, 1 == 1, message)
             True
 
             When `when` is False, then True is returned no matter what the
@@ -339,7 +313,7 @@ class DefCheck:
 
             >>> DefCheck.verify(False, True, message)
             True
-            
+
         Args:
             when: If this is True then check the `then` condition, otherwise return True.
             then: If `when` is True and this is not, raise the ValueError.
@@ -380,47 +354,6 @@ class DefCheck:
             raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
         return True
 
-    # @staticmethod
-    # def verify_choice(value: str, choice: frozenset[str]) -> bool:
-    #     """Check if the value is available to choose from.
-
-    #     Some GEDCOM structures involve more than one tag.  The permitted
-    #     tags are in an enumeration set.  This method validates that
-    #     the choice the user made was in the enumeration set.
-
-    #     Example:
-    #         This test shows that the value of Tag.GIVN which is "GIVN" is in
-    #         the set of accepted values for a Personal Name Piece structure.
-    #         >>> from chronodata.methods import DefCheck
-    #         >>> from chronodata.enums import Tag
-    #         >>> from chronodata.constants import Choice
-    #         >>> DefCheck.verify_choice(Tag.GIVN.value, Choice.PERSONAL_NAME_PIECE)
-    #         True
-
-    #     Args:
-    #         value: The value of the Tag, not the name of the Tag itself.
-    #         choice: The set the available choices for the value.
-
-    #     Returns:
-    #         True: If the value of the Tag is in the available choices.
-    #         False: If the value of the Tag is not in the available choices.
-    #     """
-    #     if value not in choice:
-    #         raise ValueError(Msg.NOT_VALID_CHOICE.format(value, choice))
-    #     return True
-
-    # @staticmethod
-    # def verify_dict_key(value: str, dictionary: dict[str, str]) -> bool:
-    #     """Check if the value is in the proper dictionary."""
-    #     DefCheck.verify_type(value, str)
-    #     if (
-    #         value != ''
-    #         and value not in dictionary
-    #         and value not in dictionary.values()
-    #     ):
-    #         raise ValueError(Msg.NOT_VALID_KEY.format(value, dictionary))
-    #     return True
-
     @staticmethod
     def display_dictionary(dictionary: dict[str, str]) -> pd.DataFrame:
         pd.set_option('display.max_rows', None)
@@ -428,22 +361,6 @@ class DefCheck:
             dictionary, orient='index', columns=['Value']
         )
 
-    # @staticmethod
-    # def get_dict_key_values(
-    #     query: str, dictionary: dict[str, str]
-    # ) -> list[str]:
-    #     """Return all items found in the dictionary matching either key or value."""
-    #     found: list[str] = []
-    #     if query in dictionary:
-    #         found.append(''.join([query, ': ', dictionary[query]]))
-    #     for item in dictionary.items():
-    #         if query == item[1]:
-    #             found.append(''.join([item[0], ': ', item[1]]))
-    #     # if query in dictionary.values():
-    #     #     for key in dictionary.items():
-    #     #         if dictionary[key] == query:
-    #     #             found.append(''.join([str(key), ': ', str(query)]))
-    #     return found
 
     @staticmethod
     def verify_not_default(value: Any, default: Any) -> bool:
