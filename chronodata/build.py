@@ -30,25 +30,33 @@ from chronodata.messages import Issue, Msg
 from chronodata.methods import DefTag
 
 # from chronodata.readwrite import Base
-from chronodata.records import (
-    FamilyXref,
-    IndividualXref,
-    MultimediaXref,
-    RepositoryXref,
-    SharedNoteXref,
-    SourceXref,
-    SubmitterXref,
-    Void,
-)
+# from chronodata.records import (
+#     FamilyXref,
+#     IndividualXref,
+#     MultimediaXref,
+#     RepositoryXref,
+#     SharedNoteXref,
+#     SourceXref,
+#     SubmitterXref,
+#     Void,
+# )
 from chronodata.store import (
     Family,
+    FamilyXref,
     Header,
     Individual,
+    IndividualXref,
     Multimedia,
+    MultimediaXref,
     Repository,
+    RepositoryXref,
     SharedNote,
+    SharedNoteXref,
     Source,
+    SourceXref,
     Submitter,
+    SubmitterXref,
+    Void,
 )
 
 

@@ -10,7 +10,7 @@ import pytest
 
 from chronodata.build import Chronology
 from chronodata.messages import Msg
-from chronodata.records import Void
+from chronodata.store import Void
 
 testdata = [
     # TEST Initial counter value.

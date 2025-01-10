@@ -19,7 +19,7 @@ import pytest
 from chronodata.build import Chronology
 from chronodata.messages import Msg
 from chronodata.methods import DefCheck
-from chronodata.records import (
+from chronodata.store import (
     FamilyXref,
     IndividualXref,
     MultimediaXref,
