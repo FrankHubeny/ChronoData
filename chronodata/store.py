@@ -77,7 +77,10 @@ __all__ = [
     'Wife',
 ]
 
+import contextlib
 import logging
+import re
+from enum import Enum
 from textwrap import dedent, indent
 from typing import Any, Literal, NamedTuple
 
@@ -107,7 +110,6 @@ from chronodata.constants import (
     Value,
 )
 from chronodata.messages import Example, Msg
-from chronodata.methods import DefCheck, DefTag
 from chronodata.records import (
     FamilyXref,
     IndividualXref,
@@ -120,7 +122,328 @@ from chronodata.records import (
 )
 
 
-class Format:
+class Tagger:
+    """Global methods to construct GEDCOM output."""
+
+    @staticmethod
+    def unique_xref(tuples: tuple[Any], xref: Any, name: Any) -> bool:
+        values = {getattr(t, str(xref)) for t in tuples}
+        values.add(str(name))
+        return len(values) == len(tuples)
+
+    @staticmethod
+    def taginfo(
+        level: int,
+        tag: Tag,
+        payload: str = '',
+        extra: str = '',
+    ) -> str:
+        """Return a GEDCOM formatted line for the information and level.
+
+        This is suitable for most tagged lines to guarantee it is uniformly
+        formatted.  Although the user need not worry about calling this line,
+        it is provided so the user can see the GEDCOM formatted output
+        that would result.
+
+        Example:
+            The main use of this method generates a GEDCOM line.
+            Note how the initial and ending spaces have been stripped from
+            the input value.
+            >>> from chronodata.constants import Tag
+            >>> from chronodata.store import Tagger
+            >>> print(Tagger.taginfo(1, Tag.NAME, '  Some Name'))
+            1 NAME   Some Name
+            <BLANKLINE>
+
+            There can also be an extra parameter.
+            >>> print(Tagger.taginfo(1, Tag.NAME, 'SomeName', 'Other info'))
+            1 NAME SomeName Other info
+            <BLANKLINE>
+
+        """
+
+        if extra == '':
+            if payload == '':
+                return f'{level} {tag.value}\n'
+            return f'{level} {tag.value} {Tagger.clean_input(payload)}\n'
+        return f'{level} {tag.value} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}\n'
+
+    @staticmethod
+    def list_to_str(
+        lines: str, level: int, items: list[Any], flag: str = ''
+    ) -> str:
+        """Append the GEDCOM lines from a list of NamedTuples to the GEDCOM file.
+
+        Example:
+            >>> from chronodata.constants import Tag
+            >>> from chronodata.store import Note, Tagger
+            >>> lines = ''
+            >>> note1 = Note(note='This is the first note')
+            >>> note2 = Note(note='This is the second note')
+            >>> notes = [
+            ...     note1,
+            ...     note2,
+            ... ]
+            >>> lines = Tagger.list_to_str(lines, 1, notes)
+            >>> print(lines)
+            1 NOTE This is the first note
+            2 LANG und
+            1 NOTE This is the second note
+            2 LANG und
+            <BLANKLINE>
+
+        Args:
+            lines: The already constructed GEDCOM file that will be appended to.
+            level: The GEDCOM level of the structure.
+            items: The list of NamedTuples to append to `lines`.
+            flag: An optional flag that will be passed to the `.ged` method of the
+                NamedTuple which will modify its processing.
+        """
+        if len(items) > 0:
+            for item in items:
+                if flag != '':
+                    lines = ''.join([lines, item.ged(level, flag)])
+                else:
+                    lines = ''.join([lines, item.ged(level)])
+        return lines
+
+    @staticmethod
+    def empty_to_str(lines: str, level: int, tag: Tag) -> str:
+        """Join a GEDCOM line that has only a level and a tag to a string.
+
+        This method hides the join operation.
+
+        Example:
+            >>> from chronodata.store import Tagger
+            >>> from chronodata.constants import Tag
+            >>> lines = ''
+            >>> line = Tagger.empty_to_str(lines, 1, Tag.MAP)
+            >>> print(line)
+            1 MAP
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix of the returned string.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+
+        """
+        return ''.join([lines, Tagger.taginfo(level, tag)])
+
+    @staticmethod
+    def str_to_str(
+        lines: str, level: int, tag: Tag, payload: str, extra: str = ''
+    ) -> str:
+        """Join a GEDCOM line to a string.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line and the check that this should only
+        be done if the payload is not empty.
+
+        Example:
+            >>> from chronodata.constants import Tag
+            >>> from chronodata.store import Tagger
+            >>> lines = '1 MAP\\n'
+            >>> lines = Tagger.str_to_str(lines, 2, Tag.LATI, 'N30.0')
+            >>> lines = Tagger.str_to_str(lines, 2, Tag.LONG, 'W30.0')
+            >>> print(lines)
+            1 MAP
+            2 LATI N30.0
+            2 LONG W30.0
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            info: The payload stored in this tagged line.
+            extra: Optional extra payload to be stored on the same line.
+        """
+        if payload != '':
+            return ''.join([lines, Tagger.taginfo(level, tag, payload, extra)])
+        return lines
+
+    @staticmethod
+    def strlist_to_str(
+        lines: str, level: int, tag: Tag, records: list[str]
+    ) -> str:
+        """Join a list of GEDCOM lines to a string.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line and the check that this should only
+        be done if the payload is not empty.
+
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            records: The list of strings to tag.
+        """
+        for record in records:
+            lines = Tagger.str_to_str(lines, level, tag, record)
+        return lines
+
+    @staticmethod
+    def clean_input(input: str) -> str:
+        """Remove banned GEDCOM unicode characters from input strings.
+
+        The control characters U+0000 - U+001F and the delete character U+007F
+        are listed in the
+        [C0 Controls and Basic Latin](https://www.unicode.org/charts/PDF/U0000.pdf)
+        chart.
+
+        The code points U+D800 - U+DFFF are not interpreted.
+        They are described in the
+        [High Surrogate Area](https://www.unicode.org/charts/PDF/UD800.pdf) and
+        [Low Surrogate Area](https://www.unicode.org/charts/PDF/UDC00.pdf)
+        standards.
+
+        The code points U+FFFE and U+FFFF are noncharacters as described in the
+        [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
+
+        Reference:
+            - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
+            - [Unicode Specification](https://www.unicode.org/versions/Unicode16.0.0/#Summary)
+            - [Python re Module](https://docs.python.org/3/library/re.html)
+        """
+
+        return re.sub(String.BANNED, '', input)
+
+class Checker:
+    """Global methods supporting validation of data."""
+
+    @staticmethod
+    def verify(when: bool, then: bool, message: str) -> bool:
+        """Use conditional logic to test whether to raise a ValueError exception.
+
+        The only time this fails is when the `when` is True,
+        but the `then` is False.  In that case a ValueError is raised
+        with the value in `message`.  In all other cases, True is returned.
+
+        This helps verify that more complicated GEDCOM criteria are met.
+
+        Examples:
+            >>> from chronodata.store import Checker
+            >>> message = 'Error!'
+            >>> Checker.verify(True, 1 == 2, message)
+            Traceback (most recent call last):
+            ValueError: Error!
+
+            >>> Checker.verify(True, 1 == 1, message)
+            True
+
+            When `when` is False, then True is returned no matter what the
+            value of `then` happens to be.
+            >>> Checker.verify(False, False, message)
+            True
+
+            >>> Checker.verify(False, True, message)
+            True
+
+        Args:
+            when: If this is True then check the `then` condition, otherwise return True.
+            then: If `when` is True and this is not, raise the ValueError.
+            message: This is the message used by the ValueError.
+        """
+        if when and not then:
+            raise ValueError(message)
+        return True
+
+    @staticmethod
+    def verify_type(
+        value: Any | None, value_type: Any, validate: bool = True
+    ) -> bool:
+        """Check if the value has the specified type."""
+        check: bool = True
+        if value is not None:
+            if not isinstance(value, value_type):
+                raise TypeError(
+                    Msg.WRONG_TYPE.format(value, type(value), value_type)
+                )
+            if not isinstance(value, int | float | str | Enum) and validate:
+                with contextlib.suppress(Exception):
+                    check = value.validate()
+        return check
+
+    @staticmethod
+    def verify_tuple_type(name: list[Any], value_type: Any) -> bool:
+        """Check if each member of the tuple has the specified type."""
+        if name != [] and name is not None:
+            for value in name:
+                Checker.verify_type(value, value_type)
+        return True
+
+    @staticmethod
+    def verify_enum(value: str, enumeration: Any) -> bool:
+        """Check if the value is in the proper enumation."""
+        if value not in enumeration:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(value, enumeration))
+        return True
+
+    # @staticmethod
+    # def display_dictionary(dictionary: dict[str, str]) -> pd.DataFrame:
+    #     pd.set_option('display.max_rows', None)
+    #     return pd.DataFrame.from_dict(
+    #         dictionary, orient='index', columns=['Value']
+    #     )
+
+
+    @staticmethod
+    def verify_not_default(value: Any, default: Any) -> bool:
+        """Check that the value is not the default value.
+
+        If the value equals the default value in certain structures,
+        the structure is empty.  Further processing on it can stop.
+        In particular the output of its `ged` method is the empty string.
+
+        Examples:
+            The first example checks that the empty string is recognized
+            as the default value of the empty string.
+            >>> from chronodata.store import Checker
+            >>> Checker.verify_not_default('', '')
+            Traceback (most recent call last):
+            ValueError: The value "" cannot be the default value "".
+
+            The second example checks that a non-empty string
+            is not identified as the default.
+            >>> Checker.verify_not_default('not empty', '')
+            True
+
+        Args:
+            value: What needs to be checked against the `default` value.
+            default: The value to compare with `value`.
+
+        Exception:
+            ValueError: An exception is raised if the value is the default value.
+
+        Returns:
+            True: If the value does not equal the default value and an exception
+                has not been raised.
+        """
+        if value == default:
+            raise ValueError(Msg.NOT_DEFAULT.format(value, default))
+        return True
+
+    @staticmethod
+    def verify_range(
+        value: int | float, low: int | float, high: int | float
+    ) -> bool:
+        """Check if the value is inclusively between low and high boundaries."""
+        if not low <= value <= high:
+            raise ValueError(Msg.RANGE_ERROR.format(value, low, high))
+        return True
+
+    @staticmethod
+    def verify_not_negative(value: int | float) -> bool:
+        """Check if the value is a positive number."""
+        if value < 0:
+            raise ValueError(Msg.NEGATIVE_ERROR.format(value))
+        return True
+
+
+
+class Formatter:
     """Methods to support formatting strings to meet the GEDCOM standard."""
 
     @staticmethod
@@ -209,11 +532,11 @@ class Address(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            DefCheck.verify_tuple_type(self.address, str)
-            and DefCheck.verify_type(self.city, str)
-            and DefCheck.verify_type(self.state, str)
-            and DefCheck.verify_type(self.postal, str)
-            and DefCheck.verify_type(self.country, str)
+            Checker.verify_tuple_type(self.address, str)
+            and Checker.verify_type(self.city, str)
+            and Checker.verify_type(self.state, str)
+            and Checker.verify_type(self.postal, str)
+            and Checker.verify_type(self.country, str)
         )
         return check
 
@@ -222,13 +545,13 @@ class Address(NamedTuple):
         lines: str = ''
         if self.validate():
             if len(self.address) > 0:
-                lines = DefTag.taginfo(level, Tag.ADDR, self.address[0])
+                lines = Tagger.taginfo(level, Tag.ADDR, self.address[0])
                 for line in self.address[1:]:
-                    lines = DefTag.str_to_str(lines, level, Tag.CONT, line)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.CITY, self.city)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.STAE, self.state)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.POST, self.postal)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.CTRY, self.country)
+                    lines = Tagger.str_to_str(lines, level, Tag.CONT, line)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.CITY, self.city)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.STAE, self.state)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.POST, self.postal)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.CTRY, self.country)
         return lines
 
     def code(self, level: int = 0) -> str:
@@ -374,16 +697,16 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_enum(self.greater_less_than, GreaterLessThan)
-            and DefCheck.verify_type(self.years, int)
-            and DefCheck.verify_type(self.months, int)
-            and DefCheck.verify_type(self.weeks, int)
-            and DefCheck.verify_type(self.days, int)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_not_negative(self.years)
-            and DefCheck.verify_not_negative(self.months)
-            and DefCheck.verify_not_negative(self.weeks)
-            and DefCheck.verify_not_negative(self.days)
+            Checker.verify_enum(self.greater_less_than, GreaterLessThan)
+            and Checker.verify_type(self.years, int)
+            and Checker.verify_type(self.months, int)
+            and Checker.verify_type(self.weeks, int)
+            and Checker.verify_type(self.days, int)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_not_negative(self.years)
+            and Checker.verify_not_negative(self.months)
+            and Checker.verify_not_negative(self.weeks)
+            and Checker.verify_not_negative(self.days)
         )
         return check
 
@@ -402,14 +725,14 @@ class Age(NamedTuple):
                 info = ''.join([info, f' {self.weeks!s}w'])
             if self.days > 0:
                 info = ''.join([info, f' {self.days!s}d'])
-            line = DefTag.taginfo(
+            line = Tagger.taginfo(
                 level,
                 Tag.AGE,
                 info.replace('  ', ' ').replace('  ', ' ').strip(),
             )
             if self.phrase != '':
                 line = ''.join(
-                    [line, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [line, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return line
 
@@ -546,12 +869,12 @@ class PersonalNamePieces(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_tuple_type(self.prefix, str)
-            and DefCheck.verify_tuple_type(self.given, str)
-            and DefCheck.verify_tuple_type(self.nickname, str)
-            and DefCheck.verify_tuple_type(self.surname_prefix, str)
-            and DefCheck.verify_tuple_type(self.surname, str)
-            and DefCheck.verify_tuple_type(self.suffix, str)
+            Checker.verify_tuple_type(self.prefix, str)
+            and Checker.verify_tuple_type(self.given, str)
+            and Checker.verify_tuple_type(self.nickname, str)
+            and Checker.verify_tuple_type(self.surname_prefix, str)
+            and Checker.verify_tuple_type(self.surname, str)
+            and Checker.verify_tuple_type(self.suffix, str)
         )
         return check
 
@@ -559,14 +882,14 @@ class PersonalNamePieces(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.strlist_to_str(lines, level, Tag.NPFX, self.prefix)
-            lines = DefTag.strlist_to_str(lines, level, Tag.GIVN, self.given)
-            lines = DefTag.strlist_to_str(lines, level, Tag.NICK, self.nickname)
-            lines = DefTag.strlist_to_str(
+            lines = Tagger.strlist_to_str(lines, level, Tag.NPFX, self.prefix)
+            lines = Tagger.strlist_to_str(lines, level, Tag.GIVN, self.given)
+            lines = Tagger.strlist_to_str(lines, level, Tag.NICK, self.nickname)
+            lines = Tagger.strlist_to_str(
                 lines, level, Tag.SPFX, self.surname_prefix
             )
-            lines = DefTag.strlist_to_str(lines, level, Tag.SURN, self.surname)
-            lines = DefTag.strlist_to_str(lines, level, Tag.NSFX, self.suffix)
+            lines = Tagger.strlist_to_str(lines, level, Tag.SURN, self.surname)
+            lines = Tagger.strlist_to_str(lines, level, Tag.NSFX, self.suffix)
         return lines
 
     def code(self, level: int = 0, name: str = 'pieces') -> str:
@@ -703,9 +1026,9 @@ class NameTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.translation, str)
-            and DefCheck.verify_not_default(self.translation, '')
-            and DefCheck.verify_type(self.pieces, PersonalNamePieces)
+            Checker.verify_type(self.translation, str)
+            and Checker.verify_not_default(self.translation, '')
+            and Checker.verify_type(self.pieces, PersonalNamePieces)
         )
         return check
 
@@ -713,8 +1036,8 @@ class NameTranslation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.TRAN, self.translation)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.LANG, self.language)
+            lines = Tagger.str_to_str(lines, level, Tag.TRAN, self.translation)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.LANG, self.language)
             if self.pieces is not None:
                 lines = ''.join([lines, self.pieces.ged(level + 1)])
         return lines
@@ -780,9 +1103,9 @@ class NoteTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.translation, str)
-            and DefCheck.verify_not_default(self.translation, '')
-            and DefCheck.verify_enum(self.mime.value, MediaType)
+            Checker.verify_type(self.translation, str)
+            and Checker.verify_not_default(self.translation, '')
+            and Checker.verify_enum(self.mime.value, MediaType)
         )
         return check
 
@@ -793,9 +1116,9 @@ class NoteTranslation(NamedTuple):
             lines = ''.join(
                 [
                     lines,
-                    DefTag.taginfo(level, Tag.TRAN, self.translation),
-                    DefTag.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    DefTag.taginfo(level + 1, Tag.LANG, self.language),
+                    Tagger.taginfo(level, Tag.TRAN, self.translation),
+                    Tagger.taginfo(level + 1, Tag.MIME, self.mime.value),
+                    Tagger.taginfo(level + 1, Tag.LANG, self.language),
                 ]
             )
         return lines
@@ -843,10 +1166,10 @@ class CallNumber(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.call_number, str)
-            and DefCheck.verify_not_default(self.call_number, '')
-            and DefCheck.verify_enum(self.media.value, Media)
-            and DefCheck.verify_type(self.phrase, str)
+            Checker.verify_type(self.call_number, str)
+            and Checker.verify_not_default(self.call_number, '')
+            and Checker.verify_enum(self.media.value, Media)
+            and Checker.verify_type(self.phrase, str)
         )
         return check
 
@@ -854,19 +1177,19 @@ class CallNumber(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.taginfo(level, Tag.CALN, self.call_number)
+            lines = Tagger.taginfo(level, Tag.CALN, self.call_number)
             if self.media != Media.NONE:
                 lines = ''.join(
                     [
                         lines,
-                        DefTag.taginfo(level + 1, Tag.MEDI, self.media.value),
+                        Tagger.taginfo(level + 1, Tag.MEDI, self.media.value),
                     ]
                 )
             if self.phrase != '':
                 lines = ''.join(
                     [
                         lines,
-                        DefTag.taginfo(level + 2, Tag.PHRASE, self.phrase),
+                        Tagger.taginfo(level + 2, Tag.PHRASE, self.phrase),
                     ]
                 )
         return lines
@@ -903,10 +1226,10 @@ class SourceRepositoryCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.repo, RepositoryXref)
-            and DefCheck.verify_not_default(self.repo, Void.REPO)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_type(self.call_numbers, CallNumber)
+            Checker.verify_type(self.repo, RepositoryXref)
+            and Checker.verify_not_default(self.repo, Void.REPO)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_type(self.call_numbers, CallNumber)
         )
         return check
 
@@ -914,9 +1237,9 @@ class SourceRepositoryCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.taginfo(level, Tag.SOUR, str(self.repo))
-            lines = DefTag.list_to_str(lines, level, self.notes)
-            lines = DefTag.list_to_str(lines, level, self.call_numbers)
+            lines = Tagger.taginfo(level, Tag.SOUR, str(self.repo))
+            lines = Tagger.list_to_str(lines, level, self.notes)
+            lines = Tagger.list_to_str(lines, level, self.call_numbers)
             # if self.notes is not None:
             #     for note in self.notes:
             #         lines = ''.join([lines, note.ged(level + 1)])
@@ -1008,17 +1331,17 @@ class SourceCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_not_default(str(self.xref), Void.SOUR)
-            and DefCheck.verify_type(self.xref, SourceXref)
-            and DefCheck.verify_type(self.page, str)
-            and DefCheck.verify_tuple_type(self.texts, Text)
-            and DefCheck.verify_enum(self.event.value, Event)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_enum(self.role.value, Role)
-            and DefCheck.verify_type(self.role_phrase, str)
-            and DefCheck.verify_enum(self.quality.value, Quay)
-            and DefCheck.verify_tuple_type(self.multimedia, MultimediaLink)
-            and DefCheck.verify_tuple_type(self.notes, Note)
+            Checker.verify_not_default(str(self.xref), Void.SOUR)
+            and Checker.verify_type(self.xref, SourceXref)
+            and Checker.verify_type(self.page, str)
+            and Checker.verify_tuple_type(self.texts, Text)
+            and Checker.verify_enum(self.event.value, Event)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_enum(self.role.value, Role)
+            and Checker.verify_type(self.role_phrase, str)
+            and Checker.verify_enum(self.quality.value, Quay)
+            and Checker.verify_tuple_type(self.multimedia, MultimediaLink)
+            and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -1026,9 +1349,9 @@ class SourceCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.taginfo(level, Tag.SOUR, str(self.xref))
+            lines = Tagger.taginfo(level, Tag.SOUR, str(self.xref))
             if self.page != '':
-                lines = DefTag.taginfo(level + 1, Tag.PAGE, self.page)
+                lines = Tagger.taginfo(level + 1, Tag.PAGE, self.page)
 
         return lines
 
@@ -1124,11 +1447,11 @@ class Note(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.snote, SharedNoteXref | None)
-            and DefCheck.verify_type(self.note, str)
-            and DefCheck.verify_enum(self.mime.value, MediaType)
-            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.snote, SharedNoteXref | None)
+            and Checker.verify_type(self.note, str)
+            and Checker.verify_enum(self.mime.value, MediaType)
+            and Checker.verify_tuple_type(self.translations, NoteTranslation)
+            and Checker.verify_tuple_type(
                 self.source_citations, SourceCitation
             )
         )
@@ -1139,19 +1462,19 @@ class Note(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.snote is not None:
-                lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(
                     lines, level, Tag.SNOTE, self.snote.fullname
                 )
             else:
-                lines = DefTag.str_to_str(lines, level, Tag.NOTE, self.note)
-                lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(lines, level, Tag.NOTE, self.note)
+                lines = Tagger.str_to_str(
                     lines, level + 1, Tag.MIME, self.mime.value
                 )
-                lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(
                     lines, level + 1, Tag.LANG, self.language
                 )
-                lines = DefTag.list_to_str(lines, level + 1, self.translations)
-                lines = DefTag.list_to_str(
+                lines = Tagger.list_to_str(lines, level + 1, self.translations)
+                lines = Tagger.list_to_str(
                     lines, level + 1, self.source_citations
                 )
         return lines
@@ -1251,15 +1574,15 @@ class PersonalName(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_not_default(self.name, '')
-            and DefCheck.verify_type(self.name, str)
-            and DefCheck.verify_type(self.surname, str)
-            and DefCheck.verify_enum(self.type.value, NameType)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_type(self.pieces, PersonalNamePieces)
-            and DefCheck.verify_tuple_type(self.translations, NameTranslation)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_not_default(self.name, '')
+            and Checker.verify_type(self.name, str)
+            and Checker.verify_type(self.surname, str)
+            and Checker.verify_enum(self.type.value, NameType)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.pieces, PersonalNamePieces)
+            and Checker.verify_tuple_type(self.translations, NameTranslation)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(
                 self.source_citations, SourceCitation
             )
         )
@@ -1269,23 +1592,23 @@ class PersonalName(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.NAME, self.name)
-            lines = DefTag.str_to_str(
+            lines = Tagger.str_to_str(lines, level, Tag.NAME, self.name)
+            lines = Tagger.str_to_str(
                 lines, level + 1, Tag.TYPE, self.type.value
             )
             # lines = ''.join(
             #     [
-            #         DefTag.taginfo(level, Tag.NAME, self.name),
-            #         DefTag.taginfo(level + 1, Tag.TYPE, self.type.value),
+            #         Tagger.taginfo(level, Tag.NAME, self.name),
+            #         Tagger.taginfo(level + 1, Tag.TYPE, self.type.value),
             #     ]
             # )
             if self.pieces is not None:
                 lines = ''.join([lines, self.pieces.ged(level + 1)])
             # if self.translations is not None:
             #     for translation in self.translations:
-            lines = DefTag.list_to_str(lines, level + 1, self.translations)
-            lines = DefTag.list_to_str(lines, level + 1, self.notes)
-            lines = DefTag.list_to_str(lines, level + 1, self.source_citations)
+            lines = Tagger.list_to_str(lines, level + 1, self.translations)
+            lines = Tagger.list_to_str(lines, level + 1, self.notes)
+            lines = Tagger.list_to_str(lines, level + 1, self.source_citations)
             # if self.notes is not None:
             #     for note in self.notes:
             #         lines = ''.join([lines, note.ged(level + 1)])
@@ -1397,13 +1720,13 @@ class Association(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, IndividualXref)
-            and DefCheck.verify_type(self.role, Role)
-            # and DefCheck.verify_enum(self.role.value, Role)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_type(self.role_phrase, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
+            Checker.verify_type(self.xref, IndividualXref)
+            and Checker.verify_type(self.role, Role)
+            # and Checker.verify_enum(self.role.value, Role)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.role_phrase, str)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.citations, SourceCitation)
         )
         return check
 
@@ -1412,18 +1735,18 @@ class Association(NamedTuple):
         lines: str = ''
         if self.validate():
             # if self.xref == '':
-            #     lines = DefTag.str_to_str(lines, level, Tag.ASSO, Void.NAME)
+            #     lines = Tagger.str_to_str(lines, level, Tag.ASSO, Void.NAME)
             # else:
-            lines = DefTag.str_to_str(lines, level, Tag.ASSO, str(self.xref))
-            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
-            lines = DefTag.str_to_str(
+            lines = Tagger.str_to_str(lines, level, Tag.ASSO, str(self.xref))
+            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.str_to_str(
                 lines, level + 1, Tag.ROLE, self.role.value
             )
-            lines = DefTag.str_to_str(
+            lines = Tagger.str_to_str(
                 lines, level + 2, Tag.PHRASE, self.role_phrase
             )
-            lines = DefTag.list_to_str(lines, level + 1, self.notes)
-            lines = DefTag.list_to_str(lines, level + 1, self.citations)
+            lines = Tagger.list_to_str(lines, level + 1, self.notes)
+            lines = Tagger.list_to_str(lines, level + 1, self.citations)
         return lines
 
 
@@ -1450,12 +1773,12 @@ class MultimediaLink(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.crop, str)
-            and DefCheck.verify_type(self.top, int)
-            and DefCheck.verify_type(self.left, int)
-            and DefCheck.verify_type(self.height, int)
-            and DefCheck.verify_type(self.width, int)
-            and DefCheck.verify_type(self.title, str)
+            Checker.verify_type(self.crop, str)
+            and Checker.verify_type(self.top, int)
+            and Checker.verify_type(self.left, int)
+            and Checker.verify_type(self.height, int)
+            and Checker.verify_type(self.width, int)
+            and Checker.verify_type(self.title, str)
         )
         return check
 
@@ -1472,17 +1795,17 @@ class Exid(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.exid, str
-        ) and DefCheck.verify_type(self.exid_type, str)
+        ) and Checker.verify_type(self.exid_type, str)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         return ''.join(
             [
-                DefTag.taginfo(level, Tag.EXID, self.exid),
-                DefTag.taginfo(level + 1, Tag.TYPE, self.exid_type),
+                Tagger.taginfo(level, Tag.EXID, self.exid),
+                Tagger.taginfo(level + 1, Tag.TYPE, self.exid_type),
             ]
         )
 
@@ -1571,15 +1894,15 @@ class PlaceName(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.place1, str)
-            and DefCheck.verify_type(self.place2, str)
-            and DefCheck.verify_type(self.place3, str)
-            and DefCheck.verify_type(self.place4, str)
-            and DefCheck.verify_type(self.form1, str)
-            and DefCheck.verify_type(self.form2, str)
-            and DefCheck.verify_type(self.form3, str)
-            and DefCheck.verify_type(self.form4, str)
-            and DefCheck.verify_type(self.language, str)
+            Checker.verify_type(self.place1, str)
+            and Checker.verify_type(self.place2, str)
+            and Checker.verify_type(self.place3, str)
+            and Checker.verify_type(self.place4, str)
+            and Checker.verify_type(self.form1, str)
+            and Checker.verify_type(self.form2, str)
+            and Checker.verify_type(self.form3, str)
+            and Checker.verify_type(self.form4, str)
+            and Checker.verify_type(self.language, str)
         )
         return check
 
@@ -1611,17 +1934,17 @@ class PlaceName(NamedTuple):
             )
             match style:
                 case String.PLACE_FULL:
-                    lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
-                    lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
-                    lines = DefTag.str_to_str(
+                    lines = Tagger.str_to_str(lines, level, Tag.PLAC, place)
+                    lines = Tagger.str_to_str(lines, level + 1, Tag.FORM, form)
+                    lines = Tagger.str_to_str(
                         lines, level + 1, Tag.LANG, self.language
                     )
                 case String.PLACE_SHORT:
-                    lines = DefTag.str_to_str(lines, level, Tag.PLAC, place)
-                    lines = DefTag.str_to_str(lines, level + 1, Tag.FORM, form)
+                    lines = Tagger.str_to_str(lines, level, Tag.PLAC, place)
+                    lines = Tagger.str_to_str(lines, level + 1, Tag.FORM, form)
                 case String.PLACE_TRANSLATION:
-                    lines = DefTag.str_to_str(lines, level, Tag.TRAN, place)
-                    lines = DefTag.str_to_str(
+                    lines = Tagger.str_to_str(lines, level, Tag.TRAN, place)
+                    lines = Tagger.str_to_str(
                         lines, level + 1, Tag.LANG, self.language
                     )
         return lines
@@ -1653,12 +1976,12 @@ class Map(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.latitude, float)
-            and DefCheck.verify_enum(self.north_south, Latitude)
-            and DefCheck.verify_type(self.longitude, float)
-            and DefCheck.verify_enum(self.east_west, Longitude)
-            and DefCheck.verify_range(self.latitude, 0.0, 360.0)
-            and DefCheck.verify_range(self.longitude, -90.0, 90.0)
+            Checker.verify_type(self.latitude, float)
+            and Checker.verify_enum(self.north_south, Latitude)
+            and Checker.verify_type(self.longitude, float)
+            and Checker.verify_enum(self.east_west, Longitude)
+            and Checker.verify_range(self.latitude, 0.0, 360.0)
+            and Checker.verify_range(self.longitude, -90.0, 90.0)
         )
         return check
 
@@ -1668,9 +1991,9 @@ class Map(NamedTuple):
         latitude: str = ''.join([self.north_south, str(self.latitude)])
         longitude: str = ''.join([self.east_west, str(self.longitude)])
         if self.validate():
-            lines = DefTag.empty_to_str(lines, level, Tag.MAP)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.LATI, latitude)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.LONG, longitude)
+            lines = Tagger.empty_to_str(lines, level, Tag.MAP)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.LATI, latitude)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.LONG, longitude)
         return lines
 
 
@@ -1782,11 +2105,11 @@ class Place(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.place, PlaceName)
-            and DefCheck.verify_tuple_type(self.translations, PlaceName)
-            and DefCheck.verify_type(self.map, Map)
-            and DefCheck.verify_tuple_type(self.exids, Exid)
-            and DefCheck.verify_tuple_type(self.notes, Note)
+            Checker.verify_type(self.place, PlaceName)
+            and Checker.verify_tuple_type(self.translations, PlaceName)
+            and Checker.verify_type(self.map, Map)
+            and Checker.verify_tuple_type(self.exids, Exid)
+            and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -1795,15 +2118,15 @@ class Place(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = ''.join([lines, self.place.ged(level)])
-            lines = DefTag.list_to_str(
+            lines = Tagger.list_to_str(
                 lines,
                 level + 1,
                 self.translations,
                 flag=String.PLACE_TRANSLATION,
             )
             lines = ''.join([lines, self.map.ged(level + 1)])
-            lines = DefTag.list_to_str(lines, level + 1, self.exids)
-            lines = DefTag.list_to_str(lines, level + 1, self.notes)
+            lines = Tagger.list_to_str(lines, level + 1, self.exids)
+            lines = Tagger.list_to_str(lines, level + 1, self.notes)
         return lines
 
 
@@ -1838,12 +2161,12 @@ class Date(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.year, int)
-            and DefCheck.verify_type(self.month, int)
-            and DefCheck.verify_type(self.day, int)
-            and DefCheck.verify_type(self.week, int)
-            and DefCheck.verify_range(self.week, 0, 52)
-            and DefCheck.verify_range(self.month, 0, 12)
+            Checker.verify_type(self.year, int)
+            and Checker.verify_type(self.month, int)
+            and Checker.verify_type(self.day, int)
+            and Checker.verify_type(self.week, int)
+            and Checker.verify_range(self.week, 0, 52)
+            and Checker.verify_range(self.month, 0, 12)
             # and if self.year == 0:
             #     raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
         )
@@ -1885,7 +2208,7 @@ class Date(NamedTuple):
                 formatted_date = ''.join(
                     [formatted_date, f' {year_str}\n']
                 ).strip()
-            lines = DefTag.str_to_str(lines, level, Tag.DATE, formatted_date)
+            lines = Tagger.str_to_str(lines, level, Tag.DATE, formatted_date)
         return lines
 
     def iso(self) -> str:
@@ -1919,13 +2242,13 @@ class Time(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.hour, int)
-            and DefCheck.verify_type(self.minute, int)
-            and DefCheck.verify_type(self.second, int | float)
-            and DefCheck.verify_type(self.UTC, bool)
-            and DefCheck.verify_range(self.hour, 0, 23)
-            and DefCheck.verify_range(self.minute, 0, 59)
-            and DefCheck.verify_range(self.second, 0, 59.999999999999)
+            Checker.verify_type(self.hour, int)
+            and Checker.verify_type(self.minute, int)
+            and Checker.verify_type(self.second, int | float)
+            and Checker.verify_type(self.UTC, bool)
+            and Checker.verify_range(self.hour, 0, 23)
+            and Checker.verify_range(self.minute, 0, 59)
+            and Checker.verify_range(self.second, 0, 59.999999999999)
         )
         return check
 
@@ -1943,7 +2266,7 @@ class Time(NamedTuple):
                 second_str = ''.join(['0', second_str])
             if self.UTC:
                 second_str = ''.join([second_str, 'Z'])
-            return DefTag.taginfo(
+            return Tagger.taginfo(
                 level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
             )
         return ''
@@ -1982,7 +2305,7 @@ class DateExact(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.phrase, str)
+            Checker.verify_type(self.phrase, str)
             and self.date.validate()
             and self.time.validate()
         )
@@ -1996,7 +2319,7 @@ class DateExact(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -2023,7 +2346,7 @@ class DateValue(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.phrase, str)
+            Checker.verify_type(self.phrase, str)
             and self.date.validate()
             and self.time.validate()
         )
@@ -2038,7 +2361,7 @@ class DateValue(NamedTuple):
                 lines = ''.join([lines, self.time.ged(level + 1)])
             if self.phrase != '':
                 lines = ''.join(
-                    [lines, DefTag.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
                 )
         return lines
 
@@ -2091,24 +2414,24 @@ class EventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.date_value, DateValue)
-            and DefCheck.verify_type(self.place, Place)
-            and DefCheck.verify_type(self.address, Address)
-            and DefCheck.verify_tuple_type(self.phones, str)
-            and DefCheck.verify_tuple_type(self.emails, str)
-            and DefCheck.verify_tuple_type(self.faxes, str)
-            and DefCheck.verify_tuple_type(self.wwws, str)
-            and DefCheck.verify_type(self.agency, str)
-            and DefCheck.verify_type(self.religion, str)
-            and DefCheck.verify_type(self.cause, str)
-            and DefCheck.verify_type(self.resn, str)
-            and DefCheck.verify_tuple_type(self.associations, Association)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, Source)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.date_value, DateValue)
+            and Checker.verify_type(self.place, Place)
+            and Checker.verify_type(self.address, Address)
+            and Checker.verify_tuple_type(self.phones, str)
+            and Checker.verify_tuple_type(self.emails, str)
+            and Checker.verify_tuple_type(self.faxes, str)
+            and Checker.verify_tuple_type(self.wwws, str)
+            and Checker.verify_type(self.agency, str)
+            and Checker.verify_type(self.religion, str)
+            and Checker.verify_type(self.cause, str)
+            and Checker.verify_type(self.resn, str)
+            and Checker.verify_tuple_type(self.associations, Association)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.sources, Source)
+            and Checker.verify_tuple_type(
                 self.multimedia_links, MultimediaLink
             )
-            and DefCheck.verify_tuple_type(self.uids, Id)
+            and Checker.verify_tuple_type(self.uids, Id)
         )
         return check
 
@@ -2122,19 +2445,19 @@ class EventDetail(NamedTuple):
                 lines = ''.join([lines, self.place.ged(level)])
             # if self.address != Address([], '', '', '', ''):
             lines = ''.join([lines, self.address.ged(level)])
-            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
-            lines = DefTag.str_to_str(lines, level, Tag.AGNC, self.agency)
-            lines = DefTag.str_to_str(lines, level, Tag.RELI, self.religion)
-            lines = DefTag.str_to_str(lines, level, Tag.CAUS, self.cause)
-            lines = DefTag.str_to_str(lines, level, Tag.RESN, self.resn)
-            lines = DefTag.list_to_str(lines, level, self.associations)
-            lines = DefTag.list_to_str(lines, level, self.notes)
-            lines = DefTag.list_to_str(lines, level, self.sources)
-            lines = DefTag.list_to_str(lines, level, self.multimedia_links)
-            lines = DefTag.list_to_str(lines, level, self.uids)
+            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.str_to_str(lines, level, Tag.AGNC, self.agency)
+            lines = Tagger.str_to_str(lines, level, Tag.RELI, self.religion)
+            lines = Tagger.str_to_str(lines, level, Tag.CAUS, self.cause)
+            lines = Tagger.str_to_str(lines, level, Tag.RESN, self.resn)
+            lines = Tagger.list_to_str(lines, level, self.associations)
+            lines = Tagger.list_to_str(lines, level, self.notes)
+            lines = Tagger.list_to_str(lines, level, self.sources)
+            lines = Tagger.list_to_str(lines, level, self.multimedia_links)
+            lines = Tagger.list_to_str(lines, level, self.uids)
         return lines
 
     def code(self, level: int = 0, detail: str = String.MIN) -> str:
@@ -2190,9 +2513,9 @@ class FamilyEventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.husband_age, Age | None)
-            and DefCheck.verify_type(self.wife_age, Age | None)
-            and DefCheck.verify_type(self.event_detail, EventDetail | None)
+            Checker.verify_type(self.husband_age, Age | None)
+            and Checker.verify_type(self.wife_age, Age | None)
+            and Checker.verify_type(self.event_detail, EventDetail | None)
         )
         return check
 
@@ -2201,10 +2524,10 @@ class FamilyEventDetail(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.husband_age is not None:
-                lines = DefTag.empty_to_str(lines, level, Tag.HUSB)
+                lines = Tagger.empty_to_str(lines, level, Tag.HUSB)
                 lines = ''.join([lines, self.husband_age.ged(level + 1)])
             if self.wife_age is not None:
-                lines = DefTag.empty_to_str(lines, level, Tag.WIFE)
+                lines = Tagger.empty_to_str(lines, level, Tag.WIFE)
                 lines = ''.join([lines, self.wife_age.ged(level + 1)])
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level)])
@@ -2255,11 +2578,11 @@ class FamilyAttribute(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_enum(self.tag.value, FamAttr)
-            and DefCheck.verify_type(self.payload, str)
-            and DefCheck.verify_type(self.attribute_type, str)
-            and DefCheck.verify_type(
+            Checker.verify_type(self.tag, Tag)
+            and Checker.verify_enum(self.tag.value, FamAttr)
+            and Checker.verify_type(self.payload, str)
+            and Checker.verify_type(self.attribute_type, str)
+            and Checker.verify_type(
                 self.family_event_detail, FamilyEventDetail | None
             )
         )
@@ -2269,8 +2592,8 @@ class FamilyAttribute(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.tag.value != Tag.NONE.value and self.validate():
-            lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
-            lines = DefTag.str_to_str(
+            lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
+            lines = Tagger.str_to_str(
                 lines, level + 1, Tag.TYPE, self.attribute_type
             )
             if self.family_event_detail is not None:
@@ -2379,19 +2702,19 @@ class FamilyEvent(NamedTuple):
         }
         even: bool = self.event_type != String.EMPTY
         check: bool = (
-            DefCheck.verify_type(self.tag, Tag)
-            and DefCheck.verify_enum(self.tag.value, FamEven)
-            and DefCheck.verify_type(self.payload, str)
-            and DefCheck.verify_type(self.event_type, str)
-            and DefCheck.verify_type(
+            Checker.verify_type(self.tag, Tag)
+            and Checker.verify_enum(self.tag.value, FamEven)
+            and Checker.verify_type(self.payload, str)
+            and Checker.verify_type(self.event_type, str)
+            and Checker.verify_type(
                 self.event_detail, FamilyEventDetail | None
             )
-            and DefCheck.verify(
+            and Checker.verify(
                 check_tag,
                 check_payload,
                 Msg.TAG_PAYLOAD.format(self.tag.value),
             )
-            and DefCheck.verify(
+            and Checker.verify(
                 not check_tag, even, Msg.EMPTY_EVENT_TYPE.format(self.tag.value)
             )
         )
@@ -2402,10 +2725,10 @@ class FamilyEvent(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.payload == String.EMPTY:
-                lines = DefTag.empty_to_str(lines, level, self.tag)
+                lines = Tagger.empty_to_str(lines, level, self.tag)
             else:
-                lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
-            lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
+            lines = Tagger.str_to_str(
                 lines, level + 1, Tag.TYPE, self.event_type
             )
             if self.event_detail is not None:
@@ -2434,17 +2757,17 @@ class Husband(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.phrase, str
-        ) and DefCheck.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.HUSB, str(self.xref))
-            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.str_to_str(lines, level, Tag.HUSB, str(self.xref))
+            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2454,17 +2777,17 @@ class Wife(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.phrase, str
-        ) and DefCheck.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.WIFE, str(self.xref))
-            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.str_to_str(lines, level, Tag.WIFE, str(self.xref))
+            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2474,17 +2797,17 @@ class Child(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.phrase, str
-        ) and DefCheck.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.CHIL, str(self.xref))
-            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.str_to_str(lines, level, Tag.CHIL, str(self.xref))
+            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2499,12 +2822,12 @@ class LDSOrdinanceDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.date_value, DateValue | None)
-            and DefCheck.verify_type(self.temp, str)
-            and DefCheck.verify_type(self.place, Place | None)
-            and DefCheck.verify_enum(self.status.value, Stat)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, SourceCitation)
+            Checker.verify_type(self.date_value, DateValue | None)
+            and Checker.verify_type(self.temp, str)
+            and Checker.verify_type(self.place, Place | None)
+            and Checker.verify_enum(self.status.value, Stat)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.sources, SourceCitation)
         )
         return check
 
@@ -2522,9 +2845,9 @@ class LDSSpouseSealing(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.tag, str
-        ) and DefCheck.verify_type(self.detail, LDSOrdinanceDetail | None)
+        ) and Checker.verify_type(self.detail, LDSOrdinanceDetail | None)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -2543,11 +2866,11 @@ class LDSIndividualOrdinances(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.tag, str)
-            and DefCheck.verify_type(
+            Checker.verify_type(self.tag, str)
+            and Checker.verify_type(
                 self.ordinance_detail, LDSOrdinanceDetail | None
             )
-            and DefCheck.verify_type(self.family_xref, str)
+            and Checker.verify_type(self.family_xref, str)
         )
         return check
 
@@ -2580,9 +2903,9 @@ class Identifier(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_enum(self.tag.value, Id)
-            and DefCheck.verify_type(self.tag_info, str)
-            and DefCheck.verify_type(self.tag_type, str)
+            Checker.verify_enum(self.tag.value, Id)
+            and Checker.verify_type(self.tag_info, str)
+            and Checker.verify_type(self.tag_type, str)
         )
         return check
 
@@ -2591,10 +2914,10 @@ class Identifier(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.tag != Id.NONE:
-                lines = DefTag.taginfo(level, self.tag.value, self.tag_info)
+                lines = Tagger.taginfo(level, self.tag.value, self.tag_info)
             if self.tag != Id.UID:
                 lines = ''.join(
-                    [lines, DefTag.taginfo(level + 1, Tag.TYPE, self.tag_type)]
+                    [lines, Tagger.taginfo(level + 1, Tag.TYPE, self.tag_type)]
                 )
             if self.tag == Id.EXID and self.tag_type == '':
                 logging.warning(Msg.EXID_TYPE)
@@ -2624,9 +2947,9 @@ class IndividualEventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.event_detail, EventDetail)
-            and DefCheck.verify_type(self.age, Age)
-            and DefCheck.verify_type(self.phrase, str)
+            Checker.verify_type(self.event_detail, EventDetail)
+            and Checker.verify_type(self.age, Age)
+            and Checker.verify_type(self.phrase, str)
         )
         return check
 
@@ -2637,7 +2960,7 @@ class IndividualEventDetail(NamedTuple):
             lines = ''.join([lines, self.event_detail.ged(level)])
             if self.age is not None:
                 lines = ''.join([lines, self.age.ged(level)])
-                lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(
                     lines, level + 1, Tag.PHRASE, self.phrase
                 )
         return lines
@@ -2715,9 +3038,9 @@ class IndividualAttribute(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_enum(self.tag.value, IndiAttr)
-            and DefCheck.verify_type(self.tag_type, str)
-            and DefCheck.verify_type(
+            Checker.verify_enum(self.tag.value, IndiAttr)
+            and Checker.verify_type(self.tag_type, str)
+            and Checker.verify_type(
                 self.event_detail, IndividualEventDetail | None
             )
         )
@@ -2917,15 +3240,15 @@ class IndividualEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_enum(self.tag.value, IndiEven)
-            and DefCheck.verify_type(self.text, str)
-            # and DefCheck.verify_not_default(self.text, String.EMPTY)
-            and DefCheck.verify_type(
+            Checker.verify_enum(self.tag.value, IndiEven)
+            and Checker.verify_type(self.text, str)
+            # and Checker.verify_not_default(self.text, String.EMPTY)
+            and Checker.verify_type(
                 self.event_detail, IndividualEventDetail | None
             )
-            and DefCheck.verify_type(self.family_xref, FamilyXref)
-            and DefCheck.verify_enum(self.adoption.value, Adop)
-            and DefCheck.verify_type(self.phrase, str)
+            and Checker.verify_type(self.family_xref, FamilyXref)
+            and Checker.verify_enum(self.adoption.value, Adop)
+            and Checker.verify_type(self.phrase, str)
         )
         return check
 
@@ -2934,10 +3257,10 @@ class IndividualEvent(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.payload == String.EMPTY:
-                lines = DefTag.empty_to_str(lines, level, self.tag)
+                lines = Tagger.empty_to_str(lines, level, self.tag)
             else:
-                lines = DefTag.str_to_str(lines, level, self.tag, self.payload)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.TYPE, self.text)
+                lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.TYPE, self.text)
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level + 1)])
             if (
@@ -2945,18 +3268,18 @@ class IndividualEvent(NamedTuple):
                 in (Tag.BIRT.value, Tag.CHR.value, Tag.ADOP.value)
                 and self.family_xref.name != Void.FAM.name
             ):
-                lines = DefTag.str_to_str(
+                lines = Tagger.str_to_str(
                     lines, level + 1, Tag.FAMC, self.family_xref.fullname
                 )
                 if (
                     self.tag.value == Tag.ADOP.value
                     and self.family_xref.name != Void.FAM.name
                 ):
-                    lines = DefTag.str_to_str(
+                    lines = Tagger.str_to_str(
                         lines, level + 2, Tag.ADOP, self.adoption.value
                     )
                     if self.adoption.value != Tag.NONE.value:
-                        lines = DefTag.str_to_str(
+                        lines = Tagger.str_to_str(
                             lines, level + 3, Tag.PHRASE, self.phrase
                         )
         return lines
@@ -2970,17 +3293,17 @@ class Alias(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.xref, str
-        ) and DefCheck.verify_type(self.phrase, str)
+        ) and Checker.verify_type(self.phrase, str)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.str_to_str(lines, level, Tag.ALIA, self.xref)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.str_to_str(lines, level, Tag.ALIA, self.xref)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -2995,12 +3318,12 @@ class FamilyChild(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.family_xref, str)
-            and DefCheck.verify_type(self.pedigree, str)
-            and DefCheck.verify_type(self.pedigree_phrase, str)
-            and DefCheck.verify_type(self.status, str)
-            and DefCheck.verify_type(self.status_phrase, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
+            Checker.verify_type(self.family_xref, str)
+            and Checker.verify_type(self.pedigree, str)
+            and Checker.verify_type(self.pedigree_phrase, str)
+            and Checker.verify_type(self.status, str)
+            and Checker.verify_type(self.status_phrase, str)
+            and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -3018,9 +3341,9 @@ class FamilySpouse(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.family_xref, str
-        ) and DefCheck.verify_tuple_type(self.notes, Note)
+        ) and Checker.verify_tuple_type(self.notes, Note)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -3037,9 +3360,9 @@ class FileTranslations(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = DefCheck.verify_type(
+        check: bool = Checker.verify_type(
             self.path, str
-        ) and DefCheck.verify_type(self.media_type, str)
+        ) and Checker.verify_type(self.media_type, str)
         return check
 
     def ged(self, level: int = 1) -> str:  # noqa: ARG002
@@ -3058,9 +3381,9 @@ class FileTranslations(NamedTuple):
 #     def validate(self) -> bool:
 #         """Validate the stored value."""
 #         check: bool = (
-#             DefCheck.verify_type(self.text, str)
-#             and DefCheck.verify_type(self.mime, MediaType)
-#             and DefCheck.verify_type(self.language, Lang)
+#             Checker.verify_type(self.text, str)
+#             and Checker.verify_type(self.mime, MediaType)
+#             and Checker.verify_type(self.language, Lang)
 #         )
 #         return check
 
@@ -3083,12 +3406,12 @@ class File(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.path, str)
-            and DefCheck.verify_type(self.media_type, str)
-            and DefCheck.verify_type(self.media, str)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_type(self.title, str)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.path, str)
+            and Checker.verify_type(self.media_type, str)
+            and Checker.verify_type(self.media, str)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.title, str)
+            and Checker.verify_tuple_type(
                 self.file_translations, FileTranslations
             )
         )
@@ -3113,12 +3436,12 @@ class SourceEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.event, str)
-            and DefCheck.verify_type(self.date_period, str)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_type(self.place, str)
-            and DefCheck.verify_type(self.agency, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
+            Checker.verify_type(self.event, str)
+            and Checker.verify_type(self.date_period, str)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.place, str)
+            and Checker.verify_type(self.agency, str)
+            and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -3140,11 +3463,11 @@ class NonEvent(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.no, str)
-            and DefCheck.verify_type(self.date, Date | None)
-            and DefCheck.verify_type(self.phrase, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, SourceEvent)
+            Checker.verify_type(self.no, str)
+            and Checker.verify_type(self.date, Date | None)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.sources, SourceEvent)
         )
         return check
 
@@ -3208,22 +3531,22 @@ class Family(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, FamilyXref)
-            and DefCheck.verify_enum(self.resn.value, Resn)
-            and DefCheck.verify_tuple_type(self.attributes, FamilyAttribute)
-            and DefCheck.verify_tuple_type(self.events, FamilyEvent)
-            and DefCheck.verify_type(self.husband, Husband)
-            and DefCheck.verify_type(self.wife, Wife)
-            and DefCheck.verify_tuple_type(self.children, Child)
-            and DefCheck.verify_tuple_type(self.associations, Association)
-            and DefCheck.verify_tuple_type(self.submitters, SubmitterXref)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.xref, FamilyXref)
+            and Checker.verify_enum(self.resn.value, Resn)
+            and Checker.verify_tuple_type(self.attributes, FamilyAttribute)
+            and Checker.verify_tuple_type(self.events, FamilyEvent)
+            and Checker.verify_type(self.husband, Husband)
+            and Checker.verify_type(self.wife, Wife)
+            and Checker.verify_tuple_type(self.children, Child)
+            and Checker.verify_tuple_type(self.associations, Association)
+            and Checker.verify_tuple_type(self.submitters, SubmitterXref)
+            and Checker.verify_tuple_type(
                 self.lds_spouse_sealings, LDSSpouseSealing
             )
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.citations, SourceCitation)
-            and DefCheck.verify_tuple_type(
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.citations, SourceCitation)
+            and Checker.verify_tuple_type(
                 self.multimedia_links, MultimediaLink
             )
         )
@@ -3235,7 +3558,7 @@ class Family(NamedTuple):
         if self.validate():
             if self.resn != Resn.NONE:
                 lines = ''.join(
-                    [lines, DefTag.taginfo(level, Tag.RESN, self.resn.value)]
+                    [lines, Tagger.taginfo(level, Tag.RESN, self.resn.value)]
                 )
             if self.attributes is not None:
                 for attribute in self.attributes:
@@ -3256,7 +3579,7 @@ class Family(NamedTuple):
             if self.submitters is not None:
                 for submitter in self.submitters:
                     lines = ''.join(
-                        [lines, DefTag.taginfo(level, Tag.SUBM, submitter)]
+                        [lines, Tagger.taginfo(level, Tag.SUBM, submitter)]
                     )
             if self.lds_spouse_sealings is not None:
                 for sealing in self.lds_spouse_sealings:
@@ -3309,12 +3632,12 @@ class Multimedia(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, MultimediaXref)
-            and DefCheck.verify_enum(self.resn.value, Resn)
-            and DefCheck.verify_tuple_type(self.files, File)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, Source)
+            Checker.verify_type(self.xref, MultimediaXref)
+            and Checker.verify_enum(self.resn.value, Resn)
+            and Checker.verify_tuple_type(self.files, File)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.sources, Source)
         )
         return check
 
@@ -3371,17 +3694,17 @@ class Source(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, SourceXref)
-            and DefCheck.verify_type(self.author, str)
-            and DefCheck.verify_type(self.title, str)
-            and DefCheck.verify_type(self.abbreviation, str)
-            and DefCheck.verify_type(self.published, str)
-            and DefCheck.verify_tuple_type(self.events, SourceEvent)
-            and DefCheck.verify_tuple_type(self.text, Text)
-            and DefCheck.verify_tuple_type(self.repositories, Repository)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.xref, SourceXref)
+            and Checker.verify_type(self.author, str)
+            and Checker.verify_type(self.title, str)
+            and Checker.verify_type(self.abbreviation, str)
+            and Checker.verify_type(self.published, str)
+            and Checker.verify_tuple_type(self.events, SourceEvent)
+            and Checker.verify_tuple_type(self.text, Text)
+            and Checker.verify_tuple_type(self.repositories, Repository)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(
                 self.multimedia_links, MultimediaLink
             )
         )
@@ -3432,19 +3755,19 @@ class Submitter(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, SubmitterXref)
-            and DefCheck.verify_type(self.name, str)
-            and DefCheck.verify_type(self.address, Address | None)
-            and DefCheck.verify_tuple_type(self.phones, str)
-            and DefCheck.verify_tuple_type(self.emails, str)
-            and DefCheck.verify_tuple_type(self.faxes, str)
-            and DefCheck.verify_tuple_type(self.wwws, str)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.xref, SubmitterXref)
+            and Checker.verify_type(self.name, str)
+            and Checker.verify_type(self.address, Address | None)
+            and Checker.verify_tuple_type(self.phones, str)
+            and Checker.verify_tuple_type(self.emails, str)
+            and Checker.verify_tuple_type(self.faxes, str)
+            and Checker.verify_tuple_type(self.wwws, str)
+            and Checker.verify_tuple_type(
                 self.multimedia_links, MultimediaLink
             )
-            and DefCheck.verify_tuple_type(self.languages, str)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.languages, str)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
 
@@ -3582,26 +3905,26 @@ class Individual(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, IndividualXref)
-            and DefCheck.verify_enum(self.resn.value, Resn)
-            and DefCheck.verify_tuple_type(
+            Checker.verify_type(self.xref, IndividualXref)
+            and Checker.verify_enum(self.resn.value, Resn)
+            and Checker.verify_tuple_type(
                 self.personal_names, PersonalNamePieces
             )
-            and DefCheck.verify_enum(self.sex.value, Sex)
-            and DefCheck.verify_tuple_type(self.attributes, IndividualAttribute)
-            and DefCheck.verify_tuple_type(self.events, IndividualEvent)
-            and DefCheck.verify_tuple_type(
+            and Checker.verify_enum(self.sex.value, Sex)
+            and Checker.verify_tuple_type(self.attributes, IndividualAttribute)
+            and Checker.verify_tuple_type(self.events, IndividualEvent)
+            and Checker.verify_tuple_type(
                 self.lds_individual_ordinances, LDSIndividualOrdinances
             )
-            and DefCheck.verify_tuple_type(self.submitters, str)
-            and DefCheck.verify_tuple_type(self.associations, Association)
-            and DefCheck.verify_tuple_type(self.aliases, Alias)
-            and DefCheck.verify_tuple_type(self.ancestor_interest, str)
-            and DefCheck.verify_tuple_type(self.descendent_interest, str)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.sources, Source)
-            and DefCheck.verify_tuple_type(
+            and Checker.verify_tuple_type(self.submitters, str)
+            and Checker.verify_tuple_type(self.associations, Association)
+            and Checker.verify_tuple_type(self.aliases, Alias)
+            and Checker.verify_tuple_type(self.ancestor_interest, str)
+            and Checker.verify_tuple_type(self.descendent_interest, str)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.sources, Source)
+            and Checker.verify_tuple_type(
                 self.multimedia_links, MultimediaLink
             )
         )
@@ -3611,27 +3934,27 @@ class Individual(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged(level)
         if self.validate():
-            lines = DefTag.str_to_str(
+            lines = Tagger.str_to_str(
                 lines, level + 1, Tag.RESN, self.resn.value
             )
-            lines = DefTag.list_to_str(lines, level + 1, self.personal_names)
-            lines = DefTag.str_to_str(lines, level + 1, Tag.SEX, self.sex.value)
-            lines = DefTag.list_to_str(lines, level + 1, self.attributes)
-            lines = DefTag.list_to_str(lines, level + 1, self.events)
-            lines = DefTag.list_to_str(
+            lines = Tagger.list_to_str(lines, level + 1, self.personal_names)
+            lines = Tagger.str_to_str(lines, level + 1, Tag.SEX, self.sex.value)
+            lines = Tagger.list_to_str(lines, level + 1, self.attributes)
+            lines = Tagger.list_to_str(lines, level + 1, self.events)
+            lines = Tagger.list_to_str(
                 lines, level + 1, self.lds_individual_ordinances
             )
-            lines = DefTag.list_to_str(lines, level + 1, self.submitters)
-            lines = DefTag.list_to_str(lines, level + 1, self.associations)
-            lines = DefTag.list_to_str(lines, level + 1, self.aliases)
-            lines = DefTag.list_to_str(lines, level + 1, self.ancestor_interest)
-            lines = DefTag.list_to_str(
+            lines = Tagger.list_to_str(lines, level + 1, self.submitters)
+            lines = Tagger.list_to_str(lines, level + 1, self.associations)
+            lines = Tagger.list_to_str(lines, level + 1, self.aliases)
+            lines = Tagger.list_to_str(lines, level + 1, self.ancestor_interest)
+            lines = Tagger.list_to_str(
                 lines, level + 1, self.descendent_interest
             )
-            lines = DefTag.list_to_str(lines, level + 1, self.identifiers)
-            lines = DefTag.list_to_str(lines, level + 1, self.notes)
-            lines = DefTag.list_to_str(lines, level + 1, self.sources)
-            lines = DefTag.list_to_str(lines, level + 1, self.multimedia_links)
+            lines = Tagger.list_to_str(lines, level + 1, self.identifiers)
+            lines = Tagger.list_to_str(lines, level + 1, self.notes)
+            lines = Tagger.list_to_str(lines, level + 1, self.sources)
+            lines = Tagger.list_to_str(lines, level + 1, self.multimedia_links)
         return lines
 
     def code(
@@ -3707,14 +4030,14 @@ class Repository(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, RepositoryXref)
-            and DefCheck.verify_type(self.name, str)
-            and DefCheck.verify_type(self.address, Address | None)
-            and DefCheck.verify_tuple_type(self.emails, str)
-            and DefCheck.verify_tuple_type(self.faxes, str)
-            and DefCheck.verify_tuple_type(self.wwws, str)
-            and DefCheck.verify_tuple_type(self.notes, Note)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            Checker.verify_type(self.xref, RepositoryXref)
+            and Checker.verify_type(self.name, str)
+            and Checker.verify_type(self.address, Address | None)
+            and Checker.verify_tuple_type(self.emails, str)
+            and Checker.verify_tuple_type(self.faxes, str)
+            and Checker.verify_tuple_type(self.wwws, str)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
 
@@ -3723,10 +4046,10 @@ class Repository(NamedTuple):
         lines: str = self.xref.ged(level)
         if self.validate():
             lines = ''.join([lines, self.address.ged(level)])
-            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
         return lines
 
 
@@ -3742,13 +4065,13 @@ class SharedNote(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            DefCheck.verify_type(self.xref, SharedNoteXref)
-            and DefCheck.verify_type(self.text, str)
-            and DefCheck.verify_enum(self.mime.value, MediaType)
-            and DefCheck.verify_type(self.language, str)
-            and DefCheck.verify_tuple_type(self.translations, NoteTranslation)
-            and DefCheck.verify_tuple_type(self.sources, Source)
-            and DefCheck.verify_tuple_type(self.identifiers, Identifier)
+            Checker.verify_type(self.xref, SharedNoteXref)
+            and Checker.verify_type(self.text, str)
+            and Checker.verify_enum(self.mime.value, MediaType)
+            and Checker.verify_type(self.language, str)
+            and Checker.verify_tuple_type(self.translations, NoteTranslation)
+            and Checker.verify_tuple_type(self.sources, Source)
+            and Checker.verify_tuple_type(self.identifiers, Identifier)
         )
         return check
 
@@ -3780,9 +4103,9 @@ class Schema(NamedTuple):
 
     def validate(self) -> bool:
         check: bool = (
-            DefCheck.verify_type(self.tag, Tag)
-            # and DefCheck.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
-            and DefCheck.verify_type(self.url, str)
+            Checker.verify_type(self.tag, Tag)
+            # and Checker.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
+            and Checker.verify_type(self.url, str)
         )
         return check
 
@@ -3851,17 +4174,17 @@ class Header(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = DefTag.empty_to_str(lines, level, Tag.HEAD)
-            lines = DefTag.empty_to_str(lines, level + 1, Tag.GEDC)
-            lines = DefTag.str_to_str(
+            lines = Tagger.empty_to_str(lines, level, Tag.HEAD)
+            lines = Tagger.empty_to_str(lines, level + 1, Tag.GEDC)
+            lines = Tagger.str_to_str(
                 lines, level + 2, Tag.VERS, String.VERSION
             )
             if self.schemas is not None:
-                lines = DefTag.empty_to_str(lines, level + 1, Tag.SCHMA)
+                lines = Tagger.empty_to_str(lines, level + 1, Tag.SCHMA)
             lines = ''.join([lines, self.address.ged(level)])
-            lines = DefTag.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = DefTag.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = DefTag.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = DefTag.strlist_to_str(lines, level, Tag.WWW, self.wwws)
-            # lines = DefTag.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
+            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
+            # lines = Tagger.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
         return lines
