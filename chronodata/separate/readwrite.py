@@ -4,22 +4,147 @@
 import csv
 import json
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
-from chronodata.constants import (
-    Calendar,
-    Key,
+from chronodata.separate.constants import (
     Number,
     String,
     Tag,
     Unit,
 )
-from chronodata.messages import Issue, Msg
-from chronodata.store import Tagger
+from chronodata.separate.messages import Issue, Msg
+
+
+@dataclass(frozen=True)
+class Value:
+    """The following constants are dictionary values."""
+
+    AD: str = ' AD'
+    BC: str = ' BC'
+    BCE: str = ' BCE'
+    BEFORE_PRESENT: str = 'BEFORE PRESENT'
+    BP: str = ' BP'
+    CE: str = ' CE'
+    DATETIME_EPOCH: int = 1970
+    EMPTY: str = ''
+    EPOCH: str = 'Epoch'
+    EXPERIMENT: str = 'EXPERIMENT'
+    GREGORIAN: str = 'GREGORIAN'
+    ISO: str = 'ISO'
+    MAX_MONTHS: str = 'Max Months'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
+    SECULAR: str = 'SECULAR'
+
+
+@dataclass(frozen=True)
+class Key:
+    """The following constants define the keys that are used
+    for dictionaries."""
+
+    ACTORS: str = 'ACTORS'
+    BEGIN: str = 'BEGIN'
+    BIRTH: str = 'BIRTH'
+    CAL: str = 'CALENDAR'
+    CHALLENGES: str = 'CHALLENGES'
+    COMMENTS: str = 'COMMENTS'
+    DATE: str = 'DATE'
+    DEATH: str = 'DEATH'
+    DESC: str = 'DESC'
+    END: str = 'END'
+    EVENTS: str = 'EVENTS'
+    FATHER: str = 'FATHER'
+    FEMALE: str = 'FEMALE'
+    FILE: str = 'FILENAME'
+    LABELS: str = 'LABELS'
+    MALE: str = 'MALE'
+    MARKERS: str = 'MARKERS'
+    MESSAGE: str = 'MSG'
+    MOTHER: str = 'MOTHER'
+    NAME: str = 'NAME'
+    PRE: str = 'PRE'
+    PERIODS: str = 'PERIODS'
+    POST: str = 'POST'
+    SOURCES: str = 'SOURCES'
+    STRICT: str = 'STRICT'
+    TEXTS: str = 'TEXTS'
+    TIMESTAMP: str = 'TIMESTAMP'
+    ZERO: str = 'ZERO'
+    keys: ClassVar = [
+        ACTORS,
+        BEGIN,
+        BIRTH,
+        CAL,
+        CHALLENGES,
+        COMMENTS,
+        DATE,
+        DEATH,
+        DESC,
+        END,
+        EVENTS,
+        FATHER,
+        FEMALE,
+        FILE,
+        LABELS,
+        MALE,
+        MARKERS,
+        MOTHER,
+        NAME,
+        PERIODS,
+        POST,
+        PRE,
+        SOURCES,
+        STRICT,
+        TEXTS,
+        ZERO,
+    ]
+
+
+@dataclass(frozen=True)
+class Calendar:
+    """The following dictionaries define the constants for
+    particular calendars using previously defined constants.
+    """
+
+    BEFORE_PRESENT: ClassVar = {
+        Key.NAME: Value.BEFORE_PRESENT,
+        Key.POST: '',
+        Key.PRE: Value.BP,
+        Key.STRICT: True,
+        Key.ZERO: False,
+    }
+    EXPERIMENT: ClassVar = {
+        Key.NAME: Value.EXPERIMENT,
+        Key.POST: '',
+        Key.PRE: '',
+        Key.STRICT: True,
+        Key.ZERO: False,
+    }
+    GREGORIAN: ClassVar = {
+        Key.NAME: Value.GREGORIAN,
+        Key.POST: Value.AD,
+        Key.PRE: Value.BC,
+        Key.STRICT: True,
+        Key.ZERO: False,
+    }
+    SECULAR: ClassVar = {
+        Key.NAME: Value.SECULAR,
+        Key.POST: Value.CE,
+        Key.PRE: Value.BCE,
+        Key.STRICT: True,
+        Key.ZERO: False,
+    }
+    calendars: ClassVar = [
+        BEFORE_PRESENT,
+        EXPERIMENT,
+        GREGORIAN,
+        SECULAR,
+    ]
 
 
 class Base:
@@ -88,9 +213,9 @@ class Base:
 
     def _get_filename_type(self, filename: str) -> str:
         filename_type: str = ''
-        if filename[-Number.JSONLEN:] == String.JSON:
+        if filename[-Number.JSONLEN :] == String.JSON:
             filename_type = String.JSON
-        if filename[-Number.GEDLEN:] == String.GED:
+        if filename[-Number.GEDLEN :] == String.GED:
             filename_type = String.GED
         return filename_type
 
@@ -100,7 +225,7 @@ class Base:
                 Path(self.filename), encoding='utf-8', mode=String.READ
             ) as infile:
                 data: Any = infile.readlines()
-                self.csv_data = ''.join([self.csv_data, Tagger.clean_input(data)])
+                self.csv_data = ''.join([self.csv_data, data])
                 infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -128,7 +253,7 @@ class Base:
                 Path(self.filename), encoding='utf-8', mode=String.READ
             ) as infile:
                 data: Any = infile.readlines()
-                self.ged_data.append(Tagger.clean_input(data))
+                self.ged_data.append(data)
                 infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -439,7 +564,8 @@ class Base:
             year = np.datetime64(date, Unit.YEAR).astype(String.INT) + 1970
         else:
             year = (
-                np.datetime_as_string(date, unit=Unit.YEAR).astype(String.INT) + 1970
+                np.datetime_as_string(date, unit=Unit.YEAR).astype(String.INT)
+                + 1970
             )
         if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0):
             days = 366

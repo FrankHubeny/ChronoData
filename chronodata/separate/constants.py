@@ -1,3 +1,5 @@
+# ChronoData constants
+
 # chronodata/constants.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 # chronodata/enums.py
@@ -50,21 +52,22 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ClassVar, Literal
 
-# class AgeConstants:
-#     """Age enumerations for the Age NamedTuple."""
 
-#     UNIT: ClassVar = {
-#         'y': 'y',
-#         'year': 'y',
-#         'm': 'month',
-#         'month': 'm',
-#         'd': 'd',
-#         'day': 'd',
-#         'w': 'w',
-#         'week': 'w',
-#     }
-#     BOUND: ClassVar = {'<', '>'}
-#     NAME: ClassVar = {'U'}
+class AgeConstants:
+    """Age enumerations for the Age NamedTuple."""
+
+    UNIT: ClassVar = {
+        'y': 'y',
+        'year': 'y',
+        'm': 'month',
+        'month': 'm',
+        'd': 'd',
+        'day': 'd',
+        'w': 'w',
+        'week': 'w',
+    }
+    BOUND: ClassVar = {'<', '>'}
+    NAME: ClassVar = {'U'}
 
 
 @dataclass(frozen=True)
@@ -160,8 +163,12 @@ class String:
     ATSIGN: str = '@'
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
+    CHRON_NAMES: str = 'CHRON NAMES'
+    CHRONS: str = 'CHRONS'
     COLON: str = ':'
     CSV: str = '.csv'
+    DATA: str = 'DATA'
+    DATE: str = 'DATE'
     DAY: str = 'd'
     DOUBLE_NEWLINE: str = '\n\n'
     EMPTY: str = ''
@@ -183,8 +190,13 @@ class String:
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
     LANG_URI: str = 'http://'
+    LESS_THAN: str = '<'
+    LOCATION: str = 'lower right'
+    MAX_MONTHS: str = 'Max Months'
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
+    NAME: str = 'NAME'
     NEGATIVE: str = '-'
     NEWLINE: str = '\n'
     NOW: str = 'now'
@@ -197,9 +209,13 @@ class String:
     READ: str = 'r'
     SPACE: str = ' '
     T: str = 'T'
+    TESTCASES: str = 'TEST CASES'
     UNDERLINE: str = '_'
     UNDETERMINED: str = 'und'
     VERSION: str = '7.0'
+    WEEK: str = 'w'
+    WRITE: str = 'w'
+    YEAR: str = 'y'
     Z: str = 'Z'
 
 

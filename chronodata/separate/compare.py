@@ -3,18 +3,83 @@
 
 import json
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]  
 
-from chronodata.constants import String
-from chronodata.messages import Column, Msg
+from chronodata.separate.messages import Column, Msg
 from chronodata.separate.readwrite import Base
 
+
+@dataclass(frozen=True)
+class String:
+    """The following constants define strings that are neither keys
+    nor values of a dictionary, but are used in generating comments,
+    formatting numbers or other processes.
+    """
+
+    ATSIGN: str = '@'
+    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    BC: str = 'BCE'
+    CHRON_NAMES: str = 'CHRON NAMES'
+    CHRONS: str = 'CHRONS'
+    COLON: str = ':'
+    CSV: str = '.csv'
+    DATA: str = 'DATA'
+    DATE: str = 'DATE'
+    DAY: str = 'd'
+    DOUBLE_NEWLINE: str = '\n\n'
+    EMPTY: str = ''
+    EVENT: str = 'EVENT'
+    FORM_DEFAULT1: str = 'City'
+    FORM_DEFAULT2: str = 'County'
+    FORM_DEFAULT3: str = 'State'
+    FORM_DEFAULT4: str = 'Country'
+    FRENCH_R: str = 'FRENCH_R'
+    GED: str = '.ged'
+    GRAMPS: str = '.gramps'
+    GREATER_THAN: str = '>'
+    GREGORIAN: str = 'GREGORIAN'
+    HEBREW: str = 'HEBREW'
+    HYPHEN: str = '-'
+    INDENT: str = '    '
+    INDEX: str = 'index'
+    INT: str = 'int'
+    JSON: str = '.json'
+    JULIAN: str = 'JULIAN'
+    LANG_URI: str = 'http://'
+    LESS_THAN: str = '<'
+    LOCATION: str = 'lower right'
+    MAX_MONTHS: str = 'Max Months'
+    MONTH: str = 'm'
+    MONTH_NAMES: str = 'Month Names'
+    MONTH_MAX_DAYS: str = 'Month Max Days'
+    NAME: str = 'NAME'
+    NEGATIVE: str = '-'
+    NEWLINE: str = '\n'
+    NOW: str = 'now'
+    OCCURRED: Literal['Y'] = 'Y'
+    PLACE_FULL = 'F'
+    PLACE_SHORT = 'S'
+    PLACE_TRANSLATION = 'T'
+    MAX = 'MAX'
+    MIN = 'MIN'
+    READ: str = 'r'
+    SPACE: str = ' '
+    T: str = 'T'
+    TESTCASES: str = 'TEST CASES'
+    UNDERLINE: str = '_'
+    UNDETERMINED: str = 'und'
+    VERSION: str = '7.0'
+    WEEK: str = 'w'
+    WRITE: str = 'w'
+    YEAR: str = 'y'
+    Z: str = 'Z'
 
 class Challenge:
     """Load a set of chronologies, construct challenges, view and save."""

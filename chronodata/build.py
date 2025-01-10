@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from chronodata.constants import (
-    Key,
+    # Key,
     Number,
     String,
     Tag,
@@ -86,9 +86,9 @@ class Genealogy:
         self.submitter_xreflist: list[str] = [Void.NAME]
         match self.filename_type:
             case '':
-                self.chron = {
-                    Tag.NAME: name,
-                    Key.CAL: calendar,
+                self.chron: dict[str, str] = {
+                    # Tag.NAME: name,
+                    # Key.CAL: calendar,
                 }
                 if log:
                     logging.info(Msg.STARTED.format(self.chron_name))
