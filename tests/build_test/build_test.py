@@ -3,23 +3,17 @@
 
 import pytest
 
-from chronodata.build import Chronology
-from chronodata.methods import DefCheck
-from chronodata.records import (
-    FamilyXref,
-    IndividualXref,
-    # MultimediaXref,
-    # RepositoryXref,
-    # SourceXref,
-    # SubmitterXref,
-)
+from chronodata.build import Genealogy
+from chronodata.constants import Sex
 from chronodata.store import (
+    Checker,
     Child,
     Family,
     FamilyChild,
+    FamilyXref,
     Husband,
     Individual,
-    Sex,
+    IndividualXref,
     Wife,
 )
 
@@ -65,29 +59,29 @@ testdata_indi_xref = [
 def test_create_individual_xrefs(
     test_input: str, expected: str | int | bool
 ) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
 
     # Create the individual xrefs.
     joe_xref = a.individual_xref('joseph')
     mary_xref = a.individual_xref('mary')
     jesus_xref = a.individual_xref('jesus')
-    joe_xref_type = DefCheck.verify_type(joe_xref, IndividualXref)  # noqa: F841
-    mary_xref_type = DefCheck.verify_type(mary_xref, IndividualXref)  # noqa: F841
-    jesus_xref_type = DefCheck.verify_type(jesus_xref, IndividualXref)  # noqa: F841
+    joe_xref_type = Checker.verify_type(joe_xref, IndividualXref)  # noqa: F841
+    mary_xref_type = Checker.verify_type(mary_xref, IndividualXref)  # noqa: F841
+    jesus_xref_type = Checker.verify_type(jesus_xref, IndividualXref)  # noqa: F841
 
     # Create the family xref.
     joe_mary_xref = a.family_xref('joe & mary')
-    joe_mary_xref_type = DefCheck.verify_type(joe_mary_xref, FamilyXref)  # noqa: F841
+    joe_mary_xref_type = Checker.verify_type(joe_mary_xref, FamilyXref)  # noqa: F841
 
     # Create the individual records.
     joe = Individual(xref=joe_xref, sex=Sex.M)
     mary = Individual(xref=mary_xref, sex=Sex.F)
     jesus = Individual(
-        xref=jesus_xref, sex=Sex.M, families_child=(FamilyChild(joe_mary_xref),)
+        xref=jesus_xref, sex=Sex.M, families_child=[FamilyChild(joe_mary_xref),]
     )
-    joe_type = DefCheck.verify_type(joe, Individual)  # noqa: F841
-    mary_type = DefCheck.verify_type(mary, Individual)  # noqa: F841
-    jesus_type = DefCheck.verify_type(jesus, Individual)  # noqa: F841
+    joe_type = Checker.verify_type(joe, Individual)  # noqa: F841
+    mary_type = Checker.verify_type(mary, Individual)  # noqa: F841
+    jesus_type = Checker.verify_type(jesus, Individual)  # noqa: F841
 
     # Create the family record.
     joe_husband = Husband(joe_xref, 'Joe is the husband.')
@@ -95,9 +89,9 @@ def test_create_individual_xrefs(
     jesus_child = Child(jesus_xref, 'Jesus is the child.')
 
     # Create the roles of Joe, Mary and Jesus in the family.
-    joe_husband_type = DefCheck.verify_type(joe_husband, Husband)  # noqa: F841
-    mary_wife_type = DefCheck.verify_type(mary_wife, Wife)  # noqa: F841
-    jesus_child_type = DefCheck.verify_type(jesus_child, Child)  # noqa: F841
+    joe_husband_type = Checker.verify_type(joe_husband, Husband)  # noqa: F841
+    mary_wife_type = Checker.verify_type(mary_wife, Wife)  # noqa: F841
+    jesus_child_type = Checker.verify_type(jesus_child, Child)  # noqa: F841
 
     # Create the family.
     joe_mary = Family(
@@ -106,7 +100,7 @@ def test_create_individual_xrefs(
         wife=mary_wife,
         children=(jesus_child,),
     )
-    joe_mary_type = DefCheck.verify_type(joe_mary, Family)  # noqa: F841
+    joe_mary_type = Checker.verify_type(joe_mary, Family)  # noqa: F841
 
     # Create the display at this point.
     family = joe_mary.ged().splitlines()  # noqa: F841

@@ -1,5 +1,5 @@
 """------------------------------------------------------------------------------
-                    Three Generation Chronology Tests
+                    Three Generation Genealogy Tests
 
     This builds an imaginary chronology of the three generations
     that uses all of the features multiple times.
@@ -7,14 +7,14 @@
 
 import pytest
 
-from chronodata.build import Chronology
+from chronodata.build import Genealogy
 
 testdata = [('joe_someone', '@JOE_SOMEONE@')]
 
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_address(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology(name='genesis5')
+    a = Genealogy(name='genesis5')
     # first generation
     joe_someone = str(a.individual_xref(' Joe Someone '))  # noqa: F841
     jill_someone = str(a.individual_xref('Jill Someone'))  # noqa: F841

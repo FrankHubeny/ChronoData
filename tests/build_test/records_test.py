@@ -16,10 +16,10 @@
 
 import pytest
 
-from chronodata.build import Chronology
+from chronodata.build import Genealogy
 from chronodata.messages import Msg
-from chronodata.methods import DefCheck
 from chronodata.store import (
+    Checker,
     FamilyXref,
     IndividualXref,
     MultimediaXref,
@@ -48,11 +48,11 @@ testdata_individual = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_individual)  # noqa: PT006
 def test_individual(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
 
     # Test creation of the IndividualXref type without names.
     individual = a.individual_xref()
-    indi_type = DefCheck.verify_type(individual, IndividualXref)  # noqa: F841
+    indi_type = Checker.verify_type(individual, IndividualXref)  # noqa: F841
     indi_name = individual.name  # noqa: F841
     indi_fullname = individual.fullname  # noqa: F841
     indi_string = str(individual)  # noqa: F841
@@ -78,7 +78,7 @@ def test_individual(test_input: str, expected: str | int | bool) -> None:
 def test_individual_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello individual'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.individual_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.individual_xref(xref_name)  # noqa: F841
@@ -94,9 +94,9 @@ testdata_family = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_family)  # noqa: PT006
 def test_family(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     family = a.family_xref('a family')
-    family_type = DefCheck.verify_type(family, FamilyXref)  # noqa: F841
+    family_type = Checker.verify_type(family, FamilyXref)  # noqa: F841
     family_name = family.name  # noqa: F841
     family_fullname = family.fullname  # noqa: F841
     family_string = str(family)  # noqa: F841
@@ -107,7 +107,7 @@ def test_family(test_input: str, expected: str | int | bool) -> None:
 def test_family_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello family'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.family_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.family_xref(xref_name)  # noqa: F841
@@ -123,9 +123,9 @@ testdata_multimedia = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_multimedia)  # noqa: PT006
 def test_multimedia(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     multimedia = a.multimedia_xref()
-    multimedia_type = DefCheck.verify_type(multimedia, MultimediaXref)  # noqa: F841
+    multimedia_type = Checker.verify_type(multimedia, MultimediaXref)  # noqa: F841
     multimedia_name = multimedia.name  # noqa: F841
     multimedia_fullname = multimedia.fullname  # noqa: F841
     multimedia_string = str(multimedia)  # noqa: F841
@@ -136,7 +136,7 @@ def test_multimedia(test_input: str, expected: str | int | bool) -> None:
 def test_multimedia_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello multimedia'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.multimedia_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.multimedia_xref(xref_name)  # noqa: F841
@@ -152,9 +152,9 @@ testdata_repository = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_repository)  # noqa: PT006
 def test_repository(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     repository = a.repository_xref()
-    repository_type = DefCheck.verify_type(repository, RepositoryXref)  # noqa: F841
+    repository_type = Checker.verify_type(repository, RepositoryXref)  # noqa: F841
     repository_name = repository.name  # noqa: F841
     repository_fullname = repository.fullname  # noqa: F841
     repository_string = str(repository)  # noqa: F841
@@ -165,7 +165,7 @@ def test_repository(test_input: str, expected: str | int | bool) -> None:
 def test_repository_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello repository'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.repository_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.repository_xref(xref_name)  # noqa: F841
@@ -181,9 +181,9 @@ testdata_shared_note = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_shared_note)  # noqa: PT006
 def test_shared_note(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     shared_note = a.shared_note_xref()
-    shared_note_type = DefCheck.verify_type(shared_note, SharedNoteXref)  # noqa: F841
+    shared_note_type = Checker.verify_type(shared_note, SharedNoteXref)  # noqa: F841
     shared_note_name = shared_note.name  # noqa: F841
     shared_note_fullname = shared_note.fullname  # noqa: F841
     shared_note_string = str(shared_note)  # noqa: F841
@@ -194,7 +194,7 @@ def test_shared_note(test_input: str, expected: str | int | bool) -> None:
 def test_shared_note_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello shared note'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.shared_note_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.shared_note_xref(xref_name)  # noqa: F841
@@ -210,9 +210,9 @@ testdata_source = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_source)  # noqa: PT006
 def test_source(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     source = a.source_xref()
-    source_type = DefCheck.verify_type(source, SourceXref)  # noqa: F841
+    source_type = Checker.verify_type(source, SourceXref)  # noqa: F841
     source_name = source.name  # noqa: F841
     source_fullname = source.fullname  # noqa: F841
     source_string = str(source)  # noqa: F841
@@ -223,7 +223,7 @@ def test_source(test_input: str, expected: str | int | bool) -> None:
 def test_source_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello source'
-    a = Chronology('tttt')
+    a = Genealogy('tttt')
     name1 = a.source_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.source_xref(xref_name)  # noqa: F841
@@ -239,9 +239,9 @@ testdata_submitter = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_submitter)  # noqa: PT006
 def test_submitter(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     submitter = a.submitter_xref()
-    submitter_type = DefCheck.verify_type(submitter, SubmitterXref)  # noqa: F841
+    submitter_type = Checker.verify_type(submitter, SubmitterXref)  # noqa: F841
     submitter_name = submitter.name  # noqa: F841
     submitter_fullname = submitter.fullname  # noqa: F841
     submitter_string = str(submitter)  # noqa: F841
@@ -252,7 +252,7 @@ def test_submitter(test_input: str, expected: str | int | bool) -> None:
 def test_submitter_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello submitter'
-    a = Chronology('submitter')
+    a = Genealogy('submitter')
     name1 = a.submitter_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.submitter_xref(xref_name)  # noqa: F841

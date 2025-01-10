@@ -13,7 +13,7 @@ import pandas as pd  # type: ignore[import-untyped]
 
 from chronodata.constants import String
 from chronodata.messages import Column, Msg
-from chronodata.readwrite import Base
+from chronodata.separate.readwrite import Base
 
 
 class Challenge:

@@ -21,10 +21,12 @@ __all__ = [
     'Age',
     'Alias',
     'Association',
+    'Checker',
     'Child',
     'Date',
     'DateExact',
     'DateValue',
+    'Dater',
     'EventDetail',
     'Exid',
     'Family',
@@ -37,6 +39,7 @@ __all__ = [
     'FamilyXref',
     'File',
     'FileTranslations',
+    'Formatter',
     'Header',
     'Husband',
     'Identifier',
@@ -62,6 +65,7 @@ __all__ = [
     'PersonalNamePieces',
     'Place',
     'PlaceName',
+    'Placer',
     'Repository',
     'Repository',
     'RepositoryXref',
@@ -79,6 +83,7 @@ __all__ = [
     'Submitter',
     'Submitter',
     'SubmitterXref',
+    'Tagger',
     'Text',
     'Time',
     'Void',
@@ -87,10 +92,13 @@ __all__ = [
 
 import contextlib
 import logging
+import math
 import re
 from enum import Enum
 from textwrap import dedent, indent
 from typing import Any, Literal, NamedTuple
+
+import numpy as np
 
 from chronodata.constants import (
     Adop,
@@ -118,17 +126,6 @@ from chronodata.constants import (
     Value,
 )
 from chronodata.messages import Example, Msg
-
-# from chronodata.records import (
-#     FamilyXref,
-#     IndividualXref,
-#     MultimediaXref,
-#     RepositoryXref,
-#     SharedNoteXref,
-#     SourceXref,
-#     SubmitterXref,
-#     Void,
-# )
 
 
 class Tagger:
@@ -319,6 +316,7 @@ class Tagger:
 
         return re.sub(String.BANNED, '', input)
 
+
 class Checker:
     """Global methods supporting validation of data."""
 
@@ -397,7 +395,6 @@ class Checker:
     #         dictionary, orient='index', columns=['Value']
     #     )
 
-
     @staticmethod
     def verify_not_default(value: Any, default: Any) -> bool:
         """Check that the value is not the default value.
@@ -449,6 +446,231 @@ class Checker:
         if value < 0:
             raise ValueError(Msg.NEGATIVE_ERROR.format(value))
         return True
+
+
+class Dater:
+    """Global methods supporting date processing."""
+
+    @staticmethod
+    def ged_date(
+        iso_date: str = String.NOW,
+        calendar: str = 'GREGORIAN',
+        epoch: bool = True,
+    ) -> tuple[str, str]:
+        """Obtain the GEDCOM date and time from an ISO date and time or the
+        current UTC timestamp in GEDCOM format.
+
+        Args:
+            iso_date: The ISO date or `now` for the current date and time.
+            calendar: The GEDCOM calendar to use when returning the date.
+            epoch: Return the epoch, `BCE`, for the GEDCOM date if it is before
+                the current epoch.  Set this to `False` to not return the epoch.
+                This only applies to dates prior to 1 AD.
+
+        References
+        ----------
+
+        Exceptions:
+
+        """
+        datetime: str = str(np.datetime64(iso_date))
+        date, time = datetime.split(String.T)
+        date_pieces = date.split(String.HYPHEN)
+        if len(date_pieces) == 3:
+            year: str = date_pieces[0]
+            month: str = date_pieces[1]
+            day: str = date_pieces[2]
+        else:
+            year = date_pieces[1]
+            month = date_pieces[2]
+            day = date_pieces[3]
+        ged_time: str = ''.join([time, String.Z])
+        good_calendar: str | bool = Cal.CALENDARS.get(String.GREGORIAN, False)
+        if not good_calendar:
+            logging.critical(Msg.BAD_CALENDAR.format(calendar))
+            raise ValueError(Msg.BAD_CALENDAR.format(calendar))
+        month_code: str = Cal.CALENDARS[calendar][String.MONTH_NAMES].get(
+            month, False
+        )
+        if not month_code:
+            logging.critical(Msg.BAD_MONTH.format(calendar, month))
+            raise ValueError(Msg.BAD_MONTH.format(calendar, month))
+        ged_date: str = ''
+        if epoch and len(date_pieces) == 4:
+            ged_date = ''.join(
+                [
+                    day,
+                    String.SPACE,
+                    month_code,
+                    String.SPACE,
+                    year,
+                    String.SPACE,
+                    String.BC,
+                ]
+            )
+        else:
+            ged_date = ''.join(
+                [day, String.SPACE, month_code, String.SPACE, year]
+            )
+        return ged_date, ged_time
+
+    @staticmethod
+    def iso_date(
+        ged_date: str,
+        ged_time: str = '',
+        calendar: str = String.GREGORIAN,
+    ) -> str:
+        """Return an ISO date and time given a GEDCOM date and time."""
+        day: str
+        month: str
+        year: str
+        day, month, year = ged_date.split(String.SPACE)
+        time: str = ged_time.split(String.Z)[0]
+        good_calendar: str | bool = Cal.CALENDARS[calendar].get(
+            String.GREGORIAN, False
+        )
+        if not good_calendar:
+            logging.critical(Msg.BAD_CALENDAR.format(calendar))
+            raise ValueError(Msg.BAD_CALENDAR.format(calendar))
+        month_code: str = Cal.CALENDARS[calendar].get(month, False)
+        if not month_code:
+            logging.critical(Msg.BAD_MONTH.format(calendar, month))
+            raise ValueError(Msg.BAD_MONTH.format(calendar, month))
+        iso_datetime: str = ''.join(
+            [
+                year,
+                String.HYPHEN,
+                month_code,
+                String.HYPHEN,
+                day,
+                String.T,
+                time,
+            ]
+        )
+        return iso_datetime
+
+    @staticmethod
+    def now(level: int = 2) -> str:
+        """Return the current UTC date and time rather than an entered value.
+
+        This will be returned as a list of two lines for a GEDCOM file.
+        This method will not likely be needed by the builder of a chronology
+        unless the builder wants to enter the current date and time into
+        the chronology. The current date and time is automatically
+        entered for each record as its creation date and time
+        as well as its change date and time.
+
+        Return
+        ------
+        A list containing two strings is returned. The first member of
+        the list is the date formatted to be used in a GEDCOM file.
+        The second member of the list is the time formatted to
+        be used in a GEDCOM file.
+
+        Example
+        -------
+        >>> from chronodata.store import Dater  # doctest: +ELLIPSIS
+        >>> print(Dater.now())
+        2 DATE ...
+        3 TIME ...
+        <BLANKLINE>
+
+        Changing the level adjusts the level numbers for the two returned strings.
+
+        >>> print(Dater.now(level=5))
+        5 DATE ...
+        6 TIME ...
+        <BLANKLINE>
+
+        See Also
+        --------
+        - `creation_date`
+        - `change_date`
+        - `header`
+        """
+        date: str
+        time: str
+        date, time = Dater.ged_date()
+        return ''.join(
+            [
+                Tagger.taginfo(level, Tag.DATE, date),
+                Tagger.taginfo(level + 1, Tag.TIME, time),
+            ]
+        )
+
+    @staticmethod
+    def creation_date() -> str:
+        """Return three GEDCOM lines showing a line with a creation tag (CREA)
+        and then two automatically generated
+        UTC date and time lines.  These are used to
+        show when a record has been created.
+
+        See Also
+        --------
+        - `now`: the method that generates the current UTC date and time
+        - `family`: the method creating the family record (FAM)
+        - `individual`: the method creating the individual record (INDI)
+        - `multimedia`: the method creating the multimedia record (OBJE)
+        - `repository`: the method creating the repository record (REPO)
+        - `shared_note`: the method creating the shared note record (SNOTE)
+        - `source`: the method creating the source record (SOUR)
+        - `submitter`: the method creating the submitter record (SUBM)
+        """
+        return ''.join([Tagger.taginfo(1, Tag.CREA), Dater.now()])
+
+
+class Placer:
+    """Global methods to support place data."""
+
+    @staticmethod
+    def to_decimal(
+        degrees: int, minutes: int, seconds: float, precision: int = 6
+    ) -> float:
+        """Convert degrees, minutes and seconds to a decimal.
+
+        Example:
+            >>> from chronodata.store import Placer
+            >>> Placer.to_decimal(49, 17, 50, 10)
+            49.2972222222
+
+        See Also:
+            - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
+
+        """
+        sign: int = -1 if degrees < 0 else 1
+        degrees = abs(degrees)
+        minutes_per_degree = 60
+        seconds_per_degree = 3600
+        return round(
+            sign * degrees
+            + (minutes / minutes_per_degree)
+            + (seconds / seconds_per_degree),
+            precision,
+        )
+
+    @staticmethod
+    def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
+        """Convert a measurment in decimals to one showing degrees, minutes
+        and sconds.
+
+        >>> from chronodata.store import Placer
+        >>> Placer.to_dms(49.29722222222, 10)
+        (49, 17, 49.999999992)
+
+        See Also:
+            - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
+
+        """
+        minutes_per_degree = 60
+        seconds_per_degree = 3600
+        degrees: int = math.floor(position)
+        minutes: int = math.floor((position - degrees) * minutes_per_degree)
+        seconds: float = round(
+            (position - degrees - (minutes / minutes_per_degree))
+            * seconds_per_degree,
+            precision,
+        )
+        return (degrees, minutes, seconds)
 
 
 
@@ -544,7 +766,6 @@ class IndividualXref(Xref):
         self.tag = Tag.INDI
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
         self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-        
 
 
 class MultimediaXref(Xref):
@@ -568,7 +789,6 @@ class MultimediaXref(Xref):
         self.tag = Tag.OBJE
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
         self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-        
 
 
 class RepositoryXref(Xref):
@@ -1658,9 +1878,7 @@ class Note(NamedTuple):
             and Checker.verify_type(self.note, str)
             and Checker.verify_enum(self.mime.value, MediaType)
             and Checker.verify_tuple_type(self.translations, NoteTranslation)
-            and Checker.verify_tuple_type(
-                self.source_citations, SourceCitation
-            )
+            and Checker.verify_tuple_type(self.source_citations, SourceCitation)
         )
         return check
 
@@ -1789,9 +2007,7 @@ class PersonalName(NamedTuple):
             and Checker.verify_type(self.pieces, PersonalNamePieces)
             and Checker.verify_tuple_type(self.translations, NameTranslation)
             and Checker.verify_tuple_type(self.notes, Note)
-            and Checker.verify_tuple_type(
-                self.source_citations, SourceCitation
-            )
+            and Checker.verify_tuple_type(self.source_citations, SourceCitation)
         )
         return check
 
@@ -1851,14 +2067,14 @@ class Association(NamedTuple):
         Both orderings record the same data under the individual with pointer `@I1@`.
 
         First import the required classes.
-        >>> from chronodata.build import Chronology
+        >>> from chronodata.build import Genealogy
         >>> from chronodata.constants import Role
         >>> from chronodata.store import Association, Individual
 
         Next, create a chronology and the two individuals references.
         There is no need to create an individual reference for Mr Stockdale
         so we leave his pointer as `@VOID@`.
-        >>> chron = Chronology('test')
+        >>> chron = Genealogy('test')
         >>> individual = chron.individual_xref('I', initial=True)
         >>> clergy = chron.individual_xref('I', initial=True)
 
@@ -2635,9 +2851,7 @@ class EventDetail(NamedTuple):
             and Checker.verify_tuple_type(self.associations, Association)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
-            and Checker.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
+            and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_tuple_type(self.uids, Id)
         )
         return check
@@ -2913,9 +3127,7 @@ class FamilyEvent(NamedTuple):
             and Checker.verify_enum(self.tag.value, FamEven)
             and Checker.verify_type(self.payload, str)
             and Checker.verify_type(self.event_type, str)
-            and Checker.verify_type(
-                self.event_detail, FamilyEventDetail | None
-            )
+            and Checker.verify_type(self.event_detail, FamilyEventDetail | None)
             and Checker.verify(
                 check_tag,
                 check_payload,
@@ -3281,11 +3493,11 @@ class IndividualEvent(NamedTuple):
         This example can be implemented as follows.
 
         First import the needed classes.
-        >>> from chronodata.build import Chronology
+        >>> from chronodata.build import Genealogy
         >>> from chronodata.store import Individual, IndividualEvent
 
-        Next, create a Chronology and an individual with reference `@I1@`.
-        >>> chron = Chronology('event example')
+        Next, create a Genealogy and an individual with reference `@I1@`.
+        >>> chron = Genealogy('event example')
         >>> indi_i1_xref = chron.individual_xref('I1')
 
         Finally, create the individual record for `@I1@` with two individual events
@@ -3753,9 +3965,7 @@ class Family(NamedTuple):
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.citations, SourceCitation)
-            and Checker.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
+            and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
 
@@ -3911,9 +4121,7 @@ class Source(NamedTuple):
             and Checker.verify_tuple_type(self.repositories, Repository)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
-            and Checker.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
+            and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
 
@@ -3969,9 +4177,7 @@ class Submitter(NamedTuple):
             and Checker.verify_tuple_type(self.emails, str)
             and Checker.verify_tuple_type(self.faxes, str)
             and Checker.verify_tuple_type(self.wwws, str)
-            and Checker.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
+            and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_tuple_type(self.languages, str)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
@@ -4003,13 +4209,13 @@ class Individual(NamedTuple):
 
         This can be implemented by doing the following.
         First import the packages.
-        >>> from chronodata.build import Chronology
+        >>> from chronodata.build import Genealogy
         >>> from chronodata.store import Association, Individual
         >>> from chronodata.constants import Role
 
-        Next instantiate a Chronology which will store the information.
+        Next instantiate a Genealogy which will store the information.
         This will be named `test`.
-        >>> a = Chronology('test')
+        >>> a = Genealogy('test')
 
         Next instantiate two IndivdiaulXref values called `I1` and `I2`.
         >>> i1 = a.individual_xref('I1')
@@ -4099,6 +4305,7 @@ class Individual(NamedTuple):
     attributes: list[IndividualAttribute] = []  # noqa: RUF012
     events: list[IndividualEvent] = []  # noqa: RUF012
     lds_individual_ordinances: list[LDSIndividualOrdinances] = []  # noqa: RUF012
+    families_child: list[FamilyChild] = []  # noqa: RUF012
     submitters: list[Submitter] = []  # noqa: RUF012
     associations: list[Association] = []  # noqa: RUF012
     aliases: list[Alias] = []  # noqa: RUF012
@@ -4123,6 +4330,7 @@ class Individual(NamedTuple):
             and Checker.verify_tuple_type(
                 self.lds_individual_ordinances, LDSIndividualOrdinances
             )
+            and Checker.verify_tuple_type(self.families_child, FamilyChild)
             and Checker.verify_tuple_type(self.submitters, str)
             and Checker.verify_tuple_type(self.associations, Association)
             and Checker.verify_tuple_type(self.aliases, Alias)
@@ -4131,9 +4339,7 @@ class Individual(NamedTuple):
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
-            and Checker.verify_tuple_type(
-                self.multimedia_links, MultimediaLink
-            )
+            and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
         )
         return check
 
@@ -4151,6 +4357,7 @@ class Individual(NamedTuple):
             lines = Tagger.list_to_str(
                 lines, level + 1, self.lds_individual_ordinances
             )
+            lines = Tagger.list_to_str(lines, level + 1, self.families_child)
             lines = Tagger.list_to_str(lines, level + 1, self.submitters)
             lines = Tagger.list_to_str(lines, level + 1, self.associations)
             lines = Tagger.list_to_str(lines, level + 1, self.aliases)
@@ -4173,11 +4380,11 @@ class Individual(NamedTuple):
         spaces: str = String.INDENT * level
         preface: str = f"""
             # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
-            from chronodata.build import Chronology
+            from chronodata.build import Genealogy
             from chronodata.constants import Resn, Sex
             from chronodata.store import Individual
 
-            {chronology_name} = Chronology('{chronology_name}')
+            {chronology_name} = Genealogy('{chronology_name}')
             {self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
             """
         return indent(

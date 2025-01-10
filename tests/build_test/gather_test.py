@@ -15,14 +15,13 @@ import re
 
 import pytest
 
-from chronodata.build import Chronology
+from chronodata.build import Genealogy
 from chronodata.constants import String  # noqa: F401
 from chronodata.messages import Msg
 
 # from chronodata.records import FamilyXref, IndividualXref, MultimediaXref, RepositoryXref, SharedNoteXref, SourceXref, SubmitterXref
 from chronodata.store import (
     Family,
-    Husband,
     Individual,
     Multimedia,
     Repository,
@@ -34,11 +33,6 @@ from chronodata.store import (
 testdata_empty = [
     ('len(a.ged_family)', 0),
     ('len(a.ged_individual)', 0),
-    # ('len(a.ged_multimedia)', 0),
-    # ('len(a.ged_repository)', 0),
-    # ('len(a.ged_shared_note)', 0),
-    # ('len(a.ged_source)', 0),
-    # ('len(a.ged_submitter)', 0),
 ]
 
 
@@ -46,7 +40,7 @@ testdata_empty = [
 def test_empty_record_lists(
     test_input: str, expected: str | int | bool
 ) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     a.families([])
     a.individuals([])
     a.multimedia([])
@@ -71,7 +65,7 @@ testdata_one = (
 
 @pytest.mark.parametrize('test_input,expected', testdata_one)  # noqa: PT006
 def test_one_record(test_input: str, expected: str) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     familyxref = a.family_xref()
     individualxref = a.individual_xref()
     multimediaxref = a.multimedia_xref()
@@ -110,7 +104,7 @@ testdata_three: list[tuple[str, int]] = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_three)  # noqa: PT006
 def test_three_records(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology('test')
+    a = Genealogy('test')
     family1 = Family(a.family_xref())
     family2 = Family(a.family_xref())
     family3 = Family(a.family_xref())
@@ -143,67 +137,9 @@ def test_three_records(test_input: str, expected: str | int | bool) -> None:
     assert eval(test_input) == expected
 
 
-# testdata_duplicates: list[tuple[str, int]] = [
-#     ('a.ged_family.count(String.NEWLINE)', 1),
-#     ('a.ged_individual.count(String.NEWLINE)', 1),
-#     ('a.ged_multimedia.count(String.NEWLINE)', 1),
-#     ('a.ged_repository.count(String.NEWLINE)', 1),
-#     ('a.ged_shared_note.count(String.NEWLINE)', 1),
-#     ('a.ged_source.count(String.NEWLINE)', 1),
-#     ('a.ged_submitter.count(String.NEWLINE)', 1),
-# ]
-
-
-# @pytest.mark.parametrize('test_input,expected', testdata_duplicates)  # noqa: PT006
-# def test_duplicates(test_input: str, expected: str | int | bool) -> None:
-#     a = Chronology('test')
-#     fam = Family(a.family_xref())
-#     indi = Individual(a.individual_xref())
-#     obje = Multimedia(a.multimedia_xref())
-#     repo = Repository(a.repository_xref())
-#     snote = SharedNote(a.shared_note_xref())
-#     sour = Source(a.source_xref())
-#     subm = Submitter(a.submitter_xref())
-#     a.families([fam, fam])
-#     a.individuals([indi, indi, indi, indi])
-#     a.multimedia([obje, obje, obje])
-#     a.repositories([repo, repo, repo, repo, repo])
-#     a.shared_notes([snote, snote, snote])
-#     a.sources([sour, sour, sour])
-#     a.submitters([subm, subm])
-
-#     assert eval(test_input) == expected
-
-
-# testdata_same_xref_different_record: list[tuple[str, int | str]] = [
-#     ('a.ged_family.count(String.NEWLINE)', 2),
-#     ('a.ged_family', '0 @3@ FAM\n1 HUSB @1@\n'),
-# ]
-
-
-# @pytest.mark.parametrize(
-#     'test_input,expected',  # noqa: PT006
-#     testdata_same_xref_different_record,
-# )
-# def test_same_xref_different_record(
-#     test_input: str, expected: str | int | bool
-# ) -> None:
-#     a = Chronology('test')
-#     indi_xref1 = a.individual_xref()
-#     indi_xref2 = a.individual_xref()
-#     indi1 = Husband(indi_xref1)
-#     indi2 = Husband(indi_xref2)
-#     fam_xref = a.family_xref()
-#     fam1 = Family(fam_xref, husband=indi1)
-#     fam2 = Family(fam_xref, husband=indi2)
-#     a.families([fam1, fam2])
-
-#     assert eval(test_input) == expected
-
-
 def test_missing_individual() -> None:
     """Test that an individual identifier was not listed in the individual records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     sam_xref = a.individual_xref('sam')
     sam = Individual(sam_xref)
 
@@ -217,7 +153,7 @@ def test_missing_individual() -> None:
 
 def test_missing_family() -> None:
     """Test that a family identifier was not listed in the family records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.family_xref('one')
     one = Family(one_xref)
 
@@ -231,7 +167,7 @@ def test_missing_family() -> None:
 
 def test_missing_multimedia() -> None:
     """Test that a multimedia identifier was not listed in the multimedia records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.multimedia_xref('one')
     one = Multimedia(one_xref)
 
@@ -245,7 +181,7 @@ def test_missing_multimedia() -> None:
 
 def test_missing_repository() -> None:
     """Test that a repository identifier was not listed in the repository records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.repository_xref('one')
     one = Repository(one_xref)
 
@@ -259,7 +195,7 @@ def test_missing_repository() -> None:
 
 def test_missing_shared_note() -> None:
     """Test that a shared note identifier was not listed in the shared note records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.shared_note_xref('one')
     one = SharedNote(one_xref)
 
@@ -273,7 +209,7 @@ def test_missing_shared_note() -> None:
 
 def test_missing_source() -> None:
     """Test that a source identifier was not listed in the source records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.source_xref('one')
     one = Source(one_xref)
 
@@ -287,7 +223,7 @@ def test_missing_source() -> None:
 
 def test_missing_submitter() -> None:
     """Test that a submitter identifier was not listed in the submitter records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one_xref = a.submitter_xref('one')
     one = Submitter(one_xref)
 
@@ -301,7 +237,7 @@ def test_missing_submitter() -> None:
 
 def test_many_missing_families() -> None:
     """Test that many family identifiers wer not listed in the family records."""
-    a = Chronology('test')
+    a = Genealogy('test')
     one = a.family_xref('one')
 
     two = a.family_xref('two')
@@ -314,7 +250,7 @@ def test_many_missing_families() -> None:
 
 def test_duplicate_family() -> None:
     """Test that an error is raised if a family cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     fam_one_xref = a.family_xref('one')
     fam = Family(xref=fam_one_xref)
     with pytest.raises(
@@ -326,7 +262,7 @@ def test_duplicate_family() -> None:
 
 def test_duplicate_individual() -> None:
     """Test that an error is raised if an individual cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     indi_one_xref = a.individual_xref('one')
     indi = Individual(xref=indi_one_xref)
     with pytest.raises(
@@ -338,7 +274,7 @@ def test_duplicate_individual() -> None:
 
 def test_duplicate_multimedia() -> None:
     """Test that an error is raised if a multimedia cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     obje_one_xref = a.multimedia_xref('one')
     obje = Multimedia(xref=obje_one_xref)
     with pytest.raises(
@@ -350,7 +286,7 @@ def test_duplicate_multimedia() -> None:
 
 def test_duplicate_repository() -> None:
     """Test that an error is raised if a repository cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     repo_one_xref = a.repository_xref('one')
     repo = Repository(xref=repo_one_xref)
     with pytest.raises(
@@ -362,7 +298,7 @@ def test_duplicate_repository() -> None:
 
 def test_duplicate_shared_note() -> None:
     """Test that an error is raised if a shared note cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     snote_one_xref = a.shared_note_xref('one')
     snote = SharedNote(xref=snote_one_xref)
     with pytest.raises(
@@ -374,23 +310,23 @@ def test_duplicate_shared_note() -> None:
 
 def test_duplicate_source() -> None:
     """Test that an error is raised if a source cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     sour_one_xref = a.source_xref('one')
     sour = Source(xref=sour_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(sour_one_xref.fullname)),
     ):
-        a.families([sour, sour])
+        a.families([sour, sour]) # type: ignore[list-item]
 
 
 def test_duplicate_submitter() -> None:
     """Test that an error is raised if a submitter cross-reference identifier is used twice."""
-    a = Chronology('duplicate')
+    a = Genealogy('duplicate')
     subm_one_xref = a.submitter_xref('one')
     subm = Submitter(xref=subm_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(subm_one_xref.fullname)),
     ):
-        a.families([subm, subm])
+        a.families([subm, subm]) # type: ignore[list-item]

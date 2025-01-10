@@ -27,19 +27,6 @@ from chronodata.constants import (
     Tag,
 )
 from chronodata.messages import Issue, Msg
-from chronodata.methods import DefTag
-
-# from chronodata.readwrite import Base
-# from chronodata.records import (
-#     FamilyXref,
-#     IndividualXref,
-#     MultimediaXref,
-#     RepositoryXref,
-#     SharedNoteXref,
-#     SourceXref,
-#     SubmitterXref,
-#     Void,
-# )
 from chronodata.store import (
     Family,
     FamilyXref,
@@ -56,11 +43,12 @@ from chronodata.store import (
     SourceXref,
     Submitter,
     SubmitterXref,
+    Tagger,
     Void,
 )
 
 
-class Chronology:
+class Genealogy:
     """Methods to add, update and remove a specific loaded chronology."""
 
     def __init__(
@@ -137,7 +125,7 @@ class Chronology:
             ) as infile:
                 data: Any = infile.readlines()
                 self.csv_data = ''.join(
-                    [self.csv_data, DefTag.clean_input(data)]
+                    [self.csv_data, Tagger.clean_input(data)]
                 )
                 infile.close()
         except UnicodeDecodeError:
@@ -166,7 +154,7 @@ class Chronology:
                 Path(self.filename), encoding='utf-8', mode=String.READ
             ) as infile:
                 data: Any = infile.readlines()
-                self.ged_data.append(DefTag.clean_input(data))
+                self.ged_data.append(Tagger.clean_input(data))
                 infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -380,8 +368,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a family record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.family_xref()
             >>> print(id)
             @1@
@@ -445,8 +433,8 @@ class Chronology:
         Examples:
             The first example shows the output of the counter for an individual record
             without a name.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.individual_xref()
             >>> print(id)
             @1@
@@ -511,8 +499,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a multimedia record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.multimedia_xref()
             >>> print(id)
             @1@
@@ -577,8 +565,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a repository record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.repository_xref()
             >>> print(id)
             @1@
@@ -636,8 +624,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.shared_note_xref()
             >>> print(id)
             @1@
@@ -695,8 +683,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.source_xref()
             >>> print(id)
             @1@
@@ -754,8 +742,8 @@ class Chronology:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('testing')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('testing')
             >>> id = a.submitter_xref()
             >>> print(id)
             @1@
@@ -821,7 +809,7 @@ class Chronology:
         """Collect and store all family records for the chronology.
 
         After importing `chronodata.build` and `chronodata.store`
-        one can instantiate a `Chronology` and create a family
+        one can instantiate a `Genealogy` and create a family
         identifier to be used in forming a GEDCOM family record.
         The `tuples.Family` NamedTuple will hold all of this
         particular family's information. When one has constructed
@@ -835,9 +823,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Family
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> family_id = a.family_xref()
             >>> family = Family(xref=family_id)
             >>> a.families(
@@ -883,9 +871,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Individual
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> individual_id = a.individual_xref()
             >>> individual = Individual(xref=individual_id)
             >>> a.individuals(
@@ -931,9 +919,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Multimedia
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
             >>> mm = Multimedia(xref=mm_id)
             >>> a.multimedia(
@@ -979,9 +967,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Repository
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> repo_id = a.repository_xref()
             >>> repo = Repository(xref=repo_id)
             >>> a.repositories(
@@ -1027,9 +1015,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import SharedNote
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> sn_id = a.shared_note_xref()
             >>> sn = SharedNote(xref=sn_id)
             >>> a.shared_notes(
@@ -1075,9 +1063,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Source
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> source_id = a.source_xref()
             >>> source = Source(xref=source_id)
             >>> a.sources(
@@ -1123,9 +1111,9 @@ class Chronology:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Chronology
+            >>> from chronodata.build import Genealogy
             >>> from chronodata.store import Submitter
-            >>> a = Chronology('test')
+            >>> a = Genealogy('test')
             >>> sub_id = a.submitter_xref()
             >>> sub = Submitter(xref=sub_id)
             >>> a.submitters(
@@ -1172,8 +1160,8 @@ class Chronology:
         Example:
             This example provides the minimum data for a GEDCOM version 7.0 file.
             Nothing else has been added to it.
-            >>> from chronodata.build import Chronology
-            >>> a = Chronology('test')
+            >>> from chronodata.build import Genealogy
+            >>> a = Genealogy('test')
             >>> a.header(Header())
             >>> print(a.ged_header)
             0 HEAD

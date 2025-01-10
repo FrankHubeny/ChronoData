@@ -22,7 +22,7 @@ class Column:
 
     CHART_COLOR: str = 'Chart Color'
     CHART_LINE_STYLE: str = 'Chart Line Style'
-    CHRONO_NAME: str = 'Chronology'
+    CHRONO_NAME: str = 'Chronogenealogy'
     CODE: str = 'Code'
     DATETIME: str = 'Date/Time'
     DURATION: str = 'Duration Years'

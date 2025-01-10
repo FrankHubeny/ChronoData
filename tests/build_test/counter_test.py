@@ -8,7 +8,7 @@ This module contains tests for the _counter method verify the returned values ar
 
 import pytest
 
-from chronodata.build import Chronology
+from chronodata.build import Genealogy
 from chronodata.messages import Msg
 from chronodata.store import Void
 
@@ -38,8 +38,8 @@ testdata = [
 @pytest.mark.description('Testing the _counter method of the build module.')
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_counter(test_input: str, expected: str | int | bool) -> None:
-    # SETUP Instantiate a Chronology.
-    a = Chronology(name='testing')
+    # SETUP Instantiate a Genealogy.
+    a = Genealogy(name='testing')
 
     # TEST Initial counter value.
     oldxref = a.xref_counter  # noqa: F841
@@ -78,14 +78,14 @@ def test_counter(test_input: str, expected: str | int | bool) -> None:
 
 def test_use_empty_identifier() -> None:
     """Test that the empty identifier cannot be used."""
-    a = Chronology('test')
+    a = Genealogy('test')
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(Void.NAME, 'VOID')):
         a._counter(a.individual_xreflist, 'VOID')
 
 
 def test_reused_identifier() -> None:
     """Test that an identifier cannot be reused."""
-    a = Chronology('test')
+    a = Genealogy('test')
     a._counter(a.individual_xreflist, ' joe ')
     with pytest.raises(
         ValueError, match=Msg.XREF_EXISTS.format('@JOE@', ' joe ')

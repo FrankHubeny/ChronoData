@@ -9,17 +9,17 @@
 
 import pytest
 
-from chronodata.build import Chronology
+from chronodata.build import Genealogy
 
 testdata = [('ussher_mankind', '@MANKIND@')]
 
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_flood_comparisons(test_input: str, expected: str | int | bool) -> None:
-    a = Chronology(name='ussher')
+    a = Genealogy(name='ussher')
     ussher_mankind = str(a.family_xref(' Mankind '))  # noqa: F841
 
-    b = Chronology(name='smith')
+    b = Genealogy(name='smith')
     smith_mankind = str(b.family_xref('Mankind'))  # noqa: F841
 
     assert eval(test_input) == expected

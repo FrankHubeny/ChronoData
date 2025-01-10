@@ -19,7 +19,7 @@ from chronodata.constants import (
     Unit,
 )
 from chronodata.messages import Issue, Msg
-from chronodata.methods import DefTag
+from chronodata.store import Tagger
 
 
 class Base:
@@ -100,7 +100,7 @@ class Base:
                 Path(self.filename), encoding='utf-8', mode=String.READ
             ) as infile:
                 data: Any = infile.readlines()
-                self.csv_data = ''.join([self.csv_data, DefTag.clean_input(data)])
+                self.csv_data = ''.join([self.csv_data, Tagger.clean_input(data)])
                 infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
@@ -128,7 +128,7 @@ class Base:
                 Path(self.filename), encoding='utf-8', mode=String.READ
             ) as infile:
                 data: Any = infile.readlines()
-                self.ged_data.append(DefTag.clean_input(data))
+                self.ged_data.append(Tagger.clean_input(data))
                 infile.close()
         except UnicodeDecodeError:
             logging.error(Msg.NOT_UNICODE.format(self.filename))
