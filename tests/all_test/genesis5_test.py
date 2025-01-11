@@ -1,7 +1,7 @@
 """------------------------------------------------------------------------------
                             Genesis 5 Tests
 
-    This builds a chronology of the chronology in Genesis 5.
+    This builds a genealogy of the genealogy in Genesis 5.
 ------------------------------------------------------------------------------"""
 
 import pytest

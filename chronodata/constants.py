@@ -31,8 +31,8 @@ __all__ = [
     'Id',
     'IndiAttr',
     'IndiEven',
-    'Media',
     'MediaType',
+    'Medium',
     'NameType',
     'Pedi',
     'Quay',
@@ -412,7 +412,7 @@ class Longitude(Enum):
     WEST = 'W'
 
 
-class Media(Enum):
+class Medium(Enum):
     AUDIO = 'AUDIO'
     BOOK = 'BOOK'
     CARD = 'CARD'

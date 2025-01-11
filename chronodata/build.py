@@ -1,12 +1,12 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-"""Methods to build a chronology based on the GEDCOM standard.
+"""Methods to build a genealogy based on the GEDCOM standard.
 
-This module implements reading and writing chronology files according to the
+This module implements reading and writing genealogy files according to the
 [FamilySearch GEDCOM Version 7](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
 standard.  It also allows reading files in the GEDCOM 5.5.1 standard,
 but will write the output in compliance with GEDCOM 7.0.
 
-The underlying datastructure for the chronology is a Python dictionary.
+The underlying datastructure for the genealogy is a Python dictionary.
 This dictionary can be read and written in JSON.
 
 Rather than introduce extensions to the GEDCOM standards new data items
@@ -49,7 +49,7 @@ from chronodata.store import (
 
 
 class Genealogy:
-    """Methods to add, update and remove a specific loaded chronology."""
+    """Methods to add, update and remove a specific loaded genealogy."""
 
     def __init__(
         self,
@@ -208,7 +208,7 @@ class Genealogy:
         # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
 
     def save(self, filename: str = '', overwrite: bool = False) -> None:
-        """Save the current chronology.
+        """Save the current genealogy.
 
         Parameters
         ----------
@@ -269,7 +269,7 @@ class Genealogy:
                     logging.info(Msg.SAVE_FIRST.format(self.chron_name))
 
     # def rename(self, name: str) -> None:
-    #     """Rename the chronology."""
+    #     """Rename the genealogy."""
     #     self.chron.update({Key.NAME: name})
     #     self.chron_name = self.chron[Key.NAME]
     #     logging.info(Msg.RENAME.format(self.chron_name))
@@ -312,7 +312,7 @@ class Genealogy:
 
         This procedure is called through seven other procedures.  These seven
         other procedures will distinctive type the string so it can be used
-        to build a chronology with the `tuples` module.
+        to build a genealogy with the `tuples` module.
 
         Exception:
             ValueError if a name is used twice for this record type.
@@ -417,7 +417,7 @@ class Genealogy:
         Create an IndividualXref identifier from a unique string according to the
         GEDCOM standard.
 
-        We will likely need many individuals in a single chronology.  When we are comparing
+        We will likely need many individuals in a single genealogy.  When we are comparing
         chronologies we will need to synchronize those names.  Being able to
         name the identifiers helps to synchronize the various chronologies we
         will be comparing.  This method allows us to create named identifiers.
@@ -806,7 +806,7 @@ class Genealogy:
         return destination
 
     def families(self, records: list[Family]) -> None:
-        """Collect and store all family records for the chronology.
+        """Collect and store all family records for the genealogy.
 
         After importing `chronodata.build` and `chronodata.store`
         one can instantiate a `Genealogy` and create a family
@@ -814,7 +814,7 @@ class Genealogy:
         The `tuples.Family` NamedTuple will hold all of this
         particular family's information. When one has constructed
         all of the families that one wants to define for this
-        chronology, they are bundled together with this method.
+        genealogy, they are bundled together with this method.
         This stores them as GEDCOM strings waiting to be saved
         to a file.
 
@@ -864,7 +864,7 @@ class Genealogy:
         self.ged_family = self._gather(records, self.family_xreflist)
 
     def individuals(self, records: list[Individual]) -> None:
-        """Collect and store all individual records for the chronology.
+        """Collect and store all individual records for the genealogy.
 
         Args:
             records: a list of all Individual records.
@@ -912,7 +912,7 @@ class Genealogy:
         self.ged_individual = self._gather(records, self.individual_xreflist)
 
     def multimedia(self, records: list[Multimedia]) -> None:
-        """Collect and store all multimedia records for the chronology.
+        """Collect and store all multimedia records for the genealogy.
 
         Args:
             records: a list of all Multimedia records.
@@ -960,7 +960,7 @@ class Genealogy:
         self.ged_multimedia = self._gather(records, self.multimedia_xreflist)
 
     def repositories(self, records: list[Repository]) -> None:
-        """Collect and store all repository records for the chronology.
+        """Collect and store all repository records for the genealogy.
 
         Args:
             records: a list of all Repository records.
@@ -1008,7 +1008,7 @@ class Genealogy:
         self.ged_repository = self._gather(records, self.repository_xreflist)
 
     def shared_notes(self, records: list[SharedNote]) -> None:
-        """Collect and store all shared note records for the chronology.
+        """Collect and store all shared note records for the genealogy.
 
         Args:
             records: a tuple of all SharedNote records.
@@ -1056,7 +1056,7 @@ class Genealogy:
         self.ged_shared_note = self._gather(records, self.shared_note_xreflist)
 
     def sources(self, records: list[Source]) -> None:
-        """Collect and store all source records for the chronology.
+        """Collect and store all source records for the genealogy.
 
         Args:
             records: a list of all Source records.
@@ -1104,7 +1104,7 @@ class Genealogy:
         self.ged_source = self._gather(records, self.source_xreflist)
 
     def submitters(self, records: list[Submitter]) -> None:
-        """Collect and store all submitter records for the chronology.
+        """Collect and store all submitter records for the genealogy.
 
         Args:
             records: a list of all Submitter records.

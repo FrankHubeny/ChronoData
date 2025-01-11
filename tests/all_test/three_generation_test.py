@@ -1,7 +1,7 @@
 """------------------------------------------------------------------------------
                     Three Generation Genealogy Tests
 
-    This builds an imaginary chronology of the three generations
+    This builds an imaginary genealogy of the three generations
     that uses all of the features multiple times.
 ------------------------------------------------------------------------------"""
 

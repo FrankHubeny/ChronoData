@@ -37,6 +37,7 @@ class Msg:
         'The cross-reference identifier {0} has already been used.'
     )
     EMPTY_EVENT_TYPE: str = 'The event type for tag {0} must have some value.'
+    EXID_TYPE: str = 'The EXID identifier requires a type description of it.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
@@ -50,7 +51,8 @@ class Msg:
     NOT_VALID_ENUM: str = 'The tag {0} is not in the list of valid tags.'
     RANGE: str = 'The value "{0}" is not greater than or equal to "{1}" but strictly less than "{2}".'
     RANGE_ERROR: str = '"{0}" must be greater than or equal to "{1}" and less than or equal to "{2}".'
-    STARTED: str = 'The "{0}" chronology has been started.'
+    SLGC_REQUIRES_FAM: str = 'The Tag.SLGC requires a valid family cross reference identifier.'
+    STARTED: str = 'The "{0}" genealogy has been started.'
     TAG_PAYLOAD: str = (
         'The tag {0} cannot have a payload different from "Y" or "".'
     )

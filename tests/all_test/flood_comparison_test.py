@@ -3,7 +3,7 @@
 
     This builds two chronologies based on two different biblical
     accounts of when the flood occurred and puts in a challenge
-    based on a living tree to show one chronology is more likely
+    based on a living tree to show one genealogy is more likely
     than the other.
 ------------------------------------------------------------------------------"""
 

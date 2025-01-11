@@ -1,7 +1,7 @@
 """------------------------------------------------------------------------------
                             Uranium Tests
 
-    This builds a chronology of the uranium transition to lead testing
+    This builds a genealogy of the uranium transition to lead testing
     results along the way.
 ------------------------------------------------------------------------------"""
 

@@ -1,7 +1,7 @@
 # chronodata/tuples.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """NamedTuples to store, validate and display data
-entered by the user for a chronology.
+entered by the user for a genealogy.
 
 The NamedTuples are based on the GEDCOM standard with others
 added to aid the user in collecting the data.
@@ -21,6 +21,7 @@ __all__ = [
     'Age',
     'Alias',
     'Association',
+    'CallNumber',
     'Checker',
     'Child',
     'Date',
@@ -49,7 +50,7 @@ __all__ = [
     'IndividualEvent',
     'IndividualEventDetail',
     'IndividualXref',
-    'LDSIndividualOrdinances',
+    'LDSIndividualOrdinance',
     'LDSOrdinanceDetail',
     'LDSSpouseSealing',
     'Map',
@@ -113,8 +114,8 @@ from chronodata.constants import (
     IndiEven,
     Latitude,
     Longitude,
-    Media,
     MediaType,
+    Medium,
     NameType,
     Quay,
     Resn,
@@ -129,20 +130,52 @@ from chronodata.messages import Example, Msg
 
 
 class Tagger:
-    """Global methods to construct GEDCOM output."""
+    """Global methods to tag GEDCOM information.
+
+    There are five methods.
+    - `clean_input` makes sure that user input does not contain banned utf-8 strings.
+    - `taginfo` performs the base tagging process calling clean_input on user input.
+    - `empty` constructs a tag where there is no user input.
+    - `string` constructs a tag on user input or a list of a similar type of user input.
+    - `structure` runs the ged method on an already tagged structure or a list of
+        similar structures adding them to the final GEDCOM string.
+    """
 
     @staticmethod
-    def unique_xref(tuples: tuple[Any], xref: Any, name: Any) -> bool:
-        values = {getattr(t, str(xref)) for t in tuples}
-        values.add(str(name))
-        return len(values) == len(tuples)
+    def clean_input(input: str) -> str:
+        """Remove banned GEDCOM unicode characters from input strings.
+
+        The control characters U+0000 - U+001F and the delete character U+007F
+        are listed in the
+        [C0 Controls and Basic Latin](https://www.unicode.org/charts/PDF/U0000.pdf)
+        chart.
+
+        The code points U+D800 - U+DFFF are not interpreted.
+        They are described in the
+        [High Surrogate Area](https://www.unicode.org/charts/PDF/UD800.pdf) and
+        [Low Surrogate Area](https://www.unicode.org/charts/PDF/UDC00.pdf)
+        standards.
+
+        The code points U+FFFE and U+FFFF are noncharacters as described in the
+        [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
+
+        Examples:
+
+
+        Reference:
+            - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
+            - [Unicode Specification](https://www.unicode.org/versions/Unicode16.0.0/#Summary)
+            - [Python re Module](https://docs.python.org/3/library/re.html)
+        """
+
+        return re.sub(String.BANNED, String.EMPTY, input)
 
     @staticmethod
     def taginfo(
         level: int,
         tag: Tag,
-        payload: str = '',
-        extra: str = '',
+        payload: str = String.EMPTY,
+        extra: str = String.EMPTY,
     ) -> str:
         """Return a GEDCOM formatted line for the information and level.
 
@@ -168,62 +201,24 @@ class Tagger:
 
         """
 
-        if extra == '':
-            if payload == '':
-                return f'{level} {tag.value}\n'
-            return f'{level} {tag.value} {Tagger.clean_input(payload)}\n'
-        return f'{level} {tag.value} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}\n'
+        if extra == String.EMPTY:
+            if payload == String.EMPTY:
+                return f'{level} {tag.value}{String.NEWLINE}'
+            return f'{level} {tag.value} {Tagger.clean_input(payload)}{String.NEWLINE}'
+        return f'{level} {tag.value} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{String.NEWLINE}'
 
     @staticmethod
-    def list_to_str(
-        lines: str, level: int, items: list[Any], flag: str = ''
-    ) -> str:
-        """Append the GEDCOM lines from a list of NamedTuples to the GEDCOM file.
-
-        Example:
-            >>> from chronodata.constants import Tag
-            >>> from chronodata.store import Note, Tagger
-            >>> lines = ''
-            >>> note1 = Note(note='This is the first note')
-            >>> note2 = Note(note='This is the second note')
-            >>> notes = [
-            ...     note1,
-            ...     note2,
-            ... ]
-            >>> lines = Tagger.list_to_str(lines, 1, notes)
-            >>> print(lines)
-            1 NOTE This is the first note
-            2 LANG und
-            1 NOTE This is the second note
-            2 LANG und
-            <BLANKLINE>
-
-        Args:
-            lines: The already constructed GEDCOM file that will be appended to.
-            level: The GEDCOM level of the structure.
-            items: The list of NamedTuples to append to `lines`.
-            flag: An optional flag that will be passed to the `.ged` method of the
-                NamedTuple which will modify its processing.
-        """
-        if len(items) > 0:
-            for item in items:
-                if flag != '':
-                    lines = ''.join([lines, item.ged(level, flag)])
-                else:
-                    lines = ''.join([lines, item.ged(level)])
-        return lines
-
-    @staticmethod
-    def empty_to_str(lines: str, level: int, tag: Tag) -> str:
+    def empty(lines: str, level: int, tag: Tag) -> str:
         """Join a GEDCOM line that has only a level and a tag to a string.
 
-        This method hides the join operation.
+        This method hides the join operation and allows the `string` method
+        to return the lines if the payload is empty.
 
         Example:
             >>> from chronodata.store import Tagger
             >>> from chronodata.constants import Tag
             >>> lines = ''
-            >>> line = Tagger.empty_to_str(lines, 1, Tag.MAP)
+            >>> line = Tagger.empty(lines, 1, Tag.MAP)
             >>> print(line)
             1 MAP
             <BLANKLINE>
@@ -237,48 +232,46 @@ class Tagger:
         return ''.join([lines, Tagger.taginfo(level, tag)])
 
     @staticmethod
-    def str_to_str(
-        lines: str, level: int, tag: Tag, payload: str, extra: str = ''
+    def string(
+        lines: str,
+        level: int,
+        tag: Tag,
+        payload: list[str] | str,
+        extra: str = String.EMPTY,
     ) -> str:
-        """Join a GEDCOM line to a string.
+        """Join a string or a list of string to GEDCOM lines.
 
         This method hides the concatenation of the already constructed
         GEDCOM file with the new line and the check that this should only
-        be done if the payload is not empty.
+        be done if the payload is not empty.  It also hides checking
+        whether the string is part of a list or not.
 
-        Example:
-            >>> from chronodata.constants import Tag
+        Examples:
+            Suppose there is only one string that should be tagged.
             >>> from chronodata.store import Tagger
-            >>> lines = '1 MAP\\n'
-            >>> lines = Tagger.str_to_str(lines, 2, Tag.LATI, 'N30.0')
-            >>> lines = Tagger.str_to_str(lines, 2, Tag.LONG, 'W30.0')
+            >>> lines = ''
+            >>> lines = Tagger.empty(lines, 1, Tag.MAP)
+            >>> lines = Tagger.string(lines, 2, Tag.LATI, 'N30.0')
+            >>> lines = Tagger.string(lines, 2, Tag.LONG, 'W30.0')
             >>> print(lines)
             1 MAP
             2 LATI N30.0
             2 LONG W30.0
             <BLANKLINE>
 
-        Args:
-            lines: The prefix string that will be appended to.
-            level: The GEDCOM level of the structure.
-            tag: The tag to apply to this line.
-            info: The payload stored in this tagged line.
-            extra: Optional extra payload to be stored on the same line.
-        """
-        if payload != '':
-            return ''.join([lines, Tagger.taginfo(level, tag, payload, extra)])
-        return lines
-
-    @staticmethod
-    def strlist_to_str(
-        lines: str, level: int, tag: Tag, records: list[str]
-    ) -> str:
-        """Join a list of GEDCOM lines to a string.
-
-        This method hides the concatenation of the already constructed
-        GEDCOM file with the new line and the check that this should only
-        be done if the payload is not empty.
-
+            Suppose there are a list of strings that should be tagged.
+            >>> lines = ''
+            >>> wwws = [
+            ...     'https://here.com',
+            ...     'https://there.com',
+            ...     'https://everywhere.com',
+            ... ]
+            >>> lines = Tagger.string(lines, 3, Tag.WWW, wwws)
+            >>> print(lines)
+            3 WWW https://here.com
+            3 WWW https://there.com
+            3 WWW https://everywhere.com
+            <BLANKLINE>
 
         Args:
             lines: The prefix string that will be appended to.
@@ -286,35 +279,69 @@ class Tagger:
             tag: The tag to apply to this line.
             records: The list of strings to tag.
         """
-        for record in records:
-            lines = Tagger.str_to_str(lines, level, tag, record)
+
+        if isinstance(payload, list):
+            for item in payload:
+                lines = ''.join([lines, Tagger.taginfo(level, tag, item)])
+            return lines
+        if payload != String.EMPTY:
+            return ''.join([lines, Tagger.taginfo(level, tag, payload, extra)])
         return lines
 
     @staticmethod
-    def clean_input(input: str) -> str:
-        """Remove banned GEDCOM unicode characters from input strings.
+    def structure(
+        lines: str, level: int, payload: list[Any] | Any, flag: str = String.EMPTY
+    ) -> str:
+        """Join a structure or a list of structure to GEDCOM lines.
 
-        The control characters U+0000 - U+001F and the delete character U+007F
-        are listed in the
-        [C0 Controls and Basic Latin](https://www.unicode.org/charts/PDF/U0000.pdf)
-        chart.
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line.  It also hides checking
+        whether the string is part of a list or not.
 
-        The code points U+D800 - U+DFFF are not interpreted.
-        They are described in the
-        [High Surrogate Area](https://www.unicode.org/charts/PDF/UD800.pdf) and
-        [Low Surrogate Area](https://www.unicode.org/charts/PDF/UDC00.pdf)
-        standards.
+        Examples:
+            Suppose there is one structure to write to GEDCOM lines.
+            >>> from chronodata.store import Map, Tagger
+            >>> map1 = Map('N', 30.0, 'W', 30.0)
+            >>> map2 = Map('S', 40.0, 'E', 20.0)
+            >>> lines = ''
+            >>> lines = Tagger.structure(lines, 2, map1)
+            >>> print(lines)
+            2 MAP
+            3 LATI N30.0
+            3 LONG W30.0
+            <BLANKLINE>
 
-        The code points U+FFFE and U+FFFF are noncharacters as described in the
-        [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
+            Now include both defined maps into a list.
+            >>> lines = ''
+            >>> lines = Tagger.structure(lines, 4, [map1, map2])
+            >>> print(lines)
+            4 MAP
+            5 LATI N30.0
+            5 LONG W30.0
+            4 MAP
+            5 LATI S40.0
+            5 LONG E20.0
+            <BLANKLINE>
 
-        Reference:
-            - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
-            - [Unicode Specification](https://www.unicode.org/versions/Unicode16.0.0/#Summary)
-            - [Python re Module](https://docs.python.org/3/library/re.html)
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            payload: The structure or list of structures from which the lines will be formed.
+            flag: An optional item passed to the structure's ged method to modify its behavior.
         """
 
-        return re.sub(String.BANNED, '', input)
+        if isinstance(payload, list):
+            for item in payload:
+                if flag != String.EMPTY:
+                    lines = ''.join([lines, item.ged(level, flag)])
+                else:
+                    lines = ''.join([lines, item.ged(level)])
+            return lines
+        if flag != String.EMPTY:
+            lines = ''.join([lines, payload.ged(level, flag)])
+        else:
+            lines = ''.join([lines, payload.ged(level)])
+        return lines
 
 
 class Checker:
@@ -554,9 +581,9 @@ class Dater:
         """Return the current UTC date and time rather than an entered value.
 
         This will be returned as a list of two lines for a GEDCOM file.
-        This method will not likely be needed by the builder of a chronology
+        This method will not likely be needed by the builder of a genealogy
         unless the builder wants to enter the current date and time into
-        the chronology. The current date and time is automatically
+        the genealogy. The current date and time is automatically
         entered for each record as its creation date and time
         as well as its change date and time.
 
@@ -671,7 +698,6 @@ class Placer:
             precision,
         )
         return (degrees, minutes, seconds)
-
 
 
 class Formatter:
@@ -894,6 +920,327 @@ class Void:
     SUBM: SubmitterXref = SubmitterXref(NAME)
 
 
+class Date(NamedTuple):
+    """Validate and display date data in various formats.
+
+    Dates are entered based on a Gregorian calendar. This calendar
+    does not have a 0 year.  The year 1 BC is entered as `-1`.
+
+    A default value of `0` for any date component means that the component
+    will not be displayed.
+
+    The GEDCOM standard allows a week without specifying the other components.
+
+    Parameters:
+        year
+
+
+    Examples:
+
+    Reference:
+        [GEDCOM DATE](https://gedcom.io/terms/v7/DATE)
+        [GEDCOM DATE type](https://gedcom.io/terms/v7/type-Date)
+    """
+
+    year: int = 0
+    month: int = 0
+    day: int = 0
+    week: int = 0
+    calendar: str = Value.GREGORIAN
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.year, int)
+            and Checker.verify_type(self.month, int)
+            and Checker.verify_type(self.day, int)
+            and Checker.verify_type(self.week, int)
+            and Checker.verify_range(self.week, 0, 52)
+            and Checker.verify_range(self.month, 0, 12)
+            # and if self.year == 0:
+            #     raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
+        )
+        return check
+
+    def ged(self, level: int = 1, calendar: str = Value.GREGORIAN) -> str:
+        """Display the validated date in GEDCOM format.
+
+        Reference
+        ---------
+        - [GEDCOM Standard V 7.0](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+        """
+        lines: str = ''
+        if self.validate():
+            # day_str: str = (
+            #     str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
+            # )
+            month_str: str = (
+                str(self.month)
+                if self.month > 9
+                else ''.join(['0', str(self.month)])
+            )
+            year_str: str = str(self.year)
+            if self.year < 0:
+                year_str = ''.join(
+                    [str(-self.year), Cal.CALENDARS[calendar][Value.EPOCH]]
+                )
+            formatted_date: str = ''
+            if self.day != 0:
+                formatted_date = ''.join([formatted_date, f' {self.day!s}'])
+            if self.month != 0:
+                formatted_date = ''.join(
+                    [
+                        formatted_date,
+                        f' {Cal.CALENDARS[calendar][Value.MONTH_NAMES][str(month_str)]}',
+                    ]
+                )
+            if self.year != 0:
+                formatted_date = ''.join(
+                    [formatted_date, f' {year_str}\n']
+                ).strip()
+            lines = Tagger.string(lines, level, Tag.DATE, formatted_date)
+        return lines
+
+    def iso(self) -> str:
+        """Return the validated ISO format for the date.
+
+        References
+        ----------
+        - [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
+        - [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
+        """
+        if self.validate():
+            return f'{self.year}-{self.month}-{self.day}'
+        return ''
+
+    def code(self, level: int = 0, name: str = 'date') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = Date(
+    year = {self.year},
+    month = '{self.month}',
+    day = '{self.day}',
+    week = '{self.week}',
+    calendar = '{self.calendar}',
+)""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Date
+        gedcom_docs: str = ''
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Date(
+                    year=2024,
+                    month=10,
+                    day=10,
+                    week=0,
+                    calendar=Value.GREGORIAN,
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Date(
+                    year=2024,
+                    month=10,
+                    day=10,
+                    week=0,
+                    calendar=Value.GREGORIAN,
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Date(
+                    year=2024,
+                    month=10,
+                    day=10,
+                    week=0,
+                    calendar=Value.GREGORIAN,
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Date()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
+
+
+class Time(NamedTuple):
+    """Validate and display time data in various formats.
+
+    The standard does not permit leap seconds nor end of day instant (24:00:00).
+
+    Reference
+    ---------
+    - [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
+    """
+
+    hour: int = 0
+    minute: int = 0
+    second: int | float = 0.0
+    UTC: bool = False
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.hour, int)
+            and Checker.verify_type(self.minute, int)
+            and Checker.verify_type(self.second, int | float)
+            and Checker.verify_type(self.UTC, bool)
+            and Checker.verify_range(self.hour, 0, 23)
+            and Checker.verify_range(self.minute, 0, 59)
+            and Checker.verify_range(self.second, 0, 59.999999999999)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        hour_str: str = str(self.hour)
+        minute_str: str = str(self.minute)
+        second_str: str = str(self.second)
+        if self.validate():
+            if 0 <= self.hour < 10:
+                hour_str = ''.join(['0', hour_str])
+            if 0 <= self.minute < 10:
+                minute_str = ''.join(['0', minute_str])
+            if 0 <= self.second < 10:
+                second_str = ''.join(['0', second_str])
+            if self.UTC:
+                second_str = ''.join([second_str, 'Z'])
+            return Tagger.taginfo(
+                level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
+            )
+        return ''
+
+    def iso(self) -> str:
+        """Return the validated ISO format for the time.
+
+        References:
+            [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
+            [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
+        """
+        if self.validate():
+            return f'{self.hour}:{self.minute}:{self.second}'
+        return ''
+
+
+class DateExact(NamedTuple):
+    """Construct a DATEVALUE structure according to the GEDCOM standard.
+
+    Example
+    -------
+
+
+    Reference
+    ---------
+
+    >n DATE <DateValue>                         {1:1}  g7:DATE
+    >  +1 TIME <Time>                           {0:1}  g7:TIME
+    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
+    """
+
+    date: Date = Date(0, 0, 0)
+    time: Time = Time(0, 0, 0)
+    phrase: str = ''
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.phrase, str)
+            and self.date.validate()
+            and self.time.validate()
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = self.date.ged(level)
+        if self.validate():
+            if self.time != Time(0, 0, 0):
+                lines = ''.join([lines, self.time.ged(level + 1)])
+            if self.phrase != '':
+                lines = ''.join(
+                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                )
+        return lines
+
+
+class DateValue(NamedTuple):
+    """Construct a DATEVALUE structure according to the GEDCOM standard.
+
+    Example
+    -------
+
+
+    Reference
+    ---------
+
+    >n DATE <DateValue>                         {1:1}  g7:DATE
+    >  +1 TIME <Time>                           {0:1}  g7:TIME
+    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
+    """
+
+    date: Date = Date(0, 0, 0)
+    time: Time = Time(0, 0, 0)
+    phrase: str = ''
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.phrase, str)
+            and self.date.validate()
+            and self.time.validate()
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            lines = self.date.ged(level)
+            if self.time != Time(0, 0, 0):
+                lines = ''.join([lines, self.time.ged(level + 1)])
+            if self.phrase != '':
+                lines = ''.join(
+                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
+                )
+        return lines
+
+
 class Address(NamedTuple):
     """Store, validate and format address information to be saved to a ged file.
 
@@ -974,11 +1321,11 @@ class Address(NamedTuple):
             if len(self.address) > 0:
                 lines = Tagger.taginfo(level, Tag.ADDR, self.address[0])
                 for line in self.address[1:]:
-                    lines = Tagger.str_to_str(lines, level, Tag.CONT, line)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.CITY, self.city)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.STAE, self.state)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.POST, self.postal)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.CTRY, self.country)
+                    lines = Tagger.string(lines, level, Tag.CONT, line)
+            lines = Tagger.string(lines, level + 1, Tag.CITY, self.city)
+            lines = Tagger.string(lines, level + 1, Tag.STAE, self.state)
+            lines = Tagger.string(lines, level + 1, Tag.POST, self.postal)
+            lines = Tagger.string(lines, level + 1, Tag.CTRY, self.country)
         return lines
 
     def code(self, level: int = 0) -> str:
@@ -1261,7 +1608,9 @@ class PersonalNamePieces(NamedTuple):
 
     Example:
         This example includes all six of the Personal Name Piece tags.
-        >>> from chronodata.store import PersonalNamePieces  # doctest: +ELLIPSIS
+        >>> from chronodata.store import (
+        ...     PersonalNamePieces,
+        ... )  # doctest: +ELLIPSIS
         >>> from chronodata.constants import Tag
 
     Args:
@@ -1309,14 +1658,12 @@ class PersonalNamePieces(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.strlist_to_str(lines, level, Tag.NPFX, self.prefix)
-            lines = Tagger.strlist_to_str(lines, level, Tag.GIVN, self.given)
-            lines = Tagger.strlist_to_str(lines, level, Tag.NICK, self.nickname)
-            lines = Tagger.strlist_to_str(
-                lines, level, Tag.SPFX, self.surname_prefix
-            )
-            lines = Tagger.strlist_to_str(lines, level, Tag.SURN, self.surname)
-            lines = Tagger.strlist_to_str(lines, level, Tag.NSFX, self.suffix)
+            lines = Tagger.string(lines, level, Tag.NPFX, self.prefix)
+            lines = Tagger.string(lines, level, Tag.GIVN, self.given)
+            lines = Tagger.string(lines, level, Tag.NICK, self.nickname)
+            lines = Tagger.string(lines, level, Tag.SPFX, self.surname_prefix)
+            lines = Tagger.string(lines, level, Tag.SURN, self.surname)
+            lines = Tagger.string(lines, level, Tag.NSFX, self.suffix)
         return lines
 
     def code(self, level: int = 0, name: str = 'pieces') -> str:
@@ -1444,6 +1791,11 @@ class NameTranslation(NamedTuple):
 
     Reference:
         [GEDCOM Pesonal Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
+
+    This is not a specified GEDCOM structure, but implements this portion of `PersonalNamePieces`.
+    > +1 TRAN <PersonalName>                   {0:M}  g7:NAME-TRAN
+    >    +2 LANG <Language>                    {1:1}  g7:LANG
+    >    +2 <<PERSONAL_NAME_PIECES>>           {0:1}
     """
 
     translation: str = String.EMPTY
@@ -1454,7 +1806,7 @@ class NameTranslation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
-            and Checker.verify_not_default(self.translation, '')
+            and Checker.verify_type(self.language, str)
             and Checker.verify_type(self.pieces, PersonalNamePieces)
         )
         return check
@@ -1463,10 +1815,9 @@ class NameTranslation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.TRAN, self.translation)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.LANG, self.language)
-            if self.pieces is not None:
-                lines = ''.join([lines, self.pieces.ged(level + 1)])
+            lines = Tagger.string(lines, level, Tag.TRAN, self.translation)
+            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+            lines = ''.join([lines, self.pieces.ged(level + 1)])
         return lines
 
     def code(self, level: int = 0, name: str = 'translation') -> str:
@@ -1475,9 +1826,84 @@ class NameTranslation(NamedTuple):
             f"""{name} = NameTranslation(
     translation = '{self.translation}',
     language = '{self.language}',
-{self.pieces.code(level+1, name='pieces')},
+{self.pieces.code(level + 1, name='pieces')},
 )""",
             spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: NameTranslation
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = NameTranslation(
+                    translation="תומס ג'ונס",
+                    language='he',
+                    pieces=PersonalNamePieces(
+                        given=["ג'ונס"],
+                        surname=['תומס'],
+                    ),
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = NameTranslation(
+                    translation='توماس جونز',
+                    language='ar',
+                    pieces=PersonalNamePieces(
+                        given=['توماس '],
+                        surname=['جونز'],
+                    ),
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = NameTranslation(
+                    translation='Τόμας Τζόουνς',
+                    language='el',
+                    pieces=PersonalNamePieces(
+                        given=['Τόμας'],
+                        surname=['Τζόουνς'],
+                    ),
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = NameTranslation()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
         )
 
 
@@ -1515,15 +1941,19 @@ class NoteTranslation(NamedTuple):
     Returns:
         A GEDCOM string storing this data.
 
+    See Also:
+        `Note`
+
     Reference:
-        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)]
 
-
+    This is not a specific GEDCOM structure but implements this part of `Note`
+    > +1 TRAN <Text>                           {0:M}  g7:NOTE-TRAN
+    >    +2 MIME <MediaType>                   {0:1}  g7:MIME
+    >    +2 LANG <Language>                    {0:1}  g7:LANG
     """
 
-    translation: str = ''
+    translation: str = String.EMPTY
     mime: MediaType = MediaType.NONE
     language: str = String.UNDETERMINED
 
@@ -1531,24 +1961,96 @@ class NoteTranslation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
-            and Checker.verify_not_default(self.translation, '')
             and Checker.verify_enum(self.mime.value, MediaType)
+            and Checker.verify_type(self.language, str)
         )
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            lines = ''.join(
-                [
-                    lines,
-                    Tagger.taginfo(level, Tag.TRAN, self.translation),
-                    Tagger.taginfo(level + 1, Tag.MIME, self.mime.value),
-                    Tagger.taginfo(level + 1, Tag.LANG, self.language),
-                ]
-            )
+        if self.translation != String.EMPTY and self.validate():
+            lines = Tagger.string(lines, level, Tag.TRAN, self.translation)
+            lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime.value)
+            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
         return lines
+
+    def code(self, level: int = 0, name: str = 'translation') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = NoteTranslation(
+    translation = '{self.translation}',
+    mime = '{self.mime}',
+    language = '{self.language}',
+)""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: NoteTranslation
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = NoteTranslation(
+                    translation='<p>To jest prosta notatka.</p>',
+                    mime=MediaType.TEXT_HTML,
+                    language='pl',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = NoteTranslation(
+                    translation='Þetta er einföld athugasemd.',
+                    mime=MediaType.TEXT_PLAIN,
+                    language='is',
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = NoteTranslation(
+                    translation='यह एक साधारण नोट है.',
+                    mime=MediaType.TEXT_PLAIN,
+                    language='hi',
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = NoteTranslation()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class CallNumber(NamedTuple):
@@ -1567,8 +2069,8 @@ class CallNumber(NamedTuple):
         <BLANKLINE>
 
         This next example uses all of the optional positions.
-        >>> from chronodata.constants import Media
-        >>> cn_all = CallNumber('1111', Media.BOOK, 'New Testament')
+        >>> from chronodata.constants import Medium
+        >>> cn_all = CallNumber('1111', Medium.BOOK, 'New Testament')
         >>> print(cn_all.ged(1))
         1 CALN 1111
         2 MEDI BOOK
@@ -1584,18 +2086,24 @@ class CallNumber(NamedTuple):
     See Also:
         `SourceRepositoryCitation`: the superstructure of this NamedTuple.
 
+    Reference:
+        [GEDCOM Medium Enumeration Set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
+        [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
+
+    >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
+    >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
-    call_number: str = ''
-    media: Media = Media.NONE
-    phrase: str = ''
+    call_number: str = String.EMPTY
+    medium: Medium = Medium.NONE
+    phrase: str = String.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.call_number, str)
-            and Checker.verify_not_default(self.call_number, '')
-            and Checker.verify_enum(self.media.value, Media)
+            and Checker.verify_enum(self.medium.value, Medium)
             and Checker.verify_type(self.phrase, str)
         )
         return check
@@ -1603,87 +2111,95 @@ class CallNumber(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            lines = Tagger.taginfo(level, Tag.CALN, self.call_number)
-            if self.media != Media.NONE:
-                lines = ''.join(
-                    [
-                        lines,
-                        Tagger.taginfo(level + 1, Tag.MEDI, self.media.value),
-                    ]
-                )
-            if self.phrase != '':
-                lines = ''.join(
-                    [
-                        lines,
-                        Tagger.taginfo(level + 2, Tag.PHRASE, self.phrase),
-                    ]
-                )
+        if self.call_number != String.EMPTY and self.validate():
+            lines = Tagger.string(lines, level, Tag.CALN, self.call_number)
+            lines = Tagger.string(lines, level + 1, Tag.MEDI, self.medium.value)
+            lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
         return lines
 
-
-class SourceRepositoryCitation(NamedTuple):
-    """Store, validate and display the optional Source Repository Citation
-     substructure of the GEDCOM standard.
-
-    Examples:
-
-    Args:
-        repo: the reference identifier for the repository.
-        notes: a tuple of Notes.
-        call_numbers: a tuple of call numbers.
-
-    Returns:
-        A GEDCOM string storing this data.
-
-    Reference:
-        [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
-
-    > n REPO @<XREF:REPO>@                       {1:1}  [g7:REPO](https://gedcom.io/terms/v7/REPO)
-    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
-    >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
-    >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
-    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    """
-
-    repo: RepositoryXref
-    notes: list[Any] = []  # noqa: RUF012
-    call_numbers: Any = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.repo, RepositoryXref)
-            and Checker.verify_not_default(self.repo, Void.REPO)
-            and Checker.verify_tuple_type(self.notes, Note)
-            and Checker.verify_type(self.call_numbers, CallNumber)
+    def code(self, level: int = 0, name: str = 'call_number') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = CallNumber(
+    call_number = '{self.call_number}',
+    medium = '{self.medium}',
+    phrase = '{self.phrase}',
+)""",
+            spaces,
         )
-        return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            lines = Tagger.taginfo(level, Tag.SOUR, str(self.repo))
-            lines = Tagger.list_to_str(lines, level, self.notes)
-            lines = Tagger.list_to_str(lines, level, self.call_numbers)
-            # if self.notes is not None:
-            #     for note in self.notes:
-            #         lines = ''.join([lines, note.ged(level + 1)])
-            # if self.call_numbers is not None:
-            #     for call_number in self.call_numbers:
-            #         lines = ''.join([lines, call_number.ged(level + 1)])
-        return lines
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: CallNumber
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = CallNumber(
+                    call_number='1-234-333 ABC',
+                    medium=Medium.BOOK,
+                    phrase='A special call number',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = CallNumber(
+                    call_number='1-234-333 ABC',
+                    medium=Medium.MAGAZINE,
+                    phrase='A special article.',
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = CallNumber(
+                    call_number='1-234-333 ABC',
+                    medium=Medium.NONE,
+                    phrase='',
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = CallNumber()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class Text(NamedTuple):
-    """_summary_
+    """Store, validate and display a text in the GEDCOM standard.
 
-    The BCP 47 language tag is a hyphenated list of subtags.
-    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use.
-    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
-    can assist with finding and checking the language tag one would like to use.
+    A Source Citation structure can have multiple texts associated with it.  This NamedTuple describes
+    a specific text.
 
     Examples:
 
@@ -1695,14 +2211,118 @@ class Text(NamedTuple):
     Returns:
         A GEDCOM string storing this data.
 
+    See Also:
+        `SourceData`
+        `SourceCitation`
+
     Reference:
-        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+        GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
+
+    This is part of the GEDCOM Source Citation structure.
+    >      +2 TEXT <Text>                        {0:M}  g7:TEXT
+    >         +3 MIME <MediaType>                {0:1}  g7:MIME
+    >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
 
-    text: str = ''
+    text: str = String.EMPTY
     mime: MediaType = MediaType.NONE
     language: str = String.UNDETERMINED
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.text, str)
+            and Checker.verify_enum(self.mime.value, MediaType)
+            and Checker.verify_type(self.language, str)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.text != String.EMPTY and self.validate():
+            lines = Tagger.string(lines, level, Tag.TEXT, str(self.text))
+            lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime.value)
+            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+        return lines
+
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+Text(
+    text = '{self.text}',
+    mime = {self.mime},
+    language = '{self.language}',
+),""",
+            spaces,
+        )  # .replace('\n', '', 1)
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Text
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Text(
+                    text='This is a text.',
+                    mime=MediaType.TEXT_PLAIN,
+                    language='en',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Text(
+                    text='ई एकटा पाठ अछि।',
+                    mime=MediaType.TEXT_PLAIN,
+                    language='mai',
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Text(
+                    text='ይህ ጽሑፍ ነው።',
+                    mime=MediaType.TEXT_PLAIN,
+                    language='am',
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Text()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class SourceData(NamedTuple):
@@ -1719,11 +2339,123 @@ class SourceData(NamedTuple):
         A GEDCOM string storing this data.
 
     Reference:
-        []()
+        [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
+
+    This is not a GEDCOM structure, but part of the Source Citation structure.
+    >   +1 DATA                                  {0:1}  g7:SOUR-DATA
+    >      +2 <<DATE_VALUE>>                     {0:1}
+    >      +2 TEXT <Text>                        {0:M}  g7:TEXT
+    >         +3 MIME <MediaType>                {0:1}  g7:MIME
+    >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
 
-    date_value: str = ''
-    texts: Any = None
+    date_value: str = String.EMPTY
+    texts: list[Text] = [Text(), Text()]  # noqa: RUF012
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = Checker.verify_type(
+            self.date_value, str
+        ) and Checker.verify_tuple_type(self.texts, Text)
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.date_value != String.EMPTY and self.validate():
+            lines = Tagger.string(lines, level, Tag.DATE, str(self.date_value))
+            lines = Tagger.structure(lines, level + 1, self.texts)
+        return lines
+
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        text_strings: list[str] = [text.code(2) for text in self.texts]
+        return indent(
+            f"""SourceData(
+    date_value = '{self.date_value}',
+    texts = [{''.join(text_strings)}
+    ],
+),""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: SourceData
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = SourceData(
+                    date_value='This is a text.',
+                    texts=[
+                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text(
+                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                        ),
+                    ],
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = SourceData(
+                    date_value='This is a text.',
+                    texts=[
+                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text(
+                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                        ),
+                    ],
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = SourceData(
+                    date_value='This is a text.',
+                    texts=[
+                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text(
+                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                        ),
+                    ],
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = SourceData()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class SourceCitation(NamedTuple):
@@ -1742,18 +2474,33 @@ class SourceCitation(NamedTuple):
 
     Reference:
         [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
+
+    > n SOUR @<XREF:SOUR>@                       {1:1}  g7:SOUR
+    >   +1 PAGE <Text>                           {0:1}  g7:PAGE
+    >   +1 DATA                                  {0:1}  g7:SOUR-DATA
+    >      +2 <<DATE_VALUE>>                     {0:1}
+    >      +2 TEXT <Text>                        {0:M}  g7:TEXT
+    >         +3 MIME <MediaType>                {0:1}  g7:MIME
+    >         +3 LANG <Language>                 {0:1}  g7:LANG
+    >   +1 EVEN <Enum>                           {0:1}  g7:SOUR-EVEN
+    >      +2 PHRASE <Text>                      {0:1}  g7:PHRASE
+    >      +2 ROLE <Enum>                        {0:1}  g7:ROLE
+    >         +3 PHRASE <Text>                   {0:1}  g7:PHRASE
+    >   +1 QUAY <Enum>                           {0:1}  g7:QUAY
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
 
     xref: SourceXref = Void.SOUR
-    page: str = ''
-    texts: Any = None
+    page: str = String.EMPTY
+    source_data: SourceData = SourceData()
     event: Event = Event.NONE
-    phrase: str = ''
+    phrase: str = String.EMPTY
     role: Role = Role.NONE
-    role_phrase: str = ''
+    role_phrase: str = String.EMPTY
     quality: Quay = Quay.NONE
-    multimedia: Any = None
-    notes: Any = None
+    multimedialinks: list[Any] = []  # noqa: RUF012
+    notes: list[Any] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1761,13 +2508,13 @@ class SourceCitation(NamedTuple):
             Checker.verify_not_default(str(self.xref), Void.SOUR)
             and Checker.verify_type(self.xref, SourceXref)
             and Checker.verify_type(self.page, str)
-            and Checker.verify_tuple_type(self.texts, Text)
+            and Checker.verify_type(self.source_data, SourceData)
             and Checker.verify_enum(self.event.value, Event)
             and Checker.verify_type(self.phrase, str)
             and Checker.verify_enum(self.role.value, Role)
             and Checker.verify_type(self.role_phrase, str)
             and Checker.verify_enum(self.quality.value, Quay)
-            and Checker.verify_tuple_type(self.multimedia, MultimediaLink)
+            and Checker.verify_tuple_type(self.multimedialinks, MultimediaLink)
             and Checker.verify_tuple_type(self.notes, Note)
         )
         return check
@@ -1775,12 +2522,107 @@ class SourceCitation(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            lines = Tagger.taginfo(level, Tag.SOUR, str(self.xref))
-            if self.page != '':
-                lines = Tagger.taginfo(level + 1, Tag.PAGE, self.page)
-
+        if self.xref.fullname != Void.SOUR.fullname and self.validate():
+            lines = Tagger.string(lines, level, Tag.SOUR, str(self.xref))
+            lines = Tagger.string(lines, level + 1, Tag.PAGE, self.page)
+            if self.source_data != SourceData():
+                lines = ''.join([lines, self.source_data.ged(level + 1)])
+            if self.event.value != Event.NONE.value:
+                lines = Tagger.string(
+                    lines, level + 1, Tag.EVEN, self.event.value
+                )
+                lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
+                lines = Tagger.string(
+                    lines, level + 2, Tag.ROLE, self.role.value
+                )
+                lines = Tagger.string(
+                    lines, level + 3, Tag.PHRASE, self.role_phrase
+                )
+            lines = Tagger.string(
+                lines, level + 1, Tag.QUAY, self.quality.value
+            )
+            lines = Tagger.structure(lines, level + 1, self.multimedialinks)
+            lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
+
+    def code(self, level: int = 0, name: str = 'source_citation') -> str:
+        spaces: str = String.INDENT * level
+        # text_strings: list[str] = [text.code(2) for text in self.texts]
+        return indent(
+            f"""{name} = SourceCitation(
+    xref = '{self.xref}',
+    page = '{self.page}',
+    source_data = {self.source_data},
+    event = {self.event},
+    phrase = {self.phrase},
+    role = {self.role},
+    role_phrase = {self.role_phrase},
+    quality = {self.quality},
+    multimedialinks = {self.multimedialinks},
+    notes = {self.notes},
+),""",
+            spaces,
+        )
+
+    def example(self, choice: int = 0) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: SourceCitation
+        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
+        chronodata_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = SourceCitation(
+                    xref=Void.SOUR,
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = SourceCitation(
+                    xref=Void.SOUR,
+                )
+                code_preface = Example.ALTERNATE
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = SourceCitation(
+                    xref=Void.SOUR,
+                )
+                code_preface = Example.LANGUAGE
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = SourceCitation()
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.NEWLINE,
+                gedcom_docs,
+                String.NEWLINE,
+                chronodata_docs,
+            ]
+        )
 
 
 class Note(NamedTuple):
@@ -1820,10 +2662,10 @@ class Note(NamedTuple):
         >>> hebrew_note_with_translations = Note(
         ...     note='זו ההערה שלי.',
         ...     language='he',
-        ...     translations=(
+        ...     translations=[
         ...         english_translation,
         ...         urdu_translation,
-        ...     ),
+        ...     ],
         ... )
         >>> print(hebrew_note_with_translations.ged(1))
         1 NOTE זו ההערה שלי.
@@ -1887,21 +2729,66 @@ class Note(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.snote is not None:
-                lines = Tagger.str_to_str(
+                lines = Tagger.string(
                     lines, level, Tag.SNOTE, self.snote.fullname
                 )
             else:
-                lines = Tagger.str_to_str(lines, level, Tag.NOTE, self.note)
-                lines = Tagger.str_to_str(
+                lines = Tagger.string(lines, level, Tag.NOTE, self.note)
+                lines = Tagger.string(
                     lines, level + 1, Tag.MIME, self.mime.value
                 )
-                lines = Tagger.str_to_str(
-                    lines, level + 1, Tag.LANG, self.language
-                )
-                lines = Tagger.list_to_str(lines, level + 1, self.translations)
-                lines = Tagger.list_to_str(
+                lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+                lines = Tagger.structure(lines, level + 1, self.translations)
+                lines = Tagger.structure(
                     lines, level + 1, self.source_citations
                 )
+        return lines
+
+
+class SourceRepositoryCitation(NamedTuple):
+    """Store, validate and display the optional Source Repository Citation
+     substructure of the GEDCOM standard.
+
+    Examples:
+
+    Args:
+        repo: the reference identifier for the repository.
+        notes: a tuple of Notes.
+        call_numbers: a tuple of call numbers.
+
+    Returns:
+        A GEDCOM string storing this data.
+
+    Reference:
+        [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
+
+    > n REPO @<XREF:REPO>@                       {1:1}  [g7:REPO](https://gedcom.io/terms/v7/REPO)
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
+    >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
+    >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    """
+
+    repo: RepositoryXref = Void.REPO
+    notes: list[Note] = []  # noqa: RUF012
+    call_numbers: list[CallNumber] = []  # noqa: RUF012
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.repo, RepositoryXref)
+            and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_tuple_type(self.call_numbers, CallNumber)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.repo.fullname != Void.NAME and self.validate():
+            lines = Tagger.taginfo(level, Tag.SOUR, str(self.repo))
+            lines = Tagger.structure(lines, level, self.notes)
+            lines = Tagger.structure(lines, level, self.call_numbers)
         return lines
 
 
@@ -1991,7 +2878,7 @@ class PersonalName(NamedTuple):
     surname: str = String.EMPTY
     type: Tag = Tag.NONE
     phrase: str = String.EMPTY
-    pieces: PersonalNamePieces | None = None
+    pieces: PersonalNamePieces = PersonalNamePieces()
     translations: list[NameTranslation] = []  # noqa: RUF012
     notes: list[Note] = []  # noqa: RUF012
     source_citations: list[SourceCitation] = []  # noqa: RUF012
@@ -2015,29 +2902,13 @@ class PersonalName(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.NAME, self.name)
-            lines = Tagger.str_to_str(
-                lines, level + 1, Tag.TYPE, self.type.value
-            )
-            # lines = ''.join(
-            #     [
-            #         Tagger.taginfo(level, Tag.NAME, self.name),
-            #         Tagger.taginfo(level + 1, Tag.TYPE, self.type.value),
-            #     ]
-            # )
+            lines = Tagger.string(lines, level, Tag.NAME, self.name)
+            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
             if self.pieces is not None:
                 lines = ''.join([lines, self.pieces.ged(level + 1)])
-            # if self.translations is not None:
-            #     for translation in self.translations:
-            lines = Tagger.list_to_str(lines, level + 1, self.translations)
-            lines = Tagger.list_to_str(lines, level + 1, self.notes)
-            lines = Tagger.list_to_str(lines, level + 1, self.source_citations)
-            # if self.notes is not None:
-            #     for note in self.notes:
-            #         lines = ''.join([lines, note.ged(level + 1)])
-            # if self.source_citations is not None:
-            #     for source in self.source_citations:
-            #         lines = ''.join([lines, source.ged(level + 1)])
+            lines = Tagger.structure(lines, level + 1, self.translations)
+            lines = Tagger.structure(lines, level + 1, self.notes)
+            lines = Tagger.structure(lines, level + 1, self.source_citations)
         return lines
 
 
@@ -2071,26 +2942,23 @@ class Association(NamedTuple):
         >>> from chronodata.constants import Role
         >>> from chronodata.store import Association, Individual
 
-        Next, create a chronology and the two individuals references.
+        Next, create a genealogy and the two individuals references.
         There is no need to create an individual reference for Mr Stockdale
         so we leave his pointer as `@VOID@`.
-        >>> chron = Genealogy('test')
-        >>> individual = chron.individual_xref('I', initial=True)
-        >>> clergy = chron.individual_xref('I', initial=True)
-
-        Next, create two associations, one for the individual and one for a baptism
-        event.
-        >>> individual_association = Association(
-        ...     phrase='Mr Stockdale',
-        ...     role=Role.OTHER,
-        ...     role_phrase='Teacher',
-        ... )
-        >>> event_association = Association(xref=clergy, role=Role.CLERGY)
+        >>> gen = Genealogy('test')
+        >>> individual = gen.individual_xref('I', initial=True)
+        >>> clergy = gen.individual_xref('I', initial=True)
 
         Finally construct the individual record and display it.
         >>> indi = Individual(
         ...     xref=individual,
-        ...     associations=[individual_association],
+        ...     associations=[
+        ...         Association(
+        ...             phrase='Mr Stockdale',
+        ...             role=Role.OTHER,
+        ...             role_phrase='Teacher',
+        ...         ),
+        ...     ],
         ...     events=[
         ...         IndividualEvent(
         ...             tag=Tag.BAPM,
@@ -2100,7 +2968,9 @@ class Association(NamedTuple):
         ...                     date_value=DateValue(
         ...                         Date(year=1930),
         ...                     ),
-        ...                     associations=[event_association],
+        ...                     associations=[
+        ...                         Association(xref=clergy, role=Role.CLERGY),
+        ...                     ],
         ...                 )
         ...             ),
         ...         )
@@ -2156,20 +3026,15 @@ class Association(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.validate():
-            # if self.xref == '':
-            #     lines = Tagger.str_to_str(lines, level, Tag.ASSO, Void.NAME)
-            # else:
-            lines = Tagger.str_to_str(lines, level, Tag.ASSO, str(self.xref))
-            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
-            lines = Tagger.str_to_str(
-                lines, level + 1, Tag.ROLE, self.role.value
-            )
-            lines = Tagger.str_to_str(
+        if self.xref.fullname != Void.INDI.fullname and self.validate():
+            lines = Tagger.string(lines, level, Tag.ASSO, str(self.xref))
+            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.string(lines, level + 1, Tag.ROLE, self.role.value)
+            lines = Tagger.string(
                 lines, level + 2, Tag.PHRASE, self.role_phrase
             )
-            lines = Tagger.list_to_str(lines, level + 1, self.notes)
-            lines = Tagger.list_to_str(lines, level + 1, self.citations)
+            lines = Tagger.structure(lines, level + 1, self.notes)
+            lines = Tagger.structure(lines, level + 1, self.citations)
         return lines
 
 
@@ -2357,17 +3222,17 @@ class PlaceName(NamedTuple):
             )
             match style:
                 case String.PLACE_FULL:
-                    lines = Tagger.str_to_str(lines, level, Tag.PLAC, place)
-                    lines = Tagger.str_to_str(lines, level + 1, Tag.FORM, form)
-                    lines = Tagger.str_to_str(
+                    lines = Tagger.string(lines, level, Tag.PLAC, place)
+                    lines = Tagger.string(lines, level + 1, Tag.FORM, form)
+                    lines = Tagger.string(
                         lines, level + 1, Tag.LANG, self.language
                     )
                 case String.PLACE_SHORT:
-                    lines = Tagger.str_to_str(lines, level, Tag.PLAC, place)
-                    lines = Tagger.str_to_str(lines, level + 1, Tag.FORM, form)
+                    lines = Tagger.string(lines, level, Tag.PLAC, place)
+                    lines = Tagger.string(lines, level + 1, Tag.FORM, form)
                 case String.PLACE_TRANSLATION:
-                    lines = Tagger.str_to_str(lines, level, Tag.TRAN, place)
-                    lines = Tagger.str_to_str(
+                    lines = Tagger.string(lines, level, Tag.TRAN, place)
+                    lines = Tagger.string(
                         lines, level + 1, Tag.LANG, self.language
                     )
         return lines
@@ -2414,9 +3279,9 @@ class Map(NamedTuple):
         latitude: str = ''.join([self.north_south, str(self.latitude)])
         longitude: str = ''.join([self.east_west, str(self.longitude)])
         if self.validate():
-            lines = Tagger.empty_to_str(lines, level, Tag.MAP)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.LATI, latitude)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.LONG, longitude)
+            lines = Tagger.empty(lines, level, Tag.MAP)
+            lines = Tagger.string(lines, level + 1, Tag.LATI, latitude)
+            lines = Tagger.string(lines, level + 1, Tag.LONG, longitude)
         return lines
 
 
@@ -2500,8 +3365,6 @@ class Place(NamedTuple):
 
 
     Reference:
-        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
         [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
 
@@ -2541,251 +3404,15 @@ class Place(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = ''.join([lines, self.place.ged(level)])
-            lines = Tagger.list_to_str(
+            lines = Tagger.structure(
                 lines,
                 level + 1,
                 self.translations,
                 flag=String.PLACE_TRANSLATION,
             )
             lines = ''.join([lines, self.map.ged(level + 1)])
-            lines = Tagger.list_to_str(lines, level + 1, self.exids)
-            lines = Tagger.list_to_str(lines, level + 1, self.notes)
-        return lines
-
-
-class Date(NamedTuple):
-    """Validate and display date data in various formats.
-
-    Dates are entered based on a Gregorian calendar. This calendar
-    does not have a 0 year.  The year 1 BC is entered as `-1`.
-
-    A default value of `0` for any date component means that the component
-    will not be displayed.
-
-    The GEDCOM standard allows a week without specifying the other components.
-
-    Parameters:
-        year
-
-
-    Examples:
-
-    Reference:
-        [GEDCOM DATE](https://gedcom.io/terms/v7/DATE)
-        [GEDCOM DATE type](https://gedcom.io/terms/v7/type-Date)
-    """
-
-    year: int = 0
-    month: int = 0
-    day: int = 0
-    week: int = 0
-    calendar: str = Value.GREGORIAN
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.year, int)
-            and Checker.verify_type(self.month, int)
-            and Checker.verify_type(self.day, int)
-            and Checker.verify_type(self.week, int)
-            and Checker.verify_range(self.week, 0, 52)
-            and Checker.verify_range(self.month, 0, 12)
-            # and if self.year == 0:
-            #     raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
-        )
-        return check
-
-    def ged(self, level: int = 1, calendar: str = Value.GREGORIAN) -> str:
-        """Display the validated date in GEDCOM format.
-
-        Reference
-        ---------
-        - [GEDCOM Standard V 7.0](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
-        """
-        lines: str = ''
-        if self.validate():
-            # day_str: str = (
-            #     str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
-            # )
-            month_str: str = (
-                str(self.month)
-                if self.month > 9
-                else ''.join(['0', str(self.month)])
-            )
-            year_str: str = str(self.year)
-            if self.year < 0:
-                year_str = ''.join(
-                    [str(-self.year), Cal.CALENDARS[calendar][Value.EPOCH]]
-                )
-            formatted_date: str = ''
-            if self.day != 0:
-                formatted_date = ''.join([formatted_date, f' {self.day!s}'])
-            if self.month != 0:
-                formatted_date = ''.join(
-                    [
-                        formatted_date,
-                        f' {Cal.CALENDARS[calendar][Value.MONTH_NAMES][str(month_str)]}',
-                    ]
-                )
-            if self.year != 0:
-                formatted_date = ''.join(
-                    [formatted_date, f' {year_str}\n']
-                ).strip()
-            lines = Tagger.str_to_str(lines, level, Tag.DATE, formatted_date)
-        return lines
-
-    def iso(self) -> str:
-        """Return the validated ISO format for the date.
-
-        References
-        ----------
-        - [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
-        - [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
-        """
-        if self.validate():
-            return f'{self.year}-{self.month}-{self.day}'
-        return ''
-
-
-class Time(NamedTuple):
-    """Validate and display time data in various formats.
-
-    The standard does not permit leap seconds nor end of day instant (24:00:00).
-
-    Reference
-    ---------
-    - [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
-    """
-
-    hour: int = 0
-    minute: int = 0
-    second: int | float = 0.0
-    UTC: bool = False
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.hour, int)
-            and Checker.verify_type(self.minute, int)
-            and Checker.verify_type(self.second, int | float)
-            and Checker.verify_type(self.UTC, bool)
-            and Checker.verify_range(self.hour, 0, 23)
-            and Checker.verify_range(self.minute, 0, 59)
-            and Checker.verify_range(self.second, 0, 59.999999999999)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        hour_str: str = str(self.hour)
-        minute_str: str = str(self.minute)
-        second_str: str = str(self.second)
-        if self.validate():
-            if 0 <= self.hour < 10:
-                hour_str = ''.join(['0', hour_str])
-            if 0 <= self.minute < 10:
-                minute_str = ''.join(['0', minute_str])
-            if 0 <= self.second < 10:
-                second_str = ''.join(['0', second_str])
-            if self.UTC:
-                second_str = ''.join([second_str, 'Z'])
-            return Tagger.taginfo(
-                level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
-            )
-        return ''
-
-    def iso(self) -> str:
-        """Return the validated ISO format for the time.
-
-        References:
-            [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
-            [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
-        """
-        if self.validate():
-            return f'{self.hour}:{self.minute}:{self.second}'
-        return ''
-
-
-class DateExact(NamedTuple):
-    """Construct a DATEVALUE structure according to the GEDCOM standard.
-
-    Example
-    -------
-
-
-    Reference
-    ---------
-
-    >n DATE <DateValue>                         {1:1}  g7:DATE
-    >  +1 TIME <Time>                           {0:1}  g7:TIME
-    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
-    """
-
-    date: Date = Date(0, 0, 0)
-    time: Time = Time(0, 0, 0)
-    phrase: str = ''
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.phrase, str)
-            and self.date.validate()
-            and self.time.validate()
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = self.date.ged(level)
-        if self.validate():
-            if self.time != Time(0, 0, 0):
-                lines = ''.join([lines, self.time.ged(level + 1)])
-            if self.phrase != '':
-                lines = ''.join(
-                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
-                )
-        return lines
-
-
-class DateValue(NamedTuple):
-    """Construct a DATEVALUE structure according to the GEDCOM standard.
-
-    Example
-    -------
-
-
-    Reference
-    ---------
-
-    >n DATE <DateValue>                         {1:1}  g7:DATE
-    >  +1 TIME <Time>                           {0:1}  g7:TIME
-    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
-    """
-
-    date: Date = Date(0, 0, 0)
-    time: Time = Time(0, 0, 0)
-    phrase: str = ''
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.phrase, str)
-            and self.date.validate()
-            and self.time.validate()
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            lines = self.date.ged(level)
-            if self.time != Time(0, 0, 0):
-                lines = ''.join([lines, self.time.ged(level + 1)])
-            if self.phrase != '':
-                lines = ''.join(
-                    [lines, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
-                )
+            lines = Tagger.structure(lines, level + 1, self.exids)
+            lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
 
@@ -2816,7 +3443,7 @@ class EventDetail(NamedTuple):
     > n UID <Special>                            {0:M}  [g7:UID]()
     """
 
-    date_value: DateValue | None = None
+    date_value: DateValue = DateValue()
     place: Place | None = None
     address: Address = Address([], '', '', '', '')
     phones: list[str] = []  # noqa: RUF012
@@ -2866,19 +3493,19 @@ class EventDetail(NamedTuple):
                 lines = ''.join([lines, self.place.ged(level)])
             # if self.address != Address([], '', '', '', ''):
             lines = ''.join([lines, self.address.ged(level)])
-            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
-            lines = Tagger.str_to_str(lines, level, Tag.AGNC, self.agency)
-            lines = Tagger.str_to_str(lines, level, Tag.RELI, self.religion)
-            lines = Tagger.str_to_str(lines, level, Tag.CAUS, self.cause)
-            lines = Tagger.str_to_str(lines, level, Tag.RESN, self.resn)
-            lines = Tagger.list_to_str(lines, level, self.associations)
-            lines = Tagger.list_to_str(lines, level, self.notes)
-            lines = Tagger.list_to_str(lines, level, self.sources)
-            lines = Tagger.list_to_str(lines, level, self.multimedia_links)
-            lines = Tagger.list_to_str(lines, level, self.uids)
+            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.string(lines, level, Tag.AGNC, self.agency)
+            lines = Tagger.string(lines, level, Tag.RELI, self.religion)
+            lines = Tagger.string(lines, level, Tag.CAUS, self.cause)
+            lines = Tagger.string(lines, level, Tag.RESN, self.resn)
+            lines = Tagger.structure(lines, level, self.associations)
+            lines = Tagger.structure(lines, level, self.notes)
+            lines = Tagger.structure(lines, level, self.sources)
+            lines = Tagger.structure(lines, level, self.multimedia_links)
+            lines = Tagger.structure(lines, level, self.uids)
         return lines
 
     def code(self, level: int = 0, detail: str = String.MIN) -> str:
@@ -2945,10 +3572,10 @@ class FamilyEventDetail(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.husband_age is not None:
-                lines = Tagger.empty_to_str(lines, level, Tag.HUSB)
+                lines = Tagger.empty(lines, level, Tag.HUSB)
                 lines = ''.join([lines, self.husband_age.ged(level + 1)])
             if self.wife_age is not None:
-                lines = Tagger.empty_to_str(lines, level, Tag.WIFE)
+                lines = Tagger.empty(lines, level, Tag.WIFE)
                 lines = ''.join([lines, self.wife_age.ged(level + 1)])
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level)])
@@ -3013,8 +3640,8 @@ class FamilyAttribute(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.tag.value != Tag.NONE.value and self.validate():
-            lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
-            lines = Tagger.str_to_str(
+            lines = Tagger.string(lines, level, self.tag, self.payload)
+            lines = Tagger.string(
                 lines, level + 1, Tag.TYPE, self.attribute_type
             )
             if self.family_event_detail is not None:
@@ -3144,12 +3771,10 @@ class FamilyEvent(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.payload == String.EMPTY:
-                lines = Tagger.empty_to_str(lines, level, self.tag)
+                lines = Tagger.empty(lines, level, self.tag)
             else:
-                lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
-            lines = Tagger.str_to_str(
-                lines, level + 1, Tag.TYPE, self.event_type
-            )
+                lines = Tagger.string(lines, level, self.tag, self.payload)
+            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.event_type)
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level + 1)])
         return lines
@@ -3185,8 +3810,8 @@ class Husband(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.HUSB, str(self.xref))
-            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.string(lines, level, Tag.HUSB, str(self.xref))
+            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -3205,12 +3830,22 @@ class Wife(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.WIFE, str(self.xref))
-            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.string(lines, level, Tag.WIFE, str(self.xref))
+            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
 class Child(NamedTuple):
+    """Store, validate and display GEDCOM child information.
+
+    Reference:
+        [GEDCOM Family Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
+
+    This is a portion of the GEDCOM Family Record.
+    >     +1 CHIL @<XREF:INDI>@                    {0:M}  g7:CHIL
+    >        +2 PHRASE <Text>                      {0:1}  g7:PHRASE
+    """
+
     xref: IndividualXref = Void.INDI
     phrase: str = ''
 
@@ -3225,42 +3860,80 @@ class Child(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.CHIL, str(self.xref))
-            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.string(lines, level, Tag.CHIL, str(self.xref))
+            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
 class LDSOrdinanceDetail(NamedTuple):
-    date_value: DateValue | None = None
-    temp: str = ''
-    place: Place | None = None
+    """Store, validate and display the GEDCOM LDS Ordinance Detail structure.
+
+    Reference:
+        [GEDCOM LDS Ordinance Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_ORDINANCE_DETAIL)
+
+    > n <<DATE_VALUE>>                         {0:1}
+    > n TEMP <Text>                            {0:1}  [g7:TEMP](https://gedcom.io/terms/v7/TEMP)
+    > n <<PLACE_STRUCTURE>>                    {0:1}
+    > n STAT <Enum>                            {0:1}  [g7:ord-STAT](https://gedcom.io/terms/v7/ord-STAT)
+    >   +1 DATE <DateExact>                    {1:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
+    >      +2 TIME <Time>                      {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+    > n <<NOTE_STRUCTURE>>                     {0:M}
+    > n <<SOURCE_CITATION>>                    {0:M}
+    """
+
+    date_value: DateValue = DateValue()
+    temple: str = String.EMPTY
+    place: Place = Place()
     status: Stat = Stat.NONE
-    notes: Any = None
-    sources: Any = None
+    status_date: Date = Date()
+    status_time: Time = Time()
+    notes: list[Note] = [Note(), Note()]  # noqa: RUF012
+    source_citations: list[SourceCitation] = [  # noqa: RUF012
+        SourceCitation(),
+        SourceCitation(),
+    ]
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.date_value, DateValue | None)
-            and Checker.verify_type(self.temp, str)
-            and Checker.verify_type(self.place, Place | None)
+            Checker.verify_type(self.date_value, DateValue)
+            and Checker.verify_type(self.temple, str)
+            and Checker.verify_type(self.place, Place)
             and Checker.verify_enum(self.status.value, Stat)
+            and Checker.verify_type(self.status_date, Date)
+            and Checker.verify_type(self.status_time, Time)
             and Checker.verify_tuple_type(self.notes, Note)
-            and Checker.verify_tuple_type(self.sources, SourceCitation)
+            and Checker.verify_tuple_type(self.source_citations, SourceCitation)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            lines = ''.join([lines, self.date_value.ged(level)])
+            lines = Tagger.string(lines, level, Tag.TEMP, self.temple)
+            lines = ''.join([lines, self.place.ged(level)])
+            lines = Tagger.string(lines, level, Tag.STAT, self.status.value)
+            lines = ''.join([lines, self.status_date.ged(level + 1)])
+            lines = ''.join([lines, self.status_time.ged(level + 2)])
+            lines = Tagger.structure(lines, level, self.notes)
+            lines = Tagger.structure(lines, level, self.source_citations)
         return lines
 
 
 class LDSSpouseSealing(NamedTuple):
+    """Store, validate and display the LDS Spouse Sealing structure.
+
+    Reference:
+        [GEDCOM LDS Spouse Sealing Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_SPOUSE_SEALING)
+
+    > n SLGS                                     {1:1}  [g7:SLGS](https://gedcom.io/terms/v7/SLGS)
+    >   +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+    """
+
     tag: Tag = Tag.SLGS
-    detail: LDSOrdinanceDetail | None = None
+    detail: LDSOrdinanceDetail = LDSOrdinanceDetail()
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3277,27 +3950,59 @@ class LDSSpouseSealing(NamedTuple):
         return lines
 
 
-class LDSIndividualOrdinances(NamedTuple):
-    tag: str
-    ordinance_detail: LDSOrdinanceDetail | None = None
-    family_xref: str = ''
+class LDSIndividualOrdinance(NamedTuple):
+    """Store, validate and display the GEDCOM LDS Individual Ordinances structure.
+
+    Reference:
+        [GEDCOM LDS Individual Ordinances](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_INDIVIDUAL_ORDINANCE)
+
+    [
+    n BAPL                                     {1:1}  [g7:BAPL](https://gedcom.io/terms/v7/BAPL)
+      +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+    |
+    n CONL                                     {1:1}  [g7:CONL](https://gedcom.io/terms/v7/CONL)
+      +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+    |
+    n ENDL                                     {1:1}  [g7:ENDL](https://gedcom.io/terms/v7/ENDL)
+      +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+    |
+    n INIL                                     {1:1}  [g7:INIL](https://gedcom.io/terms/v7/INIL)
+      +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+    |
+    n SLGC                                     {1:1}  [g7:SLGC](https://gedcom.io/terms/v7/SLGC)
+      +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
+      +1 FAMC @<XREF:FAM>@                     {1:1}  [g7:FAMC](https://gedcom.io/terms/v7/FAMC)
+    ]
+    """
+
+    tag: Tag = Tag.NONE
+    ordinance_detail: LDSOrdinanceDetail = LDSOrdinanceDetail()
+    family_xref: FamilyXref = Void.FAM
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tag, str)
-            and Checker.verify_type(
-                self.ordinance_detail, LDSOrdinanceDetail | None
+            Checker.verify_type(self.tag, Tag)
+            and Checker.verify_type(self.ordinance_detail, LDSOrdinanceDetail)
+            and Checker.verify_type(self.family_xref, FamilyXref)
+            and Checker.verify(
+                self.tag.value == Tag.SLGC.value,
+                self.family_xref.fullname != Void.FAM.fullname,
+                Msg.SLGC_REQUIRES_FAM,
             )
-            and Checker.verify_type(self.family_xref, str)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  # noqa: ARG002
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            pass
+            lines = Tagger.empty(lines, level, self.tag)
+            lines = ''.join([lines, self.ordinance_detail.ged(level + 1)])
+            if self.tag.value == Tag.SLGC.value:
+                lines = Tagger.string(
+                    lines, level + 1, Tag.FAMC, self.family_xref.fullname
+                )
         return lines
 
 
@@ -3379,9 +4084,7 @@ class IndividualEventDetail(NamedTuple):
             lines = ''.join([lines, self.event_detail.ged(level)])
             if self.age is not None:
                 lines = ''.join([lines, self.age.ged(level)])
-                lines = Tagger.str_to_str(
-                    lines, level + 1, Tag.PHRASE, self.phrase
-                )
+                lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -3497,8 +4200,8 @@ class IndividualEvent(NamedTuple):
         >>> from chronodata.store import Individual, IndividualEvent
 
         Next, create a Genealogy and an individual with reference `@I1@`.
-        >>> chron = Genealogy('event example')
-        >>> indi_i1_xref = chron.individual_xref('I1')
+        >>> genealogy = Genealogy('event example')
+        >>> indi_i1_xref = genealogy.individual_xref('I1')
 
         Finally, create the individual record for `@I1@` with two individual events
         and display the results.
@@ -3651,7 +4354,7 @@ class IndividualEvent(NamedTuple):
     tag: Tag = Tag.NONE
     payload: str = String.EMPTY
     text: str = String.EMPTY
-    event_detail: IndividualEventDetail | None = None
+    event_detail: IndividualEventDetail = IndividualEventDetail()
     family_xref: FamilyXref = Void.FAM
     adoption: Tag = Tag.NONE
     phrase: str = String.EMPTY
@@ -3661,10 +4364,7 @@ class IndividualEvent(NamedTuple):
         check: bool = (
             Checker.verify_enum(self.tag.value, IndiEven)
             and Checker.verify_type(self.text, str)
-            # and Checker.verify_not_default(self.text, String.EMPTY)
-            and Checker.verify_type(
-                self.event_detail, IndividualEventDetail | None
-            )
+            and Checker.verify_type(self.event_detail, IndividualEventDetail)
             and Checker.verify_type(self.family_xref, FamilyXref)
             and Checker.verify_enum(self.adoption.value, Adop)
             and Checker.verify_type(self.phrase, str)
@@ -3676,10 +4376,10 @@ class IndividualEvent(NamedTuple):
         lines: str = ''
         if self.validate():
             if self.payload == String.EMPTY:
-                lines = Tagger.empty_to_str(lines, level, self.tag)
+                lines = Tagger.empty(lines, level, self.tag)
             else:
-                lines = Tagger.str_to_str(lines, level, self.tag, self.payload)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.TYPE, self.text)
+                lines = Tagger.string(lines, level, self.tag, self.payload)
+            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.text)
             if self.event_detail is not None:
                 lines = ''.join([lines, self.event_detail.ged(level + 1)])
             if (
@@ -3687,18 +4387,18 @@ class IndividualEvent(NamedTuple):
                 in (Tag.BIRT.value, Tag.CHR.value, Tag.ADOP.value)
                 and self.family_xref.name != Void.FAM.name
             ):
-                lines = Tagger.str_to_str(
+                lines = Tagger.string(
                     lines, level + 1, Tag.FAMC, self.family_xref.fullname
                 )
                 if (
                     self.tag.value == Tag.ADOP.value
                     and self.family_xref.name != Void.FAM.name
                 ):
-                    lines = Tagger.str_to_str(
+                    lines = Tagger.string(
                         lines, level + 2, Tag.ADOP, self.adoption.value
                     )
                     if self.adoption.value != Tag.NONE.value:
-                        lines = Tagger.str_to_str(
+                        lines = Tagger.string(
                             lines, level + 3, Tag.PHRASE, self.phrase
                         )
         return lines
@@ -3707,13 +4407,13 @@ class IndividualEvent(NamedTuple):
 class Alias(NamedTuple):
     """Store, validate and display a GEDCOM Alias structure."""
 
-    xref: str
-    phrase: str = ''
+    xref: IndividualXref = Void.INDI
+    phrase: str = String.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = Checker.verify_type(
-            self.xref, str
+            self.xref, IndividualXref
         ) and Checker.verify_type(self.phrase, str)
         return check
 
@@ -3721,8 +4421,8 @@ class Alias(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.str_to_str(lines, level, Tag.ALIA, self.xref)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.string(lines, level, Tag.ALIA, self.xref.fullname)
+            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
 
@@ -4304,7 +5004,7 @@ class Individual(NamedTuple):
     sex: Sex = Sex.NONE
     attributes: list[IndividualAttribute] = []  # noqa: RUF012
     events: list[IndividualEvent] = []  # noqa: RUF012
-    lds_individual_ordinances: list[LDSIndividualOrdinances] = []  # noqa: RUF012
+    lds_individual_ordinances: list[LDSIndividualOrdinance] = []  # noqa: RUF012
     families_child: list[FamilyChild] = []  # noqa: RUF012
     submitters: list[Submitter] = []  # noqa: RUF012
     associations: list[Association] = []  # noqa: RUF012
@@ -4314,7 +5014,7 @@ class Individual(NamedTuple):
     identifiers: list[Identifier] = []  # noqa: RUF012
     notes: list[Note] = []  # noqa: RUF012
     sources: list[Source] = []  # noqa: RUF012
-    multimedia_links: list[Multimedia] = []  # noqa: RUF012
+    multimedia_links: list[MultimediaLink] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4328,7 +5028,7 @@ class Individual(NamedTuple):
             and Checker.verify_tuple_type(self.attributes, IndividualAttribute)
             and Checker.verify_tuple_type(self.events, IndividualEvent)
             and Checker.verify_tuple_type(
-                self.lds_individual_ordinances, LDSIndividualOrdinances
+                self.lds_individual_ordinances, LDSIndividualOrdinance
             )
             and Checker.verify_tuple_type(self.families_child, FamilyChild)
             and Checker.verify_tuple_type(self.submitters, str)
@@ -4347,28 +5047,24 @@ class Individual(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged(level)
         if self.validate():
-            lines = Tagger.str_to_str(
-                lines, level + 1, Tag.RESN, self.resn.value
-            )
-            lines = Tagger.list_to_str(lines, level + 1, self.personal_names)
-            lines = Tagger.str_to_str(lines, level + 1, Tag.SEX, self.sex.value)
-            lines = Tagger.list_to_str(lines, level + 1, self.attributes)
-            lines = Tagger.list_to_str(lines, level + 1, self.events)
-            lines = Tagger.list_to_str(
+            lines = Tagger.string(lines, level + 1, Tag.RESN, self.resn.value)
+            lines = Tagger.structure(lines, level + 1, self.personal_names)
+            lines = Tagger.string(lines, level + 1, Tag.SEX, self.sex.value)
+            lines = Tagger.structure(lines, level + 1, self.attributes)
+            lines = Tagger.structure(lines, level + 1, self.events)
+            lines = Tagger.structure(
                 lines, level + 1, self.lds_individual_ordinances
             )
-            lines = Tagger.list_to_str(lines, level + 1, self.families_child)
-            lines = Tagger.list_to_str(lines, level + 1, self.submitters)
-            lines = Tagger.list_to_str(lines, level + 1, self.associations)
-            lines = Tagger.list_to_str(lines, level + 1, self.aliases)
-            lines = Tagger.list_to_str(lines, level + 1, self.ancestor_interest)
-            lines = Tagger.list_to_str(
-                lines, level + 1, self.descendent_interest
-            )
-            lines = Tagger.list_to_str(lines, level + 1, self.identifiers)
-            lines = Tagger.list_to_str(lines, level + 1, self.notes)
-            lines = Tagger.list_to_str(lines, level + 1, self.sources)
-            lines = Tagger.list_to_str(lines, level + 1, self.multimedia_links)
+            lines = Tagger.structure(lines, level + 1, self.families_child)
+            lines = Tagger.structure(lines, level + 1, self.submitters)
+            lines = Tagger.structure(lines, level + 1, self.associations)
+            lines = Tagger.structure(lines, level + 1, self.aliases)
+            lines = Tagger.structure(lines, level + 1, self.ancestor_interest)
+            lines = Tagger.structure(lines, level + 1, self.descendent_interest)
+            lines = Tagger.structure(lines, level + 1, self.identifiers)
+            lines = Tagger.structure(lines, level + 1, self.notes)
+            lines = Tagger.structure(lines, level + 1, self.sources)
+            lines = Tagger.structure(lines, level + 1, self.multimedia_links)
         return lines
 
     def code(
@@ -4460,10 +5156,10 @@ class Repository(NamedTuple):
         lines: str = self.xref.ged(level)
         if self.validate():
             lines = ''.join([lines, self.address.ged(level)])
-            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
         return lines
 
 
@@ -4588,17 +5284,15 @@ class Header(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.empty_to_str(lines, level, Tag.HEAD)
-            lines = Tagger.empty_to_str(lines, level + 1, Tag.GEDC)
-            lines = Tagger.str_to_str(
-                lines, level + 2, Tag.VERS, String.VERSION
-            )
+            lines = Tagger.empty(lines, level, Tag.HEAD)
+            lines = Tagger.empty(lines, level + 1, Tag.GEDC)
+            lines = Tagger.string(lines, level + 2, Tag.VERS, String.VERSION)
             if self.schemas is not None:
-                lines = Tagger.empty_to_str(lines, level + 1, Tag.SCHMA)
+                lines = Tagger.empty(lines, level + 1, Tag.SCHMA)
             lines = ''.join([lines, self.address.ged(level)])
-            lines = Tagger.strlist_to_str(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.strlist_to_str(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.strlist_to_str(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.strlist_to_str(lines, level, Tag.WWW, self.wwws)
-            # lines = Tagger.list_to_str(lines, level + 1, Tag.TAG, self.schemas)
+            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
+            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
+            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
+            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            # lines = Tagger.structure(lines, level + 1, Tag.TAG, self.schemas)
         return lines

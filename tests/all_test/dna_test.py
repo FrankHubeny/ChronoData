@@ -1,7 +1,7 @@
 """------------------------------------------------------------------------------
                             DNA Tests
 
-    This builds a chronology based on DNA mutation changes between
+    This builds a genealogy based on DNA mutation changes between
     generations.
 ------------------------------------------------------------------------------"""
 
