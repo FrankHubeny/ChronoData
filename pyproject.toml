@@ -67,6 +67,7 @@ addopts = [
   "--cov=chronodata",
   "--cov-report=term-missing",
   "--doctest-modules",
+  "--ignore=chronodata/separate",
 ]
 xfail_strict = true
 faulthandler_timeout = 5

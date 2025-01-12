@@ -98,7 +98,7 @@ def test_create_individual_xrefs(
         xref=joe_mary_xref,
         husband=joe_husband,
         wife=mary_wife,
-        children=(jesus_child,),
+        children=[jesus_child,],
     )
     joe_mary_type = Checker.verify_type(joe_mary, Family)  # noqa: F841
 

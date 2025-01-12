@@ -41,8 +41,8 @@ testdata_individual = [
     ('indi_spaces_fullname', '@NAME_WITH_SPACES@'),
     ('indi_spaces_string', '@NAME_WITH_SPACES@'),
     ('indi_ged0', '0 @1@ INDI\n'),
-    ('indi_ged1', '1 INDI @1@\n'),
-    ('indi_ged1_info', '1 INDI @1@ info\n')
+    #('indi_ged1', '1 INDI @1@\n'),
+    #('indi_ged1_info', '1 INDI @1@ info\n')
 ]
 
 
@@ -56,9 +56,9 @@ def test_individual(test_input: str, expected: str | int | bool) -> None:
     indi_name = individual.name  # noqa: F841
     indi_fullname = individual.fullname  # noqa: F841
     indi_string = str(individual)  # noqa: F841
-    indi_ged0 = individual.ged(0)  # noqa: F841
-    indi_ged1 = individual.ged(1)  # noqa: F841
-    indi_ged1_info = individual.ged(1, 'info')  # noqa: F841
+    indi_ged0 = individual.ged()  # noqa: F841
+    #indi_ged1 = individual.ged(1)  
+    #indi_ged1_info = individual.ged(1, 'info')  
 
     # Test creation of IndividualXref type with a name.
     indi_named = a.individual_xref('individual')

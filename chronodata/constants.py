@@ -78,7 +78,7 @@ class Value:
     BP: str = ' BP'
     CE: str = ' CE'
     DATETIME_EPOCH: int = 1970
-    EMPTY: str = ''
+    #EMPTY: str = ''
     EPOCH: str = 'Epoch'
     EXPERIMENT: str = 'EXPERIMENT'
     GREGORIAN: str = 'GREGORIAN'
@@ -152,9 +152,9 @@ class Number:
 
 @dataclass(frozen=True)
 class String:
-    """The following constants define strings that are neither keys
-    nor values of a dictionary, but are used in generating comments,
-    formatting numbers or other processes.
+    """The following values are part of the configuration of the GEDCOM standard
+    or the Geography package.  They are not part of messages to the user
+    and so do not require internationalization.
     """
 
     ATSIGN: str = '@'
@@ -165,7 +165,7 @@ class String:
     DAY: str = 'd'
     DOUBLE_NEWLINE: str = '\n\n'
     EMPTY: str = ''
-    EVENT: str = 'EVENT'
+    #EVENT: str = 'EVENT'
     FORM_DEFAULT1: str = 'City'
     FORM_DEFAULT2: str = 'County'
     FORM_DEFAULT3: str = 'State'
@@ -182,7 +182,7 @@ class String:
     INT: str = 'int'
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
-    LANG_URI: str = 'http://'
+    #LANG_URI: str = 'http://'
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
     NEGATIVE: str = '-'
@@ -247,7 +247,7 @@ class Adop(Enum):
     HUSB = 'HUSB'
     WIFE = 'WIFE'
     BOTH = 'BOTH'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class ApproxDate(Enum):
@@ -260,7 +260,7 @@ class ApproxDate(Enum):
     ABT = 'ABT'
     CAL = 'CAL'
     EST = 'EST'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class EvenAttr(Enum):
@@ -274,7 +274,7 @@ class EvenAttr(Enum):
     RESI = 'RESI'
     FACT = 'FACT'
     EVEN = 'EVEN'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Event(Enum):
@@ -312,21 +312,21 @@ class Event(Enum):
     PROB = 'PROB'
     RETI = 'RETI'
     WILL = 'WILL'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class FamAttr(Enum):
     NCHI = 'NCHI'
     RESI = 'RESI'
     FACT = 'FACT'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class FamcStat(Enum):
     CHALLENGED = 'CHALLENGED'
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class FamEven(Enum):
@@ -341,20 +341,20 @@ class FamEven(Enum):
     MARR = 'MARR'
     MARS = 'MARS'
     EVEN = 'EVEN'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class GreaterLessThan(Enum):
     GREATER = '>'
     LESS = '<'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Id(Enum):
     REFN = 'REFN'
     UID = 'UID'
     EXID = 'EXID'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class IndiAttr(Enum):
@@ -372,7 +372,7 @@ class IndiAttr(Enum):
     SSN = 'SSN'
     TITL = 'TITL'
     FACT = 'FACT'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class IndiEven(Enum):
@@ -399,17 +399,19 @@ class IndiEven(Enum):
     RETI = 'RETI'
     WILL = 'WILL'
     EVEN = 'EVEN'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Latitude(Enum):
     NORTH = 'N'
     SOUTH = 'S'
+    NONE = String.EMPTY
 
 
 class Longitude(Enum):
     EAST = 'E'
     WEST = 'W'
+    NONE = String.EMPTY
 
 
 class Medium(Enum):
@@ -427,13 +429,13 @@ class Medium(Enum):
     TOMBSTONE = 'TOMBSTONE'
     VIDEO = 'VIDEO'
     OTHER = 'OTHER'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class MediaType(Enum):
     TEXT_HTML = 'TEXT_HTML'
     TEXT_PLAIN = 'TEXT_PLAIN'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class NameType(Enum):
@@ -444,7 +446,7 @@ class NameType(Enum):
     MARRIED = 'MARRIED'
     PROFESSIONAL = 'PROFESSIONAL'
     OTHER = 'OTHER'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Pedi(Enum):
@@ -453,7 +455,7 @@ class Pedi(Enum):
     FOSTER = 'FOSTER'
     SEALING = 'SEALING'
     OTHER = 'OTHER'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class PersonalNamePieceTag(Enum):
@@ -463,7 +465,7 @@ class PersonalNamePieceTag(Enum):
     SPFX = 'SPFX'
     SURN = 'SURN'
     NSFX = 'NSFX'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Quay(Enum):
@@ -471,7 +473,7 @@ class Quay(Enum):
     QUAY1 = '1'
     QUAY2 = '2'
     QUAY3 = '3'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class RangeDate(Enum):
@@ -487,7 +489,7 @@ class RangeDate(Enum):
     AND = 'AND'
     AFT = 'AFT'
     BEF = 'BEF'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Record(str, Enum):
@@ -498,7 +500,7 @@ class Record(str, Enum):
     SNOTE = 'SNOTE'
     SOUR = 'SOUR'
     SUBM = 'SUBM'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Resn(Enum):
@@ -514,7 +516,7 @@ class Resn(Enum):
     CONFIDENTIAL = 'CONFIDENTIAL'
     LOCKED = 'LOCKED'
     PRIVACY = 'PRIVACY'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class RestrictDate(Enum):
@@ -533,7 +535,7 @@ class RestrictDate(Enum):
     AFT = 'AFT'
     CAL = 'CAL'
     EST = 'EST'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Role(Enum):
@@ -552,7 +554,7 @@ class Role(Enum):
     WIFE = 'WIFE'
     WITN = 'WITN'
     OTHER = 'OTHER'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Sex(Enum):
@@ -560,7 +562,7 @@ class Sex(Enum):
     F = 'F'
     X = 'X'
     U = 'U'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Stat(Enum):
@@ -576,7 +578,7 @@ class Stat(Enum):
     STILLBORN = 'STILLBORN'
     SUBMITTED = 'SUBMITTED'
     UNCLEARED = 'UNCLEARED'
-    NONE = ''
+    NONE = String.EMPTY
 
 
 class Tag(Enum):
@@ -732,4 +734,4 @@ class Tag(Enum):
     WIFE = 'WIFE'
     WILL = 'WILL'
     WWW = 'WWW'
-    NONE = ''
+    NONE = String.EMPTY

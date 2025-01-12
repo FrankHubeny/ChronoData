@@ -58,3 +58,4 @@ class Msg:
     )
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'
+    ZERO_YEAR: str = 'The calendar has no zero year.'
