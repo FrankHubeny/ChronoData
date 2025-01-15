@@ -1,7 +1,5 @@
 # chronodata/constants.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-# chronodata/enums.py
-# Licensed under a 3-clause BSD style license - see LICENSE.md
 """Enumeration classes to build a dataset formatted according
 to the GEDCOM standard.
 
@@ -28,6 +26,7 @@ __all__ = [
     'FamAttr',
     'FamEven',
     'FamcStat',
+    'GedFlag',
     'Id',
     'IndiAttr',
     'IndiEven',
@@ -165,6 +164,7 @@ class String:
     DAY: str = 'd'
     DOUBLE_NEWLINE: str = '\n\n'
     EMPTY: str = ''
+    EOL: str = '\n'
     #EVENT: str = 'EVENT'
     FORM_DEFAULT1: str = 'City'
     FORM_DEFAULT2: str = 'County'
@@ -182,25 +182,34 @@ class String:
     INT: str = 'int'
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
-    #LANG_URI: str = 'http://'
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
     NEGATIVE: str = '-'
-    NEWLINE: str = '\n'
     NOW: str = 'now'
     OCCURRED: Literal['Y'] = 'Y'
-    PLACE_FULL = 'F'
-    PLACE_SHORT = 'S'
-    PLACE_TRANSLATION = 'T'
     MAX = 'MAX'
     MIN = 'MIN'
     READ: str = 'r'
+    SLASH: str = '/'
     SPACE: str = ' '
     T: str = 'T'
     UNDERLINE: str = '_'
     UNDETERMINED: str = 'und'
     VERSION: str = '7.0'
+    WRITE: str = 'w'
     Z: str = 'Z'
+
+class GedFlag:
+    """These strings signal special processing for the ged methods.
+
+    The GedFlag constants contain the name of NamedTuple class as the first part of their names
+    to help locate them.  The second part of their names contain a description of
+    the function they are signalling to occur.
+    
+    """
+    PLACENAME_FULL: Literal['F'] = 'F'
+    PLACENAME_SHORT: Literal['S'] = 'S'
+    PLACENAME_TRANSLATION: Literal['T'] = 'T'
 
 
 @dataclass(frozen=True)
@@ -323,6 +332,18 @@ class FamAttr(Enum):
 
 
 class FamcStat(Enum):
+    """Implements the FAMC-STAT enumerated set in the GEDCOM standard.
+
+    The `NONE` item in the enumeration is used as a default for when no value was entered.
+    It is not part of the GEDCOM standard.
+    
+    Reference:
+        [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
+
+        [CHALLENGED](https://gedcom.io/terms/v7/enum-CHALLENGED)
+        [DISPROVEN](https://gedcom.io/terms/v7/enum-DISPROVEN)
+        [PROVEN](https://gedcom.io/terms/v7/enum-PROVEN)
+    """
     CHALLENGED = 'CHALLENGED'
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
@@ -330,6 +351,19 @@ class FamcStat(Enum):
 
 
 class FamEven(Enum):
+    """Implements the family event tags from the GEDCOM standard as an enumerated set.
+
+    The `NONE` item in the enumeration is used as a default for when no value was entered.
+    It is not part of the GEDCOM standard.
+    
+    Reference:
+        [GEDCOM FAMC-EVEN](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events)
+
+        - [ANUL]()
+        - [CENS]()
+        - [DIV]()
+         [DIV]()
+    """
     ANUL = 'ANUL'
     CENS = 'CENS'
     DIV = 'DIV'
@@ -582,11 +616,10 @@ class Stat(Enum):
 
 
 class Tag(Enum):
-    """Tags used for various structure types in the GEDCOM standard.
+    """Enumerate all of the possible tags in a GEDCOM file.
 
-    Reference
-    ---------
-    - [GEDCOM Structure Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#structure-types)
+    Reference:
+        - [GEDCOM Structure Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#structure-types)
     """
 
     ABBR = 'ABBR'

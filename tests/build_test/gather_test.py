@@ -92,13 +92,13 @@ def test_one_record(test_input: str, expected: str) -> None:
 
 
 testdata_three: list[tuple[str, int]] = [
-    ('a.ged_family.count(String.NEWLINE)', 3),
-    ('a.ged_individual.count(String.NEWLINE)', 3),
-    ('a.ged_multimedia.count(String.NEWLINE)', 3),
-    ('a.ged_repository.count(String.NEWLINE)', 3),
-    ('a.ged_shared_note.count(String.NEWLINE)', 3),
-    ('a.ged_source.count(String.NEWLINE)', 3),
-    ('a.ged_submitter.count(String.NEWLINE)', 3),
+    ('a.ged_family.count(String.EOL)', 3),
+    ('a.ged_individual.count(String.EOL)', 3),
+    ('a.ged_multimedia.count(String.EOL)', 3),
+    ('a.ged_repository.count(String.EOL)', 3),
+    ('a.ged_shared_note.count(String.EOL)', 3),
+    ('a.ged_source.count(String.EOL)', 3),
+    ('a.ged_submitter.count(String.EOL)', 3),
 ]
 
 

@@ -65,7 +65,7 @@ class Genealogy:
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
         self.ged_header: str = ''
-        self.ged_trailer: str = f'0 {Tag.TRLR}\n'
+        self.ged_trailer: str = f'0 {Tag.TRLR.value}'
         self.ged_family: str = ''
         self.ged_individual: str = ''
         self.ged_multimedia: str = ''
@@ -242,7 +242,7 @@ class Genealogy:
                         json.dump(self.chron, file)
                         file.close()
                     logging.info(
-                        Msg.SAVED.format(self.chron_name, self.filename)
+                        Msg.SAVED.format(self.filename)
                     )
                 case String.GED:
                     output: str = ''.join(
@@ -266,7 +266,7 @@ class Genealogy:
                         Msg.SAVED.format(self.chron_name, self.filename)
                     )
                 case _:
-                    logging.info(Msg.SAVE_FIRST.format(self.chron_name))
+                    logging.info(Msg.SAVE_FIRST)
 
     # def rename(self, name: str) -> None:
     #     """Rename the genealogy."""
@@ -1154,20 +1154,25 @@ class Genealogy:
     def header(self, ged_header: Header) -> None:
         """Collect and store the header record.
 
-        Args:
-            ged_header (str): is the text of the header record.
+        
 
         Example:
-            This example provides the minimum data for a GEDCOM version 7.0 file.
+            This example provides the minimum data for a GEDCOM version 7.0 file
+            as illustrated by the [minimal70.ged](https://gedcom.io/testfiles/gedcom70/minimal70.ged) file.
             Nothing else has been added to it.
             >>> from chronodata.build import Genealogy
             >>> a = Genealogy('test')
             >>> a.header(Header())
-            >>> print(a.ged_header)
+            >>> print(''.join([a.ged_header, a.ged_trailer]))
             0 HEAD
             1 GEDC
             2 VERS 7.0
-            <BLANKLINE>
+            0 TRLR
 
+        Args:
+            ged_header: is the text of the header record.
+
+        References:
+            [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
         """
         self.ged_header = ged_header.ged()

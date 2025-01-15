@@ -95,11 +95,13 @@ import contextlib
 import logging
 import math
 import re
+import urllib.request
 from enum import Enum
 from textwrap import dedent, indent
-from typing import Any, Literal, NamedTuple
+from typing import Any, ClassVar, Literal, NamedTuple
 
 import numpy as np
+import yaml  # type: ignore[import-untyped]
 
 from chronodata.constants import (
     Adop,
@@ -108,12 +110,11 @@ from chronodata.constants import (
     FamAttr,
     # FamcStat,
     FamEven,
+    GedFlag,
     GreaterLessThan,
     Id,
     IndiAttr,
     IndiEven,
-    Latitude,
-    Longitude,
     MediaType,
     Medium,
     NameType,
@@ -126,7 +127,10 @@ from chronodata.constants import (
     Tag,
     Value,
 )
+from chronodata.gedcom import Specs
 from chronodata.messages import Example, Msg
+
+YNull = Literal['Y'] | None
 
 
 class Tagger:
@@ -176,6 +180,7 @@ class Tagger:
         tag: Tag,
         payload: str = String.EMPTY,
         extra: str = String.EMPTY,
+        format: bool = True,
     ) -> str:
         """Return a GEDCOM formatted line for the information and level.
 
@@ -199,20 +204,48 @@ class Tagger:
             1 NAME SomeName Other info
             <BLANKLINE>
 
-        """
+            This example comes from the [GEDCOM lines standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines):
+            Note how the `@me` was reformatted as `@@me`.
+            > 1 NOTE me@example.com is my email
+            > 2 CONT @@me and @I are my social media handles
+            >>> from chronodata.store import Note
+            >>> mynote = Note(
+            ...     note='''me@example.com is my email
+            ... @me and @I are my social media handles'''
+            ... )
+            >>> print(mynote.ged(1))
+            1 NOTE me@example.com is my email
+            2 CONT @@me and @I are my social media handles
+            <BLANKLINE>
 
+            However, escaping the '@' should not occur when this is part of a cross-reference identifier.
+
+
+        Reference:
+            [GEDCOM Lines](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines)
+
+        """
+        lineval: str = payload
+        if format and lineval != String.EMPTY and lineval[0] == String.ATSIGN:
+            lineval = ''.join([String.ATSIGN, lineval])
         if extra == String.EMPTY:
-            if payload == String.EMPTY:
-                return f'{level} {tag.value}{String.NEWLINE}'
-            return f'{level} {tag.value} {Tagger.clean_input(payload)}{String.NEWLINE}'
-        return f'{level} {tag.value} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{String.NEWLINE}'
+            if lineval == String.EMPTY:
+                return f'{level} {tag.value}{String.EOL}'
+            return (
+                f'{level} {tag.value} {Tagger.clean_input(lineval)}{String.EOL}'
+            )
+        return f'{level} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{String.EOL}'
 
     @staticmethod
     def empty(lines: str, level: int, tag: Tag) -> str:
         """Join a GEDCOM line that has only a level and a tag to a string.
 
-        This method hides the join operation and allows the `string` method
-        to return the lines if the payload is empty.
+        This method implements the
+        [GEDCOM empty LineVal standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines) which reads:
+        > Note that production LineVal does not match the empty string.
+        > Because empty payloads and missing payloads are considered equivalent,
+        > both a structure with no payload and a structure with the empty string
+        > as its payload are encoded with no LineVal and no space after the Tag.
 
         Example:
             >>> from chronodata.store import Tagger
@@ -238,6 +271,7 @@ class Tagger:
         tag: Tag,
         payload: list[str] | str,
         extra: str = String.EMPTY,
+        format: bool = True,
     ) -> str:
         """Join a string or a list of string to GEDCOM lines.
 
@@ -282,10 +316,37 @@ class Tagger:
 
         if isinstance(payload, list):
             for item in payload:
-                lines = ''.join([lines, Tagger.taginfo(level, tag, item)])
+                if String.EOL in item:
+                    items: list[str] = item.split(String.EOL)
+                    lines = Tagger.string(
+                        lines, level, tag, items[0], format=format
+                    )
+                    lines = Tagger.string(
+                        lines, level + 1, Tag.CONT, items[1:], format=format
+                    )
+                else:
+                    lines = ''.join(
+                        [lines, Tagger.taginfo(level, tag, item, format=format)]
+                    )
             return lines
         if payload != String.EMPTY and payload is not None:
-            return ''.join([lines, Tagger.taginfo(level, tag, payload, extra)])
+            if String.EOL in payload:
+                payloads: list[str] = payload.split(String.EOL)
+                lines = Tagger.string(
+                    lines, level, tag, payloads[0], format=format
+                )
+                lines = Tagger.string(
+                    lines, level + 1, Tag.CONT, payloads[1:], format=format
+                )
+            else:
+                return ''.join(
+                    [
+                        lines,
+                        Tagger.taginfo(
+                            level, tag, payload, extra, format=format
+                        ),
+                    ]
+                )
         return lines
 
     @staticmethod
@@ -305,14 +366,14 @@ class Tagger:
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
             >>> from chronodata.store import Map, Tagger
-            >>> map1 = Map('N', 30.0, 'W', 30.0)
-            >>> map2 = Map('S', 40.0, 'E', 20.0)
+            >>> map1 = Map(30.0, -30.0)
+            >>> map2 = Map(-40.0, 20.0)
             >>> lines = ''
             >>> lines = Tagger.structure(lines, 2, map1)
             >>> print(lines)
             2 MAP
-            3 LATI N30.0
-            3 LONG W30.0
+            3 LATI N30.000000
+            3 LONG W30.000000
             <BLANKLINE>
 
             Now include both defined maps into a list.
@@ -320,11 +381,11 @@ class Tagger:
             >>> lines = Tagger.structure(lines, 4, [map1, map2])
             >>> print(lines)
             4 MAP
-            5 LATI N30.0
-            5 LONG W30.0
+            5 LATI N30.000000
+            5 LONG W30.000000
             4 MAP
-            5 LATI S40.0
-            5 LONG E20.0
+            5 LATI S40.000000
+            5 LONG E20.000000
             <BLANKLINE>
 
         Args:
@@ -347,6 +408,26 @@ class Tagger:
             else:
                 lines = ''.join([lines, payload.ged(level)])
         return lines
+
+    @staticmethod
+    def extension(
+        lines: str,
+        level: int,
+        tag: str,
+        payload: str,
+        extra: str = String.EMPTY,
+    ) -> str:
+        ext_line: str = String.EMPTY
+        if extra == String.EMPTY:
+            if payload == String.EMPTY:
+                ext_line = f'{level} {tag}{String.EOL}'
+            else:
+                ext_line = (
+                    f'{level} {tag} {Tagger.clean_input(payload)}{String.EOL}'
+                )
+        else:
+            ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{String.EOL}'
+        return ''.join([lines, ext_line])
 
 
 class Checker:
@@ -388,6 +469,21 @@ class Checker:
         if when and not then:
             raise ValueError(message)
         return True
+
+    @staticmethod
+    def verify_ext(
+        extensions: set[str], structure: str, substructures: set[str]
+    ) -> bool:
+        all_structures: set[str] = substructures
+        all_structures.add(structure)
+        check: bool = True
+        for extension in extensions:
+            if extension not in all_structures:
+                check = False
+                raise ValueError(
+                    Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension)
+                )
+        return check
 
     @staticmethod
     def verify_type(
@@ -670,12 +766,24 @@ class Placer:
         """Convert degrees, minutes and seconds to a decimal.
 
         Example:
+            The specification for the LATI and LONG structures (tags) offer the
+            following example.
             >>> from chronodata.store import Placer
-            >>> Placer.to_decimal(49, 17, 50, 10)
-            49.2972222222
+            >>> Placer.to_decimal(168, 9, 3.4, 6)
+            168.150944
+
+        Args:
+            degrees: The degrees in the angle whether latitude or longitude.
+            minutes: The minutes in the angle.
+            seconds: The seconds in the angle.
+            precision: The number of digits to the right of the decimal point.
 
         See Also:
             - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
+
+        Reference:
+            [GEDCOM LONG structure](https://gedcom.io/terms/v7/LONG)
+            [GEDCOM LATI structure](https://gedcom.io/terms/v7/LATI)
 
         """
         sign: int = -1 if degrees < 0 else 1
@@ -758,14 +866,8 @@ class Xref:
     def ged(self, info: str = String.EMPTY) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
         if info == String.EMPTY:
-            return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
-        return f'0 {self.fullname} {self.tag.value} {info}{String.NEWLINE}'
-        # if level > 0:
-        #     cleaned_info: str = re.sub(String.BANNED, '', info).strip()
-        #     if info == '':
-        #         return f'{level} {self.tag.value} {self.fullname}\n'
-        #     return f'{level} {self.tag.value} {self.fullname} {cleaned_info}\n'
-        # return f'{level} {self.fullname} {self.tag.value}\n'
+            return f'0 {self.fullname} {self.tag.value}{String.EOL}'
+        return f'0 {self.fullname} {self.tag.value} {info}{String.EOL}'
 
 
 class FamilyXref(Xref):
@@ -783,14 +885,6 @@ class FamilyXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.FAM):
         super().__init__(name, tag)
-
-    #     self.tag = Tag.FAM
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
 
 
 class IndividualXref(Xref):
@@ -812,14 +906,6 @@ class IndividualXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.INDI):
         super().__init__(name, tag)
 
-    #     self.tag = Tag.INDI
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
-
 
 class MultimediaXref(Xref):
     """Assign Assign the MultimediaXref type to a string.
@@ -839,14 +925,6 @@ class MultimediaXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.OBJE):
         super().__init__(name, tag)
-
-    #     self.tag = Tag.OBJE
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
 
 
 class RepositoryXref(Xref):
@@ -868,14 +946,6 @@ class RepositoryXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.REPO):
         super().__init__(name, tag)
 
-    #     self.tag = Tag.REPO
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
-
 
 class SharedNoteXref(Xref):
     """Assign the SharedNoteXref type to a string.
@@ -895,14 +965,6 @@ class SharedNoteXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.SNOTE):
         super().__init__(name, tag)
-
-    #     self.tag = Tag.SNOTE
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
 
 
 class SourceXref(Xref):
@@ -924,14 +986,6 @@ class SourceXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.SOUR):
         super().__init__(name, tag)
 
-    #     self.tag = Tag.SOUR
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
-
 
 class SubmitterXref(Xref):
     """Assign the SubmitterXref type to a string.
@@ -952,14 +1006,6 @@ class SubmitterXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.SUBM):
         super().__init__(name, tag)
 
-    #     self.tag = Tag.SUBM
-    #     self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-    #     self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
-
-    # def ged(self) -> str:
-    #     """Return the identifier formatted according to the GEDCOM standard."""
-    #     return f'0 {self.fullname} {self.tag.value}{String.NEWLINE}'
-
 
 class Void:
     NAME: str = '@VOID@'
@@ -970,6 +1016,134 @@ class Void:
     SNOTE: SharedNoteXref = SharedNoteXref(NAME)
     SOUR: SourceXref = SourceXref(NAME)
     SUBM: SubmitterXref = SubmitterXref(NAME)
+
+
+class Schema:
+    """Store, validate and display schema information.
+
+    An underline is added to the front of the new tag if one is not there already.
+    Also the tag to made upper case.
+
+    This class holds multiple schema tags for the header record.  It is not a separate
+    GEDCOM structure.
+
+    Examples:
+        Consider making a _DATE extention tag based on the GEDCOM specification for
+        the standard DATE tag.
+        >>> from chronodata.store import Schema
+        >>> date = Schema('date', 'https://gedcom.io/terms/v7/DATE')
+        >>> print(date.ged(1))
+        2 TAG _DATE https://gedcom.io/terms/v7/DATE
+        <BLANKLINE>
+
+        We can put this into the header record as an extension tag as follows.
+        >>> from chronodata.store import Header
+        >>> header = Header(schema_tags=[date])
+        >>> print(header.ged())
+        0 HEAD
+        1 GEDC
+        2 VERS 7.0
+        1 SCHMA
+        2 TAG _DATE https://gedcom.io/terms/v7/DATE
+        <BLANKLINE>
+
+
+
+
+    Args:
+        tag: The tag used for the schema information.
+        url: The required url defining the payload of the tag.  This url will be accessed
+            and its contents stored.  It will be used to check the proper placement
+            of the extension tag.
+
+    See Also:
+        `header`
+
+    Returns:
+        A string representing a GEDCOM line for this tag.
+
+    Reference:
+        [GENCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+
+    >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
+    >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
+    """
+
+    def __init__(self, tag: str, url: str) -> None:
+        self.raw_tag: str = tag
+        self.url: str = url
+        self.tag: str = ''.join([String.UNDERLINE, self.raw_tag.upper()])
+        self.webUrl = urllib.request.urlopen(self.url)
+        self.result_code = str(self.webUrl.getcode())
+        raw: str = self.webUrl.read().decode('utf-8')
+        raw2: str = raw[raw.find('%YAML') :]
+        self.yaml: str = raw2[: raw2.find('...')]
+        self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
+        self.substructures: set[str] = self.yamldict['substructures']
+        self.superstructures: set[str] = self.yamldict['superstructures']
+        self.supers: set[str] = {
+            s[s.rfind('/') + 1 :] for s in self.superstructures
+        }
+        self.specification: str = self.yamldict['specification']
+        self.payload_type: Any = self.yamldict['payload']
+
+    def validate(self) -> bool:
+        check: bool = Checker.verify_type(
+            self.tag, str
+        ) and Checker.verify_type(self.url, str)
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            ext_tag: str = self.tag.upper()
+            if ext_tag[0] != String.UNDERLINE:
+                ext_tag = ''.join([String.UNDERLINE, ext_tag])
+            lines = Tagger.string(
+                lines, level + 1, Tag.TAG, ext_tag, str(self.url)
+            )
+        return lines
+
+
+class Extension(NamedTuple):
+    """Store, validate and display extension tags.
+
+    Reference:
+        [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    """
+
+    level: int
+    schema: Schema
+    payload: str = String.EMPTY
+    extra: str = String.EMPTY
+
+    def __str__(self) -> str:
+        if self.extra == String.EMPTY:
+            return f'Extension({self.schema.tag}, {self.payload})'
+        return f'Extension({self.schema.tag}, {self.payload}, {self.extra})'
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.level, int)
+            and Checker.verify_type(self.schema, Schema)
+            and Checker.verify_type(self.payload, str)
+            and Checker.verify_type(self.extra, str)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        lines: str = ''
+        if self.validate():
+            lines = Tagger.extension(
+                lines,
+                level,
+                ''.join([String.UNDERLINE, self.schema.tag.upper()]),
+                self.payload,
+                self.extra,
+            )
+        return lines
 
 
 class Date(NamedTuple):
@@ -1118,7 +1292,7 @@ class Date(NamedTuple):
                     week=0,
                     calendar=Value.GREGORIAN,
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Date(
@@ -1128,7 +1302,7 @@ class Date(NamedTuple):
                     week=0,
                     calendar=Value.GREGORIAN,
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = Date()
@@ -1143,9 +1317,9 @@ class Date(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -1426,7 +1600,7 @@ class Address(NamedTuple):
                     postal='',
                     country='',
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Address(
@@ -1436,7 +1610,7 @@ class Address(NamedTuple):
                     postal='',
                     country='Antarctica',
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = Address()
@@ -1451,9 +1625,9 @@ class Address(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -1504,6 +1678,19 @@ class Age(NamedTuple):
 
     Reference:
         [GEDCOM Specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age)
+
+    > Age         = [[ageBound D] ageDuration]
+    >
+    > ageBound    = "<" / ">"
+    > ageDuration = years [D months] [D weeks] [D days]
+    >             / months [D weeks] [D days]
+    >             / weeks [D days]
+    >             / days
+    >
+    > years   = Integer %x79    ; 35y
+    > months  = Integer %x6D    ; 11m
+    > weeks   = Integer %x77    ; 8w
+    > days    = Integer %x64    ; 21d
     """
 
     years: int = 0
@@ -1544,15 +1731,9 @@ class Age(NamedTuple):
                 info = ''.join([info, f' {self.weeks!s}w'])
             if self.days > 0:
                 info = ''.join([info, f' {self.days!s}d'])
-            line = Tagger.taginfo(
-                level,
-                Tag.AGE,
-                info.replace('  ', ' ').replace('  ', ' ').strip(),
-            )
-            if self.phrase != '':
-                line = ''.join(
-                    [line, Tagger.taginfo(level + 1, Tag.PHRASE, self.phrase)]
-                )
+            info = info.replace('  ', ' ').replace('  ', ' ').strip()
+            line = Tagger.string(line, level, Tag.AGE, info)
+            line = Tagger.string(line, level + 1, Tag.PHRASE, self.phrase)
         return line
 
     def code(self, level: int = 0, name: str = 'age') -> str:
@@ -1614,7 +1795,7 @@ class Age(NamedTuple):
                     greater_less_than='<',
                     phrase='Original text read, "Under two months and two days."',
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Age(
@@ -1625,7 +1806,7 @@ class Age(NamedTuple):
                     greater_less_than='>',
                     phrase='Original text read, "Čtyřicet týdnů a dva dny"',
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = Age()
@@ -1640,9 +1821,9 @@ class Age(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -1767,7 +1948,7 @@ class PersonalNamePieces(NamedTuple):
                     surname=['Smith'],
                     suffix=['Jr'],
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = PersonalNamePieces(
@@ -1778,7 +1959,7 @@ class PersonalNamePieces(NamedTuple):
                     surname=['Smith'],
                     suffix=['Jr'],
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = PersonalNamePieces()
@@ -1793,9 +1974,9 @@ class PersonalNamePieces(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -1920,7 +2101,7 @@ class NameTranslation(NamedTuple):
                         surname=['جونز'],
                     ),
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = NameTranslation(
@@ -1931,7 +2112,7 @@ class NameTranslation(NamedTuple):
                         surname=['Τζόουνς'],
                     ),
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = NameTranslation()
@@ -1946,9 +2127,9 @@ class NameTranslation(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2069,7 +2250,7 @@ class NoteTranslation(NamedTuple):
                     mime=MediaType.TEXT_PLAIN,
                     language='is',
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = NoteTranslation(
@@ -2077,7 +2258,7 @@ class NoteTranslation(NamedTuple):
                     mime=MediaType.TEXT_PLAIN,
                     language='hi',
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = NoteTranslation()
@@ -2092,9 +2273,9 @@ class NoteTranslation(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2211,7 +2392,7 @@ class CallNumber(NamedTuple):
                     medium=Medium.MAGAZINE,
                     phrase='A special article.',
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = CallNumber(
@@ -2219,7 +2400,7 @@ class CallNumber(NamedTuple):
                     medium=Medium.NONE,
                     phrase='',
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = CallNumber()
@@ -2234,9 +2415,9 @@ class CallNumber(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2341,7 +2522,7 @@ Text(
                     mime=MediaType.TEXT_PLAIN,
                     language='mai',
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Text(
@@ -2349,7 +2530,7 @@ Text(
                     mime=MediaType.TEXT_PLAIN,
                     language='am',
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = Text()
@@ -2364,9 +2545,9 @@ Text(
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2470,7 +2651,7 @@ class SourceData(NamedTuple):
                         ),
                     ],
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceData(
@@ -2482,7 +2663,7 @@ class SourceData(NamedTuple):
                         ),
                     ],
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = SourceData()
@@ -2497,9 +2678,9 @@ class SourceData(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2569,7 +2750,9 @@ class SourceCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.SOUR, str(self.xref))
+            lines = Tagger.string(
+                lines, level, Tag.SOUR, str(self.xref), format=False
+            )
             lines = Tagger.string(lines, level + 1, Tag.PAGE, self.page)
             lines = Tagger.structure(
                 lines, level + 1, self.source_data, SourceData()
@@ -2645,13 +2828,13 @@ class SourceCitation(NamedTuple):
                 show = SourceCitation(
                     xref=Void.SOUR,
                 )
-                code_preface = Example.ALTERNATE
+                code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceCitation(
                     xref=Void.SOUR,
                 )
-                code_preface = Example.LANGUAGE
+                code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = SourceCitation()
@@ -2666,9 +2849,9 @@ class SourceCitation(NamedTuple):
                 gedcom_preface,
                 String.DOUBLE_NEWLINE,
                 show.ged(),
-                String.NEWLINE,
+                String.EOL,
                 gedcom_docs,
-                String.NEWLINE,
+                String.EOL,
                 genealogy_docs,
             ]
         )
@@ -2689,7 +2872,18 @@ class Note(NamedTuple):
         >>> note = Note(note='This is my note.')
         >>> print(note.ged(1))
         1 NOTE This is my note.
-        2 LANG und
+        <BLANKLINE>
+
+        A note line may be continued onto two lines if the "\\n" character
+        appears in the note as illustrated in the [GEDCOM Line standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines).
+        >>> multi_line_note = Note(
+        ...     note='This is a note field that\\n  spans four lines.\\n\\n(the third line was blank)'
+        ... )
+        >>> print(multi_line_note.ged(1))
+        1 NOTE This is a note field that
+        2 CONT   spans four lines.
+        2 CONT
+        2 CONT (the third line was blank)
         <BLANKLINE>
 
         This example uses the Hebrew language translating "This is my note." as "זו ההערה שלי."
@@ -2727,6 +2921,7 @@ class Note(NamedTuple):
         3 LANG ur
         <BLANKLINE>
 
+
     Args:
         text: the text of the note.
         mime: the optional media type of the note.
@@ -2755,17 +2950,17 @@ class Note(NamedTuple):
     ]
     """  # noqa: RUF002
 
-    snote: SharedNoteXref | None = None
+    snote: SharedNoteXref = Void.SNOTE
     note: str = String.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
+    language: str = String.EMPTY
     translations: list[NoteTranslation] = []  # noqa: RUF012
     source_citations: list[SourceCitation] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.snote, SharedNoteXref | None)
+            Checker.verify_type(self.snote, SharedNoteXref)
             and Checker.verify_type(self.note, str)
             and Checker.verify_enum(self.mime.value, MediaType)
             and Checker.verify_tuple_type(self.translations, NoteTranslation)
@@ -2777,7 +2972,7 @@ class Note(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.snote is not None:
+            if self.snote != Void.SNOTE:
                 lines = Tagger.string(
                     lines, level, Tag.SNOTE, self.snote.fullname
                 )
@@ -2883,14 +3078,13 @@ class PersonalName(NamedTuple):
         ...     notes=[adam_note],
         ... )
         >>> print(adam.ged(1))
-        1 NAME אָדָ֛ם
+        1 NAME אָדָ֛ם //
         2 TYPE OTHER
         2 NICK הָֽאָדָ֖ם
         2 TRAN Adam
         3 LANG en
         3 NICK the man
         2 NOTE Here is a place to add more information.
-        3 LANG und
         <BLANKLINE>
 
     Args:
@@ -2955,7 +3149,18 @@ class PersonalName(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.NAME, self.name)
+            name_surname: str = self.name
+            if name_surname.count(String.SLASH) < 2:
+                name_surname = ''.join(
+                    [
+                        name_surname,
+                        ' ',
+                        String.SLASH,
+                        self.surname,
+                        String.SLASH,
+                    ]
+                )
+            lines = Tagger.string(lines, level, Tag.NAME, name_surname)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
             lines = Tagger.structure(
                 lines, level + 1, self.pieces, PersonalNamePieces()
@@ -3198,7 +3403,9 @@ class Association(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.ASSO, str(self.xref))
+            lines = Tagger.string(
+                lines, level, Tag.ASSO, str(self.xref), format=False
+            )
             lines = Tagger.string(
                 lines, level + 1, Tag.PHRASE, self.association_phrase
             )
@@ -3369,7 +3576,7 @@ class PlaceName(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1, style: str = String.PLACE_FULL) -> str:
+    def ged(self, level: int = 1, style: str = GedFlag.PLACENAME_FULL) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
@@ -3396,16 +3603,16 @@ class PlaceName(NamedTuple):
                 ]
             )
             match style:
-                case String.PLACE_FULL:
+                case GedFlag.PLACENAME_FULL:
                     lines = Tagger.string(lines, level, Tag.PLAC, place)
                     lines = Tagger.string(lines, level + 1, Tag.FORM, form)
                     lines = Tagger.string(
                         lines, level + 1, Tag.LANG, self.language
                     )
-                case String.PLACE_SHORT:
+                case GedFlag.PLACENAME_SHORT:
                     lines = Tagger.string(lines, level, Tag.PLAC, place)
                     lines = Tagger.string(lines, level + 1, Tag.FORM, form)
-                case String.PLACE_TRANSLATION:
+                case GedFlag.PLACENAME_TRANSLATION:
                     lines = Tagger.string(lines, level, Tag.TRAN, place)
                     lines = Tagger.string(
                         lines, level + 1, Tag.LANG, self.language
@@ -3413,51 +3620,216 @@ class PlaceName(NamedTuple):
         return lines
 
 
-class Map(NamedTuple):
+class Map:
     """Store, validate and save a GEDCOM map structure.
 
+    The latitude and longitude values are formatted to six decimal places
+    by adding zeros if necessary or truncating the number of decimals on the
+    input.
+
+    The [GEDCOM Map Structure Type](https://gedcom.io/terms/v7/MAP) reads the following
+    about the accuracy of this information:
+
+    > Note that `MAP` provides neither a notion of accuracy (for example, the `MAP`
+    > for a birth event may be some distance from the point where the birth occurred)
+    > nor a notion of region size (for example, the `MAP` for a place "Belarus" may
+    > be anywhere within that nation's 200,000 square kilometer area).
+
     Examples:
+    The first example is a basic example using arbitrary latitude and longitude values.
     >>> from chronodata.store import Map
-    >>> location = Map('N', 49.297222, 'E', 14.470833)
+    >>> location = Map(49.297222, -14.470833)
     >>> print(location.ged(1))
     1 MAP
     2 LATI N49.297222
-    2 LONG E14.470833
+    2 LONG W14.470833
     <BLANKLINE>
 
+    The second example illustrates how to enter the data if we have the angle in
+    minutes, degrees or seconds.  Using the same data from the example above,
+    we can first convert it into degrees, minutes and seconds to set up the situation
+    where the records we are given do not come in a decimal format.
+    >>> from chronodata.store import Placer
+    >>> Placer.to_dms(49.297222)
+    (49, 17, 49.9992)
+
+    >>> Placer.to_dms(-14.470833)
+    (-15, 31, 45.0012)
+
+    We can use these values as well as the decimal values to load the Map structure.
+    >>> latlon = Map(
+    ...     Placer.to_decimal(49, 17, 49.9992),
+    ...     Placer.to_decimal(-15, 31, 45.0012),
+    ... )
+    >>> print(latlon.ged(1))
+    1 MAP
+    2 LATI N49.297222
+    2 LONG W14.470833
+    <BLANKLINE>
+
+    Args:
+        latitude: The positive decimal value of the angle from the equator.
+        longitude: The positive decimal value of the angle from the prime meridian.
+        structure: The URL defining the structure used to validate whether an extension can be
+            used in this position.
+        extension: A list of extensions which have been defined for this structure in the
+            SCHMA structure of the header record.  Their definitions would have to permit
+            the extension to be used with `Map` as a superstructure.
+
     Reference:
-        - [GEDCOM Map Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MAP)
-        - [GEDCOM Latitude Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LATI)
-        - [GEDCOM Longitude Standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LONG)
+        - [GEDCOM Map Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MAP)
+        - [GEDCOM Latitude Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LATI)
+        - [GEDCOM Longitude Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LONG)
     """
 
-    north_south: Literal['N', 'S'] = 'N'
-    latitude: float = 90.0
-    east_west: Literal['E', 'W'] = 'W'
-    longitude: float = 0.0
+    structure: ClassVar[str] = Tag.MAP.value
+    substructures: ClassVar[set[str]] = {Tag.LATI.value, Tag.LONG.value}
+
+    def __init__(
+        self,
+        latitude: float = 91.0,
+        longitude: float = 181.0,
+        extensions: list[Extension] | None = None,
+    ):
+        self.latitude: float = latitude
+        self.longitude: float = longitude
+        self.extensions: list[Extension] | None = extensions
+        self.descriptions: set[str] = set()
+        self.map_extensions: list[Extension] = []
+        self.lati_extensions: list[Extension] = []
+        self.long_extensions: list[Extension] = []
+        if self.extensions is not None:
+            for ext in self.extensions:
+                self.descriptions.union(ext.schema.supers)
+                if Tag.MAP.value in ext.schema.supers:
+                    self.map_extensions.append(ext)
+                elif Tag.LATI.value in ext.schema.supers:
+                    self.lati_extensions.append(ext)
+                elif Tag.LONG.value in ext.schema.supers:
+                    self.long_extensions.append(ext)
+
+    def __str__(self) -> str:
+        if self.extensions is None:
+            return (
+                f'Map(latitude={self.latitude!s}, longitude={self.longitude!s})'
+            )
+        return f'Map(latitude={self.latitude!s}, longitude={self.longitude!s}, extensions={self.extensions!s})'
+    
+    def __repr__(self) -> str:
+        return str(self)
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.latitude, float)
-            and Checker.verify_enum(self.north_south, Latitude)
             and Checker.verify_type(self.longitude, float)
-            and Checker.verify_enum(self.east_west, Longitude)
-            and Checker.verify_range(self.latitude, 0.0, 360.0)
-            and Checker.verify_range(self.longitude, -90.0, 90.0)
+            and Checker.verify_range(self.latitude, -90.0, 90.0)
+            and Checker.verify_range(self.longitude, -180.0, 180.0)
+            and Checker.verify_ext(
+                self.descriptions, self.structure, self.substructures
+            )
         )
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        latitude: str = ''.join([self.north_south, str(self.latitude)])
-        longitude: str = ''.join([self.east_west, str(self.longitude)])
+        north_south: str = 'N'
+        if self.latitude < 0.0:
+            north_south = 'S'
+        east_west: str = 'E'
+        if self.longitude < 0.0:
+            east_west = 'W'
+        latitude: str = format(abs(self.latitude), '.6f')
+        longitude: str = format(abs(self.longitude), '.6f')
+        latitude = ''.join([north_south, latitude])
+        longitude = ''.join([east_west, longitude])
         if self.validate():
             lines = Tagger.empty(lines, level, Tag.MAP)
+            lines = Tagger.structure(lines, level + 1, self.map_extensions)
             lines = Tagger.string(lines, level + 1, Tag.LATI, latitude)
+            lines = Tagger.structure(lines, level + 2, self.lati_extensions)
             lines = Tagger.string(lines, level + 1, Tag.LONG, longitude)
+            lines = Tagger.structure(lines, level + 2, self.long_extensions)
         return lines
+
+    def code(self, level: int = 0, name: str = 'map') -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""{name} = Map(
+    latitude = {self.latitude!s},
+    longitude = {self.longitude!s},
+)""",
+            spaces,
+        )
+
+    def example(
+        self, choice: int = 0, latitude: float = 91.0, longitude: float = 181.0
+    ) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an intentional error.  If the Map structure is used
+            without specifying values, the default values will trigger an error.
+            However, if an acceptable lattitude and longitude are used in this example,
+            then the user example will be displayed.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+            latitude: If a non-zero latitude is entered this will be used in the example.
+            longitude: If a non-zero longitude is entered this will be used in the example.
+        """
+        show: Map
+        gedcom_docs: str = Specs.MAP
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Map(latitude=45.0, longitude=-45.0)
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Map(latitude=-45.123456789000, longitude=45.987654321000)
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Map(latitude=0.0000000001, longitude=0.000000005)
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                if latitude != 91.0 and longitude != 181.0:
+                    show = Map(latitude=latitude, longitude=longitude)
+                    logging.info(Example.USER_PROVIDED_EXAMPLE)
+                    code_preface = Example.USER_PROVIDED
+                    gedcom_preface = Example.GEDCOM
+                else:
+                    logging.info(Example.ERROR_EXPECTED)
+                    show = Map()
+                    code_preface = Example.EMPTY_CODE
+                    gedcom_preface = Example.EMPTY_GEDCOM
+        return ''.join(
+            [
+                code_preface,
+                String.DOUBLE_NEWLINE,
+                show.code(),
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show.ged(),
+                String.EOL,
+                gedcom_docs,
+                String.EOL,
+                genealogy_docs,
+            ]
+        )
 
 
 class Place(NamedTuple):
@@ -3508,7 +3880,7 @@ class Place(NamedTuple):
         ...     translations=[
         ...         bechyne_en,
         ...     ],
-        ...     map=Map('N', 49.297222, 'E', 14.470833),
+        ...     map=Map(49.297222, 14.470833),
         ...     notes=[
         ...         Note(note='A place in the Czech Republic.', language='en'),
         ...         Note(note='Místo v České republice.', language='cs'),
@@ -3557,9 +3929,9 @@ class Place(NamedTuple):
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
 
-    place: PlaceName = PlaceName(String.EMPTY)
+    place: PlaceName = PlaceName()
     translations: list[PlaceName] = []  # noqa: RUF012
-    map: Map = Map('N', 0, 'W', 0)
+    map: Map = Map()
     exids: list[Exid] = []  # noqa: RUF012
     notes: list[Note] = []  # noqa: RUF012
 
@@ -3583,7 +3955,7 @@ class Place(NamedTuple):
                 lines,
                 level + 1,
                 self.translations,
-                flag=String.PLACE_TRANSLATION,
+                flag=GedFlag.PLACENAME_TRANSLATION,
             )
             lines = Tagger.structure(lines, level + 1, self.map, Map())
             lines = Tagger.structure(lines, level + 1, self.exids)
@@ -3979,7 +4351,9 @@ class Husband(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.string(lines, level, Tag.HUSB, str(self.xref))
+            lines = Tagger.string(
+                lines, level, Tag.HUSB, str(self.xref), format=False
+            )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
@@ -3999,7 +4373,9 @@ class Wife(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.string(lines, level, Tag.WIFE, str(self.xref))
+            lines = Tagger.string(
+                lines, level, Tag.WIFE, str(self.xref), format=False
+            )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
@@ -4029,7 +4405,9 @@ class Child(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.string(lines, level, Tag.CHIL, str(self.xref))
+            lines = Tagger.string(
+                lines, level, Tag.CHIL, str(self.xref), format=False
+            )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
@@ -4575,16 +4953,40 @@ class IndividualEvent(NamedTuple):
 
 
 class Alias(NamedTuple):
-    """Store, validate and display a GEDCOM Alias structure."""
+    """Store, validate and display a GEDCOM Alias structure.
+
+    Data about an individual may be contained in the individual records of other individuals.
+    This tag references those other individuals.
+
+    This alias information is defined as its own class because multiple aliases could
+    be identified for a single individual.
+
+    Args:
+        xref: An individual cross-reference identifier containing information about
+            the individual referenced in the individual record.
+        phrase: Text associated with this other individual.
+
+    Reference:
+        [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
+
+    > +1 ALIA @<XREF:INDI>@                    {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
+    >    +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    """
 
     xref: IndividualXref = Void.INDI
     phrase: str = String.EMPTY
 
-    def validate(self) -> bool:
+    def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.xref, IndividualXref
-        ) and Checker.verify_type(self.phrase, str)
+        check: bool = (
+            Checker.verify_type(self.xref, IndividualXref)
+            and Checker.verify_type(self.phrase, str)
+            and Checker.verify(
+                True,
+                self.xref != main_individual,
+                Msg.SAME_INDIVIDUAL.format(self.xref.fullname),
+            )
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -4597,6 +4999,22 @@ class Alias(NamedTuple):
 
 
 class FamilyChild(NamedTuple):
+    """Store, validate and display family child data.
+
+    Multiple FAMC records may be defined for a singe Indivdiual Record.  This class
+    defines a single FAMC (Family Child) substructure.
+
+    References:
+        [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
+
+    > +1 FAMC @<XREF:FAM>@                     {0:M}  [g7:INDI-FAMC](https://gedcom.io/terms/v7/INDI-FAMC)
+    >    +2 PEDI <Enum>                        {0:1}  [g7:PEDI](https://gedcom.io/terms/v7/PEDI)
+    >       +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >    +2 STAT <Enum>                        {0:1}  [g7:FAMC-STAT](https://gedcom.io/terms/v7/FAMC-STAT)
+    >       +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >    +2 <<NOTE_STRUCTURE>>                 {0:M}
+    """
+
     family_xref: FamilyXref
     pedigree: str = ''
     pedigree_phrase: str = ''
@@ -5161,6 +5579,7 @@ class Individual(NamedTuple):
     notes: list[Note] = []  # noqa: RUF012
     sources: list[Source] = []  # noqa: RUF012
     multimedia_links: list[MultimediaLink] = []  # noqa: RUF012
+    extensions: list[Extension] = []  # noqa: RUF012
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5184,6 +5603,7 @@ class Individual(NamedTuple):
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
             and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and Checker.verify_tuple_type(self.extensions, Extension)
         )
         return check
 
@@ -5209,6 +5629,7 @@ class Individual(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
             lines = Tagger.structure(lines, level + 1, self.sources)
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
+            lines = Tagger.structure(lines, level + 1, self.extensions)
         return lines
 
     def code(
@@ -5337,33 +5758,6 @@ class SharedNote(NamedTuple):
         return lines
 
 
-class Schema(NamedTuple):
-    """Store, validate and display schema information.
-
-    Examples:
-
-
-    Args:
-        tag: The tag used for the schema information.
-        url: The url defining the payload of the tag.
-
-    Returns:
-        A string representing a GEDCOM line for this tag.
-
-    """
-
-    tag: Tag = Tag.NONE
-    url: str = ''
-
-    def validate(self) -> bool:
-        check: bool = (
-            Checker.verify_type(self.tag, Tag)
-            # and Checker.verify_enum(self.tag.value, Choice.EXTENSION_TAG)
-            and Checker.verify_type(self.url, str)
-        )
-        return check
-
-
 class Header(NamedTuple):
     """Hold data for the GEDCOM header special record.
 
@@ -5371,57 +5765,84 @@ class Header(NamedTuple):
     ---------
     - [GEDCOM Header](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
 
-    >n HEAD                                     {1:1}  g7:HEAD
-    >  +1 GEDC                                  {1:1}  g7:GEDC
-    >     +2 VERS <Special>                     {1:1}  g7:GEDC-VERS
-    >  +1 SCHMA                                 {0:1}  g7:SCHMA
-    >     +2 TAG <Special>                      {0:M}  g7:TAG
-    >  +1 SOUR <Special>                        {0:1}  g7:HEAD-SOUR
-    >     +2 VERS <Special>                     {0:1}  g7:VERS
-    >     +2 NAME <Text>                        {0:1}  g7:NAME
-    >     +2 CORP <Text>                        {0:1}  g7:CORP
+    >n HEAD                                     {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
+    >  +1 GEDC                                  {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
+    >     +2 VERS <Special>                     {1:1}  [g7:GEDC-VERS](https://gedcom.io/terms/v7/GEDC-VERS)
+    >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
+    >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
+    >  +1 SOUR <Special>                        {0:1}  [g7:HEAD-SOUR](https://gedcom.io/terms/v7/HEAD-SOUR)
+    >     +2 VERS <Special>                     {0:1}  [g7:VERS](https://gedcom.io/terms/v7/VERS)
+    >     +2 NAME <Text>                        {0:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
+    >     +2 CORP <Text>                        {0:1}  [g7:CORP](https://gedcom.io/terms/v7/CORP)
     >        +3 <<ADDRESS_STRUCTURE>>           {0:1}
-    >        +3 PHON <Special>                  {0:M}  g7:PHON
-    >        +3 EMAIL <Special>                 {0:M}  g7:EMAIL
-    >        +3 FAX <Special>                   {0:M}  g7:FAX
-    >        +3 WWW <Special>                   {0:M}  g7:WWW
-    >     +2 DATA <Text>                        {0:1}  g7:HEAD-SOUR-DATA
-    >        +3 DATE <DateExact>                {0:1}  g7:DATE-exact
-    >           +4 TIME <Time>                  {0:1}  g7:TIME
-    >        +3 COPR <Text>                     {0:1}  g7:COPR
-    >  +1 DEST <Special>                        {0:1}  g7:DEST
-    >  +1 DATE <DateExact>                      {0:1}  g7:HEAD-DATE
-    >     +2 TIME <Time>                        {0:1}  g7:TIME
-    >  +1 SUBM @<XREF:SUBM>@                    {0:1}  g7:SUBM
-    >  +1 COPR <Text>                           {0:1}  g7:COPR
-    >  +1 LANG <Language>                       {0:1}  g7:HEAD-LANG
-    >  +1 PLAC                                  {0:1}  g7:HEAD-PLAC
-    >     +2 FORM <List:Text>                   {1:1}  g7:HEAD-PLAC-FORM
+    >        +3 PHON <Special>                  {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+    >        +3 EMAIL <Special>                 {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+    >        +3 FAX <Special>                   {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+    >        +3 WWW <Special>                   {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+    >     +2 DATA <Text>                        {0:1}  [g7:HEAD-SOUR-DATA](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
+    >        +3 DATE <DateExact>                {0:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
+    >           +4 TIME <Time>                  {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+    >        +3 COPR <Text>                     {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
+    >  +1 DEST <Special>                        {0:1}  [g7:DEST](https://gedcom.io/terms/v7/DEST)
+    >  +1 DATE <DateExact>                      {0:1}  [g7:HEAD-DATE](https://gedcom.io/terms/v7/HEAD-DATE)
+    >     +2 TIME <Time>                        {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+    >  +1 SUBM @<XREF:SUBM>@                    {0:1}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
+    >  +1 COPR <Text>                           {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
+    >  +1 LANG <Language>                       {0:1}  [g7:HEAD-LANG](https://gedcom.io/terms/v7/LANG)
+    >  +1 PLAC                                  {0:1}  [g7:HEAD-PLAC](https://gedcom.io/terms/v7/PLAC)
+    >     +2 FORM <List:Text>                   {1:1}  [g7:HEAD-PLAC-FORM](https://gedcom.io/terms/v7/PLAC-FORM)
     >  +1 <<NOTE_STRUCTURE>>                    {0:1}
     """
 
-    schemas: Any = None
-    source: str = ''
-    vers: str = ''
-    name: str = ''
-    corp: str = ''
-    address: Address = Address([], '', '', '', '')
+    schema_tags: list[Schema] = []  # noqa: RUF012
+    source: str = String.EMPTY
+    vers: str = String.EMPTY
+    name: str = String.EMPTY
+    corporation: str = String.EMPTY
+    address: Address = Address()
     phones: list[str] = []  # noqa: RUF012
     emails: list[str] = []  # noqa: RUF012
     faxes: list[str] = []  # noqa: RUF012
     wwws: list[str] = []  # noqa: RUF012
-    data: str = ''
-    dest: str = ''
-    date: Date = Date(0, 0, 0)
-    time: Time = Time(0, 0, 0)
-    copr: str = ''
-    language: str = String.UNDETERMINED
-    place: PlaceName | None = None
-    note: Note | None = None
+    data: str = String.EMPTY
+    data_date: Date = Date()
+    data_time: Time = Time()
+    data_copyright: str = String.EMPTY
+    dest: str = String.EMPTY
+    header_date: Date = Date()
+    header_time: Time = Time()
+    submitter: SubmitterXref = Void.SUBM
+    subm_copyright: str = String.EMPTY
+    language: str = String.EMPTY
+    place: PlaceName = PlaceName()
+    note: Note = Note()
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = True
+        check: bool = (
+            Checker.verify_tuple_type(self.schema_tags, Schema)
+            and Checker.verify_type(self.source, str)
+            and Checker.verify_type(self.vers, str)
+            and Checker.verify_type(self.name, str)
+            and Checker.verify_type(self.corporation, str)
+            and Checker.verify_type(self.address, Address)
+            and Checker.verify_tuple_type(self.phones, str)
+            and Checker.verify_tuple_type(self.emails, str)
+            and Checker.verify_tuple_type(self.faxes, str)
+            and Checker.verify_tuple_type(self.wwws, str)
+            and Checker.verify_type(self.data, str)
+            and Checker.verify_type(self.data_date, Date)
+            and Checker.verify_type(self.data_time, Time)
+            and Checker.verify_type(self.data_copyright, str)
+            and Checker.verify_type(self.dest, str)
+            and Checker.verify_type(self.header_date, Date)
+            and Checker.verify_type(self.header_time, Time)
+            and Checker.verify_type(self.submitter, SubmitterXref)
+            and Checker.verify_type(self.subm_copyright, str)
+            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.place, PlaceName)
+            and Checker.verify_type(self.note, Note)
+        )
         return check
 
     def ged(self, level: int = 0) -> str:
@@ -5431,12 +5852,36 @@ class Header(NamedTuple):
             lines = Tagger.empty(lines, level, Tag.HEAD)
             lines = Tagger.empty(lines, level + 1, Tag.GEDC)
             lines = Tagger.string(lines, level + 2, Tag.VERS, String.VERSION)
-            if self.schemas is not None:
+            if len(self.schema_tags) > 0:
                 lines = Tagger.empty(lines, level + 1, Tag.SCHMA)
+                lines = Tagger.structure(lines, level + 1, self.schema_tags)
             lines = Tagger.structure(lines, level, self.address)
             lines = Tagger.string(lines, level, Tag.PHON, self.phones)
             lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
             lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
             lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
-            # lines = Tagger.structure(lines, level + 1, Tag.TAG, self.schemas)
+            if self.data != String.EMPTY:
+                lines = Tagger.string(lines, level + 2, Tag.DATA, self.data)
+                lines = Tagger.structure(
+                    lines, level + 3, self.data_date, Date()
+                )
+                lines = Tagger.structure(
+                    lines, level + 4, self.data_time, Time()
+                )
+                lines = Tagger.string(
+                    lines, level + 3, Tag.COPR, self.data_copyright
+                )
+            lines = Tagger.string(lines, level, Tag.DEST, self.dest)
+            lines = Tagger.structure(lines, level, self.header_date, Date())
+            lines = Tagger.structure(lines, level + 1, self.header_time, Time())
+            if self.submitter != Void.SUBM:
+                lines = Tagger.string(
+                    lines, level + 1, Tag.SUBM, self.submitter.fullname
+                )
+            lines = Tagger.string(
+                lines, level + 1, Tag.COPR, self.subm_copyright
+            )
+            lines = Tagger.string(lines, level, Tag.LANG, self.language)
+            lines = Tagger.structure(lines, level, self.place, PlaceName())
+            lines = Tagger.structure(lines, level, self.note)
         return lines
