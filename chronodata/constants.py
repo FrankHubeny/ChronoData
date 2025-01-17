@@ -148,6 +148,17 @@ class Number:
     GRAMPSLEN: int = 7
     JSONLEN: int = 5
 
+@dataclass(frozen=True)
+class Default:
+    EMPTY: str = ''
+    CHOICE: int = 1
+    MAP_LATITUDE: float = 91.0
+    MAP_LONGITUDE: float = 181.0
+    PLACE_FORM1: str = 'City'
+    PLACE_FORM2: str = 'County'
+    PLACE_FORM3: str = 'State'
+    PLACE_FORM4: str = 'Country'
+
 
 @dataclass(frozen=True)
 class String:
@@ -160,6 +171,7 @@ class String:
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
     COLON: str = ':'
+    COMMA: str = ','
     CSV: str = '.csv'
     DAY: str = 'd'
     DOUBLE_NEWLINE: str = '\n\n'
@@ -182,6 +194,9 @@ class String:
     INT: str = 'int'
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
+    LEFT_BRACKET: str = '['
+    LEFT_RIGHT_BRACKET: str = '[]'
+    LIST_ITEM_SEPARATOR: str = ', '
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
     NEGATIVE: str = '-'
@@ -190,6 +205,7 @@ class String:
     MAX = 'MAX'
     MIN = 'MIN'
     READ: str = 'r'
+    RIGHT_BRACKET: str = ']'
     SLASH: str = '/'
     SPACE: str = ' '
     T: str = 'T'

@@ -65,7 +65,7 @@ __all__ = [
     'PersonalName',
     'PersonalNamePieces',
     'Place',
-    'PlaceName',
+    'PlaceTranslation',
     'Placer',
     'Repository',
     'Repository',
@@ -106,11 +106,11 @@ import yaml  # type: ignore[import-untyped]
 from chronodata.constants import (
     Adop,
     Cal,
+    Default,
     Event,
     FamAttr,
     # FamcStat,
     FamEven,
-    GedFlag,
     GreaterLessThan,
     Id,
     IndiAttr,
@@ -821,6 +821,34 @@ class Placer:
         )
         return (degrees, minutes, seconds)
 
+    @staticmethod
+    def form(form1: str, form2: str, form3: str, form4: str) -> str:
+        return ''.join(
+            [
+                form1,
+                String.LIST_ITEM_SEPARATOR,
+                form2,
+                String.LIST_ITEM_SEPARATOR,
+                form3,
+                String.LIST_ITEM_SEPARATOR,
+                form4,
+            ]
+        )
+
+    @staticmethod
+    def place(place1: str, place2: str, place3: str, place4: str) -> str:
+        return ''.join(
+            [
+                place1,
+                String.LIST_ITEM_SEPARATOR,
+                place2,
+                String.LIST_ITEM_SEPARATOR,
+                place3,
+                String.LIST_ITEM_SEPARATOR,
+                place4,
+            ]
+        )
+
 
 class Formatter:
     """Methods to support formatting strings to meet the GEDCOM standard."""
@@ -845,6 +873,56 @@ class Formatter:
         """Format a url string to meet the GEDCOM standard."""
         return data
 
+    @staticmethod
+    def listcodes(items: Any, level: int = 1) -> str:
+        if isinstance(items, str):
+            return ''.join(["'", items, "'"])
+        if isinstance(items, list):
+            if len(items) == 0:
+                return String.LEFT_RIGHT_BRACKET
+            lines: str = String.LEFT_BRACKET
+            for item in items:
+                lines = ''.join([lines, item.code(level), String.COMMA])
+            return ''.join(
+                [
+                    lines,
+                    String.EOL,
+                    String.INDENT * (level - 1),
+                    String.RIGHT_BRACKET,
+                ]
+            )
+        code_lines: str = (
+            items.code(level)
+            .replace(String.EOL, String.EMPTY, 1)
+            .replace(String.INDENT, String.EMPTY, 1)
+        )
+        return code_lines
+
+    @staticmethod
+    def example(
+        code_preface: str,
+        show_code: str,
+        gedcom_preface: str,
+        show_ged: str,
+        gedcom_docs: str,
+        genealogy_docs: str,
+    ) -> str:
+        return ''.join(
+            [
+                code_preface,
+                String.EOL,
+                show_code,
+                String.DOUBLE_NEWLINE,
+                gedcom_preface,
+                String.DOUBLE_NEWLINE,
+                show_ged,
+                String.EOL,
+                gedcom_docs,
+                String.EOL,
+                genealogy_docs,
+            ]
+        )
+
 
 class Xref:
     def __init__(self, name: str, tag: Tag = Tag.NONE):
@@ -857,7 +935,7 @@ class Xref:
         self.name: str = name.replace('@', '').replace('_', ' ')
         self.tag: Tag = tag
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-        self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
+        #self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -868,6 +946,9 @@ class Xref:
         if info == String.EMPTY:
             return f'0 {self.fullname} {self.tag.value}{String.EOL}'
         return f'0 {self.fullname} {self.tag.value} {info}{String.EOL}'
+    
+    def code(self) -> str:
+        return self.fullname
 
 
 class FamilyXref(Xref):
@@ -1239,10 +1320,11 @@ class Date(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, level: int = 0, name: str = 'date') -> str:
+    def code(self, level: int = 0) -> str:
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = Date(
+            f"""
+Date(
     year = {self.year},
     month = '{self.month}',
     day = '{self.day}',
@@ -1252,7 +1334,7 @@ class Date(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1269,7 +1351,7 @@ class Date(NamedTuple):
             choice: The example one chooses to display.
         """
         show: Date
-        gedcom_docs: str = ''
+        gedcom_docs: str = Specs.DATE
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -1308,20 +1390,13 @@ class Date(NamedTuple):
                 show = Date()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -1382,6 +1457,19 @@ class Time(NamedTuple):
         if self.validate():
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
+    
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+Time(
+    hour = {self.hour},
+    minute = {self.minute},
+    second = {self.second},
+    UTC = '{self.UTC}',
+)""",
+            spaces,
+        )
 
 
 class DateExact(NamedTuple):
@@ -1401,7 +1489,7 @@ class DateExact(NamedTuple):
 
     date: Date = Date()
     time: Time = Time()
-    phrase: str = ''
+    phrase: str = Default.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1420,6 +1508,20 @@ class DateExact(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.time, Time())
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
+    
+    def code(self, level: int = 0) -> str:
+        date: str = Formatter.listcodes(self.date, level + 1)
+        time: str = Formatter.listcodes(self.time, level + 1)
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+DateExact(
+    date = {date},
+    time = '{time}',
+    phrase = '{self.phrase}',
+)""",
+            spaces,
+        )
 
 
 class DateValue(NamedTuple):
@@ -1458,6 +1560,20 @@ class DateValue(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.time, Time())
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
+    
+    def code(self, level: int = 0) -> str:
+        date: str = Formatter.listcodes(self.date, level + 1)
+        time: str = Formatter.listcodes(self.time, level + 1)
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+DateExact(
+    date = {date},
+    time = '{time}',
+    phrase = '{self.phrase}',
+)""",
+            spaces,
+        )
 
 
 class Address(NamedTuple):
@@ -1560,7 +1676,7 @@ class Address(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1616,20 +1732,13 @@ class Address(NamedTuple):
                 show = Address()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -1736,11 +1845,12 @@ class Age(NamedTuple):
             line = Tagger.string(line, level + 1, Tag.PHRASE, self.phrase)
         return line
 
-    def code(self, level: int = 0, name: str = 'age') -> str:
+    def code(self, level: int = 0) -> str:
         """Generate the ChronoData code that would produce the GEDCOM lines."""
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = Age(
+            f"""
+Age(
     years = {self.years},
     months = {self.months},
     weeks = {self.weeks},
@@ -1751,7 +1861,7 @@ class Age(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1812,20 +1922,13 @@ class Age(NamedTuple):
                 show = Age()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -1892,10 +1995,11 @@ class PersonalNamePieces(NamedTuple):
             lines = Tagger.string(lines, level, Tag.NSFX, self.suffix)
         return lines
 
-    def code(self, level: int = 0, name: str = 'pieces') -> str:
+    def code(self, level: int = 0) -> str:
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = PersonalNamePieces(
+            f"""
+PersonalNamePieces(
     prefix = {self.prefix},
     given = {self.given},
     nickname = {self.nickname},
@@ -1906,7 +2010,7 @@ class PersonalNamePieces(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1965,20 +2069,13 @@ class PersonalNamePieces(NamedTuple):
                 show = PersonalNamePieces()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2048,18 +2145,20 @@ class NameTranslation(NamedTuple):
             )
         return lines
 
-    def code(self, level: int = 0, name: str = 'translation') -> str:
+    def code(self, level: int = 0) -> str:
+        pieces: str = Formatter.listcodes(self.pieces, level + 1)
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = NameTranslation(
+            f"""
+NameTranslation(
     translation = '{self.translation}',
     language = '{self.language}',
-{self.pieces.code(level + 1, name='pieces')},
+    pieces = {pieces},
 )""",
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2118,20 +2217,13 @@ class NameTranslation(NamedTuple):
                 show = NameTranslation()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2181,9 +2273,9 @@ class NoteTranslation(NamedTuple):
     >    +2 LANG <Language>                    {0:1}  g7:LANG
     """
 
-    translation: str = String.EMPTY
+    translation: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
+    language: str = Default.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2203,10 +2295,11 @@ class NoteTranslation(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
         return lines
 
-    def code(self, level: int = 0, name: str = 'translation') -> str:
+    def code(self, level: int = 0) -> str:
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = NoteTranslation(
+            f"""
+NoteTranslation(
     translation = '{self.translation}',
     mime = '{self.mime}',
     language = '{self.language}',
@@ -2214,7 +2307,7 @@ class NoteTranslation(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2264,20 +2357,13 @@ class NoteTranslation(NamedTuple):
                 show = NoteTranslation()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2323,9 +2409,9 @@ class CallNumber(NamedTuple):
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
-    call_number: str = String.EMPTY
+    call_number: str = Default.EMPTY
     medium: Medium = Medium.NONE
-    phrase: str = String.EMPTY
+    phrase: str = Default.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2345,10 +2431,11 @@ class CallNumber(NamedTuple):
             lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
         return lines
 
-    def code(self, level: int = 0, name: str = 'call_number') -> str:
+    def code(self, level: int = 0) -> str:
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = CallNumber(
+            f"""
+CallNumber(
     call_number = '{self.call_number}',
     medium = '{self.medium}',
     phrase = '{self.phrase}',
@@ -2356,7 +2443,7 @@ class CallNumber(NamedTuple):
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2406,20 +2493,13 @@ class CallNumber(NamedTuple):
                 show = CallNumber()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2452,9 +2532,9 @@ class Text(NamedTuple):
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
 
-    text: str = String.EMPTY
+    text: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
+    language: str = Default.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2486,7 +2566,7 @@ Text(
             spaces,
         )  # .replace('\n', '', 1)
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2536,20 +2616,13 @@ Text(
                 show = Text()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2577,7 +2650,7 @@ class SourceData(NamedTuple):
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
 
-    date_value: str = String.EMPTY
+    date_value: DateValue = DateValue()
     texts: list[Text] = [Text(), Text()]  # noqa: RUF012
 
     def validate(self) -> bool:
@@ -2590,24 +2663,24 @@ class SourceData(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.date_value != String.EMPTY and self.validate():
+        if self.date_value != DateValue() and self.validate():
             lines = Tagger.string(lines, level, Tag.DATE, str(self.date_value))
             lines = Tagger.structure(lines, level + 1, self.texts, Text())
         return lines
 
     def code(self, level: int = 0) -> str:
+        date_value: str = Formatter.listcodes(self.date_value, level + 1)
+        texts: str = Formatter.listcodes(self.texts, level + 1)
         spaces: str = String.INDENT * level
-        text_strings: list[str] = [text.code(2) for text in self.texts]
         return indent(
-            f"""SourceData(
-    date_value = '{self.date_value}',
-    texts = [{''.join(text_strings)}
-    ],
+f"""SourceData(
+    date_value = '{date_value}',
+    texts = {texts},
 ),""",
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2631,7 +2704,7 @@ class SourceData(NamedTuple):
         match choice:
             case 1:
                 show = SourceData(
-                    date_value='This is a text.',
+                    date_value=DateValue(),
                     texts=[
                         Text('hello', MediaType.TEXT_PLAIN, language='en'),
                         Text(
@@ -2643,7 +2716,7 @@ class SourceData(NamedTuple):
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = SourceData(
-                    date_value='This is a text.',
+                    date_value=DateValue(),
                     texts=[
                         Text('hello', MediaType.TEXT_PLAIN, language='en'),
                         Text(
@@ -2655,7 +2728,7 @@ class SourceData(NamedTuple):
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceData(
-                    date_value='This is a text.',
+                    date_value=DateValue(),
                     texts=[
                         Text('hello', MediaType.TEXT_PLAIN, language='en'),
                         Text(
@@ -2669,20 +2742,13 @@ class SourceData(NamedTuple):
                 show = SourceData()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2777,26 +2843,29 @@ class SourceCitation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, level: int = 0, name: str = 'source_citation') -> str:
+    def code(self, level: int = 0) -> str:
+        source_data: str = Formatter.listcodes(self.source_data, level + 1)
+        event: str = Formatter.listcodes(self.event, level + 1)
+        multimedialinks: str = Formatter.listcodes(self.multimedialinks, level + 1)
+        notes: str = Formatter.listcodes(self.notes, level + 1)
         spaces: str = String.INDENT * level
-        # text_strings: list[str] = [text.code(2) for text in self.texts]
         return indent(
-            f"""{name} = SourceCitation(
+f"""SourceCitation(
     xref = '{self.xref}',
     page = '{self.page}',
-    source_data = {self.source_data},
-    event = {self.event},
+    source_data = {source_data},
+    event = {event},
     phrase = {self.event_phrase},
     role = {self.role},
     role_phrase = {self.role_phrase},
     quality = {self.quality},
-    multimedialinks = {self.multimedialinks},
-    notes = {self.notes},
+    multimedialinks = {multimedialinks},
+    notes = {notes},
 ),""",
             spaces,
         )
 
-    def example(self, choice: int = 0) -> str:
+    def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2840,20 +2909,13 @@ class SourceCitation(NamedTuple):
                 show = SourceCitation()
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
@@ -2990,6 +3052,30 @@ class Note(NamedTuple):
                 )
         return lines
 
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        if self.snote != Void.SNOTE:
+            return indent(
+                f"""
+Note(
+    snote = {self.snote.fullname},
+)""",
+                spaces,
+            )
+        translations = Formatter.listcodes(self.translations, level + 1)
+        source_citations = Formatter.listcodes(self.source_citations, level + 1)
+        return indent(
+            f"""
+Note(
+    note = '{self.note}',
+    mime = '{self.mime}',
+    language = '{self.language}',
+    translations = {translations},
+    source_citations = {source_citations},
+)""",
+            spaces,
+        )
+
 
 class SourceRepositoryCitation(NamedTuple):
     """Store, validate and display the optional Source Repository Citation
@@ -3038,6 +3124,20 @@ class SourceRepositoryCitation(NamedTuple):
                 lines, level, self.call_numbers, CallNumber()
             )
         return lines
+    
+    def code(self, level: int = 0) -> str:
+        notes: str = Formatter.listcodes(self.notes, level + 1)
+        call_numbers: str = Formatter.listcodes(self.call_numbers, level + 1)
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+SourceRepositoryCitation(
+    repo = {self.repo},
+    notes = {notes},
+    callnumbers = {call_numbers},
+)""",
+            spaces,
+        )
 
 
 class PersonalName(NamedTuple):
@@ -3173,6 +3273,27 @@ class PersonalName(NamedTuple):
                 lines, level + 1, self.source_citations, SourceCitation()
             )
         return lines
+    
+    def code(self, level: int = 0) -> str:
+        # pieces: str = Formatter.listcodes(self.pieces, level + 1)
+        # translations: str = Formatter.listcodes(self.translations, level + 1)
+        # notes: str = Formatter.listcodes(self.notes, level + 1)
+        # source_citations: str = Formatter.listcodes(self.source_citations, level + 1)
+        #spaces: str = String.INDENT * level
+        return indent(
+            f"""
+PersonalName(
+    name = '{self.name}',
+    surname = '{self.surname}',
+    type = '{self.type}',
+    phrase = '{self.phrase}',
+    pieces = {Formatter.listcodes(self.pieces, level + 1)},
+    translations = {Formatter.listcodes(self.translations, level + 1)},
+    notes = {Formatter.listcodes(self.notes, level + 1)},
+    source_citations = {Formatter.listcodes(self.source_citations, level + 1)},
+)""",
+            String.INDENT * level,
+        )
 
 
 class Association(NamedTuple):
@@ -3480,146 +3601,6 @@ class Exid(NamedTuple):
         )
 
 
-class PlaceName(NamedTuple):
-    """Store, validate and display a place translation.
-
-    A place is a series of named jurisdictions associated with political,
-    ecclesiastical or geographic regions.  They are listed in increasing order of size.
-    These jurisdictions are assigned a name in the form arguments.
-    By default, the jusisdictions are 'City', 'County', 'State' and
-    'Country'.  Only four are available, but not all four need be used.
-
-    For the translations the forms are the same as for the original language, but
-    the names of the jurisdictions are translated into a different language.
-
-    Examples:
-    The first example takes advantage of the four form defaults.
-    >>> chicago = PlaceName(
-    ...     place1='Chicago',
-    ...     place2='Cook County',
-    ...     place3='Illinois',
-    ...     place4='USA',
-    ...     language='en',
-    ... )
-    >>> print(chicago.ged(1))
-    1 PLAC Chicago, Cook County, Illinois, USA
-    2 FORM City, County, State, Country
-    2 LANG en
-    <BLANKLINE>
-
-    The second example adds in specific form values.
-    >>> chicago = PlaceName(
-    ...     place1='Chicago',
-    ...     place2='Cook County',
-    ...     place3='Illinois',
-    ...     place4='USA',
-    ...     form1='City2',
-    ...     form2='County2',
-    ...     form3='State2',
-    ...     form4='Country2',
-    ...     language='en',
-    ... )
-    >>> print(chicago.ged(1))
-    1 PLAC Chicago, Cook County, Illinois, USA
-    2 FORM City2, County2, State2, Country2
-    2 LANG en
-    <BLANKLINE>
-
-    The third example uses only three of the four jurisdictions accepting
-    the defaults for the unspecified values.
-    >>> chicago = PlaceName(
-    ...     place1='Chicago', place3='Illinois', place4='USA', language='en'
-    ... )
-    >>> print(chicago.ged(1))
-    1 PLAC Chicago, , Illinois, USA
-    2 FORM City, County, State, Country
-    2 LANG en
-    <BLANKLINE>
-
-    Args:
-        place1: The smallest region associated with a place, such as, the city.
-        place2: The next region larger than `place1` associated with a place, such as, county.
-        place3: The next region larger than `place2` associated with a place, such as, state.
-        place4: The next region larger than `place3` associated with a place, such as, country.
-        form1: The name of the `place1` region. (Default 'City')
-        form2: The name of the `place2` region. (Default 'County')
-        form3: The name of the `place3` region. (Default 'State')
-        form4: The name of the `place4` region. (Default 'Country')
-        language: The BCP 47 language tag for the langues of this information.
-
-    Reference:
-        [GEDCOM Place Translation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-TRAN)
-    """
-
-    place1: str = String.EMPTY
-    place2: str = String.EMPTY
-    place3: str = String.EMPTY
-    place4: str = String.EMPTY
-    form1: str = String.FORM_DEFAULT1
-    form2: str = String.FORM_DEFAULT2
-    form3: str = String.FORM_DEFAULT3
-    form4: str = String.FORM_DEFAULT4
-    language: str = String.UNDETERMINED
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.place1, str)
-            and Checker.verify_type(self.place2, str)
-            and Checker.verify_type(self.place3, str)
-            and Checker.verify_type(self.place4, str)
-            and Checker.verify_type(self.form1, str)
-            and Checker.verify_type(self.form2, str)
-            and Checker.verify_type(self.form3, str)
-            and Checker.verify_type(self.form4, str)
-            and Checker.verify_type(self.language, str)
-        )
-        return check
-
-    def ged(self, level: int = 1, style: str = GedFlag.PLACENAME_FULL) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            place: str = ''.join(
-                [
-                    self.place1,
-                    ', ',
-                    self.place2,
-                    ', ',
-                    self.place3,
-                    ', ',
-                    self.place4,
-                ]
-            )
-            form: str = ''.join(
-                [
-                    self.form1,
-                    ', ',
-                    self.form2,
-                    ', ',
-                    self.form3,
-                    ', ',
-                    self.form4,
-                ]
-            )
-            match style:
-                case GedFlag.PLACENAME_FULL:
-                    lines = Tagger.string(lines, level, Tag.PLAC, place)
-                    lines = Tagger.string(lines, level + 1, Tag.FORM, form)
-                    lines = Tagger.string(
-                        lines, level + 1, Tag.LANG, self.language
-                    )
-                case GedFlag.PLACENAME_SHORT:
-                    lines = Tagger.string(lines, level, Tag.PLAC, place)
-                    lines = Tagger.string(lines, level + 1, Tag.FORM, form)
-                case GedFlag.PLACENAME_TRANSLATION:
-                    lines = Tagger.string(lines, level, Tag.TRAN, place)
-                    lines = Tagger.string(
-                        lines, level + 1, Tag.LANG, self.language
-                    )
-        return lines
-
-
 class Map:
     """Store, validate and save a GEDCOM map structure.
 
@@ -3687,8 +3668,8 @@ class Map:
 
     def __init__(
         self,
-        latitude: float = 91.0,
-        longitude: float = 181.0,
+        latitude: float = Default.MAP_LATITUDE,
+        longitude: float = Default.MAP_LONGITUDE,
         extensions: list[Extension] | None = None,
     ):
         self.latitude: float = latitude
@@ -3714,7 +3695,7 @@ class Map:
                 f'Map(latitude={self.latitude!s}, longitude={self.longitude!s})'
             )
         return f'Map(latitude={self.latitude!s}, longitude={self.longitude!s}, extensions={self.extensions!s})'
-    
+
     def __repr__(self) -> str:
         return str(self)
 
@@ -3753,10 +3734,11 @@ class Map:
             lines = Tagger.structure(lines, level + 2, self.long_extensions)
         return lines
 
-    def code(self, level: int = 0, name: str = 'map') -> str:
+    def code(self, level: int = 0) -> str:
         spaces: str = String.INDENT * level
         return indent(
-            f"""{name} = Map(
+            f"""
+Map(
     latitude = {self.latitude!s},
     longitude = {self.longitude!s},
 )""",
@@ -3764,7 +3746,10 @@ class Map:
         )
 
     def example(
-        self, choice: int = 0, latitude: float = 91.0, longitude: float = 181.0
+        self,
+        choice: int = Default.CHOICE,
+        latitude: float = Default.MAP_LATITUDE,
+        longitude: float = Default.MAP_LONGITUDE,
     ) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3815,24 +3800,203 @@ class Map:
                     show = Map()
                     code_preface = Example.EMPTY_CODE
                     gedcom_preface = Example.EMPTY_GEDCOM
-        return ''.join(
-            [
-                code_preface,
-                String.DOUBLE_NEWLINE,
-                show.code(),
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show.ged(),
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
-class Place(NamedTuple):
+class PlaceTranslation:
+    """Store, validate and return a translation of GEDCOM place names.
+
+    A place is a comma separated string of named locations or regions going from smallest to largest.
+
+    The BCP 47 language tag is a hyphenated list of subtags.
+    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+    guide will help one make a decision on which tags to use.
+    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+    can assist with finding and checking the language tag one would like to use.
+
+    Example:
+
+
+    Args:
+        place1: A part of the place corresponding to the lowest region.
+        place2: A part of the place corresponding to the next highest region above `place1`.
+        place3: A part of the place corresponding to the next highest region above `place2`.
+        place4: A part of the place corresponding to the next highest region above `place3`.
+        language: The langue used to report the four places values.
+
+    Reference:
+        [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
+        [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
+
+
+    >   +1 TRAN <List:Text>                      {0:M}  [g7:PLAC-TRAN](https://gedcom.io/terms/v7/PLAC-TRAN)
+    >      +2 LANG <Language>                    {1:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
+    """
+
+    structure: ClassVar[str] = Tag.TRAN.value
+    substructures: ClassVar[set[str]] = {Tag.LANG.value}
+
+    def __init__(
+        self,
+        place1: str = Default.EMPTY,
+        place2: str = Default.EMPTY,
+        place3: str = Default.EMPTY,
+        place4: str = Default.EMPTY,
+        language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
+        if extensions is None:
+            extensions = []
+
+        self.place1: str = place1
+        self.place2: str = place2
+        self.place3: str = place3
+        self.place4: str = place4
+        self.place: str = Placer.place(
+            self.place1, self.place2, self.place3, self.place4
+        )
+        self.language: str = language
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.tran_extensions: list[Extension] = []
+        self.lang_extensions: list[Extension] = []
+        if self.extensions is not None:
+            for ext in self.extensions:
+                self.descriptions.union(ext.schema.supers)
+                if Tag.TRAN.value in ext.schema.supers:
+                    self.tran_extensions.append(ext)
+                elif Tag.LANG.value in ext.schema.supers:
+                    self.lang_extensions.append(ext)
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.place1, str)
+            and Checker.verify_type(self.place2, str)
+            and Checker.verify_type(self.place3, str)
+            and Checker.verify_type(self.place4, str)
+            and Checker.verify_type(self.language, str)
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = String.EMPTY
+        if self.validate():
+            lines = Tagger.string(lines, level, Tag.TRAN, self.place)
+            lines = Tagger.structure(lines, level + 1, self.tran_extensions)
+            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+            lines = Tagger.structure(lines, level + 1, self.lang_extensions)
+        return lines
+
+    def code(self, level: int = 0) -> str:
+        spaces: str = String.INDENT * level
+        return indent(
+            f"""
+PlaceTranslation(
+    place1 = '{self.place1}',
+    place2 = '{self.place2}',
+    place3 = '{self.place3}',
+    place4 = '{self.place4}',
+    language = '{self.language}',
+)""",
+            spaces,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        place1: str = Default.EMPTY,
+        place2: str = Default.EMPTY,
+        place3: str = Default.EMPTY,
+        place4: str = Default.EMPTY,
+        language: str = Default.EMPTY,
+    ) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an intentional error.  If the Map structure is used
+            without specifying values, the default values will trigger an error.
+            However, if an acceptable lattitude and longitude are used in this example,
+            then the user example will be displayed.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+            latitude: If a non-zero latitude is entered this will be used in the example.
+            longitude: If a non-zero longitude is entered this will be used in the example.
+        """
+        show: PlaceTranslation
+        gedcom_docs: str = Specs.PLACE
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = PlaceTranslation(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    language='en',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = PlaceTranslation(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    language='en',
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = PlaceTranslation(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    language='en-US',
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = PlaceTranslation(
+                    place1=place1,
+                    place2=place2,
+                    place3=place3,
+                    place4=place4,
+                    language=language,
+                )
+                logging.info(Example.USER_PROVIDED_EXAMPLE)
+                code_preface = Example.USER_PROVIDED
+                gedcom_preface = Example.GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+
+class Place:
     """Store, validate and return a GEDCOM place structure.
 
     A place is a comma separated string of named locations or regions going from smallest to largest.
@@ -3856,8 +4020,8 @@ class Place(NamedTuple):
         Normally one would not call `validate` or `ged` unless one wanted
         to see if the substructure is valid or how it would display
         in the final GEDCOM file.
-        >>> from chronodata.store import Map, Place, PlaceName
-        >>> bechyne_cs = PlaceName(
+        >>> from chronodata.store import Map, Place
+        >>> place = Place(
         ...     place1='Bechyně',
         ...     place2='okres Tábor',
         ...     place3='Jihočeský kraj',
@@ -3867,20 +4031,16 @@ class Place(NamedTuple):
         ...     form3='Stát',
         ...     form4='Země',
         ...     language='cs',
-        ... )
-        >>> bechyne_en = PlaceName(
-        ...     place1='Bechyně',
-        ...     place2='Tábor District',
-        ...     place3='South Bohemian Region',
-        ...     place4='Czech Republic',
-        ...     language='en',
-        ... )
-        >>> place = Place(
-        ...     place=bechyne_cs,
-        ...     translations=[
-        ...         bechyne_en,
-        ...     ],
         ...     map=Map(49.297222, 14.470833),
+        ...     translations=[
+        ...         PlaceTranslation(
+        ...             place1='Bechyně',
+        ...             place2='Tábor District',
+        ...             place3='South Bohemian Region',
+        ...             place4='Czech Republic',
+        ...             language='en',
+        ...         )
+        ...     ],
         ...     notes=[
         ...         Note(note='A place in the Czech Republic.', language='en'),
         ...         Note(note='Místo v České republice.', language='cs'),
@@ -3904,8 +4064,16 @@ class Place(NamedTuple):
         <BLANKLINE>
 
     Args:
-        place: A `PlaceName` tuple containing four place names, four forms and language tag.
-        translation: A list of `PlaceName` tuples used as translations.
+        place1: A part of the place corresponding to the lowest region.
+        place2: A part of the place corresponding to the next highest region above `place1`.
+        place3: A part of the place corresponding to the next highest region above `place2`.
+        place4: A part of the place corresponding to the next highest region above `place3`.
+        form1: The name of the region identified by `place1`.
+        form2: The name of the region identified by `place2`.
+        form3: The name of the region identified by `place3`.
+        form4: The name of the region identified by `place4`.
+        language: The langue used to report the four places values.
+        translation: A list of `Place` tuples used as translations.
         maps: A list of `Map` tuples for the place.
         exid: Identifiers associated with the place.
         notes: Notes associated with the place.
@@ -3929,17 +4097,84 @@ class Place(NamedTuple):
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
 
-    place: PlaceName = PlaceName()
-    translations: list[PlaceName] = []  # noqa: RUF012
-    map: Map = Map()
-    exids: list[Exid] = []  # noqa: RUF012
-    notes: list[Note] = []  # noqa: RUF012
+    structure: ClassVar[str] = Tag.PLAC.value
+    substructures: ClassVar[set[str]] = {Tag.FORM.value, Tag.LANG.value}
+
+    def __init__(
+        self,
+        place1: str = Default.EMPTY,
+        place2: str = Default.EMPTY,
+        place3: str = Default.EMPTY,
+        place4: str = Default.EMPTY,
+        form1: str = Default.PLACE_FORM1,
+        form2: str = Default.PLACE_FORM2,
+        form3: str = Default.PLACE_FORM3,
+        form4: str = Default.PLACE_FORM4,
+        language: str = Default.EMPTY,
+        translations: list[PlaceTranslation] | None = None,
+        map: Map | None = None,
+        exids: list[Exid] | None = None,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
+        if translations is None:
+            translations = []
+        if map is None:
+            map = Map()
+        if exids is None:
+            exids = []
+        if notes is None:
+            notes = []
+        if extensions is None:
+            extensions = []
+
+        self.place1: str = place1
+        self.place2: str = place2
+        self.place3: str = place3
+        self.place4: str = place4
+        self.form1: str = form1
+        self.form2: str = form2
+        self.form3: str = form3
+        self.form4: str = form4
+        self.language: str = language
+        self.translations: list[PlaceTranslation] = translations
+        self.map: Map = map
+        self.exids: list[Exid] = exids
+        self.notes: list[Note] = notes
+        self.extensions: list[Extension] = extensions
+        self.place: str = Placer.place(
+            self.place1, self.place2, self.place3, self.place4
+        )
+        self.form: str = Placer.form(
+            self.form1, self.form2, self.form3, self.form4
+        )
+        self.descriptions: set[str] = set()
+        self.plac_extensions: list[Extension] = []
+        self.form_extensions: list[Extension] = []
+        self.lang_extensions: list[Extension] = []
+        if self.extensions is not None:
+            for ext in self.extensions:
+                self.descriptions.union(ext.schema.supers)
+                if Tag.PLAC.value in ext.schema.supers:
+                    self.plac_extensions.append(ext)
+                elif Tag.FORM.value in ext.schema.supers:
+                    self.form_extensions.append(ext)
+                elif Tag.LANG.value in ext.schema.supers:
+                    self.lang_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.place, PlaceName)
-            and Checker.verify_tuple_type(self.translations, PlaceName)
+            Checker.verify_type(self.place1, str)
+            and Checker.verify_type(self.place2, str)
+            and Checker.verify_type(self.place3, str)
+            and Checker.verify_type(self.place4, str)
+            and Checker.verify_type(self.form1, str)
+            and Checker.verify_type(self.form2, str)
+            and Checker.verify_type(self.form3, str)
+            and Checker.verify_type(self.form4, str)
+            and Checker.verify_type(self.language, str)
+            and Checker.verify_tuple_type(self.translations, PlaceTranslation)
             and Checker.verify_type(self.map, Map)
             and Checker.verify_tuple_type(self.exids, Exid)
             and Checker.verify_tuple_type(self.notes, Note)
@@ -3948,19 +4183,159 @@ class Place(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
-            lines = Tagger.structure(lines, level, self.place)
-            lines = Tagger.structure(
-                lines,
-                level + 1,
-                self.translations,
-                flag=GedFlag.PLACENAME_TRANSLATION,
-            )
+            lines = Tagger.string(lines, level, Tag.PLAC, self.place)
+            lines = Tagger.structure(lines, level + 1, self.plac_extensions)
+            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form)
+            lines = Tagger.structure(lines, level + 1, self.form_extensions)
+            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+            lines = Tagger.structure(lines, level + 1, self.lang_extensions)
+            lines = Tagger.structure(lines, level + 1, self.translations)
             lines = Tagger.structure(lines, level + 1, self.map, Map())
             lines = Tagger.structure(lines, level + 1, self.exids)
             lines = Tagger.structure(lines, level + 1, self.notes, Note())
         return lines
+
+    def code(self, level: int = 0) -> str:
+        return indent(
+            f"""
+Place(
+    place1 = {Formatter.listcodes(self.place1)},
+    place2 = {Formatter.listcodes(self.place2)},
+    place3 = {Formatter.listcodes(self.place3)},
+    place4 = {Formatter.listcodes(self.place4)},
+    form1 = {Formatter.listcodes(self.form1)},
+    form2 = {Formatter.listcodes(self.form2)},
+    form3 = {Formatter.listcodes(self.form3)},
+    form4 = {Formatter.listcodes(self.form4)},
+    language = {Formatter.listcodes(self.language)},
+    translations = {Formatter.listcodes(self.translations, level + 2)},
+    map = {Formatter.listcodes(self.map, level + 1)},
+    exids = {Formatter.listcodes(self.exids, level + 2)},
+    notes = {Formatter.listcodes(self.notes, level + 2)},
+    extensions = {Formatter.listcodes(self.extensions, level + 2)},
+)""",
+            String.INDENT * level,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        place1: str = Default.EMPTY,
+        place2: str = Default.EMPTY,
+        place3: str = Default.EMPTY,
+        place4: str = Default.EMPTY,
+        form1: str = Default.PLACE_FORM1,
+        form2: str = Default.PLACE_FORM2,
+        form3: str = Default.PLACE_FORM3,
+        form4: str = Default.PLACE_FORM4,
+        language: str = Default.EMPTY,
+        translations: list[PlaceTranslation] | None = None,
+        map: Map | None = None,
+        exids: list[Exid] | None = None,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an intentional error.  If the Map structure is used
+            without specifying values, the default values will trigger an error.
+            However, if an acceptable lattitude and longitude are used in this example,
+            then the user example will be displayed.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+            latitude: If a non-zero latitude is entered this will be used in the example.
+            longitude: If a non-zero longitude is entered this will be used in the example.
+        """
+        show: Place
+        gedcom_docs: str = Specs.PLACE
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Place(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    translations=[
+                        PlaceTranslation(
+                            place1='Chicago',
+                            place2='Cook County',
+                            place3='Illinois',
+                            place4='USA',
+                            language='en-US',
+                        ),
+                    ],
+                    map=Map(latitude=41.881832, longitude=-87.623177),
+                    notes=[
+                        Note(note='Just a note'),
+                        Note(note='Just a second note'),
+                    ],
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Place(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    map=Map(latitude=41.881832, longitude=-87.623177),
+                    notes=[Note(note='Just a note')],
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Place(
+                    place1='Chicago',
+                    place2='Cook County',
+                    place3='Illinois',
+                    place4='USA',
+                    map=Map(latitude=41.881832, longitude=-87.623177),
+                    notes=[Note(note='Just a note')],
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Place(
+                    place1=place1,
+                    place2=place2,
+                    place3=place3,
+                    place4=place4,
+                    form1=form1,
+                    form2=form2,
+                    form3=form3,
+                    form4=form4,
+                    language=language,
+                    translations=translations,
+                    map=map,
+                    exids=exids,
+                    notes=notes,
+                    extensions=extensions,
+                )
+                logging.info(Example.USER_PROVIDED_EXAMPLE)
+                code_preface = Example.USER_PROVIDED
+                gedcom_preface = Example.GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
 
 
 class EventDetail(NamedTuple):
@@ -5814,7 +6189,7 @@ class Header(NamedTuple):
     submitter: SubmitterXref = Void.SUBM
     subm_copyright: str = String.EMPTY
     language: str = String.EMPTY
-    place: PlaceName = PlaceName()
+    # place: PlaceName = PlaceName()
     note: Note = Note()
 
     def validate(self) -> bool:
@@ -5840,7 +6215,7 @@ class Header(NamedTuple):
             and Checker.verify_type(self.submitter, SubmitterXref)
             and Checker.verify_type(self.subm_copyright, str)
             and Checker.verify_type(self.language, str)
-            and Checker.verify_type(self.place, PlaceName)
+            # and Checker.verify_type(self.place, PlaceName)
             and Checker.verify_type(self.note, Note)
         )
         return check
@@ -5882,6 +6257,6 @@ class Header(NamedTuple):
                 lines, level + 1, Tag.COPR, self.subm_copyright
             )
             lines = Tagger.string(lines, level, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level, self.place, PlaceName())
+            # lines = Tagger.structure(lines, level, self.place, PlaceName())
             lines = Tagger.structure(lines, level, self.note)
         return lines
