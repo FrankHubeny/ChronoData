@@ -77,7 +77,7 @@ class Value:
     BP: str = ' BP'
     CE: str = ' CE'
     DATETIME_EPOCH: int = 1970
-    #EMPTY: str = ''
+    # EMPTY: str = ''
     EPOCH: str = 'Epoch'
     EXPERIMENT: str = 'EXPERIMENT'
     GREGORIAN: str = 'GREGORIAN'
@@ -148,16 +148,34 @@ class Number:
     GRAMPSLEN: int = 7
     JSONLEN: int = 5
 
+
 @dataclass(frozen=True)
 class Default:
-    EMPTY: str = ''
     CHOICE: int = 1
-    MAP_LATITUDE: float = 91.0
-    MAP_LONGITUDE: float = 181.0
+    DATE_DAY: int = 0
+    DATE_MONTH: int = 0
+    DATE_YEAR: int = 0
+    DATE_WEEK: int = 0
+    DAYS: int = 0
+    EMPTY: str = ''
+    GREATER_LESS_THAN: str = '>'
+    HEIGHT: int = 0
+    LEFT: int = 0
+    MAP_LATITUDE: float = 0.0
+    MAP_LONGITUDE: float = 0.0
+    MONTHS: int = 0
     PLACE_FORM1: str = 'City'
     PLACE_FORM2: str = 'County'
     PLACE_FORM3: str = 'State'
     PLACE_FORM4: str = 'Country'
+    TIME_HOUR: int = 0
+    TIME_MINUTE: int = 0
+    TIME_SECOND: float = 0.0
+    TIME_UTC: bool = False
+    TOP: int = 0
+    WEEKS: int = 0
+    WIDTH: int = 0
+    YEARS: int = 0
 
 
 @dataclass(frozen=True)
@@ -177,7 +195,7 @@ class String:
     DOUBLE_NEWLINE: str = '\n\n'
     EMPTY: str = ''
     EOL: str = '\n'
-    #EVENT: str = 'EVENT'
+    # EVENT: str = 'EVENT'
     FORM_DEFAULT1: str = 'City'
     FORM_DEFAULT2: str = 'County'
     FORM_DEFAULT3: str = 'State'
@@ -215,14 +233,16 @@ class String:
     WRITE: str = 'w'
     Z: str = 'Z'
 
+
 class GedFlag:
     """These strings signal special processing for the ged methods.
 
     The GedFlag constants contain the name of NamedTuple class as the first part of their names
     to help locate them.  The second part of their names contain a description of
     the function they are signalling to occur.
-    
+
     """
+
     PLACENAME_FULL: Literal['F'] = 'F'
     PLACENAME_SHORT: Literal['S'] = 'S'
     PLACENAME_TRANSLATION: Literal['T'] = 'T'
@@ -352,7 +372,7 @@ class FamcStat(Enum):
 
     The `NONE` item in the enumeration is used as a default for when no value was entered.
     It is not part of the GEDCOM standard.
-    
+
     Reference:
         [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
 
@@ -360,6 +380,7 @@ class FamcStat(Enum):
         [DISPROVEN](https://gedcom.io/terms/v7/enum-DISPROVEN)
         [PROVEN](https://gedcom.io/terms/v7/enum-PROVEN)
     """
+
     CHALLENGED = 'CHALLENGED'
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
@@ -371,7 +392,7 @@ class FamEven(Enum):
 
     The `NONE` item in the enumeration is used as a default for when no value was entered.
     It is not part of the GEDCOM standard.
-    
+
     Reference:
         [GEDCOM FAMC-EVEN](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events)
 
@@ -380,6 +401,7 @@ class FamEven(Enum):
         - [DIV]()
          [DIV]()
     """
+
     ANUL = 'ANUL'
     CENS = 'CENS'
     DIV = 'DIV'

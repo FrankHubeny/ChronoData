@@ -25,7 +25,6 @@ __all__ = [
     'Checker',
     'Child',
     'Date',
-    'DateExact',
     'DateValue',
     'Dater',
     'EventDetail',
@@ -39,7 +38,7 @@ __all__ = [
     'FamilySpouse',
     'FamilyXref',
     'File',
-    'FileTranslations',
+    'FileTranslation',
     'Formatter',
     'Header',
     'Husband',
@@ -97,8 +96,8 @@ import math
 import re
 import urllib.request
 from enum import Enum
-from textwrap import dedent, indent
-from typing import Any, ClassVar, Literal, NamedTuple
+from textwrap import indent
+from typing import Any, ClassVar, Literal
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
@@ -874,7 +873,7 @@ class Formatter:
         return data
 
     @staticmethod
-    def listcodes(items: Any, level: int = 1) -> str:
+    def codes(items: Any, tabs: int = 1) -> str:
         if isinstance(items, str):
             return ''.join(["'", items, "'"])
         if isinstance(items, list):
@@ -882,17 +881,25 @@ class Formatter:
                 return String.LEFT_RIGHT_BRACKET
             lines: str = String.LEFT_BRACKET
             for item in items:
-                lines = ''.join([lines, item.code(level), String.COMMA])
+                lines = ''.join([lines, item.code(tabs), String.COMMA])
             return ''.join(
                 [
                     lines,
                     String.EOL,
-                    String.INDENT * (level - 1),
+                    String.INDENT * (tabs - 1),
                     String.RIGHT_BRACKET,
                 ]
             )
+        if isinstance(items, int):
+            return str(items)
+        if isinstance(items, float):
+            return str(items)
+        if isinstance(items, Enum):
+            return str(items)
+        if isinstance(items, Xref):
+            return items.fullname
         code_lines: str = (
-            items.code(level)
+            items.code(tabs)
             .replace(String.EOL, String.EMPTY, 1)
             .replace(String.INDENT, String.EMPTY, 1)
         )
@@ -935,7 +942,7 @@ class Xref:
         self.name: str = name.replace('@', '').replace('_', ' ')
         self.tag: Tag = tag
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-        #self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
+        # self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -946,8 +953,8 @@ class Xref:
         if info == String.EMPTY:
             return f'0 {self.fullname} {self.tag.value}{String.EOL}'
         return f'0 {self.fullname} {self.tag.value} {info}{String.EOL}'
-    
-    def code(self) -> str:
+
+    def code(self, tabs: int = 0) -> str:  # noqa: ARG002
         return self.fullname
 
 
@@ -1099,7 +1106,37 @@ class Void:
     SUBM: SubmitterXref = SubmitterXref(NAME)
 
 
-class Schema:
+class Structure:
+    """A base class for the GEDCOM structure classes to define dunder methods."""
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return self.ged()
+
+    def __repr__(self) -> str:
+        return (
+            self.code()
+            .replace(String.EOL, String.EMPTY)
+            .replace(String.INDENT, String.SPACE)
+        )
+    
+    def __eq__(self, other: Any) -> bool:
+        check: bool = (
+            isinstance(other, Structure)
+            and self.ged() == other.ged()
+        )
+        return check
+    
+
+    def ged(self) -> str:
+        return String.EMPTY
+
+    def code(self) -> str:
+        return String.EMPTY
+
+
+class Schema(Structure):
     """Store, validate and display schema information.
 
     An underline is added to the front of the new tag if one is not there already.
@@ -1150,6 +1187,9 @@ class Schema:
     >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
     """
 
+    structure: ClassVar[str] = Tag.SCHMA.value
+   # substructures: ClassVar[set[str]] = {Tag.TAG.value}
+
     def __init__(self, tag: str, url: str) -> None:
         self.raw_tag: str = tag
         self.url: str = url
@@ -1186,23 +1226,37 @@ class Schema:
             )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Schema(
+    tag = {Formatter.codes(self.tag, tabs)},
+    url = {Formatter.codes(self.url, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Extension(NamedTuple):
+
+class Extension(Structure):
     """Store, validate and display extension tags.
 
     Reference:
         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
+    structure: ClassVar[str] = Default.EMPTY
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    level: int
-    schema: Schema
-    payload: str = String.EMPTY
-    extra: str = String.EMPTY
-
-    def __str__(self) -> str:
-        if self.extra == String.EMPTY:
-            return f'Extension({self.schema.tag}, {self.payload})'
-        return f'Extension({self.schema.tag}, {self.payload}, {self.extra})'
+    def __init__(
+        self,
+        level: int,
+        schema: Schema,
+        payload: str = String.EMPTY,
+        extra: str = String.EMPTY,
+    ):
+        self.level = level
+        self.schema = schema
+        self.payload = payload
+        self.extra = extra
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1225,9 +1279,21 @@ class Extension(NamedTuple):
                 self.extra,
             )
         return lines
+    
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Extension(
+    level = {Formatter.codes(self.level, tabs)},
+    schema = {Formatter.codes(self.schema, tabs)},
+    payload = {Formatter.codes(self.payload, tabs)},
+    extra = {Formatter.codes(self.extra, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
 
-class Date(NamedTuple):
+class Date(Structure):
     """Validate and display date data in various formats.
 
     Dates are entered based on a Gregorian calendar. This calendar
@@ -1249,11 +1315,32 @@ class Date(NamedTuple):
         [GEDCOM DATE type](https://gedcom.io/terms/v7/type-Date)
     """
 
-    year: int = 0
-    month: int = 0
-    day: int = 0
-    week: int = 0
-    calendar: str = Value.GREGORIAN
+    structure: ClassVar[str] = Tag.DATE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
+
+    def __init__(
+        self,
+        year: int = Default.DATE_YEAR,
+        month: int = Default.DATE_MONTH,
+        day: int = Default.DATE_DAY,
+        week: int = Default.DATE_WEEK,
+        calendar: str = Value.GREGORIAN,
+    ):
+        self.year = year
+        self.month = month
+        self.day = day
+        self.week = week
+        self.calendar = calendar
+
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         self.year == other.year
+    #         and self.month == other.month
+    #         and self.day == other.day
+    #         and self.week == other.week
+    #         and self.calendar == other.calendar
+    #     )
+    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1320,18 +1407,17 @@ class Date(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Date(
-    year = {self.year},
-    month = '{self.month}',
-    day = '{self.day}',
-    week = '{self.week}',
-    calendar = '{self.calendar}',
+    year = {Formatter.codes(self.year, tabs)},
+    month = {Formatter.codes(self.month, tabs)},
+    day = {Formatter.codes(self.day, tabs)},
+    week = {Formatter.codes(self.week, tabs)},
+    calendar = {Formatter.codes(self.calendar, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -1400,7 +1486,7 @@ Date(
         )
 
 
-class Time(NamedTuple):
+class Time(Structure):
     """Validate and display time data in various formats.
 
     The standard does not permit leap seconds nor end of day instant (24:00:00).
@@ -1410,10 +1496,29 @@ class Time(NamedTuple):
     - [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
     """
 
-    hour: int = 0
-    minute: int = 0
-    second: int | float = 0.0
-    UTC: bool = False
+    structure: ClassVar[str] = Tag.TIME.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
+
+    def __init__(
+        self,
+        hour: int = Default.TIME_HOUR,
+        minute: int = Default.TIME_MINUTE,
+        second: int | float = Default.TIME_SECOND,
+        UTC: bool = False,
+    ):
+        self.hour = hour
+        self.minute = minute
+        self.second = second
+        self.UTC = UTC
+
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         self.hour == other.hour
+    #         and self.minute == other.minute
+    #         and self.second == other.second
+    #         and self.UTC == other.UTC
+    #     )
+    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1457,22 +1562,78 @@ class Time(NamedTuple):
         if self.validate():
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
-    
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Time(
-    hour = {self.hour},
-    minute = {self.minute},
-    second = {self.second},
-    UTC = '{self.UTC}',
+    hour = {Formatter.codes(self.hour, tabs)},
+    minute = {Formatter.codes(self.minute, tabs)},
+    second = {Formatter.codes(self.second, tabs)},
+    UTC = {Formatter.codes(self.UTC, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
 
-class DateExact(NamedTuple):
+# class DateExact(Structure):
+#     """Construct a DATEVALUE structure according to the GEDCOM standard.
+
+#     Example
+#     -------
+
+
+#     Reference
+#     ---------
+
+#     >n DATE <DateValue>                         {1:1}  g7:DATE
+#     >  +1 TIME <Time>                           {0:1}  g7:TIME
+#     >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
+#     """
+#     structure: ClassVar[str] = Tag.DATE.value
+#     substructures: ClassVar[set[str]] = {Tag.TIME.value, Tag.PHRASE.value}
+
+#     def __init__(
+#         self,
+#         date: Date = Date(),  
+#         time: Time = Time(),  
+#         phrase: str = Default.EMPTY,
+#     ):
+#         self.date = date
+#         self.time = time
+#         self.phrase = phrase
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.phrase, str)
+#             and self.date.validate()
+#             and self.time.validate()
+#         )
+#         return check
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = String.EMPTY
+#         if self.validate():
+#             lines = Tagger.structure(lines, level, self.date, Date())
+#             lines = Tagger.structure(lines, level + 1, self.time, Time())
+#             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
+#         return lines
+
+#     def code(self, tabs: int = 0) -> str:
+#         return indent(
+#             f"""
+# DateExact(
+#     date = {Formatter.codes(self.date, tabs)},
+#     time = {Formatter.codes(self.time, tabs)},
+#     phrase = {Formatter.codes(self.phrase, tabs)},
+# )""",
+#             String.INDENT * tabs,
+#         )
+
+
+class DateValue(Structure):
     """Construct a DATEVALUE structure according to the GEDCOM standard.
 
     Example
@@ -1486,62 +1647,32 @@ class DateExact(NamedTuple):
     >  +1 TIME <Time>                           {0:1}  g7:TIME
     >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
     """
+    structure: ClassVar[str] = Tag.DATE.value
+    substructures: ClassVar[set[str]] = {Tag.TIME.value, Tag.PHRASE.value}
 
-    date: Date = Date()
-    time: Time = Time()
-    phrase: str = Default.EMPTY
+    def __init__(
+        self,
+        date: Date | None = None,
+        time: Time | None = None,
+        phrase: str = Default.EMPTY,
+    ):
+        if date is None:
+            date = Date()
+        if time is None:
+            time = Time()
+        self.date = date
+        self.time = time
+        self.phrase = phrase
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.phrase, str)
-            and self.date.validate()
-            and self.time.validate()
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
-        if self.validate():
-            lines = Tagger.structure(lines, level, self.date, Date())
-            lines = Tagger.structure(lines, level + 1, self.time, Time())
-            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-        return lines
-    
-    def code(self, level: int = 0) -> str:
-        date: str = Formatter.listcodes(self.date, level + 1)
-        time: str = Formatter.listcodes(self.time, level + 1)
-        spaces: str = String.INDENT * level
-        return indent(
-            f"""
-DateExact(
-    date = {date},
-    time = '{time}',
-    phrase = '{self.phrase}',
-)""",
-            spaces,
-        )
-
-
-class DateValue(NamedTuple):
-    """Construct a DATEVALUE structure according to the GEDCOM standard.
-
-    Example
-    -------
-
-
-    Reference
-    ---------
-
-    >n DATE <DateValue>                         {1:1}  g7:DATE
-    >  +1 TIME <Time>                           {0:1}  g7:TIME
-    >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
-    """
-
-    date: Date = Date()
-    time: Time = Time()
-    phrase: str = ''
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         other is not None
+    #         # and self.date == other.date
+    #         # and self.time == other.time
+    #         # and self.phrase == other.phrase
+    #         and self.ged() == other.ged()
+    #     )
+    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1560,23 +1691,20 @@ class DateValue(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.time, Time())
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
-    
-    def code(self, level: int = 0) -> str:
-        date: str = Formatter.listcodes(self.date, level + 1)
-        time: str = Formatter.listcodes(self.time, level + 1)
-        spaces: str = String.INDENT * level
+
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
-DateExact(
-    date = {date},
-    time = '{time}',
-    phrase = '{self.phrase}',
+DateValue(
+    date = {Formatter.codes(self.date, tabs)},
+    time = {Formatter.codes(self.time, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
 
-class Address(NamedTuple):
+class Address(Structure):
     """Store, validate and format address information to be saved to a ged file.
 
     Example:
@@ -1632,12 +1760,22 @@ class Address(NamedTuple):
     >   +1 POST <Special>                        {0:1}  [g7:POST](https://gedcom.io/terms/v7/POST)
     >   +1 CTRY <Special>                        {0:1}  [g7:CTRY](https://gedcom.io/terms/v7/CTRY)
     """
+    structure: ClassVar[str] = Tag.ADDR.value
+    substructures: ClassVar[set[str]] = {Tag.CITY.value, Tag.STAE.value, Tag.POST.value, Tag.CTRY.value}
 
-    address: list[str] = []  # noqa: RUF012
-    city: str = ''
-    state: str = ''
-    postal: str = ''
-    country: str = ''
+    def __init__(
+        self,
+        address: list[str] = [],  # noqa: B006
+        city: str = Default.EMPTY,
+        state: str = Default.EMPTY,
+        postal: str = Default.EMPTY,
+        country: str = Default.EMPTY,
+    ):
+        self.address = address
+        self.city = city
+        self.state = state
+        self.postal = postal
+        self.country = country
 
     def validate(self) -> bool:
         check: bool = (
@@ -1663,17 +1801,17 @@ class Address(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.CTRY, self.country)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
-            f"""address = Address(
-    address = {self.address},
-    city = '{self.city}',
-    state = '{self.state}',
-    postal = '{self.postal}',
-    country = '{self.country}',
+            f"""
+Address(
+    address = {Formatter.codes(self.address, tabs)},
+    city = {Formatter.codes(self.city, tabs + 1)},
+    state = {Formatter.codes(self.state, tabs + 1)},
+    postal = {Formatter.codes(self.postal, tabs + 1)},
+    country = {Formatter.codes(self.country, tabs + 1)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -1742,7 +1880,7 @@ class Address(NamedTuple):
         )
 
 
-class Age(NamedTuple):
+class Age(Structure):
     """Implement the Age data type in the GEDCOM specification.
 
     The GEDCOM specification requires that these age components be
@@ -1801,13 +1939,36 @@ class Age(NamedTuple):
     > weeks   = Integer %x77    ; 8w
     > days    = Integer %x64    ; 21d
     """
+    structure: ClassVar[str] = Tag.AGE.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
-    years: int = 0
-    months: int = 0
-    weeks: int = 0
-    days: int = 0
-    greater_less_than: str = '>'
-    phrase: str = ''
+    def __init__(
+        self,
+        years: int = Default.YEARS,
+        months: int = Default.MONTHS,
+        weeks: int = Default.WEEKS,
+        days: int = Default.DAYS,
+        greater_less_than: str = Default.GREATER_LESS_THAN,
+        phrase: str = Default.EMPTY,
+    ):
+        self.years = years
+        self.months = months
+        self.weeks = weeks
+        self.days = days
+        self.greater_less_than = greater_less_than
+        self.phrase = phrase
+
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         other is not None
+    #         and self.years == other.years
+    #         and self.months == other.months
+    #         and self.weeks == other.weeks
+    #         and self.days == other.days
+    #         and self.greater_less_than == other.greater_less_than
+    #         and self.phrase == other.phrase
+    #     )
+    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1845,20 +2006,19 @@ class Age(NamedTuple):
             line = Tagger.string(line, level + 1, Tag.PHRASE, self.phrase)
         return line
 
-    def code(self, level: int = 0) -> str:
+    def code(self, tabs: int = 0) -> str:
         """Generate the ChronoData code that would produce the GEDCOM lines."""
-        spaces: str = String.INDENT * level
         return indent(
             f"""
 Age(
-    years = {self.years},
-    months = {self.months},
-    weeks = {self.weeks},
-    days = {self.days},
-    greater_less_than = '{self.greater_less_than}',
-    phrase = '{self.phrase}',
+    years = {Formatter.codes(self.years, tabs)},
+    months = {Formatter.codes(self.months, tabs)},
+    weeks = {Formatter.codes(self.weeks, tabs)},
+    days = {Formatter.codes(self.days, tabs)},
+    greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
+    phrase = {Formatter.codes(self.phrase)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -1932,7 +2092,7 @@ Age(
         )
 
 
-class PersonalNamePieces(NamedTuple):
+class PersonalNamePieces(Structure):
     """Store, validate and display values for an optional GEDCOM Personal Name Piece.
 
     Example:
@@ -1963,13 +2123,36 @@ class PersonalNamePieces(NamedTuple):
     > n SURN <Text>                              {0:M}  [g7:SURN](https://gedcom.io/terms/v7/SURN)
     > n NSFX <Text>                              {0:M}  [g7:NSFX](https://gedcom.io/terms/v7/NSFX)
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NPFX.value, Tag.GIVN.value, Tag.NICK.value, Tag.SPFX.value, Tag.SURN.value, Tag.NSFX.value}
 
-    prefix: list[str] = []  # noqa: RUF012
-    given: list[str] = []  # noqa: RUF012
-    nickname: list[str] = []  # noqa: RUF012
-    surname_prefix: list[str] = []  # noqa: RUF012
-    surname: list[str] = []  # noqa: RUF012
-    suffix: list[str] = []  # noqa: RUF012
+    def __init__(
+        self,
+        prefix: list[str] | None = None,
+        given: list[str] | None = None,
+        nickname: list[str] | None = None,
+        surname_prefix: list[str] | None = None,
+        surname: list[str] | None = None,
+        suffix: list[str] | None = None,
+    ):
+        if prefix is None:
+            prefix = []
+        if given is None:
+            given = []
+        if nickname is None:
+            nickname = []
+        if surname_prefix is None:
+            surname_prefix = []
+        if surname is None:
+            surname = []
+        if suffix is None:
+            suffix = []
+        self.prefix = prefix
+        self.given = given
+        self.nickname = nickname
+        self.surname_prefix = surname_prefix
+        self.surname = surname
+        self.suffix = suffix
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1995,19 +2178,18 @@ class PersonalNamePieces(NamedTuple):
             lines = Tagger.string(lines, level, Tag.NSFX, self.suffix)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 PersonalNamePieces(
-    prefix = {self.prefix},
-    given = {self.given},
-    nickname = {self.nickname},
-    surname_prefix = {self.surname_prefix},
-    surname = {self.surname},
-    suffix = {self.suffix},
+    prefix = {Formatter.codes(self.prefix, tabs)},
+    given = {Formatter.codes(self.given, tabs)},
+    nickname = {Formatter.codes(self.nickname, tabs)},
+    surname_prefix = {Formatter.codes(self.surname_prefix, tabs)},
+    surname = {Formatter.codes(self.surname, tabs)},
+    suffix = {Formatter.codes(self.suffix, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2079,7 +2261,7 @@ PersonalNamePieces(
         )
 
 
-class NameTranslation(NamedTuple):
+class NameTranslation(Structure):
     """Store, validate and display name translations.
 
     The BCP 47 language tag is a hyphenated list of subtags.
@@ -2120,10 +2302,20 @@ class NameTranslation(NamedTuple):
     >    +2 LANG <Language>                    {1:1}  g7:LANG
     >    +2 <<PERSONAL_NAME_PIECES>>           {0:1}
     """
+    structure: ClassVar[str] = Tag.TRAN.value
+    substructures: ClassVar[set[str]] = {Tag.LANG.value}
 
-    translation: str = String.EMPTY
-    language: str = String.UNDETERMINED
-    pieces: PersonalNamePieces = PersonalNamePieces()
+    def __init__(
+        self,
+        translation: str = String.EMPTY,
+        language: str = String.UNDETERMINED,
+        pieces: PersonalNamePieces | None = None,
+    ):
+        if pieces is None:
+            pieces = PersonalNamePieces()
+        self.translation = translation
+        self.language = language
+        self.pieces = pieces
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2145,17 +2337,15 @@ class NameTranslation(NamedTuple):
             )
         return lines
 
-    def code(self, level: int = 0) -> str:
-        pieces: str = Formatter.listcodes(self.pieces, level + 1)
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 NameTranslation(
-    translation = '{self.translation}',
-    language = '{self.language}',
-    pieces = {pieces},
+    translation = {Formatter.codes(self.translation, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
+    pieces = {Formatter.codes(self.pieces, tabs + 1)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2227,7 +2417,7 @@ NameTranslation(
         )
 
 
-class NoteTranslation(NamedTuple):
+class NoteTranslation(Structure):
     """Store, validate and display the optional note tranlation section of
     the GEDCOM Note Structure.
 
@@ -2272,10 +2462,18 @@ class NoteTranslation(NamedTuple):
     >    +2 MIME <MediaType>                   {0:1}  g7:MIME
     >    +2 LANG <Language>                    {0:1}  g7:LANG
     """
+    structure: ClassVar[str] = Tag.TRAN.value
+    substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
-    translation: str = Default.EMPTY
-    mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
+    def __init__(
+        self,
+        translation: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+    ):
+        self.translation = translation
+        self.mime = mime
+        self.language = language
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2295,16 +2493,15 @@ class NoteTranslation(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 NoteTranslation(
-    translation = '{self.translation}',
-    mime = '{self.mime}',
-    language = '{self.language}',
+    translation = {Formatter.codes(self.translation, tabs)},
+    mime = {Formatter.codes(self.mime, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2367,7 +2564,7 @@ NoteTranslation(
         )
 
 
-class CallNumber(NamedTuple):
+class CallNumber(Structure):
     """Store, validate and display the option call numbers for the
     SourceRepositoryCitation substructure.
 
@@ -2408,10 +2605,18 @@ class CallNumber(NamedTuple):
     >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+    structure: ClassVar[str] = Tag.CALN.value
+    substructures: ClassVar[set[str]] = {Tag.MEDI.value, Tag.PHRASE.value}
 
-    call_number: str = Default.EMPTY
-    medium: Medium = Medium.NONE
-    phrase: str = Default.EMPTY
+    def __init__(
+        self,
+        call_number: str = Default.EMPTY,
+        medium: Medium = Medium.NONE,
+        phrase: str = Default.EMPTY,
+    ):
+        self.call_number = call_number
+        self.medium = medium
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2431,16 +2636,15 @@ class CallNumber(NamedTuple):
             lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 CallNumber(
-    call_number = '{self.call_number}',
-    medium = '{self.medium}',
-    phrase = '{self.phrase}',
+    call_number = {Formatter.codes(self.call_number, tabs)},
+    medium = {Formatter.codes(self.medium, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2503,7 +2707,7 @@ CallNumber(
         )
 
 
-class Text(NamedTuple):
+class Text(Structure):
     """Store, validate and display a text in the GEDCOM standard.
 
     A Source Citation structure can have multiple texts associated with it.  This NamedTuple describes
@@ -2531,10 +2735,18 @@ class Text(NamedTuple):
     >         +3 MIME <MediaType>                {0:1}  g7:MIME
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
+    structure: ClassVar[str] = Tag.TEXT.value
+    substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
-    text: str = Default.EMPTY
-    mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
+    def __init__(
+        self,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+    ):
+        self.text = text
+        self.mime = mime
+        self.language = language
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2554,17 +2766,16 @@ class Text(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Text(
-    text = '{self.text}',
-    mime = {self.mime},
-    language = '{self.language}',
+    text = {Formatter.codes(self.text, tabs)},
+    mime = {Formatter.codes(self.mime, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
 ),""",
-            spaces,
-        )  # .replace('\n', '', 1)
+            String.INDENT * tabs,
+        )
 
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -2626,7 +2837,7 @@ Text(
         )
 
 
-class SourceData(NamedTuple):
+class SourceData(Structure):
     """_summary_
 
     Examples:
@@ -2649,9 +2860,20 @@ class SourceData(NamedTuple):
     >         +3 MIME <MediaType>                {0:1}  g7:MIME
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
+    structure: ClassVar[str] = Tag.DATE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    date_value: DateValue = DateValue()
-    texts: list[Text] = [Text(), Text()]  # noqa: RUF012
+    def __init__(
+        self,
+        date_value: DateValue | None = None,
+        texts: list[Text] | None = None,
+    ):
+        if date_value is None:
+            date_value = DateValue()
+        if texts is None:
+            texts = []
+        self.date_value = date_value
+        self.texts = texts
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2668,16 +2890,13 @@ class SourceData(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.texts, Text())
         return lines
 
-    def code(self, level: int = 0) -> str:
-        date_value: str = Formatter.listcodes(self.date_value, level + 1)
-        texts: str = Formatter.listcodes(self.texts, level + 1)
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
-f"""SourceData(
-    date_value = '{date_value}',
-    texts = {texts},
+            f"""SourceData(
+    date_value = {Formatter.codes(self.date_value, tabs + 1)},
+    texts = {Formatter.codes(self.texts, tabs + 1)},
 ),""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2752,7 +2971,7 @@ f"""SourceData(
         )
 
 
-class SourceCitation(NamedTuple):
+class SourceCitation(Structure):
     """Store, validate and display the Source Citation
     substructure of the GEDCOM standard.
 
@@ -2760,7 +2979,7 @@ class SourceCitation(NamedTuple):
 
 
     Args:
-        xref: the source identifier
+        source_xref: the source identifier
         page:
 
     Returns:
@@ -2784,22 +3003,43 @@ class SourceCitation(NamedTuple):
     >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NPFX.value, Tag.GIVN.value, Tag.NICK.value, Tag.SPFX.value, Tag.SURN.value, Tag.NSFX.value}
 
-    xref: SourceXref = Void.SOUR
-    page: str = String.EMPTY
-    source_data: SourceData = SourceData()
-    event: Event = Event.NONE
-    event_phrase: str = String.EMPTY
-    role: Role = Role.NONE
-    role_phrase: str = String.EMPTY
-    quality: Quay = Quay.NONE
-    multimedialinks: list[Any] = []  # noqa: RUF012
-    notes: list[Any] = []  # noqa: RUF012
+    def __init__(
+        self,
+        source_xref: SourceXref = Void.SOUR,
+        page: str = String.EMPTY,
+        source_data: SourceData | None = None,
+        event: Event = Event.NONE,
+        event_phrase: str = String.EMPTY,
+        role: Role = Role.NONE,
+        role_phrase: str = String.EMPTY,
+        quality: Quay = Quay.NONE,
+        multimedialinks: list[Any] | None = None, 
+        notes: list[Any] | None = None,
+    ):
+        if source_data is None:
+            source_data = SourceData()
+        if multimedialinks is None:
+            multimedialinks = []
+        if notes is None:
+            notes = []
+        self.source_xref = source_xref
+        self.page = page
+        self.source_data = source_data
+        self.event = event
+        self.event_phrase = event_phrase
+        self.role = role
+        self.role_phrase = role_phrase
+        self.quality = quality
+        self.multimedialinks = multimedialinks
+        self.notes = notes
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, SourceXref)
+            Checker.verify_type(self.source_xref, SourceXref)
             and Checker.verify_type(self.page, str)
             and Checker.verify_type(self.source_data, SourceData)
             and Checker.verify_enum(self.event.value, Event)
@@ -2817,7 +3057,7 @@ class SourceCitation(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = Tagger.string(
-                lines, level, Tag.SOUR, str(self.xref), format=False
+                lines, level, Tag.SOUR, str(self.source_xref), format=False
             )
             lines = Tagger.string(lines, level + 1, Tag.PAGE, self.page)
             lines = Tagger.structure(
@@ -2843,26 +3083,22 @@ class SourceCitation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        source_data: str = Formatter.listcodes(self.source_data, level + 1)
-        event: str = Formatter.listcodes(self.event, level + 1)
-        multimedialinks: str = Formatter.listcodes(self.multimedialinks, level + 1)
-        notes: str = Formatter.listcodes(self.notes, level + 1)
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
-f"""SourceCitation(
-    xref = '{self.xref}',
-    page = '{self.page}',
-    source_data = {source_data},
-    event = {event},
-    phrase = {self.event_phrase},
-    role = {self.role},
-    role_phrase = {self.role_phrase},
-    quality = {self.quality},
-    multimedialinks = {multimedialinks},
-    notes = {notes},
+            f"""
+SourceCitation(
+    source_xref = {Formatter.codes(self.source_xref, tabs)},
+    page = {Formatter.codes(self.page, tabs)},
+    source_data = {Formatter.codes(self.source_data, tabs + 1)},
+    event = {Formatter.codes(self.event, tabs + 1)},
+    phrase = {Formatter.codes(self.event_phrase, tabs)},
+    role = {Formatter.codes(self.role, tabs)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs)},
+    quality = {Formatter.codes(self.quality, tabs)},
+    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
 ),""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(self, choice: int = Default.CHOICE) -> str:
@@ -2889,19 +3125,19 @@ f"""SourceCitation(
         match choice:
             case 1:
                 show = SourceCitation(
-                    xref=Void.SOUR,
+                    source_xref=Void.SOUR,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = SourceCitation(
-                    xref=Void.SOUR,
+                    source_xref=Void.SOUR,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceCitation(
-                    xref=Void.SOUR,
+                    source_xref=Void.SOUR,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -2919,7 +3155,7 @@ f"""SourceCitation(
         )
 
 
-class Note(NamedTuple):
+class Note(Structure):
     """Store, validate and display a note substructure of the GEDCOM standard.
 
     The BCP 47 language tag is a hyphenated list of subtags.
@@ -3011,18 +3247,33 @@ class Note(NamedTuple):
     n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
     ]
     """  # noqa: RUF002
+    structure: ClassVar[str] = Tag.NOTE.value
+    substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
-    snote: SharedNoteXref = Void.SNOTE
-    note: str = String.EMPTY
-    mime: MediaType = MediaType.NONE
-    language: str = String.EMPTY
-    translations: list[NoteTranslation] = []  # noqa: RUF012
-    source_citations: list[SourceCitation] = []  # noqa: RUF012
+    def __init__(
+        self,
+        shared_note_xref: SharedNoteXref = Void.SNOTE,
+        note: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        translations: list[NoteTranslation] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+    ):
+        if translations is None:
+            translations = []
+        if source_citations is None:
+            source_citations = []
+        self.shared_note_xref = shared_note_xref
+        self.note = note
+        self.mime = mime
+        self.language = language
+        self.translations = translations
+        self.source_citations = source_citations
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.snote, SharedNoteXref)
+            Checker.verify_type(self.shared_note_xref, SharedNoteXref)
             and Checker.verify_type(self.note, str)
             and Checker.verify_enum(self.mime.value, MediaType)
             and Checker.verify_tuple_type(self.translations, NoteTranslation)
@@ -3034,9 +3285,9 @@ class Note(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.snote != Void.SNOTE:
+            if self.shared_note_xref != Void.SNOTE:
                 lines = Tagger.string(
-                    lines, level, Tag.SNOTE, self.snote.fullname
+                    lines, level, Tag.SNOTE, self.shared_note_xref.fullname
                 )
             else:
                 lines = Tagger.string(lines, level, Tag.NOTE, self.note)
@@ -3052,32 +3303,29 @@ class Note(NamedTuple):
                 )
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
-        if self.snote != Void.SNOTE:
+    def code(self, tabs: int = 0) -> str:
+        if self.shared_note_xref != Void.SNOTE:
             return indent(
                 f"""
 Note(
-    snote = {self.snote.fullname},
+    snote = {Formatter.codes(self.shared_note_xref, tabs)},
 )""",
-                spaces,
+                String.INDENT * tabs,
             )
-        translations = Formatter.listcodes(self.translations, level + 1)
-        source_citations = Formatter.listcodes(self.source_citations, level + 1)
         return indent(
             f"""
 Note(
-    note = '{self.note}',
-    mime = '{self.mime}',
-    language = '{self.language}',
-    translations = {translations},
-    source_citations = {source_citations},
+    note = {Formatter.codes(self.note, tabs)},
+    mime = {Formatter.codes(self.mime, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
+    translations = {Formatter.codes(self.translations, tabs + 1)},
+    source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
 
-class SourceRepositoryCitation(NamedTuple):
+class SourceRepositoryCitation(Structure):
     """Store, validate and display the optional Source Repository Citation
      substructure of the GEDCOM standard.
 
@@ -3100,15 +3348,27 @@ class SourceRepositoryCitation(NamedTuple):
     >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+    structure: ClassVar[str] = Tag.SOUR.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    repo: RepositoryXref = Void.REPO
-    notes: list[Note] = []  # noqa: RUF012
-    call_numbers: list[CallNumber] = []  # noqa: RUF012
+    def __init__(
+        self,
+        repository_xref: RepositoryXref = Void.REPO,
+        notes: list[Note] | None = None,
+        call_numbers: list[CallNumber] | None = None,
+    ):
+        if notes is None:
+            notes = []
+        if call_numbers is None:
+            call_numbers = []
+        self.repository_xref = repository_xref
+        self.notes = notes
+        self.call_numbers = call_numbers
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.repo, RepositoryXref)
+            Checker.verify_type(self.repository_xref, RepositoryXref)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.call_numbers, CallNumber)
         )
@@ -3117,30 +3377,27 @@ class SourceRepositoryCitation(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.repo.fullname != Void.NAME and self.validate():
-            lines = Tagger.taginfo(level, Tag.SOUR, str(self.repo))
+        if self.repository_xref.fullname != Void.NAME and self.validate():
+            lines = Tagger.taginfo(level, Tag.SOUR, str(self.repository_xref))
             lines = Tagger.structure(lines, level, self.notes, Note())
             lines = Tagger.structure(
                 lines, level, self.call_numbers, CallNumber()
             )
         return lines
-    
-    def code(self, level: int = 0) -> str:
-        notes: str = Formatter.listcodes(self.notes, level + 1)
-        call_numbers: str = Formatter.listcodes(self.call_numbers, level + 1)
-        spaces: str = String.INDENT * level
+
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 SourceRepositoryCitation(
-    repo = {self.repo},
-    notes = {notes},
-    callnumbers = {call_numbers},
+    repository_xref = {Formatter.codes(self.repository_xref, tabs)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
+    callnumbers = {Formatter.codes(self.call_numbers, tabs + 1)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
 
-class PersonalName(NamedTuple):
+class PersonalName(Structure):
     """Store, validate and display a personal name.
 
     Example:
@@ -3220,15 +3477,37 @@ class PersonalName(NamedTuple):
       +1 <<NOTE_STRUCTURE>>                    {0:M}
       +1 <<SOURCE_CITATION>>                   {0:M}
     """
+    structure: ClassVar[str] = Tag.NAME.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.PHRASE.value}
 
-    name: str = String.EMPTY
-    surname: str = String.EMPTY
-    type: Tag = Tag.NONE
-    phrase: str = String.EMPTY
-    pieces: PersonalNamePieces = PersonalNamePieces()
-    translations: list[NameTranslation] = []  # noqa: RUF012
-    notes: list[Note] = []  # noqa: RUF012
-    source_citations: list[SourceCitation] = []  # noqa: RUF012
+    def __init__(
+        self,
+        name: str = Default.EMPTY,
+        surname: str = Default.EMPTY,
+        type: Tag = Tag.NONE,
+        phrase: str = Default.EMPTY,
+        pieces: PersonalNamePieces | None = None,
+        translations: list[NameTranslation] | None = None,
+        notes: list[Note] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+    ):
+        if pieces is None:
+            pieces = PersonalNamePieces()
+        if translations is None:
+            translations = []
+        if notes is None:
+            notes = []
+        if source_citations is None:
+            source_citations = []
+        self.name = name
+        self.surname = surname
+        self.type = type
+        self.phrase = phrase
+        self.pieces = pieces
+        self.translations = translations
+        self.notes = notes
+        self.source_citations = source_citations
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3273,30 +3552,25 @@ class PersonalName(NamedTuple):
                 lines, level + 1, self.source_citations, SourceCitation()
             )
         return lines
-    
-    def code(self, level: int = 0) -> str:
-        # pieces: str = Formatter.listcodes(self.pieces, level + 1)
-        # translations: str = Formatter.listcodes(self.translations, level + 1)
-        # notes: str = Formatter.listcodes(self.notes, level + 1)
-        # source_citations: str = Formatter.listcodes(self.source_citations, level + 1)
-        #spaces: str = String.INDENT * level
+
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 PersonalName(
-    name = '{self.name}',
-    surname = '{self.surname}',
-    type = '{self.type}',
-    phrase = '{self.phrase}',
-    pieces = {Formatter.listcodes(self.pieces, level + 1)},
-    translations = {Formatter.listcodes(self.translations, level + 1)},
-    notes = {Formatter.listcodes(self.notes, level + 1)},
-    source_citations = {Formatter.listcodes(self.source_citations, level + 1)},
+    name = {Formatter.codes(self.name, tabs)},
+    surname = {Formatter.codes(self.surname, tabs)},
+    type = {Formatter.codes(self.type, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+    pieces = {Formatter.codes(self.pieces, tabs + 1)},
+    translations = {Formatter.codes(self.translations, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
+    source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
 )""",
-            String.INDENT * level,
+            String.INDENT * tabs,
         )
 
 
-class Association(NamedTuple):
+class Association(Structure):
     """Store, validate and display a GEDCOM Association structure.
 
 
@@ -3353,7 +3627,9 @@ class Association(NamedTuple):
         ...                         Date(year=1930),
         ...                     ),
         ...                     associations=[
-        ...                         Association(xref=clergy, role=Role.CLERGY),
+        ...                         Association(
+        ...                             individual_xref=clergy, role=Role.CLERGY
+        ...                         ),
         ...                     ],
         ...                 )
         ...             ),
@@ -3406,7 +3682,7 @@ class Association(NamedTuple):
         ...             name='Mary //',
         ...             source_citations=[
         ...                 SourceCitation(
-        ...                     xref=sour_s1_xref,
+        ...                     source_xref=sour_s1_xref,
         ...                     event=Event.BIRT,
         ...                     role=Role.MOTH,
         ...                 )
@@ -3447,7 +3723,7 @@ class Association(NamedTuple):
         ...     xref=indi_i2_xref,
         ...     associations=[
         ...         Association(
-        ...             xref=indi_i3_xref,
+        ...             individual_xref=indi_i3_xref,
         ...             role=Role.FRIEND,
         ...             role_phrase='best friend',
         ...         ),
@@ -3459,7 +3735,7 @@ class Association(NamedTuple):
         ...                 event_detail=EventDetail(
         ...                     associations=[
         ...                         Association(
-        ...                             xref=indi_i3_xref,
+        ...                             individual_xref=indi_i3_xref,
         ...                             role=Role.WITN,
         ...                         ),
         ...                     ]
@@ -3479,7 +3755,7 @@ class Association(NamedTuple):
         <BLANKLINE>
 
     Args:
-        xref: the identifier of the individual in this association.
+        individual_xref: the identifier of the individual in this association.
         phrase: a description of the association.
         role: the role of this individual.
         role_phrase: a description of the role.
@@ -3499,19 +3775,40 @@ class Association(NamedTuple):
       +1 <<NOTE_STRUCTURE>>                    {0:M}
       +1 <<SOURCE_CITATION>>                   {0:M}
     """
+    structure: ClassVar[str] = Tag.ASSO.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value, Tag.ROLE.value}
 
-    xref: IndividualXref = Void.INDI
-    association_phrase: str = String.EMPTY
-    role: Role = Role.NONE
-    role_phrase: str = String.EMPTY
-    notes: list[Note] = []  # noqa: RUF012
-    citations: list[SourceCitation] = []  # noqa: RUF012
+    def __init__(
+        self,
+        individual_xref: IndividualXref = Void.INDI,
+        association_phrase: str = String.EMPTY,
+        role: Role = Role.NONE,
+        role_phrase: str = String.EMPTY,
+        notes: list[Note] | None = None,
+        citations: list[SourceCitation] | None = None,
+    ):
+        if notes is None:
+            notes = []
+        if citations is None:
+            citations = []
+        self.individual_xref = individual_xref
+        self.association_phrase = association_phrase
+        self.role = role
+        self.role_phrase = role_phrase
+        self.notes = notes
+        self.citations = citations
+
+    def __repr__(self) -> str:
+        return (
+            self.code()
+            .replace(String.EOL, String.EMPTY)
+            .replace(String.INDENT, String.SPACE)
+        )
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, IndividualXref)
-            # and Checker.verify_type(self.role, Role)
+            Checker.verify_type(self.individual_xref, IndividualXref)
             and Checker.verify_enum(self.role.value, Role)
             and Checker.verify_type(self.association_phrase, str)
             and Checker.verify_type(self.role_phrase, str)
@@ -3525,7 +3822,7 @@ class Association(NamedTuple):
         lines: str = String.EMPTY
         if self.validate():
             lines = Tagger.string(
-                lines, level, Tag.ASSO, str(self.xref), format=False
+                lines, level, Tag.ASSO, str(self.individual_xref), format=False
             )
             lines = Tagger.string(
                 lines, level + 1, Tag.PHRASE, self.association_phrase
@@ -3540,8 +3837,22 @@ class Association(NamedTuple):
             )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Association(
+    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
+    association_phrase = {Formatter.codes(self.association_phrase, tabs)},
+    role = {Formatter.codes(self.role, tabs)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    citations = {Formatter.codes(self.citations, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class MultimediaLink(NamedTuple):
+
+class MultimediaLink(Structure):
     """_summary_
 
     Examples:
@@ -3553,13 +3864,24 @@ class MultimediaLink(NamedTuple):
     Returns:
         A GEDCOM string storing this data.
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    crop: str = ''
-    top: int = 0
-    left: int = 0
-    height: int = 0
-    width: int = 0
-    title: str = ''
+    def __init__(
+        self,
+        crop: str = Default.EMPTY,
+        top: int = Default.TOP,
+        left: int = Default.LEFT,
+        height: int = Default.HEIGHT,
+        width: int = Default.WIDTH,
+        title: str = Default.EMPTY,
+    ):
+        self.crop = crop
+        self.top = top
+        self.left = left
+        self.height = height
+        self.width = width
+        self.title = title
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3579,10 +3901,33 @@ class MultimediaLink(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+MultimediaLink(
+    crop = {Formatter.codes(self.crop, tabs)},
+    top = {Formatter.codes(self.top, tabs)},
+    left = {Formatter.codes(self.left, tabs)},
+    height = {Formatter.codes(self.height, tabs)},
+    width = {Formatter.codes(self.width, tabs)},
+    title = {Formatter.codes(self.title, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Exid(NamedTuple):
-    exid: str
-    exid_type: str
+
+class Exid(Structure):
+    """Store, validate and display an EXID structure."""
+    structure: ClassVar[str] = Tag.EXID.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value}
+
+    def __init__(
+        self,
+        exid: str,
+        exid_type: str,
+    ):
+        self.exid = exid
+        self.exid_type = exid_type
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3600,8 +3945,18 @@ class Exid(NamedTuple):
             ]
         )
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Exid(
+    exid = {Formatter.codes(self.exid, tabs)},
+    exid_type = {Formatter.codes(self.exid_type, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Map:
+
+class Map(Structure):
     """Store, validate and save a GEDCOM map structure.
 
     The latitude and longitude values are formatted to six decimal places
@@ -3672,6 +4027,8 @@ class Map:
         longitude: float = Default.MAP_LONGITUDE,
         extensions: list[Extension] | None = None,
     ):
+        if extensions is None:
+            extensions = []
         self.latitude: float = latitude
         self.longitude: float = longitude
         self.extensions: list[Extension] | None = extensions
@@ -3689,15 +4046,13 @@ class Map:
                 elif Tag.LONG.value in ext.schema.supers:
                     self.long_extensions.append(ext)
 
-    def __str__(self) -> str:
-        if self.extensions is None:
-            return (
-                f'Map(latitude={self.latitude!s}, longitude={self.longitude!s})'
-            )
-        return f'Map(latitude={self.latitude!s}, longitude={self.longitude!s}, extensions={self.extensions!s})'
-
-    def __repr__(self) -> str:
-        return str(self)
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         other is not None
+    #         and self.latitude == other.latitude
+    #         and self.longitude == other.longitude
+    #     )
+    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3734,15 +4089,14 @@ class Map:
             lines = Tagger.structure(lines, level + 2, self.long_extensions)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Map(
-    latitude = {self.latitude!s},
-    longitude = {self.longitude!s},
+    latitude = {Formatter.codes(self.latitude, tabs)},
+    longitude = {Formatter.codes(self.longitude, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(
@@ -3810,7 +4164,7 @@ Map(
         )
 
 
-class PlaceTranslation:
+class PlaceTranslation(Structure):
     """Store, validate and return a translation of GEDCOM place names.
 
     A place is a comma separated string of named locations or regions going from smallest to largest.
@@ -3896,18 +4250,17 @@ class PlaceTranslation:
             lines = Tagger.structure(lines, level + 1, self.lang_extensions)
         return lines
 
-    def code(self, level: int = 0) -> str:
-        spaces: str = String.INDENT * level
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 PlaceTranslation(
-    place1 = '{self.place1}',
-    place2 = '{self.place2}',
-    place3 = '{self.place3}',
-    place4 = '{self.place4}',
-    language = '{self.language}',
+    place1 = {Formatter.codes(self.place1, tabs)},
+    place2 = {Formatter.codes(self.place2, tabs)},
+    place3 = {Formatter.codes(self.place3, tabs)},
+    place4 = {Formatter.codes(self.place4, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
 )""",
-            spaces,
+            String.INDENT * tabs,
         )
 
     def example(
@@ -3996,7 +4349,7 @@ PlaceTranslation(
         )
 
 
-class Place:
+class Place(Structure):
     """Store, validate and return a GEDCOM place structure.
 
     A place is a comma separated string of named locations or regions going from smallest to largest.
@@ -4162,6 +4515,20 @@ class Place:
                 elif Tag.LANG.value in ext.schema.supers:
                     self.lang_extensions.append(ext)
 
+    # def __eq__(self, other: Any) -> bool:
+    #     check: bool = (
+    #         self.place1 == other.place1
+    #         and self.place2 == other.place2
+    #         and self.place3 == other.place3
+    #         and self.place4 == other.place4
+    #         and self.form1 == other.form1
+    #         and self.form2 == other.form2
+    #         and self.form3 == other.form3
+    #         and self.form4 == other.form4
+    #         and self.language == other.language
+    #     )
+    #     return check
+
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
@@ -4197,26 +4564,26 @@ class Place:
             lines = Tagger.structure(lines, level + 1, self.notes, Note())
         return lines
 
-    def code(self, level: int = 0) -> str:
+    def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Place(
-    place1 = {Formatter.listcodes(self.place1)},
-    place2 = {Formatter.listcodes(self.place2)},
-    place3 = {Formatter.listcodes(self.place3)},
-    place4 = {Formatter.listcodes(self.place4)},
-    form1 = {Formatter.listcodes(self.form1)},
-    form2 = {Formatter.listcodes(self.form2)},
-    form3 = {Formatter.listcodes(self.form3)},
-    form4 = {Formatter.listcodes(self.form4)},
-    language = {Formatter.listcodes(self.language)},
-    translations = {Formatter.listcodes(self.translations, level + 2)},
-    map = {Formatter.listcodes(self.map, level + 1)},
-    exids = {Formatter.listcodes(self.exids, level + 2)},
-    notes = {Formatter.listcodes(self.notes, level + 2)},
-    extensions = {Formatter.listcodes(self.extensions, level + 2)},
+    place1 = {Formatter.codes(self.place1, tabs)},
+    place2 = {Formatter.codes(self.place2, tabs)},
+    place3 = {Formatter.codes(self.place3, tabs)},
+    place4 = {Formatter.codes(self.place4, tabs)},
+    form1 = {Formatter.codes(self.form1, tabs)},
+    form2 = {Formatter.codes(self.form2, tabs)},
+    form3 = {Formatter.codes(self.form3, tabs)},
+    form4 = {Formatter.codes(self.form4, tabs)},
+    language = {Formatter.codes(self.language,tabs)},
+    translations = {Formatter.codes(self.translations, tabs + 2)},
+    map = {Formatter.codes(self.map, tabs + 1)},
+    exids = {Formatter.codes(self.exids, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
+    extensions = {Formatter.codes(self.extensions, tabs + 2)},
 )""",
-            String.INDENT * level,
+            String.INDENT * tabs,
         )
 
     def example(
@@ -4225,7 +4592,7 @@ Place(
         place1: str = Default.EMPTY,
         place2: str = Default.EMPTY,
         place3: str = Default.EMPTY,
-        place4: str = Default.EMPTY,
+        place4: str = Default.EMPTY, 
         form1: str = Default.PLACE_FORM1,
         form2: str = Default.PLACE_FORM2,
         form3: str = Default.PLACE_FORM3,
@@ -4338,7 +4705,7 @@ Place(
         )
 
 
-class EventDetail(NamedTuple):
+class EventDetail(Structure):
     """Store, validate and display a GEDCOM Event Detail.
 
     Reference:
@@ -4364,24 +4731,68 @@ class EventDetail(NamedTuple):
     > n <<MULTIMEDIA_LINK>>                      {0:M}
     > n UID <Special>                            {0:M}  [g7:UID]()
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.AGNC.value, Tag.RELI.value, Tag.CAUS.value, Tag.RESN.value}
 
-    date_value: DateValue = DateValue()
-    place: Place | None = None
-    address: Address = Address([], '', '', '', '')
-    phones: list[str] = []  # noqa: RUF012
-    emails: list[str] = []  # noqa: RUF012
-    faxes: list[str] = []  # noqa: RUF012
-    wwws: list[str] = []  # noqa: RUF012
-    agency: str = ''
-    religion: str = ''
-    cause: str = ''
-    resn: str = ''
-    # sort_date: SortDate = ()
-    associations: list[Association] = []  # noqa: RUF012
-    notes: list[Note] = []  # noqa: RUF012
-    sources: list[SourceCitation] = []  # noqa: RUF012
-    multimedia_links: list[MultimediaLink] = []  # noqa: RUF012
-    uids: list[Id] = []  # noqa: RUF012
+    def __init__(
+        self,
+        date_value: DateValue | None = None,
+        place: Place | None = None,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None, 
+        agency: str = '',
+        religion: str = '',
+        cause: str = '',
+        resn: str = '',
+        associations: list[Association] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        uids: list[Id] | None = None,
+    ):
+        if date_value is None:
+            date_value = DateValue()
+        if place is None:
+            place = Place()
+        if address is None:
+            address = Address()
+        if phones is None:
+            phones = []
+        if emails is None:
+            emails = []
+        if faxes is None:
+            faxes = []
+        if wwws is None:
+            wwws = []
+        if associations is None:
+            associations = []
+        if notes is None:
+            notes = []
+        if sources is None:
+            sources = []
+        if multimedia_links is None:
+            multimedia_links = []
+        if uids is None:
+            uids = []
+        self.date_value = date_value
+        self.place = place
+        self.address = address
+        self.phones = phones
+        self.emails = emails
+        self.faxes = faxes
+        self.wwws = wwws
+        self.agency = agency
+        self.religion = religion
+        self.cause = cause
+        self.resn = resn
+        self.associations = associations
+        self.notes = notes
+        self.sources = sources
+        self.multimedia_links = multimedia_links
+        self.uids = uids
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4427,23 +4838,32 @@ class EventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.uids)
         return lines
 
-    def code(self, level: int = 0, detail: str = String.MIN) -> str:
-        spaces: str = String.INDENT * level
-        preface: str = """
-            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL
-            from chronodata.constants import Choice
-            from chronodata.store import Age, FamilyEventDetail
-
-            """
+    def code(self, tabs: int = 0) -> str:
         return indent(
-            dedent(f"""
-            {preface if detail == String.MAX else ''}
-        """),
-            spaces,
+            f"""
+EventDetail(
+    date_value = {Formatter.codes(self.date_value, tabs)},
+    place = {Formatter.codes(self.place, tabs)},
+    address = {Formatter.codes(self.address, tabs)},
+    phones = {Formatter.codes(self.phones, tabs)},
+    emails = {Formatter.codes(self.emails, tabs)},
+    faxes = {Formatter.codes(self.faxes, tabs)},
+    wwws = {Formatter.codes(self.wwws, tabs)},
+    agency = {Formatter.codes(self.agency, tabs)},
+    religion = {Formatter.codes(self.religion, tabs)},
+    cause = {Formatter.codes(self.cause, tabs)},
+    resn = {Formatter.codes(self.resn, tabs)},
+    associations = {Formatter.codes(self.associations, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    sources = {Formatter.codes(self.sources, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)}
+    uids = {Formatter.codes(self.uids, tabs)},
+)""",
+            String.INDENT * tabs,
         )
 
 
-class FamilyEventDetail(NamedTuple):
+class FamilyEventDetail(Structure):
     """Store, validate and display GEDCOM family event detail structure.
 
     Examples:
@@ -4472,10 +4892,24 @@ class FamilyEventDetail(NamedTuple):
     >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     > n <<EVENT_DETAIL>>                         {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.HUSB.value, Tag.WIFE.value, Tag.AGE.value, Tag.PHRASE.value}
 
-    husband_age: Age = Age()
-    wife_age: Age = Age()
-    event_detail: EventDetail = EventDetail()
+    def __init__(
+        self,
+        husband_age: Age | None = None,
+        wife_age: Age | None = None,
+        event_detail: EventDetail | None = None,
+    ):
+        if husband_age is None:
+            husband_age = Age()
+        if wife_age is None:
+            wife_age = Age()
+        if event_detail is None:
+            event_detail = EventDetail()
+        self.husband_age = husband_age
+        self.wife_age = wife_age
+        self.event_detail = event_detail
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4488,7 +4922,7 @@ class FamilyEventDetail(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
             if self.husband_age != Age():
                 lines = Tagger.empty(lines, level, Tag.HUSB)
@@ -4501,23 +4935,19 @@ class FamilyEventDetail(NamedTuple):
             )
         return lines
 
-    def code(self, level: int = 0, detail: str = String.MIN) -> str:
-        spaces: str = String.INDENT * level
-        preface: str = """
-            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL
-            from chronodata.constants import Choice
-            from chronodata.store import Age, FamilyEventDetail
-
-            """
+    def code(self, tabs: int = 0) -> str:
         return indent(
-            dedent(f"""
-            {preface if detail == String.MAX else ''}
-        """),
-            spaces,
+            f"""
+FamilyEventDetail(
+    husband_age = {Formatter.codes(self.husband_age, tabs)},
+    wife_age = {Formatter.codes(self.wife_age, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs)} 
+)""",
+            String.INDENT * tabs,
         )
 
 
-class FamilyAttribute(NamedTuple):
+class FamilyAttribute(Structure):
     """Store, validate and display a GEDCOM Family Attribute.
 
     Reference:
@@ -4537,11 +4967,22 @@ class FamilyAttribute(NamedTuple):
     >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
     > ]
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
 
-    tag: Tag = Tag.NONE
-    payload: str = String.EMPTY
-    attribute_type: str = String.EMPTY
-    family_event_detail: FamilyEventDetail = FamilyEventDetail()
+    def __init__(
+        self,
+        tag: Tag = Tag.NONE,
+        payload: str = Default.EMPTY,
+        attribute_type: str = Default.EMPTY,
+        family_event_detail: FamilyEventDetail | None = None,
+    ):
+        if family_event_detail is None:
+            family_event_detail = FamilyEventDetail()
+        self.tag = tag
+        self.payload = payload
+        self.attribute_type = attribute_type
+        self.family_event_detail = family_event_detail
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4567,8 +5008,20 @@ class FamilyAttribute(NamedTuple):
             )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+FamilyAttribute(
+    tag = {Formatter.codes(self.tag, tabs)},
+    payload = {Formatter.codes(self.payload, tabs)},
+    attribute_type = {Formatter.codes(self.attribute_type, tabs)},
+    family_event_detail = {Formatter.codes(self.family_event_detail, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class FamilyEvent(NamedTuple):
+
+class FamilyEvent(Structure):
     """Store, validate and display a GEDCOM Family Event.
 
     Examples:
@@ -4641,11 +5094,32 @@ class FamilyEvent(NamedTuple):
     >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
     > ]
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.ANUL.value,
+            Tag.CENS.value,
+            Tag.DIV.value,
+            Tag.DIVF.value,
+            Tag.ENGA.value,
+            Tag.MARB.value,
+            Tag.MARC.value,
+            Tag.MARL.value,
+            Tag.MARR.value,
+            Tag.MARS.value,
+    }
 
-    tag: Tag = Tag.NONE
-    payload: str = String.OCCURRED
-    event_type: str = String.EMPTY
-    event_detail: FamilyEventDetail | None = None
+    def __init__(
+        self,
+        tag: Tag = Tag.NONE,
+        payload: str = String.OCCURRED,
+        event_type: str = String.EMPTY,
+        event_detail: FamilyEventDetail | None = None,
+    ):
+        if event_detail is None:
+            event_detail = FamilyEventDetail()
+        self.tag = tag
+        self.payload = payload
+        self.event_type = event_type
+        self.event_detail = event_detail
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4695,67 +5169,102 @@ class FamilyEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
-    def code(self, level: int = 0, detail: str = String.MIN) -> str:
-        spaces: str = String.INDENT * level
-        preface: str = """
-            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE
-            from chronodata.constants import Choice
-            from chronodata.store import FamilyEvent
-
-            """
+    def code(self, tabs: int = 0) -> str:
         return indent(
-            dedent(f"""
-            {preface if detail == String.MAX else ''}
-        """),
-            spaces,
+            f"""
+FamilyEvent(
+    tag = {Formatter.codes(self.tag, tabs)},
+    payload = {Formatter.codes(self.payload, tabs)},
+    event_type = {Formatter.codes(self.event_type, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs)},
+)""",
+            String.INDENT * tabs,
         )
 
 
-class Husband(NamedTuple):
-    xref: IndividualXref = Void.INDI
-    phrase: str = String.EMPTY
+class Husband(Structure):
+    """Store, validate and display the GEDCOM Husband structure."""
+    structure: ClassVar[str] = Tag.HUSB.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
+
+    def __init__(
+        self,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = String.EMPTY,
+    ):
+        self.individual_xref = individual_xref
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = Checker.verify_type(
             self.phrase, str
-        ) and Checker.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.individual_xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
-        if str(self.xref) != Void.NAME and self.validate():
+        if str(self.individual_xref) != Void.NAME and self.validate():
             lines = Tagger.string(
-                lines, level, Tag.HUSB, str(self.xref), format=False
+                lines, level, Tag.HUSB, str(self.individual_xref), format=False
             )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Husband(
+    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Wife(NamedTuple):
-    xref: IndividualXref = Void.INDI
-    phrase: str = ''
+
+class Wife(Structure):
+    """Store, validate and display the GEDCOM Wife structure."""
+    structure: ClassVar[str] = Tag.WIFE.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
+
+    def __init__(
+        self,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+    ):
+        self.individual_xref = individual_xref
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = Checker.verify_type(
             self.phrase, str
-        ) and Checker.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.individual_xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
-        if str(self.xref) != Void.NAME and self.validate():
+        if str(self.individual_xref) != Void.NAME and self.validate():
             lines = Tagger.string(
-                lines, level, Tag.WIFE, str(self.xref), format=False
+                lines, level, Tag.WIFE, str(self.individual_xref), format=False
             )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Wife(
+    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Child(NamedTuple):
+
+class Child(Structure):
     """Store, validate and display GEDCOM child information.
 
     Reference:
@@ -4765,29 +5274,46 @@ class Child(NamedTuple):
     >     +1 CHIL @<XREF:INDI>@                    {0:M}  g7:CHIL
     >        +2 PHRASE <Text>                      {0:1}  g7:PHRASE
     """
+    structure: ClassVar[str] = Tag.CHIL.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
-    xref: IndividualXref = Void.INDI
-    phrase: str = String.EMPTY
+    def __init__(
+        self,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+    ):
+        self.individual_xref = individual_xref
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = Checker.verify_type(
             self.phrase, str
-        ) and Checker.verify_type(self.xref, IndividualXref)
+        ) and Checker.verify_type(self.individual_xref, IndividualXref)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
-        if str(self.xref) != Void.NAME and self.validate():
+        if str(self.individual_xref) != Void.NAME and self.validate():
             lines = Tagger.string(
-                lines, level, Tag.CHIL, str(self.xref), format=False
+                lines, level, Tag.CHIL, str(self.individual_xref), format=False
             )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Child(
+    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class LDSOrdinanceDetail(NamedTuple):
+
+class LDSOrdinanceDetail(Structure):
     """Store, validate and display the GEDCOM LDS Ordinance Detail structure.
 
     Reference:
@@ -4802,18 +5328,41 @@ class LDSOrdinanceDetail(NamedTuple):
     > n <<NOTE_STRUCTURE>>                     {0:M}
     > n <<SOURCE_CITATION>>                    {0:M}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
 
-    date_value: DateValue = DateValue()
-    temple: str = String.EMPTY
-    place: Place = Place()
-    status: Stat = Stat.NONE
-    status_date: Date = Date()
-    status_time: Time = Time()
-    notes: list[Note] = [Note(), Note()]  # noqa: RUF012
-    source_citations: list[SourceCitation] = [  # noqa: RUF012
-        SourceCitation(),
-        SourceCitation(),
-    ]
+    def __init__(
+        self,
+        date_value: DateValue | None = None,
+        temple: str = String.EMPTY,
+        place: Place | None = None,
+        status: Stat = Stat.NONE,
+        status_date: Date | None = None,
+        status_time: Time | None = None,
+        notes: list[Note] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+    ):
+        if date_value is None:
+            date_value = DateValue()
+        if place is None:
+            place = Place()
+        if status_date is None:
+            status_date = Date()
+        if status_time is None:
+            status_time = Time()
+        if notes is None:
+            notes = []
+        if source_citations is None:
+            source_citations = []
+        self.date_value = date_value
+        self.temple = temple
+        self.place = place
+        self.status = status
+        self.status_date = status_date
+        self.status_time = status_time
+        self.notes = notes
+        self.source_citations = source_citations
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4845,8 +5394,24 @@ class LDSOrdinanceDetail(NamedTuple):
             )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+LDSOrdinanceDetail(
+    date_value = {Formatter.codes(self.date_value, tabs)},
+    temple = {Formatter.codes(self.temple, tabs)},
+    place = {Formatter.codes(self.place, tabs)},
+    status = {Formatter.codes(self.status, tabs)},
+    status_date = {Formatter.codes(self.status_date, tabs)},
+    status_time = {Formatter.codes(self.status_time, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    source_citations = {Formatter.codes(self.source_citations, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class LDSSpouseSealing(NamedTuple):
+
+class LDSSpouseSealing(Structure):
     """Store, validate and display the LDS Spouse Sealing structure.
 
     Reference:
@@ -4856,8 +5421,18 @@ class LDSSpouseSealing(NamedTuple):
     >   +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
     """
 
-    tag: Tag = Tag.SLGS
-    detail: LDSOrdinanceDetail = LDSOrdinanceDetail()
+    structure: ClassVar[str] = Tag.SLGS.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        tag: Tag = Tag.SLGS,
+        detail: LDSOrdinanceDetail | None = None,
+    ):
+        if detail is None:
+            detail = LDSOrdinanceDetail()
+        self.tag = tag
+        self.detail = detail
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4873,8 +5448,18 @@ class LDSSpouseSealing(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+LDSSPouseSealing(
+    tag = {Formatter.codes(self.tag, tabs)},
+    detail = {Formatter.codes(self.detail, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class LDSIndividualOrdinance(NamedTuple):
+
+class LDSIndividualOrdinance(Structure):
     """Store, validate and display the GEDCOM LDS Individual Ordinances structure.
 
     Reference:
@@ -4898,10 +5483,20 @@ class LDSIndividualOrdinance(NamedTuple):
       +1 FAMC @<XREF:FAM>@                     {1:1}  [g7:FAMC](https://gedcom.io/terms/v7/FAMC)
     ]
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.BAPL.value, Tag.CONL.value, Tag.ENDL.value, Tag.INIL.value, Tag.SLGC.value}
 
-    tag: Tag = Tag.NONE
-    ordinance_detail: LDSOrdinanceDetail = LDSOrdinanceDetail()
-    family_xref: FamilyXref = Void.FAM
+    def __init__(
+        self,
+        tag: Tag = Tag.NONE,
+        ordinance_detail: LDSOrdinanceDetail | None = None,
+        family_xref: FamilyXref = Void.FAM,
+    ):
+        if ordinance_detail is None:
+            ordinance_detail = LDSOrdinanceDetail()
+        self.tag = tag
+        self.ordinance_detail = ordinance_detail
+        self.family_xref = family_xref
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4929,8 +5524,19 @@ class LDSIndividualOrdinance(NamedTuple):
                 )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+LDSIndividualOrdinance(
+    tag = {Formatter.codes(self.tag, tabs)},
+    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs)},
+    family_xref = {Formatter.codes(self.family_xref, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Identifier(NamedTuple):
+
+class Identifier(Structure):
     """Construct GEDCOM data for the Identifier Structure.
 
     There are three valid identifier structures.  They will be illustrated in
@@ -4944,9 +5550,19 @@ class Identifier(NamedTuple):
 
     - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)"""
 
-    tag: Id = Id.NONE
-    tag_info: str = ''
-    tag_type: str = ''
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
+
+    def __init__(
+        self,
+        tag: Id = Id.NONE,
+        tag_info: str = Default.EMPTY,
+        tag_type: str = Default.EMPTY,
+    ):
+        self.tag = tag
+        self.tag_info = tag_info
+        self.tag_type = tag_type
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4971,11 +5587,22 @@ class Identifier(NamedTuple):
                 logging.warning(Msg.EXID_TYPE)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Identifier(
+    tag = {Formatter.codes(self.tag, tabs)},
+    tag_info = {Formatter.codes(self.tag_info, tabs)},
+    tag_type = {Formatter.codes(self.tag_type, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class IndividualEventDetail(NamedTuple):
+
+class IndividualEventDetail(Structure):
     """Store, validate and display a GEDCOM Individual Event Detail structure.
 
-    Args:
+    Args:l
         event_detail: A GEDCOM Event Detail structure.
         age: The age of the individual.
         phrase: Text describing the individual event.
@@ -4988,9 +5615,22 @@ class IndividualEventDetail(NamedTuple):
     >   +1 PHRASE <Text>                         {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
-    event_detail: EventDetail | None = None
-    age: Age | None = None  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
-    phrase: str = String.EMPTY
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        event_detail: EventDetail | None = None,
+        age: Age | None = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+        phrase: str = Default.EMPTY,
+    ):
+        if event_detail is None:
+            event_detail = EventDetail()
+        if age is None:
+            age = Age()
+        self.event_detail = event_detail
+        self.age = age
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5013,8 +5653,19 @@ class IndividualEventDetail(NamedTuple):
                 lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+IndividualEventDetail(
+    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    age = {Formatter.codes(self.age, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class IndividualAttribute(NamedTuple):
+
+class IndividualAttribute(Structure):
     """Store, validate and display a GEDCOM Individual Attribute structure.
 
     Reference:
@@ -5079,9 +5730,20 @@ class IndividualAttribute(NamedTuple):
     > ]
     """
 
-    tag: IndiAttr
-    tag_type: str = ''
-    event_detail: IndividualEventDetail = IndividualEventDetail()
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        tag: IndiAttr,
+        tag_type: str = Default.EMPTY,
+        event_detail: IndividualEventDetail | None = None,
+    ):
+        if event_detail is None:
+            event_detail = IndividualEventDetail()
+        self.tag = tag
+        self.tag_type = tag_type
+        self.event_detail = event_detail
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5099,8 +5761,19 @@ class IndividualAttribute(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+IndividualAttribute(
+    tag = {Formatter.codes(self.tag, tabs)},
+    tag_type = {Formatter.codes(self.tag_type, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class IndividualEvent(NamedTuple):
+
+class IndividualEvent(Structure):
     """Store, validate and display a GEDCOM Individual Event Structure.
 
     Examples:
@@ -5274,14 +5947,28 @@ class IndividualEvent(NamedTuple):
     >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
     > ]
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    tag: Tag = Tag.NONE
-    payload: str = String.EMPTY
-    text: str = String.EMPTY
-    event_detail: IndividualEventDetail = IndividualEventDetail()
-    family_xref: FamilyXref = Void.FAM
-    adoption: Tag = Tag.NONE
-    phrase: str = String.EMPTY
+    def __init__(
+        self,
+        tag: Tag = Tag.NONE,
+        payload: str = Default.EMPTY,
+        text: str = Default.EMPTY,
+        event_detail: IndividualEventDetail | None = None,
+        family_xref: FamilyXref = Void.FAM,
+        adoption: Tag = Tag.NONE,
+        phrase: str = Default.EMPTY,
+    ):
+        if event_detail is None:
+            event_detail = IndividualEventDetail()
+        self.tag = tag
+        self.payload = payload
+        self.text = text
+        self.event_detail = event_detail
+        self.family_xref = family_xref
+        self.adoption = adoption
+        self.phrase = phrase
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5326,8 +6013,23 @@ class IndividualEvent(NamedTuple):
                         )
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+IndividualEvent(
+    tag = {Formatter.codes(self.tag, tabs)},
+    payload = {Formatter.codes(self.payload, tabs)},
+    text = {Formatter.codes(self.text, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    family_xref = {Formatter.codes(self.family_xref, tabs)},
+    adoption = {Formatter.codes(self.adoption, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Alias(NamedTuple):
+
+class Alias(Structure):
     """Store, validate and display a GEDCOM Alias structure.
 
     Data about an individual may be contained in the individual records of other individuals.
@@ -5337,7 +6039,7 @@ class Alias(NamedTuple):
     be identified for a single individual.
 
     Args:
-        xref: An individual cross-reference identifier containing information about
+        individual_xref: An individual cross-reference identifier containing information about
             the individual referenced in the individual record.
         phrase: Text associated with this other individual.
 
@@ -5347,19 +6049,26 @@ class Alias(NamedTuple):
     > +1 ALIA @<XREF:INDI>@                    {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
     >    +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+    structure: ClassVar[str] = Tag.ALIA.value
+    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
-    xref: IndividualXref = Void.INDI
-    phrase: str = String.EMPTY
+    def __init__(
+        self,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+    ):
+        self.individual_xref = individual_xref
+        self.phrase = phrase
 
     def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, IndividualXref)
+            Checker.verify_type(self.individual_xref, IndividualXref)
             and Checker.verify_type(self.phrase, str)
             and Checker.verify(
                 True,
-                self.xref != main_individual,
-                Msg.SAME_INDIVIDUAL.format(self.xref.fullname),
+                self.individual_xref != main_individual,
+                Msg.SAME_INDIVIDUAL.format(self.individual_xref.fullname),
             )
         )
         return check
@@ -5368,12 +6077,24 @@ class Alias(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.ALIA, self.xref.fullname)
+            lines = Tagger.string(
+                lines, level, Tag.ALIA, self.individual_xref.fullname
+            )
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Alias(
+    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class FamilyChild(NamedTuple):
+
+class FamilyChild(Structure):
     """Store, validate and display family child data.
 
     Multiple FAMC records may be defined for a singe Indivdiual Record.  This class
@@ -5389,13 +6110,26 @@ class FamilyChild(NamedTuple):
     >       +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     >    +2 <<NOTE_STRUCTURE>>                 {0:M}
     """
+    structure: ClassVar[str] = Tag.FAMC.value
+    substructures: ClassVar[set[str]] = {Tag.PEDI.value, Tag.STAT.value, Tag.PHRASE.value}
 
-    family_xref: FamilyXref
-    pedigree: str = ''
-    pedigree_phrase: str = ''
-    status: str = ''
-    status_phrase: str = ''
-    notes: Any = None
+    def __init__(
+        self,
+        family_xref: FamilyXref = Void.FAM,
+        pedigree: str = Default.EMPTY,
+        pedigree_phrase: str = Default.EMPTY,
+        status: str = Default.EMPTY,
+        status_phrase: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+    ):
+        if notes is None:
+            notes = []
+        self.family_xref = family_xref
+        self.pedigree = pedigree
+        self.pedigree_phrase = pedigree_phrase
+        self.status = status
+        self.status_phrase = status_phrase
+        self.notes = notes
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5416,10 +6150,35 @@ class FamilyChild(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+FamilyChild(
+    family_xref = {Formatter.codes(self.family_xref, tabs)},
+    pedigree = {Formatter.codes(self.pedigree, tabs)},
+    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs)},
+    status = {Formatter.codes(self.status, tabs)},
+    status_phrase = {Formatter.codes(self.status_phrase, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class FamilySpouse(NamedTuple):
-    family_xref: str = ''
-    notes: Any = None
+
+class FamilySpouse(Structure):
+    """Store, validate and display the GEDCOM Family Spouse structure."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        family_xref: FamilyXref = Void.FAM,
+        notes: list[Note] | None = None,
+    ):
+        if notes is None:
+            notes = []
+        self.family_xref = family_xref
+        self.notes = notes
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5435,10 +6194,29 @@ class FamilySpouse(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+FamilySpouse(
+    family_xref = {Formatter.codes(self.family_xref, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class FileTranslations(NamedTuple):
-    path: str = ''
-    media_type: str = ''
+
+class FileTranslation(Structure):
+    """Store, validate and display the GEDCOM File structure."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        path: str = Default.EMPTY,
+        media_type: MediaType = MediaType.NONE,
+    ):
+        self.path = path
+        self.media_type = media_type
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5454,47 +6232,50 @@ class FileTranslations(NamedTuple):
             pass
         return lines
 
-
-# class Text(NamedTuple):
-#     text: str = ''
-#     mime: MediaType = MediaType.NONE
-#     language: Lang = Lang.CODE['NONE']
-
-#     def validate(self) -> bool:
-#         """Validate the stored value."""
-#         check: bool = (
-#             Checker.verify_type(self.text, str)
-#             and Checker.verify_type(self.mime, MediaType)
-#             and Checker.verify_type(self.language, Lang)
-#         )
-#         return check
-
-#     def ged(self, level: int = 1) -> str:
-#         """Format to meet GEDCOM standards."""
-#         lines: str = ''
-#         if self.validate():
-#             pass
-#         return lines
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+FileTranslation(
+    path = {Formatter.codes(self.path, tabs)},
+    media_type = {Formatter.codes(self.media_type, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
 
-class File(NamedTuple):
-    path: str = ''
-    media_type: MediaType = MediaType.NONE
-    media: str = ''
-    phrase: str = ''
-    title: str = ''
-    file_translations: Any = None
+class File(Structure):
+    """Store, validate and display the GEDCOM File structure."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        path: str = Default.EMPTY,
+        media_type: MediaType = MediaType.NONE,
+        medium: str = Default.EMPTY,
+        phrase: str = Default.EMPTY,
+        title: str = Default.EMPTY,
+        file_translations: list[FileTranslation] | None = None,
+    ):
+        if file_translations is None:
+            file_translations = []
+        self.path = path
+        self.media_type = media_type
+        self.medium = medium
+        self.phrase = phrase
+        self.title = title
+        self.file_translations = file_translations
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.path, str)
             and Checker.verify_type(self.media_type, str)
-            and Checker.verify_type(self.media, str)
+            and Checker.verify_type(self.medium, str)
             and Checker.verify_type(self.phrase, str)
             and Checker.verify_type(self.title, str)
             and Checker.verify_tuple_type(
-                self.file_translations, FileTranslations
+                self.file_translations, FileTranslation
             )
         )
         return check
@@ -5506,14 +6287,45 @@ class File(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+File(
+    path = {Formatter.codes(self.path, tabs)},
+    media_type = {Formatter.codes(self.media_type, tabs)},
+    medium = {Formatter.codes(self.medium, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+    title = {Formatter.codes(self.title, tabs)},
+    file_translations = {Formatter.codes(self.file_translations, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class SourceEvent(NamedTuple):
-    event: str = ''
-    date_period: str = ''
-    phrase: str = ''
-    place: Place | None = None
-    agency: str = ''
-    notes: Any = None
+
+class SourceEvent(Structure):
+    """Store, validate and display the GEDCOM Source Event structure."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        event: str = Default.EMPTY,
+        date_period: str = Default.EMPTY,
+        phrase: str = Default.EMPTY,
+        place: Place | None = None,
+        agency: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+    ):
+        if place is None:
+            place = Place()
+        if notes is None:
+            notes = []
+        self.event = event
+        self.date_period = date_period
+        self.phrase = phrase
+        self.place = place
+        self.agency = agency
+        self.notes = notes
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5534,13 +6346,46 @@ class SourceEvent(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+SourceEvent(
+    event = {Formatter.codes(self.event, tabs)},
+    date_period = {Formatter.codes(self.date_period, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+    place = {Formatter.codes(self.place, tabs)},
+    agency = {Formatter.codes(self.agency, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class NonEvent(NamedTuple):
-    no: str = ''
-    date: Date | None = None
-    phrase: str = ''
-    notes: Any = None
-    sources: Any = None
+
+class NonEvent(Structure):
+    """Store, validate and display a GEDCOM Non Event structure."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        no: str = Default.EMPTY,
+        date: Date | None = None,
+        phrase: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+    ):
+        if date is None:
+            date = Date()
+        if notes is None:
+            notes = []
+        if sources is None:
+            sources = []
+        self.no = no
+        self.date = date
+        self.phrase = phrase
+        self.notes = notes
+        self.sources = sources
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5560,8 +6405,21 @@ class NonEvent(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+NonEvent(
+    no = {Formatter.codes(self.no, tabs)},
+    date = {Formatter.codes(self.date, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    sources = {Formatter.codes(self.sources, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Family(NamedTuple):
+
+class Family(Structure):
     """Store, validate and display a GEDCOM Family Record.
 
     Args:
@@ -5594,21 +6452,65 @@ class Family(NamedTuple):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
 
-    xref: FamilyXref = Void.FAM
-    resn: Resn = Resn.NONE
-    attributes: Any = None
-    events: Any = None
-    husband: Husband = Husband(Void.INDI)
-    wife: Wife = Wife(Void.INDI)
-    children: Any = None
-    associations: Any = None
-    submitters: Any = None
-    lds_spouse_sealings: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    citations: Any = None
-    multimedia_links: Any = None
+    def __init__(
+        self,
+        xref: FamilyXref = Void.FAM,
+        resn: Resn = Resn.NONE,
+        attributes: Any = None,
+        events: Any = None,
+        husband: Husband | None = None,
+        wife: Wife | None = None,
+        children: Any = None,
+        associations: Any = None,
+        submitters: Any = None,
+        lds_spouse_sealings: Any = None,
+        identifiers: Any = None,
+        notes: Any = None,
+        citations: Any = None,
+        multimedia_links: Any = None,
+    ):
+        if attributes is None:
+            attributes = []
+        if events is None:
+            events = []
+        if husband is None:
+            husband = Husband()
+        if wife is None:
+            wife = Wife()
+        if children is None:
+            children = []
+        if associations is None:
+            associations = []
+        if submitters is None:
+            submitters = []
+        if lds_spouse_sealings is None:
+            lds_spouse_sealings = []
+        if identifiers is None:
+            identifiers = []
+        if notes is None:
+            notes = []
+        if citations is None:
+            citations = []
+        if multimedia_links is None:
+            multimedia_links = []
+        self.xref = xref
+        self.resn = resn
+        self.attributes = attributes
+        self.events = events
+        self.husband = husband
+        self.wife = wife
+        self.children = children
+        self.associations = associations
+        self.submitters = submitters
+        self.lds_spouse_sealings = lds_spouse_sealings
+        self.identifiers = identifiers
+        self.notes = notes
+        self.citations = citations
+        self.multimedia_links = multimedia_links
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5654,8 +6556,30 @@ class Family(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Family(
+    xref = {Formatter.codes(self.xref, tabs)},
+    resn = {Formatter.codes(self.resn, tabs)},
+    attributes = {Formatter.codes(self.attributes, tabs)},
+    events = {Formatter.codes(self.events, tabs)},
+    husband = {Formatter.codes(self.husband, tabs)},
+    wife = {Formatter.codes(self.wife, tabs)},
+    children = {Formatter.codes(self.children, tabs)},
+    associations = {Formatter.codes(self.associations, tabs)},
+    submitters = {Formatter.codes(self.submitters, tabs)},
+    lds_spouse_sealings = {Formatter.codes(self.lds_spouse_sealings, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    citations = {Formatter.codes(self.citations, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Multimedia(NamedTuple):
+
+class Multimedia(Structure):
     """Store, validate and display a GECDOM Multimedia Record.
 
     Reference:
@@ -5677,13 +6601,32 @@ class Multimedia(NamedTuple):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
-    xref: MultimediaXref = Void.OBJE
-    resn: Resn = Resn.NONE
-    files: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    sources: Any = None
+    def __init__(
+        self,
+        xref: MultimediaXref = Void.OBJE,
+        resn: Resn = Resn.NONE,
+        files: list[File] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+    ):
+        if files is None:
+            files = []
+        if identifiers is None:
+            identifiers = []
+        if notes is None:
+            notes = []
+        if sources is None:
+            sources = []
+        self.xref = xref
+        self.resn = resn
+        self.files = files
+        self.identifiers = identifiers
+        self.notes = notes
+        self.sources = sources
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5704,8 +6647,22 @@ class Multimedia(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Multimedia(
+    xref = {Formatter.codes(self.xref, tabs)},
+    resn = {Formatter.codes(self.resn, tabs)},
+    files = {Formatter.codes(self.files, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    sources = {Formatter.codes(self.sources, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Source(NamedTuple):
+
+class Source(Structure):
     """Store, validate and display a GEDCOM Source Record.
 
     Reference:
@@ -5734,18 +6691,48 @@ class Source(NamedTuple):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.AUTH.value, Tag.TITL.value, Tag.ABBR.value, Tag.PUBL.value}
 
-    xref: SourceXref = Void.SOUR
-    author: str = ''
-    title: str = ''
-    abbreviation: str = ''
-    published: str = ''
-    events: Any = None
-    text: Any = None
-    repositories: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    multimedia_links: Any = None
+    def __init__(
+        self,
+        xref: SourceXref = Void.SOUR,
+        author: str = Default.EMPTY,
+        title: str = Default.EMPTY,
+        abbreviation: str = Default.EMPTY,
+        published: str = Default.EMPTY,
+        events: Any = None,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        repositories: list[Any] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+    ):
+        if events is None:
+            events = []
+        if repositories is None:
+            repositories = []
+        if identifiers is None:
+            identifiers = []
+        if notes is None:
+            notes = []
+        if multimedia_links is None:
+            multimedia_links = []
+        self.xref = xref
+        self.author = author
+        self.title = title
+        self.abbreviation = abbreviation
+        self.published = published
+        self.events = events
+        self.text = text
+        self.mime = mime
+        self.language = language
+        self.repositories = repositories
+        self.identifiers = identifiers
+        self.notes = notes
+        self.multimedia_links = multimedia_links
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5756,7 +6743,9 @@ class Source(NamedTuple):
             and Checker.verify_type(self.abbreviation, str)
             and Checker.verify_type(self.published, str)
             and Checker.verify_tuple_type(self.events, SourceEvent)
-            and Checker.verify_tuple_type(self.text, Text)
+            and Checker.verify_type(self.text, str)
+            and Checker.verify_type(self.mime, MediaType)
+            and Checker.verify_type(self.language, str)
             and Checker.verify_tuple_type(self.repositories, Repository)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
@@ -5771,8 +6760,27 @@ class Source(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Source(
+    xref = {Formatter.codes(self.xref, tabs)},
+    author = {Formatter.codes(self.author, tabs)},
+    title = {Formatter.codes(self.title, tabs)},
+    abbreviation = {Formatter.codes(self.abbreviation, tabs)},
+    published = {Formatter.codes(self.published, tabs)},
+    events = {Formatter.codes(self.events, tabs)},
+    text = {Formatter.codes(self.text, tabs)},
+    repositories = {Formatter.codes(self.repositories, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Submitter(NamedTuple):
+
+class Submitter(Structure):
     """Store, validate and disply a GEDCOM Submitter Record.
 
     Reference:
@@ -5793,18 +6801,53 @@ class Submitter(NamedTuple):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
 
-    xref: SubmitterXref = Void.SUBM
-    name: str = ''
-    address: Address = Address([], '', '', '', '')
-    phones: list[str] = []  # noqa: RUF012
-    emails: list[str] = []  # noqa: RUF012
-    faxes: list[str] = []  # noqa: RUF012
-    wwws: list[str] = []  # noqa: RUF012
-    multimedia_links: Any = None
-    languages: Any = None
-    identifiers: Any = None
-    notes: Any = None
+    def __init__(
+        self,
+        xref: SubmitterXref = Void.SUBM,
+        name: str = Default.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None, 
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None, 
+        wwws: list[str] | None = None,  
+        multimedia_links: list[MultimediaLink] | None = None,
+        languages: list[str] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+    ):
+        if address is None:
+            address = Address()
+        if phones is None:
+            phones = []
+        if emails is None:
+            emails = []
+        if faxes is None:
+            faxes = []
+        if wwws is None:
+            wwws = []
+        if multimedia_links is None:
+            multimedia_links = []
+        if languages is None:
+            languages = []
+        if identifiers is None:
+            identifiers = []
+        if notes is None:
+            notes = []
+        self.xref = xref
+        self.name = name
+        self.address = address
+        self.phones = phones
+        self.emails = emails
+        self.faxes = faxes
+        self.wwws = wwws
+        self.multimedia_links = multimedia_links
+        self.languages = languages
+        self.identifiers = identifiers
+        self.notes = notes
+        
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5830,8 +6873,27 @@ class Submitter(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Submitter(
+    xref = {Formatter.codes(self.xref, tabs)},
+    name = {Formatter.codes(self.name, tabs)},
+    address = {Formatter.codes(self.address, tabs)},
+    phones = {Formatter.codes(self.phones, tabs)},
+    emails = {Formatter.codes(self.emails, tabs)},
+    faxes = {Formatter.codes(self.faxes, tabs)},
+    wwws = {Formatter.codes(self.wwws, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    languages = {Formatter.codes(self.languages, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Individual(NamedTuple):
+
+class Individual(Structure):
     """Store, validate and display the record-INDI GEDCOM structure.
 
     Examples:
@@ -5865,7 +6927,7 @@ class Individual(NamedTuple):
         ...     xref=i1,
         ...     associations=[
         ...         Association(
-        ...             xref=i2,
+        ...             individual_xref=i2,
         ...             role=Role.GODP,
         ...         ),
         ...     ],
@@ -5936,25 +6998,78 @@ class Individual(NamedTuple):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
 
-    xref: IndividualXref = Void.INDI
-    resn: Resn = Resn.NONE
-    personal_names: list[PersonalName] = []  # noqa: RUF012
-    sex: Sex = Sex.NONE
-    attributes: list[IndividualAttribute] = []  # noqa: RUF012
-    events: list[IndividualEvent] = []  # noqa: RUF012
-    lds_individual_ordinances: list[LDSIndividualOrdinance] = []  # noqa: RUF012
-    families_child: list[FamilyChild] = []  # noqa: RUF012
-    submitters: list[Submitter] = []  # noqa: RUF012
-    associations: list[Association] = []  # noqa: RUF012
-    aliases: list[Alias] = []  # noqa: RUF012
-    ancestor_interest: list[Submitter] = []  # noqa: RUF012
-    descendent_interest: list[Submitter] = []  # noqa: RUF012
-    identifiers: list[Identifier] = []  # noqa: RUF012
-    notes: list[Note] = []  # noqa: RUF012
-    sources: list[Source] = []  # noqa: RUF012
-    multimedia_links: list[MultimediaLink] = []  # noqa: RUF012
-    extensions: list[Extension] = []  # noqa: RUF012
+    def __init__(
+        self,
+        xref: IndividualXref = Void.INDI,
+        resn: Resn = Resn.NONE,
+        personal_names: list[PersonalName] | None = None,
+        sex: Sex = Sex.NONE,
+        attributes: list[IndividualAttribute] | None = None,
+        events: list[IndividualEvent] | None = None,
+        lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None,
+        families_child: list[FamilyChild] | None = None,
+        submitters: list[Submitter] | None = None,
+        associations: list[Association] | None = None,
+        aliases: list[Alias] | None = None,
+        ancestor_interest: list[Submitter] | None = None,
+        descendent_interest: list[Submitter] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[Source] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        extensions: list[Extension] | None = None,
+    ):
+        if personal_names is None:
+            personal_names = []
+        if attributes is None:
+            attributes = []
+        if events is None:
+            events = []
+        if lds_individual_ordinances is None:
+            lds_individual_ordinances = []
+        if families_child is None:
+            families_child = []
+        if submitters is None:
+            submitters = []
+        if associations is None:
+            associations = []
+        if aliases is None:
+            aliases = []
+        if ancestor_interest is None:
+            ancestor_interest = []
+        if descendent_interest is None:
+            descendent_interest = []
+        if identifiers is None:
+            identifiers = []
+        if notes is None:
+            notes = []
+        if sources is None:
+            sources = []
+        if multimedia_links is None:
+            multimedia_links = []
+        if extensions is None:
+            extensions = []
+        self.xref = xref
+        self.resn = resn
+        self.personal_names = personal_names
+        self.sex = sex
+        self.attributes = attributes
+        self.events = events
+        self.lds_individual_ordinances = lds_individual_ordinances
+        self.families_child = families_child
+        self.submitters = submitters
+        self.associations = associations
+        self.aliases = aliases
+        self.ancestor_interest = ancestor_interest
+        self.descendent_interest = descendent_interest
+        self.identifiers = identifiers
+        self.notes = notes
+        self.sources = sources
+        self.multimedia_links = multimedia_links
+        self.extensions = extensions
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6007,49 +7122,32 @@ class Individual(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.extensions)
         return lines
 
-    def code(
-        self,
-        level: int = 0,
-        chronology_name: str = 'chron',
-        detail: str = String.MIN,
-    ) -> str:
-        spaces: str = String.INDENT * level
-        preface: str = f"""
-            # https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD
-            from chronodata.build import Genealogy
-            from chronodata.constants import Resn, Sex
-            from chronodata.store import Individual
-
-            {chronology_name} = Genealogy('{chronology_name}')
-            {self.xref.code_xref} = {chronology_name}.individual_xref('{self.xref.name}')
-            """
+    def code(self, tabs: int = 0) -> str:
         return indent(
-            dedent(f"""
-            {preface if detail == String.MAX else ''}
-            {self.xref.code} = Individual(
-                xref = {self.xref.code_xref},
-                resn = {self.resn},
-                personal_names = {self.personal_names},
-                sex = {self.sex},
-                attributes = {self.attributes},
-                events = {self.events},
-                lds_individual_ordinances = {self.lds_individual_ordinances},
-                submitters = {self.submitters},
-                associations = {self.associations},
-                aliases = {self.aliases},
-                ancestor_interest = {self.ancestor_interest},
-                descendent_interest = {self.descendent_interest},
-                identifiers = {self.identifiers},
-                notes = {self.notes},
-                sources = {self.sources},
-                multimedia_links = {self.multimedia_links}
-            )
-            """),
-            spaces,
+            f"""
+Individual(
+    xref = {Formatter.codes(self.xref, tabs)},
+    resn = {Formatter.codes(self.resn, tabs)},
+    personal_names = {Formatter.codes(self.personal_names, tabs)},
+    sex = {Formatter.codes(self.sex, tabs)},
+    attributes = {Formatter.codes(self.attributes, tabs)},
+    events = {Formatter.codes(self.events, tabs)},
+    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs)},
+    submitters = {Formatter.codes(self.submitters, tabs)},
+    associations = {Formatter.codes(self.associations, tabs)},
+    aliases = {Formatter.codes(self.aliases, tabs)},
+    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs)},
+    descendent_interest = {Formatter.codes(self.descendent_interest, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    sources = {Formatter.codes(self.sources, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+)""",
+            String.INDENT * tabs,
         )
 
 
-class Repository(NamedTuple):
+class Repository(Structure):
     """
     Reference:
         [GEDCOM Repository](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD)
@@ -6067,22 +7165,51 @@ class Repository(NamedTuple):
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
-    xref: RepositoryXref = Void.REPO
-    name: str = ''
-    address: Address = Address([], '', '', '', '')
-    phones: list[str] = []  # noqa: RUF012
-    emails: list[str] = []  # noqa: RUF012
-    faxes: list[str] = []  # noqa: RUF012
-    wwws: list[str] = []  # noqa: RUF012
-    notes: Any = None
-    identifiers: Any = None
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        xref: RepositoryXref = Void.REPO,
+        name: str = Default.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        notes: list[Note] | None = None,
+        identifiers: list[Identifier] | None = None,
+    ):
+        if address is None:
+            address = Address()
+        if phones is None:
+            phones = []
+        if emails is None:
+            emails = []
+        if faxes is None:
+            faxes = []
+        if wwws is None:
+            wwws = []
+        if notes is None:
+            notes = []
+        if identifiers is None:
+            identifiers = []
+        self.xref = xref
+        self.name = name
+        self.address = address
+        self.phones = phones
+        self.emails = emails
+        self.faxes = faxes
+        self.wwws = wwws
+        self.notes = notes
+        self.identifiers = identifiers
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, RepositoryXref)
             and Checker.verify_type(self.name, str)
-            and Checker.verify_type(self.address, Address | None)
+            and Checker.verify_type(self.address, Address)
             and Checker.verify_tuple_type(self.emails, str)
             and Checker.verify_tuple_type(self.faxes, str)
             and Checker.verify_tuple_type(self.wwws, str)
@@ -6102,15 +7229,52 @@ class Repository(NamedTuple):
             lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Repository(
+    repository_xref = {Formatter.codes(self.xref, tabs)},
+    name = {Formatter.codes(self.name, tabs)},
+    address = {Formatter.codes(self.address, tabs)},
+    phones = {Formatter.codes(self.phones, tabs)},
+    emails = {Formatter.codes(self.emails, tabs)},
+    faxes = {Formatter.codes(self.faxes, tabs)},
+    wwws = {Formatter.codes(self.wwws, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class SharedNote(NamedTuple):
-    xref: SharedNoteXref = Void.SNOTE
-    text: str = ''
-    mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
-    translations: Any = None
-    sources: Any = None
-    identifiers: Any = None
+
+class SharedNote(Structure):
+    """Store, validate and display a GEDCOM Shared Note Record."""
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        xref: SharedNoteXref = Void.SNOTE,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = String.UNDETERMINED,
+        translations: list[NoteTranslation] | None = None,
+        sources: list[SourceCitation] | None = None,
+        identifiers: list[Identifier] | None = None,
+    ):
+        if translations is None:
+            translations = []
+        if sources is None:
+            sources = []
+        if identifiers is None:
+            identifiers = []
+        self.xref = xref
+        self.text = text
+        self.mime = mime
+        self.language = language
+        self.translations = translations
+        self.sources = sources
+        self.identifiers = identifiers
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6132,8 +7296,23 @@ class SharedNote(NamedTuple):
             pass
         return lines
 
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+SharedNote(
+    xref = {Formatter.codes(self.xref, tabs)},
+    text = {Formatter.codes(self.text, tabs)},
+    mime = {Formatter.codes(self.mime, tabs)},
+    language = {Formatter.codes(self.language,tabs)},
+    translations = {Formatter.codes(self.translations, tabs)},
+    sources = {Formatter.codes(self.sources, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
 
-class Header(NamedTuple):
+
+class Header(Structure):
     """Hold data for the GEDCOM header special record.
 
     Reference
@@ -6169,28 +7348,76 @@ class Header(NamedTuple):
     >  +1 <<NOTE_STRUCTURE>>                    {0:1}
     """
 
-    schema_tags: list[Schema] = []  # noqa: RUF012
-    source: str = String.EMPTY
-    vers: str = String.EMPTY
-    name: str = String.EMPTY
-    corporation: str = String.EMPTY
-    address: Address = Address()
-    phones: list[str] = []  # noqa: RUF012
-    emails: list[str] = []  # noqa: RUF012
-    faxes: list[str] = []  # noqa: RUF012
-    wwws: list[str] = []  # noqa: RUF012
-    data: str = String.EMPTY
-    data_date: Date = Date()
-    data_time: Time = Time()
-    data_copyright: str = String.EMPTY
-    dest: str = String.EMPTY
-    header_date: Date = Date()
-    header_time: Time = Time()
-    submitter: SubmitterXref = Void.SUBM
-    subm_copyright: str = String.EMPTY
-    language: str = String.EMPTY
-    # place: PlaceName = PlaceName()
-    note: Note = Note()
+    structure: ClassVar[str] = Tag.NONE.value
+    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+
+    def __init__(
+        self,
+        schema_tags: list[Schema] | None = None,
+        source: str = String.EMPTY,
+        vers: str = String.EMPTY,
+        name: str = String.EMPTY,
+        corporation: str = String.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        data: str = String.EMPTY,
+        data_date: Date | None = None,
+        data_time: Time | None = None,
+        data_copyright: str = String.EMPTY,
+        dest: str = String.EMPTY,
+        header_date: Date | None = None,
+        header_time: Time | None = None,
+        submitter: SubmitterXref = Void.SUBM,
+        subm_copyright: str = String.EMPTY,
+        language: str = String.EMPTY,
+        note: Note | None = None,
+    ):
+        if schema_tags is None:
+            schema_tags = []
+        if address is None:
+            address = Address()
+        if phones is None:
+            phones = []
+        if emails is None:
+            emails = []
+        if faxes is None:
+            faxes = []
+        if wwws is None:
+            wwws = []
+        if data_date is None:
+            data_date = Date()
+        if data_time is None:
+            data_time = Time()
+        if header_date is None:
+            header_date = Date()
+        if header_time is None:
+            header_time = Time()
+        if note is None:
+            note = Note()
+        self.schema_tags = schema_tags
+        self.source = source
+        self.vers = vers
+        self.name = name
+        self.corporation = corporation
+        self.address = address
+        self.phones = phones
+        self.emails = emails
+        self.faxes = faxes
+        self.wwws = wwws
+        self.data = data
+        self.data_date = data_date
+        self.data_time = data_time
+        self.data_copyright = data_copyright
+        self.dest = dest
+        self.header_date = header_date
+        self.header_time = header_time
+        self.submitter = submitter
+        self.subm_copyright = subm_copyright
+        self.language = language
+        self.note = note
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6215,7 +7442,6 @@ class Header(NamedTuple):
             and Checker.verify_type(self.submitter, SubmitterXref)
             and Checker.verify_type(self.subm_copyright, str)
             and Checker.verify_type(self.language, str)
-            # and Checker.verify_type(self.place, PlaceName)
             and Checker.verify_type(self.note, Note)
         )
         return check
@@ -6257,6 +7483,34 @@ class Header(NamedTuple):
                 lines, level + 1, Tag.COPR, self.subm_copyright
             )
             lines = Tagger.string(lines, level, Tag.LANG, self.language)
-            # lines = Tagger.structure(lines, level, self.place, PlaceName())
             lines = Tagger.structure(lines, level, self.note)
         return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Header(
+    schema_tags = {Formatter.codes(self.schema_tags, tabs)},
+    source = {Formatter.codes(self.source, tabs)},
+    vers = {Formatter.codes(self.vers, tabs)},
+    name = {Formatter.codes(self.name, tabs)},
+    corporation = {Formatter.codes(self.corporation, tabs)},
+    address = {Formatter.codes(self.address, tabs)},
+    phones = {Formatter.codes(self.phones, tabs)},
+    emails = {Formatter.codes(self.emails, tabs)},
+    faxes = {Formatter.codes(self.faxes, tabs)},
+    wwws = {Formatter.codes(self.wwws, tabs)},
+    date = {Formatter.codes(self.data, tabs)},
+    data_date = {Formatter.codes(self.data_date, tabs)},
+    date_time = {Formatter.codes(self.data_time, tabs)},
+    data_copyright = {Formatter.codes(self.data_copyright, tabs)},
+    dest = {Formatter.codes(self.dest, tabs)},
+    header_date = {Formatter.codes(self.header_date, tabs)},
+    header_time = {Formatter.codes(self.header_time, tabs)},
+    submitter = {Formatter.codes(self.submitter, tabs)},
+    subm_copyright = {Formatter.codes(self.subm_copyright, tabs)},
+    language = {Formatter.codes(self.language, tabs)},
+    note = {Formatter.codes(self.note, tabs)},
+)""",
+            String.INDENT * tabs,
+        )

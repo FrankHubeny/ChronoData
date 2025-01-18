@@ -30,6 +30,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.ANUL,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -38,6 +39,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.ANUL,
             payload=String.EMPTY,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -46,6 +48,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.CENS,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -54,6 +57,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.DIV,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -62,6 +66,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.DIVF,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -70,6 +75,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.ENGA,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -78,6 +84,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.MARB,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -86,6 +93,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.MARC,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -94,6 +102,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.MARL,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -102,6 +111,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.MARR,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -110,6 +120,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.MARS,
             payload=String.OCCURRED,
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
@@ -118,6 +129,7 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
         FamilyEvent(
             tag=Tag.EVEN,
             event_type='some string',
+            event_detail=FamilyEventDetail()
         )
         .ged(1)
         .split('\n')
