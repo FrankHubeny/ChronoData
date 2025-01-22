@@ -90,6 +90,7 @@ __all__ = [
     'Wife',
 ]
 
+
 import contextlib
 import logging
 import math
@@ -102,9 +103,11 @@ from typing import Any, ClassVar, Literal
 import numpy as np
 import yaml  # type: ignore[import-untyped]
 
+from chronodata.calendars import CalendarDefinition
 from chronodata.constants import (
     Adop,
     Cal,
+    CalendarName,
     Default,
     Event,
     FamAttr,
@@ -124,9 +127,12 @@ from chronodata.constants import (
     Stat,
     String,
     Tag,
-    Value,
 )
+from chronodata.french_revolution_calendars import CalendarsFrenchRevolution
 from chronodata.gedcom import Specs
+from chronodata.gregorian_calendars import CalendarsGregorian
+from chronodata.hebraic_calendars import CalendarsHebraic
+from chronodata.julian_calendars import CalendarsJulian
 from chronodata.messages import Example, Msg
 
 YNull = Literal['Y'] | None
@@ -572,9 +578,27 @@ class Dater:
     """Global methods supporting date processing."""
 
     @staticmethod
+    def format(
+        year: int,
+        month: int = 0,
+        day: int = 0,
+        calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
+    ) -> str:
+        formatted: str = str(year)
+        if year < 0:
+            formatted = ''.join([str(-year), String.SPACE, calendar.epoch])
+        if month > 0:
+            formatted = ''.join(
+                [calendar.months[month].abbreviation, String.SPACE, formatted]
+            )
+        if day > 0:
+            formatted = ''.join([str(day), String.SPACE, formatted])
+        return formatted
+
+    @staticmethod
     def ged_date(
         iso_date: str = String.NOW,
-        calendar: str = 'GREGORIAN',
+        calendar: CalendarName = CalendarName.GREGORIAN,
         epoch: bool = True,
     ) -> tuple[str, str]:
         """Obtain the GEDCOM date and time from an ISO 8601 date and time for the
@@ -623,7 +647,7 @@ class Dater:
         if int(year) == 0:
             raise ValueError(Msg.ZERO_YEAR)
         ged_time: str = ''.join([time, String.Z])
-        good_calendar: str | bool = Cal.CALENDARS.get(String.GREGORIAN, False)
+        good_calendar: str | bool = Cal.CALENDARS.get(calendar, False)
         if not good_calendar:
             raise ValueError(Msg.BAD_CALENDAR.format(calendar))
         month_code: str = Cal.CALENDARS[calendar][String.MONTH_NAMES].get(
@@ -1108,6 +1132,7 @@ class Void:
 
 class Structure:
     """A base class for the GEDCOM structure classes to define dunder methods."""
+
     def __init__(self) -> None:
         pass
 
@@ -1120,14 +1145,10 @@ class Structure:
             .replace(String.EOL, String.EMPTY)
             .replace(String.INDENT, String.SPACE)
         )
-    
+
     def __eq__(self, other: Any) -> bool:
-        check: bool = (
-            isinstance(other, Structure)
-            and self.ged() == other.ged()
-        )
+        check: bool = isinstance(other, Structure) and self.ged() == other.ged()
         return check
-    
 
     def ged(self) -> str:
         return String.EMPTY
@@ -1188,7 +1209,7 @@ class Schema(Structure):
     """
 
     structure: ClassVar[str] = Tag.SCHMA.value
-   # substructures: ClassVar[set[str]] = {Tag.TAG.value}
+    # substructures: ClassVar[set[str]] = {Tag.TAG.value}
 
     def __init__(self, tag: str, url: str) -> None:
         self.raw_tag: str = tag
@@ -1243,6 +1264,7 @@ class Extension(Structure):
     Reference:
         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
+
     structure: ClassVar[str] = Default.EMPTY
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
@@ -1279,7 +1301,7 @@ class Extension(Structure):
                 self.extra,
             )
         return lines
-    
+
     def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
@@ -1304,8 +1326,15 @@ class Date(Structure):
 
     The GEDCOM standard allows a week without specifying the other components.
 
-    Parameters:
-        year
+    Arg:
+        year: A numerical value representing the year.  It is the only required parameter.
+        month: An optional numerical value representing the month.  It will be converted to a string
+            value for the month.
+        day: An optional numerical value representing the day.
+        calendar: An optional tag representing the calendar system. There are four standard calendars:
+            Tag.GREGORIAN, Tag.JULIAN, Tag.FRENCH_R (French Revolution) and Tag.HEBREW.  If no calendar
+            is listed the default for calculating the month will be the Gregorian calendar.  If a
+            calendar is present, it will be displayed as part of the date.
 
 
     Examples:
@@ -1323,24 +1352,19 @@ class Date(Structure):
         year: int = Default.DATE_YEAR,
         month: int = Default.DATE_MONTH,
         day: int = Default.DATE_DAY,
-        week: int = Default.DATE_WEEK,
-        calendar: str = Value.GREGORIAN,
+        calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
+        iso: str = Default.EMPTY,
+        display_calendar: bool = False,
     ):
         self.year = year
         self.month = month
         self.day = day
-        self.week = week
         self.calendar = calendar
-
-    # def __eq__(self, other: Any) -> bool:
-    #     check: bool = (
-    #         self.year == other.year
-    #         and self.month == other.month
-    #         and self.day == other.day
-    #         and self.week == other.week
-    #         and self.calendar == other.calendar
-    #     )
-    #     return check
+        self.iso = iso
+        self.display_calendar = display_calendar
+        self.formatted_date: str = Dater.format(
+            self.year, self.month, self.day, self.calendar
+        )
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1348,54 +1372,76 @@ class Date(Structure):
             Checker.verify_type(self.year, int)
             and Checker.verify_type(self.month, int)
             and Checker.verify_type(self.day, int)
-            and Checker.verify_type(self.week, int)
-            and Checker.verify_range(self.week, 0, 52)
-            and Checker.verify_range(self.month, 0, 12)
-            # and if self.year == 0:
-            #     raise ValueError(Msg.NO_ZERO_YEAR.format(self.year, self.calendar))
+            and Checker.verify_range(self.month, 0, 13)
+            and Checker.verify_type(self.calendar, CalendarDefinition)
+            and Checker.verify_type(self.display_calendar, bool)
+            and Checker.verify_type(self.iso, str)
+            and self.calendar.validate(
+                self.year, self.month, self.day, self.iso
+            )
         )
         return check
 
-    def ged(self, level: int = 1, calendar: str = Value.GREGORIAN) -> str:
-        """Display the validated date in GEDCOM format.
-
-        Reference
-        ---------
-        - [GEDCOM Standard V 7.0](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
-        """
-        lines: str = ''
-        if self.validate():
-            # day_str: str = (
-            #     str(self.day) if self.day > 9 else ''.join(['0', str(self.day)])
-            # )
-            month_str: str = (
-                str(self.month)
-                if self.month > 9
-                else ''.join(['0', str(self.month)])
+    def ged(self, level: int = 1) -> str:
+        lines: str = String.EMPTY
+        formatted_calendar_date: str = self.formatted_date
+        if self.display_calendar:
+            formatted_calendar_date = ''.join(
+                [self.calendar.name, String.EMPTY, self.formatted_date]
             )
-            year_str: str = str(self.year)
-            if self.year < 0:
-                year_str = ''.join(
-                    [str(-self.year), Cal.CALENDARS[calendar][Value.EPOCH]]
-                )
-            formatted_date: str = ''
-            if self.day != 0:
-                formatted_date = ''.join([formatted_date, f' {self.day!s}'])
-            if self.month != 0:
-                formatted_date = ''.join(
-                    [
-                        formatted_date,
-                        f' {Cal.CALENDARS[calendar][Value.MONTH_NAMES][str(month_str)]}',
-                    ]
-                )
-            if self.year != 0:
-                formatted_date = ''.join(
-                    [formatted_date, f' {year_str}\n']
-                ).strip()
-            lines = Tagger.string(lines, level, Tag.DATE, formatted_date)
-        return lines
+        return Tagger.string(lines, level, Tag.DATE, formatted_calendar_date)
 
-    def iso(self) -> str:
+    # def ged(
+    #     self, level: int, calendar: CalendarDefinition
+    # ) -> str:
+    # """Display the validated date in GEDCOM format.
+
+    # Reference
+    # ---------
+    # - [GEDCOM Standard V 7.0](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    # """
+    # lines: str = String.EMPTY
+    # calendar_name: CalendarName = CalendarName.GREGORIAN
+    # if calendar != CalendarName.NONE:
+    #     calendar_name = calendar
+    # if self.validate():
+    #     month_str: str = (
+    #         str(self.month)
+    #         if self.month > 9
+    #         else ''.join(['0', str(self.month)])
+    #     )
+    #     year_str: str = str(self.year)
+    #     if self.year < 0:
+    #         epoch: str = String.EMPTY
+    #         if calendar_name in {
+    #             CalendarName.GREGORIAN,
+    #             CalendarName.JULIAN,
+    #         }:
+    #             epoch = ' BCE'
+    #         year_str = ''.join([str(-self.year), epoch])
+    #         # year_str = ''.join(
+    #         #     [str(-self.year), String.SPACE, Cal.CALENDARS[calendar_name][Value.EPOCH]]
+    #         # )
+    #     formatted_date = String.EMPTY
+    #     if self.calendar != CalendarName.NONE:
+    #         formatted_date = self.calendar.value
+    #     if self.day != 0:
+    #         formatted_date = ''.join([formatted_date, f' {self.day!s}'])
+    #     if self.month != 0:
+    #         formatted_date = ''.join(
+    #             [
+    #                 formatted_date,
+    #                 f' {Cal.CALENDARS[calendar_name][Value.MONTH_NAMES][str(month_str)]}',
+    #             ]
+    #         )
+    #     if self.year != 0:
+    #         formatted_date = ''.join(
+    #             [formatted_date, String.SPACE, year_str]
+    #         ).strip()
+    #     lines = Tagger.string(lines, level, Tag.DATE, formatted_date)
+    # return lines
+
+    def from_iso(self) -> str:
         """Return the validated ISO format for the date.
 
         References
@@ -1414,7 +1460,6 @@ Date(
     year = {Formatter.codes(self.year, tabs)},
     month = {Formatter.codes(self.month, tabs)},
     day = {Formatter.codes(self.day, tabs)},
-    week = {Formatter.codes(self.week, tabs)},
     calendar = {Formatter.codes(self.calendar, tabs)},
 )""",
             String.INDENT * tabs,
@@ -1447,8 +1492,7 @@ Date(
                     year=2024,
                     month=10,
                     day=10,
-                    week=0,
-                    calendar=Value.GREGORIAN,
+                    calendar=CalendarsGregorian.GREGORIAN,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -1457,8 +1501,7 @@ Date(
                     year=2024,
                     month=10,
                     day=10,
-                    week=0,
-                    calendar=Value.GREGORIAN,
+                    calendar=CalendarsGregorian.GREGORIAN,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -1467,8 +1510,7 @@ Date(
                     year=2024,
                     month=10,
                     day=10,
-                    week=0,
-                    calendar=Value.GREGORIAN,
+                    calendar=CalendarsGregorian.GREGORIAN,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -1595,8 +1637,8 @@ Time(
 
 #     def __init__(
 #         self,
-#         date: Date = Date(),  
-#         time: Time = Time(),  
+#         date: Date = Date(),
+#         time: Time = Time(),
 #         phrase: str = Default.EMPTY,
 #     ):
 #         self.date = date
@@ -1647,6 +1689,7 @@ class DateValue(Structure):
     >  +1 TIME <Time>                           {0:1}  g7:TIME
     >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
     """
+
     structure: ClassVar[str] = Tag.DATE.value
     substructures: ClassVar[set[str]] = {Tag.TIME.value, Tag.PHRASE.value}
 
@@ -1664,21 +1707,11 @@ class DateValue(Structure):
         self.time = time
         self.phrase = phrase
 
-    # def __eq__(self, other: Any) -> bool:
-    #     check: bool = (
-    #         other is not None
-    #         # and self.date == other.date
-    #         # and self.time == other.time
-    #         # and self.phrase == other.phrase
-    #         and self.ged() == other.ged()
-    #     )
-    #     return check
-
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.phrase, str)
-            and self.date.validate()
+            # and self.date.validate()
             and self.time.validate()
         )
         return check
@@ -1760,8 +1793,14 @@ class Address(Structure):
     >   +1 POST <Special>                        {0:1}  [g7:POST](https://gedcom.io/terms/v7/POST)
     >   +1 CTRY <Special>                        {0:1}  [g7:CTRY](https://gedcom.io/terms/v7/CTRY)
     """
+
     structure: ClassVar[str] = Tag.ADDR.value
-    substructures: ClassVar[set[str]] = {Tag.CITY.value, Tag.STAE.value, Tag.POST.value, Tag.CTRY.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.CITY.value,
+        Tag.STAE.value,
+        Tag.POST.value,
+        Tag.CTRY.value,
+    }
 
     def __init__(
         self,
@@ -1789,7 +1828,7 @@ class Address(Structure):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
             if len(self.address) > 0:
                 lines = Tagger.taginfo(level, Tag.ADDR, self.address[0])
@@ -1939,6 +1978,7 @@ class Age(Structure):
     > weeks   = Integer %x77    ; 8w
     > days    = Integer %x64    ; 21d
     """
+
     structure: ClassVar[str] = Tag.AGE.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
@@ -2123,8 +2163,16 @@ class PersonalNamePieces(Structure):
     > n SURN <Text>                              {0:M}  [g7:SURN](https://gedcom.io/terms/v7/SURN)
     > n NSFX <Text>                              {0:M}  [g7:NSFX](https://gedcom.io/terms/v7/NSFX)
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.NPFX.value, Tag.GIVN.value, Tag.NICK.value, Tag.SPFX.value, Tag.SURN.value, Tag.NSFX.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.NPFX.value,
+        Tag.GIVN.value,
+        Tag.NICK.value,
+        Tag.SPFX.value,
+        Tag.SURN.value,
+        Tag.NSFX.value,
+    }
 
     def __init__(
         self,
@@ -2302,6 +2350,7 @@ class NameTranslation(Structure):
     >    +2 LANG <Language>                    {1:1}  g7:LANG
     >    +2 <<PERSONAL_NAME_PIECES>>           {0:1}
     """
+
     structure: ClassVar[str] = Tag.TRAN.value
     substructures: ClassVar[set[str]] = {Tag.LANG.value}
 
@@ -2462,6 +2511,7 @@ class NoteTranslation(Structure):
     >    +2 MIME <MediaType>                   {0:1}  g7:MIME
     >    +2 LANG <Language>                    {0:1}  g7:LANG
     """
+
     structure: ClassVar[str] = Tag.TRAN.value
     substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
@@ -2605,6 +2655,7 @@ class CallNumber(Structure):
     >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+
     structure: ClassVar[str] = Tag.CALN.value
     substructures: ClassVar[set[str]] = {Tag.MEDI.value, Tag.PHRASE.value}
 
@@ -2735,6 +2786,7 @@ class Text(Structure):
     >         +3 MIME <MediaType>                {0:1}  g7:MIME
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
+
     structure: ClassVar[str] = Tag.TEXT.value
     substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
@@ -2860,6 +2912,7 @@ class SourceData(Structure):
     >         +3 MIME <MediaType>                {0:1}  g7:MIME
     >         +3 LANG <Language>                 {0:1}  g7:LANG
     """
+
     structure: ClassVar[str] = Tag.DATE.value
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
@@ -3003,8 +3056,16 @@ class SourceCitation(Structure):
     >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.NPFX.value, Tag.GIVN.value, Tag.NICK.value, Tag.SPFX.value, Tag.SURN.value, Tag.NSFX.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.NPFX.value,
+        Tag.GIVN.value,
+        Tag.NICK.value,
+        Tag.SPFX.value,
+        Tag.SURN.value,
+        Tag.NSFX.value,
+    }
 
     def __init__(
         self,
@@ -3016,7 +3077,7 @@ class SourceCitation(Structure):
         role: Role = Role.NONE,
         role_phrase: str = String.EMPTY,
         quality: Quay = Quay.NONE,
-        multimedialinks: list[Any] | None = None, 
+        multimedialinks: list[Any] | None = None,
         notes: list[Any] | None = None,
     ):
         if source_data is None:
@@ -3247,6 +3308,7 @@ class Note(Structure):
     n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
     ]
     """  # noqa: RUF002
+
     structure: ClassVar[str] = Tag.NOTE.value
     substructures: ClassVar[set[str]] = {Tag.MIME.value, Tag.LANG.value}
 
@@ -3348,6 +3410,7 @@ class SourceRepositoryCitation(Structure):
     >      +2 MEDI <Enum>                        {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+
     structure: ClassVar[str] = Tag.SOUR.value
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
@@ -3477,6 +3540,7 @@ class PersonalName(Structure):
       +1 <<NOTE_STRUCTURE>>                    {0:M}
       +1 <<SOURCE_CITATION>>                   {0:M}
     """
+
     structure: ClassVar[str] = Tag.NAME.value
     substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.PHRASE.value}
 
@@ -3507,7 +3571,6 @@ class PersonalName(Structure):
         self.translations = translations
         self.notes = notes
         self.source_citations = source_citations
-
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3775,6 +3838,7 @@ class Association(Structure):
       +1 <<NOTE_STRUCTURE>>                    {0:M}
       +1 <<SOURCE_CITATION>>                   {0:M}
     """
+
     structure: ClassVar[str] = Tag.ASSO.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value, Tag.ROLE.value}
 
@@ -3859,34 +3923,79 @@ class MultimediaLink(Structure):
 
 
     Args:
-        NamedTuple (_type_): _description_
+
 
     Returns:
         A GEDCOM string storing this data.
+
+    n OBJE @<XREF:OBJE>@                       {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
+      +1 CROP                                  {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
+         +2 TOP <Integer>                      {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
+         +2 LEFT <Integer>                     {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
+         +2 HEIGHT <Integer>                   {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
+         +2 WIDTH <Integer>                    {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
+      +1 TITL <Text>                           {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
     """
-    structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.NONE.value}
+
+    structure: ClassVar[str] = Tag.OBJE.value
+    substructures: ClassVar[set[str]] = {
+        Tag.CROP.value,
+        Tag.TOP.value,
+        Tag.LEFT.value,
+        Tag.HEIGHT.value,
+        Tag.WIDTH.value,
+        Tag.TITL.value,
+    }
 
     def __init__(
         self,
-        crop: str = Default.EMPTY,
+        multimedia_xref: MultimediaXref = Void.OBJE,
         top: int = Default.TOP,
         left: int = Default.LEFT,
         height: int = Default.HEIGHT,
         width: int = Default.WIDTH,
         title: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
-        self.crop = crop
+        if extensions is None:
+            extensions = []
+        self.multimedia_xref = multimedia_xref
         self.top = top
         self.left = left
         self.height = height
         self.width = width
         self.title = title
+        self.extensions = extensions
+
+        self.descriptions: set[str] = set()
+        self.obje_extensions: list[Extension] = []
+        self.crop_extensions: list[Extension] = []
+        self.top_extensions: list[Extension] = []
+        self.left_extensions: list[Extension] = []
+        self.height_extensions: list[Extension] = []
+        self.width_extensions: list[Extension] = []
+        self.titl_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.OBJE.value in ext.schema.supers:
+                self.obje_extensions.append(ext)
+            elif Tag.CROP.value in ext.schema.supers:
+                self.crop_extensions.append(ext)
+            elif Tag.TOP.value in ext.schema.supers:
+                self.top_extensions.append(ext)
+            elif Tag.LEFT.value in ext.schema.supers:
+                self.left_extensions.append(ext)
+            elif Tag.HEIGHT.value in ext.schema.supers:
+                self.height_extensions.append(ext)
+            elif Tag.WIDTH.value in ext.schema.supers:
+                self.width_extensions.append(ext)
+            elif Tag.TITL.value in ext.schema.supers:
+                self.titl_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.crop, str)
+            Checker.verify_type(self.multimedia_xref, MultimediaXref)
             and Checker.verify_type(self.top, int)
             and Checker.verify_type(self.left, int)
             and Checker.verify_type(self.height, int)
@@ -3896,28 +4005,122 @@ class MultimediaLink(Structure):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = f'{level}'
+        lines: str = String.EMPTY
         if self.validate():
-            pass
+            # display only if there is an image file under the multimedia xref
+            # need to find out how to identify this and the pixels in that file
+            lines = Tagger.string(
+                lines, level, Tag.OBJE, self.multimedia_xref.fullname
+            )
+            lines = Tagger.structure(lines, level + 1, self.obje_extensions)
+            lines = Tagger.empty(lines, level + 1, Tag.CROP)
+            lines = Tagger.structure(lines, level + 2, self.crop_extensions)
+            lines = Tagger.string(lines, level + 2, Tag.TOP, str(self.top))
+            lines = Tagger.structure(lines, level + 3, self.top_extensions)
+            lines = Tagger.string(lines, level + 2, Tag.LEFT, str(self.left))
+            lines = Tagger.structure(lines, level + 3, self.left_extensions)
+            lines = Tagger.string(
+                lines, level + 2, Tag.HEIGHT, str(self.height)
+            )
+            lines = Tagger.structure(lines, level + 3, self.height_extensions)
+            lines = Tagger.string(lines, level + 2, Tag.WIDTH, str(self.width))
+            lines = Tagger.structure(lines, level + 3, self.width_extensions)
+            lines = Tagger.string(lines, level + 1, Tag.TITL, self.title)
+            lines = Tagger.structure(lines, level + 2, self.titl_extensions)
         return lines
 
     def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 MultimediaLink(
-    crop = {Formatter.codes(self.crop, tabs)},
+    obje = {Formatter.codes(self.multimedia_xref, tabs)},
     top = {Formatter.codes(self.top, tabs)},
     left = {Formatter.codes(self.left, tabs)},
     height = {Formatter.codes(self.height, tabs)},
     width = {Formatter.codes(self.width, tabs)},
     title = {Formatter.codes(self.title, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)}
 )""",
             String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = 1,
+        multimedia_xref: MultimediaXref = Void.OBJE,
+        top: int = Default.TOP,
+        left: int = Default.LEFT,
+        height: int = Default.HEIGHT,
+        width: int = Default.WIDTH,
+        title: str = Default.EMPTY,
+        extensions: list[Any] | None = None,
+    ) -> str:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an intentional error.  If the Map structure is used
+            without specifying values, the default values will trigger an error.
+            However, if an acceptable lattitude and longitude are used in this example,
+            then the user example will be displayed.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+            latitude: If a non-zero latitude is entered this will be used in the example.
+            longitude: If a non-zero longitude is entered this will be used in the example.
+        """
+        if extensions is None:
+            extensions = []
+        show: MultimediaLink
+        gedcom_docs: str = Specs.MULTIMEDIA_LINK
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = MultimediaLink(
+                    multimedia_xref=Void.OBJE,
+                    top=0,
+                    left=0,
+                    height=0,
+                    width=0,
+                    title='My title',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = MultimediaLink()
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = MultimediaLink()
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = MultimediaLink(
+                    multimedia_xref, top, left, height, width, title, extensions
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
         )
 
 
 class Exid(Structure):
     """Store, validate and display an EXID structure."""
+
     structure: ClassVar[str] = Tag.EXID.value
     substructures: ClassVar[set[str]] = {Tag.TYPE.value}
 
@@ -4045,14 +4248,6 @@ class Map(Structure):
                     self.lati_extensions.append(ext)
                 elif Tag.LONG.value in ext.schema.supers:
                     self.long_extensions.append(ext)
-
-    # def __eq__(self, other: Any) -> bool:
-    #     check: bool = (
-    #         other is not None
-    #         and self.latitude == other.latitude
-    #         and self.longitude == other.longitude
-    #     )
-    #     return check
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4515,20 +4710,6 @@ class Place(Structure):
                 elif Tag.LANG.value in ext.schema.supers:
                     self.lang_extensions.append(ext)
 
-    # def __eq__(self, other: Any) -> bool:
-    #     check: bool = (
-    #         self.place1 == other.place1
-    #         and self.place2 == other.place2
-    #         and self.place3 == other.place3
-    #         and self.place4 == other.place4
-    #         and self.form1 == other.form1
-    #         and self.form2 == other.form2
-    #         and self.form3 == other.form3
-    #         and self.form4 == other.form4
-    #         and self.language == other.language
-    #     )
-    #     return check
-
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
@@ -4576,7 +4757,7 @@ Place(
     form2 = {Formatter.codes(self.form2, tabs)},
     form3 = {Formatter.codes(self.form3, tabs)},
     form4 = {Formatter.codes(self.form4, tabs)},
-    language = {Formatter.codes(self.language,tabs)},
+    language = {Formatter.codes(self.language, tabs)},
     translations = {Formatter.codes(self.translations, tabs + 2)},
     map = {Formatter.codes(self.map, tabs + 1)},
     exids = {Formatter.codes(self.exids, tabs + 2)},
@@ -4592,7 +4773,7 @@ Place(
         place1: str = Default.EMPTY,
         place2: str = Default.EMPTY,
         place3: str = Default.EMPTY,
-        place4: str = Default.EMPTY, 
+        place4: str = Default.EMPTY,
         form1: str = Default.PLACE_FORM1,
         form2: str = Default.PLACE_FORM2,
         form3: str = Default.PLACE_FORM3,
@@ -4731,8 +4912,14 @@ class EventDetail(Structure):
     > n <<MULTIMEDIA_LINK>>                      {0:M}
     > n UID <Special>                            {0:M}  [g7:UID]()
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.AGNC.value, Tag.RELI.value, Tag.CAUS.value, Tag.RESN.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.AGNC.value,
+        Tag.RELI.value,
+        Tag.CAUS.value,
+        Tag.RESN.value,
+    }
 
     def __init__(
         self,
@@ -4742,7 +4929,7 @@ class EventDetail(Structure):
         phones: list[str] | None = None,
         emails: list[str] | None = None,
         faxes: list[str] | None = None,
-        wwws: list[str] | None = None, 
+        wwws: list[str] | None = None,
         agency: str = '',
         religion: str = '',
         cause: str = '',
@@ -4892,8 +5079,14 @@ class FamilyEventDetail(Structure):
     >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     > n <<EVENT_DETAIL>>                         {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.HUSB.value, Tag.WIFE.value, Tag.AGE.value, Tag.PHRASE.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.HUSB.value,
+        Tag.WIFE.value,
+        Tag.AGE.value,
+        Tag.PHRASE.value,
+    }
 
     def __init__(
         self,
@@ -4967,8 +5160,14 @@ class FamilyAttribute(Structure):
     >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
     > ]
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -5094,17 +5293,19 @@ class FamilyEvent(Structure):
     >   +1 <<FAMILY_EVENT_DETAIL>>               {0:1}
     > ]
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.ANUL.value,
-            Tag.CENS.value,
-            Tag.DIV.value,
-            Tag.DIVF.value,
-            Tag.ENGA.value,
-            Tag.MARB.value,
-            Tag.MARC.value,
-            Tag.MARL.value,
-            Tag.MARR.value,
-            Tag.MARS.value,
+    substructures: ClassVar[set[str]] = {
+        Tag.ANUL.value,
+        Tag.CENS.value,
+        Tag.DIV.value,
+        Tag.DIVF.value,
+        Tag.ENGA.value,
+        Tag.MARB.value,
+        Tag.MARC.value,
+        Tag.MARL.value,
+        Tag.MARR.value,
+        Tag.MARS.value,
     }
 
     def __init__(
@@ -5184,6 +5385,7 @@ FamilyEvent(
 
 class Husband(Structure):
     """Store, validate and display the GEDCOM Husband structure."""
+
     structure: ClassVar[str] = Tag.HUSB.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
@@ -5225,6 +5427,7 @@ Husband(
 
 class Wife(Structure):
     """Store, validate and display the GEDCOM Wife structure."""
+
     structure: ClassVar[str] = Tag.WIFE.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
@@ -5274,6 +5477,7 @@ class Child(Structure):
     >     +1 CHIL @<XREF:INDI>@                    {0:M}  g7:CHIL
     >        +2 PHRASE <Text>                      {0:1}  g7:PHRASE
     """
+
     structure: ClassVar[str] = Tag.CHIL.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
@@ -5328,8 +5532,14 @@ class LDSOrdinanceDetail(Structure):
     > n <<NOTE_STRUCTURE>>                     {0:M}
     > n <<SOURCE_CITATION>>                    {0:M}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -5362,7 +5572,6 @@ class LDSOrdinanceDetail(Structure):
         self.status_time = status_time
         self.notes = notes
         self.source_citations = source_citations
-
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5422,7 +5631,12 @@ class LDSSpouseSealing(Structure):
     """
 
     structure: ClassVar[str] = Tag.SLGS.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -5483,8 +5697,15 @@ class LDSIndividualOrdinance(Structure):
       +1 FAMC @<XREF:FAM>@                     {1:1}  [g7:FAMC](https://gedcom.io/terms/v7/FAMC)
     ]
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.BAPL.value, Tag.CONL.value, Tag.ENDL.value, Tag.INIL.value, Tag.SLGC.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.BAPL.value,
+        Tag.CONL.value,
+        Tag.ENDL.value,
+        Tag.INIL.value,
+        Tag.SLGC.value,
+    }
 
     def __init__(
         self,
@@ -5563,7 +5784,6 @@ class Identifier(Structure):
         self.tag_info = tag_info
         self.tag_type = tag_type
 
-
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
@@ -5616,7 +5836,12 @@ class IndividualEventDetail(Structure):
     """
 
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -5731,7 +5956,12 @@ class IndividualAttribute(Structure):
     """
 
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -5947,6 +6177,7 @@ class IndividualEvent(Structure):
     >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
     > ]
     """
+
     structure: ClassVar[str] = Tag.NONE.value
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
@@ -6049,6 +6280,7 @@ class Alias(Structure):
     > +1 ALIA @<XREF:INDI>@                    {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
     >    +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
+
     structure: ClassVar[str] = Tag.ALIA.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
 
@@ -6110,8 +6342,13 @@ class FamilyChild(Structure):
     >       +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     >    +2 <<NOTE_STRUCTURE>>                 {0:M}
     """
+
     structure: ClassVar[str] = Tag.FAMC.value
-    substructures: ClassVar[set[str]] = {Tag.PEDI.value, Tag.STAT.value, Tag.PHRASE.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.PEDI.value,
+        Tag.STAT.value,
+        Tag.PHRASE.value,
+    }
 
     def __init__(
         self,
@@ -6167,8 +6404,14 @@ FamilyChild(
 
 class FamilySpouse(Structure):
     """Store, validate and display the GEDCOM Family Spouse structure."""
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6207,8 +6450,14 @@ FamilySpouse(
 
 class FileTranslation(Structure):
     """Store, validate and display the GEDCOM File structure."""
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6245,8 +6494,14 @@ FileTranslation(
 
 class File(Structure):
     """Store, validate and display the GEDCOM File structure."""
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6304,8 +6559,14 @@ File(
 
 class SourceEvent(Structure):
     """Store, validate and display the GEDCOM Source Event structure."""
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6362,9 +6623,22 @@ SourceEvent(
 
 
 class NonEvent(Structure):
-    """Store, validate and display a GEDCOM Non Event structure."""
+    """Store, validate and display a GEDCOM Non Event structure.
+
+    > n NO <Enum>                                {1:1}  [g7:NO](https://gedcom.io/terms/v7/NO)
+    >   +1 DATE <DatePeriod>                     {0:1}  [g7:NO-DATE](https://gedcom.io/terms/v7/NO-DATE)
+    >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<SOURCE_CITATION>>                   {0:M}
+    """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6385,7 +6659,6 @@ class NonEvent(Structure):
         self.phrase = phrase
         self.notes = notes
         self.sources = sources
-
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6452,8 +6725,14 @@ class Family(Structure):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -6510,7 +6789,6 @@ class Family(Structure):
         self.notes = notes
         self.citations = citations
         self.multimedia_links = multimedia_links
-
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6601,6 +6879,7 @@ class Multimedia(Structure):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
 
@@ -6691,8 +6970,14 @@ class Source(Structure):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.AUTH.value, Tag.TITL.value, Tag.ABBR.value, Tag.PUBL.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.AUTH.value,
+        Tag.TITL.value,
+        Tag.ABBR.value,
+        Tag.PUBL.value,
+    }
 
     def __init__(
         self,
@@ -6801,18 +7086,24 @@ class Submitter(Structure):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
         xref: SubmitterXref = Void.SUBM,
         name: str = Default.EMPTY,
         address: Address | None = None,
-        phones: list[str] | None = None, 
+        phones: list[str] | None = None,
         emails: list[str] | None = None,
-        faxes: list[str] | None = None, 
-        wwws: list[str] | None = None,  
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
         languages: list[str] | None = None,
         identifiers: list[Identifier] | None = None,
@@ -6847,7 +7138,6 @@ class Submitter(Structure):
         self.languages = languages
         self.identifiers = identifiers
         self.notes = notes
-        
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6998,8 +7288,14 @@ class Individual(Structure):
     >   +1 <<CHANGE_DATE>>                       {0:1}
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -7166,7 +7462,12 @@ class Repository(Structure):
     """
 
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -7249,8 +7550,14 @@ Repository(
 
 class SharedNote(Structure):
     """Store, validate and display a GEDCOM Shared Note Record."""
+
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,
@@ -7303,7 +7610,7 @@ SharedNote(
     xref = {Formatter.codes(self.xref, tabs)},
     text = {Formatter.codes(self.text, tabs)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language,tabs)},
+    language = {Formatter.codes(self.language, tabs)},
     translations = {Formatter.codes(self.translations, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
@@ -7349,7 +7656,12 @@ class Header(Structure):
     """
 
     structure: ClassVar[str] = Tag.NONE.value
-    substructures: ClassVar[set[str]] = {Tag.TYPE.value, Tag.NCHI.value, Tag.RESI.value, Tag.FACT.value}
+    substructures: ClassVar[set[str]] = {
+        Tag.TYPE.value,
+        Tag.NCHI.value,
+        Tag.RESI.value,
+        Tag.FACT.value,
+    }
 
     def __init__(
         self,

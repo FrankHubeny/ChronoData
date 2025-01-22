@@ -66,6 +66,11 @@ from typing import ClassVar, Literal
 #     NAME: ClassVar = {'U'}
 
 
+
+
+
+
+
 @dataclass(frozen=True)
 class Value:
     """The following constants are dictionary values."""
@@ -88,11 +93,73 @@ class Value:
     SECULAR: str = 'SECULAR'
 
 
+class CalendarName(Enum):
+    """Names of recognized calendars.
+
+    Reference:
+        - [Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
+    """
+
+    GREGORIAN = 'GREGORIAN'
+    JULIAN = 'JULIAN'
+    FRENCH_R = 'FRENCH_R'
+    HEBREW = 'HEBREW'
+    NONE = 'NONE'
+
+
 class Cal:
     """GEDCOM codes for various calendars."""
 
     CALENDARS: ClassVar = {
-        Value.GREGORIAN: {
+        CalendarName.HEBREW: {
+            Value.MAX_MONTHS: 13,
+            Value.MONTH_NAMES: {
+                '01': 'TSH',
+                '02': 'CSH',
+                '03': 'KSL',
+                '04': 'TVT',
+                '05': 'SHV',
+                '06': 'ADR',
+                '07': 'ADS',
+                '08': 'NSN',
+                '09': 'IYR',
+                '10': 'SVN',
+                '11': 'TMZ',
+                '12': 'AAV',
+                '13': 'ELL',
+            },
+            Value.ISO: {
+                'TSH': '09',
+                'CSH': '02',
+                'KSL': '03',
+                'TVT': '04',
+                'SHV': '05',
+                'ADR': '06',
+                'ADS': '07',
+                'NSN': '08',
+                'IYR': '09',
+                'SVN': '10',
+                'TMZ': '11',
+                'AAV': '12',
+                'ELL': '13',
+            },
+            Value.MONTH_MAX_DAYS: {
+                '01': 31,
+                '02': 29,
+                '03': 31,
+                '04': 30,
+                '05': 31,
+                '06': 30,
+                '07': 31,
+                '08': 31,
+                '09': 30,
+                '10': 31,
+                '11': 30,
+                '12': 31,
+            },
+            Value.EPOCH: '',
+        },
+        CalendarName.GREGORIAN: {
             Value.MAX_MONTHS: 12,
             Value.MONTH_NAMES: {
                 '01': 'JAN',
@@ -136,8 +203,103 @@ class Cal:
                 '11': 30,
                 '12': 31,
             },
-            Value.EPOCH: ' BCE',
-        }
+            Value.EPOCH: 'BCE',
+        },
+        CalendarName.JULIAN: {
+            Value.MAX_MONTHS: 12,
+            Value.MONTH_NAMES: {
+                '01': 'JAN',
+                '02': 'FEB',
+                '03': 'MAR',
+                '04': 'APR',
+                '05': 'MAY',
+                '06': 'JUN',
+                '07': 'JUL',
+                '08': 'AUG',
+                '09': 'SEP',
+                '10': 'OCT',
+                '11': 'NOV',
+                '12': 'DEC',
+            },
+            Value.ISO: {
+                'JAN': '01',
+                'FEB': '02',
+                'MAR': '03',
+                'APR': '04',
+                'MAY': '05',
+                'JUN': '06',
+                'JUL': '07',
+                'AUG': '08',
+                'SEP': '09',
+                'OCT': '10',
+                'NOV': '11',
+                'DEC': '12',
+            },
+            Value.MONTH_MAX_DAYS: {
+                '01': 31,
+                '02': 29,
+                '03': 31,
+                '04': 30,
+                '05': 31,
+                '06': 30,
+                '07': 31,
+                '08': 31,
+                '09': 30,
+                '10': 31,
+                '11': 30,
+                '12': 31,
+            },
+            Value.EPOCH: 'BCE',
+        },
+        CalendarName.FRENCH_R: {
+            Value.MAX_MONTHS: 13,
+            Value.MONTH_NAMES: {
+                '01': 'VEND',
+                '02': 'BRUM',
+                '03': 'FRIM',
+                '04': 'NIVO',
+                '05': 'PLUV',
+                '06': 'VENT',
+                '07': 'GERM',
+                '08': 'FLOR',
+                '09': 'PRAI',
+                '10': 'MESS',
+                '11': 'THER',
+                '12': 'FRUC',
+                '13': 'COMP',
+            },
+            Value.ISO: {
+                'VEND': '10',
+                'BRUM': '11',
+                'FRIM': '12',
+                'NIVO': '01',
+                'PLUV': '02',
+                'VENT': '03',
+                'GERM': '04',
+                'FLOR': '05',
+                'PRAI': '06',
+                'MESS': '07',
+                'THER': '08',
+                'FRUC': '09',
+                'COMP': '09',
+            },
+            Value.MONTH_MAX_DAYS: {
+                '01': 30,
+                '02': 30,
+                '03': 30,
+                '04': 30,
+                '05': 30,
+                '06': 30,
+                '07': 30,
+                '08': 30,
+                '09': 30,
+                '10': 30,
+                '11': 30,
+                '12': 30,
+                '13': 5,
+            },
+            Value.EPOCH: '',
+        },
     }
 
 
@@ -723,16 +885,20 @@ class Tag(Enum):
     FILE = 'FILE'
     FILM = 'FILM'
     FORM = 'FORM'
+    FRENCH_R = 'FRENCH_R'
     GEDC = 'GEDC'
     GIVN = 'GIVN'
     GRAD = 'GRAD'
+    GREGORIAN = 'GREGORIAN'
     HEAD = 'HEAD'
+    HEBREW = 'HEBREW'
     HEIGHT = 'HEIGHT'
     HUSB = 'HUSB'
     IDNO = 'IDNO'
     IMMI = 'IMMI'
     INDI = 'INDI'
     INIL = 'INIL'
+    JULIAN = 'JULIAN'
     LANG = 'LANG'
     LANG_ = '_LANG'
     LATI = 'LATI'
