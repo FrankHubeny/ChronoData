@@ -111,6 +111,7 @@ class CalendarsFrenchRevolution:
             DayDefinition(64, 'Cormier'),
             DayDefinition(65, 'Rouleau'),
         ],
+        holidays=[],
         epoch='',
         zero=False,
         negative=False,

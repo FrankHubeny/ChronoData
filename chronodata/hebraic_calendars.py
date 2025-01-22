@@ -43,6 +43,7 @@ class CalendarsHebraic:
             WeekDayDefinition(1,'Yom Shabbat'),
         ],
         days=[],
+        holidays=[],
         epoch='',
         negative=False,
         zero=False,

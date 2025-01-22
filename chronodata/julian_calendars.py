@@ -40,6 +40,7 @@ class CalendarsJulian:
             WeekDayDefinition(7,'Saturday'),
         ],
         days=[],
+        holidays=[],
         epoch='BCE',
         zero=False,
         negative=True,

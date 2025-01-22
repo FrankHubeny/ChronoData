@@ -4,6 +4,7 @@
 from chronodata.calendars import (
     CalendarDefinition,
     DayDefinition,
+    HolidayDefinition,
     MonthDefinition,
     WeekDayDefinition,
     YearDefinition,
@@ -40,6 +41,7 @@ class CalendarsGregorian:
             WeekDayDefinition(7, 'Saturday'),
         ],
         days=[],
+        holidays=[],
         epoch='BCE',
         zero=False,
         negative=True,
