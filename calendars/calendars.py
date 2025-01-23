@@ -1,0 +1,333 @@
+# calendars
+"""Define NamedTuples to store information about a specific calendar system."""
+
+import uuid
+from textwrap import indent
+from typing import Any, NamedTuple
+
+#import icalendar
+import numpy as np
+
+
+class CalendarMessage:
+    DAY_RANGE: str = 'The day "{0}" is either less than 1 or greater than the number of days in month {1}: "{2}".'
+    END: str = 'The date "{0}" goes beyond the end of the calendar "{1}".'
+    BEGIN: str = 'The date "{0}" comes before the start of the calendar "{1}".'
+    MONTH_RANGE: str = 'The month "{0}" is either less than 1 or greater than the number of months "{1}".'
+    ZERO: str = 'The year is 0, but there is no 0 year in the calendar.'
+
+
+class Constants:
+    BRACKETS: str = '[]'
+    COMMA: str = ','
+    ICS_BEGIN_CALENDAR: str = """BEGIN:VCALENDAR
+PRODID:-//calendars//Year//UND
+CALSCALE:GREGORIAN
+VERSION:2.0
+"""
+    ICS_BEGIN_DAY: str = 'BEGIN:VEVENT'
+    ICS_DAY_START: str = 'DTSTART;VALUE=DATE:'
+    ICS_DAY_END: str = 'DTEND;VALUE=DATE:'
+    ICS_DESCRIPTION: str = 'DESCRIPTION:'
+    ICS_END_CALENDAR: str = 'END:VCALENDAR'
+    ICS_END_DAY: str = 'END:VEVENT'
+    ICS_SEPARATOR: str = ':'
+    ICS_SUMMARY: str = 'SUMMARY:'
+    ICS_UID: str = 'UID:'
+    EMPTY: str = ''
+
+    EOL: str = '\n'
+    FLOAT_ZERO: float = 0.0
+    HYPHEN: str = '-'
+    INDENT: str = '    '
+    LEFT_BRACKET: str = '['
+    RIGHT_BRACKET: str = ']'
+    ZERO: int = 0
+
+
+class YearDefinition(NamedTuple):
+    """A description of a year in the calendar."""
+
+    number: int
+    name: str
+    symbol: str
+
+
+class MonthDefinition(NamedTuple):
+    """A description of a month in the calendar."""
+
+    number: int
+    name: str
+    days: int
+    abbreviation: str = Constants.EMPTY
+    symbol: str = Constants.EMPTY
+
+
+class WeekDefinition(NamedTuple):
+    """A description of a week in the calendar."""
+
+    number: int
+    name: str
+    symbol: str = Constants.EMPTY
+
+
+class WeekDayDefinition(NamedTuple):
+    """A description of the days of a week."""
+
+    number: int
+    name: str
+    abbreviation: str = Constants.EMPTY
+    symbol: str = Constants.EMPTY
+
+
+class DayDefinition(NamedTuple):
+    """A description of a day in the calendar."""
+
+    number: int
+    name: str
+    month: int = 0
+    symbol: str = Constants.EMPTY
+    summary: str = Constants.EMPTY
+    description: str = Constants.EMPTY
+
+
+class HolidayDefinition(NamedTuple):
+    """A description of a day in the calendar."""
+
+    number: int
+    name: str
+
+
+class LocationDefinition(NamedTuple):
+    """A description of the location where the calendar was used."""
+
+    latitude: float
+    longitude: float
+    description: str = Constants.EMPTY
+
+
+class CalendarDefinition(NamedTuple):
+    """Frameword for definitions for specific calendars with methods to work with those calendars.
+
+    Args:
+        name: The name of the calendar provding a way to display it as a string.
+        months: A list of abbreviations for the names of the months. The 0 month is ''.
+        days_in_monts: A lit of the number of days for each month.  The 0 day is 0.
+        epoch: If the calendar has and epoch splitting the years into positive and negative, this is the name
+            of the negative years.
+        zero: If the calendar has a zero year (unlike the Gregorian calendar) then this is True.
+            Otherwise, it is false.
+        negative: Even if the calendar has a beginning, it may not permit negative years.  This flag
+            signal that negative dates before the beginning are not permitted.
+
+    Reference:
+
+    """
+
+    name: str
+    years: list[YearDefinition]
+    months: list[MonthDefinition]
+    weeks: list[WeekDefinition]
+    weekdays: list[WeekDayDefinition]
+    days: list[DayDefinition]
+    holidays: list[HolidayDefinition]
+    epoch: str = ''
+    zero: bool = True
+    negative: bool = True
+    start: np.datetime64 = np.datetime64('nat')
+    end: np.datetime64 = np.datetime64('nat')
+    location: LocationDefinition = LocationDefinition(
+        Constants.FLOAT_ZERO, Constants.FLOAT_ZERO, Constants.EMPTY
+    )
+    description: str = Constants.EMPTY
+
+    def validate(
+        self, year: int, month: int, day: int, iso: str = Constants.EMPTY
+    ) -> bool:
+        date: tuple[int, int, int] = (year, month, day)
+        if iso != Constants.EMPTY:
+            year, month, day = self.from_iso(iso)
+        if year == 0 and not self.zero:
+            raise ValueError(CalendarMessage.ZERO)
+        if month < 0 or month > len(self.months) - 1:
+            raise ValueError(
+                CalendarMessage.MONTH_RANGE.format(
+                    str(month), str(len(self.months) - 1)
+                )
+            )
+        if day < 0 or day > self.months[month].days:
+            raise ValueError(
+                CalendarMessage.DAY_RANGE.format(
+                    str(day), str(month), str(self.months[month].days)
+                )
+            )
+        if (
+            self.end != (Constants.ZERO, Constants.ZERO, Constants.ZERO)
+            and date > self.end
+        ):
+            raise ValueError(CalendarMessage.END.format(date, self.end))
+        if (
+            self.start != (Constants.ZERO, Constants.ZERO, Constants.ZERO)
+            and date < self.start
+        ):
+            raise ValueError(CalendarMessage.BEGIN.format(date, self.start))
+        return True
+
+    def days_in_month(self, month: int) -> int:
+        """Return the number of days in a month."""
+        return self.months[month].days
+
+    def days_in_year(self, days: int) -> int:
+        return days
+
+    def from_iso(self, iso: str) -> tuple[int, int, int]:
+        year_month_day: list[str] = iso.split(Constants.HYPHEN)
+        year: int = int(year_month_day[0])
+        month: int = int(year_month_day[1])
+        day: int = int(year_month_day[2])
+        return year, month, day
+
+    def format(
+        self,
+        year: int,
+        month: int = Constants.ZERO,
+        day: int = Constants.ZERO,
+        iso: str = Constants.EMPTY,
+    ) -> str:
+        if iso != Constants.EMPTY:
+            year, month, day = self.from_iso(iso)
+        return f'{year!s}-{self.months[month]}-{day!s}'
+
+    def ics(self, start: str, end: str) -> str:
+        """Construct an ICS list of events from the days defined in the calendar.
+
+        The days are represented as day-long events.  This allows one to
+        see the calendar as aligned with the more common
+        universal calendar of the program.
+
+        Args:
+            start: The first day for the ICS list of events.
+            end: The last day for the ICS list of events.
+        
+        Reference:
+            [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545)
+            [icalendar](https://icalendar.readthedocs.io/en/latest/)
+        """
+        lines: str = Constants.ICS_BEGIN_CALENDAR
+        index: int = 1
+        day: str = start
+        end_day: str = end
+        for day_item in self.days:
+            summary: str = self.months[self.days[day_item.number].month].name
+            day_summary: str = self.days[index].summary
+            if day_summary != Constants.EMPTY:
+                summary = ''.join(
+                    [summary, Constants.ICS_SEPARATOR, day_summary]
+                )
+            lines = ''.join(
+                [
+                    lines,
+                    Constants.ICS_BEGIN_DAY,
+                    Constants.EOL,
+                    Constants.ICS_UID,
+                    str(uuid.uuid4()),
+                    Constants.EOL,
+                    Constants.ICS_DAY_START,
+                    day,
+                    Constants.EOL,
+                    Constants.ICS_DAY_END,
+                    end_day,
+                    Constants.EOL,
+                    Constants.ICS_SUMMARY,
+                    summary,
+                    Constants.EOL,
+                    Constants.ICS_DESCRIPTION,
+                    self.days[index].description,
+                    Constants.EOL,
+                    Constants.ICS_END_DAY,
+                    Constants.EOL,
+                ]
+            )
+            index += 1
+        return ''.join([lines, Constants.ICS_END_CALENDAR])
+
+    def isleap(self, year: int) -> bool:  # noqa: ARG002
+        return False
+
+    def describe(
+        self,
+        year: int = Constants.ZERO,
+        month: int = Constants.ZERO,
+        day: int = Constants.ZERO,
+        iso: str = Constants.EMPTY,
+    ) -> str:
+        if iso != Constants.EMPTY:
+            year, month, day = self.from_iso(iso)
+        lines: str = f'Date: {self.months[month].abbreviation} {day!s}, {year!s}{Constants.EOL}'
+        lines = ''.join(
+            [lines, f'Calendar: {self.name.title()}{Constants.EOL}']
+        )
+        lines = ''.join(
+            [lines, f'Is leap year? {self.isleap(year)},{Constants.EOL}']
+        )
+        if day > Constants.ZERO:
+            pass
+        if month > Constants.ZERO:
+            pass
+        return lines
+
+    def codelist(self, items: list[Any], tabs: int = 2) -> str:
+        if len(items) == Constants.ZERO:
+            return Constants.BRACKETS
+        lines: str = ''.join([Constants.LEFT_BRACKET, Constants.EOL])
+        for item in items:
+            lines = ''.join(
+                [
+                    lines,
+                    Constants.INDENT * tabs,
+                    repr(item),
+                    Constants.COMMA,
+                    Constants.EOL,
+                ]
+            )
+        return ''.join(
+            [
+                lines[:-1],
+                Constants.EOL,
+                Constants.INDENT * (tabs - 1),
+                Constants.RIGHT_BRACKET,
+            ]
+        )
+
+    def code(self, tabs: int = Constants.ZERO) -> str:
+        """Generate the code to define the calendar so it can be modified."""
+
+        return indent(
+            f"""
+import numpy as np
+from calendars.calendars import (
+    CalendarDefinition,
+    DayDefinition,
+    LocationDefinition,
+    MonthDefinition,
+    WeekDayDefinition,
+    YearDefinition, 
+)  
+new_calendar = CalendarDefinition(
+    name = '{self.name}',
+    years = {self.codelist(self.years)},
+    months = {self.codelist(self.months)},
+    weeks = {self.codelist(self.weeks)},
+    weekdays = {self.codelist(self.weekdays)},
+    days = {self.codelist(self.days)},
+    holidays = {self.codelist(self.holidays)},
+    epoch = '{self.epoch}',
+    zero = {self.zero},
+    negative = {self.negative},
+    start = np.datetime64('{self.start}'),
+    end = np.datetime64('{self.end}'),
+    location = {(self.location.__repr__())},
+    description = '{self.description}',
+)""",
+            Constants.INDENT * tabs,
+        )

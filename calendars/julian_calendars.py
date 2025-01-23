@@ -1,7 +1,7 @@
 # julian_calendars
 """Calendar definitions sometimes described as Julian calendars."""
 
-from chronodata.calendars import (
+from calendars.calendars import (
     CalendarDefinition,
     DayDefinition,
     MonthDefinition,

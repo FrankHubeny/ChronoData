@@ -1,7 +1,7 @@
 # gregorian_calendars
 """This is a set of one or more calendars that represent the Gregorian calendar."""
 
-from chronodata.calendars import (
+from calendars.calendars import (
     CalendarDefinition,
     DayDefinition,
     HolidayDefinition,
@@ -32,13 +32,13 @@ class CalendarsGregorian:
         ],
         weeks=[],
         weekdays=[
-            WeekDayDefinition(1, 'Sunday'),
-            WeekDayDefinition(2, 'Monday'),
-            WeekDayDefinition(3, 'Tuesday'),
-            WeekDayDefinition(4, 'Wednesday'),
-            WeekDayDefinition(5, 'Thursday'),
-            WeekDayDefinition(6, 'Friday'),
-            WeekDayDefinition(7, 'Saturday'),
+            WeekDayDefinition(1, 'Sunday', abbreviation='SUN'),
+            WeekDayDefinition(2, 'Monday', abbreviation='MON'),
+            WeekDayDefinition(3, 'Tuesday', abbreviation='TUE'),
+            WeekDayDefinition(4, 'Wednesday', abbreviation='WED'),
+            WeekDayDefinition(5, 'Thursday', abbreviation='THU'),
+            WeekDayDefinition(6, 'Friday', abbreviation='FRI'),
+            WeekDayDefinition(7, 'Saturday', abbreviation='SAT'),
         ],
         days=[],
         holidays=[],

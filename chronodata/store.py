@@ -103,7 +103,7 @@ from typing import Any, ClassVar, Literal
 import numpy as np
 import yaml  # type: ignore[import-untyped]
 
-from chronodata.calendars import CalendarDefinition
+from calendars.calendars import CalendarDefinition
 from chronodata.constants import (
     Adop,
     Cal,
@@ -128,11 +128,11 @@ from chronodata.constants import (
     String,
     Tag,
 )
-from chronodata.french_revolution_calendars import CalendarsFrenchRevolution
+from calendars.french_revolution_calendars import CalendarsFrenchRevolution
 from chronodata.gedcom import Specs
-from chronodata.gregorian_calendars import CalendarsGregorian
-from chronodata.hebraic_calendars import CalendarsHebraic
-from chronodata.julian_calendars import CalendarsJulian
+from calendars.gregorian_calendars import CalendarsGregorian
+from calendars.hebraic_calendars import CalendarsHebraic
+from calendars.julian_calendars import CalendarsJulian
 from chronodata.messages import Example, Msg
 
 YNull = Literal['Y'] | None

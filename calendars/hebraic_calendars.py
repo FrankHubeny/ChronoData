@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from chronodata.calendars import (
+from calendars.calendars import (
     CalendarDefinition,
     DayDefinition,
     MonthDefinition,
