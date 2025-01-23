@@ -64,7 +64,7 @@ addopts = [
   "--strict-markers", 
   "--strict-config",
   "--import-mode=importlib",	
-  "--cov=chronodata",
+  "--cov=genedata",
   "--cov-report=term-missing",
   "--doctest-modules",
   "--ignore=chronodata/separate",
@@ -75,7 +75,9 @@ filterwarnings = ["error"]
 log_cli_level = "INFO"
 testpaths = [
   "tests",
+  "genedata",
   "chronodata",
+  "calendars",
 ]
 markers = [
   "description",
@@ -83,7 +85,9 @@ markers = [
 
 [tool.mypy]
 mypy_path = [
-    "ChronoData/chronodata", 
+    "ChronoData/genedata", 
+    "ChronoData/chronodata",
+    "ChronoData/calendars",
     "ChronoData/tests",
 ]
 files = [

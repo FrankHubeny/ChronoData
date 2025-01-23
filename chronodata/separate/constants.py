@@ -1,8 +1,7 @@
-# ChronoData constants
+# Genealogical Data Constants
 
-# chronodata/constants.py
+# genedata/constants.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
-# chronodata/enums.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """Enumeration classes to build a dataset formatted according
 to the GEDCOM standard.

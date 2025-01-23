@@ -1,4 +1,4 @@
-# chronodata/tuples.py
+# genedata/tuples.py
 # Licensed under a 3-clause BSD style license - see LICENSE.md
 """NamedTuples to store, validate and display data
 entered by the user for a genealogy.
@@ -104,7 +104,7 @@ import numpy as np
 import yaml  # type: ignore[import-untyped]
 
 from calendars.calendars import CalendarDefinition
-from chronodata.constants import (
+from genedata.constants import (
     Adop,
     Cal,
     CalendarName,
@@ -129,11 +129,11 @@ from chronodata.constants import (
     Tag,
 )
 from calendars.french_revolution_calendars import CalendarsFrenchRevolution
-from chronodata.gedcom import Specs
+from genedata.gedcom import Specs
 from calendars.gregorian_calendars import CalendarsGregorian
 from calendars.hebraic_calendars import CalendarsHebraic
 from calendars.julian_calendars import CalendarsJulian
-from chronodata.messages import Example, Msg
+from genedata.messages import Example, Msg
 
 YNull = Literal['Y'] | None
 
@@ -198,8 +198,8 @@ class Tagger:
             The main use of this method generates a GEDCOM line.
             Note how the initial and ending spaces have been stripped from
             the input value.
-            >>> from chronodata.constants import Tag
-            >>> from chronodata.store import Tagger
+            >>> from genedata.constants import Tag
+            >>> from genedata.store import Tagger
             >>> print(Tagger.taginfo(1, Tag.NAME, '  Some Name'))
             1 NAME   Some Name
             <BLANKLINE>
@@ -213,7 +213,7 @@ class Tagger:
             Note how the `@me` was reformatted as `@@me`.
             > 1 NOTE me@example.com is my email
             > 2 CONT @@me and @I are my social media handles
-            >>> from chronodata.store import Note
+            >>> from genedata.store import Note
             >>> mynote = Note(
             ...     note='''me@example.com is my email
             ... @me and @I are my social media handles'''
@@ -253,8 +253,8 @@ class Tagger:
         > as its payload are encoded with no LineVal and no space after the Tag.
 
         Example:
-            >>> from chronodata.store import Tagger
-            >>> from chronodata.constants import Tag
+            >>> from genedata.store import Tagger
+            >>> from genedata.constants import Tag
             >>> lines = ''
             >>> line = Tagger.empty(lines, 1, Tag.MAP)
             >>> print(line)
@@ -287,7 +287,7 @@ class Tagger:
 
         Examples:
             Suppose there is only one string that should be tagged.
-            >>> from chronodata.store import Tagger
+            >>> from genedata.store import Tagger
             >>> lines = ''
             >>> lines = Tagger.empty(lines, 1, Tag.MAP)
             >>> lines = Tagger.string(lines, 2, Tag.LATI, 'N30.0')
@@ -370,7 +370,7 @@ class Tagger:
 
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
-            >>> from chronodata.store import Map, Tagger
+            >>> from genedata.store import Map, Tagger
             >>> map1 = Map(30.0, -30.0)
             >>> map2 = Map(-40.0, 20.0)
             >>> lines = ''
@@ -449,7 +449,7 @@ class Checker:
         This helps verify that more complicated GEDCOM criteria are met.
 
         Examples:
-            >>> from chronodata.store import Checker
+            >>> from genedata.store import Checker
             >>> message = 'Error!'
             >>> Checker.verify(True, 1 == 2, message)
             Traceback (most recent call last):
@@ -532,7 +532,7 @@ class Checker:
         Examples:
             The first example checks that the empty string is recognized
             as the default value of the empty string.
-            >>> from chronodata.store import Checker
+            >>> from genedata.store import Checker
             >>> Checker.verify_not_default('', '')
             Traceback (most recent call last):
             ValueError: The value "" cannot be the default value "".
@@ -606,7 +606,7 @@ class Dater:
 
         Examples:
             The ISO date for January 1, 2000 at 1:15:30 AM would be `20000101 01:15:30`.
-            >>> from chronodata.store import Dater
+            >>> from genedata.store import Dater
             >>> print(Dater.ged_date(iso_date='2000-01-01T01:15:30'))
             ('01 JAN 2000', '01:15:30Z')
 
@@ -729,7 +729,7 @@ class Dater:
 
         Example
         -------
-        >>> from chronodata.store import Dater  # doctest: +ELLIPSIS
+        >>> from genedata.store import Dater  # doctest: +ELLIPSIS
         >>> print(Dater.now())
         2 DATE ...
         3 TIME ...
@@ -791,7 +791,7 @@ class Placer:
         Example:
             The specification for the LATI and LONG structures (tags) offer the
             following example.
-            >>> from chronodata.store import Placer
+            >>> from genedata.store import Placer
             >>> Placer.to_decimal(168, 9, 3.4, 6)
             168.150944
 
@@ -825,7 +825,7 @@ class Placer:
         """Convert a measurment in decimals to one showing degrees, minutes
         and sconds.
 
-        >>> from chronodata.store import Placer
+        >>> from genedata.store import Placer
         >>> Placer.to_dms(49.29722222222, 10)
         (49, 17, 49.999999992)
 
@@ -986,13 +986,13 @@ class FamilyXref(Xref):
     """Assign the FamilyXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.family_xref()` method.
+    the `genedata.build.family_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        chronodata.build.family_xref()
+        genedata.build.family_xref()
     """
 
     def __init__(self, name: str, tag: Tag = Tag.FAM):
@@ -1003,13 +1003,13 @@ class IndividualXref(Xref):
     """Assign the IndividualXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.individual_xref()` method.
+    the `genedata.build.individual_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        `chronodata.build.individual_xref()`
+        `genedata.build.individual_xref()`
 
     Reference:
         [GEDCOM INDIVIDUAL Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
@@ -1023,13 +1023,13 @@ class MultimediaXref(Xref):
     """Assign Assign the MultimediaXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.multimedia_xref()` method.
+    the `genedata.build.multimedia_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        `chronodata.build.multimedia_xref()`
+        `genedata.build.multimedia_xref()`
 
     Reference:
         [GEDCOM MULTIMEDIA Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
@@ -1043,13 +1043,13 @@ class RepositoryXref(Xref):
     """Assign the RepositoryXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.repository_xref()` method.
+    the `genedata.build.repository_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        `chronodata.build.repository_xref()`
+        `genedata.build.repository_xref()`
 
     Reference:
         https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD
@@ -1063,13 +1063,13 @@ class SharedNoteXref(Xref):
     """Assign the SharedNoteXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.shared_note_xref()` method.
+    the `genedata.build.shared_note_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        `chronodata.build.shared_note_xref()`
+        `genedata.build.shared_note_xref()`
 
     Reference:
         - [GEDCOM SHARED_NOTE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
@@ -1083,13 +1083,13 @@ class SourceXref(Xref):
     """Assign the SourceXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.source_xref()` method.
+    the `genedata.build.source_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        `chronodata.build.source_xref()`
+        `genedata.build.source_xref()`
 
     Reference:
         [GEDCOM SOURCE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
@@ -1103,13 +1103,13 @@ class SubmitterXref(Xref):
     """Assign the SubmitterXref type to a string.
 
     This class is not instantiated directly, but only through
-    the `chronodata.build.submitter_xref()` method.
+    the `genedata.build.submitter_xref()` method.
 
     Args:
         name: The name of the identifier.
 
     See Also:
-        chronodata.build.submitter_xref()
+        genedata.build.submitter_xref()
 
     Reference:
         [GEDCOM SUBMITTER Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
@@ -1169,14 +1169,14 @@ class Schema(Structure):
     Examples:
         Consider making a _DATE extention tag based on the GEDCOM specification for
         the standard DATE tag.
-        >>> from chronodata.store import Schema
+        >>> from genedata.store import Schema
         >>> date = Schema('date', 'https://gedcom.io/terms/v7/DATE')
         >>> print(date.ged(1))
         2 TAG _DATE https://gedcom.io/terms/v7/DATE
         <BLANKLINE>
 
         We can put this into the header record as an extension tag as follows.
-        >>> from chronodata.store import Header
+        >>> from genedata.store import Header
         >>> header = Header(schema_tags=[date])
         >>> print(header.ged())
         0 HEAD
@@ -1742,7 +1742,7 @@ class Address(Structure):
 
     Example:
         The following is the minimum amount of information for an address.
-        >>> from chronodata.store import Address
+        >>> from genedata.store import Address
         >>> mailing_address = Address(
         ...     ['12345 ABC Street', 'South North City, My State 22222'],
         ... )
@@ -1754,7 +1754,7 @@ class Address(Structure):
         <BLANKLINE>
 
         There are five named strings stored in this NamedTuple.
-        >>> from chronodata.store import Address
+        >>> from genedata.store import Address
         >>> full_address = Address(
         ...     ['12345 ABC Street', 'South North City, My State 23456'],
         ...     'South North City',
@@ -1927,8 +1927,8 @@ class Age(Structure):
     add information about the data provided.
 
     Examples:
-        >>> from chronodata.store import Age
-        >>> from chronodata.constants import String
+        >>> from genedata.store import Age
+        >>> from genedata.constants import String
         >>> print(
         ...     Age(
         ...         10,
@@ -2137,10 +2137,10 @@ class PersonalNamePieces(Structure):
 
     Example:
         This example includes all six of the Personal Name Piece tags.
-        >>> from chronodata.store import (
+        >>> from genedata.store import (
         ...     PersonalNamePieces,
         ... )  # doctest: +ELLIPSIS
-        >>> from chronodata.constants import Tag
+        >>> from genedata.constants import Tag
 
     Args:
         prefix: An option list of NPFX or name prefixes of the name.
@@ -2323,7 +2323,7 @@ class NameTranslation(Structure):
         Although the `ged` method to display preforms a validation first,
         this example will show that and then display the data using
         the GEDCOM standard.  No personal name pieces will be displayed.
-        >>> from chronodata.store import NameTranslation
+        >>> from genedata.store import NameTranslation
         >>> joe_in_chinese = '喬'
         >>> language = 'cmn'
         >>> nt = NameTranslation(joe_in_chinese, language)
@@ -2478,8 +2478,8 @@ class NoteTranslation(Structure):
 
     Example:
         This example will translation "This is a note." into the Arabic "هذه ملاحظة.".
-        >>> from chronodata.store import NoteTranslation
-        >>> from chronodata.constants import MediaType
+        >>> from genedata.store import NoteTranslation
+        >>> from genedata.constants import MediaType
         >>> arabic_text = 'هذه ملاحظة.'
         >>> mime = MediaType.TEXT_HTML
         >>> language = 'afb'
@@ -2621,7 +2621,7 @@ class CallNumber(Structure):
     Example:
         This example assumes there is a call number "1111" which is the
         minimal amount of information needed to use this optional feature.
-        >>> from chronodata.store import CallNumber
+        >>> from genedata.store import CallNumber
         >>> cn = CallNumber('1111')
         >>> cn.validate()
         True
@@ -2630,7 +2630,7 @@ class CallNumber(Structure):
         <BLANKLINE>
 
         This next example uses all of the optional positions.
-        >>> from chronodata.constants import Medium
+        >>> from genedata.constants import Medium
         >>> cn_all = CallNumber('1111', Medium.BOOK, 'New Testament')
         >>> print(cn_all.ged(1))
         1 CALN 1111
@@ -3227,7 +3227,7 @@ class Note(Structure):
 
     Example:
         This example is a note without other information.
-        >>> from chronodata.store import Note
+        >>> from genedata.store import Note
         >>> note = Note(note='This is my note.')
         >>> print(note.ged(1))
         1 NOTE This is my note.
@@ -3254,7 +3254,7 @@ class Note(Structure):
         <BLANKLINE>
 
         The next example adds translations of the previous example to the note.
-        >>> from chronodata.constants import MediaType
+        >>> from genedata.constants import MediaType
         >>> english_translation = NoteTranslation(
         ...     'This is my note.', MediaType.TEXT_PLAIN, 'en'
         ... )
@@ -3477,14 +3477,14 @@ class PersonalName(Structure):
         Note the trailing "," in the `translations` parameter.  Even though there
         is only one translation, this is required to guarantee the tuple
         is not interpreted as a string of letters.
-        >>> from chronodata.store import (
+        >>> from genedata.store import (
         ...     NameTranslation,
         ...     Note,
         ...     PersonalName,
         ...     PersonalNamePieces,
         ...     SourceCitation,
         ... )
-        >>> from chronodata.constants import NameType, PersonalNamePieceTag
+        >>> from genedata.constants import NameType, PersonalNamePieceTag
         >>> adam_note = Note(note='Here is a place to add more information.')
         >>> adam_english = NameTranslation(
         ...     'Adam', 'en', PersonalNamePieces(nickname=['the man'])
@@ -3659,9 +3659,9 @@ class Association(Structure):
         Both orderings record the same data under the individual with pointer `@I1@`.
 
         First import the required classes.
-        >>> from chronodata.build import Genealogy
-        >>> from chronodata.constants import Role
-        >>> from chronodata.store import Association, Individual
+        >>> from genedata.build import Genealogy
+        >>> from genedata.constants import Role
+        >>> from genedata.store import Association, Individual
 
         Next, create a genealogy and the two individuals references.
         There is no need to create an individual reference for Mr Stockdale
@@ -3728,9 +3728,9 @@ class Association(Structure):
         Since we already have an individual referenced as `I1` above, we instantiate
         another Genealogy which illustrates that we can have multiple Genealogies
         instantiated at one time.
-        >>> from chronodata.build import Genealogy
-        >>> from chronodata.constants import Event, Role
-        >>> from chronodata.store import (
+        >>> from genedata.build import Genealogy
+        >>> from genedata.constants import Event, Role
+        >>> from genedata.store import (
         ...     Individual,
         ...     PersonalName,
         ...     SourceCitation,
@@ -3773,9 +3773,9 @@ class Association(Structure):
 
         Then we will create two individuals in the gen3 Genealogy
         with cross-reference identifiers `@I2@` and `@I3@`.
-        >>> from chronodata.build import Genealogy
-        >>> from chronodata.constants import Event, Role
-        >>> from chronodata.store import (
+        >>> from genedata.build import Genealogy
+        >>> from genedata.constants import Event, Role
+        >>> from genedata.store import (
         ...     Association,
         ...     Individual,
         ...     IndividualEvent,
@@ -4176,7 +4176,7 @@ class Map(Structure):
 
     Examples:
     The first example is a basic example using arbitrary latitude and longitude values.
-    >>> from chronodata.store import Map
+    >>> from genedata.store import Map
     >>> location = Map(49.297222, -14.470833)
     >>> print(location.ged(1))
     1 MAP
@@ -4188,7 +4188,7 @@ class Map(Structure):
     minutes, degrees or seconds.  Using the same data from the example above,
     we can first convert it into degrees, minutes and seconds to set up the situation
     where the records we are given do not come in a decimal format.
-    >>> from chronodata.store import Placer
+    >>> from genedata.store import Placer
     >>> Placer.to_dms(49.297222)
     (49, 17, 49.9992)
 
@@ -4568,7 +4568,7 @@ class Place(Structure):
         Normally one would not call `validate` or `ged` unless one wanted
         to see if the substructure is valid or how it would display
         in the final GEDCOM file.
-        >>> from chronodata.store import Map, Place
+        >>> from genedata.store import Map, Place
         >>> place = Place(
         ...     place1='Bechyně',
         ...     place2='okres Tábor',
@@ -5054,7 +5054,7 @@ class FamilyEventDetail(Structure):
     """Store, validate and display GEDCOM family event detail structure.
 
     Examples:
-        >>> from chronodata.store import FamilyEventDetail
+        >>> from genedata.store import FamilyEventDetail
         >>> family_detail = FamilyEventDetail(
         ...     husband_age=Age(25, phrase='Happy'),
         ...     wife_age=Age(24, phrase='Very happy'),
@@ -5229,8 +5229,8 @@ class FamilyEvent(Structure):
         Tag.MARR, Tag.MARS, Tag.EVEN.  This example shows the error that
         would result if a different tag is used once the NamedTuple is validated.
         First, set up the situation for the error to occur.
-        >>> from chronodata.constants import Tag
-        >>> from chronodata.store import FamilyEvent
+        >>> from genedata.constants import Tag
+        >>> from genedata.store import FamilyEvent
         >>> event = FamilyEvent(Tag.DATE)
 
         Next, evaluate `event`.
@@ -6023,8 +6023,8 @@ class IndividualEvent(Structure):
         This example can be implemented as follows.
 
         First import the needed classes.
-        >>> from chronodata.build import Genealogy
-        >>> from chronodata.store import Individual, IndividualEvent
+        >>> from genedata.build import Genealogy
+        >>> from genedata.store import Individual, IndividualEvent
 
         Next, create a Genealogy and an individual with reference `@I1@`.
         >>> genealogy = Genealogy('event example')
@@ -7200,9 +7200,9 @@ class Individual(Structure):
 
         This can be implemented by doing the following.
         First import the packages.
-        >>> from chronodata.build import Genealogy
-        >>> from chronodata.store import Association, Individual
-        >>> from chronodata.constants import Role
+        >>> from genedata.build import Genealogy
+        >>> from genedata.store import Association, Individual
+        >>> from genedata.constants import Role
 
         Next instantiate a Genealogy which will store the information.
         This will be named `test`.
@@ -7252,7 +7252,7 @@ class Individual(Structure):
         >>> indi_error = Individual(xref=fam)
         >>> indi_error.validate()
         Traceback (most recent call last):
-        TypeError: "@MY_FAMILY@" has type <class 'chronodata.store.FamilyXref'> but should have type <class 'chronodata.store.IndividualXref'>.
+        TypeError: "@MY_FAMILY@" has type <class 'genedata.store.FamilyXref'> but should have type <class 'genedata.store.IndividualXref'>.
 
     Reference:
         [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)

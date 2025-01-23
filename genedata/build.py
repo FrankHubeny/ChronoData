@@ -20,14 +20,14 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from chronodata.constants import (
+from genedata.constants import (
     # Key,
     Number,
     String,
     Tag,
 )
-from chronodata.messages import Issue, Msg
-from chronodata.store import (
+from genedata.messages import Issue, Msg
+from genedata.store import (
     Family,
     FamilyXref,
     Header,
@@ -368,7 +368,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a family record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.family_xref()
             >>> print(id)
@@ -433,7 +433,7 @@ class Genealogy:
         Examples:
             The first example shows the output of the counter for an individual record
             without a name.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.individual_xref()
             >>> print(id)
@@ -499,7 +499,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a multimedia record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.multimedia_xref()
             >>> print(id)
@@ -565,7 +565,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a repository record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.repository_xref()
             >>> print(id)
@@ -624,7 +624,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.shared_note_xref()
             >>> print(id)
@@ -683,7 +683,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.source_xref()
             >>> print(id)
@@ -742,7 +742,7 @@ class Genealogy:
 
         Examples:
             The first example generates identifier for a shared note record.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
             >>> id = a.submitter_xref()
             >>> print(id)
@@ -808,7 +808,7 @@ class Genealogy:
     def families(self, records: list[Family]) -> None:
         """Collect and store all family records for the genealogy.
 
-        After importing `chronodata.build` and `chronodata.store`
+        After importing `genedata.build` and `genedata.store`
         one can instantiate a `Genealogy` and create a family
         identifier to be used in forming a GEDCOM family record.
         The `tuples.Family` NamedTuple will hold all of this
@@ -823,8 +823,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Family
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Family
             >>> a = Genealogy('test')
             >>> family_id = a.family_xref()
             >>> family = Family(xref=family_id)
@@ -871,8 +871,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Individual
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Individual
             >>> a = Genealogy('test')
             >>> individual_id = a.individual_xref()
             >>> individual = Individual(xref=individual_id)
@@ -919,8 +919,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Multimedia
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Multimedia
             >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
             >>> mm = Multimedia(xref=mm_id)
@@ -967,8 +967,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Repository
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Repository
             >>> a = Genealogy('test')
             >>> repo_id = a.repository_xref()
             >>> repo = Repository(xref=repo_id)
@@ -1015,8 +1015,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import SharedNote
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import SharedNote
             >>> a = Genealogy('test')
             >>> sn_id = a.shared_note_xref()
             >>> sn = SharedNote(xref=sn_id)
@@ -1063,8 +1063,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Source
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Source
             >>> a = Genealogy('test')
             >>> source_id = a.source_xref()
             >>> source = Source(xref=source_id)
@@ -1111,8 +1111,8 @@ class Genealogy:
 
         Examples:
             This is a minimal example illustrating the process.
-            >>> from chronodata.build import Genealogy
-            >>> from chronodata.store import Submitter
+            >>> from genedata.build import Genealogy
+            >>> from genedata.store import Submitter
             >>> a = Genealogy('test')
             >>> sub_id = a.submitter_xref()
             >>> sub = Submitter(xref=sub_id)
@@ -1160,7 +1160,7 @@ class Genealogy:
             This example provides the minimum data for a GEDCOM version 7.0 file
             as illustrated by the [minimal70.ged](https://gedcom.io/testfiles/gedcom70/minimal70.ged) file.
             Nothing else has been added to it.
-            >>> from chronodata.build import Genealogy
+            >>> from genedata.build import Genealogy
             >>> a = Genealogy('test')
             >>> a.header(Header())
             >>> print(''.join([a.ged_header, a.ged_trailer]))
