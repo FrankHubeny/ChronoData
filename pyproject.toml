@@ -64,7 +64,7 @@ addopts = [
   "--strict-markers", 
   "--strict-config",
   "--import-mode=importlib",	
-  "--cov=genedata",
+  "--cov=calendars",
   "--cov-report=term-missing",
   "--doctest-modules",
   "--ignore=chronodata/separate",

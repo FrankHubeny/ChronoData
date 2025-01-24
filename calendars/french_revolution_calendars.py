@@ -14,7 +14,7 @@ from calendars.calendars import (
 
 class CalendarsFrenchRevolution:
     FRENCH_R = CalendarDefinition(
-        name='FRENCH_R',
+        name='French Revolution',
         years=[],
         months=[
             MonthDefinition(0, '', days=0, abbreviation=''), 
@@ -112,10 +112,9 @@ class CalendarsFrenchRevolution:
             DayDefinition(65, 'Rouleau'),
         ],
         holidays=[],
-        epoch='',
+        epoch=np.datetime64('1792-01-01'),
         zero=False,
         negative=False,
-        start=np.datetime64('1792-01-01'),
         end=np.datetime64('1806-04-11'),
         description='',
     )

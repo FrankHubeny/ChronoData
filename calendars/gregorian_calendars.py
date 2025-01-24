@@ -1,19 +1,47 @@
 # gregorian_calendars
 """This is a set of one or more calendars that represent the Gregorian calendar."""
 
+import numpy as np
+
 from calendars.calendars import (
     CalendarDefinition,
     DayDefinition,
     HolidayDefinition,
     MonthDefinition,
     WeekDayDefinition,
+    WeekDefinition,
     YearDefinition,
 )
 
 
 class CalendarsGregorian:
+    """Specific definitions for a Gregorian calendar.
+
+    GREGORIAN: A complete Gregorian calendar.
+    GREGORIAN_EMPTY: A mostly empty Gregorian calendar defined for testing
+        purposes and for constructing a calendar from scratch with examples
+        of each of the NamedTuples forming a CalendarDefinition.
+    
+    
+    """
+    GREGORIAN_EMPTY: CalendarDefinition = CalendarDefinition(
+        name='',
+        years=[YearDefinition(1, 'First Year', 'AD')],
+        months=[MonthDefinition(1, 'January', 31)],
+        weeks=[WeekDefinition(1, 'First Week')],
+        weekdays=[WeekDayDefinition(1, 'Sunday')],
+        days=[DayDefinition(1, "New Year's Day")],
+        holidays=[HolidayDefinition(1, "New Year's Day")],
+        epoch=np.datetime64('1', 'D'),
+        epoch_name='BC',
+        zero=False,
+        negative=True,
+        end=np.datetime64('NaT'),
+        description='',
+    )
+
     GREGORIAN: CalendarDefinition = CalendarDefinition(
-        name='GREGORIAN',
+        name='Gregorian',
         years=[],
         months=[
             MonthDefinition(0, '', days=0, abbreviation=''), 
@@ -42,7 +70,8 @@ class CalendarsGregorian:
         ],
         days=[],
         holidays=[],
-        epoch='BCE',
+        epoch = np.datetime64('1', 'D'),
+        epoch_name='BCE',
         zero=False,
         negative=True,
         description='',

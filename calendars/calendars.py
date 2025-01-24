@@ -5,7 +5,6 @@ import uuid
 from textwrap import indent
 from typing import Any, NamedTuple
 
-#import icalendar
 import numpy as np
 
 
@@ -20,6 +19,10 @@ class CalendarMessage:
 class Constants:
     BRACKETS: str = '[]'
     COMMA: str = ','
+    EMPTY: str = ''
+    EOL: str = '\n'
+    FLOAT_ZERO: float = 0.0
+    HYPHEN: str = '-'
     ICS_BEGIN_CALENDAR: str = """BEGIN:VCALENDAR
 PRODID:-//calendars//Year//UND
 CALSCALE:GREGORIAN
@@ -34,13 +37,9 @@ VERSION:2.0
     ICS_SEPARATOR: str = ':'
     ICS_SUMMARY: str = 'SUMMARY:'
     ICS_UID: str = 'UID:'
-    EMPTY: str = ''
-
-    EOL: str = '\n'
-    FLOAT_ZERO: float = 0.0
-    HYPHEN: str = '-'
     INDENT: str = '    '
     LEFT_BRACKET: str = '['
+    NAT: str = 'NaT'
     RIGHT_BRACKET: str = ']'
     ZERO: int = 0
 
@@ -131,11 +130,11 @@ class CalendarDefinition(NamedTuple):
     weekdays: list[WeekDayDefinition]
     days: list[DayDefinition]
     holidays: list[HolidayDefinition]
-    epoch: str = ''
+    epoch: np.datetime64 = np.datetime64(Constants.NAT)
+    epoch_name: str = Constants.EMPTY
     zero: bool = True
     negative: bool = True
-    start: np.datetime64 = np.datetime64('nat')
-    end: np.datetime64 = np.datetime64('nat')
+    end: np.datetime64 = np.datetime64(Constants.NAT)
     location: LocationDefinition = LocationDefinition(
         Constants.FLOAT_ZERO, Constants.FLOAT_ZERO, Constants.EMPTY
     )
@@ -147,9 +146,9 @@ class CalendarDefinition(NamedTuple):
         date: tuple[int, int, int] = (year, month, day)
         if iso != Constants.EMPTY:
             year, month, day = self.from_iso(iso)
-        if year == 0 and not self.zero:
+        if year == Constants.ZERO and not self.zero:
             raise ValueError(CalendarMessage.ZERO)
-        if month < 0 or month > len(self.months) - 1:
+        if month < Constants.ZERO or month > len(self.months) - 1:
             raise ValueError(
                 CalendarMessage.MONTH_RANGE.format(
                     str(month), str(len(self.months) - 1)
@@ -167,10 +166,11 @@ class CalendarDefinition(NamedTuple):
         ):
             raise ValueError(CalendarMessage.END.format(date, self.end))
         if (
-            self.start != (Constants.ZERO, Constants.ZERO, Constants.ZERO)
-            and date < self.start
+            self.epoch != np.datetime64(Constants.NAT)
+            and date < self.epoch
+            and not self.negative
         ):
-            raise ValueError(CalendarMessage.BEGIN.format(date, self.start))
+            raise ValueError(CalendarMessage.BEGIN.format(date, self.epoch))
         return True
 
     def days_in_month(self, month: int) -> int:
@@ -181,6 +181,7 @@ class CalendarDefinition(NamedTuple):
         return days
 
     def from_iso(self, iso: str) -> tuple[int, int, int]:
+        """Convert a Gregorian ISO 8601 date to this calendar's year, month and day."""
         year_month_day: list[str] = iso.split(Constants.HYPHEN)
         year: int = int(year_month_day[0])
         month: int = int(year_month_day[1])
@@ -251,8 +252,11 @@ class CalendarDefinition(NamedTuple):
             index += 1
         return ''.join([lines, Constants.ICS_END_CALENDAR])
 
-    def isleap(self, year: int) -> bool:  # noqa: ARG002
-        return False
+    def isleap(self, year: int) -> bool:  
+        """Test if a year is a leap year with the default test for the Gregorian calendar."""
+        return year % 4 == 0 and year % 400 != 0
+
+    
 
     def describe(
         self,
@@ -300,7 +304,25 @@ class CalendarDefinition(NamedTuple):
         )
 
     def code(self, tabs: int = Constants.ZERO) -> str:
-        """Generate the code to define the calendar so it can be modified."""
+        """Generate the code to define the calendar so it can be modified.
+
+        This method is based on the __repr__ method for NamedTuples.  One can
+        get similar, but unformatted results by running `repr` on an already
+        existing CalendarDefinition, say CalendarsGregorian.GREGORIAN.  If one
+        ran `repr(CalendarsGregorian.GREGORIAN) one would get a string that would
+        get a string one could run and get another NamedTuple like it.
+
+        What this method adds is formatting for the repr result and the imports
+        that would be needed for the repr to run.
+
+        Examples:
+            There is an empty Gregorian CalendarsGregorian for testing and starting
+            a new calendar system from scratch called `CalendarsGregorian.GREGORIAN_EMPTY`.
+            One could get the code for that calendar by using `repr` as in the first
+            example.
+            >>> import calendars.gregorian_calendars 
+        
+        """
 
         return indent(
             f"""
@@ -321,10 +343,10 @@ new_calendar = CalendarDefinition(
     weekdays = {self.codelist(self.weekdays)},
     days = {self.codelist(self.days)},
     holidays = {self.codelist(self.holidays)},
-    epoch = '{self.epoch}',
+    epoch = np.datetime64('{self.epoch}'),
+    epoch_name = '{self.epoch_name}',
     zero = {self.zero},
     negative = {self.negative},
-    start = np.datetime64('{self.start}'),
     end = np.datetime64('{self.end}'),
     location = {(self.location.__repr__())},
     description = '{self.description}',

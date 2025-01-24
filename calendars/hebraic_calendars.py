@@ -14,7 +14,7 @@ from calendars.calendars import (
 
 class CalendarsHebraic:
     HEBREW = CalendarDefinition(
-        name='HEBREW',
+        name='Hebrew',
         years=[],
         months=[
             MonthDefinition(0, '', days=0, abbreviation=''), 
@@ -44,9 +44,8 @@ class CalendarsHebraic:
         ],
         days=[],
         holidays=[],
-        epoch='',
+        epoch=np.datetime64('-3752-01-01'),
         negative=False,
         zero=False,
-        start=np.datetime64('-3752-01-01'),
         description='',
     )

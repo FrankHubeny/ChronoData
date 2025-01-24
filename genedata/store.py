@@ -104,6 +104,12 @@ import numpy as np
 import yaml  # type: ignore[import-untyped]
 
 from calendars.calendars import CalendarDefinition
+
+#from calendars.french_revolution_calendars import CalendarsFrenchRevolution
+from calendars.gregorian_calendars import CalendarsGregorian
+
+#from calendars.hebraic_calendars import CalendarsHebraic
+#from calendars.julian_calendars import CalendarsJulian
 from genedata.constants import (
     Adop,
     Cal,
@@ -128,11 +134,7 @@ from genedata.constants import (
     String,
     Tag,
 )
-from calendars.french_revolution_calendars import CalendarsFrenchRevolution
 from genedata.gedcom import Specs
-from calendars.gregorian_calendars import CalendarsGregorian
-from calendars.hebraic_calendars import CalendarsHebraic
-from calendars.julian_calendars import CalendarsJulian
 from genedata.messages import Example, Msg
 
 YNull = Literal['Y'] | None
@@ -586,7 +588,7 @@ class Dater:
     ) -> str:
         formatted: str = str(year)
         if year < 0:
-            formatted = ''.join([str(-year), String.SPACE, calendar.epoch])
+            formatted = ''.join([str(-year), String.SPACE, calendar.epoch_name])
         if month > 0:
             formatted = ''.join(
                 [calendar.months[month].abbreviation, String.SPACE, formatted]
