@@ -1,5 +1,9 @@
 # julian_calendars
-"""Calendar definitions sometimes described as Julian calendars."""
+"""Calendar definitions sometimes described as Julian calendars.
+
+References:
+    [Time and Date](https://www.timeanddate.com/calendar/julian-calendar.html)
+"""
 
 import numpy as np
 
@@ -15,7 +19,7 @@ from calendars.calendars import (
 class CalendarsJulian:
     JULIAN = CalendarDefinition(
         name='Julian',
-        years=[],
+        years=YearDefinition(4, 4 * 12, (365 * 4) + 1),
         months=[
             MonthDefinition(0, '', days=0, abbreviation=''), 
             MonthDefinition(1,'JANUARY', days=31, abbreviation='JAN'),
@@ -43,7 +47,9 @@ class CalendarsJulian:
         ],
         days=[],
         holidays=[],
-        epoch=np.datetime64('-4700', 'D'),
+        epoch_year=np.datetime64('-4713-01-01T12:00:00', 'Y'),
+        epoch_month=np.datetime64('-4713-01-01T12:00:00', 'M'),
+        epoch_day=np.datetime64('-4713-01-01T12:00:00', 'D'),
         zero=False,
         negative=True,
         description='',

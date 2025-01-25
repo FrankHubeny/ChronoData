@@ -15,9 +15,23 @@ from calendars.calendars import CalendarDefinition
 class Methods:
     @staticmethod
     def date_item(iso: str, calendar: CalendarDefinition) -> list[str]:
-        """Calculate the calendar date from an ISO 8601 date."""
-        np_date: np.datetime64 = np.datetime64(iso)
-        return [calendar.name, str(np_date - calendar.epoch)]
+        """Calculate the calendar date from an ISO 8601 date.
+        
+        Examples:
+            The ISO 8601 date should be identical to the Gregorian calendar date.
+            >>> from calendars.gregorian_calendars import CalendarsGregorian
+            >>> from calendars.methods import Methods
+            >>> Methods.date_item('2025-01-01', CalendarsGregorian.GREGORIAN)
+            ['Gregorian', '2025-01-01']
+        
+        """
+        np_year: np.datetime64 = np.datetime64(iso, 'Y')
+        years: np.timedelta64 = np_year - calendar.epoch_year
+        np_month: np.datetime64 = np.datetime64(iso, 'M')
+        months: np.timedelta64 = np_month - calendar.epoch_month
+        np_day: np.datetime64 = np.datetime64(iso, 'Y')
+        days: np.timedelta64 = np_day - calendar.epoch_day
+        return [calendar.name, str(years)+str(months)+str(days)]
 
     @staticmethod
     def date_list(iso: str, *args: CalendarDefinition) -> list[list[str]]:

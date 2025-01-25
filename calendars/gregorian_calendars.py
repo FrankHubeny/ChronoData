@@ -24,25 +24,17 @@ class CalendarsGregorian:
     
     
     """
-    GREGORIAN_EMPTY: CalendarDefinition = CalendarDefinition(
-        name='',
-        years=[YearDefinition(1, 'First Year', 'AD')],
-        months=[MonthDefinition(1, 'January', 31)],
-        weeks=[WeekDefinition(1, 'First Week')],
-        weekdays=[WeekDayDefinition(1, 'Sunday')],
-        days=[DayDefinition(1, "New Year's Day")],
-        holidays=[HolidayDefinition(1, "New Year's Day")],
-        epoch=np.datetime64('1', 'D'),
-        epoch_name='BC',
-        zero=False,
-        negative=True,
-        end=np.datetime64('NaT'),
-        description='',
-    )
 
     GREGORIAN: CalendarDefinition = CalendarDefinition(
         name='Gregorian',
-        years=[],
+        years=YearDefinition(
+            np.timedelta64(400, 'Y'), 
+            np.timedelta64(400 * 12, 'M'), 
+            np.timedelta64((400 * 365) + 99, 'D'), 
+            np.timedelta64(4, 'Y'), 
+            np.timedelta64(4 * 12, 'M'), 
+            np.timedelta64((4 * 365) + 1, 'D')
+        ),
         months=[
             MonthDefinition(0, '', days=0, abbreviation=''), 
             MonthDefinition(1, 'JANUARY', days=31, abbreviation='JAN'),
@@ -70,9 +62,30 @@ class CalendarsGregorian:
         ],
         days=[],
         holidays=[],
-        epoch = np.datetime64('1', 'D'),
+        epoch_year=np.datetime64('1', 'Y'),
+        epoch_month=np.datetime64('1', 'M'),
+        epoch_day=np.datetime64('1', 'D'),
         epoch_name='BCE',
         zero=False,
         negative=True,
         description='',
+    )
+
+    GREGORIAN_EMPTY: CalendarDefinition = CalendarDefinition(
+        name=''.join([GREGORIAN.name, '_EMPTY']),
+        years=GREGORIAN.years,
+        months=[GREGORIAN.months[1]],
+        weeks=[WeekDefinition(1, 'First Week')],
+        weekdays=[GREGORIAN.weekdays[1]],
+        days=[DayDefinition(1, "New Year's Day")],
+        holidays=[HolidayDefinition(1, "New Year's Day")],
+        epoch_year=GREGORIAN.epoch_year,
+        epoch_month=GREGORIAN.epoch_month,
+        epoch_day=GREGORIAN.epoch_day,
+        epoch_name='BC',
+        zero=GREGORIAN.zero,
+        negative=GREGORIAN.negative,
+        end=GREGORIAN.end,
+        location=GREGORIAN.location,
+        description='A mostly empty Gregorian calendar derived from GREGORIAN calendar already defined.',
     )

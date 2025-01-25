@@ -47,9 +47,12 @@ VERSION:2.0
 class YearDefinition(NamedTuple):
     """A description of a year in the calendar."""
 
-    number: int
-    name: str
-    symbol: str
+    years_in_cycle: np.timedelta64
+    months_in_cycle: np.timedelta64
+    days_in_cycle: np.timedelta64
+    years_in_subcycle: np.timedelta64 = np.timedelta64(0, 'Y')
+    months_in_subcycle: np.timedelta64 = np.timedelta64(0, 'M')
+    days_in_subcycle: np.timedelta64 = np.timedelta64(0, 'D')
 
 
 class MonthDefinition(NamedTuple):
@@ -124,13 +127,15 @@ class CalendarDefinition(NamedTuple):
     """
 
     name: str
-    years: list[YearDefinition]
+    years: YearDefinition
     months: list[MonthDefinition]
     weeks: list[WeekDefinition]
     weekdays: list[WeekDayDefinition]
     days: list[DayDefinition]
     holidays: list[HolidayDefinition]
-    epoch: np.datetime64 = np.datetime64(Constants.NAT)
+    epoch_year: np.datetime64 = np.datetime64(Constants.NAT)
+    epoch_month: np.datetime64 = np.datetime64(Constants.NAT)
+    epoch_day: np.datetime64 = np.datetime64(Constants.NAT)
     epoch_name: str = Constants.EMPTY
     zero: bool = True
     negative: bool = True
@@ -166,11 +171,11 @@ class CalendarDefinition(NamedTuple):
         ):
             raise ValueError(CalendarMessage.END.format(date, self.end))
         if (
-            self.epoch != np.datetime64(Constants.NAT)
-            and date < self.epoch
+            self.epoch_year != np.datetime64(Constants.NAT)
+            and date < self.epoch_year
             and not self.negative
         ):
-            raise ValueError(CalendarMessage.BEGIN.format(date, self.epoch))
+            raise ValueError(CalendarMessage.BEGIN.format(date, self.epoch_year))
         return True
 
     def days_in_month(self, month: int) -> int:
@@ -303,7 +308,7 @@ class CalendarDefinition(NamedTuple):
             ]
         )
 
-    def code(self, tabs: int = Constants.ZERO) -> str:
+    def code(self, tabs: int = Constants.ZERO) -> None:
         """Generate the code to define the calendar so it can be modified.
 
         This method is based on the __repr__ method for NamedTuples.  One can
@@ -324,26 +329,37 @@ class CalendarDefinition(NamedTuple):
         
         """
 
-        return indent(
+        print(indent(  # noqa: T201
             f"""
 import numpy as np
 from calendars.calendars import (
     CalendarDefinition,
     DayDefinition,
+    HolidayDefinition,
     LocationDefinition,
     MonthDefinition,
+    WeekDefinition,
     WeekDayDefinition,
     YearDefinition, 
 )  
 new_calendar = CalendarDefinition(
     name = '{self.name}',
-    years = {self.codelist(self.years)},
+    years = YearDefinition(
+        years_in_cycle = np.timedelta64({self.years.years_in_cycle.astype("int")}, 'Y'),           # Gregorian example: Although years divisible by 4 are leap years, years divisible by 400 are not.
+        months_in_cycle = np.timedelta64({self.years.months_in_cycle.astype("int")}, 'M'),         # 12 months/year * 400 years/cycle = 4800 years/cycle.
+        days_in_cycle = np.timedelta64({self.years.days_in_cycle.astype("int")}, 'D'),         # 365 days/year * 400 years/cycle + 100 leap years - 1 year divisible by 400 per cycle.
+        years_in_subcycle = np.timedelta64({self.years.years_in_subcycle.astype("int")}, 'Y'),          # The subcycle has only 4 years.
+        months_in_subcycle = np.timedelta64({self.years.months_in_subcycle.astype("int")}, 'M'),        # 12 months/year * 4 years/subcycle = 48 months/cycle
+        days_in_subcycle = np.timedelta64({self.years.days_in_subcycle.astype("int")}, 'D'),        # 365 days/year * 4 years/subcycle + 1 leap year/cycle
+    ),
     months = {self.codelist(self.months)},
     weeks = {self.codelist(self.weeks)},
     weekdays = {self.codelist(self.weekdays)},
     days = {self.codelist(self.days)},
     holidays = {self.codelist(self.holidays)},
-    epoch = np.datetime64('{self.epoch}'),
+    epoch_year = np.datetime64('{self.epoch_year}'),
+    epoch_month = np.datetime64('{self.epoch_month}'),
+    epoch_day = np.datetime64('{self.epoch_day}'),
     epoch_name = '{self.epoch_name}',
     zero = {self.zero},
     negative = {self.negative},
@@ -352,4 +368,4 @@ new_calendar = CalendarDefinition(
     description = '{self.description}',
 )""",
             Constants.INDENT * tabs,
-        )
+        ))
