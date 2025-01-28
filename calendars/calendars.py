@@ -343,29 +343,29 @@ from calendars.calendars import (
     YearDefinition, 
 )  
 new_calendar = CalendarDefinition(
-    name = '{self.name}',
+    name = {self.name!r},
     years = YearDefinition(
-        years_in_cycle = np.timedelta64({self.years.years_in_cycle.astype("int")}, 'Y'),           # Gregorian example: Although years divisible by 4 are leap years, years divisible by 400 are not.
-        months_in_cycle = np.timedelta64({self.years.months_in_cycle.astype("int")}, 'M'),         # 12 months/year * 400 years/cycle = 4800 years/cycle.
-        days_in_cycle = np.timedelta64({self.years.days_in_cycle.astype("int")}, 'D'),         # 365 days/year * 400 years/cycle + 100 leap years - 1 year divisible by 400 per cycle.
-        years_in_subcycle = np.timedelta64({self.years.years_in_subcycle.astype("int")}, 'Y'),          # The subcycle has only 4 years.
-        months_in_subcycle = np.timedelta64({self.years.months_in_subcycle.astype("int")}, 'M'),        # 12 months/year * 4 years/subcycle = 48 months/cycle
-        days_in_subcycle = np.timedelta64({self.years.days_in_subcycle.astype("int")}, 'D'),        # 365 days/year * 4 years/subcycle + 1 leap year/cycle
+        years_in_cycle = {self.years.years_in_cycle!r},           # Gregorian example: Although years divisible by 4 are leap years, years divisible by 400 are not.
+        months_in_cycle = {self.years.months_in_cycle!r},         # 12 months/year * 400 years/cycle = 4800 years/cycle.
+        days_in_cycle = {self.years.days_in_cycle!r},         # 365 days/year * 400 years/cycle + 100 leap years - 1 year divisible by 400 per cycle.
+        years_in_subcycle = {self.years.years_in_subcycle!r},          # The subcycle has only 4 years.
+        months_in_subcycle = {self.years.months_in_subcycle!r},        # 12 months/year * 4 years/subcycle = 48 months/cycle
+        days_in_subcycle = {self.years.days_in_subcycle!r},        # 365 days/year * 4 years/subcycle + 1 leap year/cycle
     ),
     months = {self.codelist(self.months)},
     weeks = {self.codelist(self.weeks)},
     weekdays = {self.codelist(self.weekdays)},
     days = {self.codelist(self.days)},
     holidays = {self.codelist(self.holidays)},
-    epoch_year = np.datetime64('{self.epoch_year}'),
-    epoch_month = np.datetime64('{self.epoch_month}'),
-    epoch_day = np.datetime64('{self.epoch_day}'),
-    epoch_name = '{self.epoch_name}',
-    zero = {self.zero},
-    negative = {self.negative},
-    end = np.datetime64('{self.end}'),
-    location = {(self.location.__repr__())},
-    description = '{self.description}',
+    epoch_year = {self.epoch_year!r},
+    epoch_month = {self.epoch_month!r},
+    epoch_day = {self.epoch_day!r},
+    epoch_name = {self.epoch_name!r},
+    zero = {self.zero!r},
+    negative = {self.negative!r},
+    end = {self.end!r},
+    location = {self.location!r},
+    description = {self.description!r},
 )""",
             Constants.INDENT * tabs,
         ))

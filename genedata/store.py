@@ -105,11 +105,11 @@ import yaml  # type: ignore[import-untyped]
 
 from calendars.calendars import CalendarDefinition
 
-#from calendars.french_revolution_calendars import CalendarsFrenchRevolution
+# from calendars.french_revolution_calendars import CalendarsFrenchRevolution
 from calendars.gregorian_calendars import CalendarsGregorian
 
-#from calendars.hebraic_calendars import CalendarsHebraic
-#from calendars.julian_calendars import CalendarsJulian
+# from calendars.hebraic_calendars import CalendarsHebraic
+# from calendars.julian_calendars import CalendarsJulian
 from genedata.constants import (
     Adop,
     Cal,
@@ -900,8 +900,6 @@ class Formatter:
 
     @staticmethod
     def codes(items: Any, tabs: int = 1) -> str:
-        if isinstance(items, str):
-            return ''.join(["'", items, "'"])
         if isinstance(items, list):
             if len(items) == 0:
                 return String.LEFT_RIGHT_BRACKET
@@ -916,14 +914,8 @@ class Formatter:
                     String.RIGHT_BRACKET,
                 ]
             )
-        if isinstance(items, int):
-            return str(items)
-        if isinstance(items, float):
-            return str(items)
-        if isinstance(items, Enum):
-            return str(items)
-        if isinstance(items, Xref):
-            return items.fullname
+        if isinstance(items, str | int | float | Enum | Xref):
+            return f'{items!r}'
         code_lines: str = (
             items.code(tabs)
             .replace(String.EOL, String.EMPTY, 1)
@@ -968,11 +960,13 @@ class Xref:
         self.name: str = name.replace('@', '').replace('_', ' ')
         self.tag: Tag = tag
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-        # self.code = f'{self.tag.value.lower()}_{self.name.lower()}'
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
         return self.fullname
+
+    def __repr__(self) -> str:
+        return f"Xref('{self.fullname}')"
 
     def ged(self, info: str = String.EMPTY) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
@@ -1000,6 +994,9 @@ class FamilyXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.FAM):
         super().__init__(name, tag)
 
+    def __repr__(self) -> str:
+        return f"FamilyXref('{self.name}')"
+
 
 class IndividualXref(Xref):
     """Assign the IndividualXref type to a string.
@@ -1019,6 +1016,9 @@ class IndividualXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.INDI):
         super().__init__(name, tag)
+
+    def __repr__(self) -> str:
+        return f"IndividualXref('{self.name}')"
 
 
 class MultimediaXref(Xref):
@@ -1040,6 +1040,9 @@ class MultimediaXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.OBJE):
         super().__init__(name, tag)
 
+    def __repr__(self) -> str:
+        return f"MultimediaXref('{self.name}')"
+
 
 class RepositoryXref(Xref):
     """Assign the RepositoryXref type to a string.
@@ -1059,6 +1062,9 @@ class RepositoryXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.REPO):
         super().__init__(name, tag)
+
+    def __repr__(self) -> str:
+        return f"RepositoryXref('{self.name}')"
 
 
 class SharedNoteXref(Xref):
@@ -1080,6 +1086,9 @@ class SharedNoteXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.SNOTE):
         super().__init__(name, tag)
 
+    def __repr__(self) -> str:
+        return f"SharedNoteXref('{self.name}')"
+
 
 class SourceXref(Xref):
     """Assign the SourceXref type to a string.
@@ -1100,6 +1109,9 @@ class SourceXref(Xref):
     def __init__(self, name: str, tag: Tag = Tag.SOUR):
         super().__init__(name, tag)
 
+    def __repr__(self) -> str:
+        return f"SourceXref('{self.name}')"
+
 
 class SubmitterXref(Xref):
     """Assign the SubmitterXref type to a string.
@@ -1119,6 +1131,9 @@ class SubmitterXref(Xref):
 
     def __init__(self, name: str, tag: Tag = Tag.SUBM):
         super().__init__(name, tag)
+
+    def __repr__(self) -> str:
+        return f"SubmitterXref('{self.name}')"
 
 
 class Void:
@@ -1146,6 +1161,8 @@ class Structure:
             self.code()
             .replace(String.EOL, String.EMPTY)
             .replace(String.INDENT, String.SPACE)
+            .replace('( ', '(')
+            .replace(',)', ')')
         )
 
     def __eq__(self, other: Any) -> bool:
@@ -3863,13 +3880,6 @@ class Association(Structure):
         self.role_phrase = role_phrase
         self.notes = notes
         self.citations = citations
-
-    def __repr__(self) -> str:
-        return (
-            self.code()
-            .replace(String.EOL, String.EMPTY)
-            .replace(String.INDENT, String.SPACE)
-        )
 
     def validate(self) -> bool:
         """Validate the stored value."""
