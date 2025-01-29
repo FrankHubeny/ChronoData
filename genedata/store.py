@@ -879,24 +879,40 @@ class Formatter:
     """Methods to support formatting strings to meet the GEDCOM standard."""
 
     @staticmethod
-    def phone(data: str) -> str:
-        """Format a phone string to meet the GEDCOM standard."""
-        return data
+    def phone(area: int, prefix: int, line: int, country: int = 1) -> str:
+        """Format a phone string to meet the GEDCOM standard.
 
-    @staticmethod
-    def email(data: str) -> str:
-        """Format an email string to meet the GEDCOM standard."""
-        return data
+        The International Notation from the ITU-T E.123 standard
+        are followed.  Spaces are used between the country, area_code and local numbers.
+        A `+` precedes the country code.
 
-    @staticmethod
-    def fax(data: str) -> str:
-        """Format a fax string to meet the GEDCOM standard."""
-        return data
+        The GEDCOM standard does not require this international notation, but recommends it.
+        This method formats for the optional international notation should the user
+        choose have a method format the number in a uniform manner.
 
-    @staticmethod
-    def www(data: str) -> str:
-        """Format a url string to meet the GEDCOM standard."""
-        return data
+        One may use this for fax numbers as well.
+
+        Examples:
+            The first example shows the use of the default, US, international number.
+            >>> from genedata.store import Formatter
+            >>> Formatter.phone(123, 456, 7890)
+            '+1 123 456 7890'
+
+            The second example provides a non-US country number.
+            >>> Formatter.phone(123, 456, 7890, 44)
+            '+44 123 456 7890'
+
+        Args:
+            area: The area code for the phone number.
+            prefix: The prefix portion of the phone number.
+            line: The local number for the phone number.
+            country: The country code with default 1 for United States.
+
+        Reference:
+            [GEDCOM Standard](https://gedcom.io/terms/v7/PHON)
+            [ITU-T E.123 Standard](https://www.itu.int/rec/T-REC-E.123-200102-I/en)
+        """
+        return f'+{country!s} {area!s} {prefix!s} {line!s}'
 
     @staticmethod
     def codes(items: Any, tabs: int = 1) -> str:
@@ -1278,7 +1294,7 @@ Schema(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -1303,22 +1319,22 @@ Schema(
         match choice:
             case 1:
                 show = Schema(
-                    tag = '_DATE',
-                    url = '',
+                    tag='_DATE',
+                    url='',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Schema(
-                    tag = '_DATE',
-                    url = '',
+                    tag='_DATE',
+                    url='',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Schema(
-                    tag = '_DATE',
-                    url = '',
+                    tag='_DATE',
+                    url='',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -1391,7 +1407,7 @@ Extension(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -1442,7 +1458,7 @@ Extension(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Extension(1, Schema('',''))
+                show = Extension(1, Schema('', ''))
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -1453,7 +1469,6 @@ Extension(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Date(Structure):
@@ -1748,7 +1763,7 @@ Time(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3638,7 +3653,7 @@ Note(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3663,31 +3678,31 @@ Note(
         match choice:
             case 1:
                 show = Note(
-                    note = 'A note',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    source_citations = None,
+                    note='A note',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    source_citations=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Note(
-                    note = 'A note',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    source_citations = None,
+                    note='A note',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    source_citations=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Note(
-                    note = 'A note',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    source_citations = None,
+                    note='A note',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    source_citations=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -3703,7 +3718,6 @@ Note(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class SourceRepositoryCitation(Structure):
@@ -3777,7 +3791,7 @@ SourceRepositoryCitation(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3802,25 +3816,25 @@ SourceRepositoryCitation(
         match choice:
             case 1:
                 show = SourceRepositoryCitation(
-                    repository_xref = Void.REPO,
-                    notes = None,
-                    call_numbers = None,
+                    repository_xref=Void.REPO,
+                    notes=None,
+                    call_numbers=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = SourceRepositoryCitation(
-                    repository_xref = Void.REPO,
-                    notes = None,
-                    call_numbers = None,
+                    repository_xref=Void.REPO,
+                    notes=None,
+                    call_numbers=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceRepositoryCitation(
-                    repository_xref = Void.REPO,
-                    notes = None,
-                    call_numbers = None,
+                    repository_xref=Void.REPO,
+                    notes=None,
+                    call_numbers=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -3836,7 +3850,6 @@ SourceRepositoryCitation(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class PersonalName(Structure):
@@ -4010,7 +4023,7 @@ PersonalName(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4035,40 +4048,40 @@ PersonalName(
         match choice:
             case 1:
                 show = PersonalName(
-                    name = 'First Name Last Name',
-                    surname = 'Last Name',
-                    type = Tag.NONE,
-                    phrase = '',
-                    pieces = None,
-                    translations = None,
-                    notes = None,
-                    source_citations = None,
+                    name='First Name Last Name',
+                    surname='Last Name',
+                    type=Tag.NONE,
+                    phrase='',
+                    pieces=None,
+                    translations=None,
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = PersonalName(
-                    name = 'First Name Last Name',
-                    surname = 'Last Name',
-                    type = Tag.NONE,
-                    phrase = '',
-                    pieces = None,
-                    translations = None,
-                    notes = None,
-                    source_citations = None,
+                    name='First Name Last Name',
+                    surname='Last Name',
+                    type=Tag.NONE,
+                    phrase='',
+                    pieces=None,
+                    translations=None,
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = PersonalName(
-                    name = 'First Name Last Name',
-                    surname = 'Last Name',
-                    type = Tag.NONE,
-                    phrase = '',
-                    pieces = None,
-                    translations = None,
-                    notes = None,
-                    source_citations = None,
+                    name='First Name Last Name',
+                    surname='Last Name',
+                    type=Tag.NONE,
+                    phrase='',
+                    pieces=None,
+                    translations=None,
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -4084,7 +4097,6 @@ PersonalName(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Association(Structure):
@@ -4361,7 +4373,7 @@ Association(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4386,34 +4398,34 @@ Association(
         match choice:
             case 1:
                 show = Association(
-                    individual_xref = Void.INDI,
-                    association_phrase = 'A phrase',
-                    role = Role.NONE,
-                    role_phrase = 'Role Phrase',
-                    notes = None,
-                    citations = None,
+                    individual_xref=Void.INDI,
+                    association_phrase='A phrase',
+                    role=Role.NONE,
+                    role_phrase='Role Phrase',
+                    notes=None,
+                    citations=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Association(
-                    individual_xref = Void.INDI,
-                    association_phrase = 'A phrase',
-                    role = Role.NONE,
-                    role_phrase = 'Role Phrase',
-                    notes = None,
-                    citations = None,
+                    individual_xref=Void.INDI,
+                    association_phrase='A phrase',
+                    role=Role.NONE,
+                    role_phrase='Role Phrase',
+                    notes=None,
+                    citations=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Association(
-                    individual_xref = Void.INDI,
-                    association_phrase = 'A phrase',
-                    role = Role.NONE,
-                    role_phrase = 'Role Phrase',
-                    notes = None,
-                    citations = None,
+                    individual_xref=Void.INDI,
+                    association_phrase='A phrase',
+                    role=Role.NONE,
+                    role_phrase='Role Phrase',
+                    notes=None,
+                    citations=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -4429,7 +4441,6 @@ Association(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class MultimediaLink(Structure):
@@ -4673,7 +4684,7 @@ Exid(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4698,27 +4709,27 @@ Exid(
         match choice:
             case 1:
                 show = Exid(
-                    exid = '22222',
-                    exid_type = 'type',
+                    exid='22222',
+                    exid_type='type',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Exid(
-                    exid = '22222',
-                    exid_type = 'type',
+                    exid='22222',
+                    exid_type='type',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Exid(
-                    exid = '22222',
-                    exid_type = 'type',
+                    exid='22222',
+                    exid_type='type',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Exid('','')
+                show = Exid('', '')
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -5566,7 +5577,7 @@ class EventDetail(Structure):
             and Checker.verify_type(self.agency, str)
             and Checker.verify_type(self.religion, str)
             and Checker.verify_type(self.cause, str)
-            and Checker.verify_type(self.resn, str)
+            and Checker.verify_type(self.resn, Resn)
             and Checker.verify_tuple_type(self.associations, Association)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
@@ -5577,7 +5588,7 @@ class EventDetail(Structure):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
             lines = Tagger.structure(lines, level, self.date_value, DateValue())
             lines = Tagger.structure(lines, level, self.place, Place())
@@ -5589,7 +5600,7 @@ class EventDetail(Structure):
             lines = Tagger.string(lines, level, Tag.AGNC, self.agency)
             lines = Tagger.string(lines, level, Tag.RELI, self.religion)
             lines = Tagger.string(lines, level, Tag.CAUS, self.cause)
-            lines = Tagger.structure(lines, level, Tag.RESN, self.resn)
+            lines = Tagger.string(lines, level, Tag.RESN, self.resn.value)
             lines = Tagger.structure(lines, level, self.associations)
             lines = Tagger.structure(lines, level, self.notes)
             lines = Tagger.structure(lines, level, self.sources)
@@ -5620,7 +5631,7 @@ EventDetail(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5645,64 +5656,64 @@ EventDetail(
         match choice:
             case 1:
                 show = EventDetail(
-                    date_value = DateValue(),
-                    place = Place(),
-                    address = Address(),
-                    phones = ['123-122-1223'],
-                    emails = ['abc@xyz.com'],
-                    faxes = ['345-234-2345'],
-                    wwws = ['https:here.com'],
-                    agency = '',
-                    religion = '',
-                    cause = '',
-                    resn = Resn.NONE,
-                    associations = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
-                    uids = None,
+                    date_value=DateValue(),
+                    place=Place(),
+                    address=Address(),
+                    phones=['123-122-1223'],
+                    emails=['abc@xyz.com'],
+                    faxes=['345-234-2345'],
+                    wwws=['https:here.com'],
+                    agency='',
+                    religion='',
+                    cause='',
+                    resn=Resn.NONE,
+                    associations=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
+                    uids=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = EventDetail(
-                    date_value = DateValue(),
-                    place = Place(),
-                    address = Address(),
-                    phones = ['123-122-1223'],
-                    emails = ['abc@xyz.com'],
-                    faxes = ['345-234-2345'],
-                    wwws = ['https:here.com'],
-                    agency = '',
-                    religion = '',
-                    cause = '',
-                    resn = Resn.NONE,
-                    associations = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
-                    uids = None,
+                    date_value=DateValue(),
+                    place=Place(),
+                    address=Address(),
+                    phones=['123-122-1223'],
+                    emails=['abc@xyz.com'],
+                    faxes=['345-234-2345'],
+                    wwws=['https:here.com'],
+                    agency='',
+                    religion='',
+                    cause='',
+                    resn=Resn.NONE,
+                    associations=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
+                    uids=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = EventDetail(
-                    date_value = DateValue(),
-                    place = Place(),
-                    address = Address(),
-                    phones = ['123-122-1223'],
-                    emails = ['abc@xyz.com'],
-                    faxes = ['345-234-2345'],
-                    wwws = ['https:here.com'],
-                    agency = '',
-                    religion = '',
-                    cause = '',
-                    resn = Resn.NONE,
-                    associations = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
-                    uids = None,
+                    date_value=DateValue(),
+                    place=Place(),
+                    address=Address(),
+                    phones=['123-122-1223'],
+                    emails=['abc@xyz.com'],
+                    faxes=['345-234-2345'],
+                    wwws=['https:here.com'],
+                    agency='',
+                    religion='',
+                    cause='',
+                    resn=Resn.NONE,
+                    associations=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
+                    uids=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -5718,7 +5729,6 @@ EventDetail(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class FamilyEventDetail(Structure):
@@ -5809,7 +5819,7 @@ FamilyEventDetail(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5834,25 +5844,25 @@ FamilyEventDetail(
         match choice:
             case 1:
                 show = FamilyEventDetail(
-                    husband_age = Age(30),
-                    wife_age = Age(30),
-                    event_detail = None, 
+                    husband_age=Age(30),
+                    wife_age=Age(30),
+                    event_detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilyEventDetail(
-                    husband_age = Age(30),
-                    wife_age = Age(30),
-                    event_detail = None, 
+                    husband_age=Age(30),
+                    wife_age=Age(30),
+                    event_detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilyEventDetail(
-                    husband_age = Age(30),
-                    wife_age = Age(30),
-                    event_detail = None, 
+                    husband_age=Age(30),
+                    wife_age=Age(30),
+                    event_detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -5868,7 +5878,6 @@ FamilyEventDetail(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class FamilyAttribute(Structure):
@@ -5949,7 +5958,7 @@ FamilyAttribute(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5974,28 +5983,28 @@ FamilyAttribute(
         match choice:
             case 1:
                 show = FamilyAttribute(
-                    tag = Tag.NONE,
-                    payload = '',
-                    attribute_type = '',
-                    family_event_detail = None,
+                    tag=Tag.NONE,
+                    payload='',
+                    attribute_type='',
+                    family_event_detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilyAttribute(
-                    tag = Tag.NONE,
-                    payload = '',
-                    attribute_type = '',
-                    family_event_detail = None,
+                    tag=Tag.NONE,
+                    payload='',
+                    attribute_type='',
+                    family_event_detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilyAttribute(
-                    tag = Tag.NONE,
-                    payload = '',
-                    attribute_type = '',
-                    family_event_detail = None,
+                    tag=Tag.NONE,
+                    payload='',
+                    attribute_type='',
+                    family_event_detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6174,7 +6183,7 @@ FamilyEvent(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6199,28 +6208,28 @@ FamilyEvent(
         match choice:
             case 1:
                 show = FamilyEvent(
-                    tag = Tag.NONE,
-                    payload = String.OCCURRED,
-                    event_type = '',
-                    event_detail = None,
+                    tag=Tag.NONE,
+                    payload=String.OCCURRED,
+                    event_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilyEvent(
-                    tag = Tag.NONE,
-                    payload = String.OCCURRED,
-                    event_type = '',
-                    event_detail = None,
+                    tag=Tag.NONE,
+                    payload=String.OCCURRED,
+                    event_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilyEvent(
-                    tag = Tag.NONE,
-                    payload = String.OCCURRED,
-                    event_type = '',
-                    event_detail = None,
+                    tag=Tag.NONE,
+                    payload=String.OCCURRED,
+                    event_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6236,7 +6245,6 @@ FamilyEvent(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Husband(Structure):
@@ -6279,7 +6287,7 @@ Husband(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6304,22 +6312,22 @@ Husband(
         match choice:
             case 1:
                 show = Husband(
-                    individual_xref = Void.INDI,
-                    phrase = 'Husband',
+                    individual_xref=Void.INDI,
+                    phrase='Husband',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Husband(
-                    individual_xref = Void.INDI,
-                    phrase = 'Husband',
+                    individual_xref=Void.INDI,
+                    phrase='Husband',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Husband(
-                    individual_xref = Void.INDI,
-                    phrase = 'Husband',
+                    individual_xref=Void.INDI,
+                    phrase='Husband',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6335,7 +6343,6 @@ Husband(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Wife(Structure):
@@ -6378,7 +6385,7 @@ Wife(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6403,22 +6410,22 @@ Wife(
         match choice:
             case 1:
                 show = Wife(
-                    individual_xref = Void.INDI,
-                    phrase = 'Wife',
+                    individual_xref=Void.INDI,
+                    phrase='Wife',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Wife(
-                    individual_xref = Void.INDI,
-                    phrase = 'Wife',
+                    individual_xref=Void.INDI,
+                    phrase='Wife',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Wife(
-                    individual_xref = Void.INDI,
-                    phrase = 'Wife',
+                    individual_xref=Void.INDI,
+                    phrase='Wife',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6434,7 +6441,6 @@ Wife(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Child(Structure):
@@ -6485,7 +6491,7 @@ Child(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6510,22 +6516,22 @@ Child(
         match choice:
             case 1:
                 show = Child(
-                    individual_xref = Void.INDI,
-                    phrase = 'Child',
+                    individual_xref=Void.INDI,
+                    phrase='Child',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Child(
-                    individual_xref = Void.INDI,
-                    phrase = 'Child',
+                    individual_xref=Void.INDI,
+                    phrase='Child',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Child(
-                    individual_xref = Void.INDI,
-                    phrase = 'Child',
+                    individual_xref=Void.INDI,
+                    phrase='Child',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6541,7 +6547,6 @@ Child(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class LDSOrdinanceDetail(Structure):
@@ -6645,7 +6650,7 @@ LDSOrdinanceDetail(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6670,40 +6675,40 @@ LDSOrdinanceDetail(
         match choice:
             case 1:
                 show = LDSOrdinanceDetail(
-                    date_value = DateValue(),
-                    temple = '',
-                    place = Place(),
-                    status = Stat.NONE,
-                    status_date = Date(),
-                    status_time = Time(),
-                    notes = None,
-                    source_citations = None,
+                    date_value=DateValue(),
+                    temple='',
+                    place=Place(),
+                    status=Stat.NONE,
+                    status_date=Date(),
+                    status_time=Time(),
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = LDSOrdinanceDetail(
-                    date_value = DateValue(),
-                    temple = '',
-                    place = Place(),
-                    status = Stat.NONE,
-                    status_date = Date(),
-                    status_time = Time(),
-                    notes = None,
-                    source_citations = None,
+                    date_value=DateValue(),
+                    temple='',
+                    place=Place(),
+                    status=Stat.NONE,
+                    status_date=Date(),
+                    status_time=Time(),
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = LDSOrdinanceDetail(
-                    date_value = DateValue(),
-                    temple = '',
-                    place = Place(),
-                    status = Stat.NONE,
-                    status_date = Date(),
-                    status_time = Time(),
-                    notes = None,
-                    source_citations = None,
+                    date_value=DateValue(),
+                    temple='',
+                    place=Place(),
+                    status=Stat.NONE,
+                    status_date=Date(),
+                    status_time=Time(),
+                    notes=None,
+                    source_citations=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6719,7 +6724,6 @@ LDSOrdinanceDetail(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class LDSSpouseSealing(Structure):
@@ -6773,7 +6777,7 @@ LDSSPouseSealing(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6798,22 +6802,22 @@ LDSSPouseSealing(
         match choice:
             case 1:
                 show = LDSSpouseSealing(
-                    tag = Tag.SLGS,
-                    detail = None,
+                    tag=Tag.SLGS,
+                    detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = LDSSpouseSealing(
-                    tag = Tag.SLGS,
-                    detail = None,
+                    tag=Tag.SLGS,
+                    detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = LDSSpouseSealing(
-                    tag = Tag.SLGS,
-                    detail = None,
+                    tag=Tag.SLGS,
+                    detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6829,7 +6833,6 @@ LDSSPouseSealing(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class LDSIndividualOrdinance(Structure):
@@ -6914,7 +6917,7 @@ LDSIndividualOrdinance(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6939,25 +6942,25 @@ LDSIndividualOrdinance(
         match choice:
             case 1:
                 show = LDSIndividualOrdinance(
-                    tag = Tag.NONE,
-                    ordinance_detail = None,
-                    family_xref = Void.FAM,
+                    tag=Tag.NONE,
+                    ordinance_detail=None,
+                    family_xref=Void.FAM,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = LDSIndividualOrdinance(
-                    tag = Tag.NONE,
-                    ordinance_detail = None,
-                    family_xref = Void.FAM,
+                    tag=Tag.NONE,
+                    ordinance_detail=None,
+                    family_xref=Void.FAM,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = LDSIndividualOrdinance(
-                    tag = Tag.NONE,
-                    ordinance_detail = None,
-                    family_xref = Void.FAM,
+                    tag=Tag.NONE,
+                    ordinance_detail=None,
+                    family_xref=Void.FAM,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7035,7 +7038,7 @@ Identifier(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7060,25 +7063,25 @@ Identifier(
         match choice:
             case 1:
                 show = Identifier(
-                    tag = Id.NONE,
-                    tag_info = '',
-                    tag_type = '',
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Identifier(
-                    tag = Id.NONE,
-                    tag_info = '',
-                    tag_type = '',
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Identifier(
-                    tag = Id.NONE,
-                    tag_info = '',
-                    tag_type = '',
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7094,7 +7097,6 @@ Identifier(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class IndividualEventDetail(Structure):
@@ -7166,7 +7168,7 @@ IndividualEventDetail(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7191,25 +7193,25 @@ IndividualEventDetail(
         match choice:
             case 1:
                 show = IndividualEventDetail(
-                    event_detail = None,
-                    age = Age(10),
-                    phrase = 'Birthday',
+                    event_detail=None,
+                    age=Age(10),
+                    phrase='Birthday',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = IndividualEventDetail(
-                    event_detail = None,
-                    age = Age(10),
-                    phrase = 'Birthday',
+                    event_detail=None,
+                    age=Age(10),
+                    phrase='Birthday',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = IndividualEventDetail(
-                    event_detail = None,
-                    age = Age(10),
-                    phrase = 'Birthday',
+                    event_detail=None,
+                    age=Age(10),
+                    phrase='Birthday',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7338,7 +7340,7 @@ IndividualAttribute(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7363,25 +7365,25 @@ IndividualAttribute(
         match choice:
             case 1:
                 show = IndividualAttribute(
-                    tag = IndiAttr.NONE,
-                    tag_type = '',
-                    event_detail = None,
+                    tag=IndiAttr.NONE,
+                    tag_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = IndividualAttribute(
-                    tag = IndiAttr.NONE,
-                    tag_type = '',
-                    event_detail = None,
+                    tag=IndiAttr.NONE,
+                    tag_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = IndividualAttribute(
-                    tag = IndiAttr.NONE,
-                    tag_type = '',
-                    event_detail = None,
+                    tag=IndiAttr.NONE,
+                    tag_type='',
+                    event_detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7397,7 +7399,6 @@ IndividualAttribute(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class IndividualEvent(Structure):
@@ -7655,7 +7656,7 @@ IndividualEvent(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7680,37 +7681,37 @@ IndividualEvent(
         match choice:
             case 1:
                 show = IndividualEvent(
-                    tag = Tag.NONE,
-                    payload = '',
-                    text = '',
-                    event_detail = None,
-                    family_xref = Void.FAM,
-                    adoption = Tag.NONE,
-                    phrase = '',
+                    tag=Tag.NONE,
+                    payload='',
+                    text='',
+                    event_detail=None,
+                    family_xref=Void.FAM,
+                    adoption=Tag.NONE,
+                    phrase='',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = IndividualEvent(
-                    tag = Tag.NONE,
-                    payload = '',
-                    text = '',
-                    event_detail = None,
-                    family_xref = Void.FAM,
-                    adoption = Tag.NONE,
-                    phrase = '',
+                    tag=Tag.NONE,
+                    payload='',
+                    text='',
+                    event_detail=None,
+                    family_xref=Void.FAM,
+                    adoption=Tag.NONE,
+                    phrase='',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = IndividualEvent(
-                    tag = Tag.NONE,
-                    payload = '',
-                    text = '',
-                    event_detail = None,
-                    family_xref = Void.FAM,
-                    adoption = Tag.NONE,
-                    phrase = '',
+                    tag=Tag.NONE,
+                    payload='',
+                    text='',
+                    event_detail=None,
+                    family_xref=Void.FAM,
+                    adoption=Tag.NONE,
+                    phrase='',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7726,7 +7727,6 @@ IndividualEvent(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Alias(Structure):
@@ -7793,7 +7793,7 @@ Alias(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7818,22 +7818,22 @@ Alias(
         match choice:
             case 1:
                 show = Alias(
-                    individual_xref = Void.INDI,
-                    phrase = '',
+                    individual_xref=Void.INDI,
+                    phrase='',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Alias(
-                    individual_xref = Void.INDI,
-                    phrase = '',
+                    individual_xref=Void.INDI,
+                    phrase='',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Alias(
-                    individual_xref = Void.INDI,
-                    phrase = '',
+                    individual_xref=Void.INDI,
+                    phrase='',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7925,7 +7925,7 @@ FamilyChild(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7950,34 +7950,34 @@ FamilyChild(
         match choice:
             case 1:
                 show = FamilyChild(
-                    family_xref = Void.FAM,
-                    pedigree = '',
-                    pedigree_phrase = '',
-                    status = '',
-                    status_phrase = '',
-                    notes = None,
+                    family_xref=Void.FAM,
+                    pedigree='',
+                    pedigree_phrase='',
+                    status='',
+                    status_phrase='',
+                    notes=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilyChild(
-                    family_xref = Void.FAM,
-                    pedigree = '',
-                    pedigree_phrase = '',
-                    status = '',
-                    status_phrase = '',
-                    notes = None,
+                    family_xref=Void.FAM,
+                    pedigree='',
+                    pedigree_phrase='',
+                    status='',
+                    status_phrase='',
+                    notes=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilyChild(
-                    family_xref = Void.FAM,
-                    pedigree = '',
-                    pedigree_phrase = '',
-                    status = '',
-                    status_phrase = '',
-                    notes = None,
+                    family_xref=Void.FAM,
+                    pedigree='',
+                    pedigree_phrase='',
+                    status='',
+                    status_phrase='',
+                    notes=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7993,7 +7993,6 @@ FamilyChild(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class FamilySpouse(Structure):
@@ -8040,7 +8039,7 @@ FamilySpouse(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8065,22 +8064,22 @@ FamilySpouse(
         match choice:
             case 1:
                 show = FamilySpouse(
-                    family_xref = Void.FAM,
-                    notes = None,
+                    family_xref=Void.FAM,
+                    notes=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilySpouse(
-                    family_xref = Void.FAM,
-                    notes = None,
+                    family_xref=Void.FAM,
+                    notes=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilySpouse(
-                    family_xref = Void.FAM,
-                    notes = None,
+                    family_xref=Void.FAM,
+                    notes=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8096,7 +8095,6 @@ FamilySpouse(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class FileTranslation(Structure):
@@ -8141,7 +8139,7 @@ FileTranslation(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8166,22 +8164,22 @@ FileTranslation(
         match choice:
             case 1:
                 show = FileTranslation(
-                    path = '',
-                    media_type = MediaType.NONE,
+                    path='',
+                    media_type=MediaType.NONE,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FileTranslation(
-                    path = '',
-                    media_type = MediaType.NONE,
+                    path='',
+                    media_type=MediaType.NONE,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FileTranslation(
-                    path = '',
-                    media_type = MediaType.NONE,
+                    path='',
+                    media_type=MediaType.NONE,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8197,7 +8195,6 @@ FileTranslation(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class File(Structure):
@@ -8263,7 +8260,7 @@ File(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8288,34 +8285,34 @@ File(
         match choice:
             case 1:
                 show = File(
-                    path = '',
-                    media_type = MediaType.NONE,
-                    medium = Medium.NONE,
-                    phrase = '',
-                    title = '',
-                    file_translations = None,
+                    path='',
+                    media_type=MediaType.NONE,
+                    medium=Medium.NONE,
+                    phrase='',
+                    title='',
+                    file_translations=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = File(
-                    path = '',
-                    media_type = MediaType.NONE,
-                    medium = Medium.NONE,
-                    phrase = '',
-                    title = '',
-                    file_translations = None,
+                    path='',
+                    media_type=MediaType.NONE,
+                    medium=Medium.NONE,
+                    phrase='',
+                    title='',
+                    file_translations=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = File(
-                    path = '',
-                    media_type = MediaType.NONE,
-                    medium = Medium.NONE,
-                    phrase = '',
-                    title = '',
-                    file_translations = None,
+                    path='',
+                    media_type=MediaType.NONE,
+                    medium=Medium.NONE,
+                    phrase='',
+                    title='',
+                    file_translations=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8331,7 +8328,6 @@ File(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class SourceEvent(Structure):
@@ -8397,7 +8393,7 @@ SourceEvent(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8422,34 +8418,34 @@ SourceEvent(
         match choice:
             case 1:
                 show = SourceEvent(
-                    event = '',
-                    date_period = '',
-                    phrase = '',
-                    place = Place(),
-                    agency = '',
-                    notes = None,
+                    event='',
+                    date_period='',
+                    phrase='',
+                    place=Place(),
+                    agency='',
+                    notes=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = SourceEvent(
-                    event = '',
-                    date_period = '',
-                    phrase = '',
-                    place = Place(),
-                    agency = '',
-                    notes = None,
+                    event='',
+                    date_period='',
+                    phrase='',
+                    place=Place(),
+                    agency='',
+                    notes=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SourceEvent(
-                    event = '',
-                    date_period = '',
-                    phrase = '',
-                    place = Place(),
-                    agency = '',
-                    notes = None,
+                    event='',
+                    date_period='',
+                    phrase='',
+                    place=Place(),
+                    agency='',
+                    notes=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8535,7 +8531,7 @@ NonEvent(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8560,31 +8556,31 @@ NonEvent(
         match choice:
             case 1:
                 show = NonEvent(
-                    no = '',
-                    date = Date(),
-                    phrase = '',
-                    notes = None,
-                    sources = None,
+                    no='',
+                    date=Date(),
+                    phrase='',
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = NonEvent(
-                    no = '',
-                    date = Date(),
-                    phrase = '',
-                    notes = None,
-                    sources = None,
+                    no='',
+                    date=Date(),
+                    phrase='',
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = NonEvent(
-                    no = '',
-                    date = Date(),
-                    phrase = '',
-                    notes = None,
-                    sources = None,
+                    no='',
+                    date=Date(),
+                    phrase='',
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8765,7 +8761,7 @@ Family(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8790,55 +8786,55 @@ Family(
         match choice:
             case 1:
                 show = Family(
-                    xref = Void.FAM,
-                    resn = Resn.NONE,
-                    attributes = '',
-                    husband = Husband(),
-                    wife = Wife(),
-                    children = None,
-                    associations = None,
-                    submitters = None,
-                    lds_spouse_sealings = None,
-                    identifiers = None,
-                    notes = None,
-                    citations = None,
-                    multimedia_links = None,
+                    xref=Void.FAM,
+                    resn=Resn.NONE,
+                    attributes='',
+                    husband=Husband(),
+                    wife=Wife(),
+                    children=None,
+                    associations=None,
+                    submitters=None,
+                    lds_spouse_sealings=None,
+                    identifiers=None,
+                    notes=None,
+                    citations=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Family(
-                    xref = Void.FAM,
-                    resn = Resn.NONE,
-                    attributes = '',
-                    husband = Husband(),
-                    wife = Wife(),
-                    children = None,
-                    associations = None,
-                    submitters = None,
-                    lds_spouse_sealings = None,
-                    identifiers = None,
-                    notes = None,
-                    citations = None,
-                    multimedia_links = None,
+                    xref=Void.FAM,
+                    resn=Resn.NONE,
+                    attributes='',
+                    husband=Husband(),
+                    wife=Wife(),
+                    children=None,
+                    associations=None,
+                    submitters=None,
+                    lds_spouse_sealings=None,
+                    identifiers=None,
+                    notes=None,
+                    citations=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Family(
-                    xref = Void.FAM,
-                    resn = Resn.NONE,
-                    attributes = '',
-                    husband = Husband(),
-                    wife = Wife(),
-                    children = None,
-                    associations = None,
-                    submitters = None,
-                    lds_spouse_sealings = None,
-                    identifiers = None,
-                    notes = None,
-                    citations = None,
-                    multimedia_links = None,
+                    xref=Void.FAM,
+                    resn=Resn.NONE,
+                    attributes='',
+                    husband=Husband(),
+                    wife=Wife(),
+                    children=None,
+                    associations=None,
+                    submitters=None,
+                    lds_spouse_sealings=None,
+                    identifiers=None,
+                    notes=None,
+                    citations=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8854,7 +8850,6 @@ Family(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Multimedia(Structure):
@@ -8939,7 +8934,7 @@ Multimedia(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8964,34 +8959,34 @@ Multimedia(
         match choice:
             case 1:
                 show = Multimedia(
-                    xref = Void.OBJE,
-                    resn = Resn.NONE,
-                    files = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
+                    xref=Void.OBJE,
+                    resn=Resn.NONE,
+                    files=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Multimedia(
-                    xref = Void.OBJE,
-                    resn = Resn.NONE,
-                    files = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
+                    xref=Void.OBJE,
+                    resn=Resn.NONE,
+                    files=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Multimedia(
-                    xref = Void.OBJE,
-                    resn = Resn.NONE,
-                    files = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
+                    xref=Void.OBJE,
+                    resn=Resn.NONE,
+                    files=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9131,7 +9126,7 @@ Source(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9156,49 +9151,49 @@ Source(
         match choice:
             case 1:
                 show = Source(
-                    xref = Void.SOUR,
-                    author = '',
-                    title = '',
-                    abbreviation = '',
-                    published = '',
-                    events = None,
-                    text = '',
-                    repositories = None,
-                    identifiers = None,
-                    notes = None,
-                    multimedia_links = None,
+                    xref=Void.SOUR,
+                    author='',
+                    title='',
+                    abbreviation='',
+                    published='',
+                    events=None,
+                    text='',
+                    repositories=None,
+                    identifiers=None,
+                    notes=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Source(
-                    xref = Void.SOUR,
-                    author = '',
-                    title = '',
-                    abbreviation = '',
-                    published = '',
-                    events = None,
-                    text = '',
-                    repositories = None,
-                    identifiers = None,
-                    notes = None,
-                    multimedia_links = None,
+                    xref=Void.SOUR,
+                    author='',
+                    title='',
+                    abbreviation='',
+                    published='',
+                    events=None,
+                    text='',
+                    repositories=None,
+                    identifiers=None,
+                    notes=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Source(
-                    xref = Void.SOUR,
-                    author = '',
-                    title = '',
-                    abbreviation = '',
-                    published = '',
-                    events = None,
-                    text = '',
-                    repositories = None,
-                    identifiers = None,
-                    notes = None,
-                    multimedia_links = None,
+                    xref=Void.SOUR,
+                    author='',
+                    title='',
+                    abbreviation='',
+                    published='',
+                    events=None,
+                    text='',
+                    repositories=None,
+                    identifiers=None,
+                    notes=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9214,7 +9209,6 @@ Source(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Submitter(Structure):
@@ -9333,7 +9327,7 @@ Submitter(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9358,49 +9352,49 @@ Submitter(
         match choice:
             case 1:
                 show = Submitter(
-                    xref = Void.SUBM,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    multimedia_links = None,
-                    languages = None,
-                    identifiers = None,
-                    notes = None,
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Submitter(
-                    xref = Void.SUBM,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    multimedia_links = None,
-                    languages = None,
-                    identifiers = None,
-                    notes = None,
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Submitter(
-                    xref = Void.SUBM,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    multimedia_links = None,
-                    languages = None,
-                    identifiers = None,
-                    notes = None,
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9416,7 +9410,6 @@ Submitter(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Individual(Structure):
@@ -9677,7 +9670,7 @@ Individual(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9702,64 +9695,64 @@ Individual(
         match choice:
             case 1:
                 show = Individual(
-                    xref = Void.INDI,
-                    resn = Resn.NONE,
-                    personal_names = None,
-                    sex = Sex.NONE,
-                    attributes = None,
-                    events = None,
-                    lds_individual_ordinances = None,
-                    submitters = None,
-                    associations = None,
-                    aliases = None,
-                    ancestor_interest = None,
-                    descendent_interest = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
+                    xref=Void.INDI,
+                    resn=Resn.NONE,
+                    personal_names=None,
+                    sex=Sex.NONE,
+                    attributes=None,
+                    events=None,
+                    lds_individual_ordinances=None,
+                    submitters=None,
+                    associations=None,
+                    aliases=None,
+                    ancestor_interest=None,
+                    descendent_interest=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Individual(
-                    xref = Void.INDI,
-                    resn = Resn.NONE,
-                    personal_names = None,
-                    sex = Sex.NONE,
-                    attributes = None,
-                    events = None,
-                    lds_individual_ordinances = None,
-                    submitters = None,
-                    associations = None,
-                    aliases = None,
-                    ancestor_interest = None,
-                    descendent_interest = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
+                    xref=Void.INDI,
+                    resn=Resn.NONE,
+                    personal_names=None,
+                    sex=Sex.NONE,
+                    attributes=None,
+                    events=None,
+                    lds_individual_ordinances=None,
+                    submitters=None,
+                    associations=None,
+                    aliases=None,
+                    ancestor_interest=None,
+                    descendent_interest=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Individual(
-                    xref = Void.INDI,
-                    resn = Resn.NONE,
-                    personal_names = None,
-                    sex = Sex.NONE,
-                    attributes = None,
-                    events = None,
-                    lds_individual_ordinances = None,
-                    submitters = None,
-                    associations = None,
-                    aliases = None,
-                    ancestor_interest = None,
-                    descendent_interest = None,
-                    identifiers = None,
-                    notes = None,
-                    sources = None,
-                    multimedia_links = None,
+                    xref=Void.INDI,
+                    resn=Resn.NONE,
+                    personal_names=None,
+                    sex=Sex.NONE,
+                    attributes=None,
+                    events=None,
+                    lds_individual_ordinances=None,
+                    submitters=None,
+                    associations=None,
+                    aliases=None,
+                    ancestor_interest=None,
+                    descendent_interest=None,
+                    identifiers=None,
+                    notes=None,
+                    sources=None,
+                    multimedia_links=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9775,7 +9768,6 @@ Individual(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Repository(Structure):
@@ -9881,7 +9873,7 @@ Repository(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9906,43 +9898,43 @@ Repository(
         match choice:
             case 1:
                 show = Repository(
-                    xref = Void.REPO,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    notes = None,
-                    identifiers = None,
+                    xref=Void.REPO,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    notes=None,
+                    identifiers=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Repository(
-                    xref = Void.REPO,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    notes = None,
-                    identifiers = None,
+                    xref=Void.REPO,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    notes=None,
+                    identifiers=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Repository(
-                    xref = Void.REPO,
-                    name = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    notes = None,
-                    identifiers = None,
+                    xref=Void.REPO,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    notes=None,
+                    identifiers=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9958,7 +9950,6 @@ Repository(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class SharedNote(Structure):
@@ -10030,7 +10021,7 @@ SharedNote(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10055,37 +10046,37 @@ SharedNote(
         match choice:
             case 1:
                 show = SharedNote(
-                    xref = Void.SNOTE,
-                    text = '',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    sources = None,
-                    identifiers = None,
+                    xref=Void.SNOTE,
+                    text='',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    sources=None,
+                    identifiers=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = SharedNote(
-                    xref = Void.SNOTE,
-                    text = '',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    sources = None,
-                    identifiers = None,
+                    xref=Void.SNOTE,
+                    text='',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    sources=None,
+                    identifiers=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = SharedNote(
-                    xref = Void.SNOTE,
-                    text = '',
-                    mime = MediaType.NONE,
-                    language = 'en-US',
-                    translations = None,
-                    sources = None,
-                    identifiers = None,
+                    xref=Void.SNOTE,
+                    text='',
+                    mime=MediaType.NONE,
+                    language='en-US',
+                    translations=None,
+                    sources=None,
+                    identifiers=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -10101,7 +10092,6 @@ SharedNote(
             gedcom_docs,
             genealogy_docs,
         )
-
 
 
 class Header(Structure):
@@ -10311,7 +10301,7 @@ Header(
 )""",
             String.INDENT * tabs,
         )
-    
+
     def example(self, choice: int = Default.CHOICE) -> str:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10336,79 +10326,79 @@ Header(
         match choice:
             case 1:
                 show = Header(
-                    schema_tags = None,
-                    source = '',
-                    vers = 'v7.0',
-                    name = '',
-                    corporation = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    data = '',
-                    data_date = Date(),
-                    data_time = Time(),
-                    data_copyright = '',
-                    dest = '',
-                    header_date = Date(),
-                    header_time = Time(),
-                    submitter = Void.SUBM,
-                    subm_copyright = '',
-                    language = 'en-US',
-                    note = None,
+                    schema_tags=None,
+                    source='',
+                    vers='v7.0',
+                    name='',
+                    corporation='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    data='',
+                    data_date=Date(),
+                    data_time=Time(),
+                    data_copyright='',
+                    dest='',
+                    header_date=Date(),
+                    header_time=Time(),
+                    submitter=Void.SUBM,
+                    subm_copyright='',
+                    language='en-US',
+                    note=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Header(
-                    schema_tags = None,
-                    source = '',
-                    vers = 'v7.0',
-                    name = '',
-                    corporation = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    data = '',
-                    data_date = Date(),
-                    data_time = Time(),
-                    data_copyright = '',
-                    dest = '',
-                    header_date = Date(),
-                    header_time = Time(),
-                    submitter = Void.SUBM,
-                    subm_copyright = '',
-                    language = 'en-US',
-                    note = None,
+                    schema_tags=None,
+                    source='',
+                    vers='v7.0',
+                    name='',
+                    corporation='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    data='',
+                    data_date=Date(),
+                    data_time=Time(),
+                    data_copyright='',
+                    dest='',
+                    header_date=Date(),
+                    header_time=Time(),
+                    submitter=Void.SUBM,
+                    subm_copyright='',
+                    language='en-US',
+                    note=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Header(
-                    schema_tags = None,
-                    source = '',
-                    vers = 'v7.0',
-                    name = '',
-                    corporation = '',
-                    address = Address(),
-                    phones = None,
-                    emails = None,
-                    faxes = None,
-                    wwws = None,
-                    data = '',
-                    data_date = Date(),
-                    data_time = Time(),
-                    data_copyright = '',
-                    dest = '',
-                    header_date = Date(),
-                    header_time = Time(),
-                    submitter = Void.SUBM,
-                    subm_copyright = '',
-                    language = 'en-US',
-                    note = None,
+                    schema_tags=None,
+                    source='',
+                    vers='v7.0',
+                    name='',
+                    corporation='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    data='',
+                    data_date=Date(),
+                    data_time=Time(),
+                    data_copyright='',
+                    dest='',
+                    header_date=Date(),
+                    header_time=Time(),
+                    submitter=Void.SUBM,
+                    subm_copyright='',
+                    language='en-US',
+                    note=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
