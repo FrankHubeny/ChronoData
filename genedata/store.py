@@ -947,21 +947,23 @@ class Formatter:
         show_ged: str,
         gedcom_docs: str,
         genealogy_docs: str,
-    ) -> str:
-        return ''.join(
-            [
-                code_preface,
-                String.EOL,
-                show_code,
-                String.DOUBLE_NEWLINE,
-                gedcom_preface,
-                String.DOUBLE_NEWLINE,
-                show_ged,
-                String.EOL,
-                gedcom_docs,
-                String.EOL,
-                genealogy_docs,
-            ]
+    ) -> None:
+        print(  # noqa: T201
+            ''.join(
+                [
+                    code_preface,
+                    String.EOL,
+                    show_code,
+                    String.DOUBLE_NEWLINE,
+                    gedcom_preface,
+                    String.DOUBLE_NEWLINE,
+                    show_ged,
+                    String.EOL,
+                    gedcom_docs,
+                    String.EOL,
+                    genealogy_docs,
+                ]
+            )
         )
 
 
@@ -972,7 +974,7 @@ class Xref:
         Args:
         - `name`: The name of the identifier.
         """
-        self.fullname: str = name
+        self.fullname: str = name.upper()
         self.name: str = name.replace('@', '').replace('_', ' ')
         self.tag: Tag = tag
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
@@ -1011,7 +1013,7 @@ class FamilyXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"FamilyXref('{self.name}')"
+        return f"FamilyXref('{self.fullname}')"
 
 
 class IndividualXref(Xref):
@@ -1034,7 +1036,7 @@ class IndividualXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"IndividualXref('{self.name}')"
+        return f"IndividualXref('{self.fullname}')"
 
 
 class MultimediaXref(Xref):
@@ -1057,7 +1059,7 @@ class MultimediaXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"MultimediaXref('{self.name}')"
+        return f"MultimediaXref('{self.fullname}')"
 
 
 class RepositoryXref(Xref):
@@ -1080,7 +1082,7 @@ class RepositoryXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"RepositoryXref('{self.name}')"
+        return f"RepositoryXref('{self.fullname}')"
 
 
 class SharedNoteXref(Xref):
@@ -1103,7 +1105,7 @@ class SharedNoteXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"SharedNoteXref('{self.name}')"
+        return f"SharedNoteXref('{self.fullname}')"
 
 
 class SourceXref(Xref):
@@ -1126,7 +1128,7 @@ class SourceXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"SourceXref('{self.name}')"
+        return f"SourceXref('{self.fullname}')"
 
 
 class SubmitterXref(Xref):
@@ -1149,7 +1151,7 @@ class SubmitterXref(Xref):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
-        return f"SubmitterXref('{self.name}')"
+        return f"SubmitterXref('{self.fullname}')"
 
 
 class Void:
@@ -1191,8 +1193,8 @@ class Structure:
     def code(self) -> str:
         return String.EMPTY
 
-    def example(self) -> str:
-        return String.EMPTY
+    def example(self) -> None:
+        print(String.EMPTY)  # noqa: T201
 
 
 class Schema(Structure):
@@ -1295,7 +1297,7 @@ Schema(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1408,7 +1410,7 @@ Extension(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1511,6 +1513,7 @@ class Date(Structure):
         calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
         iso: str = Default.EMPTY,
         display_calendar: bool = False,
+        extensions: list[Extension] | None = None,
     ):
         self.year = year
         self.month = month
@@ -1521,6 +1524,18 @@ class Date(Structure):
         self.formatted_date: str = Dater.format(
             self.year, self.month, self.day, self.calendar
         )
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1617,11 +1632,12 @@ Date(
     month = {Formatter.codes(self.month, tabs)},
     day = {Formatter.codes(self.day, tabs)},
     calendar = {Formatter.codes(self.calendar, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1703,11 +1719,24 @@ class Time(Structure):
         minute: int = Default.TIME_MINUTE,
         second: int | float = Default.TIME_SECOND,
         UTC: bool = False,
+        extensions: list[Extension] | None = None,
     ):
         self.hour = hour
         self.minute = minute
         self.second = second
         self.UTC = UTC
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1760,11 +1789,12 @@ Time(
     minute = {Formatter.codes(self.minute, tabs)},
     second = {Formatter.codes(self.second, tabs)},
     UTC = {Formatter.codes(self.UTC, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1907,6 +1937,7 @@ class DateValue(Structure):
         date: Date | None = None,
         time: Time | None = None,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         if date is None:
             date = Date()
@@ -1915,6 +1946,18 @@ class DateValue(Structure):
         self.date = date
         self.time = time
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1941,11 +1984,12 @@ DateValue(
     date = {Formatter.codes(self.date, tabs)},
     time = {Formatter.codes(self.time, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2077,12 +2121,25 @@ class Address(Structure):
         state: str = Default.EMPTY,
         postal: str = Default.EMPTY,
         country: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.address = address
         self.city = city
         self.state = state
         self.postal = postal
         self.country = country
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         check: bool = (
@@ -2117,11 +2174,12 @@ Address(
     state = {Formatter.codes(self.state, tabs + 1)},
     postal = {Formatter.codes(self.postal, tabs + 1)},
     country = {Formatter.codes(self.country, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2258,6 +2316,7 @@ class Age(Structure):
         days: int = Default.DAYS,
         greater_less_than: str = Default.GREATER_LESS_THAN,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.years = years
         self.months = months
@@ -2265,6 +2324,18 @@ class Age(Structure):
         self.days = days
         self.greater_less_than = greater_less_than
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     # def __eq__(self, other: Any) -> bool:
     #     check: bool = (
@@ -2325,11 +2396,12 @@ Age(
     days = {Formatter.codes(self.days, tabs)},
     greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
     phrase = {Formatter.codes(self.phrase)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2450,6 +2522,7 @@ class PersonalNamePieces(Structure):
         surname_prefix: list[str] | None = None,
         surname: list[str] | None = None,
         suffix: list[str] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if prefix is None:
             prefix = []
@@ -2469,6 +2542,18 @@ class PersonalNamePieces(Structure):
         self.surname_prefix = surname_prefix
         self.surname = surname
         self.suffix = suffix
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2504,11 +2589,12 @@ PersonalNamePieces(
     surname_prefix = {Formatter.codes(self.surname_prefix, tabs)},
     surname = {Formatter.codes(self.surname, tabs)},
     suffix = {Formatter.codes(self.suffix, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2627,12 +2713,25 @@ class NameTranslation(Structure):
         translation: str = String.EMPTY,
         language: str = String.UNDETERMINED,
         pieces: PersonalNamePieces | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if pieces is None:
             pieces = PersonalNamePieces()
         self.translation = translation
         self.language = language
         self.pieces = pieces
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2661,11 +2760,12 @@ NameTranslation(
     translation = {Formatter.codes(self.translation, tabs)},
     language = {Formatter.codes(self.language, tabs)},
     pieces = {Formatter.codes(self.pieces, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2788,10 +2888,23 @@ class NoteTranslation(Structure):
         translation: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
         language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.translation = translation
         self.mime = mime
         self.language = language
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2818,11 +2931,12 @@ NoteTranslation(
     translation = {Formatter.codes(self.translation, tabs)},
     mime = {Formatter.codes(self.mime, tabs)},
     language = {Formatter.codes(self.language, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2932,10 +3046,23 @@ class CallNumber(Structure):
         call_number: str = Default.EMPTY,
         medium: Medium = Medium.NONE,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.call_number = call_number
         self.medium = medium
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2962,11 +3089,12 @@ CallNumber(
     call_number = {Formatter.codes(self.call_number, tabs)},
     medium = {Formatter.codes(self.medium, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3063,10 +3191,23 @@ class Text(Structure):
         text: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
         language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.text = text
         self.mime = mime
         self.language = language
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3093,11 +3234,12 @@ Text(
     text = {Formatter.codes(self.text, tabs)},
     mime = {Formatter.codes(self.mime, tabs)},
     language = {Formatter.codes(self.language, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 ),""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3188,6 +3330,7 @@ class SourceData(Structure):
         self,
         date_value: DateValue | None = None,
         texts: list[Text] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if date_value is None:
             date_value = DateValue()
@@ -3195,6 +3338,18 @@ class SourceData(Structure):
             texts = []
         self.date_value = date_value
         self.texts = texts
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3216,11 +3371,12 @@ class SourceData(Structure):
             f"""SourceData(
     date_value = {Formatter.codes(self.date_value, tabs + 1)},
     texts = {Formatter.codes(self.texts, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 ),""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3347,6 +3503,7 @@ class SourceCitation(Structure):
         quality: Quay = Quay.NONE,
         multimedialinks: list[Any] | None = None,
         notes: list[Any] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if source_data is None:
             source_data = SourceData()
@@ -3364,6 +3521,18 @@ class SourceCitation(Structure):
         self.quality = quality
         self.multimedialinks = multimedialinks
         self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3426,11 +3595,12 @@ SourceCitation(
     quality = {Formatter.codes(self.quality, tabs)},
     multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 ),""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3588,6 +3758,7 @@ class Note(Structure):
         language: str = Default.EMPTY,
         translations: list[NoteTranslation] | None = None,
         source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if translations is None:
             translations = []
@@ -3599,6 +3770,18 @@ class Note(Structure):
         self.language = language
         self.translations = translations
         self.source_citations = source_citations
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3650,11 +3833,12 @@ Note(
     language = {Formatter.codes(self.language, tabs)},
     translations = {Formatter.codes(self.translations, tabs + 1)},
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3752,6 +3936,7 @@ class SourceRepositoryCitation(Structure):
         repository_xref: RepositoryXref = Void.REPO,
         notes: list[Note] | None = None,
         call_numbers: list[CallNumber] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if notes is None:
             notes = []
@@ -3760,6 +3945,18 @@ class SourceRepositoryCitation(Structure):
         self.repository_xref = repository_xref
         self.notes = notes
         self.call_numbers = call_numbers
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3788,11 +3985,12 @@ SourceRepositoryCitation(
     repository_xref = {Formatter.codes(self.repository_xref, tabs)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
     callnumbers = {Formatter.codes(self.call_numbers, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3946,6 +4144,7 @@ class PersonalName(Structure):
         translations: list[NameTranslation] | None = None,
         notes: list[Note] | None = None,
         source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if pieces is None:
             pieces = PersonalNamePieces()
@@ -3963,6 +4162,18 @@ class PersonalName(Structure):
         self.translations = translations
         self.notes = notes
         self.source_citations = source_citations
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4020,11 +4231,12 @@ PersonalName(
     translations = {Formatter.codes(self.translations, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4316,6 +4528,7 @@ class Association(Structure):
         role_phrase: str = String.EMPTY,
         notes: list[Note] | None = None,
         citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if notes is None:
             notes = []
@@ -4327,6 +4540,18 @@ class Association(Structure):
         self.role_phrase = role_phrase
         self.notes = notes
         self.citations = citations
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4370,11 +4595,12 @@ Association(
     role_phrase = {Formatter.codes(self.role_phrase, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     citations = {Formatter.codes(self.citations, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4581,7 +4807,7 @@ MultimediaLink(
         width: int = Default.WIDTH,
         title: str = Default.EMPTY,
         extensions: list[Any] | None = None,
-    ) -> str:
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4655,9 +4881,22 @@ class Exid(Structure):
         self,
         exid: str,
         exid_type: str,
+        extensions: list[Extension] | None = None,
     ):
         self.exid = exid
         self.exid_type = exid_type
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4681,11 +4920,12 @@ class Exid(Structure):
 Exid(
     exid = {Formatter.codes(self.exid, tabs)},
     exid_type = {Formatter.codes(self.exid_type, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4817,7 +5057,7 @@ class Map(Structure):
             extensions = []
         self.latitude: float = latitude
         self.longitude: float = longitude
-        self.extensions: list[Extension] | None = extensions
+        self.extensions: list[Extension] = extensions
         self.descriptions: set[str] = set()
         self.map_extensions: list[Extension] = []
         self.lati_extensions: list[Extension] = []
@@ -4873,6 +5113,7 @@ class Map(Structure):
 Map(
     latitude = {Formatter.codes(self.latitude, tabs)},
     longitude = {Formatter.codes(self.longitude, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -4882,7 +5123,7 @@ Map(
         choice: int = Default.CHOICE,
         latitude: float = Default.MAP_LATITUDE,
         longitude: float = Default.MAP_LONGITUDE,
-    ) -> str:
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5037,6 +5278,7 @@ PlaceTranslation(
     place3 = {Formatter.codes(self.place3, tabs)},
     place4 = {Formatter.codes(self.place4, tabs)},
     language = {Formatter.codes(self.language, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -5049,7 +5291,7 @@ PlaceTranslation(
         place3: str = Default.EMPTY,
         place4: str = Default.EMPTY,
         language: str = Default.EMPTY,
-    ) -> str:
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5367,7 +5609,7 @@ Place(
         exids: list[Exid] | None = None,
         notes: list[Note] | None = None,
         extensions: list[Extension] | None = None,
-    ) -> str:
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5522,6 +5764,7 @@ class EventDetail(Structure):
         sources: list[SourceCitation] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
         uids: list[Id] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if date_value is None:
             date_value = DateValue()
@@ -5563,6 +5806,18 @@ class EventDetail(Structure):
         self.sources = sources
         self.multimedia_links = multimedia_links
         self.uids = uids
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5628,11 +5883,12 @@ EventDetail(
     sources = {Formatter.codes(self.sources, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)}
     uids = {Formatter.codes(self.uids, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5774,6 +6030,7 @@ class FamilyEventDetail(Structure):
         husband_age: Age | None = None,
         wife_age: Age | None = None,
         event_detail: EventDetail | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if husband_age is None:
             husband_age = Age()
@@ -5784,6 +6041,18 @@ class FamilyEventDetail(Structure):
         self.husband_age = husband_age
         self.wife_age = wife_age
         self.event_detail = event_detail
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5815,12 +6084,13 @@ class FamilyEventDetail(Structure):
 FamilyEventDetail(
     husband_age = {Formatter.codes(self.husband_age, tabs)},
     wife_age = {Formatter.codes(self.wife_age, tabs)},
-    event_detail = {Formatter.codes(self.event_detail, tabs)} 
+    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5915,6 +6185,7 @@ class FamilyAttribute(Structure):
         payload: str = Default.EMPTY,
         attribute_type: str = Default.EMPTY,
         family_event_detail: FamilyEventDetail | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if family_event_detail is None:
             family_event_detail = FamilyEventDetail()
@@ -5922,6 +6193,18 @@ class FamilyAttribute(Structure):
         self.payload = payload
         self.attribute_type = attribute_type
         self.family_event_detail = family_event_detail
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5955,11 +6238,12 @@ FamilyAttribute(
     payload = {Formatter.codes(self.payload, tabs)},
     attribute_type = {Formatter.codes(self.attribute_type, tabs)},
     family_event_detail = {Formatter.codes(self.family_event_detail, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6116,6 +6400,7 @@ class FamilyEvent(Structure):
         payload: str = String.OCCURRED,
         event_type: str = String.EMPTY,
         event_detail: FamilyEventDetail | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if event_detail is None:
             event_detail = FamilyEventDetail()
@@ -6123,6 +6408,18 @@ class FamilyEvent(Structure):
         self.payload = payload
         self.event_type = event_type
         self.event_detail = event_detail
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6180,11 +6477,12 @@ FamilyEvent(
     payload = {Formatter.codes(self.payload, tabs)},
     event_type = {Formatter.codes(self.event_type, tabs)},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6248,7 +6546,20 @@ FamilyEvent(
 
 
 class Husband(Structure):
-    """Store, validate and display the GEDCOM Husband structure."""
+    """Store, validate and display the GEDCOM Husband structure.
+
+    Args:
+        individual_xref: Cross reference identifier for the husband as an individual.
+        phrase: A phrase associated with the husband.
+        extensions: A list of extensions for either the husband (HUSB) tag or the phrase (PHASE) tag.
+            These extensions must be specified in the `Header` structure prior to being used.
+
+    Reference:
+        [GEDCOM HUSB](https://gedcom.io/terms/v7/HUSB)
+
+    > +1 HUSB @<XREF:INDI>@                    {0:1}  g7:FAM-HUSB
+    >    +2 PHRASE <Text>                      {0:1}  g7:PHRASE
+    """
 
     structure: ClassVar[str] = Tag.HUSB.value
     substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
@@ -6257,15 +6568,32 @@ class Husband(Structure):
         self,
         individual_xref: IndividualXref = Void.INDI,
         phrase: str = String.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.individual_xref = individual_xref
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.husb_extensions: list[Extension] = []
+        self.phrase_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.HUSB.value in ext.schema.supers:
+                self.husb_extensions.append(ext)
+            elif Tag.PHRASE.value in ext.schema.supers:
+                self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.phrase, str
-        ) and Checker.verify_type(self.individual_xref, IndividualXref)
+        check: bool = (
+            Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.individual_xref, IndividualXref)
+            and Checker.verify_ext(
+                self.descriptions, self.structure, self.substructures
+            )
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -6275,7 +6603,9 @@ class Husband(Structure):
             lines = Tagger.string(
                 lines, level, Tag.HUSB, str(self.individual_xref), format=False
             )
+            lines = Tagger.structure(lines, level + 1, self.husb_extensions)
             lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
+            lines = Tagger.structure(lines, level + 2, self.phrase_extensions)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -6284,11 +6614,18 @@ class Husband(Structure):
 Husband(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6312,8 +6649,9 @@ Husband(
         match choice:
             case 1:
                 show = Husband(
-                    individual_xref=Void.INDI,
-                    phrase='Husband',
+                    individual_xref=IndividualXref('@JOE@'),
+                    phrase='Void husband reference without extensions.',
+                    extensions=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -6321,6 +6659,7 @@ Husband(
                 show = Husband(
                     individual_xref=Void.INDI,
                     phrase='Husband',
+                    extensions=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -6328,13 +6667,19 @@ Husband(
                 show = Husband(
                     individual_xref=Void.INDI,
                     phrase='Husband',
+                    extensions=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Husband()
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
+                show = Husband(
+                    individual_xref=individual_xref,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
+                logging.info(Example.USER_PROVIDED_EXAMPLE)
+                code_preface = Example.USER_PROVIDED
+                gedcom_preface = Example.GEDCOM
         return Formatter.example(
             code_preface,
             show.code(),
@@ -6355,9 +6700,22 @@ class Wife(Structure):
         self,
         individual_xref: IndividualXref = Void.INDI,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.individual_xref = individual_xref
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.wife_extensions: list[Extension] = []
+        self.phrase_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.WIFE.value in ext.schema.supers:
+                self.wife_extensions.append(ext)
+            elif Tag.PHRASE.value in ext.schema.supers:
+                self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6382,11 +6740,12 @@ class Wife(Structure):
 Wife(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6461,9 +6820,22 @@ class Child(Structure):
         self,
         individual_xref: IndividualXref = Void.INDI,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.individual_xref = individual_xref
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.chil_extensions: list[Extension] = []
+        self.phrase_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.CHIL.value in ext.schema.supers:
+                self.chil_extensions.append(ext)
+            elif Tag.PHRASE.value in ext.schema.supers:
+                self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6488,11 +6860,12 @@ class Child(Structure):
 Child(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6571,6 +6944,7 @@ class LDSOrdinanceDetail(Structure):
         Tag.NCHI.value,
         Tag.RESI.value,
         Tag.FACT.value,
+        Tag.PLAC.value
     }
 
     def __init__(
@@ -6583,6 +6957,7 @@ class LDSOrdinanceDetail(Structure):
         status_time: Time | None = None,
         notes: list[Note] | None = None,
         source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if date_value is None:
             date_value = DateValue()
@@ -6604,6 +6979,18 @@ class LDSOrdinanceDetail(Structure):
         self.status_time = status_time
         self.notes = notes
         self.source_citations = source_citations
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.plac_extensions: list[Extension] = []
+        self.phrase_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.PLAC.value in ext.schema.supers:
+                self.plac_extensions.append(ext)
+            elif Tag.PHRASE.value in ext.schema.supers:
+                self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6647,11 +7034,12 @@ LDSOrdinanceDetail(
     status_time = {Formatter.codes(self.status_time, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     source_citations = {Formatter.codes(self.source_citations, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6748,11 +7136,21 @@ class LDSSpouseSealing(Structure):
         self,
         tag: Tag = Tag.SLGS,
         detail: LDSOrdinanceDetail | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if detail is None:
             detail = LDSOrdinanceDetail()
         self.tag = tag
         self.detail = detail
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        self.slgs_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.SLGS.value in ext.schema.supers:
+                self.slgs_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6774,11 +7172,12 @@ class LDSSpouseSealing(Structure):
 LDSSPouseSealing(
     tag = {Formatter.codes(self.tag, tabs)},
     detail = {Formatter.codes(self.detail, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6874,12 +7273,25 @@ class LDSIndividualOrdinance(Structure):
         tag: Tag = Tag.NONE,
         ordinance_detail: LDSOrdinanceDetail | None = None,
         family_xref: FamilyXref = Void.FAM,
+        extensions: list[Extension] | None = None,
     ):
         if ordinance_detail is None:
             ordinance_detail = LDSOrdinanceDetail()
         self.tag = tag
         self.ordinance_detail = ordinance_detail
         self.family_xref = family_xref
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6914,11 +7326,12 @@ LDSIndividualOrdinance(
     tag = {Formatter.codes(self.tag, tabs)},
     ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs)},
     family_xref = {Formatter.codes(self.family_xref, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7000,10 +7413,23 @@ class Identifier(Structure):
         tag: Id = Id.NONE,
         tag_info: str = Default.EMPTY,
         tag_type: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.tag = tag
         self.tag_info = tag_info
         self.tag_type = tag_type
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7035,11 +7461,12 @@ Identifier(
     tag = {Formatter.codes(self.tag, tabs)},
     tag_info = {Formatter.codes(self.tag_info, tabs)},
     tag_type = {Formatter.codes(self.tag_type, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7128,6 +7555,7 @@ class IndividualEventDetail(Structure):
         event_detail: EventDetail | None = None,
         age: Age | None = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         if event_detail is None:
             event_detail = EventDetail()
@@ -7136,6 +7564,18 @@ class IndividualEventDetail(Structure):
         self.event_detail = event_detail
         self.age = age
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7165,11 +7605,12 @@ IndividualEventDetail(
     event_detail = {Formatter.codes(self.event_detail, tabs)},
     age = {Formatter.codes(self.age, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7307,12 +7748,25 @@ class IndividualAttribute(Structure):
         tag: IndiAttr,
         tag_type: str = Default.EMPTY,
         event_detail: IndividualEventDetail | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if event_detail is None:
             event_detail = IndividualEventDetail()
         self.tag = tag
         self.tag_type = tag_type
         self.event_detail = event_detail
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7337,11 +7791,12 @@ IndividualAttribute(
     tag = {Formatter.codes(self.tag, tabs)},
     tag_type = {Formatter.codes(self.tag_type, tabs)},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7588,6 +8043,7 @@ class IndividualEvent(Structure):
         family_xref: FamilyXref = Void.FAM,
         adoption: Tag = Tag.NONE,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         if event_detail is None:
             event_detail = IndividualEventDetail()
@@ -7598,6 +8054,18 @@ class IndividualEvent(Structure):
         self.family_xref = family_xref
         self.adoption = adoption
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7653,11 +8121,12 @@ IndividualEvent(
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7757,9 +8226,22 @@ class Alias(Structure):
         self,
         individual_xref: IndividualXref = Void.INDI,
         phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ):
         self.individual_xref = individual_xref
         self.phrase = phrase
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
@@ -7790,11 +8272,12 @@ class Alias(Structure):
 Alias(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7883,6 +8366,7 @@ class FamilyChild(Structure):
         status: str = Default.EMPTY,
         status_phrase: str = Default.EMPTY,
         notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if notes is None:
             notes = []
@@ -7892,6 +8376,18 @@ class FamilyChild(Structure):
         self.status = status
         self.status_phrase = status_phrase
         self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7922,11 +8418,12 @@ FamilyChild(
     status = {Formatter.codes(self.status, tabs)},
     status_phrase = {Formatter.codes(self.status_phrase, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8010,11 +8507,24 @@ class FamilySpouse(Structure):
         self,
         family_xref: FamilyXref = Void.FAM,
         notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if notes is None:
             notes = []
         self.family_xref = family_xref
         self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8036,11 +8546,12 @@ class FamilySpouse(Structure):
 FamilySpouse(
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8112,9 +8623,22 @@ class FileTranslation(Structure):
         self,
         path: str = Default.EMPTY,
         media_type: MediaType = MediaType.NONE,
+        extensions: list[Extension] | None = None,
     ):
         self.path = path
         self.media_type = media_type
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8136,11 +8660,12 @@ class FileTranslation(Structure):
 FileTranslation(
     path = {Formatter.codes(self.path, tabs)},
     media_type = {Formatter.codes(self.media_type, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8216,6 +8741,7 @@ class File(Structure):
         phrase: str = Default.EMPTY,
         title: str = Default.EMPTY,
         file_translations: list[FileTranslation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if file_translations is None:
             file_translations = []
@@ -8225,6 +8751,18 @@ class File(Structure):
         self.phrase = phrase
         self.title = title
         self.file_translations = file_translations
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8257,11 +8795,12 @@ File(
     phrase = {Formatter.codes(self.phrase, tabs)},
     title = {Formatter.codes(self.title, tabs)},
     file_translations = {Formatter.codes(self.file_translations, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8349,6 +8888,7 @@ class SourceEvent(Structure):
         place: Place | None = None,
         agency: str = Default.EMPTY,
         notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if place is None:
             place = Place()
@@ -8360,6 +8900,18 @@ class SourceEvent(Structure):
         self.place = place
         self.agency = agency
         self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8390,11 +8942,12 @@ SourceEvent(
     place = {Formatter.codes(self.place, tabs)},
     agency = {Formatter.codes(self.agency, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8488,6 +9041,7 @@ class NonEvent(Structure):
         phrase: str = Default.EMPTY,
         notes: list[Note] | None = None,
         sources: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if date is None:
             date = Date()
@@ -8500,6 +9054,18 @@ class NonEvent(Structure):
         self.phrase = phrase
         self.notes = notes
         self.sources = sources
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8528,11 +9094,12 @@ NonEvent(
     phrase = {Formatter.codes(self.phrase, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8656,6 +9223,7 @@ class Family(Structure):
         notes: Any = None,
         citations: Any = None,
         multimedia_links: Any = None,
+        extensions: list[Extension] | None = None,
     ):
         if attributes is None:
             attributes = []
@@ -8695,6 +9263,18 @@ class Family(Structure):
         self.notes = notes
         self.citations = citations
         self.multimedia_links = multimedia_links
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8758,11 +9338,12 @@ Family(
     notes = {Formatter.codes(self.notes, tabs)},
     citations = {Formatter.codes(self.citations, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8886,6 +9467,7 @@ class Multimedia(Structure):
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         sources: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if files is None:
             files = []
@@ -8901,6 +9483,18 @@ class Multimedia(Structure):
         self.identifiers = identifiers
         self.notes = notes
         self.sources = sources
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8931,11 +9525,12 @@ Multimedia(
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9057,6 +9652,7 @@ class Source(Structure):
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if events is None:
             events = []
@@ -9081,6 +9677,18 @@ class Source(Structure):
         self.identifiers = identifiers
         self.notes = notes
         self.multimedia_links = multimedia_links
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9123,11 +9731,12 @@ Source(
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9254,6 +9863,7 @@ class Submitter(Structure):
         languages: list[str] | None = None,
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if address is None:
             address = Address()
@@ -9284,6 +9894,18 @@ class Submitter(Structure):
         self.languages = languages
         self.identifiers = identifiers
         self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9324,11 +9946,12 @@ Submitter(
     languages = {Formatter.codes(self.languages, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9667,11 +10290,12 @@ Individual(
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9807,6 +10431,7 @@ class Repository(Structure):
         wwws: list[str] | None = None,
         notes: list[Note] | None = None,
         identifiers: list[Identifier] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if address is None:
             address = Address()
@@ -9831,6 +10456,18 @@ class Repository(Structure):
         self.wwws = wwws
         self.notes = notes
         self.identifiers = identifiers
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9870,11 +10507,12 @@ Repository(
     wwws = {Formatter.codes(self.wwws, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9972,6 +10610,7 @@ class SharedNote(Structure):
         translations: list[NoteTranslation] | None = None,
         sources: list[SourceCitation] | None = None,
         identifiers: list[Identifier] | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if translations is None:
             translations = []
@@ -9986,6 +10625,18 @@ class SharedNote(Structure):
         self.translations = translations
         self.sources = sources
         self.identifiers = identifiers
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10018,11 +10669,12 @@ SharedNote(
     translations = {Formatter.codes(self.translations, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -10161,6 +10813,7 @@ class Header(Structure):
         subm_copyright: str = String.EMPTY,
         language: str = String.EMPTY,
         note: Note | None = None,
+        extensions: list[Extension] | None = None,
     ):
         if schema_tags is None:
             schema_tags = []
@@ -10205,6 +10858,18 @@ class Header(Structure):
         self.subm_copyright = subm_copyright
         self.language = language
         self.note = note
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+        # self.husb_extensions: list[Extension] = []
+        # self.phrase_extensions: list[Extension] = []
+        # for ext in self.extensions:
+        #     self.descriptions.union(ext.schema.supers)
+        #     if Tag.HUSB.value in ext.schema.supers:
+        #         self.husb_extensions.append(ext)
+        #     elif Tag.PHRASE.value in ext.schema.supers:
+        #         self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10298,11 +10963,12 @@ Header(
     subm_copyright = {Formatter.codes(self.subm_copyright, tabs)},
     language = {Formatter.codes(self.language, tabs)},
     note = {Formatter.codes(self.note, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> str:
+    def example(self, choice: int = Default.CHOICE) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
