@@ -11,13 +11,13 @@ from typing import Any, ClassVar
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
-from chronodata.separate.constants import (
+from chronodata.constants import (
     Number,
     String,
     Tag,
     Unit,
 )
-from chronodata.separate.messages import Issue, Msg
+from chronodata.messages import Issue, Msg
 
 
 @dataclass(frozen=True)

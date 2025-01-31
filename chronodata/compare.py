@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]  
 
-from chronodata.separate.messages import Column, Msg
-from chronodata.separate.readwrite import Base
+from chronodata.messages import Column, Msg
+from chronodata.readwrite import Base
 
 
 @dataclass(frozen=True)
