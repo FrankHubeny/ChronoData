@@ -966,6 +966,56 @@ class Formatter:
             )
         )
 
+    @staticmethod
+    def schema_example(
+        code_preface: str,
+        show_code: str,
+        gedcom_preface: str,
+        show_ged: str,
+        superstructures: dict[str, str],
+        substructures: dict[str, str],
+        gedcom_docs: str,
+        genealogy_docs: str,
+    ) -> None:
+        superstructs: str = String.EMPTY
+        substructs: str = String.EMPTY
+        key: str
+        value: str
+        for key, value in superstructures.items():
+            superstructs = ''.join(
+                [
+                    superstructs,
+                    String.EOL,
+                    f'{String.INDENT}{key:<40} {value:<6}',
+                ]
+            )
+        for key, value in substructures.items():
+            substructs = ''.join(
+                [substructs, String.EOL, f'{String.INDENT}{key:<40} {value:<6}']
+            )
+        print(  # noqa: T201
+            ''.join(
+                [
+                    code_preface,
+                    String.EOL,
+                    show_code,
+                    String.DOUBLE_NEWLINE,
+                    gedcom_preface,
+                    String.DOUBLE_NEWLINE,
+                    show_ged,
+                    String.EOL,
+                    Example.SUPERSTRUCTURES,
+                    superstructs,
+                    Example.SUBSTRUCTURES,
+                    substructs,
+                    Example.GEDCOM_SPECIFICATION,
+                    gedcom_docs,
+                    String.EOL,
+                    genealogy_docs,
+                ]
+            )
+        )
+
 
 class Xref:
     def __init__(self, name: str, tag: Tag = Tag.NONE):
@@ -1249,20 +1299,21 @@ class Schema(Structure):
     """
 
     structure: ClassVar[str] = Tag.SCHMA.value
-    # substructures: ClassVar[set[str]] = {Tag.TAG.value}
 
     def __init__(self, tag: str, url: str) -> None:
         self.raw_tag: str = tag
         self.url: str = url
-        self.tag: str = ''.join([String.UNDERLINE, self.raw_tag.upper()])
+        self.tag: str = self.raw_tag.upper()
+        if self.tag[0] != String.UNDERLINE:
+            self.tag = ''.join([String.UNDERLINE, self.raw_tag.upper()])
         self.webUrl = urllib.request.urlopen(self.url)
         self.result_code = str(self.webUrl.getcode())
         raw: str = self.webUrl.read().decode('utf-8')
         raw2: str = raw[raw.find('%YAML') :]
         self.yaml: str = raw2[: raw2.find('...')]
         self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
-        self.substructures: set[str] = self.yamldict['substructures']
-        self.superstructures: set[str] = self.yamldict['superstructures']
+        self.substructures: dict[str, str] = self.yamldict['substructures']
+        self.superstructures: dict[str, str] = self.yamldict['superstructures']
         self.supers: set[str] = {
             s[s.rfind('/') + 1 :] for s in self.superstructures
         }
@@ -1277,7 +1328,7 @@ class Schema(Structure):
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
             ext_tag: str = self.tag.upper()
             if ext_tag[0] != String.UNDERLINE:
@@ -1297,7 +1348,12 @@ Schema(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: str = Default.EMPTY,
+        url: str = Default.EMPTY,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1322,7 +1378,7 @@ Schema(
             case 1:
                 show = Schema(
                     tag='_DATE',
-                    url='',
+                    url='https://gedcom.io/terms/v7/DATE',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -1341,14 +1397,16 @@ Schema(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Schema(tag='', url='')
+                show = Schema(tag=tag, url=url)
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
-        return Formatter.example(
+        return Formatter.schema_example(
             code_preface,
             show.code(),
             gedcom_preface,
             show.ged(),
+            self.superstructures,
+            self.substructures,
             gedcom_docs,
             genealogy_docs,
         )
@@ -1361,20 +1419,21 @@ class Extension(Structure):
         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
 
-    structure: ClassVar[str] = Default.EMPTY
-    substructures: ClassVar[set[str]] = {Tag.NONE.value}
-
     def __init__(
         self,
         level: int,
         schema: Schema,
         payload: str = String.EMPTY,
         extra: str = String.EMPTY,
+        substructures: list[Any] | None = None,
     ):
+        if substructures is None:
+            substructures = []
         self.level = level
         self.schema = schema
         self.payload = payload
         self.extra = extra
+        self.substructures = substructures
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1383,6 +1442,7 @@ class Extension(Structure):
             and Checker.verify_type(self.schema, Schema)
             and Checker.verify_type(self.payload, str)
             and Checker.verify_type(self.extra, str)
+            and Checker.verify_tuple_type(self.substructures, Any)
         )
         return check
 
@@ -1406,11 +1466,20 @@ Extension(
     schema = {Formatter.codes(self.schema, tabs)},
     payload = {Formatter.codes(self.payload, tabs)},
     extra = {Formatter.codes(self.extra, tabs)},
+    substructures = {Formatter.codes(self.substructures, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        level: int = 1,
+        schema: Schema | None = None,
+        payload: str = Default.EMPTY,
+        extra: str = Default.EMPTY,
+        substructures: list[Any] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1460,7 +1529,15 @@ Extension(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Extension(1, Schema('', ''))
+                if schema is None:
+                    schema = Schema(Default.EMPTY, Default.EMPTY)
+                show = Extension(
+                    level=level,
+                    schema=schema,
+                    payload=payload,
+                    extra=extra,
+                    substructures=substructures,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -1637,7 +1714,17 @@ Date(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        year: int = 0,
+        month: int = 0,
+        day: int = 0,
+        calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
+        iso: str = Default.EMPTY,
+        display_calendar: bool = False,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1687,7 +1774,15 @@ Date(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Date()
+                show = Date(
+                    year=year,
+                    month=month,
+                    day=day,
+                    calendar=calendar,
+                    iso=iso,
+                    display_calendar=display_calendar,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -1794,7 +1889,15 @@ Time(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        hour: int = Default.TIME_HOUR,
+        minute: int = Default.TIME_MINUTE,
+        second: int | float = Default.TIME_SECOND,
+        UTC: bool = False,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -1844,7 +1947,13 @@ Time(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Time()
+                show = Time(
+                    hour=hour,
+                    minute=minute,
+                    second=second,
+                    UTC=UTC,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -1989,7 +2098,14 @@ DateValue(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date: Date | None = None,
+        time: Time | None = None,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2036,7 +2152,12 @@ DateValue(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = DateValue()
+                show = DateValue(
+                    date=date,
+                    time=time,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -2179,7 +2300,16 @@ Address(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        address: list[str] = [],  # noqa: B006
+        city: str = Default.EMPTY,
+        state: str = Default.EMPTY,
+        postal: str = Default.EMPTY,
+        country: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2232,7 +2362,14 @@ Address(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Address()
+                show = Address(
+                    address=address,
+                    city=city,
+                    state=state,
+                    postal=postal,
+                    country=country,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -2401,7 +2538,17 @@ Age(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        years: int = Default.YEARS,
+        months: int = Default.MONTHS,
+        weeks: int = Default.WEEKS,
+        days: int = Default.DAYS,
+        greater_less_than: str = Default.GREATER_LESS_THAN,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2459,7 +2606,15 @@ Age(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Age()
+                show = Age(
+                    years=years,
+                    months=months,
+                    weeks=weeks,
+                    days=days,
+                    greater_less_than=greater_less_than,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -2594,7 +2749,17 @@ PersonalNamePieces(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        prefix: list[str] | None = None,
+        given: list[str] | None = None,
+        nickname: list[str] | None = None,
+        surname_prefix: list[str] | None = None,
+        surname: list[str] | None = None,
+        suffix: list[str] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2650,7 +2815,14 @@ PersonalNamePieces(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = PersonalNamePieces()
+                show = PersonalNamePieces(
+                    prefix=prefix,
+                    given=given,
+                    nickname=nickname,
+                    surname_prefix=surname_prefix,
+                    surname=surname,
+                    suffix=suffix,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -2765,7 +2937,14 @@ NameTranslation(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        translation: str = String.EMPTY,
+        language: str = String.UNDETERMINED,
+        pieces: PersonalNamePieces | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2821,7 +3000,12 @@ NameTranslation(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = NameTranslation()
+                show = NameTranslation(
+                    translation=translation,
+                    language=language,
+                    pieces=pieces,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -2936,7 +3120,14 @@ NoteTranslation(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        translation: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -2983,7 +3174,12 @@ NoteTranslation(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = NoteTranslation()
+                show = NoteTranslation(
+                    translation=translation,
+                    mime=mime,
+                    language=language,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3094,7 +3290,14 @@ CallNumber(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        call_number: str = Default.EMPTY,
+        medium: Medium = Medium.NONE,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3141,7 +3344,12 @@ CallNumber(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = CallNumber()
+                show = CallNumber(
+                    call_number=call_number,
+                    medium=medium,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3239,7 +3447,14 @@ Text(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3286,7 +3501,12 @@ Text(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Text()
+                show = Text(
+                    text=text,
+                    mime=mime,
+                    language=language,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3376,7 +3596,13 @@ class SourceData(Structure):
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date_value: DateValue | None = None,
+        texts: list[Text] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3435,7 +3661,11 @@ class SourceData(Structure):
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = SourceData()
+                show = SourceData(
+                    date_value=date_value,
+                    texts=texts,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3600,7 +3830,21 @@ SourceCitation(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        source_xref: SourceXref = Void.SOUR,
+        page: str = String.EMPTY,
+        source_data: SourceData | None = None,
+        event: Event = Event.NONE,
+        event_phrase: str = String.EMPTY,
+        role: Role = Role.NONE,
+        role_phrase: str = String.EMPTY,
+        quality: Quay = Quay.NONE,
+        multimedialinks: list[Any] | None = None,
+        notes: list[Any] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3641,7 +3885,19 @@ SourceCitation(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = SourceCitation()
+                show = SourceCitation(
+                    source_xref=source_xref,
+                    page=page,
+                    source_data=source_data,
+                    event=event,
+                    event_phrase=event_phrase,
+                    role=role,
+                    role_phrase=role_phrase,
+                    quality=quality,
+                    multimedialinks=multimedialinks,
+                    notes=notes,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3838,7 +4094,17 @@ Note(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        shared_note_xref: SharedNoteXref = Void.SNOTE,
+        note: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        translations: list[NoteTranslation] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -3891,7 +4157,15 @@ Note(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Note()
+                show = Note(
+                    shared_note_xref=shared_note_xref,
+                    note=note,
+                    mime=mime,
+                    language=language,
+                    translations=translations,
+                    source_citations=source_citations,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -3990,7 +4264,14 @@ SourceRepositoryCitation(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        repository_xref: RepositoryXref = Void.REPO,
+        notes: list[Note] | None = None,
+        call_numbers: list[CallNumber] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4037,7 +4318,12 @@ SourceRepositoryCitation(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = SourceRepositoryCitation()
+                show = SourceRepositoryCitation(
+                    repository_xref=repository_xref,
+                    notes=notes,
+                    call_numbers=call_numbers,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -4236,7 +4522,19 @@ PersonalName(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        name: str = Default.EMPTY,
+        surname: str = Default.EMPTY,
+        type: Tag = Tag.NONE,
+        phrase: str = Default.EMPTY,
+        pieces: PersonalNamePieces | None = None,
+        translations: list[NameTranslation] | None = None,
+        notes: list[Note] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4298,7 +4596,17 @@ PersonalName(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = PersonalName()
+                show = PersonalName(
+                    name=name,
+                    surname=surname,
+                    type=type,
+                    phrase=phrase,
+                    pieces=pieces,
+                    translations=translations,
+                    notes=notes,
+                    source_citations=source_citations,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -4600,7 +4908,17 @@ Association(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        individual_xref: IndividualXref = Void.INDI,
+        association_phrase: str = String.EMPTY,
+        role: Role = Role.NONE,
+        role_phrase: str = String.EMPTY,
+        notes: list[Note] | None = None,
+        citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4656,7 +4974,15 @@ Association(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Association()
+                show = Association(
+                    individual_xref=individual_xref,
+                    association_phrase=association_phrase,
+                    role=role,
+                    role_phrase=role_phrase,
+                    notes=notes,
+                    citations=citations,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -4857,7 +5183,13 @@ MultimediaLink(
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = MultimediaLink(
-                    multimedia_xref, top, left, height, width, title, extensions
+                    multimedia_xref=multimedia_xref,
+                    top=top,
+                    left=left,
+                    height=height,
+                    width=width,
+                    title=title,
+                    extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -4925,7 +5257,13 @@ Exid(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        exid: str = Default.EMPTY,
+        exid_type: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -4969,7 +5307,11 @@ Exid(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Exid('', '')
+                show = Exid(
+                    exid=exid,
+                    exid_type=exid_type,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -5123,6 +5465,7 @@ Map(
         choice: int = Default.CHOICE,
         latitude: float = Default.MAP_LATITUDE,
         longitude: float = Default.MAP_LONGITUDE,
+        extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5164,13 +5507,21 @@ Map(
                 gedcom_preface = Example.GEDCOM
             case _:
                 if latitude != 91.0 and longitude != 181.0:
-                    show = Map(latitude=latitude, longitude=longitude)
+                    show = Map(
+                        latitude=latitude,
+                        longitude=longitude,
+                        extensions=extensions,
+                    )
                     logging.info(Example.USER_PROVIDED_EXAMPLE)
                     code_preface = Example.USER_PROVIDED
                     gedcom_preface = Example.GEDCOM
                 else:
                     logging.info(Example.ERROR_EXPECTED)
-                    show = Map()
+                    show = Map(
+                        latitude=latitude,
+                        longitude=longitude,
+                        extensions=extensions,
+                    )
                     code_preface = Example.EMPTY_CODE
                     gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -5291,6 +5642,7 @@ PlaceTranslation(
         place3: str = Default.EMPTY,
         place4: str = Default.EMPTY,
         language: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5355,6 +5707,7 @@ PlaceTranslation(
                     place3=place3,
                     place4=place4,
                     language=language,
+                    extensions=extensions,
                 )
                 logging.info(Example.USER_PROVIDED_EXAMPLE)
                 code_preface = Example.USER_PROVIDED
@@ -5888,7 +6241,27 @@ EventDetail(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date_value: DateValue | None = None,
+        place: Place | None = None,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        agency: str = '',
+        religion: str = '',
+        cause: str = '',
+        resn: Resn = Resn.NONE,
+        associations: list[Association] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        uids: list[Id] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -5974,7 +6347,25 @@ EventDetail(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = EventDetail()
+                show = EventDetail(
+                    date_value=date_value,
+                    place=place,
+                    address=address,
+                    phones=phones,
+                    emails=emails,
+                    faxes=faxes,
+                    wwws=wwws,
+                    agency=agency,
+                    religion=religion,
+                    cause=cause,
+                    resn=resn,
+                    associations=associations,
+                    notes=notes,
+                    sources=sources,
+                    multimedia_links=multimedia_links,
+                    uids=uids,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6090,7 +6481,14 @@ FamilyEventDetail(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        husband_age: Age | None = None,
+        wife_age: Age | None = None,
+        event_detail: EventDetail | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6137,7 +6535,12 @@ FamilyEventDetail(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FamilyEventDetail()
+                show = FamilyEventDetail(
+                    husband_age=husband_age,
+                    wife_age=wife_age,
+                    event_detail=event_detail,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6243,7 +6646,15 @@ FamilyAttribute(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Tag = Tag.NONE,
+        payload: str = Default.EMPTY,
+        attribute_type: str = Default.EMPTY,
+        family_event_detail: FamilyEventDetail | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6293,7 +6704,13 @@ FamilyAttribute(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FamilyAttribute()
+                show = FamilyAttribute(
+                    tag=tag,
+                    payload=payload,
+                    attribute_type=attribute_type,
+                    family_event_detail=family_event_detail,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6482,7 +6899,15 @@ FamilyEvent(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Tag = Tag.NONE,
+        payload: str = String.OCCURRED,
+        event_type: str = String.EMPTY,
+        event_detail: FamilyEventDetail | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6532,7 +6957,13 @@ FamilyEvent(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FamilyEvent()
+                show = FamilyEvent(
+                    tag=tag,
+                    payload=payload,
+                    event_type=event_type,
+                    event_detail=event_detail,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6745,7 +7176,13 @@ Wife(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6789,7 +7226,11 @@ Wife(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Wife()
+                show = Wife(
+                    individual_xref=individual_xref,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6865,7 +7306,13 @@ Child(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -6909,7 +7356,11 @@ Child(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Child()
+                show = Child(
+                    individual_xref=individual_xref,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -6944,7 +7395,7 @@ class LDSOrdinanceDetail(Structure):
         Tag.NCHI.value,
         Tag.RESI.value,
         Tag.FACT.value,
-        Tag.PLAC.value
+        Tag.PLAC.value,
     }
 
     def __init__(
@@ -7039,7 +7490,19 @@ LDSOrdinanceDetail(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date_value: DateValue | None = None,
+        temple: str = String.EMPTY,
+        place: Place | None = None,
+        status: Stat = Stat.NONE,
+        status_date: Date | None = None,
+        status_time: Time | None = None,
+        notes: list[Note] | None = None,
+        source_citations: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7101,7 +7564,17 @@ LDSOrdinanceDetail(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = LDSOrdinanceDetail()
+                show = LDSOrdinanceDetail(
+                    date_value=date_value,
+                    temple=temple,
+                    place=place,
+                    status=status,
+                    status_date=status_date,
+                    status_time=status_time,
+                    notes=notes,
+                    source_citations=source_citations,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -7177,7 +7650,13 @@ LDSSPouseSealing(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Tag = Tag.SLGS,
+        detail: LDSOrdinanceDetail | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7221,7 +7700,11 @@ LDSSPouseSealing(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = LDSSpouseSealing()
+                show = LDSSpouseSealing(
+                    tag=tag,
+                    detail=detail,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -7331,7 +7814,14 @@ LDSIndividualOrdinance(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Tag = Tag.NONE,
+        ordinance_detail: LDSOrdinanceDetail | None = None,
+        family_xref: FamilyXref = Void.FAM,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7378,7 +7868,12 @@ LDSIndividualOrdinance(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = LDSIndividualOrdinance()
+                show = LDSIndividualOrdinance(
+                    tag=tag,
+                    ordinance_detail=ordinance_detail,
+                    family_xref=family_xref,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -7466,7 +7961,14 @@ Identifier(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Id = Id.NONE,
+        tag_info: str = Default.EMPTY,
+        tag_type: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7513,7 +8015,12 @@ Identifier(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Identifier()
+                show = Identifier(
+                    tag=tag,
+                    tag_info=tag_info,
+                    tag_type=tag_type,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -7610,7 +8117,14 @@ IndividualEventDetail(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        event_detail: EventDetail | None = None,
+        age: Age | None = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7657,7 +8171,12 @@ IndividualEventDetail(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = IndividualEventDetail()
+                show = IndividualEventDetail(
+                    event_detail=event_detail,
+                    age=age,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -7796,7 +8315,14 @@ IndividualAttribute(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: IndiAttr = IndiAttr.NONE,
+        tag_type: str = Default.EMPTY,
+        event_detail: IndividualEventDetail | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -7843,7 +8369,12 @@ IndividualAttribute(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = IndividualAttribute(IndiAttr.NONE)
+                show = IndividualAttribute(
+                    tag=tag,
+                    tag_type=tag_type,
+                    event_detail=event_detail,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8126,7 +8657,18 @@ IndividualEvent(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Tag = Tag.NONE,
+        payload: str = Default.EMPTY,
+        text: str = Default.EMPTY,
+        event_detail: IndividualEventDetail | None = None,
+        family_xref: FamilyXref = Void.FAM,
+        adoption: Tag = Tag.NONE,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8185,7 +8727,16 @@ IndividualEvent(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = IndividualEvent()
+                show = IndividualEvent(
+                    tag=tag,
+                    payload=payload,
+                    text=text,
+                    event_detail=event_detail,
+                    family_xref=family_xref,
+                    adoption=adoption,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8277,7 +8828,13 @@ Alias(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        individual_xref: IndividualXref = Void.INDI,
+        phrase: str = Default.EMPTY,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8321,7 +8878,11 @@ Alias(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Alias()
+                show = Alias(
+                    individual_xref=individual_xref,
+                    phrase=phrase,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8423,7 +8984,17 @@ FamilyChild(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        family_xref: FamilyXref = Void.FAM,
+        pedigree: str = Default.EMPTY,
+        pedigree_phrase: str = Default.EMPTY,
+        status: str = Default.EMPTY,
+        status_phrase: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8479,7 +9050,15 @@ FamilyChild(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FamilyChild()
+                show = FamilyChild(
+                    family_xref=family_xref,
+                    pedigree=pedigree,
+                    pedigree_phrase=pedigree_phrase,
+                    status=status,
+                    status_phrase=status_phrase,
+                    notes=notes,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8551,7 +9130,13 @@ FamilySpouse(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        family_xref: FamilyXref = Void.FAM,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8595,7 +9180,11 @@ FamilySpouse(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FamilySpouse()
+                show = FamilySpouse(
+                    family_xref=family_xref,
+                    notes=notes,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8665,7 +9254,13 @@ FileTranslation(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        path: str = Default.EMPTY,
+        media_type: MediaType = MediaType.NONE,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8709,7 +9304,11 @@ FileTranslation(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = FileTranslation()
+                show = FileTranslation(
+                    path=path,
+                    media_type=media_type,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8800,7 +9399,17 @@ File(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        path: str = Default.EMPTY,
+        media_type: MediaType = MediaType.NONE,
+        medium: Medium = Medium.NONE,
+        phrase: str = Default.EMPTY,
+        title: str = Default.EMPTY,
+        file_translations: list[FileTranslation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -8856,7 +9465,15 @@ File(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = File()
+                show = File(
+                    path=path,
+                    media_type=media_type,
+                    medium=medium,
+                    phrase=phrase,
+                    title=title,
+                    file_translations=file_translations,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -8947,7 +9564,17 @@ SourceEvent(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        event: str = Default.EMPTY,
+        date_period: str = Default.EMPTY,
+        phrase: str = Default.EMPTY,
+        place: Place | None = None,
+        agency: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9003,7 +9630,15 @@ SourceEvent(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = SourceEvent()
+                show = SourceEvent(
+                    event=event,
+                    date_period=date_period,
+                    phrase=phrase,
+                    place=place,
+                    agency=agency,
+                    notes=notes,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -9099,7 +9734,16 @@ NonEvent(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        no: str = Default.EMPTY,
+        date: Date | None = None,
+        phrase: str = Default.EMPTY,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9152,7 +9796,14 @@ NonEvent(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = NonEvent()
+                show = NonEvent(
+                    no=no,
+                    date=date,
+                    phrase=phrase,
+                    notes=notes,
+                    sources=sources,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -9343,7 +9994,25 @@ Family(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: FamilyXref = Void.FAM,
+        resn: Resn = Resn.NONE,
+        attributes: Any = None,
+        events: Any = None,
+        husband: Husband | None = None,
+        wife: Wife | None = None,
+        children: Any = None,
+        associations: Any = None,
+        submitters: Any = None,
+        lds_spouse_sealings: Any = None,
+        identifiers: Any = None,
+        notes: Any = None,
+        citations: Any = None,
+        multimedia_links: Any = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9420,7 +10089,23 @@ Family(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Family()
+                show = Family(
+                    xref=xref,
+                    resn=resn,
+                    attributes=attributes,
+                    events=events,
+                    husband=husband,
+                    wife=wife,
+                    children=children,
+                    associations=associations,
+                    submitters=submitters,
+                    lds_spouse_sealings=lds_spouse_sealings,
+                    identifiers=identifiers,
+                    notes=notes,
+                    citations=citations,
+                    multimedia_links=multimedia_links,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -9530,7 +10215,17 @@ Multimedia(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: MultimediaXref = Void.OBJE,
+        resn: Resn = Resn.NONE,
+        files: list[File] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[SourceCitation] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9586,7 +10281,15 @@ Multimedia(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Multimedia()
+                show = Multimedia(
+                    xref=xref,
+                    resn=resn,
+                    files=files,
+                    identifiers=identifiers,
+                    notes=notes,
+                    sources=sources,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -9736,7 +10439,24 @@ Source(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: SourceXref = Void.SOUR,
+        author: str = Default.EMPTY,
+        title: str = Default.EMPTY,
+        abbreviation: str = Default.EMPTY,
+        published: str = Default.EMPTY,
+        events: Any = None,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = Default.EMPTY,
+        repositories: list[Any] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -9807,7 +10527,22 @@ Source(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Source()
+                show = Source(
+                    xref=xref,
+                    author=author,
+                    title=title,
+                    abbreviation=abbreviation,
+                    published=published,
+                    events=events,
+                    text=text,
+                    mime=mime,
+                    language=language,
+                    repositories=repositories,
+                    identifiers=identifiers,
+                    notes=notes,
+                    multimedia_links=multimedia_links,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -9951,7 +10686,22 @@ Submitter(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: SubmitterXref = Void.SUBM,
+        name: str = Default.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        languages: list[str] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -10022,7 +10772,20 @@ Submitter(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Submitter()
+                show = Submitter(
+                    xref=xref,
+                    name=name,
+                    address=address,
+                    phones=phones,
+                    emails=emails,
+                    faxes=faxes,
+                    wwws=wwws,
+                    multimedia_links=multimedia_links,
+                    languages=languages,
+                    identifiers=identifiers,
+                    notes=notes,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -10295,7 +11058,28 @@ Individual(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: IndividualXref = Void.INDI,
+        resn: Resn = Resn.NONE,
+        personal_names: list[PersonalName] | None = None,
+        sex: Sex = Sex.NONE,
+        attributes: list[IndividualAttribute] | None = None,
+        events: list[IndividualEvent] | None = None,
+        lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None,
+        families_child: list[FamilyChild] | None = None,
+        submitters: list[Submitter] | None = None,
+        associations: list[Association] | None = None,
+        aliases: list[Alias] | None = None,
+        ancestor_interest: list[Submitter] | None = None,
+        descendent_interest: list[Submitter] | None = None,
+        identifiers: list[Identifier] | None = None,
+        notes: list[Note] | None = None,
+        sources: list[Source] | None = None,
+        multimedia_links: list[MultimediaLink] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -10381,7 +11165,26 @@ Individual(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Individual()
+                show = Individual(
+                    xref=xref,
+                    resn=resn,
+                    personal_names=personal_names,
+                    sex=sex,
+                    attributes=attributes,
+                    events=events,
+                    lds_individual_ordinances=lds_individual_ordinances,
+                    families_child=families_child,
+                    submitters=submitters,
+                    associations=associations,
+                    aliases=aliases,
+                    ancestor_interest=ancestor_interest,
+                    descendent_interest=descendent_interest,
+                    identifiers=identifiers,
+                    notes=notes,
+                    sources=sources,
+                    multimedia_links=multimedia_links,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -10512,7 +11315,20 @@ Repository(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: RepositoryXref = Void.REPO,
+        name: str = Default.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        notes: list[Note] | None = None,
+        identifiers: list[Identifier] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -10577,7 +11393,18 @@ Repository(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Repository()
+                show = Repository(
+                    xref=xref,
+                    name=name,
+                    address=address,
+                    phones=phones,
+                    emails=emails,
+                    faxes=faxes,
+                    wwws=wwws,
+                    notes=notes,
+                    identifiers=identifiers,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -10674,7 +11501,18 @@ SharedNote(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: SharedNoteXref = Void.SNOTE,
+        text: str = Default.EMPTY,
+        mime: MediaType = MediaType.NONE,
+        language: str = String.UNDETERMINED,
+        translations: list[NoteTranslation] | None = None,
+        sources: list[SourceCitation] | None = None,
+        identifiers: list[Identifier] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -10733,7 +11571,16 @@ SharedNote(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = SharedNote()
+                show = SharedNote(
+                    xref=xref,
+                    text=text,
+                    mime=mime,
+                    language=language,
+                    translations=translations,
+                    sources=sources,
+                    identifiers=identifiers,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
@@ -10968,7 +11815,32 @@ Header(
             String.INDENT * tabs,
         )
 
-    def example(self, choice: int = Default.CHOICE) -> None:
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        schema_tags: list[Schema] | None = None,
+        source: str = String.EMPTY,
+        vers: str = String.EMPTY,
+        name: str = String.EMPTY,
+        corporation: str = String.EMPTY,
+        address: Address | None = None,
+        phones: list[str] | None = None,
+        emails: list[str] | None = None,
+        faxes: list[str] | None = None,
+        wwws: list[str] | None = None,
+        data: str = String.EMPTY,
+        data_date: Date | None = None,
+        data_time: Time | None = None,
+        data_copyright: str = String.EMPTY,
+        dest: str = String.EMPTY,
+        header_date: Date | None = None,
+        header_time: Time | None = None,
+        submitter: SubmitterXref = Void.SUBM,
+        subm_copyright: str = String.EMPTY,
+        language: str = String.EMPTY,
+        note: Note | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
 
@@ -11069,7 +11941,30 @@ Header(
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
-                show = Header()
+                show = Header(
+                    schema_tags=schema_tags,
+                    source=source,
+                    vers=vers,
+                    name=name,
+                    corporation=corporation,
+                    address=address,
+                    phones=phones,
+                    emails=emails,
+                    faxes=faxes,
+                    wwws=wwws,
+                    data=data,
+                    data_date=data_date,
+                    data_time=data_time,
+                    data_copyright=data_copyright,
+                    dest=dest,
+                    header_date=header_date,
+                    header_time=header_time,
+                    submitter=submitter,
+                    subm_copyright=subm_copyright,
+                    language=language,
+                    note=note,
+                    extensions=extensions,
+                )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
         return Formatter.example(
