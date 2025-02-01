@@ -111,30 +111,50 @@ from calendars.gregorian_calendars import CalendarsGregorian
 # from calendars.hebraic_calendars import CalendarsHebraic
 # from calendars.julian_calendars import CalendarsJulian
 from genedata.constants import (
-    Adop,
+    # Adop,
     Cal,
     CalendarName,
     Default,
     Event,
+    # FamAttr,
+    # FamcStat,
+    # FamEven,
+    GreaterLessThan,
+    # Id,
+    # IndiAttr,
+    # IndiEven,
+    MediaType,
+    # Medium,
+    # NameType,
+    # Quay,
+    # Resn,
+    # Role,
+    # Sex,
+    # Stat,
+    String,
+    # Tag,
+)
+from genedata.gedcom import (
+    Adop,
+    # Event,
     FamAttr,
     # FamcStat,
     FamEven,
-    GreaterLessThan,
     Id,
     IndiAttr,
     IndiEven,
-    MediaType,
+    # LineVal,
+    # MediaType,
     Medium,
     NameType,
     Quay,
     Resn,
     Role,
     Sex,
+    Specs,
     Stat,
-    String,
     Tag,
 )
-from genedata.gedcom import Specs
 from genedata.messages import Example, Msg
 
 YNull = Literal['Y'] | None
@@ -6732,7 +6752,7 @@ class FamilyEvent(Structure):
         Tag.MARR, Tag.MARS, Tag.EVEN.  This example shows the error that
         would result if a different tag is used once the NamedTuple is validated.
         First, set up the situation for the error to occur.
-        >>> from genedata.constants import Tag
+        >>> from genedata.gedcom import Tag
         >>> from genedata.store import FamilyEvent
         >>> event = FamilyEvent(Tag.DATE)
 
@@ -6962,273 +6982,6 @@ FamilyEvent(
                     payload=payload,
                     event_type=event_type,
                     event_detail=event_detail,
-                    extensions=extensions,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            show.ged(),
-            gedcom_docs,
-            genealogy_docs,
-        )
-
-
-class Husband(Structure):
-    """Store, validate and display the GEDCOM Husband structure.
-
-    Args:
-        individual_xref: Cross reference identifier for the husband as an individual.
-        phrase: A phrase associated with the husband.
-        extensions: A list of extensions for either the husband (HUSB) tag or the phrase (PHASE) tag.
-            These extensions must be specified in the `Header` structure prior to being used.
-
-    Reference:
-        [GEDCOM HUSB](https://gedcom.io/terms/v7/HUSB)
-
-    > +1 HUSB @<XREF:INDI>@                    {0:1}  g7:FAM-HUSB
-    >    +2 PHRASE <Text>                      {0:1}  g7:PHRASE
-    """
-
-    structure: ClassVar[str] = Tag.HUSB.value
-    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
-
-    def __init__(
-        self,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: str = String.EMPTY,
-        extensions: list[Extension] | None = None,
-    ):
-        self.individual_xref = individual_xref
-        self.phrase = phrase
-        if extensions is None:
-            extensions = []
-        self.extensions: list[Extension] = extensions
-        self.descriptions: set[str] = set()
-        self.husb_extensions: list[Extension] = []
-        self.phrase_extensions: list[Extension] = []
-        for ext in self.extensions:
-            self.descriptions.union(ext.schema.supers)
-            if Tag.HUSB.value in ext.schema.supers:
-                self.husb_extensions.append(ext)
-            elif Tag.PHRASE.value in ext.schema.supers:
-                self.phrase_extensions.append(ext)
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.phrase, str)
-            and Checker.verify_type(self.individual_xref, IndividualXref)
-            and Checker.verify_ext(
-                self.descriptions, self.structure, self.substructures
-            )
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
-        if str(self.individual_xref) != Void.NAME and self.validate():
-            lines = Tagger.string(
-                lines, level, Tag.HUSB, str(self.individual_xref), format=False
-            )
-            lines = Tagger.structure(lines, level + 1, self.husb_extensions)
-            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 2, self.phrase_extensions)
-        return lines
-
-    def code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Husband(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    extensions = {Formatter.codes(self.extensions, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: str = Default.EMPTY,
-        extensions: list[Extension] | None = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Husband
-        gedcom_docs: str = Specs.HUSBAND
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Husband(
-                    individual_xref=IndividualXref('@JOE@'),
-                    phrase='Void husband reference without extensions.',
-                    extensions=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Husband(
-                    individual_xref=Void.INDI,
-                    phrase='Husband',
-                    extensions=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Husband(
-                    individual_xref=Void.INDI,
-                    phrase='Husband',
-                    extensions=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Husband(
-                    individual_xref=individual_xref,
-                    phrase=phrase,
-                    extensions=extensions,
-                )
-                logging.info(Example.USER_PROVIDED_EXAMPLE)
-                code_preface = Example.USER_PROVIDED
-                gedcom_preface = Example.GEDCOM
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            show.ged(),
-            gedcom_docs,
-            genealogy_docs,
-        )
-
-
-class Wife(Structure):
-    """Store, validate and display the GEDCOM Wife structure."""
-
-    structure: ClassVar[str] = Tag.WIFE.value
-    substructures: ClassVar[set[str]] = {Tag.PHRASE.value}
-
-    def __init__(
-        self,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: str = Default.EMPTY,
-        extensions: list[Extension] | None = None,
-    ):
-        self.individual_xref = individual_xref
-        self.phrase = phrase
-        if extensions is None:
-            extensions = []
-        self.extensions: list[Extension] = extensions
-        self.descriptions: set[str] = set()
-        self.wife_extensions: list[Extension] = []
-        self.phrase_extensions: list[Extension] = []
-        for ext in self.extensions:
-            self.descriptions.union(ext.schema.supers)
-            if Tag.WIFE.value in ext.schema.supers:
-                self.wife_extensions.append(ext)
-            elif Tag.PHRASE.value in ext.schema.supers:
-                self.phrase_extensions.append(ext)
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.phrase, str
-        ) and Checker.verify_type(self.individual_xref, IndividualXref)
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
-        if str(self.individual_xref) != Void.NAME and self.validate():
-            lines = Tagger.string(
-                lines, level, Tag.WIFE, str(self.individual_xref), format=False
-            )
-            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-        return lines
-
-    def code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Wife(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    extensions = {Formatter.codes(self.extensions, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: str = Default.EMPTY,
-        extensions: list[Extension] | None = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Wife
-        gedcom_docs: str = Specs.WIFE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Wife(
-                    individual_xref=Void.INDI,
-                    phrase='Wife',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Wife(
-                    individual_xref=Void.INDI,
-                    phrase='Wife',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Wife(
-                    individual_xref=Void.INDI,
-                    phrase='Wife',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Wife(
-                    individual_xref=individual_xref,
-                    phrase=phrase,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -7898,7 +7651,18 @@ class Identifier(Structure):
 
     Reference:
 
-    - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)"""
+    - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)
+
+    [
+    n REFN <Special>                           {1:1}  g7:REFN
+    +1 TYPE <Text>                           {0:1}  g7:TYPE
+    |
+    n UID <Special>                            {1:1}  g7:UID
+    |
+    n EXID <Special>                           {1:1}  g7:EXID
+    +1 TYPE <Special>                        {0:1}  g7:EXID-TYPE
+    ]
+    """
 
     structure: ClassVar[str] = Tag.NONE.value
     substructures: ClassVar[set[str]] = {Tag.NONE.value}
@@ -9856,6 +9620,9 @@ class Family(Structure):
         Tag.NCHI.value,
         Tag.RESI.value,
         Tag.FACT.value,
+        Tag.HUSB.value,
+        Tag.WIFE.value,
+        Tag.PHRASE.value,
     }
 
     def __init__(
@@ -9864,8 +9631,10 @@ class Family(Structure):
         resn: Resn = Resn.NONE,
         attributes: Any = None,
         events: Any = None,
-        husband: Husband | None = None,
-        wife: Wife | None = None,
+        husband: IndividualXref = Void.INDI,
+        husband_phrase: str = String.EMPTY,
+        wife: IndividualXref = Void.INDI,
+        wife_phrase: str = String.EMPTY,
         children: Any = None,
         associations: Any = None,
         submitters: Any = None,
@@ -9880,10 +9649,6 @@ class Family(Structure):
             attributes = []
         if events is None:
             events = []
-        if husband is None:
-            husband = Husband()
-        if wife is None:
-            wife = Wife()
         if children is None:
             children = []
         if associations is None:
@@ -9905,7 +9670,9 @@ class Family(Structure):
         self.attributes = attributes
         self.events = events
         self.husband = husband
+        self.husband_phrase = husband_phrase
         self.wife = wife
+        self.wife_phrase = wife_phrase
         self.children = children
         self.associations = associations
         self.submitters = submitters
@@ -9918,14 +9685,17 @@ class Family(Structure):
             extensions = []
         self.extensions: list[Extension] = extensions
         self.descriptions: set[str] = set()
-        # self.husb_extensions: list[Extension] = []
-        # self.phrase_extensions: list[Extension] = []
-        # for ext in self.extensions:
-        #     self.descriptions.union(ext.schema.supers)
-        #     if Tag.HUSB.value in ext.schema.supers:
-        #         self.husb_extensions.append(ext)
-        #     elif Tag.PHRASE.value in ext.schema.supers:
-        #         self.phrase_extensions.append(ext)
+        self.husb_extensions: list[Extension] = []
+        self.wife_extensions: list[Extension] = []
+        self.phrase_extensions: list[Extension] = []
+        for ext in self.extensions:
+            self.descriptions.union(ext.schema.supers)
+            if Tag.HUSB.value in ext.schema.supers:
+                self.husb_extensions.append(ext)
+            elif Tag.WIFE.value in ext.schema.supers:
+                self.wife_extensions.append(ext)
+            elif Tag.PHRASE.value in ext.schema.supers:
+                self.phrase_extensions.append(ext)
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9934,8 +9704,10 @@ class Family(Structure):
             and Checker.verify_enum(self.resn.value, Resn)
             and Checker.verify_tuple_type(self.attributes, FamilyAttribute)
             and Checker.verify_tuple_type(self.events, FamilyEvent)
-            and Checker.verify_type(self.husband, Husband)
-            and Checker.verify_type(self.wife, Wife)
+            and Checker.verify_type(self.husband, IndividualXref)
+            and Checker.verify_type(self.husband_phrase, str)
+            and Checker.verify_type(self.wife, IndividualXref)
+            and Checker.verify_type(self.wife_phrase, str)
             and Checker.verify_tuple_type(self.children, Child)
             and Checker.verify_tuple_type(self.associations, Association)
             and Checker.verify_tuple_type(self.submitters, SubmitterXref)
@@ -9959,11 +9731,25 @@ class Family(Structure):
                 )
             lines = Tagger.structure(lines, level, self.attributes)
             lines = Tagger.structure(lines, level, self.events)
-            lines = Tagger.structure(lines, level + 1, self.husband)
-            lines = Tagger.structure(lines, level + 1, self.wife)
+            if str(self.husband) != str(Void.INDI):
+                lines = Tagger.string(
+                    lines, level + 1, Tag.HUSB, str(self.husband), format=False
+                )
+                lines = Tagger.string(
+                    lines, level + 2, Tag.PHRASE, self.husband_phrase
+                )
+            if str(self.wife) != str(Void.INDI):
+                lines = Tagger.string(
+                    lines, level + 1, Tag.WIFE, str(self.wife), format=False
+                )
+                lines = Tagger.string(
+                    lines, level + 2, Tag.PHRASE, self.wife_phrase
+                )
             lines = Tagger.structure(lines, level + 1, self.children)
             lines = Tagger.structure(lines, level + 1, self.associations)
-            lines = Tagger.string(lines, level, Tag.SUBM, self.submitters)
+            lines = Tagger.string(
+                lines, level, Tag.SUBM, self.submitters, format=False
+            )
             lines = Tagger.structure(lines, level + 1, self.lds_spouse_sealings)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -9980,7 +9766,9 @@ Family(
     attributes = {Formatter.codes(self.attributes, tabs)},
     events = {Formatter.codes(self.events, tabs)},
     husband = {Formatter.codes(self.husband, tabs)},
+    husband_phrase = {Formatter.codes(self.husband_phrase, tabs)},
     wife = {Formatter.codes(self.wife, tabs)},
+    wife_phrase = {Formatter.codes(self.wife_phrase, tabs)},
     children = {Formatter.codes(self.children, tabs)},
     associations = {Formatter.codes(self.associations, tabs)},
     submitters = {Formatter.codes(self.submitters, tabs)},
@@ -10001,8 +9789,10 @@ Family(
         resn: Resn = Resn.NONE,
         attributes: Any = None,
         events: Any = None,
-        husband: Husband | None = None,
-        wife: Wife | None = None,
+        husband: IndividualXref = Void.INDI,
+        husband_phrase: str = Default.EMPTY,
+        wife: IndividualXref = Void.INDI,
+        wife_phrase: str = Default.EMPTY,
         children: Any = None,
         associations: Any = None,
         submitters: Any = None,
@@ -10039,8 +9829,10 @@ Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
                     attributes='',
-                    husband=Husband(),
-                    wife=Wife(),
+                    husband=Void.INDI,
+                    husband_phrase=Default.EMPTY,
+                    wife=Void.INDI,
+                    wife_phrase=Default.EMPTY,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -10057,8 +9849,10 @@ Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
                     attributes='',
-                    husband=Husband(),
-                    wife=Wife(),
+                    husband=Void.INDI,
+                    husband_phrase=Default.EMPTY,
+                    wife=Void.INDI,
+                    wife_phrase=Default.EMPTY,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -10075,8 +9869,10 @@ Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
                     attributes='',
-                    husband=Husband(),
-                    wife=Wife(),
+                    husband=Void.INDI,
+                    husband_phrase=Default.EMPTY,
+                    wife=Void.INDI,
+                    wife_phrase=Default.EMPTY,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -10095,7 +9891,9 @@ Family(
                     attributes=attributes,
                     events=events,
                     husband=husband,
+                    husband_phrase=husband_phrase,
                     wife=wife,
+                    wife_phrase=wife_phrase,
                     children=children,
                     associations=associations,
                     submitters=submitters,
@@ -11418,7 +11216,11 @@ Repository(
 
 
 class SharedNote(Structure):
-    """Store, validate and display a GEDCOM Shared Note Record."""
+    """Store, validate and display a GEDCOM Shared Note Record.
+
+    Reference:
+        [GEDCOM Shared Note Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
+    """
 
     structure: ClassVar[str] = Tag.NONE.value
     substructures: ClassVar[set[str]] = {
