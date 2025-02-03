@@ -73,10 +73,6 @@ from enum import Enum
 from typing import Any, NamedTuple
 
 
-class String(Enum):
-    EMPTY: str = ''
-
-
 class DataType(Enum):
     """Enumerate the GEDCOM data types.
 
@@ -105,11 +101,196 @@ class Line(NamedTuple):
     data_type: DataType
     required: bool
     many: bool
-    documentation: str
+    docs: str
     increment: int = 0
     xref: bool = False
     extra: str = ''
-    sublines: list[Any] | None = None
+    supers: list[Any] | None = None
+    subs: list[Any] | None = None
+
+    def show(self, level: int = 0) -> str:
+        return f'{level + self.increment} {self.tag} {self.data_type} ({self.required}:{self.many}) {self.docs}'
+
+
+@dataclass(frozen=True)
+class Docs:
+    ABBR = 'https://gedcom.io/terms/v7/ABBR'
+    ADDR = 'https://gedcom.io/terms/v7/ADDR'
+    ADOP = 'https://gedcom.io/terms/v7/ADOP'
+    ADOP_FAMC = 'https://gedcom.io/terms/v7/ADOP-FAMC'
+    ADR1 = 'https://gedcom.io/terms/v7/ADR1'
+    ADR2 = 'https://gedcom.io/terms/v7/ADR2'
+    ADR3 = 'https://gedcom.io/terms/v7/ADR3'
+    AGE = 'https://gedcom.io/terms/v7/AGE'
+    AGNC = 'https://gedcom.io/terms/v7/AGNC'
+    ALIA = 'https://gedcom.io/terms/v7/ALIA'
+    ANCI = 'https://gedcom.io/terms/v7/ANCI'
+    ANUL = 'https://gedcom.io/terms/v7/ANUL'
+    ASSO = 'https://gedcom.io/terms/v7/ASSO'
+    AUTH = 'https://gedcom.io/terms/v7/AUTH'
+    BAPL = 'https://gedcom.io/terms/v7/BAPL'
+    BAPM = 'https://gedcom.io/terms/v7/BAPM'
+    BARM = 'https://gedcom.io/terms/v7/BARM'
+    BASM = 'https://gedcom.io/terms/v7/BASM'
+    BIRT = 'https://gedcom.io/terms/v7/BIRT'
+    BLES = 'https://gedcom.io/terms/v7/BLES'
+    BURI = 'https://gedcom.io/terms/v7/BURI'
+    CALN = 'https://gedcom.io/terms/v7/CALN'
+    CAST = 'https://gedcom.io/terms/v7/CAST'
+    CAUS = 'https://gedcom.io/terms/v7/CAUS'
+    CHAN = 'https://gedcom.io/terms/v7/CHAN'
+    CHIL = 'https://gedcom.io/terms/v7/CHIL'
+    CHR = 'https://gedcom.io/terms/v7/CHR'
+    CHRA = 'https://gedcom.io/terms/v7/CHRA'
+    CITY = 'https://gedcom.io/terms/v7/CITY'
+    CONF = 'https://gedcom.io/terms/v7/CONF'
+    CONL = 'https://gedcom.io/terms/v7/CONL'
+    COPR = 'https://gedcom.io/terms/v7/COPR'
+    CORP = 'https://gedcom.io/terms/v7/CORP'
+    CREA = 'https://gedcom.io/terms/v7/CREA'
+    CREM = 'https://gedcom.io/terms/v7/CREM'
+    CROP = 'https://gedcom.io/terms/v7/CROP'
+    CTRY = 'https://gedcom.io/terms/v7/CTRY'
+    DATA = 'https://gedcom.io/terms/v7/DATA'
+    DATA_EVEN = 'https://gedcom.io/terms/v7/DATA-EVEN'
+    DATA_EVEN_DATE = 'https://gedcom.io/terms/v7/DATA-EVEN-DATE'
+    DATE = 'https://gedcom.io/terms/v7/DATE'
+    DATE_EXACT = 'https://gedcom.io/terms/v7/DATE-exact'
+    DEAT = 'https://gedcom.io/terms/v7/DEAT'
+    DESI = 'https://gedcom.io/terms/v7/DESI'
+    DEST = 'https://gedcom.io/terms/v7/DEST'
+    DIV = 'https://gedcom.io/terms/v7/DIV'
+    DIVF = 'https://gedcom.io/terms/v7/DIVF'
+    DSCR = 'https://gedcom.io/terms/v7/DSCR'
+    EDUC = 'https://gedcom.io/terms/v7/EDUC'
+    ENDL = 'https://gedcom.io/terms/v7/ENDL'
+    ENGA = 'https://gedcom.io/terms/v7/ENGA'
+    EMAIL = 'https://gedcom.io/terms/v7/EMAIL'
+    EMIG = 'https://gedcom.io/terms/v7/EMIG'
+    EXID = 'https://gedcom.io/terms/v7/EXID'
+    EXID_TYPE = 'https://gedcom.io/terms/v7/EXID-TYPE'
+    FAM_CENS = 'https://gedcom.io/terms/v7/FAM-CENS'
+    FAM_EVEN = 'https://gedcom.io/terms/v7/FAM-EVEN'
+    FAM_FACT = 'https://gedcom.io/terms/v7/FAM-FACT'
+    FAM_HUSB = 'https://gedcom.io/terms/v7/FAM-HUSB'
+    FAM_NCHI = 'https://gedcom.io/terms/v7/FAM-NCHI'
+    FAM_RESI = 'https://gedcom.io/terms/v7/FAM-RESI'
+    FAM_WIFE = 'https://gedcom.io/terms/v7/FAM-WIFE'
+    FAMC = 'https://gedcom.io/terms/v7/FAMC'
+    FAMC_ADOP = 'https://gedcom.io/terms/v7/FAMC-ADOP'
+    FAMC_STAT = 'https://gedcom.io/terms/v7/FAMC-STAT'
+    FAMS = 'https://gedcom.io/terms/v7/FAMS'
+    FAX = 'https://gedcom.io/terms/v7/FAX'
+    FCOM = 'https://gedcom.io/terms/v7/FCOM'
+    FILE = 'https://gedcom.io/terms/v7/FILE'
+    FILE_TRAN = 'https://gedcom.io/terms/v7/FILE-TRAN'
+    FORM = 'https://gedcom.io/terms/v7/FORM'
+    GEDC = 'https://gedcom.io/terms/v7/GEDC'
+    GEDC_VERS = 'https://gedcom.io/terms/v7/GEDC-VERS'
+    GIVN = 'https://gedcom.io/terms/v7/GIVN'
+    GRAD = 'https://gedcom.io/terms/v7/GRAD'
+    HEAD = 'https://gedcom.io/terms/v7/HEAD'
+    HEAD_DATE = 'https://gedcom.io/terms/v7/HEAD-DATE'
+    HEAD_PLAC = 'https://gedcom.io/terms/v7/HEAD-PLAC'
+    HEAD_PLAC_FORM = 'https://gedcom.io/terms/v7/HEAD-PLAC-FORM'
+    HEAD_SOUR = 'https://gedcom.io/terms/v7/HEAD-SOUR'
+    HEAD_SOUR_DATA = 'https://gedcom.io/terms/v7/HEAD-SOUR-DATA'
+    HEIGHT = 'https://gedcom.io/terms/v7/HEIGHT'
+    HUSB = 'https://gedcom.io/terms/v7/HUSB'
+    IDNO = 'https://gedcom.io/terms/v7/IDNO'
+    IMMI = 'https://gedcom.io/terms/v7/IMMI'
+    INDI_CENS = 'https://gedcom.io/terms/v7/INDI-CENS'
+    INDI_EVEN = 'https://gedcom.io/terms/v7/INDI-EVEN'
+    INDI_FACT = 'https://gedcom.io/terms/v7/INDI-FACT'
+    INDI_FAMC = 'https://gedcom.io/terms/v7/INDI-FAMC'
+    INDI_NAME = 'https://gedcom.io/terms/v7/INDI-NAME'
+    INDI_NCHI = 'https://gedcom.io/terms/v7/INDI-NCHI'
+    INDI_RELI = 'https://gedcom.io/terms/v7/INDI-RELI'
+    INDI_RESI = 'https://gedcom.io/terms/v7/INDI-RESI'
+    INDI_TITL = 'https://gedcom.io/terms/v7/INDI-TITL'
+    INIL = 'https://gedcom.io/terms/v7/INIL'
+    LANG = 'https://gedcom.io/terms/v7/LANG'
+    LATI = 'https://gedcom.io/terms/v7/LATI'
+    LEFT = 'https://gedcom.io/terms/v7/LEFT'
+    LONG = 'https://gedcom.io/terms/v7/LONG'
+    MAP = 'https://gedcom.io/terms/v7/MAP'
+    MARB = 'https://gedcom.io/terms/v7/MARB'
+    MARC = 'https://gedcom.io/terms/v7/MARC'
+    MARL = 'https://gedcom.io/terms/v7/MARL'
+    MARR = 'https://gedcom.io/terms/v7/MARR'
+    MARS = 'https://gedcom.io/terms/v7/MARS'
+    MEDI = 'https://gedcom.io/terms/v7/MEDI'
+    MIME = 'https://gedcom.io/terms/v7/MIME'
+    NAME = 'https://gedcom.io/terms/v7/NAME'
+    NAME_TRAN = 'https://gedcom.io/terms/v7/NAME-TRAN'
+    NAME_TYPE = 'https://gedcom.io/terms/v7/NAME-TYPE'
+    NATI = 'https://gedcom.io/terms/v7/NATI'
+    NATU = 'https://gedcom.io/terms/v7/NATU'
+    NICK = 'https://gedcom.io/terms/v7/NICK'
+    NMR = 'https://gedcom.io/terms/v7/NMR'
+    NO = 'https://gedcom.io/terms/v7/NO'
+    NO_DATE = 'https://gedcom.io/terms/v7/NO-DATE'
+    NOTE = 'https://gedcom.io/terms/v7/NOTE'
+    NOTE_TRAN = 'https://gedcom.io/terms/v7/NOTE-TRAN'
+    NPFX = 'https://gedcom.io/terms/v7/NPFX'
+    NSFX = 'https://gedcom.io/terms/v7/NSFX'
+    OBJE = 'https://gedcom.io/terms/v7/OBJE'
+    OCCU = 'https://gedcom.io/terms/v7/OCCU'
+    ORD_STAT = 'https://gedcom.io/terms/v7/ord-STAT'
+    ORDN = 'https://gedcom.io/terms/v7/ORDN'
+    PAGE = 'https://gedcom.io/terms/v7/PAGE'
+    PEDI = 'https://gedcom.io/terms/v7/PEDI'
+    PHON = 'https://gedcom.io/terms/v7/PHON'
+    PHRASE = 'https://gedcom.io/terms/v7/PHRASE'
+    PLAC = 'https://gedcom.io/terms/v7/PLAC'
+    PLAC_FORM = 'https://gedcom.io/terms/v7/PLAC-FORM'
+    PLAC_TRAN = 'https://gedcom.io/terms/v7/PLAC-TRAN'
+    POST = 'https://gedcom.io/terms/v7/POST'
+    PROB = 'https://gedcom.io/terms/v7/PROB'
+    PROP = 'https://gedcom.io/terms/v7/PROP'
+    PUBL = 'https://gedcom.io/terms/v7/PUBL'
+    QUAY = 'https://gedcom.io/terms/v7/QUAY'
+    RECORD_FAM = 'https://gedcom.io/terms/v7/record-FAM'
+    RECORD_INDI = 'https://gedcom.io/terms/v7/record-INDI'
+    RECORD_OBJE = 'https://gedcom.io/terms/v7/record-OBJE'
+    RECORD_REPO = 'https://gedcom.io/terms/v7/record-REPO'
+    RECORD_SNOTE = 'https://gedcom.io/terms/v7/record-SNOTE'
+    RECORD_SOUR = 'https://gedcom.io/terms/v7/record-SOUR'
+    RECORD_SUBM = 'https://gedcom.io/terms/v7/record-SUBM'
+    REFN = 'https://gedcom.io/terms/v7/REFN'
+    RELI = 'https://gedcom.io/terms/v7/RELI'
+    REPO = 'https://gedcom.io/terms/v7/REPO'
+    RESN = 'https://gedcom.io/terms/v7/RESN'
+    RETI = 'https://gedcom.io/terms/v7/RETI'
+    ROLE = 'https://gedcom.io/terms/v7/ROLE'
+    SCHMA = 'https://gedcom.io/terms/v7/SCHMA'
+    SDATE = 'https://gedcom.io/terms/v7/SDATE'
+    SEX = 'https://gedcom.io/terms/v7/SEX'
+    SLGC = 'https://gedcom.io/terms/v7/SLGC'
+    SLGS = 'https://gedcom.io/terms/v7/SLGS'
+    SNOTE = 'https://gedcom.io/terms/v7/SNOTE'
+    SOUR = 'https://gedcom.io/terms/v7/SOUR'
+    SOUR_DATA = 'https://gedcom.io/terms/v7/SOUR-DATA'
+    SOUR_EVEN = 'https://gedcom.io/terms/v7/SOUR-EVEN'
+    SPFX = 'https://gedcom.io/terms/v7/SPFX'
+    SSN = 'https://gedcom.io/terms/v7/SSN'
+    STAE = 'https://gedcom.io/terms/v7/STAE'
+    SUBM = 'https://gedcom.io/terms/v7/SUBM'
+    SUBM_LANG = 'https://gedcom.io/terms/v7/SUBM-LANG'
+    SURN = 'https://gedcom.io/terms/v7/SURN'
+    TAG = 'https://gedcom.io/terms/v7/TAG'
+    TEMP = 'https://gedcom.io/terms/v7/TEMP'
+    TEXT = 'https://gedcom.io/terms/v7/TEXT'
+    TIME = 'https://gedcom.io/terms/v7/TIME'
+    TITL = 'https://gedcom.io/terms/v7/TITL'
+    TOP = 'https://gedcom.io/terms/v7/TOP'
+    TYPE = 'https://gedcom.io/terms/v7/TYPE'
+    UID = 'https://gedcom.io/terms/v7/UID'
+    VERS = 'https://gedcom.io/terms/v7/VERS'
+    WIDTH = 'https://gedcom.io/terms/v7/WIDTH'
+    WIFE = 'https://gedcom.io/terms/v7/WIFE'
+    WILL = 'https://gedcom.io/terms/v7/WILL'
+    WWW = 'https://gedcom.io/terms/v7/WWW'
 
 
 @dataclass(frozen=True)
@@ -138,645 +319,589 @@ class OverView:
         >>> from genedata.gedcom import OverView
         >>> print(OverView.HEADER)  # doctest: +ELLIPSIS
         <BLANKLINE>
-        0 HEAD                                    {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
-          1 GEDC                                  {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
-             2 VERS <Special>                     {1:1}  [g7:GEDC-VERS](https://gedcom.io/terms/v7/GEDC-VERS)
-          1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
-             2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
-          1 SOUR <Special>                        {0:1}  [g7:HEAD-SOUR](https://gedcom.io/terms/v7/HEAD-SOUR)
-             2 VERS <Special>                     {0:1}  [g7:VERS](https://gedcom.io/terms/v7/VERS)
-             2 NAME <Text>                        {0:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-             2 CORP <Text>                        {0:1}  [g7:CORP](https://gedcom.io/terms/v7/CORP)
-                3 <<ADDRESS_STRUCTURE>>           {0:1}
-                3 ADDR <Special>                  {1:1}  [g7:ADDR](https://gedcom.io/terms/v7/ADDR)
-                   4 ADR1 <Special>               {0:1}  [g7:ADR1](https://gedcom.io/terms/v7/ADR1)
-                   4 ADR2 <Special>               {0:1}  [g7:ADR2](https://gedcom.io/terms/v7/ADR2)
-                   4 ADR3 <Special>               {0:1}  [g7:ADR3](https://gedcom.io/terms/v7/ADR3)
-                   4 CITY <Special>               {0:1}  [g7:CITY](https://gedcom.io/terms/v7/CITY)
-                   4 STAE <Special>               {0:1}  [g7:STAE](https://gedcom.io/terms/v7/STAE)
-                   4 POST <Special>               {0:1}  [g7:POST](https://gedcom.io/terms/v7/POST)
-                   4 CTRY <Special>               {0:1}  [g7:CTRY](https://gedcom.io/terms/v7/CTRY)
-                3 PHON <Special>                  {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-                3 EMAIL <Special>                 {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-                3 FAX <Special>                   {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-                3 WWW <Special>                   {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-             2 DATA <Text>                        {0:1}  [g7:HEAD-SOUR-DATA](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
-                3 DATE <DateExact>                {0:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
-                   4 TIME <Time>                  {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-                3 COPR <Text>                     {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-          1 DEST <Special>                        {0:1}  [g7:DEST](https://gedcom.io/terms/v7/DEST)
-          1 DATE <DateExact>                      {0:1}  [g7:HEAD-DATE](https://gedcom.io/terms/v7/HEAD-DATE)
-             2 TIME <Time>                        {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-          1 SUBM @<XREF:SUBM>@                    {0:1}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
-          1 COPR <Text>                           {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-          1 LANG <Language>                       {0:1}  [g7:HEAD-LANG](https://gedcom.io/terms/v7/LANG)
-          1 PLAC                                  {0:1}  [g7:HEAD-PLAC](https://gedcom.io/terms/v7/PLAC)
-             2 FORM <List:Text>                   {1:1}  [g7:HEAD-PLAC-FORM](https://gedcom.io/terms/v7/PLAC-FORM)
-          1 <<NOTE_STRUCTURE>>                    {0:1}
-          [
-          1 NOTE <Text>                           {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-             2 MIME <MediaType>                   {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-             2 LANG <Language>                    {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-             2 TRAN <Text>                        {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-                3 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-                3 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-             2 <<SOURCE_CITATION>>                {0:M}
-             2 SOUR @<XREF:SOUR>@                 {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-                3 PAGE <Text>                     {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-                3 DATA                            {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-                   4 <<DATE_VALUE>>               {0:1}
-                   4 TEXT <Text>                  {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-                      5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-                      5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-                3 EVEN <Enum>                     {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-                   4 PHRASE <Text>                {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-                   4 ROLE <Enum>                  {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-                      5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-                3 QUAY <Enum>                     {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-                3 <<MULTIMEDIA_LINK>>             {0:M}
-                3 OBJE @<XREF:OBJE>@              {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-                   4 CROP                         {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-                      5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-                      5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-                      5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-                      5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-                   4 TITL <Text>                  {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-                3 <<NOTE_STRUCTURE>>              {0:M}  (see above)
-          |
-          1 SNOTE @<XREF:SNOTE>@                  {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-          ]
         <BLANKLINE>
 
     Reference:
         [The FamilySearch GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
     """
 
-    FAMILY: str = """
-0 @XREF:FAM@ FAM                      {1:1}  [g7:record-FAM](https://gedcom.io/terms/v7/record-FAM)
-  1 RESN <List:Enum>                  {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
-  1 <<FAMILY_ATTRIBUTE_STRUCTURE>>    {0:M}
-  1 <<FAMILY_EVENT_STRUCTURE>>        {0:M}
-  1 <<NON_EVENT_STRUCTURE>>           {0:M}
-  1 HUSB @<XREF:INDI>@                {0:1}  [g7:FAM-HUSB](https://gedcom.io/terms/v7/FAM-HUSB)
-    2 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-  1 WIFE @<XREF:INDI>@                {0:1}  [g7:FAM-WIFE](https://gedcom.io/terms/v7/FAM-WIFE)
-    2 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-  1 CHIL @<XREF:INDI>@                {0:M}  [g7:CHIL](https://gedcom.io/terms/v7/CHIL)
-    2 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-  1 <<ASSOCIATION_STRUCTURE>>         {0:M}
-  1 SUBM @<XREF:SUBM>@                {0:M}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
-  1 <<LDS_SPOUSE_SEALING>>            {0:M}
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<SOURCE_CITATION>>               {0:M}
-  1 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-    2 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-    2 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-      3 <<DATE_VALUE>>              {0:1}
-      3 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-        4 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-        4 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-      3 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-        4 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-    2 <<MULTIMEDIA_LINK>>           {0:M}
-    2 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-      3 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-        4 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-        4 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-        4 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-        4 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-      3 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-    2 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  1 <<MULTIMEDIA_LINK>>               {0:M}
-  1 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-    2 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-      3 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-      3 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-      3 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-      3 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-    2 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    ADDRESS_STRUCTURE: str = f"""
+n ADDR <Special>                       {{1:1}}  [g7:ADDR]({Docs.ADDR})
+  +1 ADR1 <Special>                    {{0:1}}  [g7:ADR1]({Docs.ADR1})
+  +1 ADR2 <Special>                    {{0:1}}  [g7:ADR2]({Docs.ADR2})
+  +1 ADR3 <Special>                    {{0:1}}  [g7:ADR3]({Docs.ADR3})
+  +1 CITY <Special>                    {{0:1}}  [g7:CITY]({Docs.CITY})
+  +1 STAE <Special>                    {{0:1}}  [g7:STAE]({Docs.STAE})
+  +1 POST <Special>                    {{0:1}}  [g7:POST]({Docs.POST})
+  +1 CTRY <Special>                    {{0:1}}  [g7:CTRY]({Docs.CTRY})  
 """
-    HEADER: str = """
-0 HEAD                                {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
-  1 GEDC                              {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
-    2 VERS <Special>                  {1:1}  [g7:GEDC-VERS](https://gedcom.io/terms/v7/GEDC-VERS)
-  1 SCHMA                             {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
-    2 TAG <Special>                   {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
-  1 SOUR <Special>                    {0:1}  [g7:HEAD-SOUR](https://gedcom.io/terms/v7/HEAD-SOUR)
-    2 VERS <Special>                  {0:1}  [g7:VERS](https://gedcom.io/terms/v7/VERS)
-    2 NAME <Text>                     {0:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-    2 CORP <Text>                     {0:1}  [g7:CORP](https://gedcom.io/terms/v7/CORP)
-      3 <<ADDRESS_STRUCTURE>>         {0:1}
-      3 ADDR <Special>                {1:1}  [g7:ADDR](https://gedcom.io/terms/v7/ADDR)
-        4 ADR1 <Special>              {0:1}  [g7:ADR1](https://gedcom.io/terms/v7/ADR1)
-        4 ADR2 <Special>              {0:1}  [g7:ADR2](https://gedcom.io/terms/v7/ADR2)
-        4 ADR3 <Special>              {0:1}  [g7:ADR3](https://gedcom.io/terms/v7/ADR3)
-        4 CITY <Special>              {0:1}  [g7:CITY](https://gedcom.io/terms/v7/CITY)
-        4 STAE <Special>              {0:1}  [g7:STAE](https://gedcom.io/terms/v7/STAE)
-        4 POST <Special>              {0:1}  [g7:POST](https://gedcom.io/terms/v7/POST)
-        4 CTRY <Special>              {0:1}  [g7:CTRY](https://gedcom.io/terms/v7/CTRY)
-      3 PHON <Special>                {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-      3 EMAIL <Special>               {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-      3 FAX <Special>                 {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-      3 WWW <Special>                 {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-    2 DATA <Text>                     {0:1}  [g7:HEAD-SOUR-DATA](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
-      3 DATE <DateExact>              {0:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
-        4 TIME <Time>                 {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-      3 COPR <Text>                   {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-  1 DEST <Special>                    {0:1}  [g7:DEST](https://gedcom.io/terms/v7/DEST)
-  1 DATE <DateExact>                  {0:1}  [g7:HEAD-DATE](https://gedcom.io/terms/v7/HEAD-DATE)
-    2 TIME <Time>                     {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-  1 SUBM @<XREF:SUBM>@                {0:1}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
-  1 COPR <Text>                       {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-  1 LANG <Language>                   {0:1}  [g7:HEAD-LANG](https://gedcom.io/terms/v7/LANG)
-  1 PLAC                              {0:1}  [g7:HEAD-PLAC](https://gedcom.io/terms/v7/PLAC)
-    2 FORM <List:Text>                {1:1}  [g7:HEAD-PLAC-FORM](https://gedcom.io/terms/v7/PLAC-FORM)
-  1 <<NOTE_STRUCTURE>>                {0:1}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
+    ASSOCIATION_STRUCTURE: str = f"""
+n ASSO @<XREF:INDI>@                   {{1:1}}  [g7:ASSO]({Docs.ASSO})
+  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  +1 ROLE <Enum>                       {{1:1}}  [g7:ROLE]({Docs.ROLE})
+     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    CHANGE_DATE: str = f"""
+n CHAN                                 {{1:1}}  [g7:CHAN]({Docs.CHAN})
+  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
+     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+"""
+    CREATION_DATE: str = f"""
+n CREA                                 {{1:1}}  [g7:CREA]({Docs.CREA})
+  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
+     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
+"""
+    DATE_VALUE: str = f"""
+n DATE <DateValue>                     {{1:1}}  [g7:DATE]({Docs.DATE})
+  +1 TIME <Time>                       {{0:1}}  [g7:TIME]({Docs.TIME})
+  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+"""
+    EVENT_DETAIL: str = f"""
+n <<DATE_VALUE>>                       {{0:1}}
+n <<PLACE_STRUCTURE>>                  {{0:1}}
+n <<ADDRESS_STRUCTURE>>                {{0:1}}
+n PHON <Special>                       {{0:M}}  [g7:PHON]({Docs.PHON})
+n EMAIL <Special>                      {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
+n FAX <Special>                        {{0:M}}  [g7:FAX]({Docs.FAX})
+n WWW <Special>                        {{0:M}}  [g7:WWW]({Docs.WWW})
+n AGNC <Text>                          {{0:1}}  [g7:AGNC]({Docs.AGNC})
+n RELI <Text>                          {{0:1}}  [g7:RELI]({Docs.RELI})
+n CAUS <Text>                          {{0:1}}  [g7:CAUS]({Docs.CAUS})
+n RESN <List:Enum>                     {{0:1}}  [g7:RESN]({Docs.RESN})
+n SDATE <DateValue>                    {{0:1}}  [g7:SDATE]({Docs.SDATE})
+  +1 TIME <Time>                       {{0:1}}  [g7:TIME]({Docs.TIME})
+  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+n <<ASSOCIATION_STRUCTURE>>            {{0:M}}
+n <<NOTE_STRUCTURE>>                   {{0:M}}
+n <<SOURCE_CITATION>>                  {{0:M}}
+n <<MULTIMEDIA_LINK>>                  {{0:M}}
+n UID <Special>                        {{0:M}}  [g7:UID]()
+"""
+    FAMILY: str = f"""
+0 @XREF:FAM@ FAM                       {{1:1}}  [g7:record-FAM]({Docs.RECORD_FAM})
+  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
+  1 <<FAMILY_ATTRIBUTE_STRUCTURE>>     {{0:M}}
+  1 <<FAMILY_EVENT_STRUCTURE>>         {{0:M}}
+  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
+  1 HUSB @<XREF:INDI>@                 {{0:1}}  [g7:FAM-HUSB]({Docs.FAM_HUSB})
+    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  1 WIFE @<XREF:INDI>@                 {{0:1}}  [g7:FAM-WIFE]({Docs.FAM_WIFE})
+    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  1 CHIL @<XREF:INDI>@                 {{0:M}}  [g7:CHIL]({Docs.CHIL})
+    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
+  1 SUBM @<XREF:SUBM>@                 {{0:M}}  [g7:SUBM]({Docs.SUBM})
+  1 <<LDS_SPOUSE_SEALING>>             {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    FAMILY_ATTRIBUTE_STRUCTURE: str = f"""
+[
+n NCHI <Integer>                       {{1:1}}  [g7:FAM-NCHI]({Docs.FAM_NCHI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n RESI <Text>                          {{1:1}}  [g7:FAM-RESI]({Docs.FAM_RESI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n FACT <Text>                          {{1:1}}  [g7:FAM-FACT]({Docs.FAM_FACT})
+  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+]
+"""
+    FAMILY_EVENT_DETAIL: str = f"""
+n HUSB                                 {{0:1}}  [g7:HUSB]({Docs.HUSB})
+  +1 AGE <Age>                         {{1:1}}  [g7:AGE]({Docs.AGE})
+     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+n WIFE                                 {{0:1}}  [g7:WIFE]({Docs.WIFE})
+  +1 AGE <Age>                         {{1:1}}  [g7:AGE]({Docs.AGE})
+     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+n <<EVENT_DETAIL>>                     {{0:1}}
+"""
+    FAMILY_EVENT_STRUCTURE: str = f"""
+[
+n ANUL [Y|<NULL>]                      {{1:1}}  [g7:ANUL]({Docs.ANUL})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n CENS [Y|<NULL>]                      {{1:1}}  [g7:FAM-CENS]({Docs.FAM_CENS})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n DIV [Y|<NULL>]                       {{1:1}}  [g7:DIV]({Docs.DIV})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n DIVF [Y|<NULL>]                      {{1:1}}  [g7:DIVF]({Docs.DIVF})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n ENGA [Y|<NULL>]                      {{1:1}}  [g7:ENGA]({Docs.ENGA})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n MARB [Y|<NULL>]                      {{1:1}}  [g7:MARB]({Docs.MARB})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n MARC [Y|<NULL>]                      {{1:1}}  [g7:MARC]({Docs.MARC})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n MARL [Y|<NULL>]                      {{1:1}}  [g7:MARL]({Docs.MARL})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n MARR [Y|<NULL>]                      {{1:1}}  [g7:MARR]({Docs.MARR})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n MARS [Y|<NULL>]                      {{1:1}}  [g7:MARS]({Docs.MARS})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n EVEN <Text>                          {{1:1}}  [g7:FAM-EVEN]({Docs.FAM_EVEN})
+  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+]
+"""
+    HEADER: str = f"""
+0 HEAD                                 {{1:1}}  [g7:HEAD]({Docs.HEAD})
+  1 GEDC                               {{1:1}}  [g7:GEDC]({Docs.GEDC})
+    2 VERS <Special>                   {{1:1}}  [g7:GEDC-VERS]({Docs.GEDC_VERS})
+  1 SCHMA                              {{0:1}}  [g7:SCHMA]({Docs.SCHMA})
+    2 TAG <Special>                    {{0:M}}  [g7:TAG]({Docs.TAG})
+  1 SOUR <Special>                     {{0:1}}  [g7:HEAD-SOUR]({Docs.HEAD_SOUR})
+    2 VERS <Special>                   {{0:1}}  [g7:VERS]({Docs.VERS})
+    2 NAME <Text>                      {{0:1}}  [g7:NAME]({Docs.NAME})
+    2 CORP <Text>                      {{0:1}}  [g7:CORP]({Docs.CORP})
+      3 <<ADDRESS_STRUCTURE>>          {{0:1}}
+      3 PHON <Special>                 {{0:M}}  [g7:PHON]({Docs.PHON})
+      3 EMAIL <Special>                {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
+      3 FAX <Special>                  {{0:M}}  [g7:FAX]({Docs.FAX})
+      3 WWW <Special>                  {{0:M}}  [g7:WWW]({Docs.WWW})
+    2 DATA <Text>                      {{0:1}}  [g7:HEAD-SOUR-DATA]({Docs.HEAD_SOUR_DATA})
+      3 DATE <DateExact>               {{0:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
+        4 TIME <Time>                  {{0:1}}  [g7:TIME]({Docs.TIME})
+      3 COPR <Text>                    {{0:1}}  [g7:COPR]({Docs.COPR})
+  1 DEST <Special>                     {{0:1}}  [g7:DEST]({Docs.DEST})
+  1 DATE <DateExact>                   {{0:1}}  [g7:HEAD-DATE]({Docs.HEAD_DATE})
+    2 TIME <Time>                      {{0:1}}  [g7:TIME]({Docs.TIME})
+  1 SUBM @<XREF:SUBM>@                 {{0:1}}  [g7:SUBM]({Docs.SUBM})
+  1 COPR <Text>                        {{0:1}}  [g7:COPR]({Docs.COPR})
+  1 LANG <Language>                    {{0:1}}  [g7:HEAD-LANG]({Docs.LANG})
+  1 PLAC                               {{0:1}}  [g7:HEAD-PLAC]({Docs.HEAD_PLAC})
+    2 FORM <List:Text>                 {{1:1}}  [g7:HEAD-PLAC-FORM]({Docs.HEAD_PLAC_FORM})
+  1 <<NOTE_STRUCTURE>>                 {{0:1}}
     """
-    INDIVIDUAL: str = """
-0 @XREF:INDI@ INDI                    {1:1}  [g7:record-INDI](https://gedcom.io/terms/v7/record-INDI)
-  1 RESN <List:Enum>                  {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
-  1 <<PERSONAL_NAME_STRUCTURE>>       {0:M}
-  1 SEX <Enum>                        {0:1}  [g7:SEX](https://gedcom.io/terms/v7/SEX)
-  1 <<INDIVIDUAL_ATTRIBUTE_STRUCTURE>>{0:M}
-  1 <<INDIVIDUAL_EVENT_STRUCTURE>>    {0:M}
-  1 <<NON_EVENT_STRUCTURE>>           {0:M}
-  1 <<LDS_INDIVIDUAL_ORDINANCE>>      {0:M}
-  1 FAMC @<XREF:FAM>@                 {0:M}  [g7:INDI-FAMC](https://gedcom.io/terms/v7/INDI-FAMC)
-    2 PEDI <Enum>                     {0:1}  [g7:PEDI](https://gedcom.io/terms/v7/PEDI)
-      3 PHRASE <Text>                 {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 STAT <Enum>                     {0:1}  [g7:FAMC-STAT](https://gedcom.io/terms/v7/FAMC-STAT)
-      3 PHRASE <Text>                 {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 <<NOTE_STRUCTURE>>              {0:M}
-  1 FAMS @<XREF:FAM>@                 {0:M}  [g7:FAMS](https://gedcom.io/terms/v7/FAMS)
-    2 <<NOTE_STRUCTURE>>              {0:M}
-  1 SUBM @<XREF:SUBM>@                {0:M}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
-  1 <<ASSOCIATION_STRUCTURE>>         {0:M}
-  1 ALIA @<XREF:INDI>@                {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
-    2 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-  1 ANCI @<XREF:SUBM>@                {0:M}  [g7:ANCI](https://gedcom.io/terms/v7/ANCI)
-  1 DESI @<XREF:SUBM>@                {0:M}  [g7:DESI](https://gedcom.io/terms/v7/DESI)
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<SOURCE_CITATION>>               {0:M}
-  1 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-    2 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-    2 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-      3 <<DATE_VALUE>>              {0:1}
-      3 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-        4 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-        4 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-      3 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-        4 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-    2 <<MULTIMEDIA_LINK>>           {0:M}
-    2 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-      3 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-        4 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-        4 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-        4 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-        4 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-      3 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-    2 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  1 <<MULTIMEDIA_LINK>>               {0:M}
-  1 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-    2 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-      3 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-      3 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-      3 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-      3 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-    2 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    IDENTIFIER_STRUCTURE: str = f"""
+[
+n REFN <Special>                       {{1:1}}  [g7:REFN]({Docs.REFN})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+|
+n UID <Special>                        {{1:1}}  [g7:UID]({Docs.UID})
+|
+n EXID <Special>                       {{1:1}}  [g7:EXID]({Docs.EXID})
+  +1 TYPE <Special>                    {{0:1}}  [g7:EXID-TYPE]({Docs.EXID_TYPE})
+]
 """
-    MULTIMEDIA: str = """
-0 @XREF:OBJE@ OBJE                    {1:1}  [g7:record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
-  1 RESN <List:Enum>                  {0:1}  [g7:RESN](https://gedcom.io/terms/v7/RESN)
-  1 FILE <FilePath>                   {1:M}  [g7:FILE](https://gedcom.io/terms/v7/FILE)
-    2 FORM <MediaType>                {1:1}  [g7:FORM](https://gedcom.io/terms/v7/FORM)
-      3 MEDI <Enum>                   {0:1}  [g7:MEDI](https://gedcom.io/terms/v7/MEDI)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 TITL <Text>                     {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-    2 TRAN <FilePath>                 {0:M}  [g7:FILE-TRAN](https://gedcom.io/terms/v7/FILE-TRAN)
-      3 FORM <MediaType>              {1:1}  [g7:FORM](https://gedcom.io/terms/v7/FORM)
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<SOURCE_CITATION>>               {0:M}
-  1 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-    2 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-    2 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-      3 <<DATE_VALUE>>              {0:1}
-      3 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-        4 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-        4 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-      3 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-        4 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-    2 <<MULTIMEDIA_LINK>>           {0:M}
-    2 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-      3 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-        4 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-        4 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-        4 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-        4 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-      3 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-    2 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    INDIVIDUAL: str = f"""
+0 @XREF:INDI@ INDI                     {{1:1}}  [g7:record-INDI]({Docs.RECORD_INDI})
+  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
+  1 <<PERSONAL_NAME_STRUCTURE>>        {{0:M}}
+  1 SEX <Enum>                         {{0:1}}  [g7:SEX]({Docs.SEX})
+  1 <<INDIVIDUAL_ATTRIBUTE_STRUCTURE>> {{0:M}}
+  1 <<INDIVIDUAL_EVENT_STRUCTURE>>     {{0:M}}
+  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
+  1 <<LDS_INDIVIDUAL_ORDINANCE>>       {{0:M}}
+  1 FAMC @<XREF:FAM>@                  {{0:M}}  [g7:INDI-FAMC]({Docs.INDI_FAMC})
+    2 PEDI <Enum>                      {{0:1}}  [g7:PEDI]({Docs.PEDI})
+      3 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+    2 STAT <Enum>                      {{0:1}}  [g7:FAMC-STAT]({Docs.FAMC_STAT})
+      3 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 FAMS @<XREF:FAM>@                  {{0:M}}  [g7:FAMS]({Docs.FAMS})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 SUBM @<XREF:SUBM>@                 {{0:M}}  [g7:SUBM]({Docs.SUBM})
+  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
+  1 ALIA @<XREF:INDI>@                 {{0:M}}  [g7:ALIA]({Docs.ALIA})
+    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  1 ANCI @<XREF:SUBM>@                 {{0:M}}  [g7:ANCI]({Docs.ANCI})
+  1 DESI @<XREF:SUBM>@                 {{0:M}}  [g7:DESI]({Docs.DESI})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
 """
-    REPOSITORY: str = """
-0 @XREF:REPO@ REPO                    {1:1}  [g7:record-REPO](https://gedcom.io/terms/v7/record-REPO)
-  1 NAME <Text>                       {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-  1 <<ADDRESS_STRUCTURE>>             {0:1}
-  1 PHON <Special>                    {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-  1 EMAIL <Special>                   {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-  1 FAX <Special>                     {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-  1 WWW <Special>                     {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    INDIVIDUAL_ATTRIBUTE_STRUCTURE: str = f"""
+[
+n CAST <Text>                          {{1:1}}  [g7:CAST]({Docs.CAST})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n DSCR <Text>                          {{1:1}}  [g7:DSCR]({Docs.DSCR})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n EDUC <Text>                          {{1:1}}  [g7:EDUC]({Docs.EDUC})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n IDNO <Special>                       {{1:1}}  [g7:IDNO]({Docs.IDNO})
+  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n NATI <Text>                          {{1:1}}  [g7:NATI]({Docs.NATI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n NCHI <Integer>                       {{1:1}}  [g7:INDI-NCHI]({Docs.INDI_NCHI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n NMR <Integer>                        {{1:1}}  [g7:NMR]({Docs.NMR})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n OCCU <Text>                          {{1:1}}  [g7:OCCU]({Docs.OCCU})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n PROP <Text>                          {{1:1}}  [g7:PROP]({Docs.PROP})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n RELI <Text>                          {{1:1}}  [g7:INDI-RELI]({Docs.INDI_RELI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n RESI <Text>                          {{1:1}}  [g7:INDI-RESI]({Docs.INDI_RESI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n SSN <Special>                        {{1:1}}  [g7:SSN]({Docs.SSN})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n TITL <Text>                          {{1:1}}  [g7:INDI-TITL]({Docs.INDI_TITL})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n FACT <Text>                          {{1:1}}  [g7:INDI-FACT]({Docs.INDI_FACT})
+  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+]
 """
-    SHARED_NOTE: str = """
-0 @XREF:SNOTE@ SNOTE <Text>           {1:1}  [g7:record-SNOTE](https://gedcom.io/terms/v7/record-SNOTE)
-  1 MIME <MediaType>                  {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-  1 LANG <Language>                   {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-  1 TRAN <Text>                       {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-  1 <<SOURCE_CITATION>>               {0:M}
-  1 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-    2 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-    2 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-      3 <<DATE_VALUE>>              {0:1}
-      3 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-        4 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-        4 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-      3 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-        4 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-    2 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-    2 <<MULTIMEDIA_LINK>>           {0:M}
-    2 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-      3 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-        4 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-        4 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-        4 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-        4 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-      3 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-    2 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    INDIVIDUAL_EVENT_DETAIL: str = f"""
+n <<EVENT_DETAIL>>                     {{1:1}}
+n AGE <Age>                            {{0:1}}  [g7:AGE]({Docs.AGE})
+  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
 """
-    SOURCE: str = """
-0 @XREF:SOUR@ SOUR                    {1:1}  [g7:record-SOUR](https://gedcom.io/terms/v7/record-SOUR)
-  1 DATA                              {0:1}  [g7:DATA](https://gedcom.io/terms/v7/DATA)
-    2 EVEN <List:Enum>                {0:M}  [g7:DATA-EVEN](https://gedcom.io/terms/v7/DATA-EVEN)
-      3 DATE <DatePeriod>             {0:1}  [g7:DATA-EVEN-DATE](https://gedcom.io/terms/v7/DATA-EVEN-DATE)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 <<PLACE_STRUCTURE>>           {0:1}
-    2 AGNC <Text>                     {0:1}  [g7:AGNC](https://gedcom.io/terms/v7/AGNC)
-    2 <<NOTE_STRUCTURE>>              {0:M}
-  1 AUTH <Text>                       {0:1}  [g7:AUTH](https://gedcom.io/terms/v7/AUTH)
-  1 TITL <Text>                       {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-  1 ABBR <Text>                       {0:1}  [g7:ABBR](https://gedcom.io/terms/v7/ABBR)
-  1 PUBL <Text>                       {0:1}  [g7:PUBL](https://gedcom.io/terms/v7/PUBL)
-  1 TEXT <Text>                       {0:1}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-  1 <<SOURCE_REPOSITORY_CITATION>>    {0:M}
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<MULTIMEDIA_LINK>>               {0:M}
-  1 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-    2 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-      3 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-      3 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-      3 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-      3 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-    2 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    INDIVIDUAL_EVENT_STRUCTURE: str = f"""
+[
+n ADOP [Y|<NULL>]                      {{1:1}}  [g7:ADOP]({Docs.ADOP})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:ADOP-FAMC]({Docs.ADOP_FAMC})
+     +2 ADOP <Enum>                    {{0:1}}  [g7:FAMC-ADOP]({Docs.FAMC_ADOP})
+        +3 PHRASE <Text>               {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+|
+n BAPM [Y|<NULL>]                      {{1:1}}  [g7:BAPM]({Docs.BAPM})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n BARM [Y|<NULL>]                      {{1:1}}  [g7:BARM]({Docs.BARM})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n BASM [Y|<NULL>]                      {{1:1}}  [g7:BASM]({Docs.BASM})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n BIRT [Y|<NULL>]                      {{1:1}}  [g7:BIRT]({Docs.BIRT})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:FAMC]({Docs.TYPE})
+|
+n BLES [Y|<NULL>]                      {{1:1}}  [g7:BLES]({Docs.BLES})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n BURI [Y|<NULL>]                      {{1:1}}  [g7:BURI]({Docs.BURI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+
+n CENS [Y|<NULL>]                      {{1:1}}  [g7:INDI-CENS]({Docs.INDI_CENS})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n CHR [Y|<NULL>]                       {{1:1}}  [g7:CHR]({Docs.CHR})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:FAMC]({Docs.FAMC})
+|
+n CHRA [Y|<NULL>]                      {{1:1}}  [g7:CHRA]({Docs.CHRA})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n CONF [Y|<NULL>]                      {{1:1}}  [g7:CONF]({Docs.CONF})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n CREM [Y|<NULL>]                      {{1:1}}  [g7:CREM]({Docs.CREM})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n DEAT [Y|<NULL>]                      {{1:1}}  [g7:DEAT]({Docs.DEAT})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n EMIG [Y|<NULL>]                      {{1:1}}  [g7:EMIG]({Docs.EMIG})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n FCOM [Y|<NULL>]                      {{1:1}}  [g7:FCOM]({Docs.FCOM})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n GRAD [Y|<NULL>]                      {{1:1}}  [g7:GRAD]({Docs.GRAD})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n IMMI [Y|<NULL>]                      {{1:1}}  [g7:IMMI]({Docs.IMMI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n NATU [Y|<NULL>]                      {{1:1}}  [g7:NATU]({Docs.NATU})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n ORDN [Y|<NULL>]                      {{1:1}}  [g7:ORDN]({Docs.ORDN})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n PROB [Y|<NULL>]                      {{1:1}}  [g7:PROB]({Docs.PROB})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n RETI [Y|<NULL>]                      {{1:1}}  [g7:RETI]({Docs.RETI})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n WILL [Y|<NULL>]                      {{1:1}}  [g7:WILL]({Docs.WILL})
+  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n EVEN <Text>                          {{1:1}}  [g7:INDI-EVEN]({Docs.INDI_EVEN})
+  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+]
 """
-    SUBMITTER: str = """
-0 @XREF:SUBM@ SUBM                    {1:1}  [g7:record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
-  1 NAME <Text>                       {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-  1 <<ADDRESS_STRUCTURE>>             {0:1}
-  1 PHON <Special>                    {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-  1 EMAIL <Special>                   {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-  1 FAX <Special>                     {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-  1 WWW <Special>                     {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-  1 <<MULTIMEDIA_LINK>>               {0:M}
-  1 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-    2 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-      3 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-      3 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-      3 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-      3 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-    2 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-  1 LANG <Language>                   {0:M}  [g7:SUBM-LANG](https://gedcom.io/terms/v7/SUBM-LANG)
-  1 <<IDENTIFIER_STRUCTURE>>          {0:M}
-  [
-  1 REFN <Special>                    {1:1}  [g7:REFN](https://gedcom.io/terms/v7/REFN)
-    2 TYPE <Text>                     {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
-  |
-  1 UID <Special>                     {1:1}  [g7:UID](https://gedcom.io/terms/v7/UID)
-  |
-  1 EXID <Special>                    {1:1}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    2 TYPE <Special>                  {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-  ]
-  1 <<NOTE_STRUCTURE>>                {0:M}
-  [
-  1 NOTE <Text>                       {1:1}  [g7:NOTE](https://gedcom.io/terms/v7/NOTE)
-    2 MIME <MediaType>                {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-    2 LANG <Language>                 {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 TRAN <Text>                     {0:M}  [g7:NOTE-TRAN](https://gedcom.io/terms/v7/NOTE-TRAN)
-      3 MIME <MediaType>              {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-      3 LANG <Language>               {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-    2 <<SOURCE_CITATION>>             {0:M}
-    2 SOUR @<XREF:SOUR>@              {1:1}  [g7:SOUR](https://gedcom.io/terms/v7/SOUR)
-      3 PAGE <Text>                   {0:1}  [g7:PAGE](https://gedcom.io/terms/v7/PAGE)
-      3 DATA                          {0:1}  [g7:SOUR-DATA](https://gedcom.io/terms/v7/SOUR-DATA)
-        4 <<DATE_VALUE>>              {0:1}
-        4 TEXT <Text>                 {0:M}  [g7:TEXT](https://gedcom.io/terms/v7/TEXT)
-          5 MIME <MediaType>          {0:1}  [g7:MIME](https://gedcom.io/terms/v7/MIME)
-          5 LANG <Language>           {0:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
-      3 EVEN <Enum>                   {0:1}  [g7:SOUR-EVEN](https://gedcom.io/terms/v7/SOUR-EVEN)
-        4 PHRASE <Text>               {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-        4 ROLE <Enum>                 {0:1}  [g7:ROLE](https://gedcom.io/terms/v7/ROLE)
-          5 PHRASE <Text>             {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
-      3 QUAY <Enum>                   {0:1}  [g7:QUAY](https://gedcom.io/terms/v7/QUAY)
-      3 <<MULTIMEDIA_LINK>>           {0:M}
-      3 OBJE @<XREF:OBJE>@            {1:1}  [g7:OBJE](https://gedcom.io/terms/v7/OBJE)
-        4 CROP                        {0:1}  [g7:CROP](https://gedcom.io/terms/v7/CROP)
-          5 TOP <Integer>             {0:1}  [g7:TOP](https://gedcom.io/terms/v7/TOP)
-          5 LEFT <Integer>            {0:1}  [g7:LEFT](https://gedcom.io/terms/v7/LEFT)
-          5 HEIGHT <Integer>          {0:1}  [g7:HEIGHT](https://gedcom.io/terms/v7/HEIGHT)
-          5 WIDTH <Integer>           {0:1}  [g7:WIDTH](https://gedcom.io/terms/v7/WIDTH)
-        4 TITL <Text>                 {0:1}  [g7:TITL](https://gedcom.io/terms/v7/TITL)
-      3 <<NOTE_STRUCTURE>>            {0:M}  (see above)
-  |
-  1 SNOTE @<XREF:SNOTE>@              {1:1}  [g7:SNOTE](https://gedcom.io/terms/v7/SNOTE)
-  ]
-  1 <<CHANGE_DATE>>                   {0:1}
-  1 <<CREATION_DATE>>                 {0:1}
+    LDS_ORDINANCE_DETAIL: str = f"""
+n <<DATE_VALUE>>                       {{:1}}
+n TEMP <Text>                          {{0:1}}  [g7:TEMP]({Docs.TEMP})
+n <<PLACE_STRUCTURE>>                  {{0:1}}
+n STAT <Enum>                          {{0:1}}  [g7:ord-STAT]({Docs.ORD_STAT})
+  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
+     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
+n <<NOTE_STRUCTURE>>                   {{0:M}}
+n <<SOURCE_CITATION>>                  {{0:M}}
+"""
+    LDS_INDIVIDUAL_ORDINANCE: str = f"""
+[
+n BAPL                                 {{1:1}}  [g7:BAPL]({Docs.BAPL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n CONL                                 {{1:1}}  [g7:CONL]({Docs.CONL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n ENDL                                 {{1:1}}  [g7:ENDL]({Docs.ENDL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n INIL                                 {{1:1}}  [g7:INIL]({Docs.INIL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n SLGC                                 {{1:1}}  [g7:SLGC]({Docs.SLGC})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+  +1 FAMC @<XREF:FAM>@                 {{1:1}}  [g7:FAMC]({Docs.FAMC})
+]
+"""
+    LDS_SPOUSE_SEALING = f"""
+n SLGS                                 {{1:1}}  [g7:SLGS]({Docs.SLGS})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+"""
+    MULTIMEDIA: str = f"""
+0 @XREF:OBJE@ OBJE                     {{1:1}}  [g7:record-OBJE]({Docs.RECORD_OBJE})
+  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
+  1 FILE <FilePath>                    {{1:M}}  [g7:FILE]({Docs.FILE})
+    2 FORM <MediaType>                 {{1:1}}  [g7:FORM]({Docs.FORM})
+      3 MEDI <Enum>                    {{0:1}}  [g7:MEDI]({Docs.MEDI})
+        4 PHRASE <Text>                {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+    2 TITL <Text>                      {{0:1}}  [g7:TITL]({Docs.TITL})
+    2 TRAN <FilePath>                  {{0:M}}  [g7:FILE-TRAN]({Docs.FILE_TRAN})
+      3 FORM <MediaType>               {{1:1}}  [g7:FORM]({Docs.FORM})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    MULTIMEDIA_LINK: str = f"""
+n OBJE @<XREF:OBJE>@                   {{1:1}} [g7:OBJE]({Docs.OBJE})
+  +1 CROP                              {{0:1}}  [g7:CROP]({Docs.CROP})
+    +2 TOP <Integer>                   {{0:1}}  [g7:TOP]({Docs.TOP})
+    +2 LEFT <Integer>                  {{0:1}}  [g7:LEFT]({Docs.LEFT})
+    +2 HEIGHT <Integer>                {{0:1}}  [g7:HEIGHT]({Docs.HEIGHT})
+    +2 WIDTH <Integer>                 {{0:1}}  [g7:WIDTH]({Docs.WIDTH})
+  +1 TITL <Text>                       {{0:1}}  [g7:TITL]({Docs.TITL})
+"""
+    NON_EVENT_STRUCTURE: str = f"""
+n NO <Enum>                            {{1:1}}  [g7:NO]({Docs.NO})
+  +1 DATE <DatePeriod>                 {{0:1}}  [g7:NO-DATE]({Docs.NO_DATE})
+     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    NOTE_STRUCTURE: str = f"""
+[
+n NOTE <Text>                          {{1:1}}  [g7:NOTE]({Docs.NOTE})
+  +1 MIME <MediaType>                  {{0:1}}  [g7:MIME]({Docs.MIME})
+  +1 LANG <Language>                   {{0:1}}  [g7:LANG]({Docs.LANG})
+  +1 TRAN <Text>                       {{0:M}}  [g7:NOTE-TRAN]({Docs.NOTE_TRAN})
+    +2 MIME <MediaType>                {{0:1}}  [g7:MIME]({Docs.MIME})
+    +2 LANG <Language>                 {{0:1}}  [g7:LANG]({Docs.LANG})
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+|
+n SNOTE @<XREF:SNOTE>@                 {{1:1}}  [g7:SNOTE]({Docs.SNOTE})
+]
+"""
+    PERSONAL_NAME_PIECES: str = f"""
+n NPFX <Text>                          {{0:M}}  [g7:NPFX]({Docs.NPFX})
+n GIVN <Text>                          {{0:M}}  [g7:GIVN]({Docs.GIVN})
+n NICK <Text>                          {{0:M}}  [g7:NICK]({Docs.NICK})
+n SPFX <Text>                          {{0:M}}  [g7:SPFX]({Docs.SPFX})
+n SURN <Text>                          {{0:M}}  [g7:SURN]({Docs.SURN})
+n NSFX <Text>                          {{0:M}}  [g7:NSFX]({Docs.NSFX})
+"""
+    PERSONAL_NAME_STRUCTURE: str = f"""
+n NAME <PersonalName>                  {{1:1}}  [g7:INDI-NAME]({Docs.INDI_NAME})
+  +1 TYPE <Enum>                       {{0:1}}  [g7:NAME-TYPE]({Docs.NAME_TYPE})
+     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  +1 <<PERSONAL_NAME_PIECES>>          {{0:1}}
+  +1 TRAN <PersonalName>               {{0:M}}  [g7:NAME-TRAN]({Docs.NAME_TRAN})
+     +2 LANG <Language>                {{1:1}}  [g7:LANG]({Docs.LANG})
+     +2 <<PERSONAL_NAME_PIECES>>       {{0:1}}
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    PLACE_STRUCTURE: str = f"""
+n PLAC <List:Text>                     {{1:1}}   [g7:PLAC]({Docs.PLAC})
+  +1 FORM <List:Text>                  {{0:1}}   [g7:PLAC-FORM]({Docs.PLAC_FORM})
+  +1 LANG <Language>                   {{0:1}}   [g7:LANG]({Docs.LANG})
+  +1 TRAN <List:Text>                  {{0:M}}   [g7:PLAC-TRAN]({Docs.PLAC_TRAN})
+     +2 LANG <Language>                {{1:1}}   [g7:LANG]({Docs.LANG})
+  +1 MAP                               {{0:1}}   [g7:MAP]({Docs.MAP})
+     +2 LATI <Special>                 {{1:1}}   [g7:LATI]({Docs.LATI})
+     +2 LONG <Special>                 {{1:1}}   [g7:LONG]({Docs.LONG})
+  +1 EXID <Special>                    {{0:M}}   [g7:EXID]({Docs.EXID})
+     +2 TYPE <Special>                 {{0:1}}   [g7:EXID-TYPE]({Docs.EXID_TYPE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}} 
+"""
+    REPOSITORY: str = f"""
+0 @XREF:REPO@ REPO                     {{1:1}}  [g7:record-REPO]({Docs.RECORD_REPO})
+  1 NAME <Text>                        {{1:1}}  [g7:NAME]({Docs.NAME})
+  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
+  1 PHON <Special>                     {{0:M}}  [g7:PHON]({Docs.PHON})
+  1 EMAIL <Special>                    {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
+  1 FAX <Special>                      {{0:M}}  [g7:FAX]({Docs.FAX})
+  1 WWW <Special>                      {{0:M}}  [g7:WWW]({Docs.WWW})
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SHARED_NOTE: str = f"""
+0 @XREF:SNOTE@ SNOTE <Text>            {{1:1}}  [g7:record-SNOTE]({Docs.RECORD_SNOTE})
+  1 MIME <MediaType>                   {{0:1}}  [g7:MIME]({Docs.MIME})
+  1 LANG <Language>                    {{0:1}}  [g7:LANG]({Docs.LANG})
+  1 TRAN <Text>                        {{0:M}}  [g7:NOTE-TRAN]({Docs.NOTE_TRAN})
+    2 MIME <MediaType>                 {{0:1}}  [g7:MIME]({Docs.MIME})
+    2 LANG <Language>                  {{0:1}}  [g7:LANG]({Docs.LANG})
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SOURCE: str = f"""
+0 @XREF:SOUR@ SOUR                     {{1:1}}  [g7:record-SOUR]({Docs.RECORD_SOUR})
+  1 DATA                               {{0:1}}  [g7:DATA]({Docs.DATA})
+    2 EVEN <List:Enum>                 {{0:M}}  [g7:DATA-EVEN]({Docs.DATA_EVEN})
+      3 DATE <DatePeriod>              {{0:1}}  [g7:DATA-EVEN-DATE]({Docs.DATA_EVEN_DATE})
+        4 PHRASE <Text>                {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+      3 <<PLACE_STRUCTURE>>            {{0:1}}
+    2 AGNC <Text>                      {{0:1}}  [g7:AGNC]({Docs.AGNC})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 AUTH <Text>                        {{0:1}}  [g7:AUTH]({Docs.AUTH})
+  1 TITL <Text>                        {{0:1}}  [g7:TITL]({Docs.TITL})
+  1 ABBR <Text>                        {{0:1}}  [g7:ABBR]({Docs.ABBR})
+  1 PUBL <Text>                        {{0:1}}  [g7:PUBL]({Docs.PUBL})
+  1 TEXT <Text>                        {{0:1}}  [g7:TEXT]({Docs.TEXT})
+    2 MIME <MediaType>                 {{0:1}}  [g7:MIME]({Docs.MIME})
+    2 LANG <Language>                  {{0:1}}  [g7:LANG]({Docs.LANG})
+  1 <<SOURCE_REPOSITORY_CITATION>>     {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SOURCE_CITATION: str = f"""
+n SOUR @<XREF:SOUR>@                   {{1:1}}  [g7:SOUR]({Docs.SOUR})
+  +1 PAGE <Text>                       {{0:1}}  [g7:PAGE]({Docs.PAGE})
+  +1 DATA                              {{0:1}}  [g7:SOUR-DATA]({Docs.SOUR_DATA})
+    +2 <<DATE_VALUE>>                  {{0:1}}
+    +2 TEXT <Text>                     {{0:M}}  [g7:TEXT]({Docs.TEXT})
+      +3 MIME <MediaType>              {{0:1}}  [g7:MIME]({Docs.MIME})
+      +3 LANG <Language>               {{0:1}}  [g7:LANG]({Docs.LANG})
+  +1 EVEN <Enum>                       {{0:1}}  [g7:SOUR-EVEN]({Docs.SOUR_EVEN})
+    +2 PHRASE <Text>                   {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+    +2 ROLE <Enum>                     {{0:1}}  [g7:ROLE]({Docs.ROLE})
+      +3 PHRASE <Text>                 {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+  +1 QUAY <Enum>                       {{0:1}}  [g7:QUAY]({Docs.QUAY})
+  +1 <<MULTIMEDIA_LINK>>               {{0:M}}
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+"""
+    SOURCE_REPOSITORY_CITATION: str = f"""
+n REPO @<XREF:REPO>@                   {{1:1}}  [g7:REPO]({Docs.REPO})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 CALN <Special>                    {{0:M}}  [g7:CALN]({Docs.CALN})
+     +2 MEDI <Enum>                    {{0:1}}  [g7:MEDI]({Docs.MEDI})
+        +3 PHRASE <Text>               {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
+"""
+    SUBMITTER: str = f"""
+0 @XREF:SUBM@ SUBM                     {{1:1}}  [g7:record-SUBM]({Docs.RECORD_SUBM})
+  1 NAME <Text>                        {{1:1}}  [g7:NAME]({Docs.NAME})
+  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
+  1 PHON <Special>                     {{0:M}}  [g7:PHON]({Docs.PHON})
+  1 EMAIL <Special>                    {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
+  1 FAX <Special>                      {{0:M}}  [g7:FAX]({Docs.FAX})
+  1 WWW <Special>                      {{0:M}}  [g7:WWW]({Docs.WWW})
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 LANG <Language>                    {{0:M}}  [g7:SUBM-LANG]({Docs.SUBM_LANG})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
 """
 
 
