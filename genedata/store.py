@@ -22,8 +22,10 @@ __all__ = [
     'Alias',
     'Association',
     'CallNumber',
+    'ChangeDate',
     'Checker',
     'Child',
+    'CreationDate',
     'Date',
     'DateValue',
     'Dater',
@@ -41,7 +43,6 @@ __all__ = [
     'FileTranslation',
     'Formatter',
     'Header',
-    'Husband',
     'Identifier',
     'Individual',
     'Individual',
@@ -87,7 +88,6 @@ __all__ = [
     'Text',
     'Time',
     'Void',
-    'Wife',
 ]
 
 
@@ -497,6 +497,11 @@ class Checker:
             raise ValueError(message)
         return True
 
+    # @staticmethod
+    # def verify_extension(super: Tag, extension: Extension) -> bool:
+    #     check: bool = True
+    #     return check
+        
     @staticmethod
     def verify_ext(
         extensions: set[str], structure: str, substructures: set[str]
@@ -1568,6 +1573,7 @@ Extension(
             gedcom_docs,
             genealogy_docs,
         )
+Ext = Extension | list[Extension] | None
 
 
 class Date(Structure):
@@ -1610,7 +1616,8 @@ class Date(Structure):
         calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
         iso: str = Default.EMPTY,
         display_calendar: bool = False,
-        extensions: list[Extension] | None = None,
+        extensions: Ext = None
+        #extensions: list[Extension] | None = None,
     ):
         self.year = year
         self.month = month
@@ -1623,7 +1630,7 @@ class Date(Structure):
         )
         if extensions is None:
             extensions = []
-        self.extensions: list[Extension] = extensions
+        self.extensions: Ext = extensions
         self.descriptions: set[str] = set()
         # self.husb_extensions: list[Extension] = []
         # self.phrase_extensions: list[Extension] = []
@@ -2176,6 +2183,274 @@ DateValue(
                     date=date,
                     time=time,
                     phrase=phrase,
+                    extensions=extensions,
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+
+class ChangeDate(Structure):
+    """Store, validate and format change date information.
+    
+    Example:
+    
+    Args:
+    
+    Reference:
+        [GEDCOM Change Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CHANGE_DATE)
+    > n CHAN                                     {1:1}  g7:CHAN
+    >   +1 DATE <DateExact>                      {1:1}  g7:DATE-exact
+    >      +2 TIME <Time>                        {0:1}  g7:TIME
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    """
+    structure: ClassVar[str] = Tag.DATE.value
+    substructures: ClassVar[set[str]] = {Tag.TIME.value, Tag.PHRASE.value}
+
+    def __init__(
+        self,
+        date: Date | None = None,
+        time: Time | None = None,
+        notes: list[Any] | None = None,
+        extensions: list[Extension] | None = None,
+    ):
+        if date is None:
+            date = Date()
+        if time is None:
+            time = Time()
+        if notes is None:
+            notes = []
+        self.date = date
+        self.time = time
+        self.notes = notes
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_tuple_type(self.notes, Note)
+            and self.date.validate()
+            and self.time.validate()
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            lines = Tagger.empty(lines, level, Tag.CHAN)
+            lines = Tagger.structure(lines, level + 1, self.date, Date())
+            lines = Tagger.structure(lines, level + 2, self.time, Time())
+            lines = Tagger.structure(lines, level + 1, self.notes, Note())
+        return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+ChangeDate(
+    date = {Formatter.codes(self.date, tabs)},
+    time = {Formatter.codes(self.time, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date: Date | None = None,
+        time: Time | None = None,
+        notes: list[Any] | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: ChangeDate
+        gedcom_docs: str = Specs.DATE_VALUE
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = ChangeDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                    notes=None,
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = ChangeDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                    notes=[Note(note='Test Date and Time')],
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = ChangeDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                    notes=[Note(note='Test Date and Time')],
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = ChangeDate(
+                    date=date,
+                    time=time,
+                    notes=notes,
+                    extensions=extensions,
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+class CreationDate(Structure):
+    """Store, validate and format create date information.
+    
+    Example:
+    
+    Args:
+    
+    Reference:
+        [GEDCOM Creation Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CREATION_DATE)
+    > n CREA                                     {1:1}  g7:CREA
+    >   +1 DATE <DateExact>                      {1:1}  g7:DATE-exact
+    >      +2 TIME <Time>                        {0:1}  g7:TIME
+    """
+    structure: ClassVar[str] = Tag.DATE.value
+    substructures: ClassVar[set[str]] = {Tag.TIME.value, Tag.PHRASE.value}
+
+    def __init__(
+        self,
+        date: Date | None = None,
+        time: Time | None = None,
+        extensions: list[Extension] | None = None,
+    ):
+        if date is None:
+            date = Date()
+        if time is None:
+            time = Time()
+        self.date = date
+        self.time = time
+        if extensions is None:
+            extensions = []
+        self.extensions: list[Extension] = extensions
+        self.descriptions: set[str] = set()
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            self.date.validate()
+            and self.time.validate()
+        )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            lines = Tagger.empty(lines, level, Tag.CREA)
+            lines = Tagger.structure(lines, level + 1, self.date, Date())
+            lines = Tagger.structure(lines, level + 2, self.time, Time())
+        return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+CreationDate(
+    date = {Formatter.codes(self.date, tabs)},
+    time = {Formatter.codes(self.time, tabs)},
+    extensions = {Formatter.codes(self.extensions, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        date: Date | None = None,
+        time: Time | None = None,
+        extensions: list[Extension] | None = None,
+    ) -> None:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: CreationDate
+        gedcom_docs: str = Specs.DATE_VALUE
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = CreationDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = CreationDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = CreationDate(
+                    Date(2024, 1, 10),
+                    Time(12, 30, 5),
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = CreationDate(
+                    date=date,
+                    time=time,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -9643,6 +9918,8 @@ class Family(Structure):
         notes: Any = None,
         citations: Any = None,
         multimedia_links: Any = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if attributes is None:
@@ -9681,6 +9958,8 @@ class Family(Structure):
         self.notes = notes
         self.citations = citations
         self.multimedia_links = multimedia_links
+        self.change = change
+        self.creation = creation
         if extensions is None:
             extensions = []
         self.extensions: list[Extension] = extensions
@@ -9718,6 +9997,8 @@ class Family(Structure):
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.citations, SourceCitation)
             and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -9755,6 +10036,8 @@ class Family(Structure):
             lines = Tagger.structure(lines, level + 1, self.notes)
             lines = Tagger.structure(lines, level + 1, self.citations)
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
+            lines = Tagger.structure(lines, level + 1, self.change)
+            lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -9777,6 +10060,8 @@ Family(
     notes = {Formatter.codes(self.notes, tabs)},
     citations = {Formatter.codes(self.citations, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -9801,6 +10086,8 @@ Family(
         notes: Any = None,
         citations: Any = None,
         multimedia_links: Any = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -9841,6 +10128,8 @@ Family(
                     notes=None,
                     citations=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -9861,6 +10150,8 @@ Family(
                     notes=None,
                     citations=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -9881,6 +10172,8 @@ Family(
                     notes=None,
                     citations=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9902,6 +10195,8 @@ Family(
                     notes=notes,
                     citations=citations,
                     multimedia_links=multimedia_links,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -9950,6 +10245,8 @@ class Multimedia(Structure):
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         sources: list[SourceCitation] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if files is None:
@@ -9966,6 +10263,8 @@ class Multimedia(Structure):
         self.identifiers = identifiers
         self.notes = notes
         self.sources = sources
+        self.change = change
+        self.creation = creation
         if extensions is None:
             extensions = []
         self.extensions: list[Extension] = extensions
@@ -9988,6 +10287,8 @@ class Multimedia(Structure):
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -10008,6 +10309,8 @@ Multimedia(
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10022,6 +10325,8 @@ Multimedia(
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         sources: list[SourceCitation] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -10053,6 +10358,8 @@ Multimedia(
                     identifiers=None,
                     notes=None,
                     sources=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -10064,6 +10371,8 @@ Multimedia(
                     identifiers=None,
                     notes=None,
                     sources=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -10075,6 +10384,8 @@ Multimedia(
                     identifiers=None,
                     notes=None,
                     sources=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -10086,6 +10397,8 @@ Multimedia(
                     identifiers=identifiers,
                     notes=notes,
                     sources=sources,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -10153,6 +10466,8 @@ class Source(Structure):
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if events is None:
@@ -10178,6 +10493,8 @@ class Source(Structure):
         self.identifiers = identifiers
         self.notes = notes
         self.multimedia_links = multimedia_links
+        self.change = change
+        self.creation = creation
         if extensions is None:
             extensions = []
         self.extensions: list[Extension] = extensions
@@ -10207,6 +10524,8 @@ class Source(Structure):
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -10232,6 +10551,8 @@ Source(
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10253,6 +10574,8 @@ Source(
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -10289,6 +10612,8 @@ Source(
                     identifiers=None,
                     notes=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -10305,6 +10630,8 @@ Source(
                     identifiers=None,
                     notes=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -10321,6 +10648,8 @@ Source(
                     identifiers=None,
                     notes=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -10339,6 +10668,8 @@ Source(
                     identifiers=identifiers,
                     notes=notes,
                     multimedia_links=multimedia_links,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -10396,6 +10727,8 @@ class Submitter(Structure):
         languages: list[str] | None = None,
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if address is None:
@@ -10427,6 +10760,8 @@ class Submitter(Structure):
         self.languages = languages
         self.identifiers = identifiers
         self.notes = notes
+        self.change = change
+        self.creation = creation
         if extensions is None:
             extensions = []
         self.extensions: list[Extension] = extensions
@@ -10454,6 +10789,8 @@ class Submitter(Structure):
             and Checker.verify_tuple_type(self.languages, str)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
             and Checker.verify_tuple_type(self.notes, Note)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -10479,6 +10816,8 @@ Submitter(
     languages = {Formatter.codes(self.languages, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10498,6 +10837,8 @@ Submitter(
         languages: list[str] | None = None,
         identifiers: list[Identifier] | None = None,
         notes: list[Note] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -10534,6 +10875,8 @@ Submitter(
                     languages=None,
                     identifiers=None,
                     notes=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -10550,6 +10893,8 @@ Submitter(
                     languages=None,
                     identifiers=None,
                     notes=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -10566,6 +10911,8 @@ Submitter(
                     languages=None,
                     identifiers=None,
                     notes=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -10583,6 +10930,8 @@ Submitter(
                     identifiers=identifiers,
                     notes=notes,
                     extensions=extensions,
+                    change=change,
+                    creation=creation,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -10729,6 +11078,8 @@ class Individual(Structure):
         notes: list[Note] | None = None,
         sources: list[Source] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if personal_names is None:
@@ -10778,6 +11129,8 @@ class Individual(Structure):
         self.notes = notes
         self.sources = sources
         self.multimedia_links = multimedia_links
+        self.change = change
+        self.creation = creation
         self.extensions = extensions
 
     def validate(self) -> bool:
@@ -10802,6 +11155,8 @@ class Individual(Structure):
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.sources, Source)
             and Checker.verify_tuple_type(self.multimedia_links, MultimediaLink)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
             and Checker.verify_tuple_type(self.extensions, Extension)
         )
         return check
@@ -10829,6 +11184,8 @@ class Individual(Structure):
             lines = Tagger.structure(lines, level + 1, self.sources)
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
             lines = Tagger.structure(lines, level + 1, self.extensions)
+            lines = Tagger.structure(lines, level + 1, self.change)
+            lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -10851,6 +11208,8 @@ Individual(
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10876,6 +11235,8 @@ Individual(
         notes: list[Note] | None = None,
         sources: list[Source] | None = None,
         multimedia_links: list[MultimediaLink] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -10917,6 +11278,8 @@ Individual(
                     notes=None,
                     sources=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -10938,6 +11301,8 @@ Individual(
                     notes=None,
                     sources=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -10959,6 +11324,8 @@ Individual(
                     notes=None,
                     sources=None,
                     multimedia_links=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -10981,6 +11348,8 @@ Individual(
                     notes=notes,
                     sources=sources,
                     multimedia_links=multimedia_links,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -11032,6 +11401,8 @@ class Repository(Structure):
         wwws: list[str] | None = None,
         notes: list[Note] | None = None,
         identifiers: list[Identifier] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if address is None:
@@ -11056,6 +11427,8 @@ class Repository(Structure):
         self.faxes = faxes
         self.wwws = wwws
         self.notes = notes
+        self.change = change
+        self.creation = creation
         self.identifiers = identifiers
         if extensions is None:
             extensions = []
@@ -11081,6 +11454,8 @@ class Repository(Structure):
             and Checker.verify_tuple_type(self.wwws, str)
             and Checker.verify_tuple_type(self.notes, Note)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -11093,6 +11468,8 @@ class Repository(Structure):
             lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
             lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
             lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.structure(lines, level, self.change)
+            lines = Tagger.structure(lines, level, self.creation)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -11108,6 +11485,8 @@ Repository(
     wwws = {Formatter.codes(self.wwws, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
+    change = {Formatter.codes(self.change, tabs)},
+    creation = {Formatter.codes(self.creation, tabs)},
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -11125,6 +11504,8 @@ Repository(
         wwws: list[str] | None = None,
         notes: list[Note] | None = None,
         identifiers: list[Identifier] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -11159,6 +11540,8 @@ Repository(
                     wwws=None,
                     notes=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -11173,6 +11556,8 @@ Repository(
                     wwws=None,
                     notes=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -11187,6 +11572,8 @@ Repository(
                     wwws=None,
                     notes=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -11201,6 +11588,8 @@ Repository(
                     wwws=wwws,
                     notes=notes,
                     identifiers=identifiers,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -11239,6 +11628,8 @@ class SharedNote(Structure):
         translations: list[NoteTranslation] | None = None,
         sources: list[SourceCitation] | None = None,
         identifiers: list[Identifier] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ):
         if translations is None:
@@ -11254,6 +11645,8 @@ class SharedNote(Structure):
         self.translations = translations
         self.sources = sources
         self.identifiers = identifiers
+        self.change = change
+        self.creation=creation
         if extensions is None:
             extensions = []
         self.extensions: list[Extension] = extensions
@@ -11277,6 +11670,8 @@ class SharedNote(Structure):
             and Checker.verify_tuple_type(self.translations, NoteTranslation)
             and Checker.verify_tuple_type(self.sources, Source)
             and Checker.verify_tuple_type(self.identifiers, Identifier)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
         )
         return check
 
@@ -11298,6 +11693,8 @@ SharedNote(
     translations = {Formatter.codes(self.translations, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
+    change = {Formatter.codes(self.change, tabs)}
+    creation = {Formatter.codes(self.creation, tabs)}
     extensions = {Formatter.codes(self.extensions, tabs)},
 )""",
             String.INDENT * tabs,
@@ -11313,6 +11710,8 @@ SharedNote(
         translations: list[NoteTranslation] | None = None,
         sources: list[SourceCitation] | None = None,
         identifiers: list[Identifier] | None = None,
+        change: ChangeDate | None = None,
+        creation: CreationDate | None = None,
         extensions: list[Extension] | None = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -11345,6 +11744,8 @@ SharedNote(
                     translations=None,
                     sources=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -11357,6 +11758,8 @@ SharedNote(
                     translations=None,
                     sources=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -11369,6 +11772,8 @@ SharedNote(
                     translations=None,
                     sources=None,
                     identifiers=None,
+                    change=None,
+                    creation=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -11381,6 +11786,8 @@ SharedNote(
                     translations=translations,
                     sources=sources,
                     identifiers=identifiers,
+                    change=change,
+                    creation=creation,
                     extensions=extensions,
                 )
                 code_preface = Example.EMPTY_CODE
