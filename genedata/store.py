@@ -17,21 +17,37 @@ Examples:
 """
 
 __all__ = [
+    'WWW',
+    'AddrType',
     'Address',
     'Age',
     'Alias',
+    'AssoType',
     'Association',
     'CallNumber',
+    'CalnType',
     'ChangeDate',
+    'ChangeDateType',
     'Checker',
+    'ChilType',
     'Child',
     'CreationDate',
+    'CreationDateType',
     'Date',
+    'DateType',
     'DateValue',
+    'DateValueType',
     'Dater',
+    'Email',
+    'EmailType',
     'EventDetail',
     'Exid',
-    'Family',
+    'ExidType',
+    'FamAttrType',
+    'FamEvenDetailType',
+    'FamEvenType',
+    'FamType',
+    'FamcType',
     'Family',
     'FamilyAttribute',
     'FamilyChild',
@@ -39,12 +55,18 @@ __all__ = [
     'FamilyEventDetail',
     'FamilySpouse',
     'FamilyXref',
+    'FamsType',
+    'Fax',
+    'FaxType',
     'File',
+    'FileTranType',
     'FileTranslation',
+    'FileType',
     'Formatter',
     'Header',
     'Identifier',
-    'Individual',
+    'IndiAttrType',
+    'IndiEvenType',
     'Individual',
     'IndividualAttribute',
     'IndividualEvent',
@@ -53,17 +75,31 @@ __all__ = [
     'LDSIndividualOrdinance',
     'LDSOrdinanceDetail',
     'LDSSpouseSealing',
+    'Lang',
+    'LangType',
+    'MMLinkType',
     'Map',
-    'Multimedia',
+    'MapType',
     'Multimedia',
     'MultimediaLink',
     'MultimediaXref',
     'NameTranslation',
+    'NoType',
     'NonEvent',
     'Note',
+    'NoteTranType',
     'NoteTranslation',
+    'ObjeType',
     'PersonalName',
     'PersonalNamePieces',
+    'PersonalNamePiecesType',
+    'PersonalNameType',
+    'Phone',
+    'PhoneType',
+    'Phrase',
+    'PhraseType',
+    'PlacTranType',
+    'PlacType',
     'Place',
     'PlaceTranslation',
     'Placer',
@@ -72,9 +108,9 @@ __all__ = [
     'RepositoryXref',
     'Schema',
     'SharedNote',
-    'SharedNote',
     'SharedNoteXref',
-    'Source',
+    'SnoteType',
+    'SourType',
     'Source',
     'SourceCitation',
     'SourceData',
@@ -88,6 +124,7 @@ __all__ = [
     'Text',
     'Time',
     'Void',
+    'WWWType'
 ]
 
 
@@ -122,6 +159,7 @@ from genedata.constants import (
 )
 from genedata.gedcom import (
     Adop,
+    Docs,
     Even,
     EvenAttr,
     FamAttr,
@@ -486,7 +524,6 @@ class Checker:
             raise ValueError(message)
         return True
 
-        
     @staticmethod
     def verify_ext(tag: Tag, extensions: Any) -> bool:
         check: bool = True
@@ -494,23 +531,25 @@ class Checker:
             return check
         if isinstance(extensions, list):
             for extension in extensions:
-                if len(extension.schema.supers) > 0 and tag.value not in extension.schema.supers:
+                if (
+                    len(extension.schema.supers) > 0
+                    and tag.value not in extension.schema.supers
+                ):
                     check = False
                     raise ValueError(
                         Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension)
                     )
             return check
-        if len(extension.schema.supers) > 0 and tag.value not in extension.schema.supers:
-                check = False
-                raise ValueError(
-                    Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension)
-                )
+        if (
+            len(extension.schema.supers) > 0
+            and tag.value not in extension.schema.supers
+        ):
+            check = False
+            raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension))
         return check
 
     @staticmethod
-    def verify_type(
-        value: Any, value_type: Any, validate: bool = True
-    ) -> bool:
+    def verify_type(value: Any, value_type: Any, validate: bool = True) -> bool:
         """Check if the value has the specified type."""
         check: bool = True
         if value is None:
@@ -524,6 +563,7 @@ class Checker:
                 if not isinstance(item, int | float | str | Enum) and validate:
                     with contextlib.suppress(Exception):
                         check = item.validate()
+            return check
         if not isinstance(value, value_type):
             raise TypeError(
                 Msg.WRONG_TYPE.format(value, type(value), value_type)
@@ -581,7 +621,7 @@ class Checker:
                 has not been raised.
         """
         if value == default:
-            raise ValueError(Msg.NOT_DEFAULT.format(value, default))
+            raise ValueError(Msg.NOT_DEFAULT.format(default))
         return True
 
     @staticmethod
@@ -1565,7 +1605,9 @@ Extension(
             gedcom_docs,
             genealogy_docs,
         )
-Ext = Extension | list[Extension] | None
+
+
+ExtType = Extension | list[Extension] | None
 
 
 class Date(NamedTuple):
@@ -1603,7 +1645,7 @@ class Date(NamedTuple):
     calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN
     iso: str = Default.EMPTY
     display_calendar: bool = False
-    date_ext: Ext = None
+    date_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1669,7 +1711,7 @@ Date(
         calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
         iso: str = Default.EMPTY,
         display_calendar: bool = False,
-        date_ext: Ext = None,
+        date_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -1739,6 +1781,9 @@ Date(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+DateType = Date | None
 
 
 class Time(NamedTuple):
@@ -1755,7 +1800,7 @@ class Time(NamedTuple):
     minute: int = Default.TIME_MINUTE
     second: int | float = Default.TIME_SECOND
     UTC: bool = False
-    time_ext: Ext = None
+    time_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1786,7 +1831,9 @@ class Time(NamedTuple):
                 second_str = ''.join(['0', second_str])
             if self.UTC:
                 second_str = ''.join([second_str, 'Z'])
-            lines = Tagger.string(lines, level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}')
+            lines = Tagger.string(
+                lines, level, Tag.TIME, f'{hour_str}:{minute_str}:{second_str}'
+            )
             lines = Tagger.structure(lines, level + 1, self.time_ext)
         return lines
 
@@ -1821,7 +1868,7 @@ Time(
         minute: int = Default.TIME_MINUTE,
         second: int | float = Default.TIME_SECOND,
         UTC: bool = False,
-        time_ext: Ext = None,
+        time_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -1889,6 +1936,9 @@ Time(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+TimeType = Time | None
 
 
 # class DateExact(Structure):
@@ -1963,17 +2013,17 @@ class DateValue(NamedTuple):
     >  +1 PHRASE <Text>                         {0:1}  g7:PHRASE
     """
 
-    date: Date = Date()
-    time: Time = Time()
+    date: DateType = None
+    time: TimeType = None
     phrase: str = Default.EMPTY
-    phrase_ext: Ext = None
+    phrase_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.phrase, str)
-            and self.date.validate()
-            and self.time.validate()
+            and (self.date is not None and self.date.validate())
+            and (self.time is not None and self.time.validate())
             and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
@@ -2006,7 +2056,7 @@ DateValue(
         date: Date = Date(),  # noqa: B008
         time: Time = Time(),  # noqa: B008
         phrase: str = Default.EMPTY,
-        phrase_ext: Ext = None,
+        phrase_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2072,13 +2122,16 @@ DateValue(
         )
 
 
+DateValueType = DateValue | None
+
+
 class ChangeDate(NamedTuple):
     """Store, validate and format change date information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Change Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CHANGE_DATE)
     > n CHAN                                     {1:1}  g7:CHAN
@@ -2086,10 +2139,11 @@ class ChangeDate(NamedTuple):
     >      +2 TIME <Time>                        {0:1}  g7:TIME
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
+
     date: Date = Date()
     time: Time = Time()
     notes: list[Any] | None = None
-    chan_ext: Ext = None
+    chan_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -2129,7 +2183,7 @@ ChangeDate(
         date: Date = Date(),  # noqa: B008
         time: Time = Time(),  # noqa: B008
         notes: list[Any] | None = None,
-        chan_ext: Ext = None,
+        chan_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2194,13 +2248,17 @@ ChangeDate(
             genealogy_docs,
         )
 
+
+ChangeDateType = ChangeDate | None
+
+
 class CreationDate(NamedTuple):
     """Store, validate and format create date information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Creation Date](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CREATION_DATE)
     > n CREA                                     {1:1}  g7:CREA
@@ -2210,12 +2268,12 @@ class CreationDate(NamedTuple):
 
     date: Date = Date()
     time: Time = Time()
-    crea_ext: Ext = None
+    crea_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            self.date.validate() 
+            self.date.validate()
             and self.time.validate()
             and Checker.verify_ext(Tag.CREA, self.crea_ext)
         )
@@ -2247,7 +2305,7 @@ CreationDate(
         choice: int = Default.CHOICE,
         date: Date = Date(),  # noqa: B008
         time: Time = Time(),  # noqa: B008
-        crea_ext: Ext = None,
+        crea_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2309,27 +2367,165 @@ CreationDate(
         )
 
 
-class Phone(NamedTuple):
-    """Store, validate and format phone information.
-    
-    Example:
-    
-    Args:
-    
+CreationDateType = CreationDate | None
+
+
+class Identifier(NamedTuple):
+    """Construct GEDCOM data for the Identifier Structure.
+
+    There are three valid identifier structures.  They will be illustrated in
+    the examples.
+
+    Examples:
+
+
+
     Reference:
-        [GEDCOM Phone](https://gedcom.io/terms/v7/PHON)
-    
+
+    - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)
+
+    [
+    n REFN <Special>                           {1:1}  g7:REFN
+    +1 TYPE <Text>                           {0:1}  g7:TYPE
+    |
+    n UID <Special>                            {1:1}  g7:UID
+    |
+    n EXID <Special>                           {1:1}  g7:EXID
+    +1 TYPE <Special>                        {0:1}  g7:EXID-TYPE
+    ]
     """
 
-    phone: str = Default.EMPTY
-    phon_ext: Ext = None
+    tag: Id = Id.NONE
+    tag_info: str = Default.EMPTY
+    tag_type: str = Default.EMPTY
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.phone, str)
-            and Checker.verify_ext(Tag.PHON, self.phon_ext)
+            Checker.verify_enum(self.tag.value, Id)
+            and Checker.verify_type(self.tag_info, str)
+            and Checker.verify_type(self.tag_type, str)
         )
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            if self.tag != Id.NONE:
+                lines = Tagger.taginfo(level, self.tag.value, self.tag_info)
+            if self.tag != Id.UID:
+                lines = ''.join(
+                    [lines, Tagger.taginfo(level + 1, Tag.TYPE, self.tag_type)]
+                )
+            if self.tag == Id.EXID and self.tag_type == '':
+                logging.warning(Msg.EXID_TYPE)
+        return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Identifier(
+    tag = {Formatter.codes(self.tag, tabs)},
+    tag_info = {Formatter.codes(self.tag_info, tabs)},
+    tag_type = {Formatter.codes(self.tag_type, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        tag: Id = Id.NONE,
+        tag_info: str = Default.EMPTY,
+        tag_type: str = Default.EMPTY,
+    ) -> None:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Identifier
+        gedcom_docs: str = Specs.IDENTIFIER
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Identifier(
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Identifier(
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Identifier(
+                    tag=Id.NONE,
+                    tag_info='',
+                    tag_type='',
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Identifier(
+                    tag=tag,
+                    tag_info=tag_info,
+                    tag_type=tag_type,
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+
+IdenType = Identifier | list[Identifier] | None
+
+
+class Phone(NamedTuple):
+    """Store, validate and format phone information.
+
+    Example:
+
+    Args:
+
+    Reference:
+        [GEDCOM Phone](https://gedcom.io/terms/v7/PHON)
+
+    """
+
+    phone: str = Default.EMPTY
+    phon_ext: ExtType = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = Checker.verify_type(
+            self.phone, str
+        ) and Checker.verify_ext(Tag.PHON, self.phon_ext)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -2354,7 +2550,7 @@ Phone(
         self,
         choice: int = Default.CHOICE,
         phone: str = Default.EMPTY,
-        phon_ext: Ext = None,
+        phon_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2372,7 +2568,7 @@ Phone(
             choice: The example one chooses to display.
         """
         show: Phone
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = Docs.PHON
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -2384,15 +2580,11 @@ Phone(
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
-                show = Phone(
-                    phone='12345667'
-                )
+                show = Phone(phone='12345667')
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
-                show = Phone(
-                    phone='23456'
-                )
+                show = Phone(phone='23456')
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
@@ -2411,34 +2603,37 @@ Phone(
             genealogy_docs,
         )
 
+
+PhoneType = Phone | list[Phone] | None
+
+
 class Email(NamedTuple):
     """Store, validate and format email information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Phone](https://gedcom.io/terms/v7/EMAIL)
-    
+
     """
 
     email: str = Default.EMPTY
-    email_ext: Ext = None
+    email_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.email, str)
-            and Checker.verify_ext(Tag.PHON, self.email_ext)
-        )
+        check: bool = Checker.verify_type(
+            self.email, str
+        ) and Checker.verify_ext(Tag.EMAIL, self.email_ext)
         return check
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.PHON, self.email)
+            lines = Tagger.string(lines, level, Tag.EMAIL, self.email)
             lines = Tagger.structure(lines, level + 1, self.email_ext)
         return lines
 
@@ -2456,7 +2651,7 @@ Email(
         self,
         choice: int = Default.CHOICE,
         email: str = Default.EMPTY,
-        email_ext: Ext = None,
+        email_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2474,7 +2669,7 @@ Email(
             choice: The example one chooses to display.
         """
         show: Email
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = Docs.EMAIL
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -2486,15 +2681,11 @@ Email(
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
-                show = Email(
-                    email='r@c.com'
-                )
+                show = Email(email='r@c.com')
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
-                show = Email(
-                    email='two@three.com'
-                )
+                show = Email(email='two@three.com')
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
@@ -2514,26 +2705,28 @@ Email(
         )
 
 
+EmailType = Email | list[Email] | None
+
+
 class Fax(NamedTuple):
     """Store, validate and format fax information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Phone](https://gedcom.io/terms/v7/FAX)
-    
+
     """
 
     fax: str = Default.EMPTY
-    fax_ext: Ext = None
+    fax_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.fax, str)
-            and Checker.verify_ext(Tag.PHON, self.fax_ext)
+        check: bool = Checker.verify_type(self.fax, str) and Checker.verify_ext(
+            Tag.FAX, self.fax_ext
         )
         return check
 
@@ -2541,7 +2734,7 @@ class Fax(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.PHON, self.fax)
+            lines = Tagger.string(lines, level, Tag.FAX, self.fax)
             lines = Tagger.structure(lines, level + 1, self.fax_ext)
         return lines
 
@@ -2559,7 +2752,7 @@ Fax(
         self,
         choice: int = Default.CHOICE,
         fax: str = Default.EMPTY,
-        fax_ext: Ext = None,
+        fax_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2577,7 +2770,7 @@ Fax(
             choice: The example one chooses to display.
         """
         show: Fax
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = Docs.FAX
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -2589,15 +2782,11 @@ Fax(
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
-                show = Fax(
-                    fax='3333333'
-                )
+                show = Fax(fax='3333333')
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
-                show = Fax(
-                    fax='two@three.com'
-                )
+                show = Fax(fax='two@three.com')
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
@@ -2615,27 +2804,30 @@ Fax(
             gedcom_docs,
             genealogy_docs,
         )
-    
+
+
+FaxType = Fax | list[Fax] | None
+
+
 class WWW(NamedTuple):
     """Store, validate and format fax information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Phone](https://gedcom.io/terms/v7/FAX)
-    
+
     """
 
     www: str = Default.EMPTY
-    www_ext: Ext = None
+    www_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.www, str)
-            and Checker.verify_ext(Tag.PHON, self.www_ext)
+        check: bool = Checker.verify_type(self.www, str) and Checker.verify_ext(
+            Tag.WWW, self.www_ext
         )
         return check
 
@@ -2643,7 +2835,7 @@ class WWW(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.PHON, self.www)
+            lines = Tagger.string(lines, level, Tag.WWW, self.www)
             lines = Tagger.structure(lines, level + 1, self.www_ext)
         return lines
 
@@ -2661,7 +2853,7 @@ WWW(
         self,
         choice: int = Default.CHOICE,
         www: str = Default.EMPTY,
-        www_ext: Ext = None,
+        www_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2679,7 +2871,7 @@ WWW(
             choice: The example one chooses to display.
         """
         show: WWW
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = Docs.WWW
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -2691,15 +2883,11 @@ WWW(
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
-                show = WWW(
-                    www='3333333'
-                )
+                show = WWW(www='3333333')
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
-                show = WWW(
-                    www='two@three.com'
-                )
+                show = WWW(www='two@three.com')
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
@@ -2718,27 +2906,30 @@ WWW(
             genealogy_docs,
         )
 
+
+WWWType = WWW | list[WWW] | None
+
+
 class Lang(NamedTuple):
     """Store, validate and format fax information.
-    
+
     Example:
-    
+
     Args:
-    
+
     Reference:
         [GEDCOM Phone](https://gedcom.io/terms/v7/FAX)
-    
+
     """
 
     lang: str = Default.EMPTY
-    lang_ext: Ext = None
+    lang_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.lang, str)
-            and Checker.verify_ext(Tag.PHON, self.lang_ext)
-        )
+        check: bool = Checker.verify_type(
+            self.lang, str
+        ) and Checker.verify_ext(Tag.LANG, self.lang_ext)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -2763,7 +2954,7 @@ Lang(
         self,
         choice: int = Default.CHOICE,
         lang: str = Default.EMPTY,
-        lang_ext: Ext = None,
+        lang_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -2781,7 +2972,7 @@ Lang(
             choice: The example one chooses to display.
         """
         show: Lang
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = Docs.LANG
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
@@ -2793,15 +2984,11 @@ Lang(
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
-                show = Lang(
-                    lang='en'
-                )
+                show = Lang(lang='en')
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
-                show = Lang(
-                    lang='two@three.com'
-                )
+                show = Lang(lang='two@three.com')
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
@@ -2819,7 +3006,109 @@ Lang(
             gedcom_docs,
             genealogy_docs,
         )
-    
+
+
+LangType = Lang | list[Lang] | None
+
+
+class Phrase(NamedTuple):
+    """Store, validate and format fax information.
+
+    Example:
+
+    Args:
+
+    Reference:
+        [GEDCOM Phone](https://gedcom.io/terms/v7/FAX)
+
+    """
+
+    phrase: str = Default.EMPTY
+    phrase_ext: ExtType = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = Checker.verify_type(
+            self.phrase, str
+        ) and Checker.verify_ext(Tag.LANG, self.phrase_ext)
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = ''
+        if self.validate():
+            lines = Tagger.string(lines, level, Tag.LANG, self.phrase)
+            lines = Tagger.structure(lines, level + 1, self.phrase_ext)
+        return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Phrase(
+    phrase = {Formatter.codes(self.phrase, tabs)},
+    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        phrase: str = Default.EMPTY,
+        phrase_ext: ExtType = None,
+    ) -> None:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Phrase
+        gedcom_docs: str = Docs.LANG
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Phrase('something')            
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Phrase('else')
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Phrase('now')
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Phrase(
+                    phrase=phrase,
+                    phrase_ext=phrase_ext,
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+
+PhraseType = Phrase | None
+
 
 class Address(NamedTuple):
     """Store, validate and format address information to be saved to a ged file.
@@ -2883,15 +3172,15 @@ class Address(NamedTuple):
     state: str = Default.EMPTY
     postal: str = Default.EMPTY
     country: str = Default.EMPTY
-    addr_ext: Ext = None
-    city_ext: Ext = None
-    stae_ext: Ext = None
-    post_ext: Ext = None
-    ctry_ext: Ext = None
+    addr_ext: ExtType = None
+    city_ext: ExtType = None
+    stae_ext: ExtType = None
+    post_ext: ExtType = None
+    ctry_ext: ExtType = None
 
     def validate(self) -> bool:
         check: bool = (
-            Checker.verify_type(self.address, str|list|None)
+            Checker.verify_type(self.address, str | list | None)
             and Checker.verify_type(self.city, str)
             and Checker.verify_type(self.state, str)
             and Checker.verify_type(self.postal, str)
@@ -2949,11 +3238,11 @@ Address(
         state: str = Default.EMPTY,
         postal: str = Default.EMPTY,
         country: str = Default.EMPTY,
-        addr_ext: Ext = None,
-        city_ext: Ext = None,
-        stae_ext: Ext = None,
-        post_ext: Ext = None,
-        ctry_ext: Ext = None,
+        addr_ext: ExtType = None,
+        city_ext: ExtType = None,
+        stae_ext: ExtType = None,
+        post_ext: ExtType = None,
+        ctry_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3031,6 +3320,9 @@ Address(
         )
 
 
+AddrType = Address | None
+
+
 class Age(NamedTuple):
     """Implement the Age data type in the GEDCOM specification.
 
@@ -3096,9 +3388,8 @@ class Age(NamedTuple):
     weeks: int = Default.WEEKS
     days: int = Default.DAYS
     greater_less_than: str = Default.GREATER_LESS_THAN
-    phrase: str = Default.EMPTY
-    age_ext: Ext = None
-    phrase_ext: Ext = None
+    phrase: PhraseType = None
+    age_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -3108,13 +3399,12 @@ class Age(NamedTuple):
             and Checker.verify_type(self.months, int)
             and Checker.verify_type(self.weeks, int)
             and Checker.verify_type(self.days, int)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_not_negative(self.years)
             and Checker.verify_not_negative(self.months)
             and Checker.verify_not_negative(self.weeks)
             and Checker.verify_not_negative(self.days)
             and Checker.verify_ext(Tag.AGE, self.age_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
@@ -3136,8 +3426,7 @@ class Age(NamedTuple):
             info = info.replace('  ', ' ').replace('  ', ' ').strip()
             line = Tagger.string(line, level, Tag.AGE, info)
             line = Tagger.structure(line, level + 1, self.age_ext)
-            line = Tagger.string(line, level + 1, Tag.PHRASE, self.phrase)
-            line = Tagger.structure(line, level + 1, self.phrase_ext)
+            line = Tagger.structure(line, level + 1, self.phrase)
         return line
 
     def code(self, tabs: int = 0) -> str:
@@ -3152,7 +3441,6 @@ Age(
     greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
     phrase = {Formatter.codes(self.phrase)},
     age_ext = {Formatter.codes(self.age_ext, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -3165,9 +3453,8 @@ Age(
         weeks: int = Default.WEEKS,
         days: int = Default.DAYS,
         greater_less_than: str = Default.GREATER_LESS_THAN,
-        phrase: str = Default.EMPTY,
-        age_ext: Ext = None,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
+        age_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3199,7 +3486,7 @@ Age(
                     weeks=1,
                     days=2,
                     greater_less_than='',
-                    phrase='Original text read, "Ten years, two months, one week and two days."',
+                    phrase=Phrase('Original text read, "Ten years, two months, one week and two days."'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -3210,7 +3497,7 @@ Age(
                     weeks=0,
                     days=2,
                     greater_less_than='<',
-                    phrase='Original text read, "Under two months and two days."',
+                    phrase=Phrase('Original text read, "Under two months and two days."'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -3221,7 +3508,7 @@ Age(
                     weeks=40,
                     days=2,
                     greater_less_than='>',
-                    phrase='Original text read, "Čtyřicet týdnů a dva dny"',
+                    phrase=Phrase('Original text read, "Čtyřicet týdnů a dva dny"'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -3234,7 +3521,6 @@ Age(
                     greater_less_than=greater_less_than,
                     phrase=phrase,
                     age_ext=age_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -3246,6 +3532,9 @@ Age(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+AgeType = Age | None
 
 
 class PersonalNamePieces(NamedTuple):
@@ -3286,22 +3575,22 @@ class PersonalNamePieces(NamedTuple):
     surname_prefix: list[str] | None = None
     surname: list[str] | None = None
     suffix: list[str] | None = None
-    npfx_ext: Ext = None
-    givn_ext: Ext = None
-    nick_ext: Ext = None
-    spfx_ext: Ext = None
-    surn_ext: Ext = None
-    nsfx_ext: Ext = None
+    npfx_ext: ExtType = None
+    givn_ext: ExtType = None
+    nick_ext: ExtType = None
+    spfx_ext: ExtType = None
+    surn_ext: ExtType = None
+    nsfx_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.prefix, str|list|None)
-            and Checker.verify_type(self.given, str|list|None)
-            and Checker.verify_type(self.nickname, str|list|None)
-            and Checker.verify_type(self.surname_prefix, str|list|None)
-            and Checker.verify_type(self.surname, str|list|None)
-            and Checker.verify_type(self.suffix, str|list|None)
+            Checker.verify_type(self.prefix, str | list | None)
+            and Checker.verify_type(self.given, str | list | None)
+            and Checker.verify_type(self.nickname, str | list | None)
+            and Checker.verify_type(self.surname_prefix, str | list | None)
+            and Checker.verify_type(self.surname, str | list | None)
+            and Checker.verify_type(self.suffix, str | list | None)
             and Checker.verify_ext(Tag.NPFX, self.npfx_ext)
             and Checker.verify_ext(Tag.GIVN, self.givn_ext)
             and Checker.verify_ext(Tag.NICK, self.nick_ext)
@@ -3358,12 +3647,12 @@ PersonalNamePieces(
         surname_prefix: list[str] | None = None,
         surname: list[str] | None = None,
         suffix: list[str] | None = None,
-        npfx_ext: Ext = None,
-        givn_ext: Ext = None,
-        nick_ext: Ext = None,
-        spfx_ext: Ext = None,
-        surn_ext: Ext = None,
-        nsfx_ext: Ext = None,
+        npfx_ext: ExtType = None,
+        givn_ext: ExtType = None,
+        nick_ext: ExtType = None,
+        spfx_ext: ExtType = None,
+        surn_ext: ExtType = None,
+        nsfx_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3446,6 +3735,9 @@ PersonalNamePieces(
         )
 
 
+PersonalNamePiecesType = PersonalNamePieces | None
+
+
 class NameTranslation(NamedTuple):
     """Store, validate and display name translations.
 
@@ -3489,19 +3781,18 @@ class NameTranslation(NamedTuple):
     """
 
     translation: str = String.EMPTY
-    language: str = String.UNDETERMINED
+    language: LangType = None
     pieces: PersonalNamePieces | None = None
-    tran_ext: Ext = None
-    lang_ext: Ext = None
+    tran_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
+            and Checker.verify_not_default(self.language, None)
             and Checker.verify_type(self.pieces, PersonalNamePieces)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -3511,8 +3802,7 @@ class NameTranslation(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level, Tag.TRAN, self.translation)
             lines = Tagger.structure(lines, level + 1, self.tran_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 2, self.lang_ext)
+            lines = Tagger.structure(lines, level + 1, self.language)
             lines = Tagger.structure(
                 lines, level + 1, self.pieces, PersonalNamePieces()
             )
@@ -3523,10 +3813,9 @@ class NameTranslation(NamedTuple):
             f"""
 NameTranslation(
     translation = {Formatter.codes(self.translation, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     pieces = {Formatter.codes(self.pieces, tabs + 1)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -3535,10 +3824,9 @@ NameTranslation(
         self,
         choice: int = Default.CHOICE,
         translation: str = String.EMPTY,
-        language: str = String.UNDETERMINED,
+        language: LangType = None,
         pieces: PersonalNamePieces | None = None,
-        tran_ext: Ext = None,
-        lang_ext: Ext = None,
+        tran_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3564,7 +3852,7 @@ NameTranslation(
             case 1:
                 show = NameTranslation(
                     translation="תומס ג'ונס",
-                    language='he',
+                    language=Lang('he'),
                     pieces=PersonalNamePieces(
                         given=["ג'ונס"],
                         surname=['תומס'],
@@ -3575,7 +3863,7 @@ NameTranslation(
             case 2:
                 show = NameTranslation(
                     translation='توماس جونز',
-                    language='ar',
+                    language=Lang('ar'),
                     pieces=PersonalNamePieces(
                         given=['توماس '],
                         surname=['جونز'],
@@ -3586,7 +3874,7 @@ NameTranslation(
             case 3:
                 show = NameTranslation(
                     translation='Τόμας Τζόουνς',
-                    language='el',
+                    language=Lang('el'),
                     pieces=PersonalNamePieces(
                         given=['Τόμας'],
                         surname=['Τζόουνς'],
@@ -3600,7 +3888,6 @@ NameTranslation(
                     language=language,
                     pieces=pieces,
                     tran_ext=tran_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -3612,6 +3899,9 @@ NameTranslation(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+NameTranType = NameTranslation | list[NameTranslation] | None
 
 
 class NoteTranslation(NamedTuple):
@@ -3662,20 +3952,18 @@ class NoteTranslation(NamedTuple):
 
     translation: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
-    tran_ext: Ext = None
-    mime_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    tran_ext: ExtType = None
+    mime_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
             and Checker.verify_enum(self.mime.value, MediaType)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -3687,8 +3975,7 @@ class NoteTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.tran_ext)
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime.value)
             lines = Tagger.structure(lines, level + 2, self.mime_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 2, self.lang_ext)
+            lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -3700,7 +3987,6 @@ NoteTranslation(
     language = {Formatter.codes(self.language, tabs)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -3710,10 +3996,9 @@ NoteTranslation(
         choice: int = Default.CHOICE,
         translation: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
-        language: str = Default.EMPTY,
-        tran_ext: Ext = None,
-        mime_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        tran_ext: ExtType = None,
+        mime_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3740,7 +4025,7 @@ NoteTranslation(
                 show = NoteTranslation(
                     translation='<p>To jest prosta notatka.</p>',
                     mime=MediaType.TEXT_HTML,
-                    language='pl',
+                    language=Lang('pl'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -3748,7 +4033,7 @@ NoteTranslation(
                 show = NoteTranslation(
                     translation='Þetta er einföld athugasemd.',
                     mime=MediaType.TEXT_PLAIN,
-                    language='is',
+                    language=Lang('is'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -3756,7 +4041,7 @@ NoteTranslation(
                 show = NoteTranslation(
                     translation='यह एक साधारण नोट है.',
                     mime=MediaType.TEXT_PLAIN,
-                    language='hi',
+                    language=Lang('hi'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -3767,7 +4052,6 @@ NoteTranslation(
                     language=language,
                     tran_ext=tran_ext,
                     mime_ext=mime_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -3779,6 +4063,9 @@ NoteTranslation(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+NoteTranType = NoteTranslation | list[NoteTranslation] | None
 
 
 class CallNumber(NamedTuple):
@@ -3825,16 +4112,14 @@ class CallNumber(NamedTuple):
 
     call_number: str = Default.EMPTY
     medium: Medium = Medium.NONE
-    phrase: str = Default.EMPTY
-    phrase_ext: Ext = None
-        
+    phrase: PhraseType = None
+
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.call_number, str)
             and Checker.verify_enum(self.medium.value, Medium)
             and Checker.verify_type(self.phrase, str)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
@@ -3844,8 +4129,7 @@ class CallNumber(NamedTuple):
         if self.call_number != String.EMPTY and self.validate():
             lines = Tagger.string(lines, level, Tag.CALN, self.call_number)
             lines = Tagger.string(lines, level + 1, Tag.MEDI, self.medium.value)
-            lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 3, self.phrase_ext)
+            lines = Tagger.structure(lines, level + 2, self.phrase)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -3855,7 +4139,6 @@ CallNumber(
     call_number = {Formatter.codes(self.call_number, tabs)},
     medium = {Formatter.codes(self.medium, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -3865,8 +4148,7 @@ CallNumber(
         choice: int = Default.CHOICE,
         call_number: str = Default.EMPTY,
         medium: Medium = Medium.NONE,
-        phrase: str = Default.EMPTY,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -3893,7 +4175,7 @@ CallNumber(
                 show = CallNumber(
                     call_number='1-234-333 ABC',
                     medium=Medium.BOOK,
-                    phrase='A special call number',
+                    phrase=Phrase('A special call number'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -3901,7 +4183,7 @@ CallNumber(
                 show = CallNumber(
                     call_number='1-234-333 ABC',
                     medium=Medium.MAGAZINE,
-                    phrase='A special article.',
+                    phrase=Phrase('A special article.'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -3909,7 +4191,7 @@ CallNumber(
                 show = CallNumber(
                     call_number='1-234-333 ABC',
                     medium=Medium.NONE,
-                    phrase='',
+                    phrase=Phrase(''),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -3918,7 +4200,6 @@ CallNumber(
                     call_number=call_number,
                     medium=medium,
                     phrase=phrase,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -3930,6 +4211,9 @@ CallNumber(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+CalnType = CallNumber | list[CallNumber] | None
 
 
 class Text(NamedTuple):
@@ -3963,20 +4247,18 @@ class Text(NamedTuple):
 
     text: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
-    text_ext: Ext = None
-    mime_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    text_ext: ExtType = None
+    mime_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.text, str)
             and Checker.verify_enum(self.mime.value, MediaType)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_ext(Tag.TEXT, self.text_ext)
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -3988,8 +4270,7 @@ class Text(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.text_ext)
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime.value)
             lines = Tagger.structure(lines, level + 1, self.mime_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 1, self.lang_ext)
+            lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -4001,7 +4282,6 @@ Text(
     language = {Formatter.codes(self.language, tabs)},
     text_ext = {Formatter.codes(self.text_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)},
 ),""",
             String.INDENT * tabs,
         )
@@ -4011,10 +4291,9 @@ Text(
         choice: int = Default.CHOICE,
         text: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
-        language: str = Default.EMPTY,
-        text_ext: Ext = None,
-        mime_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        text_ext: ExtType = None,
+        mime_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4041,7 +4320,7 @@ Text(
                 show = Text(
                     text='This is a text.',
                     mime=MediaType.TEXT_PLAIN,
-                    language='en',
+                    language=Lang('en'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -4049,7 +4328,7 @@ Text(
                 show = Text(
                     text='ई एकटा पाठ अछि।',
                     mime=MediaType.TEXT_PLAIN,
-                    language='mai',
+                    language=Lang('mai'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -4057,7 +4336,7 @@ Text(
                 show = Text(
                     text='ይህ ጽሑፍ ነው።',
                     mime=MediaType.TEXT_PLAIN,
-                    language='am',
+                    language=Lang('am'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -4068,7 +4347,6 @@ Text(
                     language=language,
                     text_ext=text_ext,
                     mime_ext=mime_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -4080,6 +4358,9 @@ Text(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+TextType = Text | list[Text] | None
 
 
 class SourceData(NamedTuple):
@@ -4108,12 +4389,12 @@ class SourceData(NamedTuple):
 
     date_value: DateValue | None = None
     texts: list[Text] | None = None
-    data_ext: Ext = None
+    data_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.date_value, str) 
+            Checker.verify_type(self.date_value, str)
             and Checker.verify_type(self.texts, Text)
             and Checker.verify_ext(Tag.DATA, self.data_ext)
         )
@@ -4144,7 +4425,7 @@ class SourceData(NamedTuple):
         choice: int = Default.CHOICE,
         date_value: DateValue | None = None,
         texts: list[Text] | None = None,
-        data_ext: Ext = None,
+        data_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4171,9 +4452,9 @@ class SourceData(NamedTuple):
                 show = SourceData(
                     date_value=DateValue(),
                     texts=[
-                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text('hello', MediaType.TEXT_PLAIN, language=Lang('en')),
                         Text(
-                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                            'hello again', MediaType.TEXT_PLAIN, language=Lang('en')
                         ),
                     ],
                 )
@@ -4183,9 +4464,9 @@ class SourceData(NamedTuple):
                 show = SourceData(
                     date_value=DateValue(),
                     texts=[
-                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text('hello', MediaType.TEXT_PLAIN, language=Lang('en')),
                         Text(
-                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                            'hello again', MediaType.TEXT_PLAIN, language=Lang('en')
                         ),
                     ],
                 )
@@ -4195,9 +4476,9 @@ class SourceData(NamedTuple):
                 show = SourceData(
                     date_value=DateValue(),
                     texts=[
-                        Text('hello', MediaType.TEXT_PLAIN, language='en'),
+                        Text('hello', MediaType.TEXT_PLAIN, language=Lang('en')),
                         Text(
-                            'hello again', MediaType.TEXT_PLAIN, language='en'
+                            'hello again', MediaType.TEXT_PLAIN, language=Lang('en')
                         ),
                     ],
                 )
@@ -4219,6 +4500,9 @@ class SourceData(NamedTuple):
             gedcom_docs,
             genealogy_docs,
         )
+
+
+SourDataType = SourceData | None
 
 
 class SourceCitation(NamedTuple):
@@ -4258,20 +4542,17 @@ class SourceCitation(NamedTuple):
     page: str = String.EMPTY
     source_data: SourceData | None = None
     event: Event = Event.NONE
-    event_phrase: str = String.EMPTY
+    event_phrase: PhraseType = None
     role: Role = Role.NONE
-    role_phrase: str = String.EMPTY
+    role_phrase: PhraseType = None
     quality: Quay = Quay.NONE
     multimedialinks: list[Any] | None = None
     notes: list[Any] | None = None
-    sour_ext: Ext = None
-    page_ext: Ext = None
-    even_ext: Ext = None
-    even_phrase_ext: Ext = None
-    role_ext: Ext = None
-    role_phrase_ext: Ext = None
-    quay_ext: Ext = None
-
+    sour_ext: ExtType = None
+    page_ext: ExtType = None
+    even_ext: ExtType = None
+    role_ext: ExtType = None
+    quay_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4280,18 +4561,16 @@ class SourceCitation(NamedTuple):
             and Checker.verify_type(self.page, str)
             and Checker.verify_type(self.source_data, SourceData)
             and Checker.verify_enum(self.event.value, Event)
-            and Checker.verify_type(self.event_phrase, str)
+            and Checker.verify_type(self.event_phrase, Phrase)
             and Checker.verify_enum(self.role.value, Role)
-            and Checker.verify_type(self.role_phrase, str)
+            and Checker.verify_type(self.role_phrase, Phrase)
             and Checker.verify_enum(self.quality.value, Quay)
             and Checker.verify_type(self.multimedialinks, MultimediaLink)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.SOUR, self.sour_ext)
             and Checker.verify_ext(Tag.PAGE, self.page_ext)
             and Checker.verify_ext(Tag.EVEN, self.even_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.even_phrase_ext)
             and Checker.verify_ext(Tag.ROLE, self.role_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.role_phrase_ext)
             and Checker.verify_ext(Tag.QUAY, self.quay_ext)
         )
         return check
@@ -4314,18 +4593,16 @@ class SourceCitation(NamedTuple):
                     lines, level + 1, Tag.EVEN, self.event.value
                 )
                 lines = Tagger.structure(lines, level + 1, self.even_ext)
-                lines = Tagger.string(
-                    lines, level + 2, Tag.PHRASE, self.event_phrase
+                lines = Tagger.structure(
+                    lines, level + 2, self.event_phrase
                 )
-                lines = Tagger.structure(lines, level + 1, self.even_phrase_ext)
                 lines = Tagger.string(
                     lines, level + 2, Tag.ROLE, self.role.value
                 )
                 lines = Tagger.structure(lines, level + 1, self.role_ext)
-                lines = Tagger.string(
-                    lines, level + 2, Tag.PHRASE, self.role_phrase
+                lines = Tagger.structure(
+                    lines, level + 2, self.role_phrase
                 )
-                lines = Tagger.structure(lines, level + 1, self.role_phrase_ext)
             lines = Tagger.string(
                 lines, level + 1, Tag.QUAY, self.quality.value
             )
@@ -4342,7 +4619,7 @@ SourceCitation(
     page = {Formatter.codes(self.page, tabs)},
     source_data = {Formatter.codes(self.source_data, tabs + 1)},
     event = {Formatter.codes(self.event, tabs + 1)},
-    phrase = {Formatter.codes(self.event_phrase, tabs)},
+    event_phrase = {Formatter.codes(self.event_phrase, tabs)},
     role = {Formatter.codes(self.role, tabs)},
     role_phrase = {Formatter.codes(self.role_phrase, tabs)},
     quality = {Formatter.codes(self.quality, tabs)},
@@ -4351,9 +4628,7 @@ SourceCitation(
     sour_ext = {Formatter.codes(self.sour_ext, tabs + 1)},
     page_ext = {Formatter.codes(self.page_ext, tabs + 1)},
     even_ext = {Formatter.codes(self.even_ext, tabs + 1)},
-    even_phrase_ext = {Formatter.codes(self.even_phrase_ext, tabs + 1)},
     role_ext = {Formatter.codes(self.role_ext, tabs + 1)},
-    role_phrase_ext = {Formatter.codes(self.role_phrase_ext, tabs + 1)},
     quay_ext = {Formatter.codes(self.quay_ext, tabs + 1)},
 ),""",
             String.INDENT * tabs,
@@ -4366,19 +4641,17 @@ SourceCitation(
         page: str = String.EMPTY,
         source_data: SourceData | None = None,
         event: Event = Event.NONE,
-        event_phrase: str = String.EMPTY,
+        event_phrase: PhraseType = None,
         role: Role = Role.NONE,
-        role_phrase: str = String.EMPTY,
+        role_phrase: PhraseType = None,
         quality: Quay = Quay.NONE,
         multimedialinks: list[Any] | None = None,
         notes: list[Any] | None = None,
-        sour_ext: Ext = None,
-        page_ext: Ext = None,
-        even_ext: Ext = None,
-        even_phrase_ext: Ext = None,
-        role_ext: Ext = None,
-        role_phrase_ext: Ext = None,
-        quay_ext: Ext = None,
+        sour_ext: ExtType = None,
+        page_ext: ExtType = None,
+        even_ext: ExtType = None,
+        role_ext: ExtType = None,
+        quay_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4434,9 +4707,7 @@ SourceCitation(
                     sour_ext=sour_ext,
                     page_ext=page_ext,
                     even_ext=even_ext,
-                    even_phrase_ext=even_phrase_ext,
                     role_ext=role_ext,
-                    role_phrase_ext=role_phrase_ext,
                     quay_ext=quay_ext,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -4449,6 +4720,9 @@ SourceCitation(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+SourCiteType = SourceCitation | list[SourceCitation] | None
 
 
 class Note(NamedTuple):
@@ -4544,17 +4818,15 @@ class Note(NamedTuple):
     ]
     """  # noqa: RUF002
 
-    
     shared_note_xref: SharedNoteXref = Void.SNOTE
     note: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
-    translations: list[NoteTranslation] | None = None
-    source_citations: list[SourceCitation] | None = None
-    snote_ext: Ext = None
-    note_ext: Ext = None
-    mime_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    translations: NoteTranType = None
+    source_citations: SourCiteType = None
+    snote_ext: ExtType = None
+    note_ext: ExtType = None
+    mime_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4567,7 +4839,6 @@ class Note(NamedTuple):
             and Checker.verify_ext(Tag.SNOTE, self.snote_ext)
             and Checker.verify_ext(Tag.NOTE, self.note_ext)
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -4579,16 +4850,15 @@ class Note(NamedTuple):
                 lines = Tagger.string(
                     lines, level, Tag.SNOTE, self.shared_note_xref.fullname
                 )
-                lines = Tagger.structure(lines, level+1, self.snote_ext)
+                lines = Tagger.structure(lines, level + 1, self.snote_ext)
             else:
                 lines = Tagger.string(lines, level, Tag.NOTE, self.note)
-                lines = Tagger.structure(lines, level+1, self.note_ext)
+                lines = Tagger.structure(lines, level + 1, self.note_ext)
                 lines = Tagger.string(
                     lines, level + 1, Tag.MIME, self.mime.value
                 )
                 lines = Tagger.structure(lines, level + 2, self.mime_ext)
-                lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-                lines = Tagger.structure(lines, level + 2, self.lang_ext)
+                lines = Tagger.structure(lines, level + 1, self.language)
                 lines = Tagger.structure(
                     lines, level + 1, self.translations, NoteTranslation()
                 )
@@ -4610,7 +4880,6 @@ Note(
     snote_ext = {Formatter.codes(self.snote_ext, tabs + 1)},
     note_ext = {Formatter.codes(self.note_ext, tabs + 1)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs + 1)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs + 1)},
 )""",
             String.INDENT * tabs,
         )
@@ -4621,13 +4890,12 @@ Note(
         shared_note_xref: SharedNoteXref = Void.SNOTE,
         note: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
-        language: str = Default.EMPTY,
-        translations: list[NoteTranslation] | None = None,
-        source_citations: list[SourceCitation] | None = None,
-        snote_ext: Ext = None,
-        note_ext: Ext = None,
-        mime_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        translations: NoteTranType = None,
+        source_citations: SourCiteType = None,
+        snote_ext: ExtType = None,
+        note_ext: ExtType = None,
+        mime_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4654,7 +4922,7 @@ Note(
                 show = Note(
                     note='A note',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     source_citations=None,
                 )
@@ -4664,7 +4932,7 @@ Note(
                 show = Note(
                     note='A note',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     source_citations=None,
                 )
@@ -4674,7 +4942,7 @@ Note(
                 show = Note(
                     note='A note',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     source_citations=None,
                 )
@@ -4691,7 +4959,6 @@ Note(
                     snote_ext=snote_ext,
                     note_ext=note_ext,
                     mime_ext=mime_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -4703,6 +4970,9 @@ Note(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+NoteType = Note | list[Note] | None
 
 
 class SourceRepositoryCitation(NamedTuple):
@@ -4730,9 +5000,9 @@ class SourceRepositoryCitation(NamedTuple):
     """
 
     repository_xref: RepositoryXref = Void.REPO
-    notes: list[Note] | None = None
-    call_numbers: list[CallNumber] | None = None
-    repo_ext: Ext = None
+    notes: NoteType = None
+    call_numbers: CalnType = None
+    repo_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4748,7 +5018,9 @@ class SourceRepositoryCitation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.repository_xref.fullname != Void.NAME and self.validate():
-            lines = Tagger.string(lines, level, Tag.SOUR, str(self.repository_xref))
+            lines = Tagger.string(
+                lines, level, Tag.SOUR, str(self.repository_xref)
+            )
             lines = Tagger.structure(lines, level + 1, self.repo_ext)
             lines = Tagger.structure(lines, level, self.notes, Note())
             lines = Tagger.structure(
@@ -4772,9 +5044,9 @@ SourceRepositoryCitation(
         self,
         choice: int = Default.CHOICE,
         repository_xref: RepositoryXref = Void.REPO,
-        notes: list[Note] | None = None,
-        call_numbers: list[CallNumber] | None = None,
-        repo_ext: Ext = None,
+        notes: NoteType = None,
+        call_numbers: CalnType = None,
+        repo_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -4838,6 +5110,9 @@ SourceRepositoryCitation(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+SourRepoCiteType = SourceRepositoryCitation | list[SourceRepositoryCitation] | None
 
 
 class PersonalName(NamedTuple):
@@ -4924,14 +5199,13 @@ class PersonalName(NamedTuple):
     name: str = Default.EMPTY
     surname: str = Default.EMPTY
     type: Tag = Tag.NONE
-    phrase: str = Default.EMPTY
-    pieces: PersonalNamePieces | None = None
-    translations: list[NameTranslation] | None = None
-    notes: list[Note] | None = None
-    source_citations: list[SourceCitation] | None = None
-    name_ext: Ext = None
-    type_ext: Ext = None
-    phrase_ext: Ext = None
+    phrase: PhraseType = None
+    pieces: PersonalNamePiecesType = None
+    translations: NameTranType = None
+    notes: NoteType = None
+    source_citations: SourCiteType = None
+    name_ext: ExtType = None
+    type_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4940,14 +5214,13 @@ class PersonalName(NamedTuple):
             and Checker.verify_type(self.name, str)
             and Checker.verify_type(self.surname, str)
             and Checker.verify_enum(self.type.value, NameType)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_type(self.pieces, PersonalNamePieces)
             and Checker.verify_type(self.translations, NameTranslation)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.source_citations, SourceCitation)
             and Checker.verify_ext(Tag.NAME, self.name_ext)
             and Checker.verify_ext(Tag.TYPE, self.type_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
@@ -4970,8 +5243,7 @@ class PersonalName(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.name_ext)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
             lines = Tagger.structure(lines, level + 2, self.type_ext)
-            lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 3, self.phrase_ext)
+            lines = Tagger.structure(lines, level + 2, self.phrase)
             lines = Tagger.structure(
                 lines, level + 1, self.pieces, PersonalNamePieces()
             )
@@ -4998,7 +5270,6 @@ PersonalName(
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
     name_ext = {Formatter.codes(self.name_ext, tabs + 1)},
     type_ext = {Formatter.codes(self.type_ext, tabs + 1)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs + 1)},
 )""",
             String.INDENT * tabs,
         )
@@ -5009,14 +5280,13 @@ PersonalName(
         name: str = Default.EMPTY,
         surname: str = Default.EMPTY,
         type: Tag = Tag.NONE,
-        phrase: str = Default.EMPTY,
-        pieces: PersonalNamePieces | None = None,
-        translations: list[NameTranslation] | None = None,
-        notes: list[Note] | None = None,
-        source_citations: list[SourceCitation] | None = None,
-        name_ext: Ext = None,
-        type_ext: Ext = None,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
+        pieces: PersonalNamePiecesType = None,
+        translations: NameTranType = None,
+        notes: NoteType = None,
+        source_citations: SourCiteType = None,
+        name_ext: ExtType = None,
+        type_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5044,7 +5314,7 @@ PersonalName(
                     name='First Name Last Name',
                     surname='Last Name',
                     type=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     pieces=None,
                     translations=None,
                     notes=None,
@@ -5057,7 +5327,7 @@ PersonalName(
                     name='First Name Last Name',
                     surname='Last Name',
                     type=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     pieces=None,
                     translations=None,
                     notes=None,
@@ -5070,7 +5340,7 @@ PersonalName(
                     name='First Name Last Name',
                     surname='Last Name',
                     type=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     pieces=None,
                     translations=None,
                     notes=None,
@@ -5090,7 +5360,6 @@ PersonalName(
                     source_citations=source_citations,
                     name_ext=name_ext,
                     type_ext=type_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -5102,6 +5371,9 @@ PersonalName(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+PersonalNameType = PersonalName | list[PersonalName] | None
 
 
 class Association(NamedTuple):
@@ -5309,23 +5581,21 @@ class Association(NamedTuple):
     """
 
     individual_xref: IndividualXref = Void.INDI
-    association_phrase: str = String.EMPTY
+    association_phrase: PhraseType = None
     role: Role = Role.NONE
-    role_phrase: str = String.EMPTY
-    notes: list[Note] | None = None
-    citations: list[SourceCitation] | None = None
-    asso_ext: Ext = None
-    asso_phrase_ext: Ext = None
-    role_ext: Ext = None
-    role_phrase_ext: Ext = None
+    role_phrase: PhraseType = None
+    notes: NoteType = None
+    citations: SourCiteType = None
+    asso_ext: ExtType = None
+    role_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.individual_xref, IndividualXref)
             and Checker.verify_enum(self.role.value, Role)
-            and Checker.verify_type(self.association_phrase, str)
-            and Checker.verify_type(self.role_phrase, str)
+            and Checker.verify_type(self.association_phrase, Phrase)
+            and Checker.verify_type(self.role_phrase, Phrase)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.citations, SourceCitation)
         )
@@ -5339,16 +5609,14 @@ class Association(NamedTuple):
                 lines, level, Tag.ASSO, str(self.individual_xref), format=False
             )
             lines = Tagger.structure(lines, level + 1, self.asso_ext)
-            lines = Tagger.string(
-                lines, level + 1, Tag.PHRASE, self.association_phrase
+            lines = Tagger.structure(
+                lines, level + 1, self.association_phrase
             )
-            lines = Tagger.structure(lines, level + 2, self.asso_phrase_ext)
             lines = Tagger.string(lines, level + 1, Tag.ROLE, self.role.value)
             lines = Tagger.structure(lines, level + 2, self.role_ext)
-            lines = Tagger.string(
-                lines, level + 2, Tag.PHRASE, self.role_phrase
+            lines = Tagger.structure(
+                lines, level + 2, self.role_phrase
             )
-            lines = Tagger.structure(lines, level + 3, self.role_phrase_ext)
             lines = Tagger.structure(lines, level + 1, self.notes, Note())
             lines = Tagger.structure(
                 lines, level + 1, self.citations, SourceCitation()
@@ -5366,9 +5634,7 @@ Association(
     notes = {Formatter.codes(self.notes, tabs)},
     citations = {Formatter.codes(self.citations, tabs)},
     asso_ext = {Formatter.codes(self.asso_ext, tabs)},
-    asso_phrase_ext = {Formatter.codes(self.asso_phrase_ext, tabs)},
     role_ext = {Formatter.codes(self.role_ext, tabs)},
-    role_phrase_ext = {Formatter.codes(self.role_phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -5377,15 +5643,13 @@ Association(
         self,
         choice: int = Default.CHOICE,
         individual_xref: IndividualXref = Void.INDI,
-        association_phrase: str = String.EMPTY,
+        association_phrase: PhraseType = None,
         role: Role = Role.NONE,
-        role_phrase: str = String.EMPTY,
-        notes: list[Note] | None = None,
-        citations: list[SourceCitation] | None = None,
-        asso_ext: Ext = None,
-        asso_phrase_ext: Ext = None,
-        role_ext: Ext = None,
-        role_phrase_ext: Ext = None,
+        role_phrase: PhraseType = None,
+        notes: NoteType = None,
+        citations: SourCiteType = None,
+        asso_ext: ExtType = None,
+        role_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5411,9 +5675,9 @@ Association(
             case 1:
                 show = Association(
                     individual_xref=Void.INDI,
-                    association_phrase='A phrase',
+                    association_phrase=Phrase('A phrase'),
                     role=Role.NONE,
-                    role_phrase='Role Phrase',
+                    role_phrase=Phrase('Role Phrase'),
                     notes=None,
                     citations=None,
                 )
@@ -5422,9 +5686,9 @@ Association(
             case 2:
                 show = Association(
                     individual_xref=Void.INDI,
-                    association_phrase='A phrase',
+                    association_phrase=Phrase('A phrase'),
                     role=Role.NONE,
-                    role_phrase='Role Phrase',
+                    role_phrase=Phrase('Role Phrase'),
                     notes=None,
                     citations=None,
                 )
@@ -5433,9 +5697,9 @@ Association(
             case 3:
                 show = Association(
                     individual_xref=Void.INDI,
-                    association_phrase='A phrase',
+                    association_phrase=Phrase('A phrase'),
                     role=Role.NONE,
-                    role_phrase='Role Phrase',
+                    role_phrase=Phrase('Role Phrase'),
                     notes=None,
                     citations=None,
                 )
@@ -5450,9 +5714,7 @@ Association(
                     notes=notes,
                     citations=citations,
                     asso_ext=asso_ext,
-                    asso_phrase_ext=asso_phrase_ext,
                     role_ext=role_ext,
-                    role_phrase_ext=role_phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -5464,6 +5726,9 @@ Association(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+AssoType = Association | None
 
 
 class MultimediaLink(NamedTuple):
@@ -5493,12 +5758,12 @@ class MultimediaLink(NamedTuple):
     height: int = Default.HEIGHT
     width: int = Default.WIDTH
     title: str = Default.EMPTY
-    obje_ext: Ext = None
-    top_ext: Ext = None
-    left_ext: Ext = None
-    height_ext: Ext = None
-    width_ext: Ext = None
-    title_ext: Ext = None
+    obje_ext: ExtType = None
+    top_ext: ExtType = None
+    left_ext: ExtType = None
+    height_ext: ExtType = None
+    width_ext: ExtType = None
+    title_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5572,12 +5837,12 @@ MultimediaLink(
         height: int = Default.HEIGHT,
         width: int = Default.WIDTH,
         title: str = Default.EMPTY,
-        obje_ext: Ext = None,
-        top_ext: Ext = None,
-        left_ext: Ext = None,
-        height_ext: Ext = None,
-        width_ext: Ext = None,
-        title_ext: Ext = None,
+        obje_ext: ExtType = None,
+        top_ext: ExtType = None,
+        left_ext: ExtType = None,
+        height_ext: ExtType = None,
+        width_ext: ExtType = None,
+        title_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5665,18 +5930,21 @@ MultimediaLink(
         )
 
 
+MMLinkType = MultimediaLink | None
+
+
 class Exid(NamedTuple):
     """Store, validate and display an EXID structure."""
 
     exid: str
     exid_type: str
-    exid_ext: Ext = None
-    exid_type_ext: Ext = None
-        
+    exid_ext: ExtType = None
+    exid_type_ext: ExtType = None
+
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.exid, str) 
+            Checker.verify_type(self.exid, str)
             and Checker.verify_type(self.exid_type, str)
             and Checker.verify_ext(Tag.EXID, self.exid_ext)
             and Checker.verify_ext(Tag.TYPE, self.exid_type_ext)
@@ -5708,8 +5976,8 @@ Exid(
         choice: int = Default.CHOICE,
         exid: str = Default.EMPTY,
         exid_type: str = Default.EMPTY,
-        exid_ext: Ext = None,
-        exid_type_ext: Ext = None,
+        exid_ext: ExtType = None,
+        exid_type_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5770,6 +6038,9 @@ Exid(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+ExidType = Exid | list[Exid] | None
 
 
 class Map(NamedTuple):
@@ -5836,9 +6107,9 @@ class Map(NamedTuple):
 
     latitude: float = Default.MAP_LATITUDE
     longitude: float = Default.MAP_LONGITUDE
-    map_ext: Ext = None
-    latitude_ext: Ext = None
-    longitude_ext: Ext = None
+    map_ext: ExtType = None
+    latitude_ext: ExtType = None
+    longitude_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -5893,9 +6164,9 @@ Map(
         choice: int = Default.CHOICE,
         latitude: float = Default.MAP_LATITUDE,
         longitude: float = Default.MAP_LONGITUDE,
-        map_ext: Ext = None,
-        latitude_ext: Ext = None,
-        longitude_ext: Ext = None,
+        map_ext: ExtType = None,
+        latitude_ext: ExtType = None,
+        longitude_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -5968,6 +6239,9 @@ Map(
         )
 
 
+MapType = Map | None
+
+
 class PlaceTranslation(NamedTuple):
     """Store, validate and return a translation of GEDCOM place names.
 
@@ -5998,14 +6272,12 @@ class PlaceTranslation(NamedTuple):
     >      +2 LANG <Language>                    {1:1}  [g7:LANG](https://gedcom.io/terms/v7/LANG)
     """
 
-    
     place1: str = Default.EMPTY
     place2: str = Default.EMPTY
     place3: str = Default.EMPTY
     place4: str = Default.EMPTY
-    language: str = Default.EMPTY
-    tran_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    tran_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6014,9 +6286,8 @@ class PlaceTranslation(NamedTuple):
             and Checker.verify_type(self.place2, str)
             and Checker.verify_type(self.place3, str)
             and Checker.verify_type(self.place4, str)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_ext(Tag.PLAC, self.tran_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -6024,12 +6295,16 @@ class PlaceTranslation(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.TRAN, Placer.place(
-            self.place1, self.place2, self.place3, self.place4
-        ))
+            lines = Tagger.string(
+                lines,
+                level,
+                Tag.TRAN,
+                Placer.place(
+                    self.place1, self.place2, self.place3, self.place4
+                ),
+            )
             lines = Tagger.structure(lines, level + 1, self.tran_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 2, self.lang_ext)
+            lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -6042,7 +6317,6 @@ PlaceTranslation(
     place4 = {Formatter.codes(self.place4, tabs)},
     language = {Formatter.codes(self.language, tabs)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)}
 )""",
             String.INDENT * tabs,
         )
@@ -6054,9 +6328,8 @@ PlaceTranslation(
         place2: str = Default.EMPTY,
         place3: str = Default.EMPTY,
         place4: str = Default.EMPTY,
-        language: str = Default.EMPTY,
-        tran_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        tran_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6090,7 +6363,7 @@ PlaceTranslation(
                     place2='Cook County',
                     place3='Illinois',
                     place4='USA',
-                    language='en',
+                    language=Lang('en'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -6100,7 +6373,7 @@ PlaceTranslation(
                     place2='Cook County',
                     place3='Illinois',
                     place4='USA',
-                    language='en',
+                    language=Lang('en'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -6110,7 +6383,7 @@ PlaceTranslation(
                     place2='Cook County',
                     place3='Illinois',
                     place4='USA',
-                    language='en-US',
+                    language=Lang('en-US'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -6122,7 +6395,6 @@ PlaceTranslation(
                     place4=place4,
                     language=language,
                     tran_ext=tran_ext,
-                    lang_ext=lang_ext,
                 )
                 logging.info(Example.USER_PROVIDED_EXAMPLE)
                 code_preface = Example.USER_PROVIDED
@@ -6135,6 +6407,9 @@ PlaceTranslation(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+PlacTranType = PlaceTranslation | list[PlaceTranslation] | None
 
 
 class Place(NamedTuple):
@@ -6246,14 +6521,13 @@ class Place(NamedTuple):
     form2: str = Default.PLACE_FORM2
     form3: str = Default.PLACE_FORM3
     form4: str = Default.PLACE_FORM4
-    language: str = Default.EMPTY
-    translations: list[PlaceTranslation] | None = None
-    map: Map | None = None
-    exids: list[Exid] | None = None
-    notes: list[Note] | None = None
-    plac_ext: Ext = None
-    form_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    translations: PlacTranType = None
+    map: MapType = None
+    exids: ExidType = None
+    notes: NoteType = None
+    plac_ext: ExtType = None
+    form_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6266,7 +6540,7 @@ class Place(NamedTuple):
             and Checker.verify_type(self.form2, str)
             and Checker.verify_type(self.form3, str)
             and Checker.verify_type(self.form4, str)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_type(self.translations, PlaceTranslation)
             and Checker.verify_type(self.map, Map)
             and Checker.verify_type(self.exids, Exid)
@@ -6278,16 +6552,23 @@ class Place(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = String.EMPTY
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.PLAC, Placer.place(
-            self.place1, self.place2, self.place3, self.place4
-        ))
+            lines = Tagger.string(
+                lines,
+                level,
+                Tag.PLAC,
+                Placer.place(
+                    self.place1, self.place2, self.place3, self.place4
+                ),
+            )
             lines = Tagger.structure(lines, level + 1, self.plac_ext)
-            lines = Tagger.string(lines, level + 1, Tag.FORM, Placer.form(
-            self.form1, self.form2, self.form3, self.form4
-        ))
+            lines = Tagger.string(
+                lines,
+                level + 1,
+                Tag.FORM,
+                Placer.form(self.form1, self.form2, self.form3, self.form4),
+            )
             lines = Tagger.structure(lines, level + 1, self.form_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 1, self.lang_ext)
+            lines = Tagger.structure(lines, level + 1, self.language)
             lines = Tagger.structure(lines, level + 1, self.translations)
             lines = Tagger.structure(lines, level + 1, self.map, Map())
             lines = Tagger.structure(lines, level + 1, self.exids)
@@ -6313,7 +6594,6 @@ Place(
     notes = {Formatter.codes(self.notes, tabs + 2)},
     plac_ext = {Formatter.codes(self.plac_ext, tabs + 2)},
     form_ext = {Formatter.codes(self.form_ext, tabs)}
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)}
 )""",
             String.INDENT * tabs,
         )
@@ -6329,14 +6609,13 @@ Place(
         form2: str = Default.PLACE_FORM2,
         form3: str = Default.PLACE_FORM3,
         form4: str = Default.PLACE_FORM4,
-        language: str = Default.EMPTY,
-        translations: list[PlaceTranslation] | None = None,
-        map: Map | None = None,
-        exids: list[Exid] | None = None,
-        notes: list[Note] | None = None,
-        plac_ext: Ext = None,
-        form_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        translations: PlacTranType = None,
+        map: MapType = None,
+        exids: ExidType = None,
+        notes: NoteType = None,
+        plac_ext: ExtType = None,
+        form_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6376,7 +6655,7 @@ Place(
                             place2='Cook County',
                             place3='Illinois',
                             place4='USA',
-                            language='en-US',
+                            language=Lang('en-US'),
                         ),
                     ],
                     map=Map(latitude=41.881832, longitude=-87.623177),
@@ -6426,7 +6705,6 @@ Place(
                     notes=notes,
                     plac_ext=plac_ext,
                     form_ext=form_ext,
-                    lang_ext=lang_ext,
                 )
                 logging.info(Example.USER_PROVIDED_EXAMPLE)
                 code_preface = Example.USER_PROVIDED
@@ -6439,6 +6717,9 @@ Place(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+PlacType = Place | None
 
 
 class EventDetail(NamedTuple):
@@ -6468,25 +6749,25 @@ class EventDetail(NamedTuple):
     > n UID <Special>                            {0:M}  [g7:UID]()
     """
 
-    date_value: DateValue | None = None
-    place: Place | None = None
-    address: Address | None = None
-    phones: StrList = None
-    emails: StrList = None
-    faxes: StrList = None
-    wwws: StrList = None
+    date_value: DateValueType = None
+    place: PlacType = None
+    address: AddrType = None
+    phones: PhoneType = None
+    emails: EmailType = None
+    faxes: FaxType = None
+    wwws: WWWType = None
     agency: str = Default.EMPTY
     religion: str = Default.EMPTY
     cause: str = Default.EMPTY
     resn: Resn = Resn.NONE
-    associations: list[Association] | None = None
-    notes: list[Note] | None = None
-    sources: list[SourceCitation] | None = None
-    multimedia_links: list[MultimediaLink] | None = None
+    associations: AssoType = None
+    notes: NoteType = None
+    sources: SourCiteType = None
+    multimedia_links: MMLinkType = None
     uids: list[Id] | None = None
-    agnc_ext: Ext = None
-    reli_ext: Ext = None
-    caus_ext: Ext = None
+    agnc_ext: ExtType = None
+    reli_ext: ExtType = None
+    caus_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6494,10 +6775,10 @@ class EventDetail(NamedTuple):
             Checker.verify_type(self.date_value, DateValue)
             and Checker.verify_type(self.place, Place)
             and Checker.verify_type(self.address, Address)
-            and Checker.verify_type(self.phones, str)
-            and Checker.verify_type(self.emails, str)
-            and Checker.verify_type(self.faxes, str)
-            and Checker.verify_type(self.wwws, str)
+            and Checker.verify_type(self.phones, Phone)
+            and Checker.verify_type(self.emails, Email)
+            and Checker.verify_type(self.faxes, Fax)
+            and Checker.verify_type(self.wwws, WWW)
             and Checker.verify_type(self.agency, str)
             and Checker.verify_type(self.religion, str)
             and Checker.verify_type(self.cause, str)
@@ -6520,10 +6801,10 @@ class EventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.date_value, DateValue())
             lines = Tagger.structure(lines, level, self.place, Place())
             lines = Tagger.structure(lines, level, self.address, Address())
-            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.structure(lines, level,  self.phones)
+            lines = Tagger.structure(lines, level, self.emails)
+            lines = Tagger.structure(lines, level, self.faxes)
+            lines = Tagger.structure(lines, level, self.wwws)
             lines = Tagger.string(lines, level, Tag.AGNC, self.agency)
             lines = Tagger.structure(lines, level + 1, self.agnc_ext)
             lines = Tagger.string(lines, level, Tag.RELI, self.religion)
@@ -6568,25 +6849,25 @@ EventDetail(
     def example(
         self,
         choice: int = Default.CHOICE,
-        date_value: DateValue | None = None,
-        place: Place | None = None,
-        address: Address | None = None,
-        phones: list[str] | None = None,
-        emails: list[str] | None = None,
-        faxes: list[str] | None = None,
-        wwws: list[str] | None = None,
+        date_value: DateValueType = None,
+        place: PlacType = None,
+        address: AddrType = None,
+        phones: PhoneType = None,
+        emails: EmailType = None,
+        faxes: FaxType = None,
+        wwws: WWWType = None,
         agency: str = '',
         religion: str = '',
         cause: str = '',
         resn: Resn = Resn.NONE,
-        associations: list[Association] | None = None,
-        notes: list[Note] | None = None,
-        sources: list[SourceCitation] | None = None,
-        multimedia_links: list[MultimediaLink] | None = None,
+        associations: AssoType = None,
+        notes: NoteType = None,
+        sources: SourCiteType = None,
+        multimedia_links: MMLinkType = None,
         uids: list[Id] | None = None,
-        agnc_ext: Ext = None,
-        reli_ext: Ext = None,
-        caus_ext: Ext = None,
+        agnc_ext: ExtType = None,
+        reli_ext: ExtType = None,
+        caus_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6614,10 +6895,10 @@ EventDetail(
                     date_value=DateValue(),
                     place=Place(),
                     address=Address(),
-                    phones=['123-122-1223'],
-                    emails=['abc@xyz.com'],
-                    faxes=['345-234-2345'],
-                    wwws=['https:here.com'],
+                    phones=Phone('123-122-1223'),
+                    emails=Email('abc@xyz.com'),
+                    faxes=Fax('345-234-2345'),
+                    wwws=WWW('https:here.com'),
                     agency='',
                     religion='',
                     cause='',
@@ -6635,10 +6916,10 @@ EventDetail(
                     date_value=DateValue(),
                     place=Place(),
                     address=Address(),
-                    phones=['123-122-1223'],
-                    emails=['abc@xyz.com'],
-                    faxes=['345-234-2345'],
-                    wwws=['https:here.com'],
+                    phones=Phone('123-122-1223'),
+                    emails=Email('abc@xyz.com'),
+                    faxes=Fax('345-234-2345'),
+                    wwws=WWW('https:here.com'),
                     agency='',
                     religion='',
                     cause='',
@@ -6656,10 +6937,10 @@ EventDetail(
                     date_value=DateValue(),
                     place=Place(),
                     address=Address(),
-                    phones=['123-122-1223'],
-                    emails=['abc@xyz.com'],
-                    faxes=['345-234-2345'],
-                    wwws=['https:here.com'],
+                    phones=Phone('123-122-1223'),
+                    emails=Email('abc@xyz.com'),
+                    faxes=Fax('345-234-2345'),
+                    wwws=WWW('https:here.com'),
                     agency='',
                     religion='',
                     cause='',
@@ -6706,6 +6987,9 @@ EventDetail(
         )
 
 
+EvenDetailType = EventDetail | list[EventDetail] | None
+
+
 class FamilyEventDetail(NamedTuple):
     """Store, validate and display GEDCOM family event detail structure.
 
@@ -6736,11 +7020,11 @@ class FamilyEventDetail(NamedTuple):
     > n <<EVENT_DETAIL>>                         {0:1}
     """
 
-    husband_age: Age | None = None
-    wife_age: Age | None = None
-    event_detail: EventDetail | None = None
-    husb_ext: Ext = None
-    wife_ext: Ext = None
+    husband_age: AgeType = None
+    wife_age: AgeType = None
+    event_detail: EvenDetailType = None
+    husb_ext: ExtType = None
+    wife_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6786,11 +7070,11 @@ FamilyEventDetail(
     def example(
         self,
         choice: int = Default.CHOICE,
-        husband_age: Age | None = None,
-        wife_age: Age | None = None,
-        event_detail: EventDetail | None = None,
-        husb_ext: Ext = None,
-        wife_ext: Ext = None,
+        husband_age: AgeType = None,
+        wife_age: AgeType = None,
+        event_detail: EvenDetailType = None,
+        husb_ext: ExtType = None,
+        wife_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6855,6 +7139,9 @@ FamilyEventDetail(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+FamEvenDetailType = FamilyEventDetail | None
 
 
 class FamilyAttribute(NamedTuple):
@@ -6878,11 +7165,10 @@ class FamilyAttribute(NamedTuple):
     > ]
     """
 
-    
     tag: Tag = Tag.NONE
     payload: str = Default.EMPTY
     attribute_type: str = Default.EMPTY
-    family_event_detail: FamilyEventDetail | None = None
+    family_event_detail: FamEvenDetailType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6926,7 +7212,7 @@ FamilyAttribute(
         tag: Tag = Tag.NONE,
         payload: str = Default.EMPTY,
         attribute_type: str = Default.EMPTY,
-        family_event_detail: FamilyEventDetail | None = None,
+        family_event_detail: FamEvenDetailType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -6993,6 +7279,9 @@ FamilyAttribute(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+FamAttrType = FamilyAttribute | list[FamilyAttribute] | None
 
 
 class FamilyEvent(NamedTuple):
@@ -7072,7 +7361,7 @@ class FamilyEvent(NamedTuple):
     tag: Tag = Tag.NONE
     payload: str = String.OCCURRED
     event_type: str = String.EMPTY
-    event_detail: FamilyEventDetail | None = None
+    event_detail: FamEvenDetailType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7140,7 +7429,7 @@ FamilyEvent(
         tag: Tag = Tag.NONE,
         payload: str = String.OCCURRED,
         event_type: str = String.EMPTY,
-        event_detail: FamilyEventDetail | None = None,
+        event_detail: FamEvenDetailType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7207,6 +7496,9 @@ FamilyEvent(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+FamEvenType = FamilyEvent | list[FamilyEvent] | None
 
 
 class Child(NamedTuple):
@@ -7221,17 +7513,15 @@ class Child(NamedTuple):
     """
 
     individual_xref: IndividualXref = Void.INDI
-    phrase: str = Default.EMPTY
-    chil_ext: Ext = None
-    phrase_ext: Ext = None
+    phrase: PhraseType = None
+    chil_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.phrase, str) 
+            Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_type(self.individual_xref, IndividualXref)
-            and Checker.verify_ext(Tag.INDI, self.chil_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
+            and Checker.verify_ext(Tag.CHIL, self.chil_ext)
         )
         return check
 
@@ -7242,9 +7532,8 @@ class Child(NamedTuple):
             lines = Tagger.string(
                 lines, level, Tag.CHIL, str(self.individual_xref), format=False
             )
-            lines = Tagger.structure(lines, level+1, self.chil_ext)
-            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 2, self.phrase_ext)
+            lines = Tagger.structure(lines, level + 1, self.chil_ext)
+            lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -7254,7 +7543,6 @@ Child(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
     chil_ext = {Formatter.codes(self.chil_ext, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)}
 )""",
             String.INDENT * tabs,
         )
@@ -7263,9 +7551,8 @@ Child(
         self,
         choice: int = Default.CHOICE,
         individual_xref: IndividualXref = Void.INDI,
-        phrase: str = Default.EMPTY,
-        chil_ext: Ext = None,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
+        chil_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7291,21 +7578,21 @@ Child(
             case 1:
                 show = Child(
                     individual_xref=Void.INDI,
-                    phrase='Child',
+                    phrase=Phrase('Child'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Child(
                     individual_xref=Void.INDI,
-                    phrase='Child',
+                    phrase=Phrase('Child'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Child(
                     individual_xref=Void.INDI,
-                    phrase='Child',
+                    phrase=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7314,7 +7601,6 @@ Child(
                     individual_xref=individual_xref,
                     phrase=phrase,
                     chil_ext=chil_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -7326,6 +7612,9 @@ Child(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+ChilType = Child | list[Child] | None
 
 
 class LDSOrdinanceDetail(NamedTuple):
@@ -7344,15 +7633,15 @@ class LDSOrdinanceDetail(NamedTuple):
     > n <<SOURCE_CITATION>>                    {0:M}
     """
 
-    date_value: DateValue | None = None
+    date_value: DateValueType = None
     temple: str = String.EMPTY
-    place: Place | None = None
+    place: PlacType = None
     status: Stat = Stat.NONE
-    status_date: Date | None = None
-    status_time: Time | None = None
-    notes: list[Note] | None = None
-    source_citations: list[SourceCitation] | None = None
-    temple_ext: Ext = None
+    status_date: DateType = None
+    status_time: TimeType = None
+    notes: NoteType = None
+    source_citations: SourCiteType = None
+    temple_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7406,15 +7695,15 @@ LDSOrdinanceDetail(
     def example(
         self,
         choice: int = Default.CHOICE,
-        date_value: DateValue | None = None,
+        date_value: DateValueType = None,
         temple: str = String.EMPTY,
-        place: Place | None = None,
+        place: PlacType = None,
         status: Stat = Stat.NONE,
-        status_date: Date | None = None,
-        status_time: Time | None = None,
-        notes: list[Note] | None = None,
-        source_citations: list[SourceCitation] | None = None,
-        temple_ext: Ext = None,
+        status_date: DateType = None,
+        status_time: TimeType = None,
+        notes: NoteType = None,
+        source_citations: SourCiteType = None,
+        temple_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7499,6 +7788,7 @@ LDSOrdinanceDetail(
             genealogy_docs,
         )
 
+LDSOrdDetailType = LDSOrdinanceDetail | None
 
 class LDSSpouseSealing(NamedTuple):
     """Store, validate and display the LDS Spouse Sealing structure.
@@ -7511,31 +7801,31 @@ class LDSSpouseSealing(NamedTuple):
     """
 
     tag: Tag = Tag.SLGS
-    detail: LDSOrdinanceDetail | None = None
-    slgs_ext: Ext = None
+    detail: LDSOrdDetailType = None
+    slgs_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tag, str) 
+            Checker.verify_type(self.tag, str)
             and Checker.verify_type(self.detail, LDSOrdinanceDetail | None)
             and Checker.verify_ext(Tag.SLGS, self.slgs_ext)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
             lines = Tagger.empty(lines, level, Tag.SLGS)
-            lines = Tagger.structure(lines, level+ 1, self.slgs_ext)
+            lines = Tagger.structure(lines, level + 1, self.slgs_ext)
             lines = Tagger.structure(lines, level + 1, self.detail)
         return lines
 
     def code(self, tabs: int = 0) -> str:
         return indent(
             f"""
-LDSSPouseSealing(
+LDSSpouseSealing(
     tag = {Formatter.codes(self.tag, tabs)},
     detail = {Formatter.codes(self.detail, tabs)},
     slgs_ext = {Formatter.codes(self.slgs_ext, tabs)},
@@ -7547,8 +7837,8 @@ LDSSPouseSealing(
         self,
         choice: int = Default.CHOICE,
         tag: Tag = Tag.SLGS,
-        detail: LDSOrdinanceDetail | None = None,
-        slgs_ext: Ext = None,
+        detail: LDSOrdDetailType = None,
+        slgs_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7610,6 +7900,9 @@ LDSSPouseSealing(
         )
 
 
+LDSSpouSealingType = LDSSpouseSealing | None
+
+
 class LDSIndividualOrdinance(NamedTuple):
     """Store, validate and display the GEDCOM LDS Individual Ordinances structure.
 
@@ -7636,7 +7929,7 @@ class LDSIndividualOrdinance(NamedTuple):
     """
 
     tag: Tag = Tag.NONE
-    ordinance_detail: LDSOrdinanceDetail | None = None
+    ordinance_detail: LDSOrdDetailType = None
     family_xref: FamilyXref = Void.FAM
 
     def validate(self) -> bool:
@@ -7680,7 +7973,7 @@ LDSIndividualOrdinance(
         self,
         choice: int = Default.CHOICE,
         tag: Tag = Tag.NONE,
-        ordinance_detail: LDSOrdinanceDetail | None = None,
+        ordinance_detail: LDSOrdDetailType = None,
         family_xref: FamilyXref = Void.FAM,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -7746,138 +8039,8 @@ LDSIndividualOrdinance(
         )
 
 
-class Identifier(NamedTuple):
-    """Construct GEDCOM data for the Identifier Structure.
+LDSIndiOrd = LDSIndividualOrdinance | None
 
-    There are three valid identifier structures.  They will be illustrated in
-    the examples.
-
-    Examples:
-
-
-
-    Reference:
-
-    - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)
-
-    [
-    n REFN <Special>                           {1:1}  g7:REFN
-    +1 TYPE <Text>                           {0:1}  g7:TYPE
-    |
-    n UID <Special>                            {1:1}  g7:UID
-    |
-    n EXID <Special>                           {1:1}  g7:EXID
-    +1 TYPE <Special>                        {0:1}  g7:EXID-TYPE
-    ]
-    """
-
-
-    tag: Id = Id.NONE
-    tag_info: str = Default.EMPTY
-    tag_type: str = Default.EMPTY
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_enum(self.tag.value, Id)
-            and Checker.verify_type(self.tag_info, str)
-            and Checker.verify_type(self.tag_type, str)
-        )
-        return check
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            if self.tag != Id.NONE:
-                lines = Tagger.taginfo(level, self.tag.value, self.tag_info)
-            if self.tag != Id.UID:
-                lines = ''.join(
-                    [lines, Tagger.taginfo(level + 1, Tag.TYPE, self.tag_type)]
-                )
-            if self.tag == Id.EXID and self.tag_type == '':
-                logging.warning(Msg.EXID_TYPE)
-        return lines
-
-    def code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Identifier(
-    tag = {Formatter.codes(self.tag, tabs)},
-    tag_info = {Formatter.codes(self.tag_info, tabs)},
-    tag_type = {Formatter.codes(self.tag_type, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Id = Id.NONE,
-        tag_info: str = Default.EMPTY,
-        tag_type: str = Default.EMPTY,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Identifier
-        gedcom_docs: str = Specs.IDENTIFIER
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Identifier(
-                    tag=Id.NONE,
-                    tag_info='',
-                    tag_type='',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Identifier(
-                    tag=Id.NONE,
-                    tag_info='',
-                    tag_type='',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Identifier(
-                    tag=Id.NONE,
-                    tag_info='',
-                    tag_type='',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Identifier(
-                    tag=tag,
-                    tag_info=tag_info,
-                    tag_type=tag_type,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            show.ged(),
-            gedcom_docs,
-            genealogy_docs,
-        )
 
 
 class IndividualEventDetail(NamedTuple):
@@ -7896,11 +8059,9 @@ class IndividualEventDetail(NamedTuple):
     >   +1 PHRASE <Text>                         {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
-
-    event_detail: EventDetail | None = None
-    age: Age | None = None  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
-    phrase: str = Default.EMPTY
-    phrase_ext: Ext = None
+    event_detail: EvenDetailType = None
+    age: AgeType = None  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+    phrase: PhraseType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7908,7 +8069,6 @@ class IndividualEventDetail(NamedTuple):
             Checker.verify_type(self.event_detail, EventDetail)
             and Checker.verify_type(self.age, Age)
             and Checker.verify_type(self.phrase, str)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
@@ -7921,8 +8081,7 @@ class IndividualEventDetail(NamedTuple):
             )
             if self.age is not None:
                 lines = Tagger.structure(lines, level, self.age, Age())
-                lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-                lines = Tagger.structure(lines, level + 2, self.phrase_ext)
+                lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -7932,7 +8091,6 @@ IndividualEventDetail(
     event_detail = {Formatter.codes(self.event_detail, tabs)},
     age = {Formatter.codes(self.age, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -7940,10 +8098,9 @@ IndividualEventDetail(
     def example(
         self,
         choice: int = Default.CHOICE,
-        event_detail: EventDetail | None = None,
-        age: Age | None = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
-        phrase: str = Default.EMPTY,
-        phrase_ext: Ext = None,
+        event_detail: EvenDetailType = None,
+        age: AgeType = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+        phrase: PhraseType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -7970,7 +8127,7 @@ IndividualEventDetail(
                 show = IndividualEventDetail(
                     event_detail=None,
                     age=Age(10),
-                    phrase='Birthday',
+                    phrase=Phrase('Birthday'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -7978,7 +8135,7 @@ IndividualEventDetail(
                 show = IndividualEventDetail(
                     event_detail=None,
                     age=Age(10),
-                    phrase='Birthday',
+                    phrase=Phrase('Birthday'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -7986,7 +8143,7 @@ IndividualEventDetail(
                 show = IndividualEventDetail(
                     event_detail=None,
                     age=Age(10),
-                    phrase='Birthday',
+                    phrase=Phrase('Birthday'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -7995,7 +8152,6 @@ IndividualEventDetail(
                     event_detail=event_detail,
                     age=age,
                     phrase=phrase,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -8007,6 +8163,9 @@ IndividualEventDetail(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+IndiEvenDetailType = IndividualEventDetail | list[IndividualEventDetail] | None
 
 
 class IndividualAttribute(NamedTuple):
@@ -8077,8 +8236,8 @@ class IndividualAttribute(NamedTuple):
     tag: Tag
     payload: str
     tag_type: str = Default.EMPTY
-    event_detail: IndividualEventDetail | None = None
-    type_ext: Ext = None
+    event_detail: IndiEvenDetailType = None
+    type_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8091,13 +8250,13 @@ class IndividualAttribute(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
             lines = Tagger.string(lines, level, self.tag, self.payload)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.tag_type)
-            lines = Tagger.structure(lines, level+1, self.type_ext)
+            lines = Tagger.structure(lines, level + 1, self.type_ext)
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
@@ -8120,8 +8279,8 @@ IndividualAttribute(
         tag: Tag = Tag.NONE,
         payload: str = Default.EMPTY,
         tag_type: str = Default.EMPTY,
-        event_detail: IndividualEventDetail | None = None,
-        type_ext: Ext = None,
+        event_detail: IndiEvenDetailType = None,
+        type_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8189,6 +8348,8 @@ IndividualAttribute(
             gedcom_docs,
             genealogy_docs,
         )
+
+IndiAttrType = IndividualAttribute | list[IndividualAttribute] | None
 
 
 class IndividualEvent(NamedTuple):
@@ -8369,12 +8530,10 @@ class IndividualEvent(NamedTuple):
     tag: Tag = Tag.NONE
     payload: str = Default.EMPTY
     text: str = Default.EMPTY
-    event_detail: IndividualEventDetail | None = None
+    event_detail: IndiEvenDetailType = None
     family_xref: FamilyXref = Void.FAM
     adoption: Tag = Tag.NONE
-    phrase: str = Default.EMPTY
-    phrase_ext: Ext = None
-    
+    phrase: PhraseType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -8384,8 +8543,7 @@ class IndividualEvent(NamedTuple):
             and Checker.verify_type(self.event_detail, IndividualEventDetail)
             and Checker.verify_type(self.family_xref, FamilyXref)
             and Checker.verify_enum(self.adoption.value, Adop)
-            and Checker.verify_type(self.phrase, str)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
+            and Checker.verify_type(self.phrase, Phrase)
         )
         return check
 
@@ -8415,10 +8573,9 @@ class IndividualEvent(NamedTuple):
                         lines, level + 2, Tag.ADOP, self.adoption.value
                     )
                     if self.adoption.value != Tag.NONE.value:
-                        lines = Tagger.string(
-                            lines, level + 3, Tag.PHRASE, self.phrase
+                        lines = Tagger.structure(
+                            lines, level + 3, self.phrase
                         )
-                        lines = Tagger.structure(lines, level + 4, self.phrase_ext)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -8432,7 +8589,6 @@ IndividualEvent(
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8443,11 +8599,10 @@ IndividualEvent(
         tag: Tag = Tag.NONE,
         payload: str = Default.EMPTY,
         text: str = Default.EMPTY,
-        event_detail: IndividualEventDetail | None = None,
+        event_detail: IndiEvenDetailType = None,
         family_xref: FamilyXref = Void.FAM,
         adoption: Tag = Tag.NONE,
-        phrase: str = Default.EMPTY,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8478,7 +8633,7 @@ IndividualEvent(
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -8490,7 +8645,7 @@ IndividualEvent(
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -8502,7 +8657,7 @@ IndividualEvent(
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8515,7 +8670,6 @@ IndividualEvent(
                     family_xref=family_xref,
                     adoption=adoption,
                     phrase=phrase,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -8527,6 +8681,9 @@ IndividualEvent(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+IndiEvenType = IndividualEvent | list[IndividualEvent] | None
 
 
 class Alias(NamedTuple):
@@ -8550,24 +8707,21 @@ class Alias(NamedTuple):
     >    +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     """
 
-    
     individual_xref: IndividualXref = Void.INDI
-    phrase: str = Default.EMPTY
-    alia_ext: Ext = None
-    phrase_ext: Ext = None
+    phrase: PhraseType = None
+    alia_ext: ExtType = None
 
     def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.individual_xref, IndividualXref)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify(
                 True,
                 self.individual_xref != main_individual,
                 Msg.SAME_INDIVIDUAL.format(self.individual_xref.fullname),
             )
             and Checker.verify_ext(Tag.ALIA, self.alia_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
@@ -8579,8 +8733,7 @@ class Alias(NamedTuple):
                 lines, level, Tag.ALIA, self.individual_xref.fullname
             )
             lines = Tagger.structure(lines, level + 1, self.alia_ext)
-            lines = Tagger.string(lines, level + 1, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 2, self.phrase_ext)
+            lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -8590,7 +8743,6 @@ Alias(
     individual_xref = {Formatter.codes(self.individual_xref, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
     alia_ext = {Formatter.codes(self.alia_ext, tabs)}
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8599,9 +8751,8 @@ Alias(
         self,
         choice: int = Default.CHOICE,
         individual_xref: IndividualXref = Void.INDI,
-        phrase: str = Default.EMPTY,
-        alia_ext: Ext = None,
-        phrase_ext: Ext = None,
+        phrase: PhraseType = None,
+        alia_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8627,21 +8778,21 @@ Alias(
             case 1:
                 show = Alias(
                     individual_xref=Void.INDI,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Alias(
                     individual_xref=Void.INDI,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Alias(
                     individual_xref=Void.INDI,
-                    phrase='',
+                    phrase=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -8650,7 +8801,6 @@ Alias(
                     individual_xref=individual_xref,
                     phrase=phrase,
                     alia_ext=alia_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -8662,6 +8812,9 @@ Alias(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+AliaType = Alias | list[Alias] | None
 
 
 class FamilyChild(NamedTuple):
@@ -8683,47 +8836,47 @@ class FamilyChild(NamedTuple):
 
     family_xref: FamilyXref = Void.FAM
     pedigree: str = Default.EMPTY
-    pedigree_phrase: str = Default.EMPTY
+    pedigree_phrase: PhraseType = None
     status: str = Default.EMPTY
-    status_phrase: str = Default.EMPTY
+    status_phrase: PhraseType = None
     notes: list[Note] | None = None
-    famc_ext: Ext = None
-    pedi_ext: Ext = None
-    pedi_phrase_ext: Ext = None
-    stat_ext: Ext = None
-    stat_phrase_ext: Ext = None
+    famc_ext: ExtType = None
+    pedi_ext: ExtType = None
+    stat_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.family_xref, str)
             and Checker.verify_type(self.pedigree, str)
-            and Checker.verify_type(self.pedigree_phrase, str)
+            and Checker.verify_type(self.pedigree_phrase, Phrase)
             and Checker.verify_type(self.status, str)
-            and Checker.verify_type(self.status_phrase, str)
+            and Checker.verify_type(self.status_phrase, Phrase)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.FAMC, self.famc_ext)
             and Checker.verify_ext(Tag.PEDI, self.pedi_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.pedi_phrase_ext)
             and Checker.verify_ext(Tag.STAT, self.stat_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.stat_phrase_ext)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.FAMC, str(self.family_xref), format=False)
+            lines = Tagger.string(
+                lines, level, Tag.FAMC, str(self.family_xref), format=False
+            )
             lines = Tagger.structure(lines, level + 1, self.famc_ext)
             lines = Tagger.string(lines, level + 1, Tag.PEDI, self.pedigree)
             lines = Tagger.structure(lines, level + 1, self.pedi_ext)
-            lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.pedigree_phrase)
-            lines = Tagger.structure(lines, level + 3, self.pedi_phrase_ext)
+            lines = Tagger.structure(
+                lines, level + 2, self.pedigree_phrase
+            )
             lines = Tagger.string(lines, level + 1, Tag.STAT, self.status)
             lines = Tagger.structure(lines, level + 2, self.stat_ext)
-            lines = Tagger.string(lines, level + 2, Tag.PHRASE, self.status_phrase)
-            lines = Tagger.structure(lines, level + 3, self.stat_phrase_ext)
+            lines = Tagger.structure(
+                lines, level + 2, self.status_phrase
+            )
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -8738,9 +8891,7 @@ FamilyChild(
     notes = {Formatter.codes(self.notes, tabs)},
     famc_ext = {Formatter.codes(self.famc_ext, tabs)},
     pedi_ext = {Formatter.codes(self.pedi_ext, tabs)},
-    pedi_phrase_ext = {Formatter.codes(self.pedi_phrase_ext, tabs)},
     stat_ext = {Formatter.codes(self.stat_ext, tabs)},
-    stat_phrase_ext = {Formatter.codes(self.stat_phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8750,15 +8901,13 @@ FamilyChild(
         choice: int = Default.CHOICE,
         family_xref: FamilyXref = Void.FAM,
         pedigree: str = Default.EMPTY,
-        pedigree_phrase: str = Default.EMPTY,
+        pedigree_phrase: PhraseType = None,
         status: str = Default.EMPTY,
-        status_phrase: str = Default.EMPTY,
+        status_phrase: PhraseType = None,
         notes: list[Note] | None = None,
-        famc_ext: Ext = None,
-        pedi_ext: Ext = None,
-        pedi_phrase_ext: Ext = None,
-        stat_ext: Ext = None,
-        stat_phrase_ext: Ext = None,
+        famc_ext: ExtType = None,
+        pedi_ext: ExtType = None,
+        stat_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8785,9 +8934,9 @@ FamilyChild(
                 show = FamilyChild(
                     family_xref=Void.FAM,
                     pedigree='',
-                    pedigree_phrase='',
+                    pedigree_phrase=None,
                     status='',
-                    status_phrase='',
+                    status_phrase=None,
                     notes=None,
                 )
                 code_preface = Example.FULL
@@ -8796,9 +8945,9 @@ FamilyChild(
                 show = FamilyChild(
                     family_xref=Void.FAM,
                     pedigree='',
-                    pedigree_phrase='',
+                    pedigree_phrase=None,
                     status='',
-                    status_phrase='',
+                    status_phrase=None,
                     notes=None,
                 )
                 code_preface = Example.SECOND
@@ -8807,9 +8956,9 @@ FamilyChild(
                 show = FamilyChild(
                     family_xref=Void.FAM,
                     pedigree='',
-                    pedigree_phrase='',
+                    pedigree_phrase=None,
                     status='',
-                    status_phrase='',
+                    status_phrase=None,
                     notes=None,
                 )
                 code_preface = Example.THIRD
@@ -8824,9 +8973,7 @@ FamilyChild(
                     notes=notes,
                     famc_ext=famc_ext,
                     pedi_ext=pedi_ext,
-                    pedi_phrase_ext=pedi_phrase_ext,
                     stat_ext=stat_ext,
-                    stat_phrase_ext=stat_phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -8838,33 +8985,38 @@ FamilyChild(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+FamcType = FamilyChild | list[FamilyChild] | None
 
 
 class FamilySpouse(NamedTuple):
     """Store, validate and display the GEDCOM Family Spouse structure.
-    
+
     > +1 FAMS @<XREF:FAM>@                     {0:M}  g7:FAMS
     >    +2 <<NOTE_STRUCTURE>>                 {0:M}
     """
 
     family_xref: FamilyXref = Void.FAM
     notes: list[Note] | None = None
-    fams_ext: Ext = None
+    fams_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.family_xref, FamilyXref) 
+            Checker.verify_type(self.family_xref, FamilyXref)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.FAMS, self.fams_ext)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.FAMS, str(self.family_xref), format=False)
+            lines = Tagger.string(
+                lines, level, Tag.FAMS, str(self.family_xref), format=False
+            )
             lines = Tagger.structure(lines, level + 1, self.fams_ext)
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
@@ -8885,7 +9037,7 @@ FamilySpouse(
         choice: int = Default.CHOICE,
         family_xref: FamilyXref = Void.FAM,
         notes: list[Note] | None = None,
-        fams_ext: Ext = None,
+        fams_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -8947,9 +9099,12 @@ FamilySpouse(
         )
 
 
+FamsType = FamilySpouse | list[FamilySpouse] | None
+
+
 class FileTranslation(NamedTuple):
     """Store, validate and display the GEDCOM File structure.
-    
+
     Reference:
         [GEDCOM Multimedia Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
     > +1 FILE <FilePath>                       {1:M}  g7:FILE
@@ -8963,13 +9118,13 @@ class FileTranslation(NamedTuple):
 
     tran: str = Default.EMPTY
     form: Tag = Tag.NONE
-    tran_ext: Ext = None
-    form_ext: Ext = None
+    tran_ext: ExtType = None
+    form_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tran, str) 
+            Checker.verify_type(self.tran, str)
             and Checker.verify_enum(self.form.value, MediaType)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
@@ -9003,8 +9158,8 @@ FileTranslation(
         choice: int = Default.CHOICE,
         tran: str = Default.EMPTY,
         form: Tag = Tag.NONE,
-        tran_ext: Ext = None,
-        form_ext: Ext = None,
+        tran_ext: ExtType = None,
+        form_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9065,14 +9220,16 @@ FileTranslation(
             gedcom_docs,
             genealogy_docs,
         )
-FileTrans = FileTranslation | list[FileTranslation] | None
+
+
+FileTranType = FileTranslation | list[FileTranslation] | None
 
 
 class File(NamedTuple):
     """Store, validate and display the GEDCOM File structure.
 
     Multiple files may be used in a Multimedia Record, but at least one exists.
-    
+
     Reference:
         [GEDCOM Multimedia Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
     > +1 FILE <FilePath>                       {1:M}  g7:FILE
@@ -9087,14 +9244,13 @@ class File(NamedTuple):
     file: str = Default.EMPTY
     form: Tag = Tag.NONE
     medi: Tag = Tag.NONE
-    phrase: str = Default.EMPTY
+    phrase: PhraseType = None
     titl: str = Default.EMPTY
-    file_translations: FileTrans = None
-    file_ext: Ext = None
-    form_ext: Ext = None
-    medi_ext: Ext = None
-    phrase_ext: Ext = None
-    titl_ext: Ext = None
+    file_translations: FileTranType = None
+    file_ext: ExtType = None
+    form_ext: ExtType = None
+    medi_ext: ExtType = None
+    titl_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9102,15 +9258,12 @@ class File(NamedTuple):
             Checker.verify_type(self.file, str)
             and Checker.verify_enum(self.form.value, MediaType)
             and Checker.verify_enum(self.medi.value, Medium)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_type(self.titl, str)
-            and Checker.verify_type(
-                self.file_translations, FileTranslation
-            )
+            and Checker.verify_type(self.file_translations, FileTranslation)
             and Checker.verify_ext(Tag.FILE, self.file_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
             and Checker.verify_ext(Tag.MEDI, self.medi_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
             and Checker.verify_ext(Tag.TITL, self.titl_ext)
         )
         return check
@@ -9121,13 +9274,12 @@ class File(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level, Tag.FILE, self.file)
             lines = Tagger.structure(lines, level + 1, self.file_ext)
-            lines = Tagger.string(lines, level+1, Tag.FORM, self.form.value)
+            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form.value)
             lines = Tagger.structure(lines, level + 2, self.form_ext)
-            lines = Tagger.string(lines, level+ 3, Tag.MEDI, self.medi.value)
+            lines = Tagger.string(lines, level + 3, Tag.MEDI, self.medi.value)
             lines = Tagger.structure(lines, level + 4, self.medi_ext)
-            lines = Tagger.string(lines, level+4, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 5, self.phrase_ext)
-            lines = Tagger.string(lines, level+1, Tag.TITL, self.titl)
+            lines = Tagger.structure(lines, level + 4, self.phrase)
+            lines = Tagger.string(lines, level + 1, Tag.TITL, self.titl)
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
         return lines
 
@@ -9144,7 +9296,6 @@ File(
     file_ext = {Formatter.codes(self.file_ext, tabs)},
     form_ext = {Formatter.codes(self.form_ext, tabs)},
     medi_ext = {Formatter.codes(self.medi_ext, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
     titl_ext = {Formatter.codes(self.titl_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -9156,14 +9307,13 @@ File(
         file: str = Default.EMPTY,
         form: Tag = Tag.NONE,
         medi: Tag = Tag.NONE,
-        phrase: str = Default.EMPTY,
+        phrase: PhraseType = None,
         titl: str = Default.EMPTY,
-        file_translations: FileTrans = None,
-        file_ext: Ext = None,
-        form_ext: Ext = None,
-        medi_ext: Ext = None,
-        phrase_ext: Ext = None,
-        titl_ext: Ext = None,
+        file_translations: FileTranType = None,
+        file_ext: ExtType = None,
+        form_ext: ExtType = None,
+        medi_ext: ExtType = None,
+        titl_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9191,7 +9341,7 @@ File(
                     file='',
                     form=Tag.NONE,
                     medi=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     titl='',
                     file_translations=None,
                 )
@@ -9202,7 +9352,7 @@ File(
                     file='',
                     form=Tag.NONE,
                     medi=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     titl='',
                     file_translations=None,
                 )
@@ -9213,7 +9363,7 @@ File(
                     file='',
                     form=Tag.NONE,
                     medi=Tag.NONE,
-                    phrase='',
+                    phrase=None,
                     titl='',
                     file_translations=None,
                 )
@@ -9230,7 +9380,6 @@ File(
                     file_ext=file_ext,
                     form_ext=form_ext,
                     medi_ext=medi_ext,
-                    phrase_ext=phrase_ext,
                     titl_ext=titl_ext,
                 )
                 code_preface = Example.EMPTY_CODE
@@ -9243,6 +9392,9 @@ File(
             gedcom_docs,
             genealogy_docs,
         )
+    
+
+FileType = File | list[File] | None
 
 
 class SourceDataEvent(NamedTuple):
@@ -9250,7 +9402,7 @@ class SourceDataEvent(NamedTuple):
 
     This is an optional part of the Source.Data Record placed as a separate class
     because there may be many of these events.
-    
+
     Reference:
         [GEDCOM Source Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
 
@@ -9265,36 +9417,33 @@ class SourceDataEvent(NamedTuple):
 
     event: Tag = Tag.NONE
     date_period: str = Default.EMPTY
-    phrase: str = Default.EMPTY
-    place: Place | None = None
-    even_ext: Ext = None
-    date_ext: Ext = None
-    phrase_ext: Ext = None
+    phrase: PhraseType = None
+    place: PlacType = None
+    even_ext: ExtType = None
+    date_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.event.value, EvenAttr)
             and Checker.verify_type(self.date_period, str)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_type(self.place, str)
             and Checker.verify_ext(Tag.EVEN, self.even_ext)
             and Checker.verify_ext(Tag.DATE, self.date_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
             lines = Tagger.string(lines, level, Tag.EVEN, self.event.value)
             lines = Tagger.structure(lines, level + 1, self.even_ext)
-            lines = Tagger.string(lines, level+1, Tag.DATE, self.date_period)
+            lines = Tagger.string(lines, level + 1, Tag.DATE, self.date_period)
             lines = Tagger.structure(lines, level + 2, self.date_ext)
-            lines = Tagger.string(lines, level+2, Tag.PHRASE, self.phrase)
-            lines = Tagger.structure(lines, level + 3, self.phrase_ext)
-            lines = Tagger.structure(lines, level+2, self.place)
+            lines = Tagger.structure(lines, level + 2, self.phrase)
+            lines = Tagger.structure(lines, level + 2, self.place)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -9307,8 +9456,6 @@ SourceDataEvent(
     place = {Formatter.codes(self.place, tabs)},
     even_ext = {Formatter.codes(self.even_ext, tabs)},
     date_ext = {Formatter.codes(self.date_ext, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
-    
 )""",
             String.INDENT * tabs,
         )
@@ -9318,12 +9465,10 @@ SourceDataEvent(
         choice: int = Default.CHOICE,
         event: Tag = Tag.NONE,
         date_period: str = Default.EMPTY,
-        phrase: str = Default.EMPTY,
-        place: Place | None = None,
-        even_ext: Ext = None,
-        date_ext: Ext = None,
-        phrase_ext: Ext = None,
-        
+        phrase: PhraseType = None,
+        place: PlacType = None,
+        even_ext: ExtType = None,
+        date_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9350,7 +9495,7 @@ SourceDataEvent(
                 show = SourceDataEvent(
                     event=Tag.NONE,
                     date_period='',
-                    phrase='',
+                    phrase=None,
                     place=Place(),
                 )
                 code_preface = Example.FULL
@@ -9359,7 +9504,7 @@ SourceDataEvent(
                 show = SourceDataEvent(
                     event=Tag.NONE,
                     date_period='',
-                    phrase='',
+                    phrase=None,
                     place=Place(),
                 )
                 code_preface = Example.SECOND
@@ -9368,7 +9513,7 @@ SourceDataEvent(
                 show = SourceDataEvent(
                     event=Tag.NONE,
                     date_period='',
-                    phrase='',
+                    phrase=None,
                     place=Place(),
                 )
                 code_preface = Example.THIRD
@@ -9381,7 +9526,6 @@ SourceDataEvent(
                     place=place,
                     even_ext=even_ext,
                     date_ext=date_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -9395,6 +9539,9 @@ SourceDataEvent(
         )
 
 
+SourDataEvenType = SourceDataEvent | list[SourceDataEvent] | None
+
+
 class NonEvent(NamedTuple):
     """Store, validate and display a GEDCOM Non Event structure.
 
@@ -9406,27 +9553,25 @@ class NonEvent(NamedTuple):
     """
 
     no: Tag = Tag.NONE
-    date: Date | None = None
-    phrase: str = Default.EMPTY
-    notes: list[Note] | None = None
-    sources: list[SourceCitation] | None = None
-    no_ext: Ext = None
-    phrase_ext: Ext = None
+    date: DateType = None
+    phrase: PhraseType = None
+    notes: NoteType = None
+    sources: SourCiteType = None
+    no_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.no.value, Even)
             and Checker.verify_type(self.date, Date | None)
-            and Checker.verify_type(self.phrase, str)
+            and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, SourceCitation)
             and Checker.verify_ext(Tag.NO, self.no_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.phrase_ext)
         )
         return check
 
-    def ged(self, level: int = 1) -> str:  
+    def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
@@ -9434,7 +9579,6 @@ class NonEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.no_ext)
             lines = Tagger.structure(lines, level + 1, self.date)
             lines = Tagger.structure(lines, level + 2, self.phrase)
-            lines = Tagger.structure(lines, level + 3, self.phrase_ext)
             lines = Tagger.structure(lines, level + 2, self.notes)
             lines = Tagger.structure(lines, level + 2, self.sources)
         return lines
@@ -9449,7 +9593,6 @@ NonEvent(
     notes = {Formatter.codes(self.notes, tabs)},
     sources = {Formatter.codes(self.sources, tabs)},
     no_ext = {Formatter.codes(self.no_ext, tabs)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -9458,12 +9601,11 @@ NonEvent(
         self,
         choice: int = Default.CHOICE,
         no: Tag = Tag.NONE,
-        date: Date | None = None,
-        phrase: str = Default.EMPTY,
-        notes: list[Note] | None = None,
-        sources: list[SourceCitation] | None = None,
-        no_ext: Ext = None,
-        phrase_ext: Ext = None,
+        date: DateType = None,
+        phrase: PhraseType = None,
+        notes: NoteType = None,
+        sources: SourCiteType = None,
+        no_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9490,7 +9632,7 @@ NonEvent(
                 show = NonEvent(
                     no=Tag.NONE,
                     date=Date(),
-                    phrase='',
+                    phrase=None,
                     notes=None,
                     sources=None,
                 )
@@ -9500,7 +9642,7 @@ NonEvent(
                 show = NonEvent(
                     no=Tag.NONE,
                     date=Date(),
-                    phrase='',
+                    phrase=None,
                     notes=None,
                     sources=None,
                 )
@@ -9510,7 +9652,7 @@ NonEvent(
                 show = NonEvent(
                     no=Tag.NONE,
                     date=Date(),
-                    phrase='',
+                    phrase=None,
                     notes=None,
                     sources=None,
                 )
@@ -9524,7 +9666,6 @@ NonEvent(
                     notes=notes,
                     sources=sources,
                     no_ext=no_ext,
-                    phrase_ext=phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -9536,6 +9677,232 @@ NonEvent(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+NoType = NonEvent | list[NonEvent] | None
+
+
+class Submitter(NamedTuple):
+    """Store, validate and disply a GEDCOM Submitter Record.
+
+    Reference:
+        [GEDCOM record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
+        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
+
+    > n @XREF:SUBM@ SUBM                         {1:1}  [g7:record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
+    >   +1 NAME <Text>                           {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
+    >   +1 <<ADDRESS_STRUCTURE>>                 {0:1}
+    >   +1 PHON <Special>                        {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+    >   +1 EMAIL <Special>                       {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+    >   +1 FAX <Special>                         {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+    >   +1 WWW <Special>                         {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
+    >   +1 LANG <Language>                       {0:M}  [g7:SUBM-LANG](https://gedcom.io/terms/v7/SUBM-LANG)
+    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
+    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
+    >   +1 <<CHANGE_DATE>>                       {0:1}
+    >   +1 <<CREATION_DATE>>                     {0:1}
+    """
+
+    xref: SubmitterXref = Void.SUBM
+    name: str = Default.EMPTY
+    address: AddrType = None
+    phones: PhoneType = None
+    emails: EmailType = None
+    faxes: FaxType = None
+    wwws: WWWType = None
+    multimedia_links: MMLinkType = None
+    languages: LangType = None
+    identifiers: IdenType = None
+    notes: NoteType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
+    name_ext: ExtType = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = (
+            Checker.verify_type(self.xref, SubmitterXref)
+            and Checker.verify_type(self.name, str)
+            and Checker.verify_type(self.address, Address)
+            and Checker.verify_type(self.phones, Phone)
+            and Checker.verify_type(self.emails, Email)
+            and Checker.verify_type(self.faxes, Fax)
+            and Checker.verify_type(self.wwws, WWW)
+            and Checker.verify_type(self.multimedia_links, MultimediaLink)
+            and Checker.verify_type(self.languages, Lang)
+            and Checker.verify_type(self.identifiers, Identifier)
+            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.change, ChangeDate | None)
+            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_ext(Tag.NAME, self.name_ext)
+        )
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = self.xref.ged()
+        if str(self.xref) != Void.NAME and self.validate():
+            lines = Tagger.string(lines, level + 1, Tag.NAME, self.name)
+            lines = Tagger.structure(lines, level + 2, self.name_ext)
+            lines = Tagger.structure(lines, level + 1, self.address)
+            lines = Tagger.structure(lines, level + 1, self.phones)
+            lines = Tagger.structure(lines, level + 1, self.emails)
+            lines = Tagger.structure(lines, level + 1, self.faxes)
+            lines = Tagger.structure(lines, level + 1, self.wwws)
+            lines = Tagger.structure(lines, level + 1, self.multimedia_links)
+            lines = Tagger.structure(lines, level + 1, self.languages)
+            lines = Tagger.structure(lines, level + 1, self.identifiers)
+            lines = Tagger.structure(lines, level + 1, self.notes)
+            lines = Tagger.structure(lines, level + 1, self.change)
+            lines = Tagger.structure(lines, level + 1, self.creation)
+        return lines
+
+    def code(self, tabs: int = 0) -> str:
+        return indent(
+            f"""
+Submitter(
+    xref = {Formatter.codes(self.xref, tabs)},
+    name = {Formatter.codes(self.name, tabs)},
+    address = {Formatter.codes(self.address, tabs)},
+    phones = {Formatter.codes(self.phones, tabs)},
+    emails = {Formatter.codes(self.emails, tabs)},
+    faxes = {Formatter.codes(self.faxes, tabs)},
+    wwws = {Formatter.codes(self.wwws, tabs)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    languages = {Formatter.codes(self.languages, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    notes = {Formatter.codes(self.notes, tabs)},
+    change = {Formatter.codes(self.change, tabs)},
+    creation = {Formatter.codes(self.creation, tabs)},
+    name_ext = {Formatter.codes(self.name_ext, tabs)},
+)""",
+            String.INDENT * tabs,
+        )
+
+    def example(
+        self,
+        choice: int = Default.CHOICE,
+        xref: SubmitterXref = Void.SUBM,
+        name: str = Default.EMPTY,
+        address: AddrType = None,
+        phones: PhoneType = None,
+        emails: EmailType = None,
+        faxes: FaxType = None,
+        wwws: WWWType = None,
+        multimedia_links: MMLinkType = None,
+        languages: LangType = None,
+        identifiers: IdenType = None,
+        notes: NoteType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
+        name_ext: ExtType = None,
+    ) -> None:
+        """Produce four examples of ChronoData code and GEDCOM output lines and link to
+        the GEDCOM documentation.
+
+        The following levels are available:
+        - 0 (Default) Produces an empty example with no GEDCOM lines.
+        - 1 Produces an example with all arguments containing data.
+        - 2 Produces an alternate example with possibly some arguments missing.
+        - 3 Produces either another alternate example or an example with non-Latin
+            character texts.
+
+        Any other value passed in will produce the same as the default level.
+
+        Args:
+            choice: The example one chooses to display.
+        """
+        show: Submitter
+        gedcom_docs: str = Specs.SUBMITTER
+        genealogy_docs: str = 'To be constructed'
+        code_preface: str = String.EMPTY
+        gedcom_preface: str = String.EMPTY
+        match choice:
+            case 1:
+                show = Submitter(
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
+                    change=None,
+                    creation=None,
+                )
+                code_preface = Example.FULL
+                gedcom_preface = Example.GEDCOM
+            case 2:
+                show = Submitter(
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
+                    change=None,
+                    creation=None,
+                )
+                code_preface = Example.SECOND
+                gedcom_preface = Example.GEDCOM
+            case 3:
+                show = Submitter(
+                    xref=Void.SUBM,
+                    name='',
+                    address=Address(),
+                    phones=None,
+                    emails=None,
+                    faxes=None,
+                    wwws=None,
+                    multimedia_links=None,
+                    languages=None,
+                    identifiers=None,
+                    notes=None,
+                    change=None,
+                    creation=None,
+                )
+                code_preface = Example.THIRD
+                gedcom_preface = Example.GEDCOM
+            case _:
+                show = Submitter(
+                    xref=xref,
+                    name=name,
+                    address=address,
+                    phones=phones,
+                    emails=emails,
+                    faxes=faxes,
+                    wwws=wwws,
+                    multimedia_links=multimedia_links,
+                    languages=languages,
+                    identifiers=identifiers,
+                    notes=notes,
+                    change=change,
+                    creation=creation,
+                    name_ext=name_ext,
+                )
+                code_preface = Example.EMPTY_CODE
+                gedcom_preface = Example.EMPTY_GEDCOM
+        return Formatter.example(
+            code_preface,
+            show.code(),
+            gedcom_preface,
+            show.ged(),
+            gedcom_docs,
+            genealogy_docs,
+        )
+
+
+SubmType = SubmitterXref | list[SubmitterXref] | None
 
 
 class Family(NamedTuple):
@@ -9574,24 +9941,22 @@ class Family(NamedTuple):
 
     xref: FamilyXref = Void.FAM
     resn: Resn = Resn.NONE
-    attributes: Any = None
-    events: Any = None
+    attributes: FamAttrType = None
+    events: FamEvenType = None
     husband: IndividualXref = Void.INDI
-    husband_phrase: str = String.EMPTY
+    husband_phrase: PhraseType = None
     wife: IndividualXref = Void.INDI
-    wife_phrase: str = String.EMPTY
-    children: Any = None
-    associations: Any = None
-    submitters: Any = None
-    lds_spouse_sealings: Any = None
-    identifiers: Any = None
-    notes: Any = None
-    citations: Any = None
-    multimedia_links: Any = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    husband_phrase_ext: Ext = None
-    wife_phrase_ext: Ext = None
+    wife_phrase: PhraseType = None
+    children: ChilType = None
+    associations: AssoType = None
+    submitters: StrList = None
+    lds_spouse_sealings: LDSSpouSealingType = None
+    identifiers: IdenType = None
+    notes: NoteType = None
+    citations: SourCiteType = None
+    multimedia_links: MMLinkType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9601,23 +9966,19 @@ class Family(NamedTuple):
             and Checker.verify_type(self.attributes, FamilyAttribute)
             and Checker.verify_type(self.events, FamilyEvent)
             and Checker.verify_type(self.husband, IndividualXref)
-            and Checker.verify_type(self.husband_phrase, str)
+            and Checker.verify_type(self.husband_phrase, Phrase)
             and Checker.verify_type(self.wife, IndividualXref)
-            and Checker.verify_type(self.wife_phrase, str)
+            and Checker.verify_type(self.wife_phrase, Phrase)
             and Checker.verify_type(self.children, Child)
             and Checker.verify_type(self.associations, Association)
             and Checker.verify_type(self.submitters, SubmitterXref)
-            and Checker.verify_type(
-                self.lds_spouse_sealings, LDSSpouseSealing
-            )
+            and Checker.verify_type(self.lds_spouse_sealings, LDSSpouseSealing)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.citations, SourceCitation)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
-            and Checker.verify_ext(Tag.PHRASE, self.husband_phrase_ext)
-            and Checker.verify_ext(Tag.PHRASE, self.wife_phrase_ext)
+            and Checker.verify_type(self.change, ChangeDate)
+            and Checker.verify_type(self.creation, CreationDate)
         )
         return check
 
@@ -9635,18 +9996,16 @@ class Family(NamedTuple):
                 lines = Tagger.string(
                     lines, level + 1, Tag.HUSB, str(self.husband), format=False
                 )
-                lines = Tagger.string(
-                    lines, level + 2, Tag.PHRASE, self.husband_phrase
+                lines = Tagger.structure(
+                    lines, level + 2, self.husband_phrase
                 )
-                lines = Tagger.structure(lines, level + 3, self.husband_phrase_ext)
             if str(self.wife) != str(Void.INDI):
                 lines = Tagger.string(
                     lines, level + 1, Tag.WIFE, str(self.wife), format=False
                 )
-                lines = Tagger.string(
-                    lines, level + 2, Tag.PHRASE, self.wife_phrase
+                lines = Tagger.structure(
+                    lines, level + 2, self.wife_phrase
                 )
-                lines = Tagger.structure(lines, level + 3, self.wife_phrase_ext)
             lines = Tagger.structure(lines, level + 1, self.children)
             lines = Tagger.structure(lines, level + 1, self.associations)
             lines = Tagger.string(
@@ -9683,8 +10042,6 @@ Family(
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
     change = {Formatter.codes(self.change, tabs)}
     creation = {Formatter.codes(self.creation, tabs)}
-    husband_phrase_ext = {Formatter.codes(self.husband_phrase_ext, tabs)},
-    wife_phrase_ext = {Formatter.codes(self.wife_phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -9694,24 +10051,22 @@ Family(
         choice: int = Default.CHOICE,
         xref: FamilyXref = Void.FAM,
         resn: Resn = Resn.NONE,
-        attributes: Any = None,
-        events: Any = None,
+        attributes: FamAttrType = None,
+        events: FamEvenType = None,
         husband: IndividualXref = Void.INDI,
-        husband_phrase: str = Default.EMPTY,
+        husband_phrase: PhraseType = None,
         wife: IndividualXref = Void.INDI,
-        wife_phrase: str = Default.EMPTY,
-        children: Any = None,
-        associations: Any = None,
-        submitters: Any = None,
-        lds_spouse_sealings: Any = None,
-        identifiers: Any = None,
-        notes: Any = None,
-        citations: Any = None,
-        multimedia_links: Any = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        husband_phrase_ext: Ext = None,
-        wife_phrase_ext: Ext = None,
+        wife_phrase: PhraseType = None,
+        children: ChilType = None,
+        associations: AssoType = None,
+        submitters: StrList = None,
+        lds_spouse_sealings: LDSSpouSealingType = None,
+        identifiers: IdenType = None,
+        notes: NoteType = None,
+        citations: SourCiteType = None,
+        multimedia_links: MMLinkType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -9738,11 +10093,11 @@ Family(
                 show = Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
-                    attributes='',
+                    attributes=None,
                     husband=Void.INDI,
-                    husband_phrase=Default.EMPTY,
+                    husband_phrase=None,
                     wife=Void.INDI,
-                    wife_phrase=Default.EMPTY,
+                    wife_phrase=None,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -9760,11 +10115,11 @@ Family(
                 show = Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
-                    attributes='',
+                    attributes=None,
                     husband=Void.INDI,
-                    husband_phrase=Default.EMPTY,
+                    husband_phrase=None,
                     wife=Void.INDI,
-                    wife_phrase=Default.EMPTY,
+                    wife_phrase=None,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -9782,11 +10137,11 @@ Family(
                 show = Family(
                     xref=Void.FAM,
                     resn=Resn.NONE,
-                    attributes='',
+                    attributes=None,
                     husband=Void.INDI,
-                    husband_phrase=Default.EMPTY,
+                    husband_phrase=None,
                     wife=Void.INDI,
-                    wife_phrase=Default.EMPTY,
+                    wife_phrase=None,
                     children=None,
                     associations=None,
                     submitters=None,
@@ -9820,8 +10175,6 @@ Family(
                     multimedia_links=multimedia_links,
                     change=change,
                     creation=creation,
-                    husband_phrase_ext=husband_phrase_ext,
-                    wife_phrase_ext=wife_phrase_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -9833,6 +10186,9 @@ Family(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+FamType = Family | list[Family] | None
 
 
 class Multimedia(NamedTuple):
@@ -9860,12 +10216,12 @@ class Multimedia(NamedTuple):
 
     xref: MultimediaXref = Void.OBJE
     resn: Tag = Tag.NONE
-    files: list[File] | None = None
-    identifiers: list[Identifier] | None = None
-    notes: list[Note] | None = None
-    sources: list[SourceCitation] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
+    files: FileType = None
+    identifiers: IdenType = None
+    notes: NoteType = None
+    sources: SourCiteType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -9881,7 +10237,7 @@ class Multimedia(NamedTuple):
         )
         return check
 
-    def ged(self, level: int = 0) -> str:  
+    def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
@@ -9915,12 +10271,12 @@ Multimedia(
         choice: int = Default.CHOICE,
         xref: MultimediaXref = Void.OBJE,
         resn: Tag = Tag.NONE,
-        files: list[File] | None = None,
-        identifiers: list[Identifier] | None = None,
-        notes: list[Note] | None = None,
-        sources: list[SourceCitation] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
+        files: FileType = None,
+        identifiers: IdenType = None,
+        notes: NoteType = None,
+        sources: SourCiteType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10005,6 +10361,9 @@ Multimedia(
         )
 
 
+ObjeType = Multimedia | list[Multimedia] | None
+
+
 class Source(NamedTuple):
     """Store, validate and display a GEDCOM Source Record.
 
@@ -10038,29 +10397,28 @@ class Source(NamedTuple):
     xref: SourceXref = Void.SOUR
     source_data_events: list[SourceDataEvent] | None = None
     agency: str = Default.EMPTY
-    data_notes: list[Note] | None = None
+    data_notes: NoteType = None
     author: str = Default.EMPTY
     title: str = Default.EMPTY
     abbreviation: str = Default.EMPTY
     published: str = Default.EMPTY
     text: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = Default.EMPTY
+    language: LangType = None
     repositories: list[Any] | None = None
-    identifiers: list[Identifier] | None = None
-    notes: list[Note] | None = None
-    multimedia_links: list[MultimediaLink] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    data_ext: Ext = None
-    agnc_ext: Ext = None
-    auth_ext: Ext = None
-    titl_ext: Ext = None
-    abbr_ext: Ext = None
-    publ_ext: Ext = None
-    text_ext: Ext = None
-    mime_ext: Ext = None
-    lang_ext: Ext = None
+    identifiers: IdenType = None
+    notes: NoteType = None
+    multimedia_links: MMLinkType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
+    data_ext: ExtType = None
+    agnc_ext: ExtType = None
+    auth_ext: ExtType = None
+    titl_ext: ExtType = None
+    abbr_ext: ExtType = None
+    publ_ext: ExtType = None
+    text_ext: ExtType = None
+    mime_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10087,7 +10445,6 @@ class Source(NamedTuple):
             and Checker.verify_ext(Tag.PUBL, self.publ_ext)
             and Checker.verify_ext(Tag.TEXT, self.text_ext)
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -10095,10 +10452,16 @@ class Source(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            if self.source_data_events is not None or self.agency != Default.EMPTY or self.notes is not None:
+            if (
+                self.source_data_events is not None
+                or self.agency != Default.EMPTY
+                or self.notes is not None
+            ):
                 lines = Tagger.empty(lines, level + 1, Tag.DATA)
                 lines = Tagger.structure(lines, level + 2, self.data_ext)
-                lines = Tagger.structure(lines, level + 2, self.source_data_events)
+                lines = Tagger.structure(
+                    lines, level + 2, self.source_data_events
+                )
                 lines = Tagger.string(lines, level + 2, Tag.AGNC, self.agency)
                 lines = Tagger.structure(lines, level + 3, self.agnc_ext)
                 lines = Tagger.structure(lines, level + 1, self.notes)
@@ -10114,8 +10477,7 @@ class Source(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.text_ext)
             lines = Tagger.string(lines, level + 2, Tag.MIME, self.mime.value)
             lines = Tagger.structure(lines, level + 3, self.mime_ext)
-            lines = Tagger.string(lines, level + 2, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 3, self.lang_ext)
+            lines = Tagger.structure(lines, level + 2, self.language)
             lines = Tagger.structure(lines, level + 1, self.repositories)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -10151,7 +10513,6 @@ Source(
     publ_ext = {Formatter.codes(self.publ_ext, tabs)}
     text_ext = {Formatter.codes(self.text_ext, tabs)}
     mime_ext = {Formatter.codes(self.mime_ext, tabs)}
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)}
 )""",
             String.INDENT * tabs,
         )
@@ -10162,29 +10523,28 @@ Source(
         xref: SourceXref = Void.SOUR,
         source_data_events: list[SourceDataEvent] | None = None,
         agency: str = Default.EMPTY,
-        data_notes: list[Note] | None = None,
+        data_notes: NoteType = None,
         author: str = Default.EMPTY,
         title: str = Default.EMPTY,
         abbreviation: str = Default.EMPTY,
         published: str = Default.EMPTY,
         text: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
-        language: str = Default.EMPTY,
+        language: LangType = None,
         repositories: list[Any] | None = None,
-        identifiers: list[Identifier] | None = None,
-        notes: list[Note] | None = None,
-        multimedia_links: list[MultimediaLink] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        data_ext: Ext = None,
-        agnc_ext: Ext = None,
-        auth_ext: Ext = None,
-        titl_ext: Ext = None,
-        abbr_ext: Ext = None,
-        publ_ext: Ext = None,
-        text_ext: Ext = None,
-        mime_ext: Ext = None,
-        lang_ext: Ext = None,
+        identifiers: IdenType = None,
+        notes: NoteType = None,
+        multimedia_links: MMLinkType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
+        data_ext: ExtType = None,
+        agnc_ext: ExtType = None,
+        auth_ext: ExtType = None,
+        titl_ext: ExtType = None,
+        abbr_ext: ExtType = None,
+        publ_ext: ExtType = None,
+        text_ext: ExtType = None,
+        mime_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10294,7 +10654,6 @@ Source(
                     publ_ext=publ_ext,
                     text_ext=text_ext,
                     mime_ext=mime_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -10308,222 +10667,7 @@ Source(
         )
 
 
-class Submitter(NamedTuple):
-    """Store, validate and disply a GEDCOM Submitter Record.
-
-    Reference:
-        [GEDCOM record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
-        [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
-
-    > n @XREF:SUBM@ SUBM                         {1:1}  [g7:record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
-    >   +1 NAME <Text>                           {1:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-    >   +1 <<ADDRESS_STRUCTURE>>                 {0:1}
-    >   +1 PHON <Special>                        {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-    >   +1 EMAIL <Special>                       {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-    >   +1 FAX <Special>                         {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-    >   +1 WWW <Special>                         {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-    >   +1 <<MULTIMEDIA_LINK>>                   {0:M}
-    >   +1 LANG <Language>                       {0:M}  [g7:SUBM-LANG](https://gedcom.io/terms/v7/SUBM-LANG)
-    >   +1 <<IDENTIFIER_STRUCTURE>>              {0:M}
-    >   +1 <<NOTE_STRUCTURE>>                    {0:M}
-    >   +1 <<CHANGE_DATE>>                       {0:1}
-    >   +1 <<CREATION_DATE>>                     {0:1}
-    """
-
-    xref: SubmitterXref = Void.SUBM
-    name: str = Default.EMPTY
-    address: Address | None = None
-    phones: list[str] | None = None
-    emails: list[str] | None = None
-    faxes: list[str] | None = None
-    wwws: list[str] | None = None
-    multimedia_links: list[MultimediaLink] | None = None
-    languages: list[str] | None = None
-    identifiers: list[Identifier] | None = None
-    notes: list[Note] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    name_ext: Ext = None
-    
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.xref, SubmitterXref)
-            and Checker.verify_type(self.name, str)
-            and Checker.verify_type(self.address, Address | None)
-            and Checker.verify_type(self.phones, str)
-            and Checker.verify_type(self.emails, str)
-            and Checker.verify_type(self.faxes, str)
-            and Checker.verify_type(self.wwws, str)
-            and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.languages, str)
-            and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
-            and Checker.verify_ext(Tag.NAME, self.name_ext)
-        )
-        return check
-
-    def ged(self, level: int = 0) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged()
-        if str(self.xref) != Void.NAME and self.validate():
-            lines = Tagger.string(lines, level + 1, Tag.NAME, self.name)
-            lines = Tagger.structure(lines, level + 2, self.name_ext)
-            lines = Tagger.structure(lines, level + 1, self.address)
-# add in phone, email, fax, www
-            lines = Tagger.structure(lines, level + 1, self.multimedia_links)
-# add in language
-            lines = Tagger.structure(lines, level + 1, self.identifiers)
-            lines = Tagger.structure(lines, level + 1, self.notes)
-            lines = Tagger.structure(lines, level + 1, self.change)
-            lines = Tagger.structure(lines, level + 1, self.creation)
-        return lines
-
-    def code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Submitter(
-    xref = {Formatter.codes(self.xref, tabs)},
-    name = {Formatter.codes(self.name, tabs)},
-    address = {Formatter.codes(self.address, tabs)},
-    phones = {Formatter.codes(self.phones, tabs)},
-    emails = {Formatter.codes(self.emails, tabs)},
-    faxes = {Formatter.codes(self.faxes, tabs)},
-    wwws = {Formatter.codes(self.wwws, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    languages = {Formatter.codes(self.languages, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    change = {Formatter.codes(self.change, tabs)},
-    creation = {Formatter.codes(self.creation, tabs)},
-    name_ext = {Formatter.codes(self.name_ext, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: SubmitterXref = Void.SUBM,
-        name: str = Default.EMPTY,
-        address: Address | None = None,
-        phones: list[str] | None = None,
-        emails: list[str] | None = None,
-        faxes: list[str] | None = None,
-        wwws: list[str] | None = None,
-        multimedia_links: list[MultimediaLink] | None = None,
-        languages: list[str] | None = None,
-        identifiers: list[Identifier] | None = None,
-        notes: list[Note] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        name_ext: Ext = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Submitter
-        gedcom_docs: str = Specs.SUBMITTER
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Submitter(
-                    xref=xref,
-                    name=name,
-                    address=address,
-                    phones=phones,
-                    emails=emails,
-                    faxes=faxes,
-                    wwws=wwws,
-                    multimedia_links=multimedia_links,
-                    languages=languages,
-                    identifiers=identifiers,
-                    notes=notes,
-                    change=change,
-                    creation=creation,
-                    name_ext=name_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            show.ged(),
-            gedcom_docs,
-            genealogy_docs,
-        )
+SourType = Source | list[Source] | None
 
 
 class Individual(NamedTuple):
@@ -10634,25 +10778,25 @@ class Individual(NamedTuple):
 
     xref: IndividualXref = Void.INDI
     resn: Resn = Resn.NONE
-    personal_names: list[PersonalName] | None = None
+    personal_names: PersonalNameType = None
     sex: Sex = Sex.NONE
-    attributes: list[IndividualAttribute] | None = None
-    events: list[IndividualEvent] | None = None
+    attributes: IndiAttrType = None
+    events: IndiEvenType = None
     lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None
-    families_child: list[FamilyChild] | None = None
-    submitters: list[Submitter] | None = None
-    associations: list[Association] | None = None
-    aliases: list[Alias] | None = None
-    ancestor_interest: list[Submitter] | None = None
-    descendent_interest: list[Submitter] | None = None
-    identifiers: list[Identifier] | None = None
-    notes: list[Note] | None = None
-    sources: list[Source] | None = None
-    multimedia_links: list[MultimediaLink] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    resn_ext: Ext = None
-    sex_ext: Ext = None
+    families_child: FamcType = None
+    submitters: StrList = None
+    associations: AssoType = None
+    aliases: AliaType = None
+    ancestor_interest: StrList = None
+    descendent_interest: StrList = None
+    identifiers: IdenType = None
+    notes: NoteType = None
+    sources: SourType = None
+    multimedia_links: MMLinkType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
+    resn_ext: ExtType = None
+    sex_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10744,25 +10888,25 @@ Individual(
         choice: int = Default.CHOICE,
         xref: IndividualXref = Void.INDI,
         resn: Resn = Resn.NONE,
-        personal_names: list[PersonalName] | None = None,
+        personal_names: PersonalNameType = None,
         sex: Sex = Sex.NONE,
-        attributes: list[IndividualAttribute] | None = None,
-        events: list[IndividualEvent] | None = None,
+        attributes: IndiAttrType = None,
+        events: IndiEvenType = None,
         lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None,
-        families_child: list[FamilyChild] | None = None,
-        submitters: list[Submitter] | None = None,
-        associations: list[Association] | None = None,
-        aliases: list[Alias] | None = None,
-        ancestor_interest: list[Submitter] | None = None,
-        descendent_interest: list[Submitter] | None = None,
-        identifiers: list[Identifier] | None = None,
-        notes: list[Note] | None = None,
-        sources: list[Source] | None = None,
-        multimedia_links: list[MultimediaLink] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        resn_ext: Ext = None,
-        sex_ext: Ext = None,
+        families_child: FamcType = None,
+        submitters: StrList = None,
+        associations: AssoType = None,
+        aliases: AliaType = None,
+        ancestor_interest: StrList = None,
+        descendent_interest: StrList = None,
+        identifiers: IdenType = None,
+        notes: NoteType = None,
+        sources: SourType = None,
+        multimedia_links: MMLinkType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
+        resn_ext: ExtType = None,
+        sex_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10890,6 +11034,9 @@ Individual(
         )
 
 
+IndiType = Individual | None
+
+
 class Repository(NamedTuple):
     """
     Reference:
@@ -10910,16 +11057,16 @@ class Repository(NamedTuple):
 
     xref: RepositoryXref = Void.REPO
     name: str = Default.EMPTY
-    address: Address | None = None
-    phones: list[str] | None = None
-    emails: list[str] | None = None
-    faxes: list[str] | None = None
-    wwws: list[str] | None = None
-    notes: list[Note] | None = None
-    identifiers: list[Identifier] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    name_ext: Ext = None
+    address: AddrType = None
+    phones: PhoneType = None
+    emails: EmailType = None
+    faxes: FaxType = None
+    wwws: WWWType = None
+    notes: NoteType = None
+    identifiers: IdenType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
+    name_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10927,9 +11074,10 @@ class Repository(NamedTuple):
             Checker.verify_type(self.xref, RepositoryXref)
             and Checker.verify_type(self.name, str)
             and Checker.verify_type(self.address, Address)
-            and Checker.verify_type(self.emails, str)
-            and Checker.verify_type(self.faxes, str)
-            and Checker.verify_type(self.wwws, str)
+            and Checker.verify_type(self.phones, Phone)
+            and Checker.verify_type(self.emails, Email)
+            and Checker.verify_type(self.faxes, Fax)
+            and Checker.verify_type(self.wwws, WWW)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.change, ChangeDate | None)
@@ -10945,10 +11093,10 @@ class Repository(NamedTuple):
             lines = Tagger.string(lines, level, Tag.NAME, self.name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
             lines = Tagger.structure(lines, level, self.address)
-            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.structure(lines, level, self.phones)
+            lines = Tagger.structure(lines, level, self.emails)
+            lines = Tagger.structure(lines, level, self.faxes)
+            lines = Tagger.structure(lines, level, self.wwws)
             lines = Tagger.structure(lines, level, self.change)
             lines = Tagger.structure(lines, level, self.creation)
         return lines
@@ -10978,16 +11126,16 @@ Repository(
         choice: int = Default.CHOICE,
         xref: RepositoryXref = Void.REPO,
         name: str = Default.EMPTY,
-        address: Address | None = None,
-        phones: list[str] | None = None,
-        emails: list[str] | None = None,
-        faxes: list[str] | None = None,
-        wwws: list[str] | None = None,
-        notes: list[Note] | None = None,
-        identifiers: list[Identifier] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        name_ext: Ext = None,
+        address: AddrType = None,
+        phones: PhoneType = None,
+        emails: EmailType = None,
+        faxes: FaxType = None,
+        wwws: WWWType = None,
+        notes: NoteType = None,
+        identifiers: IdenType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
+        name_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -11085,6 +11233,9 @@ Repository(
         )
 
 
+RepoType = Repository | None
+
+
 class SharedNote(NamedTuple):
     """Store, validate and display a GEDCOM Shared Note Record.
 
@@ -11106,15 +11257,15 @@ class SharedNote(NamedTuple):
     xref: SharedNoteXref = Void.SNOTE
     text: str = Default.EMPTY
     mime: MediaType = MediaType.NONE
-    language: str = String.UNDETERMINED
-    translations: list[NoteTranslation] | None = None
-    sources: list[SourceCitation] | None = None
-    identifiers: list[Identifier] | None = None
-    change: ChangeDate | None = None
-    creation: CreationDate | None = None
-    snote_ext: Ext = None
-    mime_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    translations: NoteTranType = None
+    sources: SourCiteType = None
+    identifiers: IdenType = None
+    change: ChangeDateType = None
+    creation: CreationDateType = None
+    snote_ext: ExtType = None
+    mime_ext: ExtType = None
+    lang_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -11122,7 +11273,7 @@ class SharedNote(NamedTuple):
             Checker.verify_type(self.xref, SharedNoteXref)
             and Checker.verify_type(self.text, str)
             and Checker.verify_enum(self.mime.value, MediaType)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_type(self.translations, NoteTranslation)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.identifiers, Identifier)
@@ -11140,7 +11291,7 @@ class SharedNote(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime.value)
             lines = Tagger.structure(lines, level + 2, self.mime_ext)
-            lines = Tagger.string(lines, level + 1, Tag.LANG, self.language)
+            lines = Tagger.structure(lines, level + 1, self.language)
             lines = Tagger.structure(lines, level + 2, self.lang_ext)
             lines = Tagger.structure(lines, level + 1, self.translations)
             lines = Tagger.structure(lines, level + 1, self.sources)
@@ -11175,15 +11326,15 @@ SharedNote(
         xref: SharedNoteXref = Void.SNOTE,
         text: str = Default.EMPTY,
         mime: MediaType = MediaType.NONE,
-        language: str = String.UNDETERMINED,
-        translations: list[NoteTranslation] | None = None,
-        sources: list[SourceCitation] | None = None,
-        identifiers: list[Identifier] | None = None,
-        change: ChangeDate | None = None,
-        creation: CreationDate | None = None,
-        snote_ext: Ext = None,
-        mime_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        translations: NoteTranType = None,
+        sources: SourCiteType = None,
+        identifiers: IdenType = None,
+        change: ChangeDateType = None,
+        creation: CreationDateType = None,
+        snote_ext: ExtType = None,
+        mime_ext: ExtType = None,
+        lang_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -11211,7 +11362,7 @@ SharedNote(
                     xref=Void.SNOTE,
                     text='',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     sources=None,
                     identifiers=None,
@@ -11225,7 +11376,7 @@ SharedNote(
                     xref=Void.SNOTE,
                     text='',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     sources=None,
                     identifiers=None,
@@ -11239,7 +11390,7 @@ SharedNote(
                     xref=Void.SNOTE,
                     text='',
                     mime=MediaType.NONE,
-                    language='en-US',
+                    language=Lang('en-US'),
                     translations=None,
                     sources=None,
                     identifiers=None,
@@ -11273,6 +11424,9 @@ SharedNote(
             gedcom_docs,
             genealogy_docs,
         )
+
+
+SnoteType = SharedNote | None
 
 
 class Header(NamedTuple):
@@ -11316,29 +11470,28 @@ class Header(NamedTuple):
     vers: str = String.EMPTY
     name: str = String.EMPTY
     corporation: str = String.EMPTY
-    address: Address | None = None
-    phones: list[str] | None = None
-    emails: list[str] | None = None
-    faxes: list[str] | None = None
-    wwws: list[str] | None = None
+    address: AddrType = None
+    phones: PhoneType = None
+    emails: EmailType = None
+    faxes: FaxType = None
+    wwws: WWWType = None
     data: str = String.EMPTY
-    data_date: Date | None = None
-    data_time: Time | None = None
+    data_date: DateType = None
+    data_time: TimeType = None
     data_copyright: str = String.EMPTY
     dest: str = String.EMPTY
-    header_date: Date | None = None
-    header_time: Time | None = None
+    header_date: DateType = None
+    header_time: TimeType = None
     submitter: SubmitterXref = Void.SUBM
     subm_copyright: str = String.EMPTY
-    language: str = String.EMPTY
-    note: Note | None = None
-    head_ext: Ext = None
-    gedc_ext: Ext = None
-    vers_ext: Ext = None
-    dest_ext: Ext = None
-    subm_ext: Ext = None
-    copr_ext: Ext = None
-    lang_ext: Ext = None
+    language: LangType = None
+    note: NoteType = None
+    head_ext: ExtType = None
+    gedc_ext: ExtType = None
+    vers_ext: ExtType = None
+    dest_ext: ExtType = None
+    subm_ext: ExtType = None
+    copr_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -11349,10 +11502,10 @@ class Header(NamedTuple):
             and Checker.verify_type(self.name, str)
             and Checker.verify_type(self.corporation, str)
             and Checker.verify_type(self.address, Address)
-            and Checker.verify_type(self.phones, str)
-            and Checker.verify_type(self.emails, str)
-            and Checker.verify_type(self.faxes, str)
-            and Checker.verify_type(self.wwws, str)
+            and Checker.verify_type(self.phones, Phone)
+            and Checker.verify_type(self.emails, Email)
+            and Checker.verify_type(self.faxes, Fax)
+            and Checker.verify_type(self.wwws, WWW)
             and Checker.verify_type(self.data, str)
             and Checker.verify_type(self.data_date, Date)
             and Checker.verify_type(self.data_time, Time)
@@ -11362,7 +11515,7 @@ class Header(NamedTuple):
             and Checker.verify_type(self.header_time, Time)
             and Checker.verify_type(self.submitter, SubmitterXref)
             and Checker.verify_type(self.subm_copyright, str)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.language, Lang)
             and Checker.verify_type(self.note, Note)
             and Checker.verify_ext(Tag.HEAD, self.head_ext)
             and Checker.verify_ext(Tag.GEDC, self.gedc_ext)
@@ -11370,7 +11523,6 @@ class Header(NamedTuple):
             and Checker.verify_ext(Tag.DEST, self.dest_ext)
             and Checker.verify_ext(Tag.SUBM, self.subm_ext)
             and Checker.verify_ext(Tag.COPR, self.copr_ext)
-            and Checker.verify_ext(Tag.LANG, self.lang_ext)
         )
         return check
 
@@ -11388,10 +11540,10 @@ class Header(NamedTuple):
                 lines = Tagger.empty(lines, level + 1, Tag.SCHMA)
                 lines = Tagger.structure(lines, level + 1, self.schema_tags)
             lines = Tagger.structure(lines, level, self.address)
-            lines = Tagger.string(lines, level, Tag.PHON, self.phones)
-            lines = Tagger.string(lines, level, Tag.EMAIL, self.emails)
-            lines = Tagger.string(lines, level, Tag.FAX, self.faxes)
-            lines = Tagger.string(lines, level, Tag.WWW, self.wwws)
+            lines = Tagger.structure(lines, level, self.phones)
+            lines = Tagger.structure(lines, level, self.emails)
+            lines = Tagger.structure(lines, level, self.faxes)
+            lines = Tagger.structure(lines, level, self.wwws)
             if self.data != String.EMPTY:
                 lines = Tagger.string(lines, level + 2, Tag.DATA, self.data)
                 lines = Tagger.structure(
@@ -11416,8 +11568,7 @@ class Header(NamedTuple):
                 lines, level + 1, Tag.COPR, self.subm_copyright
             )
             lines = Tagger.structure(lines, level + 2, self.copr_ext)
-            lines = Tagger.string(lines, level, Tag.LANG, self.language)
-            lines = Tagger.structure(lines, level + 1, self.lang_ext)
+            lines = Tagger.structure(lines, level, self.language)
             lines = Tagger.structure(lines, level, self.note)
         return lines
 
@@ -11452,7 +11603,6 @@ Header(
     dest_ext = {Formatter.codes(self.dest_ext, tabs)},
     subm_ext = {Formatter.codes(self.subm_ext, tabs)},
     copr_ext = {Formatter.codes(self.copr_ext, tabs)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -11465,29 +11615,28 @@ Header(
         vers: str = String.EMPTY,
         name: str = String.EMPTY,
         corporation: str = String.EMPTY,
-        address: Address | None = None,
-        phones: list[str] | None = None,
-        emails: list[str] | None = None,
-        faxes: list[str] | None = None,
-        wwws: list[str] | None = None,
+        address: AddrType = None,
+        phones: PhoneType = None,
+        emails: EmailType = None,
+        faxes: FaxType = None,
+        wwws: WWWType = None,
         data: str = String.EMPTY,
-        data_date: Date | None = None,
-        data_time: Time | None = None,
+        data_date: DateType = None,
+        data_time: TimeType = None,
         data_copyright: str = String.EMPTY,
         dest: str = String.EMPTY,
-        header_date: Date | None = None,
-        header_time: Time | None = None,
+        header_date: DateType = None,
+        header_time: TimeType = None,
         submitter: SubmitterXref = Void.SUBM,
         subm_copyright: str = String.EMPTY,
-        language: str = String.EMPTY,
-        note: Note | None = None,
-        head_ext: Ext = None,
-        gedc_ext: Ext = None,
-        vers_ext: Ext = None,
-        dest_ext: Ext = None,
-        subm_ext: Ext = None,
-        copr_ext: Ext = None,
-        lang_ext: Ext = None,
+        language: LangType = None,
+        note: NoteType = None,
+        head_ext: ExtType = None,
+        gedc_ext: ExtType = None,
+        vers_ext: ExtType = None,
+        dest_ext: ExtType = None,
+        subm_ext: ExtType = None,
+        copr_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -11531,7 +11680,7 @@ Header(
                     header_time=Time(),
                     submitter=Void.SUBM,
                     subm_copyright='',
-                    language='en-US',
+                    language=Lang('en-US'),
                     note=None,
                 )
                 code_preface = Example.FULL
@@ -11557,7 +11706,7 @@ Header(
                     header_time=Time(),
                     submitter=Void.SUBM,
                     subm_copyright='',
-                    language='en-US',
+                    language=Lang('en-US'),
                     note=None,
                 )
                 code_preface = Example.SECOND
@@ -11583,7 +11732,7 @@ Header(
                     header_time=Time(),
                     submitter=Void.SUBM,
                     subm_copyright='',
-                    language='en-US',
+                    language=Lang('en-US'),
                     note=None,
                 )
                 code_preface = Example.THIRD
@@ -11617,7 +11766,6 @@ Header(
                     dest_ext=dest_ext,
                     subm_ext=subm_ext,
                     copr_ext=copr_ext,
-                    lang_ext=lang_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM

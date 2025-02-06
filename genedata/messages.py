@@ -53,7 +53,7 @@ class Msg:
     MISSING: str = 'These xref values {0} are missing record definitions.'
     NEGATIVE_ERROR: str = 'The value "{0}" is less than zero.'
     NEG_YEAR: str = 'Negative year but a negative label "{0}".'
-    NOT_DEFAULT: str = 'The value "{0}" cannot be the default value "{1}".'
+    NOT_DEFAULT: str = 'GEDCOM requires a specific value different from the default "{0}".'
     NOT_DEFINED_FOR_STRUCTURE: str = 'The extension "{0}" is not defined for the current structure.'
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
