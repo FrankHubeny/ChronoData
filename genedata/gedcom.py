@@ -45,6 +45,7 @@ a GEDCOM line rather than the Tag part of the line.
 
 __all__ = [
     'Adop',
+    'Even',
     'EvenAttr',
     'FamAttr',
     'FamEven',
@@ -1150,6 +1151,41 @@ class Tag(Enum):
     WILL = 'WILL'
     WWW = 'WWW'
     NONE = ''
+
+
+class Even(Enum):
+    """Tags used for events in general."""
+    CENS = Tag.CENS.value
+    ADOP = Tag.ADOP.value
+    BAPM = Tag.BAPM.value
+    BARM = Tag.BARM.value
+    BASM = Tag.BASM.value
+    BIRT = Tag.BIRT.value
+    BLES = Tag.BLES.value
+    BURI = Tag.BURI.value
+    CHR = Tag.CHR.value
+    CHRA = Tag.CHRA.value
+    CONF = Tag.CONF.value
+    CREM = Tag.CREM.value
+    DEAT = Tag.DEAT.value
+    EMIG = Tag.EMIG.value
+    FCOM = Tag.FCOM.value
+    GRAD = Tag.GRAD.value
+    IMMI = Tag.IMMI.value
+    NATU = Tag.NATU.value
+    ORDN = Tag.ORDN.value
+    PROB = Tag.PROB.value
+    RETI = Tag.RETI.value
+    WILL = Tag.WILL.value
+    ANUL = Tag.ANUL.value
+    DIV = Tag.DIV.value
+    DIVF = Tag.DIVF.value
+    ENGA = Tag.ENGA.value
+    MARB = Tag.MARB.value
+    MARC = Tag.MARC.value
+    MARL = Tag.MARL.value
+    MARR = Tag.MARR.value
+    MARS = Tag.MARS.value
 
 
 class FamAttr(Enum):
