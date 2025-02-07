@@ -19,30 +19,11 @@ References:
 """
 
 __all__ = [
-    'Adop',
     'ApproxDate',
-    'EvenAttr',
-    'Event',
-    'FamAttr',
-    'FamEven',
-    'FamcStat',
     'GedFlag',
-    'Id',
-    'IndiAttr',
-    'IndiEven',
     'MediaType',
-    'Medium',
-    'NameType',
-    'Pedi',
-    'Quay',
     'RangeDate',
-    'Record',
-    'Resn',
     'RestrictDate',
-    'Role',
-    'Sex',
-    'Stat',
-    'Tag',
 ]
 
 from dataclasses import dataclass
@@ -452,42 +433,42 @@ class ApproxDate(Enum):
     NONE = String.EMPTY
 
 
-class Event(Enum):
-    """Tags for events."""
+# class Event(Enum):
+#     """Tags for events."""
 
-    ADOP = 'ADOP'
-    ANUL = 'ANUL'
-    BAPM = 'BAPM'
-    BARM = 'BARM'
-    BASM = 'BASM'
-    BIRT = 'BIRT'
-    BLES = 'BLES'
-    BURI = 'BURI'
-    CENS = 'CENS'
-    CHR = 'CHR'
-    CHRA = 'CHRA'
-    CONF = 'CONF'
-    CREM = 'CREM'
-    DEAT = 'DEAT'
-    DIV = 'DIV'
-    DIVF = 'DIVF'
-    EMIG = 'EMIG'
-    ENGA = 'ENGA'
-    EVEN = 'EVEN'
-    FCOM = 'FCOM'
-    GRAD = 'GRAD'
-    IMMI = 'IMMI'
-    MARB = 'MARB'
-    MARC = 'MARC'
-    MARL = 'MARL'
-    MARR = 'MARR'
-    MARS = 'MARS'
-    NATU = 'NATU'
-    ORDN = 'ORDN'
-    PROB = 'PROB'
-    RETI = 'RETI'
-    WILL = 'WILL'
-    NONE = String.EMPTY
+#     ADOP = 'ADOP'
+#     ANUL = 'ANUL'
+#     BAPM = 'BAPM'
+#     BARM = 'BARM'
+#     BASM = 'BASM'
+#     BIRT = 'BIRT'
+#     BLES = 'BLES'
+#     BURI = 'BURI'
+#     CENS = 'CENS'
+#     CHR = 'CHR'
+#     CHRA = 'CHRA'
+#     CONF = 'CONF'
+#     CREM = 'CREM'
+#     DEAT = 'DEAT'
+#     DIV = 'DIV'
+#     DIVF = 'DIVF'
+#     EMIG = 'EMIG'
+#     ENGA = 'ENGA'
+#     EVEN = 'EVEN'
+#     FCOM = 'FCOM'
+#     GRAD = 'GRAD'
+#     IMMI = 'IMMI'
+#     MARB = 'MARB'
+#     MARC = 'MARC'
+#     MARL = 'MARL'
+#     MARR = 'MARR'
+#     MARS = 'MARS'
+#     NATU = 'NATU'
+#     ORDN = 'ORDN'
+#     PROB = 'PROB'
+#     RETI = 'RETI'
+#     WILL = 'WILL'
+#     NONE = String.EMPTY
 
 
 class GreaterLessThan(Enum):
@@ -551,571 +532,571 @@ class MediaType(Enum):
     NONE = String.EMPTY
 
 
-class Tag(Enum):
-    """Enumerate all of the standard tags signalling structure types in the GEDCOM specification."""
-
-    ABBR = 'ABBR'
-    ADDR = 'ADDR'
-    ADOP = 'ADOP'
-    ADR1 = 'ADR1'
-    ADR2 = 'ADR2'
-    ADR3 = 'ADR3'
-    AGE = 'AGE'
-    AGNC = 'AGNC'
-    ALIA = 'ALIA'
-    ANCI = 'ANCI'
-    ANUL = 'ANUL'
-    ASSO = 'ASSO'
-    AUTH = 'AUTH'
-    BAPL = 'BAPL'
-    BAPM = 'BAPM'
-    BARM = 'BARM'
-    BASM = 'BASM'
-    BIRT = 'BIRT'
-    BLES = 'BLES'
-    BURI = 'BURI'
-    CALN = 'CALN'
-    CAST = 'CAST'
-    CAUS = 'CAUS'
-    CENS = 'CENS'
-    CHAN = 'CHAN'
-    CHIL = 'CHIL'
-    CHR = 'CHR'
-    CHRA = 'CHRA'
-    CITY = 'CITY'
-    CONF = 'CONF'
-    CONL = 'CONL'
-    CONT = 'CONT'
-    COPR = 'COPR'
-    CORP = 'CORP'
-    CREA = 'CREA'
-    CREM = 'CREM'
-    CROP = 'CROP'
-    CTRY = 'CTRY'
-    DATA = 'DATA'
-    DATE = 'DATE'
-    DEAT = 'DEAT'
-    DESI = 'DESI'
-    DEST = 'DEST'
-    DIV = 'DIV'
-    DIVF = 'DIVF'
-    DSCR = 'DSCR'
-    EDUC = 'EDUC'
-    EMAIL = 'EMAIL'
-    EMIG = 'EMIG'
-    ENDL = 'ENDL'
-    ENGA = 'ENGA'
-    EVEN = 'EVEN'
-    EXID = 'EXID'
-    FACT = 'FACT'
-    FAM = 'FAM'
-    FATH = 'FATH'
-    FAMC = 'FAMC'
-    FAMS = 'FAMS'
-    FAX = 'FAX'
-    FCOM = 'FCOM'
-    FILE = 'FILE'
-    FILM = 'FILM'
-    FORM = 'FORM'
-    FRENCH_R = 'FRENCH_R'
-    GEDC = 'GEDC'
-    GIVN = 'GIVN'
-    GRAD = 'GRAD'
-    GREGORIAN = 'GREGORIAN'
-    HEAD = 'HEAD'
-    HEBREW = 'HEBREW'
-    HEIGHT = 'HEIGHT'
-    HUSB = 'HUSB'
-    IDNO = 'IDNO'
-    IMMI = 'IMMI'
-    INDI = 'INDI'
-    INIL = 'INIL'
-    JULIAN = 'JULIAN'
-    LANG = 'LANG'
-    LANG_ = '_LANG'
-    LATI = 'LATI'
-    LEFT = 'LEFT'
-    LONG = 'LONG'
-    MAP = 'MAP'
-    MARB = 'MARB'
-    MARC = 'MARC'
-    MARL = 'MARL'
-    MARR = 'MARR'
-    MARS = 'MARS'
-    MEDI = 'MEDI'
-    MIME = 'MIME'
-    NAME = 'NAME'
-    NATI = 'NATI'
-    NATU = 'NATU'
-    NCHI = 'NCHI'
-    NICK = 'NICK'
-    NMR = 'NMR'
-    NO = 'NO'
-    NOTE = 'NOTE'
-    NPFX = 'NPFX'
-    NSFX = 'NSFX'
-    OBJE = 'OBJE'
-    OCCU = 'OCCU'
-    ORDN = 'ORDN'
-    PAGE = 'PAGE'
-    PEDI = 'PEDI'
-    PHON = 'PHON'
-    PHRASE = 'PHRASE'
-    PLAC = 'PLAC'
-    POST = 'POST'
-    PROB = 'PROB'
-    PROP = 'PROP'
-    PUBL = 'PUBL'
-    QUAY = 'QUAY'
-    REFN = 'REFN'
-    RELI = 'RELI'
-    REPO = 'REPO'
-    RESI = 'RESI'
-    RESN = 'RESN'
-    RETI = 'RETI'
-    ROLE = 'ROLE'
-    SCHMA = 'SCHMA'
-    SDATE = 'SDATE'
-    SEX = 'SEX'
-    SLGC = 'SLGC'
-    SLGS = 'SLGS'
-    SNOTE = 'SNOTE'
-    SOUR = 'SOUR'
-    SPFX = 'SPFX'
-    SPOU = 'SPOU'
-    SSN = 'SSN'
-    STAE = 'STAE'
-    STAT = 'STAT'
-    SUBM = 'SUBM'
-    SURN = 'SURN'
-    TAG = 'TAG'
-    TEMP = 'TEMP'
-    TEXT = 'TEXT'
-    TIME = 'TIME'
-    TITL = 'TITL'
-    TOP = 'TOP'
-    TRAN = 'TRAN'
-    TRLR = 'TRLR'
-    TYPE = 'TYPE'
-    UID = 'UID'
-    VERS = 'VERS'
-    WIDTH = 'WIDTH'
-    WIFE = 'WIFE'
-    WILL = 'WILL'
-    WWW = 'WWW'
-    NONE = String.EMPTY
-
-
-class FamAttr(Enum):
-    """Tags used for family attributes.
-
-    This is a sub-enumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM INDIEVEN]()
-    """
-
-    NCHI = Tag.NCHI.value
-    RESI = Tag.RESI.value
-    FACT = Tag.FACT.value
-    NONE = String.EMPTY
-
-
-class FamEven(Enum):
-    """Tags used for family events.
-
-    This is a sub-enumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM FAMC-EVEN](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events)
-    """
-
-    ANUL = Tag.ANUL.value
-    CENS = Tag.CENS.value
-    DIV = Tag.DIV.value
-    DIVF = Tag.DIVF.value
-    ENGA = Tag.ENGA.value
-    MARB = Tag.MARB.value
-    MARC = Tag.MARC.value
-    MARL = Tag.MARL.value
-    MARR = Tag.MARR.value
-    MARS = Tag.MARS.value
-    EVEN = Tag.EVEN.value
-    NONE = String.EMPTY
-
-
-class Id(Enum):
-    """Tags used for identifier values.
-
-    This is a sub-enumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM Identifiers]()
-    """
-
-    REFN = Tag.REFN.value
-    UID = Tag.UID.value
-    EXID = Tag.EXID.value
-    NONE = String.EMPTY
-
-
-class IndiAttr(Enum):
-    """Tags used for individual attributes.
-
-    This is a sub-enumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM INDIEVEN]()
-    """
-
-    CAST = Tag.CAST.value
-    DSCR = Tag.DSCR.value
-    EDUC = Tag.EDUC.value
-    IDNO = Tag.IDNO.value
-    NATI = Tag.NATI.value
-    NCHI = Tag.NCHI.value
-    NMR = Tag.NMR.value
-    OCCU = Tag.OCCU.value
-    PROP = Tag.PROP.value
-    RELI = Tag.RELI.value
-    RESI = Tag.RESI.value
-    SSN = Tag.SSN.value
-    TITL = Tag.TITL.value
-    FACT = Tag.FACT.value
-    NONE = String.EMPTY
-
-
-class IndiEven(Enum):
-    """Tags used for individual events.
-
-    This is a sub-enumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM INDIEVEN]()
-    """
-
-    ADOP = Tag.ADOP.value
-    BAPM = Tag.BAPM.value
-    BARM = Tag.BARM.value
-    BASM = Tag.BASM.value
-    BIRT = Tag.BIRT.value
-    BLES = Tag.BLES.value
-    BURI = Tag.BURI.value
-    CENS = Tag.CENS.value
-    CHR = Tag.CHR.value
-    CHRA = Tag.CHRA.value
-    CONF = Tag.CONF.value
-    CREM = Tag.CREM.value
-    DEAT = Tag.DEAT.value
-    EMIG = Tag.EMIG.value
-    FCOM = Tag.FCOM.value
-    GRAD = Tag.GRAD.value
-    IMMI = Tag.IMMI.value
-    NATU = Tag.NATU.value
-    ORDN = Tag.ORDN.value
-    PROB = Tag.PROB.value
-    RETI = Tag.RETI.value
-    WILL = Tag.WILL.value
-    EVEN = Tag.EVEN.value
-    NONE = String.EMPTY
-
-
-class PersonalNamePieceTag(Enum):
-    """Tags used for Personal Name Piece lines.
-
-    This is a subenumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM]()
-    """
-
-    NPFX = Tag.NPFX.value
-    GIVN = Tag.GIVN.value
-    NICK = Tag.NICK.value
-    SPFX = Tag.SPFX.value
-    SURN = Tag.SURN.value
-    NSFX = Tag.NSFX.value
-    NONE = String.EMPTY
-
-
-class Record(str, Enum):
-    """Tags used for Records.
-
-    This is a subenumeration of the Tag enumeration class.
-
-    Reference:
-        [GEDCOM RECORD]()
-    """
-
-    FAM = Tag.FAM.value
-    INDI = Tag.INDI.value
-    OBJE = Tag.OBJE.value
-    REPO = Tag.REPO.value
-    SNOTE = Tag.SNOTE.value
-    SOUR = Tag.SOUR.value
-    SUBM = Tag.SUBM.value
-    NONE = String.EMPTY
-
-
-class LineVal(Enum):
-    """Fixed values that may be used in the LineVal position of a line.
-
-    Some of these values may be identical to Tag values, but in this implementation
-    they are separate from Tag.  For example, even though there is a Tag.HUSB
-    definition that may be used in the Tag position of a GEDCOM line there is
-    also a LineVal.HUSB definition that may only be used in the LineVal of a
-    GEDCOM line.
-
-    Reference:
-        [GEDCOM LineVal Definitions]()
-    """
-
-    ADOPTED = 'ADOPTED'
-    AKA = 'AKA'
-    AUDIO = 'AUDIO'
-    BIC = 'BIC'
-    BIRTH = 'BIRTH'
-    BOOK = 'BOOK'
-    BOTH = 'BOTH'
-    CANCELED = 'CANCELED'
-    CARD = 'CARD'
-    CHALLENGED = 'CHALLENGED'
-    CHIL = 'CHIL'
-    CHILD = 'CHILD'
-    CLERGY = 'CLERGY'
-    COMPLETED = 'COMPLETED'
-    CONFIDENTIAL = 'CONFIDENTIAL'
-    DISPROVEN = 'DISPROVEN'
-    DNS = 'DNS'
-    DNS_CAN = 'DNS_CAN'
-    ELECTRONIC = 'ELECTRONIC'
-    EXCLUDED = 'EXCLUDED'
-    F = 'F'
-    FATH = 'FATH'
-    FICHE = 'FICHE'
-    FILM = 'FILM'
-    FOSTER = 'FOSTER'
-    FRIEND = 'FRIEND'
-    GODP = 'GODP'
-    HUSB = 'HUSB'
-    IMMIGRANT = 'IMMIGRANT'
-    INFANT = 'INFANT'
-    LOCKED = 'LOCKED'
-    MAGAZINE = 'MAGAZINE'
-    MAIDEN = 'MAIDEN'
-    MANUSCRIPT = 'MANUSCRIPT'
-    M = 'M'
-    MAP = 'MAP'
-    MARRIED = 'MARRIED'
-    MOTH = 'MOTH'
-    MULTIPLE = 'MULTIPLE'
-    NEWSPAPER = 'NEWSPAPER'
-    NGHBR = 'NGHBR'
-    OFFICIATOR = 'OFFICIATOR'
-    OTHER = 'OTHER'
-    PARENT = 'PARENT'
-    PHOTO = 'PHOTO'
-    PRE_1970 = 'PRE_1970'
-    PRIVACY = 'PRIVACY'
-    PROFESSIONAL = 'PROFESSIONAL'
-    PROVEN = 'PROVEN'
-    QUAY0 = '0'
-    QUAY1 = '1'
-    QUAY2 = '2'
-    QUAY3 = '3'
-    SEALING = 'SEALING'
-    SPOU = 'SPOU'
-    STILLBORN = 'STILLBORN'
-    SUBMITTED = 'SUBMITTED'
-    TOMBSTONE = 'TOMBSTONE'
-    U = 'U'
-    UNCLEARED = 'UNCLEARED'
-    VIDEO = 'VIDEO'
-    WIFE = 'WIFE'
-    WITN = 'WITN'
-    X = 'X'
-
-
-class Adop(Enum):
-    """Implement the GEDCOM enumeration set ADOP as an enumeration class.
-
-    Reference:
-        - [GEDCOM Adop Enumeration](https://gedcom.io/terms/v7/enumset-ADOP)
-    """
-
-    HUSB = LineVal.HUSB.value
-    WIFE = LineVal.WIFE.value
-    BOTH = LineVal.BOTH.value
-    NONE = String.EMPTY
-
-
-class EvenAttr(Enum):
-    """Implement the GEDCOM enumeration set EVENATTR as an enumeration class.
-
-    Reference:
-        [GEDCOM EVENATTR enumeration set](https://gedcom.io/terms/v7/enumset-EVENATTR)
-    """
-
-    CENS = 'CENS'
-    NCHI = 'NCHI'
-    RESI = 'RESI'
-    FACT = 'FACT'
-    EVEN = 'EVEN'
-    NONE = String.EMPTY
-
-
-class FamcStat(Enum):
-    """Implement the GEDCOM enumeration set FAMC-STAT as an enumeration class.
-
-    Reference:
-        [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
-    """
-
-    CHALLENGED = LineVal.CHALLENGED.value
-    DISPROVEN = LineVal.DISPROVEN.value
-    PROVEN = LineVal.PROVEN
-    NONE = String.EMPTY
-
-
-class Medium(Enum):
-    """Implement the GEDCOM enumeration set MEDI as an enumeration class.
-
-    Reference:
-        [GEDCOM MEDI enumeration set](https://gedcom.io/terms/v7/enumset-MEDI)
-    """
-
-    AUDIO = LineVal.AUDIO.value
-    BOOK = LineVal.BOOK.value
-    CARD = LineVal.CARD.value
-    ELECTRONIC = LineVal.ELECTRONIC.value
-    FICHE = LineVal.FICHE.value
-    FILM = LineVal.FILM.value
-    MAGAZINE = LineVal.MAGAZINE.value
-    MANUSCRIPT = LineVal.MANUSCRIPT.value
-    MAP = LineVal.MAP.value
-    NEWSPAPER = LineVal.NEWSPAPER.value
-    PHOTO = LineVal.PHOTO.value
-    TOMBSTONE = LineVal.TOMBSTONE.value
-    VIDEO = LineVal.VIDEO.value
-    OTHER = LineVal.OTHER.value
-    NONE = String.EMPTY
-
-
-class NameType(Enum):
-    """Implement the GEDCOM enumeration set NAME-TYPE as an eneration class.
-
-    Reference:
-        [GEDCOM NAME-TYPE enumeration set](https://gedcom.io/terms/v7/enumset-NAME-TYPE)
-    """
-
-    AKA = LineVal.AKA.value
-    BIRTH = LineVal.BIRTH.value
-    IMMIGRANT = LineVal.IMMIGRANT.value
-    MAIDEN = LineVal.MAIDEN.value
-    MARRIED = LineVal.MARRIED.value
-    PROFESSIONAL = LineVal.PROFESSIONAL.value
-    OTHER = LineVal.OTHER.value
-    NONE = String.EMPTY
-
-
-class Pedi(Enum):
-    """Implement the GEDCOM enumeration set PEDI as an enumeration class.
-
-    Reference:
-        [GEDCOM PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
-    """
-
-    ADOPTED = LineVal.ADOPTED.value
-    BIRTH = LineVal.BIRTH.value
-    FOSTER = LineVal.FOSTER.value
-    SEALING = LineVal.SEALING.value
-    OTHER = LineVal.OTHER.value
-    NONE = String.EMPTY
-
-
-class Quay(Enum):
-    """Implement the GEDCOM enumeration set QUAY as an enumeration class.
-
-    Reference:
-        [GEDCOM QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY)
-    """
-
-    QUAY0 = LineVal.QUAY0.value
-    QUAY1 = LineVal.QUAY1.value
-    QUAY2 = LineVal.QUAY2.value
-    QUAY3 = LineVal.QUAY3.value
-    NONE = String.EMPTY
-
-
-class Resn(Enum):
-    """Implement the GEDCOM enumeration set RESN as an enumeration class.
-
-    Reference:
-        [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
-    """
-
-    CONFIDENTIAL = LineVal.CONFIDENTIAL.value
-    LOCKED = LineVal.LOCKED.value
-    PRIVACY = LineVal.PRIVACY.value
-    NONE = String.EMPTY
-
-
-class Role(Enum):
-    """Implement the GEDCOM enumeration set ROLE as an enumeration class.
-
-    Reference:
-        [GEDCOM ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
-    """
-
-    CHIL = LineVal.CHIL.value
-    CLERGY = LineVal.CLERGY.value
-    FATH = LineVal.FATH.value
-    FRIEND = LineVal.FRIEND.value
-    GODP = LineVal.GODP.value
-    HUSB = LineVal.HUSB.value
-    MOTH = LineVal.MOTH.value
-    MULTIPLE = LineVal.MULTIPLE.value
-    NGHBR = LineVal.NGHBR.value
-    OFFICIATOR = LineVal.OFFICIATOR.value
-    PARENT = LineVal.PARENT.value
-    SPOU = LineVal.SPOU.value
-    WIFE = LineVal.WIFE.value
-    WITN = LineVal.WITN.value
-    OTHER = LineVal.OTHER.value
-    NONE = String.EMPTY
-
-
-class Sex(Enum):
-    """Implement the GEDCOM SEX enumeration set as an enumeration class.
-
-    Reference:
-        [GEDCOM SEX enumeration set]()
-    """
-
-    M = LineVal.M.value
-    F = LineVal.F.value
-    X = LineVal.X.value
-    U = LineVal.U.value
-    NONE = String.EMPTY
-
-
-class Stat(Enum):
-    """Implement the GEDCOM enumeration set ord-STAT as an enumeration class.
-
-    Reference:
-        [GEDCOM ord-STAT enumeration set](https://gedcom.io/terms/v7/enumset-ord-STAT)
-    """
-
-    BIC = LineVal.BIC.value
-    CANCELED = LineVal.CANCELED.value
-    CHILD = LineVal.CHILD.value
-    COMPLETED = LineVal.COMPLETED.value
-    EXCLUDED = LineVal.EXCLUDED.value
-    DNS = LineVal.DNS.value
-    DNS_CAN = LineVal.DNS_CAN.value
-    INFANT = LineVal.INFANT.value
-    PRE_1970 = LineVal.PRE_1970.value
-    STILLBORN = LineVal.STILLBORN.value
-    SUBMITTED = LineVal.SUBMITTED.value
-    UNCLEARED = LineVal.UNCLEARED.value
-    NONE = String.EMPTY
+# class Tag(Enum):
+#     """Enumerate all of the standard tags signalling structure types in the GEDCOM specification."""
+
+#     ABBR = 'ABBR'
+#     ADDR = 'ADDR'
+#     ADOP = 'ADOP'
+#     ADR1 = 'ADR1'
+#     ADR2 = 'ADR2'
+#     ADR3 = 'ADR3'
+#     AGE = 'AGE'
+#     AGNC = 'AGNC'
+#     ALIA = 'ALIA'
+#     ANCI = 'ANCI'
+#     ANUL = 'ANUL'
+#     ASSO = 'ASSO'
+#     AUTH = 'AUTH'
+#     BAPL = 'BAPL'
+#     BAPM = 'BAPM'
+#     BARM = 'BARM'
+#     BASM = 'BASM'
+#     BIRT = 'BIRT'
+#     BLES = 'BLES'
+#     BURI = 'BURI'
+#     CALN = 'CALN'
+#     CAST = 'CAST'
+#     CAUS = 'CAUS'
+#     CENS = 'CENS'
+#     CHAN = 'CHAN'
+#     CHIL = 'CHIL'
+#     CHR = 'CHR'
+#     CHRA = 'CHRA'
+#     CITY = 'CITY'
+#     CONF = 'CONF'
+#     CONL = 'CONL'
+#     CONT = 'CONT'
+#     COPR = 'COPR'
+#     CORP = 'CORP'
+#     CREA = 'CREA'
+#     CREM = 'CREM'
+#     CROP = 'CROP'
+#     CTRY = 'CTRY'
+#     DATA = 'DATA'
+#     DATE = 'DATE'
+#     DEAT = 'DEAT'
+#     DESI = 'DESI'
+#     DEST = 'DEST'
+#     DIV = 'DIV'
+#     DIVF = 'DIVF'
+#     DSCR = 'DSCR'
+#     EDUC = 'EDUC'
+#     EMAIL = 'EMAIL'
+#     EMIG = 'EMIG'
+#     ENDL = 'ENDL'
+#     ENGA = 'ENGA'
+#     EVEN = 'EVEN'
+#     EXID = 'EXID'
+#     FACT = 'FACT'
+#     FAM = 'FAM'
+#     FATH = 'FATH'
+#     FAMC = 'FAMC'
+#     FAMS = 'FAMS'
+#     FAX = 'FAX'
+#     FCOM = 'FCOM'
+#     FILE = 'FILE'
+#     FILM = 'FILM'
+#     FORM = 'FORM'
+#     FRENCH_R = 'FRENCH_R'
+#     GEDC = 'GEDC'
+#     GIVN = 'GIVN'
+#     GRAD = 'GRAD'
+#     GREGORIAN = 'GREGORIAN'
+#     HEAD = 'HEAD'
+#     HEBREW = 'HEBREW'
+#     HEIGHT = 'HEIGHT'
+#     HUSB = 'HUSB'
+#     IDNO = 'IDNO'
+#     IMMI = 'IMMI'
+#     INDI = 'INDI'
+#     INIL = 'INIL'
+#     JULIAN = 'JULIAN'
+#     LANG = 'LANG'
+#     LANG_ = '_LANG'
+#     LATI = 'LATI'
+#     LEFT = 'LEFT'
+#     LONG = 'LONG'
+#     MAP = 'MAP'
+#     MARB = 'MARB'
+#     MARC = 'MARC'
+#     MARL = 'MARL'
+#     MARR = 'MARR'
+#     MARS = 'MARS'
+#     MEDI = 'MEDI'
+#     MIME = 'MIME'
+#     NAME = 'NAME'
+#     NATI = 'NATI'
+#     NATU = 'NATU'
+#     NCHI = 'NCHI'
+#     NICK = 'NICK'
+#     NMR = 'NMR'
+#     NO = 'NO'
+#     NOTE = 'NOTE'
+#     NPFX = 'NPFX'
+#     NSFX = 'NSFX'
+#     OBJE = 'OBJE'
+#     OCCU = 'OCCU'
+#     ORDN = 'ORDN'
+#     PAGE = 'PAGE'
+#     PEDI = 'PEDI'
+#     PHON = 'PHON'
+#     PHRASE = 'PHRASE'
+#     PLAC = 'PLAC'
+#     POST = 'POST'
+#     PROB = 'PROB'
+#     PROP = 'PROP'
+#     PUBL = 'PUBL'
+#     QUAY = 'QUAY'
+#     REFN = 'REFN'
+#     RELI = 'RELI'
+#     REPO = 'REPO'
+#     RESI = 'RESI'
+#     RESN = 'RESN'
+#     RETI = 'RETI'
+#     ROLE = 'ROLE'
+#     SCHMA = 'SCHMA'
+#     SDATE = 'SDATE'
+#     SEX = 'SEX'
+#     SLGC = 'SLGC'
+#     SLGS = 'SLGS'
+#     SNOTE = 'SNOTE'
+#     SOUR = 'SOUR'
+#     SPFX = 'SPFX'
+#     SPOU = 'SPOU'
+#     SSN = 'SSN'
+#     STAE = 'STAE'
+#     STAT = 'STAT'
+#     SUBM = 'SUBM'
+#     SURN = 'SURN'
+#     TAG = 'TAG'
+#     TEMP = 'TEMP'
+#     TEXT = 'TEXT'
+#     TIME = 'TIME'
+#     TITL = 'TITL'
+#     TOP = 'TOP'
+#     TRAN = 'TRAN'
+#     TRLR = 'TRLR'
+#     TYPE = 'TYPE'
+#     UID = 'UID'
+#     VERS = 'VERS'
+#     WIDTH = 'WIDTH'
+#     WIFE = 'WIFE'
+#     WILL = 'WILL'
+#     WWW = 'WWW'
+#     NONE = String.EMPTY
+
+
+# class FamAttr(Enum):
+#     """Tags used for family attributes.
+
+#     This is a sub-enumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM INDIEVEN]()
+#     """
+
+#     NCHI = Tag.NCHI.value
+#     RESI = Tag.RESI.value
+#     FACT = Tag.FACT.value
+#     NONE = String.EMPTY
+
+
+# class FamEven(Enum):
+#     """Tags used for family events.
+
+#     This is a sub-enumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM FAMC-EVEN](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events)
+#     """
+
+#     ANUL = Tag.ANUL.value
+#     CENS = Tag.CENS.value
+#     DIV = Tag.DIV.value
+#     DIVF = Tag.DIVF.value
+#     ENGA = Tag.ENGA.value
+#     MARB = Tag.MARB.value
+#     MARC = Tag.MARC.value
+#     MARL = Tag.MARL.value
+#     MARR = Tag.MARR.value
+#     MARS = Tag.MARS.value
+#     EVEN = Tag.EVEN.value
+#     NONE = String.EMPTY
+
+
+# class Id(Enum):
+#     """Tags used for identifier values.
+
+#     This is a sub-enumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM Identifiers]()
+#     """
+
+#     REFN = Tag.REFN.value
+#     UID = Tag.UID.value
+#     EXID = Tag.EXID.value
+#     NONE = String.EMPTY
+
+
+# class IndiAttr(Enum):
+#     """Tags used for individual attributes.
+
+#     This is a sub-enumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM INDIEVEN]()
+#     """
+
+#     CAST = Tag.CAST.value
+#     DSCR = Tag.DSCR.value
+#     EDUC = Tag.EDUC.value
+#     IDNO = Tag.IDNO.value
+#     NATI = Tag.NATI.value
+#     NCHI = Tag.NCHI.value
+#     NMR = Tag.NMR.value
+#     OCCU = Tag.OCCU.value
+#     PROP = Tag.PROP.value
+#     RELI = Tag.RELI.value
+#     RESI = Tag.RESI.value
+#     SSN = Tag.SSN.value
+#     TITL = Tag.TITL.value
+#     FACT = Tag.FACT.value
+#     NONE = String.EMPTY
+
+
+# class IndiEven(Enum):
+#     """Tags used for individual events.
+
+#     This is a sub-enumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM INDIEVEN]()
+#     """
+
+#     ADOP = Tag.ADOP.value
+#     BAPM = Tag.BAPM.value
+#     BARM = Tag.BARM.value
+#     BASM = Tag.BASM.value
+#     BIRT = Tag.BIRT.value
+#     BLES = Tag.BLES.value
+#     BURI = Tag.BURI.value
+#     CENS = Tag.CENS.value
+#     CHR = Tag.CHR.value
+#     CHRA = Tag.CHRA.value
+#     CONF = Tag.CONF.value
+#     CREM = Tag.CREM.value
+#     DEAT = Tag.DEAT.value
+#     EMIG = Tag.EMIG.value
+#     FCOM = Tag.FCOM.value
+#     GRAD = Tag.GRAD.value
+#     IMMI = Tag.IMMI.value
+#     NATU = Tag.NATU.value
+#     ORDN = Tag.ORDN.value
+#     PROB = Tag.PROB.value
+#     RETI = Tag.RETI.value
+#     WILL = Tag.WILL.value
+#     EVEN = Tag.EVEN.value
+#     NONE = String.EMPTY
+
+
+# class PersonalNamePieceTag(Enum):
+#     """Tags used for Personal Name Piece lines.
+
+#     This is a subenumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM]()
+#     """
+
+#     NPFX = Tag.NPFX.value
+#     GIVN = Tag.GIVN.value
+#     NICK = Tag.NICK.value
+#     SPFX = Tag.SPFX.value
+#     SURN = Tag.SURN.value
+#     NSFX = Tag.NSFX.value
+#     NONE = String.EMPTY
+
+
+# class Record(str, Enum):
+#     """Tags used for Records.
+
+#     This is a subenumeration of the Tag enumeration class.
+
+#     Reference:
+#         [GEDCOM RECORD]()
+#     """
+
+#     FAM = Tag.FAM.value
+#     INDI = Tag.INDI.value
+#     OBJE = Tag.OBJE.value
+#     REPO = Tag.REPO.value
+#     SNOTE = Tag.SNOTE.value
+#     SOUR = Tag.SOUR.value
+#     SUBM = Tag.SUBM.value
+#     NONE = String.EMPTY
+
+
+# class LineVal(Enum):
+#     """Fixed values that may be used in the LineVal position of a line.
+
+#     Some of these values may be identical to Tag values, but in this implementation
+#     they are separate from Tag.  For example, even though there is a Tag.HUSB
+#     definition that may be used in the Tag position of a GEDCOM line there is
+#     also a LineVal.HUSB definition that may only be used in the LineVal of a
+#     GEDCOM line.
+
+#     Reference:
+#         [GEDCOM LineVal Definitions]()
+#     """
+
+#     ADOPTED = 'ADOPTED'
+#     AKA = 'AKA'
+#     AUDIO = 'AUDIO'
+#     BIC = 'BIC'
+#     BIRTH = 'BIRTH'
+#     BOOK = 'BOOK'
+#     BOTH = 'BOTH'
+#     CANCELED = 'CANCELED'
+#     CARD = 'CARD'
+#     CHALLENGED = 'CHALLENGED'
+#     CHIL = 'CHIL'
+#     CHILD = 'CHILD'
+#     CLERGY = 'CLERGY'
+#     COMPLETED = 'COMPLETED'
+#     CONFIDENTIAL = 'CONFIDENTIAL'
+#     DISPROVEN = 'DISPROVEN'
+#     DNS = 'DNS'
+#     DNS_CAN = 'DNS_CAN'
+#     ELECTRONIC = 'ELECTRONIC'
+#     EXCLUDED = 'EXCLUDED'
+#     F = 'F'
+#     FATH = 'FATH'
+#     FICHE = 'FICHE'
+#     FILM = 'FILM'
+#     FOSTER = 'FOSTER'
+#     FRIEND = 'FRIEND'
+#     GODP = 'GODP'
+#     HUSB = 'HUSB'
+#     IMMIGRANT = 'IMMIGRANT'
+#     INFANT = 'INFANT'
+#     LOCKED = 'LOCKED'
+#     MAGAZINE = 'MAGAZINE'
+#     MAIDEN = 'MAIDEN'
+#     MANUSCRIPT = 'MANUSCRIPT'
+#     M = 'M'
+#     MAP = 'MAP'
+#     MARRIED = 'MARRIED'
+#     MOTH = 'MOTH'
+#     MULTIPLE = 'MULTIPLE'
+#     NEWSPAPER = 'NEWSPAPER'
+#     NGHBR = 'NGHBR'
+#     OFFICIATOR = 'OFFICIATOR'
+#     OTHER = 'OTHER'
+#     PARENT = 'PARENT'
+#     PHOTO = 'PHOTO'
+#     PRE_1970 = 'PRE_1970'
+#     PRIVACY = 'PRIVACY'
+#     PROFESSIONAL = 'PROFESSIONAL'
+#     PROVEN = 'PROVEN'
+#     QUAY0 = '0'
+#     QUAY1 = '1'
+#     QUAY2 = '2'
+#     QUAY3 = '3'
+#     SEALING = 'SEALING'
+#     SPOU = 'SPOU'
+#     STILLBORN = 'STILLBORN'
+#     SUBMITTED = 'SUBMITTED'
+#     TOMBSTONE = 'TOMBSTONE'
+#     U = 'U'
+#     UNCLEARED = 'UNCLEARED'
+#     VIDEO = 'VIDEO'
+#     WIFE = 'WIFE'
+#     WITN = 'WITN'
+#     X = 'X'
+
+
+# class Adop(Enum):
+#     """Implement the GEDCOM enumeration set ADOP as an enumeration class.
+
+#     Reference:
+#         - [GEDCOM Adop Enumeration](https://gedcom.io/terms/v7/enumset-ADOP)
+#     """
+
+#     HUSB = LineVal.HUSB.value
+#     WIFE = LineVal.WIFE.value
+#     BOTH = LineVal.BOTH.value
+#     NONE = String.EMPTY
+
+
+# class EvenAttr(Enum):
+#     """Implement the GEDCOM enumeration set EVENATTR as an enumeration class.
+
+#     Reference:
+#         [GEDCOM EVENATTR enumeration set](https://gedcom.io/terms/v7/enumset-EVENATTR)
+#     """
+
+#     CENS = 'CENS'
+#     NCHI = 'NCHI'
+#     RESI = 'RESI'
+#     FACT = 'FACT'
+#     EVEN = 'EVEN'
+#     NONE = String.EMPTY
+
+
+# class FamcStat(Enum):
+#     """Implement the GEDCOM enumeration set FAMC-STAT as an enumeration class.
+
+#     Reference:
+#         [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
+#     """
+
+#     CHALLENGED = LineVal.CHALLENGED.value
+#     DISPROVEN = LineVal.DISPROVEN.value
+#     PROVEN = LineVal.PROVEN
+#     NONE = String.EMPTY
+
+
+# class Medium(Enum):
+#     """Implement the GEDCOM enumeration set MEDI as an enumeration class.
+
+#     Reference:
+#         [GEDCOM MEDI enumeration set](https://gedcom.io/terms/v7/enumset-MEDI)
+#     """
+
+#     AUDIO = LineVal.AUDIO.value
+#     BOOK = LineVal.BOOK.value
+#     CARD = LineVal.CARD.value
+#     ELECTRONIC = LineVal.ELECTRONIC.value
+#     FICHE = LineVal.FICHE.value
+#     FILM = LineVal.FILM.value
+#     MAGAZINE = LineVal.MAGAZINE.value
+#     MANUSCRIPT = LineVal.MANUSCRIPT.value
+#     MAP = LineVal.MAP.value
+#     NEWSPAPER = LineVal.NEWSPAPER.value
+#     PHOTO = LineVal.PHOTO.value
+#     TOMBSTONE = LineVal.TOMBSTONE.value
+#     VIDEO = LineVal.VIDEO.value
+#     OTHER = LineVal.OTHER.value
+#     NONE = String.EMPTY
+
+
+# class NameType(Enum):
+#     """Implement the GEDCOM enumeration set NAME-TYPE as an eneration class.
+
+#     Reference:
+#         [GEDCOM NAME-TYPE enumeration set](https://gedcom.io/terms/v7/enumset-NAME-TYPE)
+#     """
+
+#     AKA = LineVal.AKA.value
+#     BIRTH = LineVal.BIRTH.value
+#     IMMIGRANT = LineVal.IMMIGRANT.value
+#     MAIDEN = LineVal.MAIDEN.value
+#     MARRIED = LineVal.MARRIED.value
+#     PROFESSIONAL = LineVal.PROFESSIONAL.value
+#     OTHER = LineVal.OTHER.value
+#     NONE = String.EMPTY
+
+
+# class Pedi(Enum):
+#     """Implement the GEDCOM enumeration set PEDI as an enumeration class.
+
+#     Reference:
+#         [GEDCOM PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
+#     """
+
+#     ADOPTED = LineVal.ADOPTED.value
+#     BIRTH = LineVal.BIRTH.value
+#     FOSTER = LineVal.FOSTER.value
+#     SEALING = LineVal.SEALING.value
+#     OTHER = LineVal.OTHER.value
+#     NONE = String.EMPTY
+
+
+# class Quay(Enum):
+#     """Implement the GEDCOM enumeration set QUAY as an enumeration class.
+
+#     Reference:
+#         [GEDCOM QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY)
+#     """
+
+#     QUAY0 = LineVal.QUAY0.value
+#     QUAY1 = LineVal.QUAY1.value
+#     QUAY2 = LineVal.QUAY2.value
+#     QUAY3 = LineVal.QUAY3.value
+#     NONE = String.EMPTY
+
+
+# class Resn(Enum):
+#     """Implement the GEDCOM enumeration set RESN as an enumeration class.
+
+#     Reference:
+#         [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+#     """
+
+#     CONFIDENTIAL = LineVal.CONFIDENTIAL.value
+#     LOCKED = LineVal.LOCKED.value
+#     PRIVACY = LineVal.PRIVACY.value
+#     NONE = String.EMPTY
+
+
+# class Role(Enum):
+#     """Implement the GEDCOM enumeration set ROLE as an enumeration class.
+
+#     Reference:
+#         [GEDCOM ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
+#     """
+
+#     CHIL = LineVal.CHIL.value
+#     CLERGY = LineVal.CLERGY.value
+#     FATH = LineVal.FATH.value
+#     FRIEND = LineVal.FRIEND.value
+#     GODP = LineVal.GODP.value
+#     HUSB = LineVal.HUSB.value
+#     MOTH = LineVal.MOTH.value
+#     MULTIPLE = LineVal.MULTIPLE.value
+#     NGHBR = LineVal.NGHBR.value
+#     OFFICIATOR = LineVal.OFFICIATOR.value
+#     PARENT = LineVal.PARENT.value
+#     SPOU = LineVal.SPOU.value
+#     WIFE = LineVal.WIFE.value
+#     WITN = LineVal.WITN.value
+#     OTHER = LineVal.OTHER.value
+#     NONE = String.EMPTY
+
+
+# class Sex(Enum):
+#     """Implement the GEDCOM SEX enumeration set as an enumeration class.
+
+#     Reference:
+#         [GEDCOM SEX enumeration set]()
+#     """
+
+#     M = LineVal.M.value
+#     F = LineVal.F.value
+#     X = LineVal.X.value
+#     U = LineVal.U.value
+#     NONE = String.EMPTY
+
+
+# class Stat(Enum):
+#     """Implement the GEDCOM enumeration set ord-STAT as an enumeration class.
+
+#     Reference:
+#         [GEDCOM ord-STAT enumeration set](https://gedcom.io/terms/v7/enumset-ord-STAT)
+#     """
+
+#     BIC = LineVal.BIC.value
+#     CANCELED = LineVal.CANCELED.value
+#     CHILD = LineVal.CHILD.value
+#     COMPLETED = LineVal.COMPLETED.value
+#     EXCLUDED = LineVal.EXCLUDED.value
+#     DNS = LineVal.DNS.value
+#     DNS_CAN = LineVal.DNS_CAN.value
+#     INFANT = LineVal.INFANT.value
+#     PRE_1970 = LineVal.PRE_1970.value
+#     STILLBORN = LineVal.STILLBORN.value
+#     SUBMITTED = LineVal.SUBMITTED.value
+#     UNCLEARED = LineVal.UNCLEARED.value
+#     NONE = String.EMPTY

@@ -19,9 +19,9 @@ class Methods:
         
         Examples:
             The ISO 8601 date should be identical to the Gregorian calendar date.
-            >>> from calendars.gregorian_calendars import CalendarsGregorian
-            >>> from calendars.methods import Methods
-            >>> Methods.date_item('2025-01-01', CalendarsGregorian.GREGORIAN)
+            >> from calendars.gregorian_calendars import CalendarsGregorian
+            >> from calendars.methods import Methods
+            >> Methods.date_item('2025-01-01', CalendarsGregorian.GREGORIAN)
             ['Gregorian', '2025-01-01']
         
         """

@@ -24,8 +24,8 @@ from genedata.constants import (
     # Key,
     Number,
     String,
-    Tag,
 )
+from genedata.gedcom import Tag
 from genedata.messages import Issue, Msg
 from genedata.store import (
     Family,

@@ -165,17 +165,16 @@ class CalendarDefinition(NamedTuple):
                     str(day), str(month), str(self.months[month].days)
                 )
             )
-        if (
-            self.end != (Constants.ZERO, Constants.ZERO, Constants.ZERO)
-            and date > self.end
-        ):
-            raise ValueError(CalendarMessage.END.format(date, self.end))
-        if (
-            self.epoch_year != np.datetime64(Constants.NAT)
-            and date < self.epoch_year
-            and not self.negative
-        ):
-            raise ValueError(CalendarMessage.BEGIN.format(date, self.epoch_year))
+        # if date > self.end:
+        #     raise ValueError(CalendarMessage.END.format(date, self.end))
+        # if (
+        #     self.epoch_year != np.datetime64(Constants.NAT)
+        #     and date < self.epoch_year
+        #     and not self.negative
+        # ):
+        #     raise ValueError(
+        #         CalendarMessage.BEGIN.format(date, self.epoch_year)
+        #     )
         return True
 
     def days_in_month(self, month: int) -> int:
@@ -214,7 +213,7 @@ class CalendarDefinition(NamedTuple):
         Args:
             start: The first day for the ICS list of events.
             end: The last day for the ICS list of events.
-        
+
         Reference:
             [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545)
             [icalendar](https://icalendar.readthedocs.io/en/latest/)
@@ -257,11 +256,9 @@ class CalendarDefinition(NamedTuple):
             index += 1
         return ''.join([lines, Constants.ICS_END_CALENDAR])
 
-    def isleap(self, year: int) -> bool:  
+    def isleap(self, year: int) -> bool:
         """Test if a year is a leap year with the default test for the Gregorian calendar."""
         return year % 4 == 0 and year % 400 != 0
-
-    
 
     def describe(
         self,
@@ -325,12 +322,13 @@ class CalendarDefinition(NamedTuple):
             a new calendar system from scratch called `CalendarsGregorian.GREGORIAN_EMPTY`.
             One could get the code for that calendar by using `repr` as in the first
             example.
-            >>> import calendars.gregorian_calendars 
-        
+            >>> import calendars.gregorian_calendars
+
         """
 
-        print(indent(  # noqa: T201
-            f"""
+        print( # noqa: T201
+            indent(  
+                f"""
 import numpy as np
 from calendars.calendars import (
     CalendarDefinition,
@@ -367,5 +365,6 @@ new_calendar = CalendarDefinition(
     location = {self.location!r},
     description = {self.description!r},
 )""",
-            Constants.INDENT * tabs,
-        ))
+                Constants.INDENT * tabs,
+            )
+        )

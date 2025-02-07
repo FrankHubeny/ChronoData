@@ -53,7 +53,6 @@ __all__ = [
     'Id',
     'IndiAttr',
     'IndiEven',
-    'LineVal',
     'Medium',
     'NameType',
     'OverView',
@@ -320,6 +319,33 @@ class OverView:
         >>> from genedata.gedcom import OverView
         >>> print(OverView.HEADER)  # doctest: +ELLIPSIS
         <BLANKLINE>
+        0 HEAD                                 {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
+          1 GEDC                               {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
+            2 VERS <Special>                   {1:1}  [g7:GEDC-VERS](https://gedcom.io/terms/v7/GEDC-VERS)
+          1 SCHMA                              {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
+            2 TAG <Special>                    {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
+          1 SOUR <Special>                     {0:1}  [g7:HEAD-SOUR](https://gedcom.io/terms/v7/HEAD-SOUR)
+            2 VERS <Special>                   {0:1}  [g7:VERS](https://gedcom.io/terms/v7/VERS)
+            2 NAME <Text>                      {0:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
+            2 CORP <Text>                      {0:1}  [g7:CORP](https://gedcom.io/terms/v7/CORP)
+              3 <<ADDRESS_STRUCTURE>>          {0:1}
+              3 PHON <Special>                 {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
+              3 EMAIL <Special>                {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
+              3 FAX <Special>                  {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
+              3 WWW <Special>                  {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
+            2 DATA <Text>                      {0:1}  [g7:HEAD-SOUR-DATA](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
+              3 DATE <DateExact>               {0:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
+                4 TIME <Time>                  {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+              3 COPR <Text>                    {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
+          1 DEST <Special>                     {0:1}  [g7:DEST](https://gedcom.io/terms/v7/DEST)
+          1 DATE <DateExact>                   {0:1}  [g7:HEAD-DATE](https://gedcom.io/terms/v7/HEAD-DATE)
+            2 TIME <Time>                      {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
+          1 SUBM @<XREF:SUBM>@                 {0:1}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
+          1 COPR <Text>                        {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
+          1 LANG <Language>                    {0:1}  [g7:HEAD-LANG](https://gedcom.io/terms/v7/LANG)
+          1 PLAC                               {0:1}  [g7:HEAD-PLAC](https://gedcom.io/terms/v7/HEAD-PLAC)
+            2 FORM <List:Text>                 {1:1}  [g7:HEAD-PLAC-FORM](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
+          1 <<NOTE_STRUCTURE>>                 {0:1}
         <BLANKLINE>
 
     Reference:
@@ -1004,33 +1030,47 @@ class Tag(Enum):
     ABBR = 'ABBR'
     ADDR = 'ADDR'
     ADOP = 'ADOP'
+    ADOPTED = 'ADOPTED'
     ADR1 = 'ADR1'
     ADR2 = 'ADR2'
     ADR3 = 'ADR3'
     AGE = 'AGE'
     AGNC = 'AGNC'
+    AKA = 'AKA'
     ALIA = 'ALIA'
     ANCI = 'ANCI'
     ANUL = 'ANUL'
     ASSO = 'ASSO'
+    AUDIO = 'AUDIO'
     AUTH = 'AUTH'
     BAPL = 'BAPL'
     BAPM = 'BAPM'
     BARM = 'BARM'
     BASM = 'BASM'
+    BIC = 'BIC'
     BIRT = 'BIRT'
+    BIRTH = 'BIRTH'
     BLES = 'BLES'
+    BOOK = 'BOOK'
+    BOTH = 'BOTH'
     BURI = 'BURI'
     CALN = 'CALN'
+    CANCELED = 'CANCELED'
+    CARD = 'CARD'
     CAST = 'CAST'
     CAUS = 'CAUS'
     CENS = 'CENS'
+    CHALLENGED = 'CHALLENGED'
     CHAN = 'CHAN'
     CHIL = 'CHIL'
+    CHILD = 'CHILD'
     CHR = 'CHR'
     CHRA = 'CHRA'
     CITY = 'CITY'
+    CLERGY = 'CLERGY'
+    COMPLETED = 'COMPLETED'
     CONF = 'CONF'
+    CONFIDENTIAL = 'CONFIDENTIAL'
     CONL = 'CONL'
     CONT = 'CONT'
     COPR = 'COPR'
@@ -1044,16 +1084,22 @@ class Tag(Enum):
     DEAT = 'DEAT'
     DESI = 'DESI'
     DEST = 'DEST'
+    DISPROVEN = 'DISPROVEN'
     DIV = 'DIV'
     DIVF = 'DIVF'
+    DNS = 'DNS'
+    DNS_CAN = 'DNS_CAN'
     DSCR = 'DSCR'
     EDUC = 'EDUC'
+    ELECTRONIC = 'ELECTRONIC'
     EMAIL = 'EMAIL'
     EMIG = 'EMIG'
     ENDL = 'ENDL'
     ENGA = 'ENGA'
     EVEN = 'EVEN'
+    EXCLUDED = 'EXCLUDED'
     EXID = 'EXID'
+    F = 'F'
     FACT = 'FACT'
     FAM = 'FAM'
     FATH = 'FATH'
@@ -1061,12 +1107,16 @@ class Tag(Enum):
     FAMS = 'FAMS'
     FAX = 'FAX'
     FCOM = 'FCOM'
+    FICHE = 'FICHE'
     FILE = 'FILE'
     FILM = 'FILM'
     FORM = 'FORM'
+    FOSTER = 'FOSTER'
     FRENCH_R = 'FRENCH_R'
+    FRIEND = 'FRIEND'
     GEDC = 'GEDC'
     GIVN = 'GIVN'
+    GODP = 'GODP'
     GRAD = 'GRAD'
     GREGORIAN = 'GREGORIAN'
     HEAD = 'HEAD'
@@ -1075,26 +1125,38 @@ class Tag(Enum):
     HUSB = 'HUSB'
     IDNO = 'IDNO'
     IMMI = 'IMMI'
+    IMMIGRANT = 'IMMIGRANT'
     INDI = 'INDI'
+    INFANT = 'INFANT'
     INIL = 'INIL'
     JULIAN = 'JULIAN'
     LANG = 'LANG'
     LANG_ = '_LANG'
     LATI = 'LATI'
     LEFT = 'LEFT'
+    LOCKED = 'LOCKED'
     LONG = 'LONG'
+    M = 'M'
+    MAGAZINE = 'MAGAZINE'
+    MAIDEN = 'MAIDEN'
+    MANUSCRIPT = 'MANUSCRIPT'
     MAP = 'MAP'
     MARB = 'MARB'
     MARC = 'MARC'
     MARL = 'MARL'
     MARR = 'MARR'
+    MARRIED = 'MARRIED'
     MARS = 'MARS'
     MEDI = 'MEDI'
     MIME = 'MIME'
+    MOTH = 'MOTH'
+    MULTIPLE = 'MULTIPLE'
     NAME = 'NAME'
     NATI = 'NATI'
     NATU = 'NATU'
     NCHI = 'NCHI'
+    NEWSPAPER = 'NEWSPAPER'
+    NGHBR = 'NGHBR'
     NICK = 'NICK'
     NMR = 'NMR'
     NO = 'NO'
@@ -1103,17 +1165,29 @@ class Tag(Enum):
     NSFX = 'NSFX'
     OBJE = 'OBJE'
     OCCU = 'OCCU'
+    OFFICIATOR = 'OFFICIATOR'
     ORDN = 'ORDN'
+    OTHER = 'OTHER'
     PAGE = 'PAGE'
+    PARENT = 'PARENT'
     PEDI = 'PEDI'
     PHON = 'PHON'
+    PHOTO = 'PHOTO'
     PHRASE = 'PHRASE'
     PLAC = 'PLAC'
     POST = 'POST'
     PROB = 'PROB'
+    PRE_1970 = 'PRE_1970'
+    PRIVACY = 'PRIVACY'
+    PROFESSIONAL = 'PROFESSIONAL'
     PROP = 'PROP'
+    PROVEN = 'PROVEN'
     PUBL = 'PUBL'
     QUAY = 'QUAY'
+    QUAY0 = '0'
+    QUAY1 = '1'
+    QUAY2 = '2'
+    QUAY3 = '3'
     REFN = 'REFN'
     RELI = 'RELI'
     REPO = 'REPO'
@@ -1123,6 +1197,7 @@ class Tag(Enum):
     ROLE = 'ROLE'
     SCHMA = 'SCHMA'
     SDATE = 'SDATE'
+    SEALING = 'SEALING'
     SEX = 'SEX'
     SLGC = 'SLGC'
     SLGS = 'SLGS'
@@ -1133,23 +1208,31 @@ class Tag(Enum):
     SSN = 'SSN'
     STAE = 'STAE'
     STAT = 'STAT'
+    STILLBORN = 'STILLBORN'
     SUBM = 'SUBM'
+    SUBMITTED = 'SUBMITTED'
     SURN = 'SURN'
     TAG = 'TAG'
     TEMP = 'TEMP'
     TEXT = 'TEXT'
     TIME = 'TIME'
     TITL = 'TITL'
+    TOMBSTONE = 'TOMBSTONE'
     TOP = 'TOP'
     TRAN = 'TRAN'
     TRLR = 'TRLR'
     TYPE = 'TYPE'
+    U = 'U'
     UID = 'UID'
+    UNCLEARED = 'UNCLEARED'
     VERS = 'VERS'
+    VIDEO = 'VIDEO'
     WIDTH = 'WIDTH'
     WIFE = 'WIFE'
     WILL = 'WILL'
+    WITN = 'WITN'
     WWW = 'WWW'
+    X = 'X'
     NONE = ''
 
 
@@ -1339,84 +1422,84 @@ class Record(str, Enum):
     NONE = Tag.NONE.value
 
 
-class LineVal(Enum):
-    """Fixed values that may be used in the LineVal position of a line.
+# class LineVal(Enum):
+#     """Fixed values that may be used in the LineVal position of a line.
 
-    Some of these values may be identical to Tag values, but in this implementation
-    they are separate from Tag.  For example, even though there is a Tag.HUSB
-    definition that may be used in the Tag position of a GEDCOM line there is
-    also a LineVal.HUSB definition that may only be used in the LineVal of a
-    GEDCOM line.
+#     Some of these values may be identical to Tag values, but in this implementation
+#     they are separate from Tag.  For example, even though there is a Tag.HUSB
+#     definition that may be used in the Tag position of a GEDCOM line there is
+#     also a LineVal.HUSB definition that may only be used in the LineVal of a
+#     GEDCOM line.
 
-    Reference:
-        [GEDCOM LineVal Definitions]()
-    """
+#     Reference:
+#         [GEDCOM LineVal Definitions]()
+#     """
 
-    ADOPTED = 'ADOPTED'
-    AKA = 'AKA'
-    AUDIO = 'AUDIO'
-    BIC = 'BIC'
-    BIRTH = 'BIRTH'
-    BOOK = 'BOOK'
-    BOTH = 'BOTH'
-    CANCELED = 'CANCELED'
-    CARD = 'CARD'
-    CHALLENGED = 'CHALLENGED'
-    CHIL = 'CHIL'
-    CHILD = 'CHILD'
-    CLERGY = 'CLERGY'
-    COMPLETED = 'COMPLETED'
-    CONFIDENTIAL = 'CONFIDENTIAL'
-    DISPROVEN = 'DISPROVEN'
-    DNS = 'DNS'
-    DNS_CAN = 'DNS_CAN'
-    ELECTRONIC = 'ELECTRONIC'
-    EXCLUDED = 'EXCLUDED'
-    F = 'F'
-    FATH = 'FATH'
-    FICHE = 'FICHE'
-    FILM = 'FILM'
-    FOSTER = 'FOSTER'
-    FRIEND = 'FRIEND'
-    GODP = 'GODP'
-    HUSB = 'HUSB'
-    IMMIGRANT = 'IMMIGRANT'
-    INFANT = 'INFANT'
-    LOCKED = 'LOCKED'
-    MAGAZINE = 'MAGAZINE'
-    MAIDEN = 'MAIDEN'
-    MANUSCRIPT = 'MANUSCRIPT'
-    M = 'M'
-    MAP = 'MAP'
-    MARRIED = 'MARRIED'
-    MOTH = 'MOTH'
-    MULTIPLE = 'MULTIPLE'
-    NEWSPAPER = 'NEWSPAPER'
-    NGHBR = 'NGHBR'
-    NONE = ''
-    OFFICIATOR = 'OFFICIATOR'
-    OTHER = 'OTHER'
-    PARENT = 'PARENT'
-    PHOTO = 'PHOTO'
-    PRE_1970 = 'PRE_1970'
-    PRIVACY = 'PRIVACY'
-    PROFESSIONAL = 'PROFESSIONAL'
-    PROVEN = 'PROVEN'
-    QUAY0 = '0'
-    QUAY1 = '1'
-    QUAY2 = '2'
-    QUAY3 = '3'
-    SEALING = 'SEALING'
-    SPOU = 'SPOU'
-    STILLBORN = 'STILLBORN'
-    SUBMITTED = 'SUBMITTED'
-    TOMBSTONE = 'TOMBSTONE'
-    U = 'U'
-    UNCLEARED = 'UNCLEARED'
-    VIDEO = 'VIDEO'
-    WIFE = 'WIFE'
-    WITN = 'WITN'
-    X = 'X'
+#     ADOPTED = 'ADOPTED'
+#     AKA = 'AKA'
+#     AUDIO = 'AUDIO'
+#     BIC = 'BIC'
+#     BIRTH = 'BIRTH'
+#     BOOK = 'BOOK'
+#     BOTH = 'BOTH'
+#     CANCELED = 'CANCELED'
+#     CARD = 'CARD'
+#     CHALLENGED = 'CHALLENGED'
+#     CHIL = 'CHIL'
+#     CHILD = 'CHILD'
+#     CLERGY = 'CLERGY'
+#     COMPLETED = 'COMPLETED'
+#     CONFIDENTIAL = 'CONFIDENTIAL'
+#     DISPROVEN = 'DISPROVEN'
+#     DNS = 'DNS'
+#     DNS_CAN = 'DNS_CAN'
+#     ELECTRONIC = 'ELECTRONIC'
+#     EXCLUDED = 'EXCLUDED'
+#     F = 'F'
+#     FATH = 'FATH'
+#     FICHE = 'FICHE'
+#     FILM = 'FILM'
+#     FOSTER = 'FOSTER'
+#     FRIEND = 'FRIEND'
+#     GODP = 'GODP'
+#     HUSB = 'HUSB'
+#     IMMIGRANT = 'IMMIGRANT'
+#     INFANT = 'INFANT'
+#     LOCKED = 'LOCKED'
+#     MAGAZINE = 'MAGAZINE'
+#     MAIDEN = 'MAIDEN'
+#     MANUSCRIPT = 'MANUSCRIPT'
+#     M = 'M'
+#     MAP = 'MAP'
+#     MARRIED = 'MARRIED'
+#     MOTH = 'MOTH'
+#     MULTIPLE = 'MULTIPLE'
+#     NEWSPAPER = 'NEWSPAPER'
+#     NGHBR = 'NGHBR'
+#     NONE = ''
+#     OFFICIATOR = 'OFFICIATOR'
+#     OTHER = 'OTHER'
+#     PARENT = 'PARENT'
+#     PHOTO = 'PHOTO'
+#     PRE_1970 = 'PRE_1970'
+#     PRIVACY = 'PRIVACY'
+#     PROFESSIONAL = 'PROFESSIONAL'
+#     PROVEN = 'PROVEN'
+#     QUAY0 = '0'
+#     QUAY1 = '1'
+#     QUAY2 = '2'
+#     QUAY3 = '3'
+#     SEALING = 'SEALING'
+#     SPOU = 'SPOU'
+#     STILLBORN = 'STILLBORN'
+#     SUBMITTED = 'SUBMITTED'
+#     TOMBSTONE = 'TOMBSTONE'
+#     U = 'U'
+#     UNCLEARED = 'UNCLEARED'
+#     VIDEO = 'VIDEO'
+#     WIFE = 'WIFE'
+#     WITN = 'WITN'
+#     X = 'X'
 
 
 class Adop(Enum):
@@ -1426,10 +1509,10 @@ class Adop(Enum):
         - [GEDCOM Adop Enumeration](https://gedcom.io/terms/v7/enumset-ADOP)
     """
 
-    HUSB = LineVal.HUSB.value
-    WIFE = LineVal.WIFE.value
-    BOTH = LineVal.BOTH.value
-    NONE = LineVal.NONE.value
+    HUSB = Tag.HUSB.value
+    WIFE = Tag.WIFE.value
+    BOTH = Tag.BOTH.value
+    NONE = Tag.NONE.value
 
 
 class EvenAttr(Enum):
@@ -1454,10 +1537,10 @@ class FamcStat(Enum):
         [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
     """
 
-    CHALLENGED = LineVal.CHALLENGED.value
-    DISPROVEN = LineVal.DISPROVEN.value
-    PROVEN = LineVal.PROVEN.value
-    NONE = LineVal.NONE.value
+    CHALLENGED = Tag.CHALLENGED.value
+    DISPROVEN = Tag.DISPROVEN.value
+    PROVEN = Tag.PROVEN.value
+    NONE = Tag.NONE.value
 
 
 class Medium(Enum):
@@ -1467,21 +1550,21 @@ class Medium(Enum):
         [GEDCOM MEDI enumeration set](https://gedcom.io/terms/v7/enumset-MEDI)
     """
 
-    AUDIO = LineVal.AUDIO.value
-    BOOK = LineVal.BOOK.value
-    CARD = LineVal.CARD.value
-    ELECTRONIC = LineVal.ELECTRONIC.value
-    FICHE = LineVal.FICHE.value
-    FILM = LineVal.FILM.value
-    MAGAZINE = LineVal.MAGAZINE.value
-    MANUSCRIPT = LineVal.MANUSCRIPT.value
-    MAP = LineVal.MAP.value
-    NEWSPAPER = LineVal.NEWSPAPER.value
-    PHOTO = LineVal.PHOTO.value
-    TOMBSTONE = LineVal.TOMBSTONE.value
-    VIDEO = LineVal.VIDEO.value
-    OTHER = LineVal.OTHER.value
-    NONE = LineVal.NONE.value
+    AUDIO = Tag.AUDIO.value
+    BOOK = Tag.BOOK.value
+    CARD = Tag.CARD.value
+    ELECTRONIC = Tag.ELECTRONIC.value
+    FICHE = Tag.FICHE.value
+    FILM = Tag.FILM.value
+    MAGAZINE = Tag.MAGAZINE.value
+    MANUSCRIPT = Tag.MANUSCRIPT.value
+    MAP = Tag.MAP.value
+    NEWSPAPER = Tag.NEWSPAPER.value
+    PHOTO = Tag.PHOTO.value
+    TOMBSTONE = Tag.TOMBSTONE.value
+    VIDEO = Tag.VIDEO.value
+    OTHER = Tag.OTHER.value
+    NONE = Tag.NONE.value
 
 
 class NameType(Enum):
@@ -1491,14 +1574,14 @@ class NameType(Enum):
         [GEDCOM NAME-TYPE enumeration set](https://gedcom.io/terms/v7/enumset-NAME-TYPE)
     """
 
-    AKA = LineVal.AKA.value
-    BIRTH = LineVal.BIRTH.value
-    IMMIGRANT = LineVal.IMMIGRANT.value
-    MAIDEN = LineVal.MAIDEN.value
-    MARRIED = LineVal.MARRIED.value
-    PROFESSIONAL = LineVal.PROFESSIONAL.value
-    OTHER = LineVal.OTHER.value
-    NONE = LineVal.NONE.value
+    AKA = Tag.AKA.value
+    BIRTH = Tag.BIRTH.value
+    IMMIGRANT = Tag.IMMIGRANT.value
+    MAIDEN = Tag.MAIDEN.value
+    MARRIED = Tag.MARRIED.value
+    PROFESSIONAL = Tag.PROFESSIONAL.value
+    OTHER = Tag.OTHER.value
+    NONE = Tag.NONE.value
 
 
 class Pedi(Enum):
@@ -1508,12 +1591,12 @@ class Pedi(Enum):
         [GEDCOM PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
     """
 
-    ADOPTED = LineVal.ADOPTED.value
-    BIRTH = LineVal.BIRTH.value
-    FOSTER = LineVal.FOSTER.value
-    SEALING = LineVal.SEALING.value
-    OTHER = LineVal.OTHER.value
-    NONE = LineVal.NONE.value
+    ADOPTED = Tag.ADOPTED.value
+    BIRTH = Tag.BIRTH.value
+    FOSTER = Tag.FOSTER.value
+    SEALING = Tag.SEALING.value
+    OTHER = Tag.OTHER.value
+    NONE = Tag.NONE.value
 
 
 class Quay(Enum):
@@ -1523,11 +1606,11 @@ class Quay(Enum):
         [GEDCOM QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY)
     """
 
-    QUAY0 = LineVal.QUAY0.value
-    QUAY1 = LineVal.QUAY1.value
-    QUAY2 = LineVal.QUAY2.value
-    QUAY3 = LineVal.QUAY3.value
-    NONE = LineVal.NONE.value
+    QUAY0 = Tag.QUAY0.value
+    QUAY1 = Tag.QUAY1.value
+    QUAY2 = Tag.QUAY2.value
+    QUAY3 = Tag.QUAY3.value
+    NONE = Tag.NONE.value
 
 
 class Resn(Enum):
@@ -1537,10 +1620,10 @@ class Resn(Enum):
         [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
     """
 
-    CONFIDENTIAL = LineVal.CONFIDENTIAL.value
-    LOCKED = LineVal.LOCKED.value
-    PRIVACY = LineVal.PRIVACY.value
-    NONE = LineVal.NONE.value
+    CONFIDENTIAL = Tag.CONFIDENTIAL.value
+    LOCKED = Tag.LOCKED.value
+    PRIVACY = Tag.PRIVACY.value
+    NONE = Tag.NONE.value
 
 
 class Role(Enum):
@@ -1550,22 +1633,22 @@ class Role(Enum):
         [GEDCOM ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
     """
 
-    CHIL = LineVal.CHIL.value
-    CLERGY = LineVal.CLERGY.value
-    FATH = LineVal.FATH.value
-    FRIEND = LineVal.FRIEND.value
-    GODP = LineVal.GODP.value
-    HUSB = LineVal.HUSB.value
-    MOTH = LineVal.MOTH.value
-    MULTIPLE = LineVal.MULTIPLE.value
-    NGHBR = LineVal.NGHBR.value
-    OFFICIATOR = LineVal.OFFICIATOR.value
-    PARENT = LineVal.PARENT.value
-    SPOU = LineVal.SPOU.value
-    WIFE = LineVal.WIFE.value
-    WITN = LineVal.WITN.value
-    OTHER = LineVal.OTHER.value
-    NONE = LineVal.NONE.value
+    CHIL = Tag.CHIL.value
+    CLERGY = Tag.CLERGY.value
+    FATH = Tag.FATH.value
+    FRIEND = Tag.FRIEND.value
+    GODP = Tag.GODP.value
+    HUSB = Tag.HUSB.value
+    MOTH = Tag.MOTH.value
+    MULTIPLE = Tag.MULTIPLE.value
+    NGHBR = Tag.NGHBR.value
+    OFFICIATOR = Tag.OFFICIATOR.value
+    PARENT = Tag.PARENT.value
+    SPOU = Tag.SPOU.value
+    WIFE = Tag.WIFE.value
+    WITN = Tag.WITN.value
+    OTHER = Tag.OTHER.value
+    NONE = Tag.NONE.value
 
 
 class Sex(Enum):
@@ -1575,11 +1658,11 @@ class Sex(Enum):
         [GEDCOM SEX enumeration set]()
     """
 
-    M = LineVal.M.value
-    F = LineVal.F.value
-    X = LineVal.X.value
-    U = LineVal.U.value
-    NONE = LineVal.NONE.value
+    M = Tag.M.value
+    F = Tag.F.value
+    X = Tag.X.value
+    U = Tag.U.value
+    NONE = Tag.NONE.value
 
 
 class Stat(Enum):
@@ -1589,16 +1672,16 @@ class Stat(Enum):
         [GEDCOM ord-STAT enumeration set](https://gedcom.io/terms/v7/enumset-ord-STAT)
     """
 
-    BIC = LineVal.BIC.value
-    CANCELED = LineVal.CANCELED.value
-    CHILD = LineVal.CHILD.value
-    COMPLETED = LineVal.COMPLETED.value
-    EXCLUDED = LineVal.EXCLUDED.value
-    DNS = LineVal.DNS.value
-    DNS_CAN = LineVal.DNS_CAN.value
-    INFANT = LineVal.INFANT.value
-    PRE_1970 = LineVal.PRE_1970.value
-    STILLBORN = LineVal.STILLBORN.value
-    SUBMITTED = LineVal.SUBMITTED.value
-    UNCLEARED = LineVal.UNCLEARED.value
-    NONE = LineVal.NONE.value
+    BIC = Tag.BIC.value
+    CANCELED = Tag.CANCELED.value
+    CHILD = Tag.CHILD.value
+    COMPLETED = Tag.COMPLETED.value
+    EXCLUDED = Tag.EXCLUDED.value
+    DNS = Tag.DNS.value
+    DNS_CAN = Tag.DNS_CAN.value
+    INFANT = Tag.INFANT.value
+    PRE_1970 = Tag.PRE_1970.value
+    STILLBORN = Tag.STILLBORN.value
+    SUBMITTED = Tag.SUBMITTED.value
+    UNCLEARED = Tag.UNCLEARED.value
+    NONE = Tag.NONE.value
