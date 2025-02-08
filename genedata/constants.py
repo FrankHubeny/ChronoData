@@ -21,7 +21,6 @@ References:
 __all__ = [
     'ApproxDate',
     'GedFlag',
-    'MediaType',
     'RangeDate',
     'RestrictDate',
 ]
@@ -287,33 +286,6 @@ class Number:
     JSONLEN: int = 5
 
 
-@dataclass(frozen=True)
-class Default:
-    CHOICE: int = 1
-    DATE_DAY: int = 0
-    DATE_MONTH: int = 0
-    DATE_YEAR: int = 0
-    DATE_WEEK: int = 0
-    DAYS: int = 0
-    EMPTY: str = ''
-    GREATER_LESS_THAN: str = '>'
-    HEIGHT: int = 0
-    LEFT: int = 0
-    MAP_LATITUDE: float = 0.0
-    MAP_LONGITUDE: float = 0.0
-    MONTHS: int = 0
-    PLACE_FORM1: str = 'City'
-    PLACE_FORM2: str = 'County'
-    PLACE_FORM3: str = 'State'
-    PLACE_FORM4: str = 'Country'
-    TIME_HOUR: int = 0
-    TIME_MINUTE: int = 0
-    TIME_SECOND: float = 0.0
-    TIME_UTC: bool = False
-    TOP: int = 0
-    WEEKS: int = 0
-    WIDTH: int = 0
-    YEARS: int = 0
 
 
 @dataclass(frozen=True)
@@ -524,12 +496,12 @@ class RestrictDate(Enum):
     NONE = String.EMPTY
 
 
-class MediaType(Enum):
-    """"""
+# class MediaType(Enum):
+#     """"""
 
-    TEXT_HTML = 'TEXT_HTML'
-    TEXT_PLAIN = 'TEXT_PLAIN'
-    NONE = String.EMPTY
+#     TEXT_HTML = 'TEXT_HTML'
+#     TEXT_PLAIN = 'TEXT_PLAIN'
+#     NONE = String.EMPTY
 
 
 # class Tag(Enum):
