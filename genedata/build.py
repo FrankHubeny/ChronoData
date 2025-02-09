@@ -28,6 +28,7 @@ from genedata.constants import (
 from genedata.gedcom import Tag
 from genedata.messages import Issue, Msg
 from genedata.store import (
+    ExtensionXref,
     Family,
     FamilyXref,
     Header,
@@ -66,6 +67,7 @@ class Genealogy:
         self.ged_in_version: str = ''
         self.ged_header: str = ''
         self.ged_trailer: str = f'0 {Tag.TRLR.value}'
+        self.ged_extension: str = ''
         self.ged_family: str = ''
         self.ged_individual: str = ''
         self.ged_multimedia: str = ''
@@ -77,6 +79,7 @@ class Genealogy:
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
+        self.extension_xreflist: list[str] = [Void.NAME]
         self.family_xreflist: list[str] = [Void.NAME]
         self.individual_xreflist: list[str] = [Void.NAME]
         self.multimedia_xreflist: list[str] = [Void.NAME]
@@ -350,6 +353,42 @@ class Genealogy:
             xref = self._format_name(xref_name)
         self._set_xref(xref_list, xref, xref_name)
         return xref
+    
+    def extension_xref(
+        self, xref_name: str = '', initial: bool = False
+    ) -> ExtensionXref:
+        """
+        Create a FamilyXref identifier from a unique string according to the
+        GEDCOM standard.
+
+        Args:
+            xref_name (str, optional): A name for the identifier. Defaults to ''.
+            initial (bool, optional): Whether to use the name as an initial
+                value with an integer following. Defaults to False.
+
+        Returns:
+            ExtensionXref: A unique identifier string with type ExtensionXref.
+
+        Examples:
+
+        See Also:
+            - `family_xref`: create a typed identifier for an family record.
+            - `individual_xref`: create a typed identifier for an individual record.
+            - `multimedia_xref`: create a typed identifier for a multimedia record.
+            - `repository_xref`: create a typed identifier for a repository record.
+            - `shared_note_xref`: create a typed identifier for a shared note record.
+            - `source_xref`: create a typed identifier for a source record.
+            - `submitter_xref`: create a typed identifier for a submitter record.
+
+        Reference:
+            [GEDCOM Repository Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
+        """
+        extension_xref = self._counter(
+            self.extension_xreflist,
+            xref_name,
+            initial,
+        )
+        return ExtensionXref(extension_xref)
 
     def family_xref(
         self, xref_name: str = '', initial: bool = False
