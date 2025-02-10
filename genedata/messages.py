@@ -45,10 +45,13 @@ class Msg:
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
     )
-    EMPTY_EVENT_TYPE: str = 'The event type for tag {0} must have some value.'
+    #EMPTY_EVENT_TYPE: str = 'The event type for tag {0} must have some value.'
+    EVEN_REQUIRES_TYPE: str = 'The EVEN tag requires a non-empty TYPE.'
     EXID_TYPE: str = 'The EXID identifier requires a type description of it.'
     EXTENSION_ENUM_TAG: str = 'The tag "{0}" is not a value of the enumeration "{1}".'
+    FACT_REQUIRES_TYPE: str = 'The FACT tag requires a non-empty TYPE.'
     FILE_EXISTS: str = 'The file "{0}" already exists.'
+    IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
@@ -68,6 +71,7 @@ class Msg:
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The tag {0} is not in the list of valid tags.'
+    PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
     PHONE_AREA_CODE: str = 'The phone area code "{0}" is not greater than {1} and less than {2}.'
     PHONE_PREFIX_CODE: str = 'The phone prefix code "{0}" is not greater than {1} and less than {2}.'
@@ -81,6 +85,7 @@ class Msg:
     SCHEMA_NEEDS_URL: str = 'The schema tag "{0}" needs a non-empty url as its definition.'
     SLGC_REQUIRES_FAM: str = 'The Tag.SLGC requires a valid family cross reference identifier.'
     STARTED: str = 'The "{0}" genealogy has been started.'
+    STAT_REQUIRES_DATE: str = 'The STAT tag requires a non-empty DATE.'
     TAG_PAYLOAD: str = (
         'The tag {0} cannot have a payload different from "Y" or "".'
     )

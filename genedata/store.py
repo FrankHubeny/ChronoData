@@ -142,7 +142,6 @@ from calendars.gregorian_calendars import CalendarsGregorian
 # from calendars.hebraic_calendars import CalendarsHebraic
 # from calendars.julian_calendars import CalendarsJulian
 from genedata.constants import (
-    # Adop,
     Cal,
     CalendarName,
     String,
@@ -154,12 +153,14 @@ from genedata.gedcom import (
     Even,
     EvenAttr,
     FamAttr,
+    FamcStat,
     FamEven,
     Id,
     IndiAttr,
     IndiEven,
     Medium,
     NameType,
+    Pedi,
     Quay,
     Resn,
     Role,
@@ -170,8 +171,10 @@ from genedata.gedcom import (
 )
 from genedata.messages import Example, Msg
 
-YNull = Literal['Y'] | None
+AnyList = Any | list[Any] | None
+FloatNone = float | None
 StrList = str | list[str] | None
+YNull = Literal['Y'] | None
 
 
 class Tagger:
@@ -641,7 +644,7 @@ class Checker:
         if value == default:
             raise ValueError(Msg.NOT_DEFAULT.format(default))
         return True
-    
+
     @staticmethod
     def verify_not_empty(value: Any) -> bool:
         if value is None:
@@ -2545,15 +2548,15 @@ class Phone(NamedTuple):
 
     """
 
-    phone: str
+    phone: str = Default.EMPTY
     phon_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.phone, str, no_list=True)
+            and Checker.verify_not_empty(self.phone)
             and Checker.verify_ext(Tag.PHON, self.phon_ext)
-            # and Checker.verify_string_set(self.phone, Default.PHONE_STRING_SET)
         )
         return check
 
@@ -2646,14 +2649,16 @@ class Email(NamedTuple):
 
     """
 
-    email: str
+    email: str = Default.EMPTY
     email_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.email, str, no_list=True
-        ) and Checker.verify_ext(Tag.EMAIL, self.email_ext)
+        check: bool = (
+            Checker.verify_type(self.email, str, no_list=True)
+            and Checker.verify_not_empty(self.email)
+            and Checker.verify_ext(Tag.EMAIL, self.email_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -2747,14 +2752,16 @@ class Fax(NamedTuple):
 
     """
 
-    fax: str
+    fax: str = Default.EMPTY
     fax_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.fax, str, no_list=True
-        ) and Checker.verify_ext(Tag.FAX, self.fax_ext)
+        check: bool = (
+            Checker.verify_type(self.fax, str, no_list=True)
+            and Checker.verify_not_empty(self.fax)
+            and Checker.verify_ext(Tag.FAX, self.fax_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -2848,14 +2855,16 @@ class WWW(NamedTuple):
 
     """
 
-    www: str
+    www: str = Default.EMPTY
     www_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.www, str, no_list=True
-        ) and Checker.verify_ext(Tag.WWW, self.www_ext)
+        check: bool = (
+            Checker.verify_type(self.www, str, no_list=True)
+            and Checker.verify_not_empty(self.www)
+            and Checker.verify_ext(Tag.WWW, self.www_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -2949,14 +2958,16 @@ class Lang(NamedTuple):
 
     """
 
-    lang: str
+    lang: str = Default.EMPTY
     lang_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.lang, str, no_list=True
-        ) and Checker.verify_ext(Tag.LANG, self.lang_ext)
+        check: bool = (
+            Checker.verify_type(self.lang, str, no_list=True)
+            and Checker.verify_not_empty(self.lang)
+            and Checker.verify_ext(Tag.LANG, self.lang_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -3042,6 +3053,25 @@ class Phrase(NamedTuple):
     """Store, validate and format fax information.
 
     Example:
+        A phrase is a string which will be broken into separate GEDCOM lines if
+        any line break is present.  A line break is present either by putting
+        on in explicitly with "\n" or by using a multiline string.  Here is an
+        example of using "\n".
+        >>> from genedata.store import Phrase
+        >>> print(Phrase('This is a\\ntest phrase with two lines.').ged(1))
+        1 PHRASE This is a
+        2 CONT test phrase with two lines.
+        <BLANKLINE>
+
+        One may also use a multiline string.
+        >>> from genedata.store import Phrase
+        >>> print(
+        ...     Phrase('''This is a
+        ... test phrase with two lines.''').ged(1)
+        ... )
+        1 PHRASE This is a
+        2 CONT test phrase with two lines.
+        <BLANKLINE>
 
     Args:
 
@@ -3050,14 +3080,16 @@ class Phrase(NamedTuple):
 
     """
 
-    phrase: str | list[str]
+    phrase: str = Default.EMPTY
     phrase_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.phrase, str
-        ) and Checker.verify_ext(Tag.LANG, self.phrase_ext)
+        check: bool = (
+            Checker.verify_type(self.phrase, str, no_list=True)
+            and Checker.verify_not_empty(self.phrase)
+            and Checker.verify_ext(Tag.LANG, self.phrase_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -3258,7 +3290,7 @@ Address(
     def example(
         self,
         choice: int = Default.CHOICE,
-        address: str = Default.EMPTY,  
+        address: str = Default.EMPTY,
         city: str = Default.EMPTY,
         state: str = Default.EMPTY,
         postal: str = Default.EMPTY,
@@ -3599,12 +3631,12 @@ class PersonalNamePieces(NamedTuple):
     > n NSFX <Text>                              {0:M}  [g7:NSFX](https://gedcom.io/terms/v7/NSFX)
     """
 
-    prefix: list[str] | None = None
-    given: list[str] | None = None
-    nickname: list[str] | None = None
-    surname_prefix: list[str] | None = None
-    surname: list[str] | None = None
-    suffix: list[str] | None = None
+    prefix: StrList = None
+    given: StrList = None
+    nickname: StrList = None
+    surname_prefix: StrList = None
+    surname: StrList = None
+    suffix: StrList = None
     npfx_ext: ExtType = None
     givn_ext: ExtType = None
     nick_ext: ExtType = None
@@ -3615,12 +3647,12 @@ class PersonalNamePieces(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.prefix, str | list | None)
-            and Checker.verify_type(self.given, str | list | None)
-            and Checker.verify_type(self.nickname, str | list | None)
-            and Checker.verify_type(self.surname_prefix, str | list | None)
-            and Checker.verify_type(self.surname, str | list | None)
-            and Checker.verify_type(self.suffix, str | list | None)
+            Checker.verify_type(self.prefix, str)
+            and Checker.verify_type(self.given, str)
+            and Checker.verify_type(self.nickname, str)
+            and Checker.verify_type(self.surname_prefix, str)
+            and Checker.verify_type(self.surname, str)
+            and Checker.verify_type(self.suffix, str)
             and Checker.verify_ext(Tag.NPFX, self.npfx_ext)
             and Checker.verify_ext(Tag.GIVN, self.givn_ext)
             and Checker.verify_ext(Tag.NICK, self.nick_ext)
@@ -3671,12 +3703,12 @@ PersonalNamePieces(
     def example(
         self,
         choice: int = Default.CHOICE,
-        prefix: list[str] | None = None,
-        given: list[str] | None = None,
-        nickname: list[str] | None = None,
-        surname_prefix: list[str] | None = None,
-        surname: list[str] | None = None,
-        suffix: list[str] | None = None,
+        prefix: StrList = None,
+        given: StrList = None,
+        nickname: StrList = None,
+        surname_prefix: StrList = None,
+        surname: StrList = None,
+        suffix: StrList = None,
         npfx_ext: ExtType = None,
         givn_ext: ExtType = None,
         nick_ext: ExtType = None,
@@ -3707,12 +3739,12 @@ PersonalNamePieces(
         match choice:
             case 1:
                 show = PersonalNamePieces(
-                    prefix=['Mr', 'Sir'],
-                    given=['Tom', 'Thomas'],
-                    nickname=['Tommy'],
-                    surname_prefix=[],
-                    surname=['Smith'],
-                    suffix=['Jr'],
+                    prefix='Mr',
+                    given='Thomas',
+                    nickname='Tommy',
+                    surname_prefix='Doctor',
+                    surname='Smith',
+                    suffix='Jr',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -3720,10 +3752,10 @@ PersonalNamePieces(
                 show = PersonalNamePieces(
                     prefix=['Mr', 'Sir'],
                     given=['Tom', 'Thomas'],
-                    nickname=['Tommy'],
-                    surname_prefix=[],
-                    surname=['Smith'],
-                    suffix=['Jr'],
+                    nickname=['Tommy', 'T'],
+                    surname_prefix=['Mr', 'Sir'],
+                    surname=['Smith', 'Smyth'],
+                    suffix=['Jr', 'Junior'],
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -3812,15 +3844,16 @@ class NameTranslation(NamedTuple):
 
     translation: str = String.EMPTY
     language: LangType = None
-    pieces: PersonalNamePieces | None = None
+    pieces: PersonalNamePiecesType = None
     tran_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
+            and Checker.verify_not_empty(self.translation)
             and Checker.verify_type(self.language, Lang)
-            and Checker.verify_not_default(self.language, None)
+            and Checker.verify_not_empty(self.language)
             and Checker.verify_type(self.pieces, PersonalNamePieces)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
         )
@@ -3853,7 +3886,7 @@ NameTranslation(
         choice: int = Default.CHOICE,
         translation: str = String.EMPTY,
         language: LangType = None,
-        pieces: PersonalNamePieces | None = None,
+        pieces: PersonalNamePiecesType = None,
         tran_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -3987,6 +4020,7 @@ class NoteTranslation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.translation, str)
+            and Checker.verify_not_empty(self.translation)
             and Checker.verify_type(self.mime, str)
             and Checker.verify_type(self.language, Lang)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
@@ -4145,6 +4179,7 @@ class CallNumber(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.call_number, str)
+            and Checker.verify_not_empty(self.call_number)
             and Checker.verify_enum(self.medium, Medium)
             and Checker.verify_type(self.phrase, Phrase)
         )
@@ -4153,7 +4188,7 @@ class CallNumber(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.call_number != String.EMPTY and self.validate():
+        if self.validate():
             lines = Tagger.string(lines, level, Tag.CALN, self.call_number)
             lines = Tagger.string(lines, level + 1, Tag.MEDI, self.medium.value)
             lines = Tagger.structure(lines, level + 2, self.phrase)
@@ -4209,7 +4244,7 @@ CallNumber(
             case 2:
                 show = CallNumber(
                     call_number='1-234-333 ABC',
-                    medium=Tag.MAGAZINE,
+                    medium=Tag.NONE,
                     phrase=Phrase('A special article.'),
                 )
                 code_preface = Example.SECOND
@@ -4282,6 +4317,7 @@ class Text(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.text, str)
+            and Checker.verify_not_empty(self.text)
             and Checker.verify_type(self.mime, str)
             and Checker.verify_type(self.language, Lang)
             and Checker.verify_ext(Tag.TEXT, self.text_ext)
@@ -4292,7 +4328,7 @@ class Text(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.text != String.EMPTY and self.validate():
+        if self.validate():
             lines = Tagger.string(lines, level, Tag.TEXT, str(self.text))
             lines = Tagger.structure(lines, level + 1, self.text_ext)
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime)
@@ -4354,7 +4390,7 @@ Text(
             case 2:
                 show = Text(
                     text='ई एकटा पाठ अछि।',
-                    mime=Default.MIME,
+                    mime='text/html',
                     language=Lang('mai'),
                 )
                 code_preface = Example.SECOND
@@ -4362,7 +4398,7 @@ Text(
             case 3:
                 show = Text(
                     text='ይህ ጽሑፍ ነው።',
-                    mime=Default.MIME,
+                    mime='text/plain',
                     language=Lang('am'),
                 )
                 code_preface = Example.THIRD
@@ -4574,14 +4610,14 @@ class SourceCitation(NamedTuple):
 
     source_xref: SourceXref = Void.SOUR
     page: str = String.EMPTY
-    source_data: SourceData | None = None
+    source_data: SourDataType = None
     event: Tag = Tag.NONE
     event_phrase: PhraseType = None
     role: Tag = Tag.NONE
     role_phrase: PhraseType = None
     quality: Tag = Tag.NONE
-    multimedialinks: list[Any] | None = None
-    notes: list[Any] | None = None
+    multimedialinks: AnyList = None
+    notes: AnyList = None
     sour_ext: ExtType = None
     page_ext: ExtType = None
     even_ext: ExtType = None
@@ -4592,12 +4628,13 @@ class SourceCitation(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.source_xref, SourceXref)
-            and Checker.verify_type(self.page, str)
-            and Checker.verify_type(self.source_data, SourceData)
+            and Checker.verify_not_empty(self.source_xref)
+            and Checker.verify_type(self.page, str, no_list=True)
+            and Checker.verify_type(self.source_data, SourceData, no_list=True)
             and Checker.verify_enum(self.event, Even)
-            and Checker.verify_type(self.event_phrase, Phrase)
+            and Checker.verify_type(self.event_phrase, Phrase, no_list=True)
             and Checker.verify_enum(self.role, Role)
-            and Checker.verify_type(self.role_phrase, Phrase)
+            and Checker.verify_type(self.role_phrase, Phrase, no_list=True)
             and Checker.verify_enum(self.quality, Quay)
             and Checker.verify_type(self.multimedialinks, MultimediaLink)
             and Checker.verify_type(self.notes, Note)
@@ -4667,14 +4704,14 @@ SourceCitation(
         choice: int = Default.CHOICE,
         source_xref: SourceXref = Void.SOUR,
         page: str = String.EMPTY,
-        source_data: SourceData | None = None,
+        source_data: SourDataType = None,
         event: Tag = Tag.NONE,
         event_phrase: PhraseType = None,
         role: Tag = Tag.NONE,
         role_phrase: PhraseType = None,
         quality: Tag = Tag.NONE,
-        multimedialinks: list[Any] | None = None,
-        notes: list[Any] | None = None,
+        multimedialinks: AnyList = None,
+        notes: AnyList = None,
         sour_ext: ExtType = None,
         page_ext: ExtType = None,
         even_ext: ExtType = None,
@@ -4844,7 +4881,7 @@ class Note(NamedTuple):
     ]
     """  # noqa: RUF002
 
-    note: str
+    note: str = Default.EMPTY
     mime: str = Default.MIME
     language: LangType = None
     translations: NoteTranType = None
@@ -4856,6 +4893,7 @@ class Note(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.note, str)
+            and Checker.verify_not_empty(self.note)
             and Checker.verify_type(self.mime, str)
             and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_type(self.translations, NoteTranslation)
@@ -5005,14 +5043,16 @@ class SNote(NamedTuple):
     n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
     """
 
-    snote_xref: SharedNoteXref
+    snote_xref: SharedNoteXref = Void.SNOTE
     snote_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = Checker.verify_type(
-            self.snote_xref, SharedNoteXref, no_list=True
-        ) and Checker.verify_ext(Tag.SNOTE, self.snote_ext)
+        check: bool = (
+            Checker.verify_type(self.snote_xref, SharedNoteXref, no_list=True)
+            and Checker.verify_not_empty(self.snote_xref)
+            and Checker.verify_ext(Tag.SNOTE, self.snote_ext)
+        )
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -5112,7 +5152,7 @@ class ChangeDate(NamedTuple):
     >   +1 <<NOTE_STRUCTURE>>                    {0:M}
     """
 
-    date: Date
+    date: DateType = None
     time: TimeType = None
     notes: NoteType = None
     chan_ext: ExtType = None
@@ -5120,9 +5160,10 @@ class ChangeDate(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.notes, Note)
-            and self.date.validate()
-            and (self.time is not None and self.time.validate())
+            Checker.verify_type(self.date, Date, no_list=True)
+            and Checker.verify_not_empty(self.date)
+            and Checker.verify_type(self.time, Time, no_list=True)
+            and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.CHAN, self.chan_ext)
         )
         return check
@@ -5152,7 +5193,7 @@ ChangeDate(
     def example(
         self,
         choice: int = Default.CHOICE,
-        date: Date = Date(2025, 1, 1),  # noqa: B008
+        date: DateType = None,
         time: TimeType = None,
         notes: NoteType = None,
         chan_ext: ExtType = None,
@@ -5256,7 +5297,10 @@ class SourceRepositoryCitation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.repository_xref, RepositoryXref)
+            Checker.verify_type(
+                self.repository_xref, RepositoryXref, no_list=True
+            )
+            and Checker.verify_not_empty(self.repository_xref)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.call_numbers, CallNumber)
             and Checker.verify_ext(Tag.REPO, self.repo_ext)
@@ -5462,12 +5506,14 @@ class PersonalName(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_not_default(self.name, '')
-            and Checker.verify_type(self.name, str)
-            and Checker.verify_type(self.surname, str)
+            Checker.verify_type(self.name, str, no_list=True)
+            and Checker.verify_not_empty(self.name)
+            and Checker.verify_type(self.surname, str, no_list=True)
             and Checker.verify_enum(self.type, NameType)
-            and Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.pieces, PersonalNamePieces)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
+            and Checker.verify_type(
+                self.pieces, PersonalNamePieces, no_list=True
+            )
             and Checker.verify_type(self.translations, NameTranslation)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.source_citations, SourceCitation)
@@ -5836,10 +5882,16 @@ class Association(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.individual_xref, IndividualXref)
+            Checker.verify_type(
+                self.individual_xref, IndividualXref, no_list=True
+            )
+            and Checker.verify_not_empty(self.individual_xref)
+            and Checker.verify_type(
+                self.association_phrase, Phrase, no_list=True
+            )
             and Checker.verify_enum(self.role, Role)
-            and Checker.verify_type(self.association_phrase, Phrase)
-            and Checker.verify_type(self.role_phrase, Phrase)
+            and Checker.verify_not_empty(self.role)
+            and Checker.verify_type(self.role_phrase, Phrase, no_list=True)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.citations, SourceCitation)
         )
@@ -6006,12 +6058,15 @@ class MultimediaLink(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.multimedia_xref, MultimediaXref)
-            and Checker.verify_type(self.top, int)
-            and Checker.verify_type(self.left, int)
-            and Checker.verify_type(self.height, int)
-            and Checker.verify_type(self.width, int)
-            and Checker.verify_type(self.title, str)
+            Checker.verify_type(
+                self.multimedia_xref, MultimediaXref, no_list=True
+            )
+            and Checker.verify_not_empty(self.multimedia_xref)
+            and Checker.verify_type(self.top, int, no_list=True)
+            and Checker.verify_type(self.left, int, no_list=True)
+            and Checker.verify_type(self.height, int, no_list=True)
+            and Checker.verify_type(self.width, int, no_list=True)
+            and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(Tag.OBJE, self.obje_ext)
             and Checker.verify_ext(Tag.TOP, self.top_ext)
             and Checker.verify_ext(Tag.LEFT, self.left_ext)
@@ -6168,22 +6223,27 @@ MultimediaLink(
         )
 
 
-MMLinkType = MultimediaLink | None
+MMLinkType = MultimediaLink | list[MultimediaLink] | None
 
 
 class Exid(NamedTuple):
-    """Store, validate and display an EXID structure."""
+    """Store, validate and display an EXID structure.
 
-    exid: str
-    exid_type: str
+    >   +1 EXID <Special>                        {0:M}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
+    >      +2 TYPE <Special>                     {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
+    """
+
+    exid: str = Default.EMPTY
+    exid_type: str = Default.EMPTY
     exid_ext: ExtType = None
     exid_type_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.exid, str)
-            and Checker.verify_type(self.exid_type, str)
+            Checker.verify_type(self.exid, str, no_list=True)
+            and Checker.verify_not_empty(self.exid)
+            and Checker.verify_type(self.exid_type, str, no_list=True)
             and Checker.verify_ext(Tag.EXID, self.exid_ext)
             and Checker.verify_ext(Tag.TYPE, self.exid_type_ext)
         )
@@ -6352,8 +6412,10 @@ class Map(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.latitude, float)
-            and Checker.verify_type(self.longitude, float)
+            Checker.verify_not_empty(self.latitude)
+            and Checker.verify_not_empty(self.longitude)
+            and Checker.verify_type(self.latitude, float, no_list=True)
+            and Checker.verify_type(self.longitude, float, no_list=True)
             and Checker.verify_range(self.latitude, -90.0, 90.0)
             and Checker.verify_range(self.longitude, -180.0, 180.0)
             and Checker.verify_ext(Tag.MAP, self.map_ext)
@@ -6520,11 +6582,14 @@ class PlaceTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.place1, str)
-            and Checker.verify_type(self.place2, str)
-            and Checker.verify_type(self.place3, str)
-            and Checker.verify_type(self.place4, str)
-            and Checker.verify_type(self.language, Lang)
+            Checker.verify_type(self.place1, str, no_list=True)
+            and Checker.verify_type(self.place2, str, no_list=True)
+            and Checker.verify_type(self.place3, str, no_list=True)
+            and Checker.verify_type(self.place4, str, no_list=True)
+            and Checker.verify_not_empty(
+                ''.join([self.place1, self.place2, self.place3, self.place4])
+            )
+            and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_ext(Tag.PLAC, self.tran_ext)
         )
         return check
@@ -6773,17 +6838,20 @@ class Place(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.place1, str)
-            and Checker.verify_type(self.place2, str)
-            and Checker.verify_type(self.place3, str)
-            and Checker.verify_type(self.place4, str)
-            and Checker.verify_type(self.form1, str)
-            and Checker.verify_type(self.form2, str)
-            and Checker.verify_type(self.form3, str)
-            and Checker.verify_type(self.form4, str)
-            and Checker.verify_type(self.language, Lang)
+            Checker.verify_type(self.place1, str, no_list=True)
+            and Checker.verify_type(self.place2, str, no_list=True)
+            and Checker.verify_type(self.place3, str, no_list=True)
+            and Checker.verify_type(self.place4, str, no_list=True)
+            and Checker.verify_not_empty(
+                ''.join([self.place1, self.place2, self.place3, self.place4])
+            )
+            and Checker.verify_type(self.form1, str, no_list=True)
+            and Checker.verify_type(self.form2, str, no_list=True)
+            and Checker.verify_type(self.form3, str, no_list=True)
+            and Checker.verify_type(self.form4, str, no_list=True)
+            and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_type(self.translations, PlaceTranslation)
-            and Checker.verify_type(self.map, Map)
+            and Checker.verify_type(self.map, Map, no_list=True)
             and Checker.verify_type(self.exids, Exid)
             and Checker.verify_type(self.notes, Note)
         )
@@ -7018,22 +7086,22 @@ class EventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.date, Date)
-            and Checker.verify_type(self.time, Time)
-            and Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.place, Place)
-            and Checker.verify_type(self.address, Address)
+            Checker.verify_type(self.date, Date, no_list=True)
+            and Checker.verify_type(self.time, Time, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
+            and Checker.verify_type(self.place, Place, no_list=True)
+            and Checker.verify_type(self.address, Address, no_list=True)
             and Checker.verify_type(self.phones, Phone)
             and Checker.verify_type(self.emails, Email)
             and Checker.verify_type(self.faxes, Fax)
             and Checker.verify_type(self.wwws, WWW)
-            and Checker.verify_type(self.agency, str)
-            and Checker.verify_type(self.religion, str)
-            and Checker.verify_type(self.cause, str)
+            and Checker.verify_type(self.agency, str, no_list=True)
+            and Checker.verify_type(self.religion, str, no_list=True)
+            and Checker.verify_type(self.cause, str, no_list=True)
             and Checker.verify_enum(self.resn, Resn)
-            and Checker.verify_type(self.sdate, SDate)
-            and Checker.verify_type(self.stime, Time)
-            and Checker.verify_type(self.sphrase, Phrase)
+            and Checker.verify_type(self.sdate, SDate, no_list=True)
+            and Checker.verify_type(self.stime, Time, no_list=True)
+            and Checker.verify_type(self.sphrase, Phrase, no_list=True)
             and Checker.verify_type(self.associations, Association)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, Source)
@@ -7306,9 +7374,13 @@ class FamilyEventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.husband_age, Age | None)
-            and Checker.verify_type(self.wife_age, Age | None)
-            and Checker.verify_type(self.event_detail, EventDetail | None)
+            Checker.verify_type(self.husband_age, Age, no_list=True)
+            and Checker.verify_not_empty(self.husband_age)
+            and Checker.verify_type(self.wife_age, Age, no_list=True)
+            and Checker.verify_not_empty(self.wife_age)
+            and Checker.verify_type(
+                self.event_detail, EventDetail, no_list=True
+            )
             and Checker.verify_ext(Tag.HUSB, self.husb_ext)
             and Checker.verify_ext(Tag.WIFE, self.wife_ext)
         )
@@ -7451,9 +7523,17 @@ class FamilyAttribute(NamedTuple):
         check: bool = (
             Checker.verify_type(self.tag, Tag)
             and Checker.verify_enum(self.tag, FamAttr)
-            and Checker.verify_type(self.payload, str)
-            and Checker.verify_type(self.attribute_type, str)
-            and Checker.verify_type(self.family_event_detail, FamilyEventDetail)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify(
+                self.tag == Tag.FACT,
+                self.attribute_type != Default.EMPTY,
+                Msg.FACT_REQUIRES_TYPE,
+            )
+            and Checker.verify_type(self.payload, str, no_list=True)
+            and Checker.verify_type(self.attribute_type, str, no_list=True)
+            and Checker.verify_type(
+                self.family_event_detail, FamilyEventDetail, no_list=True
+            )
             and Checker.verify_ext(self.tag, self.tag_ext)
         )
         return check
@@ -7639,23 +7719,26 @@ class FamilyEvent(NamedTuple):
 
     tag: Tag = Tag.NONE
     occurred: bool = True
-    event_type: str = String.EMPTY
+    event_type: str = Default.EMPTY
     event_detail: FamEvenDetailType = None
     tag_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tag, Tag)
+            Checker.verify_type(self.tag, Tag, no_list=True)
+            and Checker.verify_not_empty(self.tag)
             and Checker.verify_enum(self.tag, FamEven)
-            and Checker.verify_type(self.event_type, str)
-            and Checker.verify_type(self.event_detail, FamilyEventDetail)
-            and Checker.verify_ext(self.tag, self.tag_ext)
+            and Checker.verify_type(self.event_type, str, no_list=True)
             and Checker.verify(
                 self.tag == Tag.EVEN,
-                self.event_type != String.EMPTY,
-                Msg.EMPTY_EVENT_TYPE.format(self.tag.value),
+                self.event_type != Default.EMPTY,
+                Msg.EVEN_REQUIRES_TYPE,
             )
+            and Checker.verify_type(
+                self.event_detail, FamilyEventDetail, no_list=True
+            )
+            and Checker.verify_ext(self.tag, self.tag_ext)
         )
         return check
 
@@ -7783,8 +7866,9 @@ class Child(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.individual_xref, IndividualXref)
+            Checker.verify_type(self.individual_xref, IndividualXref, no_list=True)
+            and Checker.verify_not_empty(self.individual_xref)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_ext(Tag.CHIL, self.chil_ext)
         )
         return check
@@ -7912,14 +7996,15 @@ class LDSOrdinanceDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.date, Date)
-            and Checker.verify_type(self.time, Time)
-            and Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.temple, str)
-            and Checker.verify_type(self.place, Place)
+            Checker.verify_type(self.date, Date, no_list=True)
+            and Checker.verify_type(self.time, Time, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
+            and Checker.verify_type(self.temple, str, no_list=True)
+            and Checker.verify_type(self.place, Place, no_list=True)
             and Checker.verify_enum(self.status, Stat)
-            and Checker.verify_type(self.status_date, Date)
-            and Checker.verify_type(self.status_time, Time)
+            and Checker.verify_type(self.status_date, Date, no_list=True)
+            and Checker.verify_type(self.status_time, Time, no_list=True)
+            and Checker.verify(self.status != Tag.NONE, self.date is None, Msg.STAT_REQUIRES_DATE)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.source_citations, SourceCitation)
             and Checker.verify_ext(Tag.TEMP, self.temple_ext)
@@ -8082,15 +8167,13 @@ class LDSSpouseSealing(NamedTuple):
     >   +1 <<LDS_ORDINANCE_DETAIL>>              {0:1}
     """
 
-    tag: Tag = Tag.SLGS
     detail: LDSOrdDetailType = None
     slgs_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tag, str)
-            and Checker.verify_type(self.detail, LDSOrdinanceDetail | None)
+            Checker.verify_type(self.detail, LDSOrdinanceDetail, no_list=True)
             and Checker.verify_ext(Tag.SLGS, self.slgs_ext)
         )
         return check
@@ -8108,7 +8191,6 @@ class LDSSpouseSealing(NamedTuple):
         return indent(
             f"""
 LDSSpouseSealing(
-    tag = {Formatter.codes(self.tag, tabs)},
     detail = {Formatter.codes(self.detail, tabs)},
     slgs_ext = {Formatter.codes(self.slgs_ext, tabs)},
 )""",
@@ -8118,7 +8200,6 @@ LDSSpouseSealing(
     def example(
         self,
         choice: int = Default.CHOICE,
-        tag: Tag = Tag.SLGS,
         detail: LDSOrdDetailType = None,
         slgs_ext: ExtType = None,
     ) -> None:
@@ -8145,28 +8226,24 @@ LDSSpouseSealing(
         match choice:
             case 1:
                 show = LDSSpouseSealing(
-                    tag=Tag.SLGS,
                     detail=None,
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = LDSSpouseSealing(
-                    tag=Tag.SLGS,
                     detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = LDSSpouseSealing(
-                    tag=Tag.SLGS,
                     detail=None,
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
             case _:
                 show = LDSSpouseSealing(
-                    tag=tag,
                     detail=detail,
                     slgs_ext=slgs_ext,
                 )
@@ -8218,9 +8295,10 @@ class LDSIndividualOrdinance(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tag, Tag)
-            and Checker.verify_type(self.ordinance_detail, LDSOrdinanceDetail)
-            and Checker.verify_type(self.family_xref, FamilyXref)
+            Checker.verify_type(self.tag, Tag, no_list=True)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.ordinance_detail, LDSOrdinanceDetail, no_list=True)
+            and Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
             and Checker.verify(
                 self.tag.value == Tag.SLGC.value,
                 self.family_xref.fullname != Void.FAM.fullname,
@@ -8353,9 +8431,10 @@ class IndividualEventDetail(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.event_detail, EventDetail)
-            and Checker.verify_type(self.age, Age)
-            and Checker.verify_type(self.phrase, Phrase)
+            Checker.verify_type(self.event_detail, EventDetail, no_list=True)
+            and Checker.verify_not_empty(self.event_detail)
+            and Checker.verify_type(self.age, Age, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
         )
         return check
 
@@ -8529,9 +8608,12 @@ class IndividualAttribute(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.tag, IndiAttr)
-            and Checker.verify_type(self.payload, str)
-            and Checker.verify_type(self.tag_type, str)
-            and Checker.verify_type(self.event_detail, IndividualEventDetail)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.payload, str, no_list=True)
+            and Checker.verify_type(self.tag_type, str, no_list=True)
+            and Checker.verify(self.tag==Tag.FACT, self.tag_type==Default.EMPTY, Msg.FACT_REQUIRES_TYPE)
+            and Checker.verify(self.tag==Tag.IDNO, self.tag_type==Default.EMPTY, Msg.IDNO_REQUIRES_TYPE)
+            and Checker.verify_type(self.event_detail, IndividualEventDetail, no_list=True)
             and Checker.verify_ext(Tag.TYPE, self.type_ext)
             and Checker.verify_ext(self.tag, self.tag_ext)
         )
@@ -8827,7 +8909,7 @@ class IndividualEvent(NamedTuple):
 
     tag: Tag = Tag.NONE
     payload: str = Default.EMPTY
-    text: str = Default.EMPTY
+    tag_type: str = Default.EMPTY
     event_detail: IndiEvenDetailType = None
     family_xref: FamilyXref = Void.FAM
     adoption: Tag = Tag.NONE
@@ -8838,11 +8920,14 @@ class IndividualEvent(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.tag, IndiEven)
-            and Checker.verify_type(self.text, str)
-            and Checker.verify_type(self.event_detail, IndividualEventDetail)
-            and Checker.verify_type(self.family_xref, FamilyXref)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.tag_type, str, no_list=True)
+            and Checker.verify(self.tag != Tag.EVEN, self.payload not in ['Y',''], Msg.PAYLOAD_IS_Y)
+            and Checker.verify(self.tag==Tag.EVEN, self.tag_type==Default.EMPTY, Msg.EVEN_REQUIRES_TYPE)
+            and Checker.verify_type(self.event_detail, IndividualEventDetail, no_list=True)
+            and Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
             and Checker.verify_enum(self.adoption, Adop)
-            and Checker.verify_type(self.phrase, Phrase)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_ext(self.tag, self.tag_ext)
         )
         return check
@@ -8856,7 +8941,7 @@ class IndividualEvent(NamedTuple):
             else:
                 lines = Tagger.string(lines, level, self.tag, self.payload)
             lines = Tagger.structure(lines, level + 1, self.tag_ext)
-            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.text)
+            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.tag_type)
             lines = Tagger.structure(lines, level + 1, self.event_detail)
             if (
                 self.tag.value
@@ -8883,7 +8968,7 @@ class IndividualEvent(NamedTuple):
 IndividualEvent(
     tag = {Formatter.codes(self.tag, tabs)},
     payload = {Formatter.codes(self.payload, tabs)},
-    text = {Formatter.codes(self.text, tabs)},
+    tag_type = {Formatter.codes(self.tag_type, tabs)},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
@@ -8898,7 +8983,7 @@ IndividualEvent(
         choice: int = Default.CHOICE,
         tag: Tag = Tag.NONE,
         payload: str = Default.EMPTY,
-        text: str = Default.EMPTY,
+        tag_type: str = Default.EMPTY,
         event_detail: IndiEvenDetailType = None,
         family_xref: FamilyXref = Void.FAM,
         adoption: Tag = Tag.NONE,
@@ -8930,7 +9015,7 @@ IndividualEvent(
                 show = IndividualEvent(
                     tag=Tag.NONE,
                     payload='',
-                    text='',
+                    tag_type='',
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
@@ -8942,7 +9027,7 @@ IndividualEvent(
                 show = IndividualEvent(
                     tag=Tag.NONE,
                     payload='',
-                    text='',
+                    tag_type='',
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
@@ -8954,7 +9039,7 @@ IndividualEvent(
                 show = IndividualEvent(
                     tag=Tag.NONE,
                     payload='',
-                    text='',
+                    tag_type='',
                     event_detail=None,
                     family_xref=Void.FAM,
                     adoption=Tag.NONE,
@@ -8966,7 +9051,7 @@ IndividualEvent(
                 show = IndividualEvent(
                     tag=tag,
                     payload=payload,
-                    text=text,
+                    tag_type=tag_type,
                     event_detail=event_detail,
                     family_xref=family_xref,
                     adoption=adoption,
@@ -9016,8 +9101,9 @@ class Alias(NamedTuple):
     def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.individual_xref, IndividualXref)
-            and Checker.verify_type(self.phrase, Phrase)
+            Checker.verify_type(self.individual_xref, IndividualXref, no_list=True)
+            and Checker.verify_not_empty(self.individual_xref)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify(
                 True,
                 self.individual_xref != main_individual,
@@ -9137,9 +9223,9 @@ class FamilyChild(NamedTuple):
     """
 
     family_xref: FamilyXref = Void.FAM
-    pedigree: str = Default.EMPTY
+    pedigree: Tag = Tag.NONE
     pedigree_phrase: PhraseType = None
-    status: str = Default.EMPTY
+    status: Tag = Tag.NONE
     status_phrase: PhraseType = None
     notes: list[Note] | None = None
     famc_ext: ExtType = None
@@ -9149,11 +9235,11 @@ class FamilyChild(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.family_xref, str)
-            and Checker.verify_type(self.pedigree, str)
-            and Checker.verify_type(self.pedigree_phrase, Phrase)
-            and Checker.verify_type(self.status, str)
-            and Checker.verify_type(self.status_phrase, Phrase)
+            Checker.verify_type(self.family_xref, str, no_list=True)
+            and Checker.verify_enum(self.pedigree, Pedi)
+            and Checker.verify_type(self.pedigree_phrase, Phrase, no_list=True)
+            and Checker.verify_enum(self.status, FamcStat)
+            and Checker.verify_type(self.status_phrase, Phrase, no_list=True)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.FAMC, self.famc_ext)
             and Checker.verify_ext(Tag.PEDI, self.pedi_ext)
@@ -9169,10 +9255,10 @@ class FamilyChild(NamedTuple):
                 lines, level, Tag.FAMC, str(self.family_xref), format=False
             )
             lines = Tagger.structure(lines, level + 1, self.famc_ext)
-            lines = Tagger.string(lines, level + 1, Tag.PEDI, self.pedigree)
+            lines = Tagger.string(lines, level + 1, Tag.PEDI, self.pedigree.value)
             lines = Tagger.structure(lines, level + 1, self.pedi_ext)
             lines = Tagger.structure(lines, level + 2, self.pedigree_phrase)
-            lines = Tagger.string(lines, level + 1, Tag.STAT, self.status)
+            lines = Tagger.string(lines, level + 1, Tag.STAT, self.status.value)
             lines = Tagger.structure(lines, level + 2, self.stat_ext)
             lines = Tagger.structure(lines, level + 2, self.status_phrase)
         return lines
@@ -9198,9 +9284,9 @@ FamilyChild(
         self,
         choice: int = Default.CHOICE,
         family_xref: FamilyXref = Void.FAM,
-        pedigree: str = Default.EMPTY,
+        pedigree: Tag = Tag.NONE,
         pedigree_phrase: PhraseType = None,
-        status: str = Default.EMPTY,
+        status: Tag = Tag.NONE,
         status_phrase: PhraseType = None,
         notes: list[Note] | None = None,
         famc_ext: ExtType = None,
@@ -9231,9 +9317,9 @@ FamilyChild(
             case 1:
                 show = FamilyChild(
                     family_xref=Void.FAM,
-                    pedigree='',
+                    pedigree=Tag.ADOPTED,
                     pedigree_phrase=None,
-                    status='',
+                    status=Tag.PROVEN,
                     status_phrase=None,
                     notes=None,
                 )
@@ -9242,9 +9328,9 @@ FamilyChild(
             case 2:
                 show = FamilyChild(
                     family_xref=Void.FAM,
-                    pedigree='',
+                    pedigree=Tag.BIRTH,
                     pedigree_phrase=None,
-                    status='',
+                    status=Tag.CHALLENGED,
                     status_phrase=None,
                     notes=None,
                 )
@@ -9253,9 +9339,9 @@ FamilyChild(
             case 3:
                 show = FamilyChild(
                     family_xref=Void.FAM,
-                    pedigree='',
+                    pedigree=Tag.FOSTER,
                     pedigree_phrase=None,
-                    status='',
+                    status=Tag.DISPROVEN,
                     status_phrase=None,
                     notes=None,
                 )
@@ -9296,13 +9382,13 @@ class FamilySpouse(NamedTuple):
     """
 
     family_xref: FamilyXref = Void.FAM
-    notes: list[Note] | None = None
+    notes: NoteType = None
     fams_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.family_xref, FamilyXref)
+            Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.FAMS, self.fams_ext)
         )
@@ -9415,15 +9501,17 @@ class FileTranslation(NamedTuple):
     """
 
     tran: str = Default.EMPTY
-    form: Tag = Tag.NONE
+    form: str = Default.MIME
     tran_ext: ExtType = None
     form_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.tran, str)
-            and Checker.verify_enum(self.form, str)
+            Checker.verify_type(self.tran, str, no_list=True)
+            and Checker.verify_not_empty(self.tran)
+            and Checker.verify_type(self.form, str, no_list=True)
+            and Checker.verify_not_empty(self.form)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
         )
@@ -9435,7 +9523,7 @@ class FileTranslation(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level, Tag.TRAN, self.tran)
             lines = Tagger.structure(lines, level + 1, self.tran_ext)
-            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form.value)
+            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form)
             lines = Tagger.structure(lines, level + 2, self.form_ext)
         return lines
 
@@ -9455,7 +9543,7 @@ FileTranslation(
         self,
         choice: int = Default.CHOICE,
         tran: str = Default.EMPTY,
-        form: Tag = Tag.NONE,
+        form: str = Default.MIME,
         tran_ext: ExtType = None,
         form_ext: ExtType = None,
     ) -> None:
@@ -9483,21 +9571,21 @@ FileTranslation(
             case 1:
                 show = FileTranslation(
                     tran='',
-                    form=Tag.NONE,
+                    form='text/plain',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FileTranslation(
                     tran='',
-                    form=Tag.NONE,
+                    form='pdf',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FileTranslation(
                     tran='',
-                    form=Tag.NONE,
+                    form='text/html',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -9540,7 +9628,7 @@ class File(NamedTuple):
     """
 
     file: str = Default.EMPTY
-    form: Tag = Tag.NONE
+    form: str = Default.MIME
     medi: Tag = Tag.NONE
     phrase: PhraseType = None
     titl: str = Default.EMPTY
@@ -9553,11 +9641,13 @@ class File(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.file, str)
-            and Checker.verify_enum(self.form, str)
+            Checker.verify_type(self.file, str, no_list=True)
+            and Checker.verify_not_empty(self.file)
+            and Checker.verify_type(self.form, str, no_list=True)
+            and Checker.verify_not_empty(self.form)
             and Checker.verify_enum(self.medi, Medium)
-            and Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.titl, str)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
+            and Checker.verify_type(self.titl, str, no_list=True)
             and Checker.verify_type(self.file_translations, FileTranslation)
             and Checker.verify_ext(Tag.FILE, self.file_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
@@ -9572,7 +9662,7 @@ class File(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level, Tag.FILE, self.file)
             lines = Tagger.structure(lines, level + 1, self.file_ext)
-            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form.value)
+            lines = Tagger.string(lines, level + 1, Tag.FORM, self.form)
             lines = Tagger.structure(lines, level + 2, self.form_ext)
             lines = Tagger.string(lines, level + 3, Tag.MEDI, self.medi.value)
             lines = Tagger.structure(lines, level + 4, self.medi_ext)
@@ -9603,7 +9693,7 @@ File(
         self,
         choice: int = Default.CHOICE,
         file: str = Default.EMPTY,
-        form: Tag = Tag.NONE,
+        form: str = Default.MIME,
         medi: Tag = Tag.NONE,
         phrase: PhraseType = None,
         titl: str = Default.EMPTY,
@@ -9637,7 +9727,7 @@ File(
             case 1:
                 show = File(
                     file='',
-                    form=Tag.NONE,
+                    form='pdf',
                     medi=Tag.NONE,
                     phrase=None,
                     titl='',
@@ -9648,7 +9738,7 @@ File(
             case 2:
                 show = File(
                     file='',
-                    form=Tag.NONE,
+                    form='text/html',
                     medi=Tag.NONE,
                     phrase=None,
                     titl='',
@@ -9659,7 +9749,7 @@ File(
             case 3:
                 show = File(
                     file='',
-                    form=Tag.NONE,
+                    form='text/plain',
                     medi=Tag.NONE,
                     phrase=None,
                     titl='',
@@ -9724,9 +9814,10 @@ class SourceDataEvent(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.event, EvenAttr)
-            and Checker.verify_type(self.date_period, str)
-            and Checker.verify_type(self.phrase, Phrase)
-            and Checker.verify_type(self.place, str)
+            and Checker.verify_not_empty(self.event)
+            and Checker.verify_type(self.date_period, str, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
+            and Checker.verify_type(self.place, str, no_list=True)
             and Checker.verify_ext(Tag.EVEN, self.even_ext)
             and Checker.verify_ext(Tag.DATE, self.date_ext)
         )
@@ -9861,8 +9952,9 @@ class NonEvent(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.no, Even)
-            and Checker.verify_type(self.date, Date | None)
-            and Checker.verify_type(self.phrase, Phrase)
+            and Checker.verify_not_empty(self.no)
+            and Checker.verify_type(self.date, Date, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, SourceCitation)
             and Checker.verify_ext(Tag.NO, self.no_ext)
@@ -10020,9 +10112,11 @@ class Submitter(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, SubmitterXref)
-            and Checker.verify_type(self.name, str)
-            and Checker.verify_type(self.address, Address)
+            Checker.verify_type(self.xref, SubmitterXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
+            and Checker.verify_type(self.name, str, no_list=True)
+            and Checker.verify_not_empty(self.name)
+            and Checker.verify_type(self.address, Address, no_list=True)
             and Checker.verify_type(self.phones, Phone)
             and Checker.verify_type(self.emails, Email)
             and Checker.verify_type(self.faxes, Fax)
@@ -10031,8 +10125,8 @@ class Submitter(NamedTuple):
             and Checker.verify_type(self.languages, Lang)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.NAME, self.name_ext)
         )
         return check
@@ -10256,14 +10350,15 @@ class Family(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, FamilyXref)
+            Checker.verify_type(self.xref, FamilyXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.attributes, FamilyAttribute)
             and Checker.verify_type(self.events, FamilyEvent)
-            and Checker.verify_type(self.husband, IndividualXref)
-            and Checker.verify_type(self.husband_phrase, Phrase)
-            and Checker.verify_type(self.wife, IndividualXref)
-            and Checker.verify_type(self.wife_phrase, Phrase)
+            and Checker.verify_type(self.husband, IndividualXref, no_list=True)
+            and Checker.verify_type(self.husband_phrase, Phrase, no_list=True)
+            and Checker.verify_type(self.wife, IndividualXref, no_list=True)
+            and Checker.verify_type(self.wife_phrase, Phrase, no_list=True)
             and Checker.verify_type(self.children, Child)
             and Checker.verify_type(self.associations, Association)
             and Checker.verify_type(self.submitters, SubmitterXref)
@@ -10272,8 +10367,8 @@ class Family(NamedTuple):
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.citations, SourceCitation)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.change, ChangeDate)
-            and Checker.verify_type(self.creation, CreationDate)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
         )
         return check
 
@@ -10514,14 +10609,16 @@ class Multimedia(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, MultimediaXref)
+            Checker.verify_type(self.xref, MultimediaXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.files, File)
+            and Checker.verify_not_empty(self.files)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, Source)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
         )
         return check
 
@@ -10680,7 +10777,7 @@ class Source(NamedTuple):
     """
 
     xref: SourceXref = Void.SOUR
-    source_data_events: list[SourceDataEvent] | None = None
+    source_data_events: SourDataEvenType = None
     agency: str = Default.EMPTY
     data_notes: NoteType = None
     author: str = Default.EMPTY
@@ -10690,7 +10787,7 @@ class Source(NamedTuple):
     text: str = Default.EMPTY
     mime: str = Default.MIME
     language: LangType = None
-    repositories: list[Any] | None = None
+    repositories: SourRepoCiteType = None
     identifiers: IdenType = None
     notes: NoteType = None
     multimedia_links: MMLinkType = None
@@ -10709,19 +10806,19 @@ class Source(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SourceXref)
-            and Checker.verify_type(self.author, str)
-            and Checker.verify_type(self.title, str)
-            and Checker.verify_type(self.abbreviation, str)
-            and Checker.verify_type(self.published, str)
-            and Checker.verify_type(self.text, str)
-            and Checker.verify_type(self.mime, str)
-            and Checker.verify_type(self.language, str)
+            and Checker.verify_type(self.author, str, no_list=True)
+            and Checker.verify_type(self.title, str, no_list=True)
+            and Checker.verify_type(self.abbreviation, str, no_list=True)
+            and Checker.verify_type(self.published, str, no_list=True)
+            and Checker.verify_type(self.text, str, no_list=True)
+            and Checker.verify_type(self.mime, str, no_list=True)
+            and Checker.verify_type(self.language, str, no_list=True)
             and Checker.verify_type(self.repositories, Repository)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.DATA, self.data_ext)
             and Checker.verify_ext(Tag.AGNC, self.agnc_ext)
             and Checker.verify_ext(Tag.AUTH, self.auth_ext)
@@ -10806,7 +10903,7 @@ Source(
         self,
         choice: int = Default.CHOICE,
         xref: SourceXref = Void.SOUR,
-        source_data_events: list[SourceDataEvent] | None = None,
+        source_data_events: SourDataEvenType = None,
         agency: str = Default.EMPTY,
         data_notes: NoteType = None,
         author: str = Default.EMPTY,
@@ -10816,7 +10913,7 @@ Source(
         text: str = Default.EMPTY,
         mime: str = Default.MIME,
         language: LangType = None,
-        repositories: list[Any] | None = None,
+        repositories: SourRepoCiteType = None,
         identifiers: IdenType = None,
         notes: NoteType = None,
         multimedia_links: MMLinkType = None,
@@ -11083,7 +11180,7 @@ class Individual(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, IndividualXref)
+            Checker.verify_type(self.xref, IndividualXref, no_list=True)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.personal_names, PersonalName)
             and Checker.verify_enum(self.sex, Sex)
@@ -11102,8 +11199,8 @@ class Individual(NamedTuple):
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.RESN, self.resn_ext)
             and Checker.verify_ext(Tag.SEX, self.sex_ext)
         )
@@ -11350,17 +11447,19 @@ class Repository(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, RepositoryXref)
-            and Checker.verify_type(self.name, str)
-            and Checker.verify_type(self.address, Address)
+            Checker.verify_type(self.xref, RepositoryXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
+            and Checker.verify_type(self.name, str, no_list=True)
+            and Checker.verify_not_empty(self.name)
+            and Checker.verify_type(self.address, Address, no_list=True)
             and Checker.verify_type(self.phones, Phone)
             and Checker.verify_type(self.emails, Email)
             and Checker.verify_type(self.faxes, Fax)
             and Checker.verify_type(self.wwws, WWW)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.change, ChangeDate | None)
-            and Checker.verify_type(self.creation, CreationDate | None)
+            and Checker.verify_type(self.change, ChangeDate, no_list=True)
+            and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.RESN, self.name_ext)
         )
         return check
@@ -11545,9 +11644,11 @@ class SharedNote(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.xref, SharedNoteXref)
-            and Checker.verify_type(self.text, str)
-            and Checker.verify_type(self.mime, str)
+            Checker.verify_type(self.xref, SharedNoteXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
+            and Checker.verify_type(self.text, str, no_list=True)
+            and Checker.verify_not_empty(self.text)
+            and Checker.verify_type(self.mime, str, no_list=True)
             and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_type(self.translations, NoteTranslation)
             and Checker.verify_type(self.sources, Source)
@@ -11932,7 +12033,8 @@ Header(
                     vers='v7.0',
                     name='My Name',
                     corporation='My Corporation',
-                    address=Address('234 High Low Street\nMiami, FL',
+                    address=Address(
+                        '234 High Low Street\nMiami, FL',
                     ),
                     phones=Phone('234-1234-3456'),
                     emails=Email('myemail@corp.com'),

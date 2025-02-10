@@ -1327,6 +1327,13 @@ class FamAttr(Enum):
     NONE = Tag.NONE.value
 
 
+class FamcStat(Enum):
+    CHALLENGED = 'CHALLENGED'
+    DISPROVEN = 'DISPROVEN'
+    PROVEN = 'PROVEN'
+    NONE = ''
+
+
 class FamEven(Enum):
     """Tags used for family events.
 
@@ -1568,19 +1575,6 @@ class EvenAttr(Enum):
     RESI = Tag.RESI.value
     FACT = Tag.FACT.value
     EVEN = Tag.EVEN.value
-    NONE = Tag.NONE.value
-
-
-class FamcStat(Enum):
-    """Implement the GEDCOM enumeration set FAMC-STAT as an enumeration class.
-
-    Reference:
-        [GEDCOM FAMC-STAT](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
-    """
-
-    CHALLENGED = Tag.CHALLENGED.value
-    DISPROVEN = Tag.DISPROVEN.value
-    PROVEN = Tag.PROVEN.value
     NONE = Tag.NONE.value
 
 

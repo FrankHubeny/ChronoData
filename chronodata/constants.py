@@ -28,7 +28,6 @@ __all__ = [
     'Event',
     'FamAttr',
     'FamEven',
-    'FamcStat',
     'Id',
     'IndiAttr',
     'IndiEven',
@@ -337,11 +336,7 @@ class FamAttr(Enum):
     NONE = ''
 
 
-class FamcStat(Enum):
-    CHALLENGED = 'CHALLENGED'
-    DISPROVEN = 'DISPROVEN'
-    PROVEN = 'PROVEN'
-    NONE = ''
+
 
 
 class FamEven(Enum):
