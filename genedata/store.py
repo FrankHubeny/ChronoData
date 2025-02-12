@@ -18,33 +18,20 @@ Examples:
 
 __all__ = [
     'WWW',
-    'AddrType',
     'Address',
     'Age',
     'Alias',
-    'AssoType',
     'Association',
     'CallNumber',
-    'CalnType',
     'ChangeDate',
-    'ChangeDateType',
     'Checker',
-    'ChilType',
     'Child',
     'CreationDate',
-    'CreationDateType',
     'Date',
     'Dater',
     'Email',
-    'EmailType',
     'EventDetail',
-    'Exid',
-    'ExidType',
     'ExtTag',
-    'FamAttrType',
-    'FamEvenDetailType',
-    'FamEvenType',
-    'FamcType',
     'Family',
     'FamilyAttribute',
     'FamilyChild',
@@ -52,18 +39,12 @@ __all__ = [
     'FamilyEventDetail',
     'FamilySpouse',
     'FamilyXref',
-    'FamsType',
     'Fax',
-    'FaxType',
     'File',
-    'FileTranType',
     'FileTranslation',
-    'FileType',
     'Formatter',
     'Header',
     'Identifier',
-    'IndiAttrType',
-    'IndiEvenType',
     'Individual',
     'IndividualAttribute',
     'IndividualEvent',
@@ -73,33 +54,21 @@ __all__ = [
     'LDSOrdinanceDetail',
     'LDSSpouseSealing',
     'Lang',
-    'LangType',
-    'MMLinkType',
     'Map',
-    'MapType',
     'Multimedia',
     'MultimediaLink',
     'MultimediaXref',
     'NameTranslation',
-    'NoType',
     'NonEvent',
     'Note',
-    'NoteTranType',
     'NoteTranslation',
     'PersonalName',
     'PersonalNamePieces',
-    'PersonalNamePiecesType',
-    'PersonalNameType',
     'Phone',
-    'PhoneType',
     'Phrase',
-    'PhraseType',
-    'PlacTranType',
-    'PlacType',
     'Place',
     'PlaceTranslation',
     'Placer',
-    'Repository',
     'Repository',
     'RepositoryXref',
     'SharedNote',
@@ -111,13 +80,11 @@ __all__ = [
     'SourceRepositoryCitation',
     'SourceXref',
     'Submitter',
-    'Submitter',
     'SubmitterXref',
     'Tagger',
     'Text',
     'Time',
     'Void',
-    'WWWType',
 ]
 
 
@@ -126,7 +93,6 @@ import logging
 import math
 import re
 import urllib.request
-from enum import Enum
 from pathlib import Path
 from textwrap import indent
 from typing import Any, ClassVar, Literal, NamedTuple
@@ -567,7 +533,7 @@ class Checker:
         if value is None:
             return check
         if isinstance(value, list):
-            if no_list:
+            if no_list and len(value) > 1:
                 raise TypeError(Msg.NO_LIST)
             for item in value:
                 if not isinstance(item, value_type):
@@ -1044,21 +1010,76 @@ class Formatter:
         return f'+{country!s} {area!s} {prefix!s} {line!s}'
 
     @staticmethod
-    def codes(items: Any, tabs: int = 1) -> str:
+    def codes_single(item: Any, tabs: int = 1, required: bool = False) -> str:
+        if isinstance(item, str):
+            if required and item == Default.EMPTY:
+                return f'{item!r}{String.REQUIRED}'
+            return f'{item!r}'
+        if isinstance(item, int | float):
+            return f'{item!r}'
+        if isinstance(item, Xref):
+            if required and item.fullname == Default.POINTER:
+                return f'{item!r}{String.REQUIRED}'
+            return f'{item!r}'
+        if isinstance(item, Tag):
+            if required and item == Tag.NONE:
+                return f'Tag.{item.name}{String.REQUIRED}'
+            return f'Tag.{item.name}'
+        code_lines: str = (
+            item.code(tabs - 1)
+            .replace(String.EOL, String.EMPTY, 1)
+            .replace(String.INDENT, String.EMPTY, 1)
+        )
+        return code_lines
+
+    @staticmethod
+    def codes(items: Any, tabs: int = 1, required: bool = False) -> str:
         if items is None:
-            return 'None'
+            if required:
+                return ''.join([Default.NONE, String.REQUIRED])
+            return Default.NONE
         if isinstance(items, list):
             if len(items) == 0:
+                if required:
+                    return String.LEFT_RIGHT_BRACKET_REQUIRED
                 return String.LEFT_RIGHT_BRACKET
+            if len(items) == 1:
+                return Formatter.codes_single(items[0], tabs, required)
             lines: str = String.LEFT_BRACKET
             for item in items:
-                if isinstance(item, str | int | float | Enum | Xref):
+                if isinstance(item, int | float | Xref):
                     lines = ''.join(
                         [
                             lines,
                             String.EOL,
                             String.INDENT * tabs,
                             str(item),
+                            String.COMMA,
+                        ]
+                    )
+                elif isinstance(item, str):
+                    quote_mark: str = Default.QUOTE_SINGLE
+                    if quote_mark in str(item):
+                        quote_mark = Default.QUOTE_DOUBLE
+                    lines = ''.join(
+                        [
+                            lines,
+                            String.EOL,
+                            String.INDENT * tabs,
+                            quote_mark,
+                            str(item),
+                            quote_mark,
+                            String.COMMA,
+                        ]
+                    )
+                elif isinstance(item, Tag):
+                    lines = ''.join(
+                        [
+                            lines,
+                            String.EOL,
+                            String.INDENT * tabs,
+                            'Tag.',
+                            item.value,
                             String.COMMA,
                         ]
                     )
@@ -1072,14 +1093,27 @@ class Formatter:
                     String.RIGHT_BRACKET,
                 ]
             )
-        if isinstance(items, str | int | float | Enum | Xref):
-            return f'{items!r}'
-        code_lines: str = (
-            items.code(tabs)
-            .replace(String.EOL, String.EMPTY, 1)
-            .replace(String.INDENT, String.EMPTY, 1)
-        )
-        return code_lines
+        return Formatter.codes_single(items, tabs, required)
+        # if isinstance(items, str):
+        #     if required and items == Default.EMPTY:
+        #         return f'{items!r}{String.REQUIRED}'
+        #     return f'{items!r}'
+        # if isinstance(items, int | float):
+        #     return f'{items!r}'
+        # if isinstance(items, Xref):
+        #     if required and items.fullname == Default.POINTER:
+        #         return f'{items!r}{String.REQUIRED}'
+        #     return f'{items!r}'
+        # if isinstance(items, Tag):
+        #     if required and items == Tag.NONE:
+        #         return f'Tag.{items.name}{String.REQUIRED}'
+        #     return f'Tag.{items.name}'
+        # code_lines: str = (
+        #     items.code(tabs-1)
+        #     .replace(String.EOL, String.EMPTY, 1)
+        #     .replace(String.INDENT, String.EMPTY, 1)
+        # )
+        # return code_lines
 
     @staticmethod
     def example(
@@ -1288,10 +1322,15 @@ class ExtTag(Structure):
         }
 
     def validate(self) -> bool:
-        check: bool = True
         for char in self.tag:
             if not (char.isalnum() or char == '_'):
                 raise ValueError(Msg.SCHEMA_NAME.format(self.tag, char))
+        check: bool = (
+            Checker.verify_type(self.tag, str, no_list=True)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.url, str, no_list=True)
+            and Checker.verify_not_empty(self.url)
+        )
         return check
 
     def ged(self, level: int = 0) -> str:
@@ -1310,8 +1349,8 @@ class ExtTag(Structure):
         return indent(
             f"""
 ExtTag(
-    tag = {Formatter.codes(self.tag, tabs)},
-    url = {Formatter.codes(self.url, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
+    url = {Formatter.codes(self.url, tabs, required=True)},
 )""",
             String.INDENT * tabs,
         )
@@ -1345,6 +1384,7 @@ ExtTag(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = ExtTag(
@@ -1371,11 +1411,13 @@ ExtTag(
                 show = ExtTag(tag=tag, url=url)
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.schema_example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             self.superstructures,
             self.substructures,
             gedcom_docs,
@@ -1624,10 +1666,10 @@ class Extension(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.level, int)
-            and Checker.verify_type(self.exttag, ExtTag)
-            and Checker.verify_type(self.payload, str)
-            and Checker.verify_type(self.extra, str)
+            Checker.verify_type(self.level, int, no_list=True)
+            and Checker.verify_type(self.exttag, ExtTag, no_list=True)
+            and Checker.verify_type(self.payload, str, no_list=True)
+            and Checker.verify_type(self.extra, str, no_list=True)
             and Checker.verify_type(self.substructures, Any)
         )
         return check
@@ -1648,8 +1690,8 @@ class Extension(NamedTuple):
         return indent(
             f"""
 Extension(
-    level = {Formatter.codes(self.level, tabs)},
-    exttag = {Formatter.codes(self.exttag, tabs)},
+    level = {Formatter.codes(self.level, tabs, required=True)},
+    exttag = {Formatter.codes(self.exttag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs)},
     extra = {Formatter.codes(self.extra, tabs)},
     substructures = {Formatter.codes(self.substructures, tabs)},
@@ -1686,6 +1728,7 @@ Extension(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Extension(
@@ -1726,11 +1769,13 @@ Extension(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -1773,20 +1818,19 @@ class Date(NamedTuple):
     day: int = Default.DATE_DAY
     calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN
     iso: str = Default.EMPTY
-    tag: Tag = Tag.DATE
     display_calendar: bool = False
     date_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.year, int)
-            and Checker.verify_type(self.month, int)
-            and Checker.verify_type(self.day, int)
+            Checker.verify_type(self.year, int, no_list=True)
+            and Checker.verify_type(self.month, int, no_list=True)
+            and Checker.verify_type(self.day, int, no_list=True)
             and Checker.verify_range(self.month, 0, 13)
             # and Checker.verify_type(self.calendar, CalendarDefinition)
             # and Checker.verify_type(self.display_calendar, bool)
-            and Checker.verify_type(self.iso, str)
+            and Checker.verify_type(self.iso, str, no_list=True)
             # and self.calendar.validate(
             #     self.year, self.month, self.day, self.iso
             # )
@@ -1804,7 +1848,7 @@ class Date(NamedTuple):
             formatted_calendar_date = ''.join(
                 [self.calendar.name, String.EMPTY, formatted_date]
             )
-        lines = Tagger.string(lines, level, self.tag, formatted_calendar_date)
+        lines = Tagger.string(lines, level, Tag.DATE, formatted_calendar_date)
         return Tagger.structure(lines, level + 1, self.date_ext)
 
     def from_iso(self) -> str:
@@ -1825,9 +1869,8 @@ Date(
     year = {Formatter.codes(self.year, tabs)},
     month = {Formatter.codes(self.month, tabs)},
     day = {Formatter.codes(self.day, tabs)},
-    calendar = {Formatter.codes(self.calendar, tabs)},
+    # calendar = {'add in calendar codes later'},
     iso = {Formatter.codes(self.iso, tabs)},
-    tag = {Formatter.codes(self.tag, tabs)},
     display_calendar = {Formatter.codes(self.display_calendar, tabs)},
     date_ext = {Formatter.codes(self.date_ext, tabs)},
 )""",
@@ -1842,7 +1885,6 @@ Date(
         day: int = 0,
         calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
         iso: str = Default.EMPTY,
-        tag: Tag = Tag.DATE,
         display_calendar: bool = False,
         date_ext: ExtType = None,
     ) -> None:
@@ -1866,6 +1908,7 @@ Date(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = Default.EMPTY
         gedcom_preface: str = Default.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Date(
@@ -1901,17 +1944,18 @@ Date(
                     day=day,
                     calendar=calendar,
                     iso=iso,
-                    tag=tag,
                     display_calendar=display_calendar,
                     date_ext=date_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2048,6 +2092,7 @@ SDate(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SDate(
@@ -2089,11 +2134,13 @@ SDate(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2206,6 +2253,7 @@ Time(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Time(
@@ -2244,11 +2292,13 @@ Time(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2298,8 +2348,8 @@ class CreationDate(NamedTuple):
         return indent(
             f"""
 CreationDate(
-    date = {Formatter.codes(self.date, tabs)},
-    time = {Formatter.codes(self.time, tabs)},
+    date = {Formatter.codes(self.date, tabs + 1, required=True)},
+    time = {Formatter.codes(self.time, tabs + 1, required=True)},
     crea_ext = {Formatter.codes(self.crea_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -2332,6 +2382,7 @@ CreationDate(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = CreationDate(
@@ -2362,11 +2413,13 @@ CreationDate(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2389,15 +2442,15 @@ class Identifier(NamedTuple):
 
     - [GEDCOM Identifier Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE)
 
-    [
-    n REFN <Special>                           {1:1}  g7:REFN
-    +1 TYPE <Text>                           {0:1}  g7:TYPE
-    |
-    n UID <Special>                            {1:1}  g7:UID
-    |
-    n EXID <Special>                           {1:1}  g7:EXID
-    +1 TYPE <Special>                        {0:1}  g7:EXID-TYPE
-    ]
+    > [
+    > n REFN <Special>                           {1:1}  g7:REFN
+    >   +1 TYPE <Text>                           {0:1}  g7:TYPE
+    > |
+    > n UID <Special>                            {1:1}  g7:UID
+    > |
+    > n EXID <Special>                           {1:1}  g7:EXID
+    >   +1 TYPE <Special>                        {0:1}  g7:EXID-TYPE
+    > ]
     """
 
     tag: Tag = Tag.NONE
@@ -2410,8 +2463,15 @@ class Identifier(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_enum(self.tag, Id)
-            and Checker.verify_type(self.tag_info, str)
-            and Checker.verify_type(self.tag_type, str)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.tag_info, str, no_list=True)
+            and Checker.verify_not_empty(self.tag_info)
+            and Checker.verify_type(self.tag_type, str, no_list=True)
+            and Checker.verify(
+                self.tag == Tag.EXID,
+                self.tag_type != Default.EMPTY,
+                Msg.EXID_TYPE,
+            )
             and Checker.verify_ext(self.tag, self.tag_ext)
             and Checker.verify_ext(Tag.TYPE, self.type_ext)
         )
@@ -2431,11 +2491,11 @@ class Identifier(NamedTuple):
         return indent(
             f"""
 Identifier(
-    tag = {Formatter.codes(self.tag, tabs)},
-    tag_info = {Formatter.codes(self.tag_info, tabs)},
-    tag_type = {Formatter.codes(self.tag_type, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)}
-    type_ext = {Formatter.codes(self.type_ext, tabs)}
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
+    tag_info = {Formatter.codes(self.tag_info, tabs, required=True)},
+    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EXID))},
+    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
+    type_ext = {Formatter.codes(self.type_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -2469,28 +2529,29 @@ Identifier(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Identifier(
-                    tag=Tag.NONE,
-                    tag_info='',
+                    tag=Tag.REFN,
+                    tag_info='234567',
                     tag_type='',
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = Identifier(
-                    tag=Tag.NONE,
-                    tag_info='',
+                    tag=Tag.UID,
+                    tag_info='345678',
                     tag_type='',
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = Identifier(
-                    tag=Tag.NONE,
-                    tag_info='',
-                    tag_type='',
+                    tag=Tag.EXID,
+                    tag_info='222222',
+                    tag_type='some exid type',
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -2504,11 +2565,13 @@ Identifier(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2572,8 +2635,8 @@ class Phone(NamedTuple):
         return indent(
             f"""
 Phone(
-    phone = {Formatter.codes(self.phone, tabs)},
-    phon_ext = {Formatter.codes(self.phon_ext, tabs)},
+    phone = {Formatter.codes(self.phone, tabs, required=True)},
+    phon_ext = {Formatter.codes(self.phon_ext, tabs)}, 
 )""",
             String.INDENT * tabs,
         )
@@ -2604,6 +2667,7 @@ Phone(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Phone(Formatter.phone(1, 234, 567, 8910))
@@ -2624,11 +2688,13 @@ Phone(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2663,7 +2729,7 @@ class Email(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = ''
+        lines: str = String.EMPTY
         if self.validate():
             lines = Tagger.string(lines, level, Tag.EMAIL, self.email)
             lines = Tagger.structure(lines, level + 1, self.email_ext)
@@ -2673,7 +2739,7 @@ class Email(NamedTuple):
         return indent(
             f"""
 Email(
-    email = {Formatter.codes(self.email, tabs)},
+    email = {Formatter.codes(self.email, tabs, required=True)},
     email_ext = {Formatter.codes(self.email_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -2705,6 +2771,7 @@ Email(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Email(
@@ -2727,11 +2794,13 @@ Email(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2776,7 +2845,7 @@ class Fax(NamedTuple):
         return indent(
             f"""
 Fax(
-    fax = {Formatter.codes(self.fax, tabs)},
+    fax = {Formatter.codes(self.fax, tabs, required=True)},
     fax_ext = {Formatter.codes(self.fax_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -2808,6 +2877,7 @@ Fax(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Fax(
@@ -2830,11 +2900,13 @@ Fax(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2879,7 +2951,7 @@ class WWW(NamedTuple):
         return indent(
             f"""
 WWW(
-    www = {Formatter.codes(self.www, tabs)},
+    www = {Formatter.codes(self.www, tabs, required=True)},
     www_ext = {Formatter.codes(self.www_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -2911,6 +2983,7 @@ WWW(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = WWW(
@@ -2933,11 +3006,13 @@ WWW(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -2982,7 +3057,7 @@ class Lang(NamedTuple):
         return indent(
             f"""
 Lang(
-    lang = {Formatter.codes(self.lang, tabs)},
+    lang = {Formatter.codes(self.lang, tabs, required=True)},
     lang_ext = {Formatter.codes(self.lang_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -3014,6 +3089,7 @@ Lang(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Lang(
@@ -3036,11 +3112,13 @@ Lang(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -3104,7 +3182,7 @@ class Phrase(NamedTuple):
         return indent(
             f"""
 Phrase(
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs, required=True)},
     phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -3136,6 +3214,7 @@ Phrase(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Phrase('something')
@@ -3156,11 +3235,13 @@ Phrase(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -3273,7 +3354,7 @@ class Address(NamedTuple):
         return indent(
             f"""
 Address(
-    address = {Formatter.codes(self.address, tabs + 2)},
+    address = {Formatter.codes(self.address, tabs, required=True)},
     city = {Formatter.codes(self.city, tabs)},
     state = {Formatter.codes(self.state, tabs)},
     postal = {Formatter.codes(self.postal, tabs)},
@@ -3321,6 +3402,7 @@ Address(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Address(
@@ -3367,11 +3449,13 @@ Address(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -3451,11 +3535,11 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.years, int)
-            and Checker.verify_type(self.months, int)
-            and Checker.verify_type(self.weeks, int)
-            and Checker.verify_type(self.days, int)
-            and Checker.verify_type(self.phrase, Phrase)
+            Checker.verify_type(self.years, int, no_list=True)
+            and Checker.verify_type(self.months, int, no_list=True)
+            and Checker.verify_type(self.weeks, int, no_list=True)
+            and Checker.verify_type(self.days, int, no_list=True)
+            and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_not_negative(self.years)
             and Checker.verify_not_negative(self.months)
             and Checker.verify_not_negative(self.weeks)
@@ -3495,7 +3579,7 @@ Age(
     weeks = {Formatter.codes(self.weeks, tabs)},
     days = {Formatter.codes(self.days, tabs)},
     greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
-    phrase = {Formatter.codes(self.phrase)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
     age_ext = {Formatter.codes(self.age_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -3534,6 +3618,7 @@ Age(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Age(
@@ -3586,11 +3671,13 @@ Age(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -3631,12 +3718,12 @@ class PersonalNamePieces(NamedTuple):
     > n NSFX <Text>                              {0:M}  [g7:NSFX](https://gedcom.io/terms/v7/NSFX)
     """
 
-    prefix: StrList = None
-    given: StrList = None
-    nickname: StrList = None
-    surname_prefix: StrList = None
-    surname: StrList = None
-    suffix: StrList = None
+    prefix: str | list[str] = Default.EMPTY
+    given: str | list[str] = Default.EMPTY
+    nickname: str | list[str] = Default.EMPTY
+    surname_prefix: str | list[str] = Default.EMPTY
+    surname: str | list[str] = Default.EMPTY
+    suffix: str | list[str] = Default.EMPTY
     npfx_ext: ExtType = None
     givn_ext: ExtType = None
     nick_ext: ExtType = None
@@ -3646,6 +3733,16 @@ class PersonalNamePieces(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
+        length: int = (
+            len(self.prefix)
+            + len(self.given)
+            + len(self.nickname)
+            + len(self.surname_prefix)
+            + len(self.surname)
+            + len(self.suffix)
+        )
+        if length == 0:
+            raise ValueError(Msg.PIECES_EMPTY)
         check: bool = (
             Checker.verify_type(self.prefix, str)
             and Checker.verify_type(self.given, str)
@@ -3684,12 +3781,12 @@ class PersonalNamePieces(NamedTuple):
         return indent(
             f"""
 PersonalNamePieces(
-    prefix = {Formatter.codes(self.prefix, tabs)},
-    given = {Formatter.codes(self.given, tabs)},
-    nickname = {Formatter.codes(self.nickname, tabs)},
-    surname_prefix = {Formatter.codes(self.surname_prefix, tabs)},
-    surname = {Formatter.codes(self.surname, tabs)},
-    suffix = {Formatter.codes(self.suffix, tabs)},
+    prefix = {Formatter.codes(self.prefix, tabs + 2)},
+    given = {Formatter.codes(self.given, tabs + 2)},
+    nickname = {Formatter.codes(self.nickname, tabs + 2)},
+    surname_prefix = {Formatter.codes(self.surname_prefix, tabs + 2)},
+    surname = {Formatter.codes(self.surname, tabs + 2)},
+    suffix = {Formatter.codes(self.suffix, tabs + 2)}, 
     npfx_ext = {Formatter.codes(self.npfx_ext, tabs)},
     givn_ext = {Formatter.codes(self.givn_ext, tabs)},
     nick_ext = {Formatter.codes(self.nick_ext, tabs)},
@@ -3703,12 +3800,12 @@ PersonalNamePieces(
     def example(
         self,
         choice: int = Default.CHOICE,
-        prefix: StrList = None,
-        given: StrList = None,
-        nickname: StrList = None,
-        surname_prefix: StrList = None,
-        surname: StrList = None,
-        suffix: StrList = None,
+        prefix: str | list[str] = Default.EMPTY,
+        given: str | list[str] = Default.EMPTY,
+        nickname: str | list[str] = Default.EMPTY,
+        surname_prefix: str | list[str] = Default.EMPTY,
+        surname: str | list[str] = Default.EMPTY,
+        suffix: str | list[str] = Default.EMPTY,
         npfx_ext: ExtType = None,
         givn_ext: ExtType = None,
         nick_ext: ExtType = None,
@@ -3736,6 +3833,7 @@ PersonalNamePieces(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = PersonalNamePieces(
@@ -3787,11 +3885,13 @@ PersonalNamePieces(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -3873,9 +3973,9 @@ class NameTranslation(NamedTuple):
         return indent(
             f"""
 NameTranslation(
-    translation = {Formatter.codes(self.translation, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    pieces = {Formatter.codes(self.pieces, tabs + 1)},
+    translation = {Formatter.codes(self.translation, tabs, required=True)},
+    language = {Formatter.codes(self.language, tabs + 2, required=True)},
+    pieces = {Formatter.codes(self.pieces, tabs + 2)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -3909,6 +4009,7 @@ NameTranslation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = NameTranslation(
@@ -3952,11 +4053,13 @@ NameTranslation(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4019,10 +4122,10 @@ class NoteTranslation(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.translation, str)
+            Checker.verify_type(self.translation, str, no_list=True)
             and Checker.verify_not_empty(self.translation)
-            and Checker.verify_type(self.mime, str)
-            and Checker.verify_type(self.language, Lang)
+            and Checker.verify_type(self.mime, str, no_list=True)
+            and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_ext(Tag.TRAN, self.tran_ext)
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
         )
@@ -4043,9 +4146,9 @@ class NoteTranslation(NamedTuple):
         return indent(
             f"""
 NoteTranslation(
-    translation = {Formatter.codes(self.translation, tabs)},
+    translation = {Formatter.codes(self.translation, tabs, required=True)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 )""",
@@ -4081,6 +4184,7 @@ NoteTranslation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = NoteTranslation(
@@ -4116,11 +4220,13 @@ NoteTranslation(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4198,9 +4304,9 @@ class CallNumber(NamedTuple):
         return indent(
             f"""
 CallNumber(
-    call_number = {Formatter.codes(self.call_number, tabs)},
+    call_number = {Formatter.codes(self.call_number, tabs, required=True)},
     medium = {Formatter.codes(self.medium, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
 )""",
             String.INDENT * tabs,
         )
@@ -4208,8 +4314,8 @@ CallNumber(
     def example(
         self,
         choice: int = Default.CHOICE,
-        call_number: str = Default.EMPTY,
-        medium: Tag = Tag.NONE,
+        call_number: str = '12345',
+        medium: Tag = Tag.MAGAZINE,
         phrase: PhraseType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
@@ -4232,6 +4338,7 @@ CallNumber(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = CallNumber(
@@ -4244,7 +4351,7 @@ CallNumber(
             case 2:
                 show = CallNumber(
                     call_number='1-234-333 ABC',
-                    medium=Tag.NONE,
+                    medium=Tag.MAGAZINE,
                     phrase=Phrase('A special article.'),
                 )
                 code_preface = Example.SECOND
@@ -4252,8 +4359,8 @@ CallNumber(
             case 3:
                 show = CallNumber(
                     call_number='1-234-333 ABC',
-                    medium=Tag.NONE,
-                    phrase=Phrase(''),
+                    medium=Tag.NEWSPAPER,
+                    phrase=Phrase('A newspaper article'),
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -4265,11 +4372,13 @@ CallNumber(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4340,9 +4449,9 @@ class Text(NamedTuple):
         return indent(
             f"""
 Text(
-    text = {Formatter.codes(self.text, tabs)},
+    text = {Formatter.codes(self.text, tabs, required=True)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     text_ext = {Formatter.codes(self.text_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 ),""",
@@ -4378,6 +4487,7 @@ Text(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Text(
@@ -4413,11 +4523,13 @@ Text(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4477,8 +4589,8 @@ class SourceData(NamedTuple):
         return indent(
             f"""
 SourceData(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    texts = {Formatter.codes(self.texts, tabs + 1)},
+    date = {Formatter.codes(self.date, tabs + 2)},
+    texts = {Formatter.codes(self.texts, tabs + 2)},
     data_ext = {Formatter.codes(self.data_ext, tabs)},
 ),""",
             String.INDENT * tabs,
@@ -4511,6 +4623,7 @@ SourceData(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SourceData(
@@ -4562,11 +4675,13 @@ SourceData(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4680,16 +4795,16 @@ class SourceCitation(NamedTuple):
         return indent(
             f"""
 SourceCitation(
-    source_xref = {Formatter.codes(self.source_xref, tabs)},
+    source_xref = {Formatter.codes(self.source_xref, tabs, required=True)},
     page = {Formatter.codes(self.page, tabs)},
     source_data = {Formatter.codes(self.source_data, tabs + 1)},
     event = {Formatter.codes(self.event, tabs + 1)},
-    event_phrase = {Formatter.codes(self.event_phrase, tabs)},
+    event_phrase = {Formatter.codes(self.event_phrase, tabs+2)},
     role = {Formatter.codes(self.role, tabs)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs+2)},
     quality = {Formatter.codes(self.quality, tabs)},
-    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
+    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     sour_ext = {Formatter.codes(self.sour_ext, tabs + 1)},
     page_ext = {Formatter.codes(self.page_ext, tabs + 1)},
     even_ext = {Formatter.codes(self.even_ext, tabs + 1)},
@@ -4738,6 +4853,7 @@ SourceCitation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SourceCitation(
@@ -4777,11 +4893,13 @@ SourceCitation(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -4892,7 +5010,7 @@ class Note(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.note, str)
+            Checker.verify_type(self.note, str, no_list=True)
             and Checker.verify_not_empty(self.note)
             and Checker.verify_type(self.mime, str)
             and Checker.verify_type(self.language, Lang, no_list=True)
@@ -4920,9 +5038,9 @@ class Note(NamedTuple):
         return indent(
             f"""
 Note(
-    note = {Formatter.codes(self.note, tabs)},
+    note = {Formatter.codes(self.note, tabs, required=True)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     translations = {Formatter.codes(self.translations, tabs + 1)},
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
     note_ext = {Formatter.codes(self.note_ext, tabs + 1)},
@@ -4962,6 +5080,7 @@ Note(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Note(
@@ -5005,11 +5124,13 @@ Note(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -5069,7 +5190,7 @@ class SNote(NamedTuple):
         return indent(
             f"""
 SNote(
-    snote_xref = {Formatter.codes(self.snote_xref, tabs)},
+    snote_xref = {Formatter.codes(self.snote_xref, tabs, required=True)}, 
     snote_ext = {Formatter.codes(self.snote_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -5101,6 +5222,7 @@ SNote(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SNote(
@@ -5127,11 +5249,13 @@ SNote(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -5182,8 +5306,8 @@ class ChangeDate(NamedTuple):
         return indent(
             f"""
 ChangeDate(
-    date = {Formatter.codes(self.date, tabs)},
-    time = {Formatter.codes(self.time, tabs)},
+    date = {Formatter.codes(self.date, tabs + 1, required=True)},
+    time = {Formatter.codes(self.time, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
     chan_ext = {Formatter.codes(self.chan_ext, tabs)},
 )""",
@@ -5214,10 +5338,11 @@ ChangeDate(
             choice: The example one chooses to display.
         """
         show: ChangeDate
-        gedcom_docs: str = Specs.DATE_VALUE
+        gedcom_docs: str = ''  # Specs.DATE_VALUE
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = ChangeDate(
@@ -5231,7 +5356,7 @@ ChangeDate(
                 show = ChangeDate(
                     Date(2024, 1, 10),
                     Time(12, 30, 5),
-                    notes=[Note(note='Test Date and Time')],
+                    notes=Note(note='Test Date and Time'),
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
@@ -5239,7 +5364,11 @@ ChangeDate(
                 show = ChangeDate(
                     Date(2024, 1, 10),
                     Time(12, 30, 5),
-                    notes=[Note(note='Test Date and Time')],
+                    notes=[
+                        Note('Test Date and time'),
+                        Note('Testing, testing.'),
+                        Note('This is a third note.'),
+                    ],
                 )
                 code_preface = Example.THIRD
                 gedcom_preface = Example.GEDCOM
@@ -5252,11 +5381,13 @@ ChangeDate(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -5323,7 +5454,7 @@ class SourceRepositoryCitation(NamedTuple):
         return indent(
             f"""
 SourceRepositoryCitation(
-    repository_xref = {Formatter.codes(self.repository_xref, tabs)},
+    repository_xref = {Formatter.codes(self.repository_xref, tabs, required=True)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
     callnumbers = {Formatter.codes(self.call_numbers, tabs + 1)},
     repo_ext = {Formatter.codes(self.repo_ext, tabs)},
@@ -5359,6 +5490,7 @@ SourceRepositoryCitation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SourceRepositoryCitation(
@@ -5393,11 +5525,13 @@ SourceRepositoryCitation(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -5509,6 +5643,7 @@ class PersonalName(NamedTuple):
             Checker.verify_type(self.name, str, no_list=True)
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.surname, str, no_list=True)
+            and Checker.verify_not_empty(self.surname)
             and Checker.verify_enum(self.type, NameType)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_type(
@@ -5526,18 +5661,17 @@ class PersonalName(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            name_surname: str = self.name
-            if name_surname.count(String.SLASH) < 2:
-                name_surname = ''.join(
-                    [
-                        name_surname,
-                        ' ',
-                        String.SLASH,
-                        self.surname,
-                        String.SLASH,
-                    ]
-                )
-            lines = Tagger.string(lines, level, Tag.NAME, name_surname)
+            name_surname: str = ''.join(
+                [
+                    String.SLASH,
+                    self.surname,
+                    String.SLASH,
+                ]
+            )
+            new_name: str = self.name.replace(self.surname, name_surname)
+            if self.surname not in self.name:
+                new_name = ''.join([self.name, String.SPACE, name_surname])
+            lines = Tagger.string(lines, level, Tag.NAME, new_name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
             lines = Tagger.structure(lines, level + 2, self.type_ext)
@@ -5552,10 +5686,10 @@ class PersonalName(NamedTuple):
         return indent(
             f"""
 PersonalName(
-    name = {Formatter.codes(self.name, tabs)},
-    surname = {Formatter.codes(self.surname, tabs)},
+    name = {Formatter.codes(self.name, tabs, required=True)},
+    surname = {Formatter.codes(self.surname, tabs, required=True)},
     type = {Formatter.codes(self.type, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     pieces = {Formatter.codes(self.pieces, tabs + 1)},
     translations = {Formatter.codes(self.translations, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
@@ -5600,6 +5734,7 @@ PersonalName(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = PersonalName(
@@ -5655,11 +5790,13 @@ PersonalName(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -5917,13 +6054,13 @@ class Association(NamedTuple):
         return indent(
             f"""
 Association(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
-    association_phrase = {Formatter.codes(self.association_phrase, tabs)},
-    role = {Formatter.codes(self.role, tabs)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
+    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
+    association_phrase = {Formatter.codes(self.association_phrase, tabs + 2)},
+    role = {Formatter.codes(self.role, tabs, required=True)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     citations = {Formatter.codes(self.citations, tabs)},
-    asso_ext = {Formatter.codes(self.asso_ext, tabs)},
+    asso_ext = {Formatter.codes(self.asso_ext, tabs)}, 
     role_ext = {Formatter.codes(self.role_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -5961,6 +6098,7 @@ Association(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Association(
@@ -6008,11 +6146,13 @@ Association(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -6067,7 +6207,7 @@ class MultimediaLink(NamedTuple):
             and Checker.verify_type(self.height, int, no_list=True)
             and Checker.verify_type(self.width, int, no_list=True)
             and Checker.verify_type(self.title, str, no_list=True)
-            and Checker.verify_type(Tag.OBJE, self.obje_ext)
+            and Checker.verify_ext(Tag.OBJE, self.obje_ext)
             and Checker.verify_ext(Tag.TOP, self.top_ext)
             and Checker.verify_ext(Tag.LEFT, self.left_ext)
             and Checker.verify_ext(Tag.HEIGHT, self.height_ext)
@@ -6082,7 +6222,11 @@ class MultimediaLink(NamedTuple):
             # display only if there is an image file under the multimedia xref
             # need to find out how to identify this and the pixels in that file
             lines = Tagger.string(
-                lines, level, Tag.OBJE, self.multimedia_xref.fullname
+                lines,
+                level,
+                Tag.OBJE,
+                self.multimedia_xref.fullname,
+                format=False,
             )
             lines = Tagger.structure(lines, level + 1, self.obje_ext)
             lines = Tagger.empty(lines, level + 1, Tag.CROP)
@@ -6105,7 +6249,7 @@ class MultimediaLink(NamedTuple):
         return indent(
             f"""
 MultimediaLink(
-    obje = {Formatter.codes(self.multimedia_xref, tabs)},
+    multimedia_xref = {Formatter.codes(self.multimedia_xref, tabs, required=True)},
     top = {Formatter.codes(self.top, tabs)},
     left = {Formatter.codes(self.left, tabs)},
     height = {Formatter.codes(self.height, tabs)},
@@ -6115,7 +6259,7 @@ MultimediaLink(
     top_ext = {Formatter.codes(self.top_ext, tabs)},
     left_ext = {Formatter.codes(self.left_ext, tabs)},
     height_ext = {Formatter.codes(self.height_ext, tabs)},
-    width_ext = {Formatter.codes(self.width_ext, tabs)},
+    width_ext = {Formatter.codes(self.width_ext, tabs)}, 
     title_ext = {Formatter.codes(self.title_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -6162,6 +6306,7 @@ MultimediaLink(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = MultimediaLink(
@@ -6213,11 +6358,13 @@ MultimediaLink(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -6226,119 +6373,122 @@ MultimediaLink(
 MMLinkType = MultimediaLink | list[MultimediaLink] | None
 
 
-class Exid(NamedTuple):
-    """Store, validate and display an EXID structure.
+# class Exid(NamedTuple):
+#     """Store, validate and display an EXID structure.
 
-    >   +1 EXID <Special>                        {0:M}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-    >      +2 TYPE <Special>                     {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-    """
+#     >   +1 EXID <Special>                        {0:M}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
+#     >      +2 TYPE <Special>                     {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
+#     """
 
-    exid: str = Default.EMPTY
-    exid_type: str = Default.EMPTY
-    exid_ext: ExtType = None
-    exid_type_ext: ExtType = None
+#     exid: str = Default.EMPTY
+#     exid_type: str = Default.EMPTY
+#     exid_ext: ExtType = None
+#     exid_type_ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.exid, str, no_list=True)
-            and Checker.verify_not_empty(self.exid)
-            and Checker.verify_type(self.exid_type, str, no_list=True)
-            and Checker.verify_ext(Tag.EXID, self.exid_ext)
-            and Checker.verify_ext(Tag.TYPE, self.exid_type_ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.exid, str, no_list=True)
+#             and Checker.verify_not_empty(self.exid)
+#             and Checker.verify_type(self.exid_type, str, no_list=True)
+#             and Checker.verify_ext(Tag.EXID, self.exid_ext)
+#             and Checker.verify_ext(Tag.TYPE, self.exid_type_ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
-        lines = Tagger.string(lines, level, Tag.EXID, self.exid)
-        lines = Tagger.structure(lines, level + 1, self.exid_ext)
-        lines = Tagger.string(lines, level + 1, Tag.TYPE, self.exid_type)
-        return Tagger.structure(lines, level + 2, self.exid_type_ext)
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = String.EMPTY
+#         lines = Tagger.string(lines, level, Tag.EXID, self.exid)
+#         lines = Tagger.structure(lines, level + 1, self.exid_ext)
+#         lines = Tagger.string(lines, level + 1, Tag.TYPE, self.exid_type)
+#         return Tagger.structure(lines, level + 2, self.exid_type_ext)
 
-    def code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Exid(
-    exid = {Formatter.codes(self.exid, tabs)},
-    exid_type = {Formatter.codes(self.exid_type, tabs)},
-    exid_ext = {Formatter.codes(self.exid_ext, tabs)},
-    exid_type_ext = {Formatter.codes(self.exid_type_ext, tabs)}
-)""",
-            String.INDENT * tabs,
-        )
+#     def code(self, tabs: int = 0) -> str:
+#         return indent(
+#             f"""
+# Exid(
+#     exid = {Formatter.codes(self.exid, tabs)},
+#     exid_type = {Formatter.codes(self.exid_type, tabs)},
+#     exid_ext = {Formatter.codes(self.exid_ext, tabs)},
+#     exid_type_ext = {Formatter.codes(self.exid_type_ext, tabs)}
+# )""",
+#             String.INDENT * tabs,
+#         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        exid: str = Default.EMPTY,
-        exid_type: str = Default.EMPTY,
-        exid_ext: ExtType = None,
-        exid_type_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
+#     def example(
+#         self,
+#         choice: int = Default.CHOICE,
+#         exid: str = Default.EMPTY,
+#         exid_type: str = Default.EMPTY,
+#         exid_ext: ExtType = None,
+#         exid_type_ext: ExtType = None,
+#     ) -> None:
+#         """Produce four examples of ChronoData code and GEDCOM output lines and link to
+#         the GEDCOM documentation.
 
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
+#         The following levels are available:
+#         - 0 (Default) Produces an empty example with no GEDCOM lines.
+#         - 1 Produces an example with all arguments containing data.
+#         - 2 Produces an alternate example with possibly some arguments missing.
+#         - 3 Produces either another alternate example or an example with non-Latin
+#             character texts.
 
-        Any other value passed in will produce the same as the default level.
+#         Any other value passed in will produce the same as the default level.
 
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Exid
-        gedcom_docs: str = Specs.EXID
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Exid(
-                    exid='22222',
-                    exid_type='type',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Exid(
-                    exid='22222',
-                    exid_type='type',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Exid(
-                    exid='22222',
-                    exid_type='type',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Exid(
-                    exid=exid,
-                    exid_type=exid_type,
-                    exid_ext=exid_ext,
-                    exid_type_ext=exid_type_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            show.ged(),
-            gedcom_docs,
-            genealogy_docs,
-        )
+#         Args:
+#             choice: The example one chooses to display.
+#         """
+#         show: Exid
+#         gedcom_docs: str = Specs.EXID
+#         genealogy_docs: str = 'To be constructed'
+#         code_preface: str = String.EMPTY
+#         gedcom_preface: str = String.EMPTY
+#         ged_output: str = String.EMPTY
+#         match choice:
+#             case 1:
+#                 show = Exid(
+#                     exid='22222',
+#                     exid_type='type',
+#                 )
+#                 code_preface = Example.FULL
+#                 gedcom_preface = Example.GEDCOM
+#             case 2:
+#                 show = Exid(
+#                     exid='22222',
+#                     exid_type='type',
+#                 )
+#                 code_preface = Example.SECOND
+#                 gedcom_preface = Example.GEDCOM
+#             case 3:
+#                 show = Exid(
+#                     exid='22222',
+#                     exid_type='type',
+#                 )
+#                 code_preface = Example.THIRD
+#                 gedcom_preface = Example.GEDCOM
+#             case _:
+#                 show = Exid(
+#                     exid=exid,
+#                     exid_type=exid_type,
+#                     exid_ext=exid_ext,
+#                     exid_type_ext=exid_type_ext,
+#                 )
+#                 code_preface = Example.EMPTY_CODE
+#                 gedcom_preface = Example.EMPTY_GEDCOM
+#         with contextlib.suppress(Exception):
+#             ged_output = show.ged()
+#         return Formatter.example(
+#             code_preface,
+#             show.code(),
+#             gedcom_preface,
+#             ged_output,
+#             gedcom_docs,
+#             genealogy_docs,
+#         )
 
 
-ExidType = Exid | list[Exid] | None
+# ExidType = Exid | list[Exid] | None
 
 
 class Map(NamedTuple):
@@ -6450,8 +6600,8 @@ class Map(NamedTuple):
         return indent(
             f"""
 Map(
-    latitude = {Formatter.codes(self.latitude, tabs)},
-    longitude = {Formatter.codes(self.longitude, tabs)},
+    latitude = {Formatter.codes(self.latitude, tabs, required=True)},
+    longitude = {Formatter.codes(self.longitude, tabs, required=True)},
     map_ext = {Formatter.codes(self.map_ext, tabs)},
     latitude_ext = {Formatter.codes(self.latitude_ext, tabs)},
     longitude_ext = {Formatter.codes(self.longitude_ext, tabs)},
@@ -6493,6 +6643,7 @@ Map(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Map(latitude=45.0, longitude=-45.0)
@@ -6529,11 +6680,13 @@ Map(
                     )
                     code_preface = Example.EMPTY_CODE
                     gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -6590,6 +6743,7 @@ class PlaceTranslation(NamedTuple):
                 ''.join([self.place1, self.place2, self.place3, self.place4])
             )
             and Checker.verify_type(self.language, Lang, no_list=True)
+            and Checker.verify_not_empty(self.language)
             and Checker.verify_ext(Tag.PLAC, self.tran_ext)
         )
         return check
@@ -6618,7 +6772,7 @@ PlaceTranslation(
     place2 = {Formatter.codes(self.place2, tabs)},
     place3 = {Formatter.codes(self.place3, tabs)},
     place4 = {Formatter.codes(self.place4, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
+    language = {Formatter.codes(self.language, tabs + 2)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -6659,6 +6813,7 @@ PlaceTranslation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = PlaceTranslation(
@@ -6702,11 +6857,13 @@ PlaceTranslation(
                 logging.info(Example.USER_PROVIDED_EXAMPLE)
                 code_preface = Example.USER_PROVIDED
                 gedcom_preface = Example.GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -6830,7 +6987,7 @@ class Place(NamedTuple):
     language: LangType = None
     translations: PlacTranType = None
     map: MapType = None
-    exids: ExidType = None
+    exids: IdenType = None
     notes: NoteType = None
     plac_ext: ExtType = None
     form_ext: ExtType = None
@@ -6852,7 +7009,7 @@ class Place(NamedTuple):
             and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_type(self.translations, PlaceTranslation)
             and Checker.verify_type(self.map, Map, no_list=True)
-            and Checker.verify_type(self.exids, Exid)
+            and Checker.verify_type(self.exids, Identifier)
             and Checker.verify_type(self.notes, Note)
         )
         return check
@@ -6898,7 +7055,7 @@ Place(
     form4 = {Formatter.codes(self.form4, tabs)},
     language = {Formatter.codes(self.language, tabs)},
     translations = {Formatter.codes(self.translations, tabs + 2)},
-    map = {Formatter.codes(self.map, tabs + 1)},
+    map = {Formatter.codes(self.map, tabs + 2)},
     exids = {Formatter.codes(self.exids, tabs + 2)},
     notes = {Formatter.codes(self.notes, tabs + 2)},
     plac_ext = {Formatter.codes(self.plac_ext, tabs + 2)},
@@ -6921,7 +7078,7 @@ Place(
         language: LangType = None,
         translations: PlacTranType = None,
         map: MapType = None,
-        exids: ExidType = None,
+        exids: IdenType = None,
         notes: NoteType = None,
         plac_ext: ExtType = None,
         form_ext: ExtType = None,
@@ -6951,6 +7108,7 @@ Place(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Place(
@@ -7018,11 +7176,13 @@ Place(
                 logging.info(Example.USER_PROVIDED_EXAMPLE)
                 code_preface = Example.USER_PROVIDED
                 gedcom_preface = Example.GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -7078,7 +7238,7 @@ class EventDetail(NamedTuple):
     notes: NoteType = None
     sources: SourCiteType = None
     multimedia_links: MMLinkType = None
-    uids: list[Id] | None = None
+    uids: list[Tag] | None = None
     agnc_ext: ExtType = None
     reli_ext: ExtType = None
     caus_ext: ExtType = None
@@ -7147,30 +7307,30 @@ class EventDetail(NamedTuple):
         return indent(
             f"""
 EventDetail(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    time = {Formatter.codes(self.time, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    place = {Formatter.codes(self.place, tabs + 1)},
-    address = {Formatter.codes(self.address, tabs + 1)},
-    phones = {Formatter.codes(self.phones, tabs + 1)},
-    emails = {Formatter.codes(self.emails, tabs + 1)},
-    faxes = {Formatter.codes(self.faxes, tabs + 1)},
-    wwws = {Formatter.codes(self.wwws, tabs + 1)},
+    date = {Formatter.codes(self.date, tabs + 2)},
+    time = {Formatter.codes(self.time, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    place = {Formatter.codes(self.place, tabs + 2)},
+    address = {Formatter.codes(self.address, tabs + 2)},
+    phones = {Formatter.codes(self.phones, tabs + 2)},
+    emails = {Formatter.codes(self.emails, tabs + 2)},
+    faxes = {Formatter.codes(self.faxes, tabs + 2)}, 
+    wwws = {Formatter.codes(self.wwws, tabs + 2)},
     agency = {Formatter.codes(self.agency, tabs)},
     religion = {Formatter.codes(self.religion, tabs)},
     cause = {Formatter.codes(self.cause, tabs)},
     resn = {Formatter.codes(self.resn, tabs)},
-    sdate = {Formatter.codes(self.sdate, tabs)},
-    stime = {Formatter.codes(self.stime, tabs)},
-    sphrase = {Formatter.codes(self.sphrase, tabs)},
+    sdate = {Formatter.codes(self.sdate, tabs + 2)},
+    stime = {Formatter.codes(self.stime, tabs + 2)},
+    sphrase = {Formatter.codes(self.sphrase, tabs + 2)},
     associations = {Formatter.codes(self.associations, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
-    sources = {Formatter.codes(self.sources, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)}
-    uids = {Formatter.codes(self.uids, tabs)},
+    sources = {Formatter.codes(self.sources, tabs + 2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    uids = {Formatter.codes(self.uids, tabs + 2)},
     agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
-    reli_ext = {Formatter.codes(self.reli_ext, tabs)}
-    caus_ext = {Formatter.codes(self.caus_ext, tabs)}
+    reli_ext = {Formatter.codes(self.reli_ext, tabs)},
+    caus_ext = {Formatter.codes(self.caus_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -7198,7 +7358,7 @@ EventDetail(
         notes: NoteType = None,
         sources: SourCiteType = None,
         multimedia_links: MMLinkType = None,
-        uids: list[Id] | None = None,
+        uids: list[Tag] | None = None,
         agnc_ext: ExtType = None,
         reli_ext: ExtType = None,
         caus_ext: ExtType = None,
@@ -7223,6 +7383,7 @@ EventDetail(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = EventDetail(
@@ -7322,11 +7483,13 @@ EventDetail(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -7405,11 +7568,11 @@ class FamilyEventDetail(NamedTuple):
         return indent(
             f"""
 FamilyEventDetail(
-    husband_age = {Formatter.codes(self.husband_age, tabs)},
-    wife_age = {Formatter.codes(self.wife_age, tabs)},
-    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    husband_age = {Formatter.codes(self.husband_age, tabs + 1, required=True)},
+    wife_age = {Formatter.codes(self.wife_age, tabs + 1, required=True)},
+    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
     husb_ext = {Formatter.codes(self.husb_ext, tabs)},
-    wife_ext = {Formatter.codes(self.wife_ext, tabs)}
+    wife_ext = {Formatter.codes(self.wife_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -7443,6 +7606,7 @@ FamilyEventDetail(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FamilyEventDetail(
@@ -7478,11 +7642,13 @@ FamilyEventDetail(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -7554,10 +7720,10 @@ class FamilyAttribute(NamedTuple):
         return indent(
             f"""
 FamilyAttribute(
-    tag = {Formatter.codes(self.tag, tabs)},
-    payload = {Formatter.codes(self.payload, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
+    payload = {Formatter.codes(self.payload, tabs, required=True)},
     attribute_type = {Formatter.codes(self.attribute_type, tabs)},
-    family_event_detail = {Formatter.codes(self.family_event_detail, tabs)},
+    family_event_detail = {Formatter.codes(self.family_event_detail, tabs + 2)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -7592,11 +7758,12 @@ FamilyAttribute(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FamilyAttribute(
-                    tag=Tag.NONE,
-                    payload='',
+                    tag=Tag.NCHI,
+                    payload='2',
                     attribute_type='',
                     family_event_detail=None,
                 )
@@ -7604,7 +7771,7 @@ FamilyAttribute(
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = FamilyAttribute(
-                    tag=Tag.NONE,
+                    tag=Tag.RESI,
                     payload='',
                     attribute_type='',
                     family_event_detail=None,
@@ -7613,9 +7780,9 @@ FamilyAttribute(
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = FamilyAttribute(
-                    tag=Tag.NONE,
-                    payload='',
-                    attribute_type='',
+                    tag=Tag.FACT,
+                    payload='Here',
+                    attribute_type='Where lived',
                     family_event_detail=None,
                 )
                 code_preface = Example.THIRD
@@ -7630,11 +7797,13 @@ FamilyAttribute(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -7759,11 +7928,11 @@ class FamilyEvent(NamedTuple):
         return indent(
             f"""
 FamilyEvent(
-    tag = {Formatter.codes(self.tag, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
     occurred = {Formatter.codes(self.occurred, tabs)},
-    event_type = {Formatter.codes(self.event_type, tabs)},
+    event_type = {Formatter.codes(self.event_type, tabs, required=(self.tag == Tag.EVEN))},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)}
+    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -7797,6 +7966,7 @@ FamilyEvent(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FamilyEvent(
@@ -7835,11 +8005,13 @@ FamilyEvent(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -7866,7 +8038,9 @@ class Child(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.individual_xref, IndividualXref, no_list=True)
+            Checker.verify_type(
+                self.individual_xref, IndividualXref, no_list=True
+            )
             and Checker.verify_not_empty(self.individual_xref)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_ext(Tag.CHIL, self.chil_ext)
@@ -7888,8 +8062,8 @@ class Child(NamedTuple):
         return indent(
             f"""
 Child(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     chil_ext = {Formatter.codes(self.chil_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -7922,6 +8096,7 @@ Child(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Child(
@@ -7952,11 +8127,13 @@ Child(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8004,7 +8181,11 @@ class LDSOrdinanceDetail(NamedTuple):
             and Checker.verify_enum(self.status, Stat)
             and Checker.verify_type(self.status_date, Date, no_list=True)
             and Checker.verify_type(self.status_time, Time, no_list=True)
-            and Checker.verify(self.status != Tag.NONE, self.date is None, Msg.STAT_REQUIRES_DATE)
+            and Checker.verify(
+                self.status != Tag.NONE,
+                self.date is None,
+                Msg.STAT_REQUIRES_DATE,
+            )
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.source_citations, SourceCitation)
             and Checker.verify_ext(Tag.TEMP, self.temple_ext)
@@ -8032,15 +8213,15 @@ class LDSOrdinanceDetail(NamedTuple):
         return indent(
             f"""
 LDSOrdinanceDetail(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    time = {Formatter.codes(self.time, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
+    date = {Formatter.codes(self.date, tabs + 2)},
+    time = {Formatter.codes(self.time, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
     temple = {Formatter.codes(self.temple, tabs + 1)},
-    place = {Formatter.codes(self.place, tabs + 1)},
+    place = {Formatter.codes(self.place, tabs + 2)},
     status = {Formatter.codes(self.status, tabs + 1)},
-    status_date = {Formatter.codes(self.status_date, tabs + 1)},
-    status_time = {Formatter.codes(self.status_time, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
+    status_date = {Formatter.codes(self.status_date, tabs + 2)},
+    status_time = {Formatter.codes(self.status_time, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
     temple_ext = {Formatter.codes(self.temple_ext, tabs + 1)},
 )""",
@@ -8082,6 +8263,7 @@ LDSOrdinanceDetail(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = LDSOrdinanceDetail(
@@ -8144,11 +8326,13 @@ LDSOrdinanceDetail(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8172,10 +8356,9 @@ class LDSSpouseSealing(NamedTuple):
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.detail, LDSOrdinanceDetail, no_list=True)
-            and Checker.verify_ext(Tag.SLGS, self.slgs_ext)
-        )
+        check: bool = Checker.verify_type(
+            self.detail, LDSOrdinanceDetail, no_list=True
+        ) and Checker.verify_ext(Tag.SLGS, self.slgs_ext)
         return check
 
     def ged(self, level: int = 1) -> str:
@@ -8192,7 +8375,7 @@ class LDSSpouseSealing(NamedTuple):
             f"""
 LDSSpouseSealing(
     detail = {Formatter.codes(self.detail, tabs)},
-    slgs_ext = {Formatter.codes(self.slgs_ext, tabs)},
+    slgs_ext = {Formatter.codes(self.slgs_ext, tabs)}, 
 )""",
             String.INDENT * tabs,
         )
@@ -8223,6 +8406,7 @@ LDSSpouseSealing(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = LDSSpouseSealing(
@@ -8249,11 +8433,13 @@ LDSSpouseSealing(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8297,7 +8483,9 @@ class LDSIndividualOrdinance(NamedTuple):
         check: bool = (
             Checker.verify_type(self.tag, Tag, no_list=True)
             and Checker.verify_not_empty(self.tag)
-            and Checker.verify_type(self.ordinance_detail, LDSOrdinanceDetail, no_list=True)
+            and Checker.verify_type(
+                self.ordinance_detail, LDSOrdinanceDetail, no_list=True
+            )
             and Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
             and Checker.verify(
                 self.tag.value == Tag.SLGC.value,
@@ -8317,7 +8505,11 @@ class LDSIndividualOrdinance(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.ordinance_detail)
             if self.tag == Tag.SLGC:
                 lines = Tagger.string(
-                    lines, level + 1, Tag.FAMC, self.family_xref.fullname
+                    lines,
+                    level + 1,
+                    Tag.FAMC,
+                    self.family_xref.fullname,
+                    format=False,
                 )
         return lines
 
@@ -8325,10 +8517,10 @@ class LDSIndividualOrdinance(NamedTuple):
         return indent(
             f"""
 LDSIndividualOrdinance(
-    tag = {Formatter.codes(self.tag, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
     ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs)},
-    family_xref = {Formatter.codes(self.family_xref, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)}
+    family_xref = {Formatter.codes(self.family_xref, tabs, required=(self.tag == Tag.SLGC))},
+    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8361,10 +8553,11 @@ LDSIndividualOrdinance(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = LDSIndividualOrdinance(
-                    tag=Tag.NONE,
+                    tag=Tag.BAPL,
                     ordinance_detail=None,
                     family_xref=Void.FAM,
                 )
@@ -8372,7 +8565,7 @@ LDSIndividualOrdinance(
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = LDSIndividualOrdinance(
-                    tag=Tag.NONE,
+                    tag=Tag.ENDL,
                     ordinance_detail=None,
                     family_xref=Void.FAM,
                 )
@@ -8380,7 +8573,7 @@ LDSIndividualOrdinance(
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = LDSIndividualOrdinance(
-                    tag=Tag.NONE,
+                    tag=Tag.CONL,
                     ordinance_detail=None,
                     family_xref=Void.FAM,
                 )
@@ -8395,11 +8588,13 @@ LDSIndividualOrdinance(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8452,9 +8647,9 @@ class IndividualEventDetail(NamedTuple):
         return indent(
             f"""
 IndividualEventDetail(
-    event_detail = {Formatter.codes(self.event_detail, tabs)},
-    age = {Formatter.codes(self.age, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs, required=True)},
+    age = {Formatter.codes(self.age, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
 )""",
             String.INDENT * tabs,
         )
@@ -8486,6 +8681,7 @@ IndividualEventDetail(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = IndividualEventDetail(
@@ -8519,11 +8715,13 @@ IndividualEventDetail(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8597,8 +8795,8 @@ class IndividualAttribute(NamedTuple):
     > ]
     """
 
-    tag: Tag
-    payload: str
+    tag: Tag = Tag.NONE
+    payload: str = Default.EMPTY
     tag_type: str = Default.EMPTY
     event_detail: IndiEvenDetailType = None
     type_ext: ExtType = None
@@ -8610,10 +8808,21 @@ class IndividualAttribute(NamedTuple):
             Checker.verify_enum(self.tag, IndiAttr)
             and Checker.verify_not_empty(self.tag)
             and Checker.verify_type(self.payload, str, no_list=True)
+            and Checker.verify_not_empty(self.payload)
             and Checker.verify_type(self.tag_type, str, no_list=True)
-            and Checker.verify(self.tag==Tag.FACT, self.tag_type==Default.EMPTY, Msg.FACT_REQUIRES_TYPE)
-            and Checker.verify(self.tag==Tag.IDNO, self.tag_type==Default.EMPTY, Msg.IDNO_REQUIRES_TYPE)
-            and Checker.verify_type(self.event_detail, IndividualEventDetail, no_list=True)
+            and Checker.verify(
+                self.tag == Tag.FACT,
+                self.tag_type == Default.EMPTY,
+                Msg.FACT_REQUIRES_TYPE,
+            )
+            and Checker.verify(
+                self.tag == Tag.IDNO,
+                self.tag_type == Default.EMPTY,
+                Msg.IDNO_REQUIRES_TYPE,
+            )
+            and Checker.verify_type(
+                self.event_detail, IndividualEventDetail, no_list=True
+            )
             and Checker.verify_ext(Tag.TYPE, self.type_ext)
             and Checker.verify_ext(self.tag, self.tag_ext)
         )
@@ -8634,12 +8843,12 @@ class IndividualAttribute(NamedTuple):
         return indent(
             f"""
 IndividualAttribute(
-    tag = {Formatter.codes(self.tag, tabs)},
-    payload = {Formatter.codes(self.payload, tabs)}
-    tag_type = {Formatter.codes(self.tag_type, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
+    payload = {Formatter.codes(self.payload, tabs, required=True)},
+    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag in [Tag.FACT, Tag.IDNO]))},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
     type_ext = {Formatter.codes(self.type_ext, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)}
+    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8674,11 +8883,12 @@ IndividualAttribute(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = IndividualAttribute(
-                    tag=Tag.NONE,
-                    payload='',
+                    tag=Tag.RELI,
+                    payload='Catholic',
                     tag_type='',
                     event_detail=None,
                 )
@@ -8686,18 +8896,18 @@ IndividualAttribute(
                 gedcom_preface = Example.GEDCOM
             case 2:
                 show = IndividualAttribute(
-                    tag=Tag.NONE,
-                    payload='',
-                    tag_type='',
+                    tag=Tag.IDNO,
+                    payload='Sir',
+                    tag_type='idno type',
                     event_detail=None,
                 )
                 code_preface = Example.SECOND
                 gedcom_preface = Example.GEDCOM
             case 3:
                 show = IndividualAttribute(
-                    tag=Tag.NONE,
-                    payload='',
-                    tag_type='',
+                    tag=Tag.FACT,
+                    payload='100 years old',
+                    tag_type='Age',
                     event_detail=None,
                 )
                 code_preface = Example.THIRD
@@ -8713,11 +8923,13 @@ IndividualAttribute(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -8922,9 +9134,19 @@ class IndividualEvent(NamedTuple):
             Checker.verify_enum(self.tag, IndiEven)
             and Checker.verify_not_empty(self.tag)
             and Checker.verify_type(self.tag_type, str, no_list=True)
-            and Checker.verify(self.tag != Tag.EVEN, self.payload not in ['Y',''], Msg.PAYLOAD_IS_Y)
-            and Checker.verify(self.tag==Tag.EVEN, self.tag_type==Default.EMPTY, Msg.EVEN_REQUIRES_TYPE)
-            and Checker.verify_type(self.event_detail, IndividualEventDetail, no_list=True)
+            and Checker.verify(
+                self.tag != Tag.EVEN,
+                self.payload not in ['Y', ''],
+                Msg.PAYLOAD_IS_Y,
+            )
+            and Checker.verify(
+                self.tag == Tag.EVEN,
+                self.tag_type == Default.EMPTY,
+                Msg.EVEN_REQUIRES_TYPE,
+            )
+            and Checker.verify_type(
+                self.event_detail, IndividualEventDetail, no_list=True
+            )
             and Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
             and Checker.verify_enum(self.adoption, Adop)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
@@ -8949,7 +9171,11 @@ class IndividualEvent(NamedTuple):
                 and self.family_xref.name != Void.FAM.name
             ):
                 lines = Tagger.string(
-                    lines, level + 1, Tag.FAMC, self.family_xref.fullname
+                    lines,
+                    level + 1,
+                    Tag.FAMC,
+                    self.family_xref.fullname,
+                    format=False,
                 )
                 if (
                     self.tag.value == Tag.ADOP.value
@@ -8966,14 +9192,14 @@ class IndividualEvent(NamedTuple):
         return indent(
             f"""
 IndividualEvent(
-    tag = {Formatter.codes(self.tag, tabs)},
+    tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs)},
-    tag_type = {Formatter.codes(self.tag_type, tabs)},
+    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EVEN))},
     event_detail = {Formatter.codes(self.event_detail, tabs)},
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)}
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -9010,16 +9236,17 @@ IndividualEvent(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = IndividualEvent(
-                    tag=Tag.NONE,
-                    payload='',
+                    tag=Tag.ADOP,
+                    payload='payload',
                     tag_type='',
                     event_detail=None,
                     family_xref=Void.FAM,
-                    adoption=Tag.NONE,
-                    phrase=None,
+                    adoption=Tag.BOTH,
+                    phrase=Phrase('Both husband and wife adopted the child.'),
                 )
                 code_preface = Example.FULL
                 gedcom_preface = Example.GEDCOM
@@ -9060,11 +9287,13 @@ IndividualEvent(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9101,7 +9330,9 @@ class Alias(NamedTuple):
     def validate(self, main_individual: IndividualXref = Void.INDI) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.individual_xref, IndividualXref, no_list=True)
+            Checker.verify_type(
+                self.individual_xref, IndividualXref, no_list=True
+            )
             and Checker.verify_not_empty(self.individual_xref)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify(
@@ -9118,7 +9349,11 @@ class Alias(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = Tagger.string(
-                lines, level, Tag.ALIA, self.individual_xref.fullname
+                lines,
+                level,
+                Tag.ALIA,
+                self.individual_xref.fullname,
+                format=False,
             )
             lines = Tagger.structure(lines, level + 1, self.alia_ext)
             lines = Tagger.structure(lines, level + 1, self.phrase)
@@ -9128,9 +9363,9 @@ class Alias(NamedTuple):
         return indent(
             f"""
 Alias(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    alia_ext = {Formatter.codes(self.alia_ext, tabs)}
+    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
+    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    alia_ext = {Formatter.codes(self.alia_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -9162,6 +9397,7 @@ Alias(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Alias(
@@ -9192,11 +9428,13 @@ Alias(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9235,7 +9473,8 @@ class FamilyChild(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.family_xref, str, no_list=True)
+            Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
+            and Checker.verify_not_empty(self.family_xref)
             and Checker.verify_enum(self.pedigree, Pedi)
             and Checker.verify_type(self.pedigree_phrase, Phrase, no_list=True)
             and Checker.verify_enum(self.status, FamcStat)
@@ -9252,10 +9491,12 @@ class FamilyChild(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = Tagger.string(
-                lines, level, Tag.FAMC, str(self.family_xref), format=False
+                lines, level, Tag.FAMC, self.family_xref.fullname, format=False
             )
             lines = Tagger.structure(lines, level + 1, self.famc_ext)
-            lines = Tagger.string(lines, level + 1, Tag.PEDI, self.pedigree.value)
+            lines = Tagger.string(
+                lines, level + 1, Tag.PEDI, self.pedigree.value
+            )
             lines = Tagger.structure(lines, level + 1, self.pedi_ext)
             lines = Tagger.structure(lines, level + 2, self.pedigree_phrase)
             lines = Tagger.string(lines, level + 1, Tag.STAT, self.status.value)
@@ -9267,12 +9508,12 @@ class FamilyChild(NamedTuple):
         return indent(
             f"""
 FamilyChild(
-    family_xref = {Formatter.codes(self.family_xref, tabs)},
+    family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},  
     pedigree = {Formatter.codes(self.pedigree, tabs)},
-    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs)},
+    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs + 2)},
     status = {Formatter.codes(self.status, tabs)},
-    status_phrase = {Formatter.codes(self.status_phrase, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
+    status_phrase = {Formatter.codes(self.status_phrase, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     famc_ext = {Formatter.codes(self.famc_ext, tabs)},
     pedi_ext = {Formatter.codes(self.pedi_ext, tabs)},
     stat_ext = {Formatter.codes(self.stat_ext, tabs)},
@@ -9313,6 +9554,7 @@ FamilyChild(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FamilyChild(
@@ -9361,11 +9603,13 @@ FamilyChild(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9389,6 +9633,7 @@ class FamilySpouse(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
+            and Checker.verify_not_empty(self.family_xref)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_ext(Tag.FAMS, self.fams_ext)
         )
@@ -9409,7 +9654,7 @@ class FamilySpouse(NamedTuple):
         return indent(
             f"""
 FamilySpouse(
-    family_xref = {Formatter.codes(self.family_xref, tabs)},
+    family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},
     notes = {Formatter.codes(self.notes, tabs)},
     fams_ext = {Formatter.codes(self.fams_ext, tabs)},
 )""",
@@ -9443,6 +9688,7 @@ FamilySpouse(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FamilySpouse(
@@ -9473,11 +9719,13 @@ FamilySpouse(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9531,7 +9779,7 @@ class FileTranslation(NamedTuple):
         return indent(
             f"""
 FileTranslation(
-    tran = {Formatter.codes(self.tran, tabs)},
+    tran = {Formatter.codes(self.tran, tabs, required=True)},
     form = {Formatter.codes(self.form, tabs)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
     form_ext = {Formatter.codes(self.form_ext, tabs)},
@@ -9567,6 +9815,7 @@ FileTranslation(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = FileTranslation(
@@ -9598,11 +9847,13 @@ FileTranslation(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9675,8 +9926,8 @@ class File(NamedTuple):
         return indent(
             f"""
 File(
-    file = {Formatter.codes(self.file, tabs)},
-    form = {Formatter.codes(self.form, tabs)},
+    file = {Formatter.codes(self.file, tabs, required=True)},
+    form = {Formatter.codes(self.form, tabs, required=True)},
     medi = {Formatter.codes(self.medi, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
     titl = {Formatter.codes(self.titl, tabs)},
@@ -9723,6 +9974,7 @@ File(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = File(
@@ -9772,11 +10024,13 @@ File(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9839,7 +10093,7 @@ class SourceDataEvent(NamedTuple):
         return indent(
             f"""
 SourceDataEvent(
-    event = {Formatter.codes(self.event, tabs)},
+    event = {Formatter.codes(self.event, tabs, required=True)},
     date_period = {Formatter.codes(self.date_period, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
     place = {Formatter.codes(self.place, tabs)},
@@ -9879,6 +10133,7 @@ SourceDataEvent(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SourceDataEvent(
@@ -9918,11 +10173,13 @@ SourceDataEvent(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -9977,7 +10234,7 @@ class NonEvent(NamedTuple):
         return indent(
             f"""
 NonEvent(
-    no = {Formatter.codes(self.no, tabs)},
+    no = {Formatter.codes(self.no, tabs, required=True)},
     date = {Formatter.codes(self.date, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs)},
     notes = {Formatter.codes(self.notes, tabs)},
@@ -10017,6 +10274,7 @@ NonEvent(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = NonEvent(
@@ -10059,11 +10317,13 @@ NonEvent(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -10133,8 +10393,8 @@ class Submitter(NamedTuple):
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged()
-        if str(self.xref) != Void.NAME and self.validate():
+        if self.validate():
+            lines: str = self.xref.ged()
             lines = Tagger.string(lines, level + 1, Tag.NAME, self.name)
             lines = Tagger.structure(lines, level + 2, self.name_ext)
             lines = Tagger.structure(lines, level + 1, self.address)
@@ -10154,19 +10414,19 @@ class Submitter(NamedTuple):
         return indent(
             f"""
 Submitter(
-    xref = {Formatter.codes(self.xref, tabs)},
-    name = {Formatter.codes(self.name, tabs)},
-    address = {Formatter.codes(self.address, tabs)},
-    phones = {Formatter.codes(self.phones, tabs)},
-    emails = {Formatter.codes(self.emails, tabs)},
-    faxes = {Formatter.codes(self.faxes, tabs)},
-    wwws = {Formatter.codes(self.wwws, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    languages = {Formatter.codes(self.languages, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
+    name = {Formatter.codes(self.name, tabs, required=True)},
+    address = {Formatter.codes(self.address, tabs + 2)},
+    phones = {Formatter.codes(self.phones, tabs + 2)}, 
+    emails = {Formatter.codes(self.emails, tabs + 2)},
+    faxes = {Formatter.codes(self.faxes, tabs + 2)},
+    wwws = {Formatter.codes(self.wwws, tabs + 2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)}, 
+    languages = {Formatter.codes(self.languages, tabs + 2)},
     identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    change = {Formatter.codes(self.change, tabs)},
-    creation = {Formatter.codes(self.creation, tabs)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)},
+    creation = {Formatter.codes(self.creation, tabs + 2)},
     name_ext = {Formatter.codes(self.name_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10210,6 +10470,7 @@ Submitter(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Submitter(
@@ -10284,11 +10545,13 @@ Submitter(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -10346,6 +10609,8 @@ class Family(NamedTuple):
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
+    husb_ext: ExtTagType = None
+    wife_ext: ExtTagType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -10369,6 +10634,8 @@ class Family(NamedTuple):
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
+            and Checker.verify_ext(Tag.HUSB, self.husb_ext)
+            and Checker.verify_ext(Tag.WIFE, self.wife_ext)
         )
         return check
 
@@ -10386,11 +10653,13 @@ class Family(NamedTuple):
                 lines = Tagger.string(
                     lines, level + 1, Tag.HUSB, str(self.husband), format=False
                 )
+                lines = Tagger.structure(lines, level + 2, self.husb_ext)
                 lines = Tagger.structure(lines, level + 2, self.husband_phrase)
             if str(self.wife) != str(Void.INDI):
                 lines = Tagger.string(
                     lines, level + 1, Tag.WIFE, str(self.wife), format=False
                 )
+                lines = Tagger.structure(lines, level + 2, self.wife_ext)
                 lines = Tagger.structure(lines, level + 2, self.wife_phrase)
             lines = Tagger.structure(lines, level + 1, self.children)
             lines = Tagger.structure(lines, level + 1, self.associations)
@@ -10410,24 +10679,26 @@ class Family(NamedTuple):
         return indent(
             f"""
 Family(
-    xref = {Formatter.codes(self.xref, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
     resn = {Formatter.codes(self.resn, tabs)},
-    attributes = {Formatter.codes(self.attributes, tabs)},
+    attributes = {Formatter.codes(self.attributes, tabs + 2)},
     events = {Formatter.codes(self.events, tabs)},
     husband = {Formatter.codes(self.husband, tabs)},
-    husband_phrase = {Formatter.codes(self.husband_phrase, tabs)},
+    husband_phrase = {Formatter.codes(self.husband_phrase, tabs + 2)},
     wife = {Formatter.codes(self.wife, tabs)},
-    wife_phrase = {Formatter.codes(self.wife_phrase, tabs)},
-    children = {Formatter.codes(self.children, tabs)},
-    associations = {Formatter.codes(self.associations, tabs)},
-    submitters = {Formatter.codes(self.submitters, tabs)},
-    lds_spouse_sealings = {Formatter.codes(self.lds_spouse_sealings, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
+    wife_phrase = {Formatter.codes(self.wife_phrase, tabs + 2)},
+    children = {Formatter.codes(self.children, tabs + 2)},
+    associations = {Formatter.codes(self.associations, tabs + 2)},
+    submitters = {Formatter.codes(self.submitters, tabs + 2)},
+    lds_spouse_sealings = {Formatter.codes(self.lds_spouse_sealings, tabs + 2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     citations = {Formatter.codes(self.citations, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    change = {Formatter.codes(self.change, tabs)}
-    creation = {Formatter.codes(self.creation, tabs)}
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)}
+    creation = {Formatter.codes(self.creation, tabs + 2)}
+    husb_ext = {Formatter.codes(self.husb_ext, tabs)}
+    wife_ext = {Formatter.codes(self.wife_ext, tabs)}
 )""",
             String.INDENT * tabs,
         )
@@ -10453,6 +10724,8 @@ Family(
         multimedia_links: MMLinkType = None,
         change: ChangeDateType = None,
         creation: CreationDateType = None,
+        husb_ext: ExtTagType = None,
+        wife_ext: ExtTagType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -10474,6 +10747,7 @@ Family(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Family(
@@ -10561,14 +10835,18 @@ Family(
                     multimedia_links=multimedia_links,
                     change=change,
                     creation=creation,
+                    husb_ext=husb_ext,
+                    wife_ext=wife_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -10639,14 +10917,14 @@ class Multimedia(NamedTuple):
         return indent(
             f"""
 Multimedia(
-    xref = {Formatter.codes(self.xref, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
     resn = {Formatter.codes(self.resn, tabs)},
-    files = {Formatter.codes(self.files, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    sources = {Formatter.codes(self.sources, tabs)},
-    change = {Formatter.codes(self.change, tabs)}
-    creation = {Formatter.codes(self.creation, tabs)}
+    files = {Formatter.codes(self.files, tabs, required=True)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
+    sources = {Formatter.codes(self.sources, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)},
+    creation = {Formatter.codes(self.creation, tabs + 2)},
 )""",
             String.INDENT * tabs,
         )
@@ -10683,6 +10961,7 @@ Multimedia(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Multimedia(
@@ -10736,11 +11015,13 @@ Multimedia(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -10806,6 +11087,7 @@ class Source(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SourceXref)
+            and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.author, str, no_list=True)
             and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(self.abbreviation, str, no_list=True)
@@ -10872,29 +11154,29 @@ class Source(NamedTuple):
         return indent(
             f"""
 Source(
-    xref = {Formatter.codes(self.xref, tabs)},
-    source_data_events = {Formatter.codes(self.source_data_events, tabs)}
-    agency = {Formatter.codes(self.agency, tabs)}
-    data_notes = {Formatter.codes(self.data_notes, tabs)}
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
+    source_data_events = {Formatter.codes(self.source_data_events, tabs+2)},
+    agency = {Formatter.codes(self.agency, tabs)},
+    data_notes = {Formatter.codes(self.data_notes, tabs)},
     author = {Formatter.codes(self.author, tabs)},
     title = {Formatter.codes(self.title, tabs)},
     abbreviation = {Formatter.codes(self.abbreviation, tabs)},
     published = {Formatter.codes(self.published, tabs)},
-    text = {Formatter.codes(self.text, tabs)},
-    repositories = {Formatter.codes(self.repositories, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    change = {Formatter.codes(self.change, tabs)}
-    creation = {Formatter.codes(self.creation, tabs)}
-    data_ext = {Formatter.codes(self.data_ext, tabs)}
-    agnc_ext = {Formatter.codes(self.agnc_ext, tabs)}
-    auth_ext = {Formatter.codes(self.auth_ext, tabs)}
-    titl_ext = {Formatter.codes(self.titl_ext, tabs)}
-    abbr_ext = {Formatter.codes(self.abbr_ext, tabs)}
-    publ_ext = {Formatter.codes(self.publ_ext, tabs)}
-    text_ext = {Formatter.codes(self.text_ext, tabs)}
-    mime_ext = {Formatter.codes(self.mime_ext, tabs)}
+    text = {Formatter.codes(self.text, tabs+2)},
+    repositories = {Formatter.codes(self.repositories, tabs+2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
+    notes = {Formatter.codes(self.notes, tabs+2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)},
+    change = {Formatter.codes(self.change, tabs+2)},
+    creation = {Formatter.codes(self.creation, tabs+2)},
+    data_ext = {Formatter.codes(self.data_ext, tabs)},
+    agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
+    auth_ext = {Formatter.codes(self.auth_ext, tabs)},
+    titl_ext = {Formatter.codes(self.titl_ext, tabs)},
+    abbr_ext = {Formatter.codes(self.abbr_ext, tabs)},
+    publ_ext = {Formatter.codes(self.publ_ext, tabs)},
+    text_ext = {Formatter.codes(self.text_ext, tabs)},
+    mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -10948,6 +11230,7 @@ Source(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Source(
@@ -11039,11 +11322,13 @@ Source(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -11181,6 +11466,7 @@ class Individual(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, IndividualXref, no_list=True)
+            and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.personal_names, PersonalName)
             and Checker.verify_enum(self.sex, Sex)
@@ -11238,7 +11524,7 @@ class Individual(NamedTuple):
         return indent(
             f"""
 Individual(
-    xref = {Formatter.codes(self.xref, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
     resn = {Formatter.codes(self.resn, tabs)},
     personal_names = {Formatter.codes(self.personal_names, tabs)},
     sex = {Formatter.codes(self.sex, tabs)},
@@ -11250,12 +11536,12 @@ Individual(
     aliases = {Formatter.codes(self.aliases, tabs)},
     ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs)},
     descendent_interest = {Formatter.codes(self.descendent_interest, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
     sources = {Formatter.codes(self.sources, tabs)},
     multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    change = {Formatter.codes(self.change, tabs)}
-    creation = {Formatter.codes(self.creation, tabs)}
+    change = {Formatter.codes(self.change, tabs + 2)}
+    creation = {Formatter.codes(self.creation, tabs + 2)}
     resn_ext = {Formatter.codes(self.resn_ext, tabs)},
     sex_ext = {Formatter.codes(self.sex_ext, tabs)},
 )""",
@@ -11307,6 +11593,7 @@ Individual(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Individual(
@@ -11403,11 +11690,13 @@ Individual(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -11483,17 +11772,17 @@ class Repository(NamedTuple):
         return indent(
             f"""
 Repository(
-    xref = {Formatter.codes(self.xref, tabs)},
-    name = {Formatter.codes(self.name, tabs)},
-    address = {Formatter.codes(self.address, tabs)},
-    phones = {Formatter.codes(self.phones, tabs)},
-    emails = {Formatter.codes(self.emails, tabs)},
-    faxes = {Formatter.codes(self.faxes, tabs)},
-    wwws = {Formatter.codes(self.wwws, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    change = {Formatter.codes(self.change, tabs)},
-    creation = {Formatter.codes(self.creation, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
+    name = {Formatter.codes(self.name, tabs, required=True)},
+    address = {Formatter.codes(self.address, tabs+2)},
+    phones = {Formatter.codes(self.phones, tabs+2)},
+    emails = {Formatter.codes(self.emails, tabs+2)},
+    faxes = {Formatter.codes(self.faxes, tabs+2)},
+    wwws = {Formatter.codes(self.wwws, tabs+2)},
+    notes = {Formatter.codes(self.notes, tabs+2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
+    change = {Formatter.codes(self.change, tabs+2)},
+    creation = {Formatter.codes(self.creation, tabs+2)},
     name_ext = {Formatter.codes(self.name_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -11535,6 +11824,7 @@ Repository(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Repository(
@@ -11601,11 +11891,13 @@ Repository(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -11678,15 +11970,15 @@ class SharedNote(NamedTuple):
         return indent(
             f"""
 SharedNote(
-    xref = {Formatter.codes(self.xref, tabs)},
-    text = {Formatter.codes(self.text, tabs)},
+    xref = {Formatter.codes(self.xref, tabs, required=True)},
+    text = {Formatter.codes(self.text, tabs, required=True)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
-    translations = {Formatter.codes(self.translations, tabs)},
-    sources = {Formatter.codes(self.sources, tabs)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
-    change = {Formatter.codes(self.change, tabs)}
-    creation = {Formatter.codes(self.creation, tabs)}
+    language = {Formatter.codes(self.language, tabs+2)},
+    translations = {Formatter.codes(self.translations, tabs+2)},
+    sources = {Formatter.codes(self.sources, tabs+2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
+    change = {Formatter.codes(self.change, tabs+2)},
+    creation = {Formatter.codes(self.creation, tabs+2)},
     snote_ext = {Formatter.codes(self.snote_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 )""",
@@ -11728,6 +12020,7 @@ SharedNote(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = SharedNote(
@@ -11787,11 +12080,13 @@ SharedNote(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )
@@ -11928,7 +12223,11 @@ class Header(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.header_time)
             if self.submitter != Void.SUBM:
                 lines = Tagger.string(
-                    lines, level + 1, Tag.SUBM, self.submitter.fullname
+                    lines,
+                    level + 1,
+                    Tag.SUBM,
+                    self.submitter.fullname,
+                    format=False,
                 )
                 lines = Tagger.structure(lines, level + 2, self.subm_ext)
             lines = Tagger.string(
@@ -11948,22 +12247,22 @@ Header(
     vers = {Formatter.codes(self.vers, tabs)},
     name = {Formatter.codes(self.name, tabs)},
     corporation = {Formatter.codes(self.corporation, tabs)},
-    address = {Formatter.codes(self.address, tabs + 1)},
-    phones = {Formatter.codes(self.phones, tabs + 1)},
-    emails = {Formatter.codes(self.emails, tabs + 1)},
-    faxes = {Formatter.codes(self.faxes, tabs + 1)},
-    wwws = {Formatter.codes(self.wwws, tabs + 1)},
+    address = {Formatter.codes(self.address, tabs + 2)},
+    phones = {Formatter.codes(self.phones, tabs + 2)},
+    emails = {Formatter.codes(self.emails, tabs + 2)},
+    faxes = {Formatter.codes(self.faxes, tabs + 2)},
+    wwws = {Formatter.codes(self.wwws, tabs + 2)},
     data = {Formatter.codes(self.data, tabs)},
-    data_date = {Formatter.codes(self.data_date, tabs + 1)},
-    data_time = {Formatter.codes(self.data_time, tabs + 1)},
+    data_date = {Formatter.codes(self.data_date, tabs + 2)},
+    data_time = {Formatter.codes(self.data_time, tabs + 2)},
     data_copyright = {Formatter.codes(self.data_copyright, tabs)},
     dest = {Formatter.codes(self.dest, tabs)},
-    header_date = {Formatter.codes(self.header_date, tabs + 1)},
-    header_time = {Formatter.codes(self.header_time, tabs + 1)},
+    header_date = {Formatter.codes(self.header_date, tabs + 2)},
+    header_time = {Formatter.codes(self.header_time, tabs + 2)},
     submitter = {Formatter.codes(self.submitter, tabs)},
     subm_copyright = {Formatter.codes(self.subm_copyright, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    note = {Formatter.codes(self.note, tabs + 1)},
+    language = {Formatter.codes(self.language, tabs + 2)},
+    note = {Formatter.codes(self.note, tabs + 2)},
     head_ext = {Formatter.codes(self.head_ext, tabs)},
     gedc_ext = {Formatter.codes(self.gedc_ext, tabs)},
     vers_ext = {Formatter.codes(self.vers_ext, tabs)},
@@ -12025,6 +12324,7 @@ Header(
         genealogy_docs: str = 'To be constructed'
         code_preface: str = String.EMPTY
         gedcom_preface: str = String.EMPTY
+        ged_output: str = String.EMPTY
         match choice:
             case 1:
                 show = Header(
@@ -12141,11 +12441,13 @@ Header(
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
+        with contextlib.suppress(Exception):
+            ged_output = show.ged()
         return Formatter.example(
             code_preface,
             show.code(),
             gedcom_preface,
-            show.ged(),
+            ged_output,
             gedcom_docs,
             genealogy_docs,
         )

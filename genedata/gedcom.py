@@ -1040,6 +1040,7 @@ class Default:
     MAP_LONGITUDE: float = 0.0
     MIME: str = ''
     MONTHS: int = 0
+    NONE: str = 'None'
     PHONE_AREA_MIN: int = 0
     PHONE_AREA_MAX: int = 1000
     PHONE_COUNTRY_MIN: int = 0
@@ -1054,6 +1055,8 @@ class Default:
     PLACE_FORM3: str = 'State'
     PLACE_FORM4: str = 'Country'
     POINTER: str = '@VOID@'
+    QUOTE_SINGLE: str = "'"
+    QUOTE_DOUBLE: str = '"'
     TIME_HOUR: int = 0
     TIME_MINUTE: int = 0
     TIME_SECOND: float = 0.0
@@ -1468,86 +1471,6 @@ class Record(str, Enum):
     SOUR = Tag.SOUR.value
     SUBM = Tag.SUBM.value
     NONE = Tag.NONE.value
-
-
-# class LineVal(Enum):
-#     """Fixed values that may be used in the LineVal position of a line.
-
-#     Some of these values may be identical to Tag values, but in this implementation
-#     they are separate from Tag.  For example, even though there is a Tag.HUSB
-#     definition that may be used in the Tag position of a GEDCOM line there is
-#     also a LineVal.HUSB definition that may only be used in the LineVal of a
-#     GEDCOM line.
-
-#     Reference:
-#         [GEDCOM LineVal Definitions]()
-#     """
-
-#     ADOPTED = 'ADOPTED'
-#     AKA = 'AKA'
-#     AUDIO = 'AUDIO'
-#     BIC = 'BIC'
-#     BIRTH = 'BIRTH'
-#     BOOK = 'BOOK'
-#     BOTH = 'BOTH'
-#     CANCELED = 'CANCELED'
-#     CARD = 'CARD'
-#     CHALLENGED = 'CHALLENGED'
-#     CHIL = 'CHIL'
-#     CHILD = 'CHILD'
-#     CLERGY = 'CLERGY'
-#     COMPLETED = 'COMPLETED'
-#     CONFIDENTIAL = 'CONFIDENTIAL'
-#     DISPROVEN = 'DISPROVEN'
-#     DNS = 'DNS'
-#     DNS_CAN = 'DNS_CAN'
-#     ELECTRONIC = 'ELECTRONIC'
-#     EXCLUDED = 'EXCLUDED'
-#     F = 'F'
-#     FATH = 'FATH'
-#     FICHE = 'FICHE'
-#     FILM = 'FILM'
-#     FOSTER = 'FOSTER'
-#     FRIEND = 'FRIEND'
-#     GODP = 'GODP'
-#     HUSB = 'HUSB'
-#     IMMIGRANT = 'IMMIGRANT'
-#     INFANT = 'INFANT'
-#     LOCKED = 'LOCKED'
-#     MAGAZINE = 'MAGAZINE'
-#     MAIDEN = 'MAIDEN'
-#     MANUSCRIPT = 'MANUSCRIPT'
-#     M = 'M'
-#     MAP = 'MAP'
-#     MARRIED = 'MARRIED'
-#     MOTH = 'MOTH'
-#     MULTIPLE = 'MULTIPLE'
-#     NEWSPAPER = 'NEWSPAPER'
-#     NGHBR = 'NGHBR'
-#     NONE = ''
-#     OFFICIATOR = 'OFFICIATOR'
-#     OTHER = 'OTHER'
-#     PARENT = 'PARENT'
-#     PHOTO = 'PHOTO'
-#     PRE_1970 = 'PRE_1970'
-#     PRIVACY = 'PRIVACY'
-#     PROFESSIONAL = 'PROFESSIONAL'
-#     PROVEN = 'PROVEN'
-#     QUAY0 = '0'
-#     QUAY1 = '1'
-#     QUAY2 = '2'
-#     QUAY3 = '3'
-#     SEALING = 'SEALING'
-#     SPOU = 'SPOU'
-#     STILLBORN = 'STILLBORN'
-#     SUBMITTED = 'SUBMITTED'
-#     TOMBSTONE = 'TOMBSTONE'
-#     U = 'U'
-#     UNCLEARED = 'UNCLEARED'
-#     VIDEO = 'VIDEO'
-#     WIFE = 'WIFE'
-#     WITN = 'WITN'
-#     X = 'X'
 
 
 class Adop(Enum):
