@@ -71,6 +71,7 @@ __all__ = [
     'Placer',
     'Repository',
     'RepositoryXref',
+    'SDate',
     'SharedNote',
     'SharedNoteXref',
     'Source',
@@ -88,7 +89,7 @@ __all__ = [
 ]
 
 
-import contextlib
+import contextlib  # noqa: I001
 import logging
 import math
 import re
@@ -99,6 +100,7 @@ from typing import Any, ClassVar, Literal, NamedTuple
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
+from ordered_set import OrderedSet # type: ignore[import-not-found] 
 
 from calendars.calendars import CalendarDefinition
 
@@ -362,14 +364,6 @@ class Tagger:
                 )
         return lines
 
-    # @staticmethod
-    # def string_continue(lines: str, level: int, tag: Tag, payload: list[str]) -> str:
-    #     if len(payload) > 0:
-    #         lines = Tagger.string(lines, level, tag, payload[0])
-    #         for item in payload[1:]:
-    #             lines = Tagger.string(lines, level+1, Tag.CONT, item)
-    #     return lines
-
     @staticmethod
     def structure(
         lines: str,
@@ -419,7 +413,9 @@ class Tagger:
         if payload is None or payload == Default.EMPTY:
             return lines
         if isinstance(payload, list):
-            for item in payload:
+            unique_payload = OrderedSet(payload)
+            for item in unique_payload:
+            # for item in payload:
                 if flag != String.EMPTY:
                     lines = ''.join([lines, item.ged(level, flag)])
                 else:
@@ -561,7 +557,7 @@ class Checker:
         if not isinstance(tag, Tag) and not isinstance(tag, ExtTag):
             raise ValueError(Msg.NEITHER_TAG_NOR_EXTTAG.format(str(tag)))
         if isinstance(tag, Tag) and tag.value not in enumeration:
-            raise ValueError(Msg.NOT_VALID_ENUM.format(tag.value, enumeration))
+            raise ValueError(Msg.NOT_VALID_ENUM.format(tag.name, enumeration))
         if isinstance(tag, ExtTag):
             enum_name: str = (
                 str(enumeration)
@@ -1084,7 +1080,7 @@ class Formatter:
                         ]
                     )
                 else:
-                    lines = ''.join([lines, item.code(tabs), String.COMMA])
+                    lines = ''.join([lines, item.code(tabs-1), String.COMMA])
             return ''.join(
                 [
                     lines,
@@ -1345,7 +1341,7 @@ class ExtTag(Structure):
             )
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 ExtTag(
@@ -1686,7 +1682,7 @@ class Extension(NamedTuple):
             )
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Extension(
@@ -1862,7 +1858,7 @@ class Date(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Date(
@@ -2044,14 +2040,14 @@ class SDate(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SDate(
     year = {Formatter.codes(self.year, tabs)},
     month = {Formatter.codes(self.month, tabs)},
     day = {Formatter.codes(self.day, tabs)},
-    calendar = {Formatter.codes(self.calendar, tabs)},
+    # calendar = {'add in calendar codes later'},
     iso = {Formatter.codes(self.iso, tabs)},
     tag = {Formatter.codes(self.tag, tabs)},
     display_calendar = {Formatter.codes(self.display_calendar, tabs)},
@@ -2211,7 +2207,7 @@ class Time(NamedTuple):
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Time(
@@ -2344,7 +2340,7 @@ class CreationDate(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.time)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 CreationDate(
@@ -2454,7 +2450,7 @@ class Identifier(NamedTuple):
     """
 
     tag: Tag = Tag.NONE
-    tag_info: str = Default.EMPTY
+    payload: str = Default.EMPTY
     tag_type: str = Default.EMPTY
     tag_ext: ExtType = None
     type_ext: ExtType = None
@@ -2464,8 +2460,8 @@ class Identifier(NamedTuple):
         check: bool = (
             Checker.verify_enum(self.tag, Id)
             and Checker.verify_not_empty(self.tag)
-            and Checker.verify_type(self.tag_info, str, no_list=True)
-            and Checker.verify_not_empty(self.tag_info)
+            and Checker.verify_type(self.payload, str, no_list=True)
+            and Checker.verify_not_empty(self.payload)
             and Checker.verify_type(self.tag_type, str, no_list=True)
             and Checker.verify(
                 self.tag == Tag.EXID,
@@ -2481,18 +2477,18 @@ class Identifier(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, self.tag, self.tag_info)
+            lines = Tagger.string(lines, level, self.tag, self.payload)
             lines = Tagger.structure(lines, level + 1, self.tag_ext)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.tag_type)
             lines = Tagger.structure(lines, level + 2, self.type_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Identifier(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
-    tag_info = {Formatter.codes(self.tag_info, tabs, required=True)},
+    payload = {Formatter.codes(self.payload, tabs, required=True)},
     tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EXID))},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
     type_ext = {Formatter.codes(self.type_ext, tabs)},
@@ -2504,7 +2500,7 @@ Identifier(
         self,
         choice: int = Default.CHOICE,
         tag: Tag = Tag.NONE,
-        tag_info: str = Default.EMPTY,
+        payload: str = Default.EMPTY,
         tag_type: str = Default.EMPTY,
         tag_ext: ExtType = None,
         type_ext: ExtType = None,
@@ -2534,7 +2530,7 @@ Identifier(
             case 1:
                 show = Identifier(
                     tag=Tag.REFN,
-                    tag_info='234567',
+                    payload='234567',
                     tag_type='',
                 )
                 code_preface = Example.FULL
@@ -2542,7 +2538,7 @@ Identifier(
             case 2:
                 show = Identifier(
                     tag=Tag.UID,
-                    tag_info='345678',
+                    payload='345678',
                     tag_type='',
                 )
                 code_preface = Example.SECOND
@@ -2550,7 +2546,7 @@ Identifier(
             case 3:
                 show = Identifier(
                     tag=Tag.EXID,
-                    tag_info='222222',
+                    payload='222222',
                     tag_type='some exid type',
                 )
                 code_preface = Example.THIRD
@@ -2558,7 +2554,7 @@ Identifier(
             case _:
                 show = Identifier(
                     tag=tag,
-                    tag_info=tag_info,
+                    payload=payload,
                     tag_type=tag_type,
                     tag_ext=tag_ext,
                     type_ext=type_ext,
@@ -2631,7 +2627,7 @@ class Phone(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phon_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Phone(
@@ -2735,7 +2731,7 @@ class Email(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.email_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Email(
@@ -2841,7 +2837,7 @@ class Fax(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.fax_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Fax(
@@ -2947,7 +2943,7 @@ class WWW(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.www_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 WWW(
@@ -3053,7 +3049,7 @@ class Lang(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.lang_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Lang(
@@ -3178,7 +3174,7 @@ class Phrase(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Phrase(
@@ -3350,7 +3346,7 @@ class Address(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.ctry_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Address(
@@ -3569,7 +3565,7 @@ class Age(NamedTuple):
             line = Tagger.structure(line, level + 1, self.phrase)
         return line
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         """Generate the ChronoData code that would produce the GEDCOM lines."""
         return indent(
             f"""
@@ -3579,7 +3575,7 @@ Age(
     weeks = {Formatter.codes(self.weeks, tabs)},
     days = {Formatter.codes(self.days, tabs)},
     greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     age_ext = {Formatter.codes(self.age_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -3777,16 +3773,16 @@ class PersonalNamePieces(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.nsfx_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 PersonalNamePieces(
-    prefix = {Formatter.codes(self.prefix, tabs + 2)},
-    given = {Formatter.codes(self.given, tabs + 2)},
-    nickname = {Formatter.codes(self.nickname, tabs + 2)},
-    surname_prefix = {Formatter.codes(self.surname_prefix, tabs + 2)},
-    surname = {Formatter.codes(self.surname, tabs + 2)},
-    suffix = {Formatter.codes(self.suffix, tabs + 2)}, 
+    prefix = {Formatter.codes(self.prefix, tabs + 1)},
+    given = {Formatter.codes(self.given, tabs + 1)},
+    nickname = {Formatter.codes(self.nickname, tabs + 1)},
+    surname_prefix = {Formatter.codes(self.surname_prefix, tabs + 1)},
+    surname = {Formatter.codes(self.surname, tabs + 1)},
+    suffix = {Formatter.codes(self.suffix, tabs + 1)}, 
     npfx_ext = {Formatter.codes(self.npfx_ext, tabs)},
     givn_ext = {Formatter.codes(self.givn_ext, tabs)},
     nick_ext = {Formatter.codes(self.nick_ext, tabs)},
@@ -3969,13 +3965,13 @@ class NameTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.pieces)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 NameTranslation(
     translation = {Formatter.codes(self.translation, tabs, required=True)},
-    language = {Formatter.codes(self.language, tabs + 2, required=True)},
-    pieces = {Formatter.codes(self.pieces, tabs + 2)},
+    language = {Formatter.codes(self.language, tabs + 1, required=True)},
+    pieces = {Formatter.codes(self.pieces, tabs + 1)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -4142,7 +4138,7 @@ class NoteTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 NoteTranslation(
@@ -4300,13 +4296,13 @@ class CallNumber(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 CallNumber(
     call_number = {Formatter.codes(self.call_number, tabs, required=True)},
     medium = {Formatter.codes(self.medium, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
 )""",
             String.INDENT * tabs,
         )
@@ -4445,7 +4441,7 @@ class Text(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Text(
@@ -4585,12 +4581,12 @@ class SourceData(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.texts)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SourceData(
-    date = {Formatter.codes(self.date, tabs + 2)},
-    texts = {Formatter.codes(self.texts, tabs + 2)},
+    date = {Formatter.codes(self.date, tabs + 1)},
+    texts = {Formatter.codes(self.texts, tabs + 1)},
     data_ext = {Formatter.codes(self.data_ext, tabs)},
 ),""",
             String.INDENT * tabs,
@@ -4791,7 +4787,7 @@ class SourceCitation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SourceCitation(
@@ -4799,12 +4795,12 @@ SourceCitation(
     page = {Formatter.codes(self.page, tabs)},
     source_data = {Formatter.codes(self.source_data, tabs + 1)},
     event = {Formatter.codes(self.event, tabs + 1)},
-    event_phrase = {Formatter.codes(self.event_phrase, tabs+2)},
+    event_phrase = {Formatter.codes(self.event_phrase, tabs+1)},
     role = {Formatter.codes(self.role, tabs)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs+2)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs+1)},
     quality = {Formatter.codes(self.quality, tabs)},
-    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
+    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
     sour_ext = {Formatter.codes(self.sour_ext, tabs + 1)},
     page_ext = {Formatter.codes(self.page_ext, tabs + 1)},
     even_ext = {Formatter.codes(self.even_ext, tabs + 1)},
@@ -5034,7 +5030,7 @@ class Note(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Note(
@@ -5186,7 +5182,7 @@ class SNote(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.snote_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SNote(
@@ -5302,7 +5298,7 @@ class ChangeDate(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 ChangeDate(
@@ -5450,13 +5446,13 @@ class SourceRepositoryCitation(NamedTuple):
             lines = Tagger.structure(lines, level, self.call_numbers)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SourceRepositoryCitation(
     repository_xref = {Formatter.codes(self.repository_xref, tabs, required=True)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
-    callnumbers = {Formatter.codes(self.call_numbers, tabs + 1)},
+    call_numbers = {Formatter.codes(self.call_numbers, tabs + 1)},
     repo_ext = {Formatter.codes(self.repo_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -5575,6 +5571,7 @@ class PersonalName(NamedTuple):
         ... )
         >>> adam = PersonalName(
         ...     name='אָדָ֛ם',
+        ...     surname=' ',
         ...     type=Tag.OTHER,
         ...     phrase=Phrase('The first man'),
         ...     pieces=PersonalNamePieces(nickname=['הָֽאָדָ֖ם']),
@@ -5582,7 +5579,7 @@ class PersonalName(NamedTuple):
         ...     notes=[adam_note],
         ... )
         >>> print(adam.ged(1))
-        1 NAME אָדָ֛ם //
+        1 NAME אָדָ֛ם / /
         2 TYPE OTHER
         3 PHRASE The first man
         2 NICK הָֽאָדָ֖ם
@@ -5682,7 +5679,7 @@ class PersonalName(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 PersonalName(
@@ -6050,16 +6047,16 @@ class Association(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.citations)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Association(
     individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
-    association_phrase = {Formatter.codes(self.association_phrase, tabs + 2)},
+    association_phrase = {Formatter.codes(self.association_phrase, tabs + 1)},
     role = {Formatter.codes(self.role, tabs, required=True)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    citations = {Formatter.codes(self.citations, tabs)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
+    citations = {Formatter.codes(self.citations, tabs+1)},
     asso_ext = {Formatter.codes(self.asso_ext, tabs)}, 
     role_ext = {Formatter.codes(self.role_ext, tabs)},
 )""",
@@ -6245,7 +6242,7 @@ class MultimediaLink(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.title_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 MultimediaLink(
@@ -6596,7 +6593,7 @@ class Map(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.longitude_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Map(
@@ -6764,7 +6761,7 @@ class PlaceTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 PlaceTranslation(
@@ -6772,7 +6769,7 @@ PlaceTranslation(
     place2 = {Formatter.codes(self.place2, tabs)},
     place3 = {Formatter.codes(self.place3, tabs)},
     place4 = {Formatter.codes(self.place4, tabs)},
-    language = {Formatter.codes(self.language, tabs + 2)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     tran_ext = {Formatter.codes(self.tran_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -7041,7 +7038,7 @@ class Place(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Place(
@@ -7053,12 +7050,12 @@ Place(
     form2 = {Formatter.codes(self.form2, tabs)},
     form3 = {Formatter.codes(self.form3, tabs)},
     form4 = {Formatter.codes(self.form4, tabs)},
-    language = {Formatter.codes(self.language, tabs)},
-    translations = {Formatter.codes(self.translations, tabs + 2)},
-    map = {Formatter.codes(self.map, tabs + 2)},
-    exids = {Formatter.codes(self.exids, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    plac_ext = {Formatter.codes(self.plac_ext, tabs + 2)},
+    language = {Formatter.codes(self.language, tabs+1)},
+    translations = {Formatter.codes(self.translations, tabs + 1)},
+    map = {Formatter.codes(self.map, tabs + 1)},
+    exids = {Formatter.codes(self.exids, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
+    plac_ext = {Formatter.codes(self.plac_ext, tabs)},
     form_ext = {Formatter.codes(self.form_ext, tabs)}
 )""",
             String.INDENT * tabs,
@@ -7238,7 +7235,7 @@ class EventDetail(NamedTuple):
     notes: NoteType = None
     sources: SourCiteType = None
     multimedia_links: MMLinkType = None
-    uids: list[Tag] | None = None
+    uids: IdenType = None
     agnc_ext: ExtType = None
     reli_ext: ExtType = None
     caus_ext: ExtType = None
@@ -7266,7 +7263,7 @@ class EventDetail(NamedTuple):
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
-            and Checker.verify_type(self.uids, Id)
+            and Checker.verify_type(self.uids, Identifier)
             and Checker.verify_ext(Tag.AGNC, self.agnc_ext)
             and Checker.verify_ext(Tag.RELI, self.reli_ext)
             and Checker.verify_ext(Tag.CAUS, self.caus_ext)
@@ -7303,31 +7300,31 @@ class EventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.uids)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 EventDetail(
-    date = {Formatter.codes(self.date, tabs + 2)},
-    time = {Formatter.codes(self.time, tabs + 2)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
-    place = {Formatter.codes(self.place, tabs + 2)},
-    address = {Formatter.codes(self.address, tabs + 2)},
-    phones = {Formatter.codes(self.phones, tabs + 2)},
-    emails = {Formatter.codes(self.emails, tabs + 2)},
-    faxes = {Formatter.codes(self.faxes, tabs + 2)}, 
-    wwws = {Formatter.codes(self.wwws, tabs + 2)},
+    date = {Formatter.codes(self.date, tabs + 1)},
+    time = {Formatter.codes(self.time, tabs + 1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
+    place = {Formatter.codes(self.place, tabs + 1)},
+    address = {Formatter.codes(self.address, tabs + 1)},
+    phones = {Formatter.codes(self.phones, tabs + 1)},
+    emails = {Formatter.codes(self.emails, tabs + 1)},
+    faxes = {Formatter.codes(self.faxes, tabs + 1)}, 
+    wwws = {Formatter.codes(self.wwws, tabs + 1)},
     agency = {Formatter.codes(self.agency, tabs)},
     religion = {Formatter.codes(self.religion, tabs)},
     cause = {Formatter.codes(self.cause, tabs)},
     resn = {Formatter.codes(self.resn, tabs)},
-    sdate = {Formatter.codes(self.sdate, tabs + 2)},
-    stime = {Formatter.codes(self.stime, tabs + 2)},
-    sphrase = {Formatter.codes(self.sphrase, tabs + 2)},
-    associations = {Formatter.codes(self.associations, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    sources = {Formatter.codes(self.sources, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
-    uids = {Formatter.codes(self.uids, tabs + 2)},
+    sdate = {Formatter.codes(self.sdate, tabs + 1)},
+    stime = {Formatter.codes(self.stime, tabs + 1)},
+    sphrase = {Formatter.codes(self.sphrase, tabs + 1)},
+    associations = {Formatter.codes(self.associations, tabs+1)},
+    notes = {Formatter.codes(self.notes, tabs+1)},
+    sources = {Formatter.codes(self.sources, tabs + 1)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+1)},
+    uids = {Formatter.codes(self.uids, tabs + 1)},
     agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
     reli_ext = {Formatter.codes(self.reli_ext, tabs)},
     caus_ext = {Formatter.codes(self.caus_ext, tabs)},
@@ -7358,7 +7355,7 @@ EventDetail(
         notes: NoteType = None,
         sources: SourCiteType = None,
         multimedia_links: MMLinkType = None,
-        uids: list[Tag] | None = None,
+        uids: IdenType = None,
         agnc_ext: ExtType = None,
         reli_ext: ExtType = None,
         caus_ext: ExtType = None,
@@ -7564,7 +7561,7 @@ class FamilyEventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FamilyEventDetail(
@@ -7716,14 +7713,14 @@ class FamilyAttribute(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.family_event_detail)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FamilyAttribute(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs, required=True)},
     attribute_type = {Formatter.codes(self.attribute_type, tabs)},
-    family_event_detail = {Formatter.codes(self.family_event_detail, tabs + 2)},
+    family_event_detail = {Formatter.codes(self.family_event_detail, tabs + 1)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -7834,7 +7831,7 @@ class FamilyEvent(NamedTuple):
         >>> event2 = FamilyEvent(Tag.EVEN)
         >>> event2.validate()
         Traceback (most recent call last):
-        ValueError: The event type for tag EVEN must have some value.
+        ValueError: The EVEN tag requires a non-empty TYPE.
 
     References:
         [GEDCOM Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE)
@@ -7924,14 +7921,14 @@ class FamilyEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FamilyEvent(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     occurred = {Formatter.codes(self.occurred, tabs)},
     event_type = {Formatter.codes(self.event_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -8058,7 +8055,7 @@ class Child(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Child(
@@ -8183,7 +8180,7 @@ class LDSOrdinanceDetail(NamedTuple):
             and Checker.verify_type(self.status_time, Time, no_list=True)
             and Checker.verify(
                 self.status != Tag.NONE,
-                self.date is None,
+                self.date is not None,
                 Msg.STAT_REQUIRES_DATE,
             )
             and Checker.verify_type(self.notes, Note)
@@ -8209,21 +8206,21 @@ class LDSOrdinanceDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 LDSOrdinanceDetail(
-    date = {Formatter.codes(self.date, tabs + 2)},
-    time = {Formatter.codes(self.time, tabs + 2)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
-    temple = {Formatter.codes(self.temple, tabs + 1)},
-    place = {Formatter.codes(self.place, tabs + 2)},
-    status = {Formatter.codes(self.status, tabs + 1)},
-    status_date = {Formatter.codes(self.status_date, tabs + 2)},
-    status_time = {Formatter.codes(self.status_time, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
+    date = {Formatter.codes(self.date, tabs + 1)},
+    time = {Formatter.codes(self.time, tabs + 1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
+    temple = {Formatter.codes(self.temple, tabs)},
+    place = {Formatter.codes(self.place, tabs + 1)},
+    status = {Formatter.codes(self.status, tabs)},
+    status_date = {Formatter.codes(self.status_date, tabs + 1)},
+    status_time = {Formatter.codes(self.status_time, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
     source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
-    temple_ext = {Formatter.codes(self.temple_ext, tabs + 1)},
+    temple_ext = {Formatter.codes(self.temple_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -8370,11 +8367,11 @@ class LDSSpouseSealing(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.detail)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 LDSSpouseSealing(
-    detail = {Formatter.codes(self.detail, tabs)},
+    detail = {Formatter.codes(self.detail, tabs+1)},
     slgs_ext = {Formatter.codes(self.slgs_ext, tabs)}, 
 )""",
             String.INDENT * tabs,
@@ -8513,12 +8510,12 @@ class LDSIndividualOrdinance(NamedTuple):
                 )
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 LDSIndividualOrdinance(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
-    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs)},
+    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs+1)},
     family_xref = {Formatter.codes(self.family_xref, tabs, required=(self.tag == Tag.SLGC))},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
@@ -8643,13 +8640,13 @@ class IndividualEventDetail(NamedTuple):
                 lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 IndividualEventDetail(
-    event_detail = {Formatter.codes(self.event_detail, tabs, required=True)},
-    age = {Formatter.codes(self.age, tabs + 2)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    event_detail = {Formatter.codes(self.event_detail, tabs+1, required=True)},
+    age = {Formatter.codes(self.age, tabs + 1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
 )""",
             String.INDENT * tabs,
         )
@@ -8839,14 +8836,14 @@ class IndividualAttribute(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 IndividualAttribute(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs, required=True)},
     tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag in [Tag.FACT, Tag.IDNO]))},
-    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
     type_ext = {Formatter.codes(self.type_ext, tabs)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
@@ -8980,7 +8977,7 @@ class IndividualEvent(NamedTuple):
         ...     events=[
         ...         IndividualEvent(
         ...             tag=Tag.EVEN,
-        ...             text='Land Lease',
+        ...             tag_type='Land Lease',
         ...             event_detail=IndividualEventDetail(
         ...                 event_detail=EventDetail(date=Date(1837, 10, 2))
         ...             ),
@@ -8988,7 +8985,7 @@ class IndividualEvent(NamedTuple):
         ...         IndividualEvent(
         ...             tag=Tag.EVEN,
         ...             payload='Mining equipment',
-        ...             text='Equipment Lease',
+        ...             tag_type='Equipment Lease',
         ...             event_detail=IndividualEventDetail(
         ...                 EventDetail(date=Date(1837, 11, 4))
         ...             ),
@@ -9136,12 +9133,12 @@ class IndividualEvent(NamedTuple):
             and Checker.verify_type(self.tag_type, str, no_list=True)
             and Checker.verify(
                 self.tag != Tag.EVEN,
-                self.payload not in ['Y', ''],
+                self.payload in ['Y', ''],
                 Msg.PAYLOAD_IS_Y,
             )
             and Checker.verify(
                 self.tag == Tag.EVEN,
-                self.tag_type == Default.EMPTY,
+                self.tag_type != Default.EMPTY,
                 Msg.EVEN_REQUIRES_TYPE,
             )
             and Checker.verify_type(
@@ -9188,17 +9185,17 @@ class IndividualEvent(NamedTuple):
                         lines = Tagger.structure(lines, level + 3, self.phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 IndividualEvent(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs)},
     tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs)},
+    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -9359,12 +9356,12 @@ class Alias(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 Alias(
     individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
-    phrase = {Formatter.codes(self.phrase, tabs + 2)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     alia_ext = {Formatter.codes(self.alia_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -9504,16 +9501,16 @@ class FamilyChild(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.status_phrase)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FamilyChild(
     family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},  
     pedigree = {Formatter.codes(self.pedigree, tabs)},
-    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs + 2)},
+    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs+1)},
     status = {Formatter.codes(self.status, tabs)},
-    status_phrase = {Formatter.codes(self.status_phrase, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
+    status_phrase = {Formatter.codes(self.status_phrase, tabs+1)},
+    notes = {Formatter.codes(self.notes, tabs+1)},
     famc_ext = {Formatter.codes(self.famc_ext, tabs)},
     pedi_ext = {Formatter.codes(self.pedi_ext, tabs)},
     stat_ext = {Formatter.codes(self.stat_ext, tabs)},
@@ -9650,12 +9647,12 @@ class FamilySpouse(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FamilySpouse(
     family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},
-    notes = {Formatter.codes(self.notes, tabs)},
+    notes = {Formatter.codes(self.notes, tabs+1)},
     fams_ext = {Formatter.codes(self.fams_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -9775,7 +9772,7 @@ class FileTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.form_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 FileTranslation(
@@ -9922,16 +9919,16 @@ class File(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 File(
     file = {Formatter.codes(self.file, tabs, required=True)},
     form = {Formatter.codes(self.form, tabs, required=True)},
     medi = {Formatter.codes(self.medi, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
+    phrase = {Formatter.codes(self.phrase, tabs+1)},
     titl = {Formatter.codes(self.titl, tabs)},
-    file_translations = {Formatter.codes(self.file_translations, tabs)},
+    file_translations = {Formatter.codes(self.file_translations, tabs+1)},
     file_ext = {Formatter.codes(self.file_ext, tabs)},
     form_ext = {Formatter.codes(self.form_ext, tabs)},
     medi_ext = {Formatter.codes(self.medi_ext, tabs)},
@@ -10071,7 +10068,7 @@ class SourceDataEvent(NamedTuple):
             and Checker.verify_not_empty(self.event)
             and Checker.verify_type(self.date_period, str, no_list=True)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
-            and Checker.verify_type(self.place, str, no_list=True)
+            and Checker.verify_type(self.place, Place, no_list=True)
             and Checker.verify_ext(Tag.EVEN, self.even_ext)
             and Checker.verify_ext(Tag.DATE, self.date_ext)
         )
@@ -10089,14 +10086,14 @@ class SourceDataEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.place)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 SourceDataEvent(
-    event = {Formatter.codes(self.event, tabs, required=True)},
-    date_period = {Formatter.codes(self.date_period, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    place = {Formatter.codes(self.place, tabs)},
+    event = {Formatter.codes(self.event, tabs+1, required=True)},
+    date_period = {Formatter.codes(self.date_period, tabs+1)},
+    phrase = {Formatter.codes(self.phrase, tabs+1)},
+    place = {Formatter.codes(self.place, tabs+1)},
     even_ext = {Formatter.codes(self.even_ext, tabs)},
     date_ext = {Formatter.codes(self.date_ext, tabs)},
 )""",
@@ -10230,15 +10227,15 @@ class NonEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.sources)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1) -> str:
         return indent(
             f"""
 NonEvent(
     no = {Formatter.codes(self.no, tabs, required=True)},
-    date = {Formatter.codes(self.date, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs)},
-    notes = {Formatter.codes(self.notes, tabs)},
-    sources = {Formatter.codes(self.sources, tabs)},
+    date = {Formatter.codes(self.date, tabs+1)},
+    phrase = {Formatter.codes(self.phrase, tabs+1)},
+    notes = {Formatter.codes(self.notes, tabs+1)},
+    sources = {Formatter.codes(self.sources, tabs+1)},
     no_ext = {Formatter.codes(self.no_ext, tabs)},
 )""",
             String.INDENT * tabs,
@@ -10421,9 +10418,9 @@ Submitter(
     emails = {Formatter.codes(self.emails, tabs + 2)},
     faxes = {Formatter.codes(self.faxes, tabs + 2)},
     wwws = {Formatter.codes(self.wwws, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)}, 
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)}, 
     languages = {Formatter.codes(self.languages, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs)},
+    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
     notes = {Formatter.codes(self.notes, tabs + 2)},
     change = {Formatter.codes(self.change, tabs + 2)},
     creation = {Formatter.codes(self.creation, tabs + 2)},
@@ -10556,6 +10553,8 @@ Submitter(
             genealogy_docs,
         )
 
+
+SubmType = Submitter | list[Submitter] | None
 
 class Family(NamedTuple):
     """Store, validate and display a GEDCOM Family Record.
@@ -10851,6 +10850,7 @@ Family(
             genealogy_docs,
         )
 
+FamType = Family | list[Family] | None
 
 class Multimedia(NamedTuple):
     """Store, validate and display a GECDOM Multimedia Record.
@@ -11026,6 +11026,7 @@ Multimedia(
             genealogy_docs,
         )
 
+ObjeType = Multimedia | list[Multimedia] | None
 
 class Source(NamedTuple):
     """Store, validate and display a GEDCOM Source Record.
@@ -11065,9 +11066,7 @@ class Source(NamedTuple):
     title: str = Default.EMPTY
     abbreviation: str = Default.EMPTY
     published: str = Default.EMPTY
-    text: str = Default.EMPTY
-    mime: str = Default.MIME
-    language: LangType = None
+    text: TextType = None
     repositories: SourRepoCiteType = None
     identifiers: IdenType = None
     notes: NoteType = None
@@ -11080,8 +11079,6 @@ class Source(NamedTuple):
     titl_ext: ExtType = None
     abbr_ext: ExtType = None
     publ_ext: ExtType = None
-    text_ext: ExtType = None
-    mime_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -11092,9 +11089,7 @@ class Source(NamedTuple):
             and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(self.abbreviation, str, no_list=True)
             and Checker.verify_type(self.published, str, no_list=True)
-            and Checker.verify_type(self.text, str, no_list=True)
-            and Checker.verify_type(self.mime, str, no_list=True)
-            and Checker.verify_type(self.language, str, no_list=True)
+            and Checker.verify_type(self.text, Text, no_list=True)
             and Checker.verify_type(self.repositories, Repository)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
@@ -11107,8 +11102,6 @@ class Source(NamedTuple):
             and Checker.verify_ext(Tag.TITL, self.titl_ext)
             and Checker.verify_ext(Tag.ABBR, self.abbr_ext)
             and Checker.verify_ext(Tag.PUBL, self.publ_ext)
-            and Checker.verify_ext(Tag.TEXT, self.text_ext)
-            and Checker.verify_ext(Tag.MIME, self.mime_ext)
         )
         return check
 
@@ -11137,11 +11130,7 @@ class Source(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.abbr_ext)
             lines = Tagger.string(lines, level + 1, Tag.PUBL, self.published)
             lines = Tagger.structure(lines, level + 2, self.publ_ext)
-            lines = Tagger.string(lines, level + 1, Tag.TEXT, self.text)
-            lines = Tagger.structure(lines, level + 2, self.text_ext)
-            lines = Tagger.string(lines, level + 2, Tag.MIME, self.mime)
-            lines = Tagger.structure(lines, level + 3, self.mime_ext)
-            lines = Tagger.structure(lines, level + 2, self.language)
+            lines = Tagger.structure(lines, level + 1, self.text)
             lines = Tagger.structure(lines, level + 1, self.repositories)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -11175,8 +11164,6 @@ Source(
     titl_ext = {Formatter.codes(self.titl_ext, tabs)},
     abbr_ext = {Formatter.codes(self.abbr_ext, tabs)},
     publ_ext = {Formatter.codes(self.publ_ext, tabs)},
-    text_ext = {Formatter.codes(self.text_ext, tabs)},
-    mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
@@ -11192,9 +11179,7 @@ Source(
         title: str = Default.EMPTY,
         abbreviation: str = Default.EMPTY,
         published: str = Default.EMPTY,
-        text: str = Default.EMPTY,
-        mime: str = Default.MIME,
-        language: LangType = None,
+        text: TextType = None,
         repositories: SourRepoCiteType = None,
         identifiers: IdenType = None,
         notes: NoteType = None,
@@ -11207,8 +11192,6 @@ Source(
         titl_ext: ExtType = None,
         abbr_ext: ExtType = None,
         publ_ext: ExtType = None,
-        text_ext: ExtType = None,
-        mime_ext: ExtType = None,
     ) -> None:
         """Produce four examples of ChronoData code and GEDCOM output lines and link to
         the GEDCOM documentation.
@@ -11242,7 +11225,7 @@ Source(
                     title='',
                     abbreviation='',
                     published='',
-                    text='',
+                    text=None,
                     repositories=None,
                     identifiers=None,
                     notes=None,
@@ -11262,7 +11245,7 @@ Source(
                     title='',
                     abbreviation='',
                     published='',
-                    text='',
+                    text=None,
                     repositories=None,
                     identifiers=None,
                     notes=None,
@@ -11282,7 +11265,7 @@ Source(
                     title='',
                     abbreviation='',
                     published='',
-                    text='',
+                    text=None,
                     repositories=None,
                     identifiers=None,
                     notes=None,
@@ -11303,8 +11286,6 @@ Source(
                     abbreviation=abbreviation,
                     published=published,
                     text=text,
-                    mime=mime,
-                    language=language,
                     repositories=repositories,
                     identifiers=identifiers,
                     notes=notes,
@@ -11317,8 +11298,6 @@ Source(
                     titl_ext=titl_ext,
                     abbr_ext=abbr_ext,
                     publ_ext=publ_ext,
-                    text_ext=text_ext,
-                    mime_ext=mime_ext,
                 )
                 code_preface = Example.EMPTY_CODE
                 gedcom_preface = Example.EMPTY_GEDCOM
@@ -11332,6 +11311,8 @@ Source(
             gedcom_docs,
             genealogy_docs,
         )
+    
+SourType = Source | list[Source] | None
 
 
 class Individual(NamedTuple):
@@ -11448,11 +11429,11 @@ class Individual(NamedTuple):
     events: IndiEvenType = None
     lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None
     families_child: FamcType = None
-    submitters: StrList = None
+    submitters: SubmType = None
     associations: AssoType = None
     aliases: AliaType = None
-    ancestor_interest: StrList = None
-    descendent_interest: StrList = None
+    ancestor_interest: SubmType = None
+    descendent_interest: SubmType = None
     identifiers: IdenType = None
     notes: NoteType = None
     sources: StrList = None
@@ -11476,11 +11457,11 @@ class Individual(NamedTuple):
                 self.lds_individual_ordinances, LDSIndividualOrdinance
             )
             and Checker.verify_type(self.families_child, FamilyChild)
-            and Checker.verify_type(self.submitters, str)
+            and Checker.verify_type(self.submitters, Submitter)
             and Checker.verify_type(self.associations, Association)
             and Checker.verify_type(self.aliases, Alias)
-            and Checker.verify_type(self.ancestor_interest, str)
-            and Checker.verify_type(self.descendent_interest, str)
+            and Checker.verify_type(self.ancestor_interest, Submitter)
+            and Checker.verify_type(self.descendent_interest, Submitter)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.notes, Note)
             and Checker.verify_type(self.sources, Source)
@@ -11526,20 +11507,20 @@ class Individual(NamedTuple):
 Individual(
     xref = {Formatter.codes(self.xref, tabs, required=True)},
     resn = {Formatter.codes(self.resn, tabs)},
-    personal_names = {Formatter.codes(self.personal_names, tabs)},
+    personal_names = {Formatter.codes(self.personal_names, tabs+2)},
     sex = {Formatter.codes(self.sex, tabs)},
-    attributes = {Formatter.codes(self.attributes, tabs)},
-    events = {Formatter.codes(self.events, tabs)},
-    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs)},
-    submitters = {Formatter.codes(self.submitters, tabs)},
-    associations = {Formatter.codes(self.associations, tabs)},
-    aliases = {Formatter.codes(self.aliases, tabs)},
-    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs)},
-    descendent_interest = {Formatter.codes(self.descendent_interest, tabs)},
+    attributes = {Formatter.codes(self.attributes, tabs+2)},
+    events = {Formatter.codes(self.events, tabs+2)},
+    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs+2)},
+    submitters = {Formatter.codes(self.submitters, tabs+2)},
+    associations = {Formatter.codes(self.associations, tabs+2)},
+    aliases = {Formatter.codes(self.aliases, tabs+2)},
+    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs+2)},
+    descendent_interest = {Formatter.codes(self.descendent_interest, tabs+2)},
     identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
     notes = {Formatter.codes(self.notes, tabs + 2)},
-    sources = {Formatter.codes(self.sources, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs)},
+    sources = {Formatter.codes(self.sources, tabs+2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)},
     change = {Formatter.codes(self.change, tabs + 2)}
     creation = {Formatter.codes(self.creation, tabs + 2)}
     resn_ext = {Formatter.codes(self.resn_ext, tabs)},
@@ -11559,11 +11540,11 @@ Individual(
         events: IndiEvenType = None,
         lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None,
         families_child: FamcType = None,
-        submitters: StrList = None,
+        submitters: SubmType = None,
         associations: AssoType = None,
         aliases: AliaType = None,
-        ancestor_interest: StrList = None,
-        descendent_interest: StrList = None,
+        ancestor_interest: SubmType = None,
+        descendent_interest: SubmType = None,
         identifiers: IdenType = None,
         notes: NoteType = None,
         sources: StrList = None,
@@ -11757,15 +11738,15 @@ class Repository(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.NAME, self.name)
+            lines = Tagger.string(lines, level+1, Tag.NAME, self.name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
-            lines = Tagger.structure(lines, level, self.address)
-            lines = Tagger.structure(lines, level, self.phones)
-            lines = Tagger.structure(lines, level, self.emails)
-            lines = Tagger.structure(lines, level, self.faxes)
-            lines = Tagger.structure(lines, level, self.wwws)
-            lines = Tagger.structure(lines, level, self.change)
-            lines = Tagger.structure(lines, level, self.creation)
+            lines = Tagger.structure(lines, level + 1, self.address)
+            lines = Tagger.structure(lines, level + 1, self.phones)
+            lines = Tagger.structure(lines, level + 1, self.emails)
+            lines = Tagger.structure(lines, level + 1, self.faxes)
+            lines = Tagger.structure(lines, level + 1, self.wwws)
+            lines = Tagger.structure(lines, level + 1, self.change)
+            lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
     def code(self, tabs: int = 0) -> str:
@@ -11954,7 +11935,7 @@ class SharedNote(NamedTuple):
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = self.xref.ged()
+        lines: str = self.xref.ged(self.text)
         if self.validate():
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime)
             lines = Tagger.structure(lines, level + 2, self.mime_ext)

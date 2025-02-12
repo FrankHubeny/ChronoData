@@ -1010,7 +1010,7 @@ class Genealogy:
             >>> from genedata.store import Repository
             >>> a = Genealogy('test')
             >>> repo_id = a.repository_xref()
-            >>> repo = Repository(xref=repo_id)
+            >>> repo = Repository(xref=repo_id, name='Repo Name')
             >>> a.repositories(
             ...     [
             ...         repo,
@@ -1018,6 +1018,7 @@ class Genealogy:
             ... )
             >>> print(a.ged_repository)
             0 @1@ REPO
+            1 NAME Repo Name
             <BLANKLINE>
 
             There may be more than one repository record.  This example creates a second
@@ -1058,21 +1059,21 @@ class Genealogy:
             >>> from genedata.store import SharedNote
             >>> a = Genealogy('test')
             >>> sn_id = a.shared_note_xref()
-            >>> sn = SharedNote(xref=sn_id)
+            >>> sn = SharedNote(xref=sn_id, text='The text of a shared note')
             >>> a.shared_notes(
             ...     [
             ...         sn,
             ...     ]
             ... )
             >>> print(a.ged_shared_note)
-            0 @1@ SNOTE
+            0 @1@ SNOTE The text of a shared note
             <BLANKLINE>
 
             There may be more than one shared note record.  This example creates a second
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> sn_id2 = a.shared_note_xref()
-            >>> sn2 = SharedNote(xref=sn_id2)
+            >>> sn2 = SharedNote(xref=sn_id2, text='Other text')
             >>> a.shared_notes(
             ...     [
             ...         sn,
@@ -1080,8 +1081,8 @@ class Genealogy:
             ...     ]
             ... )
             >>> print(a.ged_shared_note)
-            0 @1@ SNOTE
-            0 @2@ SNOTE
+            0 @1@ SNOTE The text of a shared note
+            0 @2@ SNOTE Other text
             <BLANKLINE>
 
         See Also:
@@ -1154,7 +1155,7 @@ class Genealogy:
             >>> from genedata.store import Submitter
             >>> a = Genealogy('test')
             >>> sub_id = a.submitter_xref()
-            >>> sub = Submitter(xref=sub_id)
+            >>> sub = Submitter(xref=sub_id, name='Tom')
             >>> a.submitters(
             ...     [
             ...         sub,
@@ -1162,13 +1163,14 @@ class Genealogy:
             ... )
             >>> print(a.ged_submitter)
             0 @1@ SUBM
+            1 NAME Tom
             <BLANKLINE>
 
             There may be more than one submitter record.  This example creates a second
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> sub_id2 = a.submitter_xref()
-            >>> sub2 = Submitter(xref=sub_id2)
+            >>> sub2 = Submitter(xref=sub_id2, name='Joe')
             >>> a.submitters(
             ...     [
             ...         sub,
@@ -1177,7 +1179,9 @@ class Genealogy:
             ... )
             >>> print(a.ged_submitter)
             0 @1@ SUBM
+            1 NAME Tom
             0 @2@ SUBM
+            1 NAME Joe
             <BLANKLINE>
 
         See Also:
