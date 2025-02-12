@@ -1188,6 +1188,25 @@ class Formatter:
             )
         )
 
+    @staticmethod
+    def display(named_tuple: Any) -> None:
+        """Display the results of the ged and code methods for a named tuple.
+
+        Args:
+            named_tuple: This is the NamedTuple to display.
+        
+        There are two methods to run:
+        1. `ged` runs validate() capturing any error message.
+        2. `code` which runs even if the ged method fails.
+        """
+        try:
+            print(f'GED:\n{named_tuple.ged()}')  # noqa: T201
+        except Exception as e:
+            print('ERROR MESSAGE:\n')  # noqa: T201
+            print(str(e))  # noqa: T201
+            print()  # noqa: T201
+        print(f'CODE:{named_tuple.code()}')  # noqa: T201
+
 
 class Structure:
     """A base class for the GEDCOM structure classes to define dunder methods."""
