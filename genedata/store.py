@@ -89,7 +89,7 @@ __all__ = [
 ]
 
 
-import contextlib  # noqa: I001
+import contextlib
 import logging
 import math
 import re
@@ -100,7 +100,7 @@ from typing import Any, ClassVar, Literal, NamedTuple
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
-from ordered_set import OrderedSet # type: ignore[import-not-found] 
+from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from calendars.calendars import CalendarDefinition
 
@@ -117,7 +117,6 @@ from genedata.constants import (
 from genedata.gedcom import (
     Adop,
     Default,
-    Docs,
     Even,
     EvenAttr,
     FamAttr,
@@ -128,12 +127,12 @@ from genedata.gedcom import (
     IndiEven,
     Medium,
     NameType,
+    OverView,
     Pedi,
     Quay,
     Resn,
     Role,
     Sex,
-    Specs,
     Stat,
     Tag,
 )
@@ -415,7 +414,7 @@ class Tagger:
         if isinstance(payload, list):
             unique_payload = OrderedSet(payload)
             for item in unique_payload:
-            # for item in payload:
+                # for item in payload:
                 if flag != String.EMPTY:
                     lines = ''.join([lines, item.ged(level, flag)])
                 else:
@@ -1080,7 +1079,7 @@ class Formatter:
                         ]
                     )
                 else:
-                    lines = ''.join([lines, item.code(tabs-1), String.COMMA])
+                    lines = ''.join([lines, item.code(tabs - 1), String.COMMA])
             return ''.join(
                 [
                     lines,
@@ -1090,53 +1089,34 @@ class Formatter:
                 ]
             )
         return Formatter.codes_single(items, tabs, required)
-        # if isinstance(items, str):
-        #     if required and items == Default.EMPTY:
-        #         return f'{items!r}{String.REQUIRED}'
-        #     return f'{items!r}'
-        # if isinstance(items, int | float):
-        #     return f'{items!r}'
-        # if isinstance(items, Xref):
-        #     if required and items.fullname == Default.POINTER:
-        #         return f'{items!r}{String.REQUIRED}'
-        #     return f'{items!r}'
-        # if isinstance(items, Tag):
-        #     if required and items == Tag.NONE:
-        #         return f'Tag.{items.name}{String.REQUIRED}'
-        #     return f'Tag.{items.name}'
-        # code_lines: str = (
-        #     items.code(tabs-1)
-        #     .replace(String.EOL, String.EMPTY, 1)
-        #     .replace(String.INDENT, String.EMPTY, 1)
-        # )
-        # return code_lines
+        
 
-    @staticmethod
-    def example(
-        code_preface: str,
-        show_code: str,
-        gedcom_preface: str,
-        show_ged: str,
-        gedcom_docs: str,
-        genealogy_docs: str,
-    ) -> None:
-        print(  # noqa: T201
-            ''.join(
-                [
-                    code_preface,
-                    String.EOL,
-                    show_code,
-                    String.DOUBLE_NEWLINE,
-                    gedcom_preface,
-                    String.DOUBLE_NEWLINE,
-                    show_ged,
-                    String.EOL,
-                    gedcom_docs,
-                    String.EOL,
-                    genealogy_docs,
-                ]
-            )
-        )
+    # @staticmethod
+    # def example(
+    #     code_preface: str,
+    #     show_code: str,
+    #     gedcom_preface: str,
+    #     show_ged: str,
+    #     gedcom_docs: str,
+    #     genealogy_docs: str,
+    # ) -> None:
+    #     print(  
+    #         ''.join(
+    #             [
+    #                 code_preface,
+    #                 String.EOL,
+    #                 show_code,
+    #                 String.DOUBLE_NEWLINE,
+    #                 gedcom_preface,
+    #                 String.DOUBLE_NEWLINE,
+    #                 show_ged,
+    #                 String.EOL,
+    #                 gedcom_docs,
+    #                 String.EOL,
+    #                 genealogy_docs,
+    #             ]
+    #         )
+    #     )
 
     @staticmethod
     def schema_example(
@@ -1194,7 +1174,7 @@ class Formatter:
 
         Args:
             named_tuple: This is the NamedTuple to display.
-        
+
         There are two methods to run:
         1. `ged` runs validate() capturing any error message.
         2. `code` which runs even if the ged method fails.
@@ -1206,6 +1186,82 @@ class Formatter:
             print(str(e))  # noqa: T201
             print()  # noqa: T201
         print(f'CODE:{named_tuple.code()}')  # noqa: T201
+        type_string: str = str(type(named_tuple))
+        match type_string:
+            case "<class 'genedata.store.Address'>":
+                print(OverView.ADDRESS_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Alias'>":
+                print(OverView.INDIVIDUAL)  # noqa: T201
+            case "<class 'genedata.store.Association'>":
+                print(OverView.ASSOCIATION_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.ChangeDate'>":
+                print(OverView.CHANGE_DATE)  # noqa: T201
+            case "<class 'genedata.store.Child'>":
+                print(OverView.FAMILY)  # noqa: T201
+            case "<class 'genedata.store.CreationDate'>":
+                print(OverView.CREATION_DATE)  # noqa: T201
+            case "<class 'genedata.store.Date'>":
+                print(OverView.DATE_VALUE)  # noqa: T201
+            case "<class 'genedata.store.Time'>":
+                print(OverView.DATE_VALUE)  # noqa: T201
+            case "<class 'genedata.store.EventDetail'>":
+                print(OverView.EVENT_DETAIL)  # noqa: T201
+            case "<class 'genedata.store.Family'>":
+                print(OverView.FAMILY)  # noqa: T201
+            case "<class 'genedata.store.FamilyAttribute'>":
+                print(OverView.FAMILY_ATTRIBUTE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.FamilyEventDetail'>":
+                print(OverView.FAMILY_EVENT_DETAIL)  # noqa: T201
+            case "<class 'genedata.store.FamilyEvent'>":
+                print(OverView.FAMILY_EVENT_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Header'>":
+                print(OverView.HEADER)  # noqa: T201
+            case "<class 'genedata.store.Identifier'>":
+                print(OverView.IDENTIFIER_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Individual'>":
+                print(OverView.INDIVIDUAL)  # noqa: T201
+            case "<class 'genedata.store.IndividualAttribute'>":
+                print(OverView.INDIVIDUAL_ATTRIBUTE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.IndividualEventDetail'>":
+                print(OverView.INDIVIDUAL_EVENT_DETAIL)  # noqa: T201
+            case "<class 'genedata.store.IndividualEvent'>":
+                print(OverView.INDIVIDUAL_EVENT_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.LDSOrdinanceDetail'>":
+                print(OverView.LDS_ORDINANCE_DETAIL)  # noqa: T201
+            case "<class 'genedata.store.LDAIndividualOrdinance'>":
+                print(OverView.LDS_INDIVIDUAL_ORDINANCE)  # noqa: T201
+            case "<class 'genedata.store.LDSSPouseSealing'>":
+                print(OverView.LDS_SPOUSE_SEALING)  # noqa: T201
+            case "<class 'genedata.store.Multimedia'>":
+                print(OverView.MULTIMEDIA)  # noqa: T201
+            case "<class 'genedata.store.MultimediaLink'>":
+                print(OverView.MULTIMEDIA_LINK)  # noqa: T201
+            case "<class 'genedata.store.NonEvent'>":
+                print(OverView.NON_EVENT_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Note'>":
+                print(OverView.NOTE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.PersonalNamePieces'>":
+                print(OverView.PERSONAL_NAME_PIECES)  # noqa: T201
+            case "<class 'genedata.store.PersonalName'>":
+                print(OverView.PERSONAL_NAME_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Phrase'>":
+                print(OverView.INDIVIDUAL)  # noqa: T201
+            case "<class 'genedata.store.Place'>":
+                print(OverView.PLACE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Repository'>":
+                print(OverView.REPOSITORY)  # noqa: T201
+            case "<class 'genedata.store.SharedNote'>":
+                print(OverView.SHARED_NOTE)  # noqa: T201
+            case "<class 'genedata.store.Source'>":
+                print(OverView.SOURCE)  # noqa: T201
+            case "<class 'genedata.store.SourceCitation'>":
+                print(OverView.SOURCE_CITATION)  # noqa: T201
+            case "<class 'genedata.store.SourceRepositoryCitation'>":
+                print(OverView.SOURCE_REPOSITORY_CITATION)  # noqa: T201
+            case "<class 'genedata.store.Submitter'>":
+                print(OverView.SUBMITTER)  # noqa: T201
+            case _:
+                pass
 
 
 class Structure:
@@ -1372,72 +1428,6 @@ ExtTag(
 
     def show(self) -> dict[str, Any]:
         return self.yamldict
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: str = Default.EMPTY,
-        url: str = Default.EMPTY,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: ExtTag
-        gedcom_docs: str = Specs.SCHEMA
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = ExtTag(
-                    tag='_DATE',
-                    url='https://gedcom.io/terms/v7/DATE',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = ExtTag(
-                    tag='_DATE',
-                    url='',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = ExtTag(
-                    tag='_DATE',
-                    url='',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = ExtTag(tag=tag, url=url)
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.schema_example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            self.superstructures,
-            self.substructures,
-            gedcom_docs,
-            genealogy_docs,
-        )
 
 
 ExtTagType = ExtTag | list[ExtTag] | None
@@ -1714,87 +1704,6 @@ Extension(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        level: int = 1,
-        exttag: ExtTag | None = None,
-        payload: str = Default.EMPTY,
-        extra: str = Default.EMPTY,
-        substructures: list[Any] | None = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Extension
-        gedcom_docs: str = Specs.EXTENSION
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Extension(
-                    level=1,
-                    exttag=ExtTag(tag='_DATE', url=''),
-                    payload='',
-                    extra='',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Extension(
-                    level=1,
-                    exttag=ExtTag(tag='_DATE', url=''),
-                    payload='',
-                    extra='',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Extension(
-                    level=1,
-                    exttag=ExtTag(tag='_DATE', url=''),
-                    payload='',
-                    extra='',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                if exttag is None:
-                    exttag = ExtTag(Default.EMPTY, Default.EMPTY)
-                show = Extension(
-                    level=level,
-                    exttag=exttag,
-                    payload=payload,
-                    extra=extra,
-                    substructures=substructures,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
 
 ExtType = Extension | list[Extension] | None
 
@@ -1890,89 +1799,6 @@ Date(
     date_ext = {Formatter.codes(self.date_ext, tabs)},
 )""",
             String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        year: int = 0,
-        month: int = 0,
-        day: int = 0,
-        calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
-        iso: str = Default.EMPTY,
-        display_calendar: bool = False,
-        date_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Date
-        gedcom_docs: str = Specs.DATE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = Default.EMPTY
-        gedcom_preface: str = Default.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Date(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Date(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Date(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Date(
-                    year=year,
-                    month=month,
-                    day=day,
-                    calendar=calendar,
-                    iso=iso,
-                    display_calendar=display_calendar,
-                    date_ext=date_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
         )
 
 
@@ -2075,91 +1901,6 @@ SDate(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        year: int = 0,
-        month: int = 0,
-        day: int = 0,
-        calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
-        iso: str = Default.EMPTY,
-        tag: Tag = Tag.SDATE,
-        display_calendar: bool = False,
-        date_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SDate
-        gedcom_docs: str = Specs.DATE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SDate(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SDate(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SDate(
-                    year=2024,
-                    month=10,
-                    day=10,
-                    calendar=CalendarsGregorian.GREGORIAN,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SDate(
-                    year=year,
-                    month=month,
-                    day=day,
-                    calendar=calendar,
-                    iso=iso,
-                    tag=tag,
-                    display_calendar=display_calendar,
-                    date_ext=date_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
 
 SDateType = SDate | None
 
@@ -2239,85 +1980,6 @@ Time(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        hour: int = Default.TIME_HOUR,
-        minute: int = Default.TIME_MINUTE,
-        second: int | float = Default.TIME_SECOND,
-        UTC: bool = False,
-        time_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Time
-        gedcom_docs: str = Specs.TIME
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Time(
-                    hour=22,
-                    minute=1,
-                    second=50,
-                    UTC=True,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Time(
-                    hour=22,
-                    minute=1,
-                    second=50,
-                    UTC=True,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Time(
-                    hour=22,
-                    minute=1,
-                    second=50,
-                    UTC=True,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Time(
-                    hour=hour,
-                    minute=minute,
-                    second=second,
-                    UTC=UTC,
-                    time_ext=time_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
 
 TimeType = Time | None
 
@@ -2368,75 +2030,6 @@ CreationDate(
     crea_ext = {Formatter.codes(self.crea_ext, tabs)},
 )""",
             String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        date: Date = Date(),  # noqa: B008
-        time: Time = Time(),  # noqa: B008
-        crea_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: CreationDate
-        gedcom_docs: str = Specs.DATE_VALUE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = CreationDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = CreationDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = CreationDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = CreationDate(
-                    date=date,
-                    time=time,
-                    crea_ext=crea_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
         )
 
 
@@ -2515,82 +2108,6 @@ Identifier(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        payload: str = Default.EMPTY,
-        tag_type: str = Default.EMPTY,
-        tag_ext: ExtType = None,
-        type_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Identifier
-        gedcom_docs: str = Specs.IDENTIFIER
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Identifier(
-                    tag=Tag.REFN,
-                    payload='234567',
-                    tag_type='',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Identifier(
-                    tag=Tag.UID,
-                    payload='345678',
-                    tag_type='',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Identifier(
-                    tag=Tag.EXID,
-                    payload='222222',
-                    tag_type='some exid type',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Identifier(
-                    tag=tag,
-                    payload=payload,
-                    tag_type=tag_type,
-                    tag_ext=tag_ext,
-                    type_ext=type_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
 
 IdenType = Identifier | list[Identifier] | None
 
@@ -2656,64 +2173,7 @@ Phone(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        phone: str = Default.EMPTY,
-        phon_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Phone
-        gedcom_docs: str = Docs.PHON
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Phone(Formatter.phone(1, 234, 567, 8910))
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Phone(Formatter.phone(10, 111, 222, 3333))
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Phone(Formatter.phone(100, 100, 200, 3000))
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Phone(
-                    phone=phone,
-                    phon_ext=phon_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 PhoneType = Phone | list[Phone] | None
 
@@ -2760,66 +2220,7 @@ Email(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        email: str = Default.EMPTY,
-        email_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Email
-        gedcom_docs: str = Docs.EMAIL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Email(
-                    email='abe@a.mail',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Email(email='r@c.com')
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Email(email='two@three.com')
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Email(
-                    email=email,
-                    email_ext=email_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 EmailType = Email | list[Email] | None
 
@@ -2866,66 +2267,7 @@ Fax(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        fax: str = Default.EMPTY,
-        fax_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Fax
-        gedcom_docs: str = Docs.FAX
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Fax(
-                    fax='234567',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Fax(fax='3333333')
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Fax(fax='two@three.com')
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Fax(
-                    fax=fax,
-                    fax_ext=fax_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FaxType = Fax | list[Fax] | None
 
@@ -2972,66 +2314,7 @@ WWW(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        www: str = Default.EMPTY,
-        www_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: WWW
-        gedcom_docs: str = Docs.WWW
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = WWW(
-                    www='234567',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = WWW(www='3333333')
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = WWW(www='two@three.com')
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = WWW(
-                    www=www,
-                    www_ext=www_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 WWWType = WWW | list[WWW] | None
 
@@ -3078,66 +2361,7 @@ Lang(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        lang: str = Default.EMPTY,
-        lang_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Lang
-        gedcom_docs: str = Docs.LANG
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Lang(
-                    lang='en-US',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Lang(lang='en')
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Lang(lang='two@three.com')
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Lang(
-                    lang=lang,
-                    lang_ext=lang_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 LangType = Lang | list[Lang] | None
 
@@ -3203,63 +2427,7 @@ Phrase(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        phrase: str = Default.EMPTY,
-        phrase_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Phrase
-        gedcom_docs: str = Docs.LANG
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Phrase('something')
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Phrase('else')
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Phrase('now')
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Phrase(
-                    phrase=phrase,
-                    phrase_ext=phrase_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 
 PhraseType = Phrase | None
@@ -3381,98 +2549,6 @@ Address(
     ctry_ext = {Formatter.codes(self.ctry_ext, tabs + 1)},
 )""",
             String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        address: str = Default.EMPTY,
-        city: str = Default.EMPTY,
-        state: str = Default.EMPTY,
-        postal: str = Default.EMPTY,
-        country: str = Default.EMPTY,
-        addr_ext: ExtType = None,
-        city_ext: ExtType = None,
-        stae_ext: ExtType = None,
-        post_ext: ExtType = None,
-        ctry_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Address
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ADDRESS_STRUCTURE'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Address(
-                    '1600 Pennsylvania Avenue NW\\nWashington, DC 20500',
-                    city='Washington',
-                    state='DC',
-                    postal='20500',
-                    country='USA',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Address(
-                    '北京市东城区景山前街4号',
-                    city='北京',
-                    state='',
-                    postal='',
-                    country='',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Address(
-                    'McMurdo Station\nAntarctica',
-                    city='McMurdo Station',
-                    state='',
-                    postal='',
-                    country='Antarctica',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Address(
-                    address=address,
-                    city=city,
-                    state=state,
-                    postal=postal,
-                    country=country,
-                    addr_ext=addr_ext,
-                    city_ext=city_ext,
-                    stae_ext=stae_ext,
-                    post_ext=post_ext,
-                    ctry_ext=ctry_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
         )
 
 
@@ -3600,103 +2676,7 @@ Age(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        years: int = Default.YEARS,
-        months: int = Default.MONTHS,
-        weeks: int = Default.WEEKS,
-        days: int = Default.DAYS,
-        greater_less_than: str = Default.GREATER_LESS_THAN,
-        phrase: PhraseType = None,
-        age_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Age
-        gedcom_docs: str = (
-            'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age'
-        )
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Age(
-                    years=10,
-                    months=2,
-                    weeks=1,
-                    days=2,
-                    greater_less_than='',
-                    phrase=Phrase(
-                        'Original text read, "Ten years, two months, one week and two days."'
-                    ),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Age(
-                    years=0,
-                    months=2,
-                    weeks=0,
-                    days=2,
-                    greater_less_than='<',
-                    phrase=Phrase(
-                        'Original text read, "Under two months and two days."'
-                    ),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Age(
-                    years=0,
-                    months=0,
-                    weeks=40,
-                    days=2,
-                    greater_less_than='>',
-                    phrase=Phrase(
-                        'Original text read, "Čtyřicet týdnů a dva dny"'
-                    ),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Age(
-                    years=years,
-                    months=months,
-                    weeks=weeks,
-                    days=days,
-                    greater_less_than=greater_less_than,
-                    phrase=phrase,
-                    age_ext=age_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 AgeType = Age | None
 
@@ -3812,105 +2792,7 @@ PersonalNamePieces(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        prefix: str | list[str] = Default.EMPTY,
-        given: str | list[str] = Default.EMPTY,
-        nickname: str | list[str] = Default.EMPTY,
-        surname_prefix: str | list[str] = Default.EMPTY,
-        surname: str | list[str] = Default.EMPTY,
-        suffix: str | list[str] = Default.EMPTY,
-        npfx_ext: ExtType = None,
-        givn_ext: ExtType = None,
-        nick_ext: ExtType = None,
-        spfx_ext: ExtType = None,
-        surn_ext: ExtType = None,
-        nsfx_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: PersonalNamePieces
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = PersonalNamePieces(
-                    prefix='Mr',
-                    given='Thomas',
-                    nickname='Tommy',
-                    surname_prefix='Doctor',
-                    surname='Smith',
-                    suffix='Jr',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = PersonalNamePieces(
-                    prefix=['Mr', 'Sir'],
-                    given=['Tom', 'Thomas'],
-                    nickname=['Tommy', 'T'],
-                    surname_prefix=['Mr', 'Sir'],
-                    surname=['Smith', 'Smyth'],
-                    suffix=['Jr', 'Junior'],
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = PersonalNamePieces(
-                    prefix=['Mr', 'Sir'],
-                    given=['Tom', 'Thomas'],
-                    nickname=['Tommy'],
-                    surname_prefix=[],
-                    surname=['Smith'],
-                    suffix=['Jr'],
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = PersonalNamePieces(
-                    prefix=prefix,
-                    given=given,
-                    nickname=nickname,
-                    surname_prefix=surname_prefix,
-                    surname=surname,
-                    suffix=suffix,
-                    npfx_ext=npfx_ext,
-                    givn_ext=givn_ext,
-                    nick_ext=nick_ext,
-                    spfx_ext=spfx_ext,
-                    surn_ext=surn_ext,
-                    nsfx_ext=nsfx_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 PersonalNamePiecesType = PersonalNamePieces | None
 
@@ -3996,89 +2878,7 @@ NameTranslation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        translation: str = String.EMPTY,
-        language: LangType = None,
-        pieces: PersonalNamePiecesType = None,
-        tran_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: NameTranslation
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = NameTranslation(
-                    translation="תומס ג'ונס",
-                    language=Lang('he'),
-                    pieces=PersonalNamePieces(
-                        given=["ג'ונס"],
-                        surname=['תומס'],
-                    ),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = NameTranslation(
-                    translation='توماس جونز',
-                    language=Lang('ar'),
-                    pieces=PersonalNamePieces(
-                        given=['توماس '],
-                        surname=['جونز'],
-                    ),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = NameTranslation(
-                    translation='Τόμας Τζόουνς',
-                    language=Lang('el'),
-                    pieces=PersonalNamePieces(
-                        given=['Τόμας'],
-                        surname=['Τζόουνς'],
-                    ),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = NameTranslation(
-                    translation=translation,
-                    language=language,
-                    pieces=pieces,
-                    tran_ext=tran_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 NameTranType = NameTranslation | list[NameTranslation] | None
 
@@ -4170,82 +2970,7 @@ NoteTranslation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        translation: str = Default.EMPTY,
-        mime: str = Default.MIME,
-        language: LangType = None,
-        tran_ext: ExtType = None,
-        mime_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: NoteTranslation
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = NoteTranslation(
-                    translation='<p>To jest prosta notatka.</p>',
-                    mime=Default.MIME,
-                    language=Lang('pl'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = NoteTranslation(
-                    translation='Þetta er einföld athugasemd.',
-                    mime=Default.MIME,
-                    language=Lang('is'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = NoteTranslation(
-                    translation='यह एक साधारण नोट है.',
-                    mime=Default.MIME,
-                    language=Lang('hi'),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = NoteTranslation(
-                    translation=translation,
-                    mime=mime,
-                    language=language,
-                    tran_ext=tran_ext,
-                    mime_ext=mime_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 NoteTranType = NoteTranslation | list[NoteTranslation] | None
 
@@ -4326,78 +3051,7 @@ CallNumber(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        call_number: str = '12345',
-        medium: Tag = Tag.MAGAZINE,
-        phrase: PhraseType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: CallNumber
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = CallNumber(
-                    call_number='1-234-333 ABC',
-                    medium=Tag.BOOK,
-                    phrase=Phrase('A special call number'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = CallNumber(
-                    call_number='1-234-333 ABC',
-                    medium=Tag.MAGAZINE,
-                    phrase=Phrase('A special article.'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = CallNumber(
-                    call_number='1-234-333 ABC',
-                    medium=Tag.NEWSPAPER,
-                    phrase=Phrase('A newspaper article'),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = CallNumber(
-                    call_number=call_number,
-                    medium=medium,
-                    phrase=phrase,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 CalnType = CallNumber | list[CallNumber] | None
 
@@ -4473,82 +3127,7 @@ Text(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        text: str = Default.EMPTY,
-        mime: str = Default.MIME,
-        language: LangType = None,
-        text_ext: ExtType = None,
-        mime_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Text
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Text(
-                    text='This is a text.',
-                    mime=Default.MIME,
-                    language=Lang('en'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Text(
-                    text='ई एकटा पाठ अछि।',
-                    mime='text/html',
-                    language=Lang('mai'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Text(
-                    text='ይህ ጽሑፍ ነው።',
-                    mime='text/plain',
-                    language=Lang('am'),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Text(
-                    text=text,
-                    mime=mime,
-                    language=language,
-                    text_ext=text_ext,
-                    mime_ext=mime_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 TextType = Text | list[Text] | None
 
@@ -4609,96 +3188,6 @@ SourceData(
     data_ext = {Formatter.codes(self.data_ext, tabs)},
 ),""",
             String.INDENT * tabs,
-        )
-
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        date: DateType = None,
-        texts: TextType = None,
-        data_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SourceData
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SourceData(
-                    date=Date(),
-                    texts=[
-                        Text('hello', Default.MIME, language=Lang('en')),
-                        Text(
-                            'hello again',
-                            Default.MIME,
-                            language=Lang('en'),
-                        ),
-                    ],
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SourceData(
-                    date=Date(),
-                    texts=[
-                        Text('hello', Default.MIME, language=Lang('en')),
-                        Text(
-                            'hello again',
-                            Default.MIME,
-                            language=Lang('en'),
-                        ),
-                    ],
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SourceData(
-                    date=Date(),
-                    texts=[
-                        Text('hello', Default.MIME, language=Lang('en')),
-                        Text(
-                            'hello again',
-                            Default.MIME,
-                            language=Lang('en'),
-                        ),
-                    ],
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SourceData(
-                    date=date,
-                    texts=texts,
-                    data_ext=data_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
         )
 
 
@@ -4814,9 +3303,9 @@ SourceCitation(
     page = {Formatter.codes(self.page, tabs)},
     source_data = {Formatter.codes(self.source_data, tabs + 1)},
     event = {Formatter.codes(self.event, tabs + 1)},
-    event_phrase = {Formatter.codes(self.event_phrase, tabs+1)},
+    event_phrase = {Formatter.codes(self.event_phrase, tabs + 1)},
     role = {Formatter.codes(self.role, tabs)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs+1)},
+    role_phrase = {Formatter.codes(self.role_phrase, tabs + 1)},
     quality = {Formatter.codes(self.quality, tabs)},
     multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
@@ -4829,96 +3318,7 @@ SourceCitation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        source_xref: SourceXref = Void.SOUR,
-        page: str = String.EMPTY,
-        source_data: SourDataType = None,
-        event: Tag = Tag.NONE,
-        event_phrase: PhraseType = None,
-        role: Tag = Tag.NONE,
-        role_phrase: PhraseType = None,
-        quality: Tag = Tag.NONE,
-        multimedialinks: AnyList = None,
-        notes: AnyList = None,
-        sour_ext: ExtType = None,
-        page_ext: ExtType = None,
-        even_ext: ExtType = None,
-        role_ext: ExtType = None,
-        quay_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SourceCitation
-        gedcom_docs: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SourceCitation(
-                    source_xref=Void.SOUR,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SourceCitation(
-                    source_xref=Void.SOUR,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SourceCitation(
-                    source_xref=Void.SOUR,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SourceCitation(
-                    source_xref=source_xref,
-                    page=page,
-                    source_data=source_data,
-                    event=event,
-                    event_phrase=event_phrase,
-                    role=role,
-                    role_phrase=role_phrase,
-                    quality=quality,
-                    multimedialinks=multimedialinks,
-                    notes=notes,
-                    sour_ext=sour_ext,
-                    page_ext=page_ext,
-                    even_ext=even_ext,
-                    role_ext=role_ext,
-                    quay_ext=quay_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 SourCiteType = SourceCitation | list[SourceCitation] | None
 
@@ -5064,92 +3464,7 @@ Note(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        note: str = 'A simple note',
-        mime: str = 'text/html',
-        language: LangType = None,
-        translations: NoteTranType = None,
-        source_citations: SourCiteType = None,
-        note_ext: ExtType = None,
-        mime_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Note
-        gedcom_docs: str = Specs.NOTE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Note(
-                    note='A note',
-                    mime='text/plain',
-                    language=Lang('en-US'),
-                    translations=None,
-                    source_citations=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Note(
-                    note='<p>A note</p>',
-                    mime='text/html',
-                    language=Lang('en-US'),
-                    translations=None,
-                    source_citations=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Note(
-                    note='A note',
-                    mime=Default.MIME,
-                    language=Lang('en-US'),
-                    translations=None,
-                    source_citations=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Note(
-                    note=note,
-                    mime=mime,
-                    language=language,
-                    translations=translations,
-                    source_citations=source_citations,
-                    note_ext=note_ext,
-                    mime_ext=mime_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 NoteType = Note | list[Note] | None
 
@@ -5211,70 +3526,7 @@ SNote(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        snote_xref: SharedNoteXref = Void.SNOTE,
-        snote_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SNote
-        gedcom_docs: str = Specs.NOTE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SNote(
-                    snote_xref=Void.SNOTE,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SNote(
-                    snote_xref=Void.SNOTE,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SNote(
-                    snote_xref=Void.SNOTE,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SNote(
-                    snote_xref=snote_xref,
-                    snote_ext=snote_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 class ChangeDate(NamedTuple):
     """Store, validate and format change date information.
@@ -5329,84 +3581,7 @@ ChangeDate(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        date: DateType = None,
-        time: TimeType = None,
-        notes: NoteType = None,
-        chan_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: ChangeDate
-        gedcom_docs: str = ''  # Specs.DATE_VALUE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = ChangeDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                    notes=Note(note='Just a quick note.'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = ChangeDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                    notes=Note(note='Test Date and Time'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = ChangeDate(
-                    Date(2024, 1, 10),
-                    Time(12, 30, 5),
-                    notes=[
-                        Note('Test Date and time'),
-                        Note('Testing, testing.'),
-                        Note('This is a third note.'),
-                    ],
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = ChangeDate(
-                    date=date,
-                    time=time,
-                    notes=notes,
-                    chan_ext=chan_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 ChangeDateType = ChangeDate | None
 
@@ -5477,80 +3652,7 @@ SourceRepositoryCitation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        repository_xref: RepositoryXref = Void.REPO,
-        notes: NoteType = None,
-        call_numbers: CalnType = None,
-        repo_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SourceRepositoryCitation
-        gedcom_docs: str = Specs.SOURCE_REPOSITORY_CITATION
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SourceRepositoryCitation(
-                    repository_xref=Void.REPO,
-                    notes=None,
-                    call_numbers=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SourceRepositoryCitation(
-                    repository_xref=Void.REPO,
-                    notes=None,
-                    call_numbers=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SourceRepositoryCitation(
-                    repository_xref=Void.REPO,
-                    notes=None,
-                    call_numbers=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SourceRepositoryCitation(
-                    repository_xref=repository_xref,
-                    notes=notes,
-                    call_numbers=call_numbers,
-                    repo_ext=repo_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 SourRepoCiteType = (
     SourceRepositoryCitation | list[SourceRepositoryCitation] | None
@@ -5716,106 +3818,7 @@ PersonalName(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        name: str = Default.EMPTY,
-        surname: str = Default.EMPTY,
-        type: Tag = Tag.NONE,
-        phrase: PhraseType = None,
-        pieces: PersonalNamePiecesType = None,
-        translations: NameTranType = None,
-        notes: NoteType = None,
-        source_citations: SourCiteType = None,
-        name_ext: ExtType = None,
-        type_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: PersonalName
-        gedcom_docs: str = Specs.PERSONAL_NAME
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = PersonalName(
-                    name='First Name Last Name',
-                    surname='Last Name',
-                    type=Tag.NONE,
-                    phrase=None,
-                    pieces=None,
-                    translations=None,
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = PersonalName(
-                    name='First Name Last Name',
-                    surname='Last Name',
-                    type=Tag.NONE,
-                    phrase=None,
-                    pieces=None,
-                    translations=None,
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = PersonalName(
-                    name='First Name Last Name',
-                    surname='Last Name',
-                    type=Tag.NONE,
-                    phrase=None,
-                    pieces=None,
-                    translations=None,
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = PersonalName(
-                    name=name,
-                    surname=surname,
-                    type=type,
-                    phrase=phrase,
-                    pieces=pieces,
-                    translations=translations,
-                    notes=notes,
-                    source_citations=source_citations,
-                    name_ext=name_ext,
-                    type_ext=type_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 
 PersonalNameType = PersonalName | list[PersonalName] | None
@@ -6075,104 +4078,14 @@ Association(
     role = {Formatter.codes(self.role, tabs, required=True)},
     role_phrase = {Formatter.codes(self.role_phrase, tabs + 1)},
     notes = {Formatter.codes(self.notes, tabs + 1)},
-    citations = {Formatter.codes(self.citations, tabs+1)},
+    citations = {Formatter.codes(self.citations, tabs + 1)},
     asso_ext = {Formatter.codes(self.asso_ext, tabs)}, 
     role_ext = {Formatter.codes(self.role_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        individual_xref: IndividualXref = Void.INDI,
-        association_phrase: PhraseType = None,
-        role: Tag = Tag.NONE,
-        role_phrase: PhraseType = None,
-        notes: NoteType = None,
-        citations: SourCiteType = None,
-        asso_ext: ExtType = None,
-        role_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Association
-        gedcom_docs: str = Specs.ASSOCIATION
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Association(
-                    individual_xref=Void.INDI,
-                    association_phrase=Phrase('A phrase'),
-                    role=Tag.NONE,
-                    role_phrase=Phrase('Role Phrase'),
-                    notes=None,
-                    citations=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Association(
-                    individual_xref=Void.INDI,
-                    association_phrase=Phrase('A phrase'),
-                    role=Tag.NONE,
-                    role_phrase=Phrase('Role Phrase'),
-                    notes=None,
-                    citations=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Association(
-                    individual_xref=Void.INDI,
-                    association_phrase=Phrase('A phrase'),
-                    role=Tag.NONE,
-                    role_phrase=Phrase('Role Phrase'),
-                    notes=None,
-                    citations=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Association(
-                    individual_xref=individual_xref,
-                    association_phrase=association_phrase,
-                    role=role,
-                    role_phrase=role_phrase,
-                    notes=notes,
-                    citations=citations,
-                    asso_ext=asso_ext,
-                    role_ext=role_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 AssoType = Association | None
 
@@ -6281,230 +4194,9 @@ MultimediaLink(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = 1,
-        multimedia_xref: MultimediaXref = Void.OBJE,
-        top: int = Default.TOP,
-        left: int = Default.LEFT,
-        height: int = Default.HEIGHT,
-        width: int = Default.WIDTH,
-        title: str = Default.EMPTY,
-        obje_ext: ExtType = None,
-        top_ext: ExtType = None,
-        left_ext: ExtType = None,
-        height_ext: ExtType = None,
-        width_ext: ExtType = None,
-        title_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an intentional error.  If the Map structure is used
-            without specifying values, the default values will trigger an error.
-            However, if an acceptable lattitude and longitude are used in this example,
-            then the user example will be displayed.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-            latitude: If a non-zero latitude is entered this will be used in the example.
-            longitude: If a non-zero longitude is entered this will be used in the example.
-        """
-        show: MultimediaLink
-        gedcom_docs: str = Specs.MULTIMEDIA_LINK
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = MultimediaLink(
-                    multimedia_xref=Void.OBJE,
-                    top=0,
-                    left=0,
-                    height=0,
-                    width=0,
-                    title='My title',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = MultimediaLink(
-                    multimedia_xref=Void.OBJE,
-                    top=0,
-                    left=0,
-                    height=0,
-                    width=0,
-                    title='My title',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = MultimediaLink(
-                    multimedia_xref=Void.OBJE,
-                    top=0,
-                    left=0,
-                    height=0,
-                    width=0,
-                    title='My title',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = MultimediaLink(
-                    multimedia_xref=multimedia_xref,
-                    top=top,
-                    left=left,
-                    height=height,
-                    width=width,
-                    title=title,
-                    obje_ext=obje_ext,
-                    top_ext=top_ext,
-                    left_ext=left_ext,
-                    width_ext=width_ext,
-                    height_ext=height_ext,
-                    title_ext=title_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
-
+    
 MMLinkType = MultimediaLink | list[MultimediaLink] | None
 
-
-# class Exid(NamedTuple):
-#     """Store, validate and display an EXID structure.
-
-#     >   +1 EXID <Special>                        {0:M}  [g7:EXID](https://gedcom.io/terms/v7/EXID)
-#     >      +2 TYPE <Special>                     {0:1}  [g7:EXID-TYPE](https://gedcom.io/terms/v7/EXID-TYPE)
-#     """
-
-#     exid: str = Default.EMPTY
-#     exid_type: str = Default.EMPTY
-#     exid_ext: ExtType = None
-#     exid_type_ext: ExtType = None
-
-#     def validate(self) -> bool:
-#         """Validate the stored value."""
-#         check: bool = (
-#             Checker.verify_type(self.exid, str, no_list=True)
-#             and Checker.verify_not_empty(self.exid)
-#             and Checker.verify_type(self.exid_type, str, no_list=True)
-#             and Checker.verify_ext(Tag.EXID, self.exid_ext)
-#             and Checker.verify_ext(Tag.TYPE, self.exid_type_ext)
-#         )
-#         return check
-
-#     def ged(self, level: int = 1) -> str:
-#         """Format to meet GEDCOM standards."""
-#         lines: str = String.EMPTY
-#         lines = Tagger.string(lines, level, Tag.EXID, self.exid)
-#         lines = Tagger.structure(lines, level + 1, self.exid_ext)
-#         lines = Tagger.string(lines, level + 1, Tag.TYPE, self.exid_type)
-#         return Tagger.structure(lines, level + 2, self.exid_type_ext)
-
-#     def code(self, tabs: int = 0) -> str:
-#         return indent(
-#             f"""
-# Exid(
-#     exid = {Formatter.codes(self.exid, tabs)},
-#     exid_type = {Formatter.codes(self.exid_type, tabs)},
-#     exid_ext = {Formatter.codes(self.exid_ext, tabs)},
-#     exid_type_ext = {Formatter.codes(self.exid_type_ext, tabs)}
-# )""",
-#             String.INDENT * tabs,
-#         )
-
-#     def example(
-#         self,
-#         choice: int = Default.CHOICE,
-#         exid: str = Default.EMPTY,
-#         exid_type: str = Default.EMPTY,
-#         exid_ext: ExtType = None,
-#         exid_type_ext: ExtType = None,
-#     ) -> None:
-#         """Produce four examples of ChronoData code and GEDCOM output lines and link to
-#         the GEDCOM documentation.
-
-#         The following levels are available:
-#         - 0 (Default) Produces an empty example with no GEDCOM lines.
-#         - 1 Produces an example with all arguments containing data.
-#         - 2 Produces an alternate example with possibly some arguments missing.
-#         - 3 Produces either another alternate example or an example with non-Latin
-#             character texts.
-
-#         Any other value passed in will produce the same as the default level.
-
-#         Args:
-#             choice: The example one chooses to display.
-#         """
-#         show: Exid
-#         gedcom_docs: str = Specs.EXID
-#         genealogy_docs: str = 'To be constructed'
-#         code_preface: str = String.EMPTY
-#         gedcom_preface: str = String.EMPTY
-#         ged_output: str = String.EMPTY
-#         match choice:
-#             case 1:
-#                 show = Exid(
-#                     exid='22222',
-#                     exid_type='type',
-#                 )
-#                 code_preface = Example.FULL
-#                 gedcom_preface = Example.GEDCOM
-#             case 2:
-#                 show = Exid(
-#                     exid='22222',
-#                     exid_type='type',
-#                 )
-#                 code_preface = Example.SECOND
-#                 gedcom_preface = Example.GEDCOM
-#             case 3:
-#                 show = Exid(
-#                     exid='22222',
-#                     exid_type='type',
-#                 )
-#                 code_preface = Example.THIRD
-#                 gedcom_preface = Example.GEDCOM
-#             case _:
-#                 show = Exid(
-#                     exid=exid,
-#                     exid_type=exid_type,
-#                     exid_ext=exid_ext,
-#                     exid_type_ext=exid_type_ext,
-#                 )
-#                 code_preface = Example.EMPTY_CODE
-#                 gedcom_preface = Example.EMPTY_GEDCOM
-#         with contextlib.suppress(Exception):
-#             ged_output = show.ged()
-#         return Formatter.example(
-#             code_preface,
-#             show.code(),
-#             gedcom_preface,
-#             ged_output,
-#             gedcom_docs,
-#             genealogy_docs,
-#         )
-
-
-# ExidType = Exid | list[Exid] | None
 
 
 class Map(NamedTuple):
@@ -6625,88 +4317,7 @@ Map(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        latitude: float = Default.MAP_LATITUDE,
-        longitude: float = Default.MAP_LONGITUDE,
-        map_ext: ExtType = None,
-        latitude_ext: ExtType = None,
-        longitude_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an intentional error.  If the Map structure is used
-            without specifying values, the default values will trigger an error.
-            However, if an acceptable lattitude and longitude are used in this example,
-            then the user example will be displayed.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-            latitude: If a non-zero latitude is entered this will be used in the example.
-            longitude: If a non-zero longitude is entered this will be used in the example.
-        """
-        show: Map
-        gedcom_docs: str = Specs.MAP
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Map(latitude=45.0, longitude=-45.0)
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Map(latitude=-45.123456789000, longitude=45.987654321000)
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Map(latitude=0.0000000001, longitude=0.000000005)
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                if latitude != 91.0 and longitude != 181.0:
-                    show = Map(
-                        latitude=latitude,
-                        longitude=longitude,
-                        map_ext=map_ext,
-                        latitude_ext=latitude_ext,
-                        longitude_ext=longitude_ext,
-                    )
-                    logging.info(Example.USER_PROVIDED_EXAMPLE)
-                    code_preface = Example.USER_PROVIDED
-                    gedcom_preface = Example.GEDCOM
-                else:
-                    logging.info(Example.ERROR_EXPECTED)
-                    show = Map(
-                        latitude=latitude,
-                        longitude=longitude,
-                        map_ext=map_ext,
-                        latitude_ext=latitude_ext,
-                        longitude_ext=longitude_ext,
-                    )
-                    code_preface = Example.EMPTY_CODE
-                    gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 MapType = Map | None
 
@@ -6794,97 +4405,7 @@ PlaceTranslation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        place1: str = Default.EMPTY,
-        place2: str = Default.EMPTY,
-        place3: str = Default.EMPTY,
-        place4: str = Default.EMPTY,
-        language: LangType = None,
-        tran_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an intentional error.  If the Map structure is used
-            without specifying values, the default values will trigger an error.
-            However, if an acceptable lattitude and longitude are used in this example,
-            then the user example will be displayed.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-            latitude: If a non-zero latitude is entered this will be used in the example.
-            longitude: If a non-zero longitude is entered this will be used in the example.
-        """
-        show: PlaceTranslation
-        gedcom_docs: str = Specs.PLACE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = PlaceTranslation(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    language=Lang('en'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = PlaceTranslation(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    language=Lang('en'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = PlaceTranslation(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    language=Lang('en-US'),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = PlaceTranslation(
-                    place1=place1,
-                    place2=place2,
-                    place3=place3,
-                    place4=place4,
-                    language=language,
-                    tran_ext=tran_ext,
-                )
-                logging.info(Example.USER_PROVIDED_EXAMPLE)
-                code_preface = Example.USER_PROVIDED
-                gedcom_preface = Example.GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
-
+    
 PlacTranType = PlaceTranslation | list[PlaceTranslation] | None
 
 
@@ -7069,7 +4590,7 @@ Place(
     form2 = {Formatter.codes(self.form2, tabs)},
     form3 = {Formatter.codes(self.form3, tabs)},
     form4 = {Formatter.codes(self.form4, tabs)},
-    language = {Formatter.codes(self.language, tabs+1)},
+    language = {Formatter.codes(self.language, tabs + 1)},
     translations = {Formatter.codes(self.translations, tabs + 1)},
     map = {Formatter.codes(self.map, tabs + 1)},
     exids = {Formatter.codes(self.exids, tabs + 1)},
@@ -7080,129 +4601,7 @@ Place(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        place1: str = Default.EMPTY,
-        place2: str = Default.EMPTY,
-        place3: str = Default.EMPTY,
-        place4: str = Default.EMPTY,
-        form1: str = Default.PLACE_FORM1,
-        form2: str = Default.PLACE_FORM2,
-        form3: str = Default.PLACE_FORM3,
-        form4: str = Default.PLACE_FORM4,
-        language: LangType = None,
-        translations: PlacTranType = None,
-        map: MapType = None,
-        exids: IdenType = None,
-        notes: NoteType = None,
-        plac_ext: ExtType = None,
-        form_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an intentional error.  If the Map structure is used
-            without specifying values, the default values will trigger an error.
-            However, if an acceptable lattitude and longitude are used in this example,
-            then the user example will be displayed.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-            latitude: If a non-zero latitude is entered this will be used in the example.
-            longitude: If a non-zero longitude is entered this will be used in the example.
-        """
-        show: Place
-        gedcom_docs: str = Specs.PLACE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Place(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    translations=[
-                        PlaceTranslation(
-                            place1='Chicago',
-                            place2='Cook County',
-                            place3='Illinois',
-                            place4='USA',
-                            language=Lang('en-US'),
-                        ),
-                    ],
-                    map=Map(latitude=41.881832, longitude=-87.623177),
-                    notes=[
-                        Note(note='Just a note'),
-                        Note(note='Just a second note'),
-                    ],
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Place(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    map=Map(latitude=41.881832, longitude=-87.623177),
-                    notes=[Note(note='Just a note')],
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Place(
-                    place1='Chicago',
-                    place2='Cook County',
-                    place3='Illinois',
-                    place4='USA',
-                    map=Map(latitude=41.881832, longitude=-87.623177),
-                    notes=[Note(note='Just a note')],
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Place(
-                    place1=place1,
-                    place2=place2,
-                    place3=place3,
-                    place4=place4,
-                    form1=form1,
-                    form2=form2,
-                    form3=form3,
-                    form4=form4,
-                    language=language,
-                    translations=translations,
-                    map=map,
-                    exids=exids,
-                    notes=notes,
-                    plac_ext=plac_ext,
-                    form_ext=form_ext,
-                )
-                logging.info(Example.USER_PROVIDED_EXAMPLE)
-                code_preface = Example.USER_PROVIDED
-                gedcom_preface = Example.GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 PlacType = Place | None
 
@@ -7339,10 +4738,10 @@ EventDetail(
     sdate = {Formatter.codes(self.sdate, tabs + 1)},
     stime = {Formatter.codes(self.stime, tabs + 1)},
     sphrase = {Formatter.codes(self.sphrase, tabs + 1)},
-    associations = {Formatter.codes(self.associations, tabs+1)},
-    notes = {Formatter.codes(self.notes, tabs+1)},
+    associations = {Formatter.codes(self.associations, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
     sources = {Formatter.codes(self.sources, tabs + 1)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+1)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 1)},
     uids = {Formatter.codes(self.uids, tabs + 1)},
     agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
     reli_ext = {Formatter.codes(self.reli_ext, tabs)},
@@ -7351,165 +4750,7 @@ EventDetail(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        date: DateType = None,
-        time: TimeType = None,
-        phrase: PhraseType = None,
-        place: PlacType = None,
-        address: AddrType = None,
-        phones: PhoneType = None,
-        emails: EmailType = None,
-        faxes: FaxType = None,
-        wwws: WWWType = None,
-        agency: str = '',
-        religion: str = '',
-        cause: str = '',
-        resn: Tag = Tag.NONE,
-        sdate: SDateType = None,
-        stime: TimeType = None,
-        sphrase: PhraseType = None,
-        associations: AssoType = None,
-        notes: NoteType = None,
-        sources: SourCiteType = None,
-        multimedia_links: MMLinkType = None,
-        uids: IdenType = None,
-        agnc_ext: ExtType = None,
-        reli_ext: ExtType = None,
-        caus_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: EventDetail
-        gedcom_docs: str = Specs.EVENT_DETAIL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = EventDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase(''),
-                    place=Place(),
-                    address=Address(),
-                    phones=Phone('123-122-1223'),
-                    emails=Email('abc@xyz.com'),
-                    faxes=Fax('345-234-2345'),
-                    wwws=WWW('https:here.com'),
-                    agency='',
-                    religion='',
-                    cause='',
-                    resn=Tag.NONE,
-                    associations=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    uids=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = EventDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase(''),
-                    place=Place(),
-                    address=Address(),
-                    phones=Phone('123-122-1223'),
-                    emails=Email('abc@xyz.com'),
-                    faxes=Fax('345-234-2345'),
-                    wwws=WWW('https:here.com'),
-                    agency='',
-                    religion='',
-                    cause='',
-                    resn=Tag.NONE,
-                    associations=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    uids=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = EventDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase(''),
-                    place=Place(),
-                    address=Address(),
-                    phones=Phone('123-122-1223'),
-                    emails=Email('abc@xyz.com'),
-                    faxes=Fax('345-234-2345'),
-                    wwws=WWW('https:here.com'),
-                    agency='',
-                    religion='',
-                    cause='',
-                    resn=Tag.NONE,
-                    associations=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    uids=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = EventDetail(
-                    date=date,
-                    time=time,
-                    phrase=phrase,
-                    place=place,
-                    address=address,
-                    phones=phones,
-                    emails=emails,
-                    faxes=faxes,
-                    wwws=wwws,
-                    agency=agency,
-                    religion=religion,
-                    cause=cause,
-                    resn=resn,
-                    sdate=sdate,
-                    stime=stime,
-                    sphrase=sphrase,
-                    associations=associations,
-                    notes=notes,
-                    sources=sources,
-                    multimedia_links=multimedia_links,
-                    uids=uids,
-                    agnc_ext=agnc_ext,
-                    reli_ext=reli_ext,
-                    caus_ext=caus_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 EvenDetailType = EventDetail | list[EventDetail] | None
 
@@ -7586,89 +4827,14 @@ class FamilyEventDetail(NamedTuple):
 FamilyEventDetail(
     husband_age = {Formatter.codes(self.husband_age, tabs + 1, required=True)},
     wife_age = {Formatter.codes(self.wife_age, tabs + 1, required=True)},
-    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
+    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
     husb_ext = {Formatter.codes(self.husb_ext, tabs)},
     wife_ext = {Formatter.codes(self.wife_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        husband_age: AgeType = None,
-        wife_age: AgeType = None,
-        event_detail: EvenDetailType = None,
-        husb_ext: ExtType = None,
-        wife_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FamilyEventDetail
-        gedcom_docs: str = Specs.FAMILY_EVENT_DETAIL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FamilyEventDetail(
-                    husband_age=Age(30),
-                    wife_age=Age(30),
-                    event_detail=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FamilyEventDetail(
-                    husband_age=Age(30),
-                    wife_age=Age(30),
-                    event_detail=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FamilyEventDetail(
-                    husband_age=Age(30),
-                    wife_age=Age(30),
-                    event_detail=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FamilyEventDetail(
-                    husband_age=husband_age,
-                    wife_age=wife_age,
-                    event_detail=event_detail,
-                    husb_ext=husb_ext,
-                    wife_ext=wife_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FamEvenDetailType = FamilyEventDetail | None
 
@@ -7745,85 +4911,7 @@ FamilyAttribute(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        payload: str = Default.EMPTY,
-        attribute_type: str = Default.EMPTY,
-        family_event_detail: FamEvenDetailType = None,
-        tag_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FamilyAttribute
-        gedcom_docs: str = Specs.FAMILY_ATTRIBUTE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FamilyAttribute(
-                    tag=Tag.NCHI,
-                    payload='2',
-                    attribute_type='',
-                    family_event_detail=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FamilyAttribute(
-                    tag=Tag.RESI,
-                    payload='',
-                    attribute_type='',
-                    family_event_detail=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FamilyAttribute(
-                    tag=Tag.FACT,
-                    payload='Here',
-                    attribute_type='Where lived',
-                    family_event_detail=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FamilyAttribute(
-                    tag=tag,
-                    payload=payload,
-                    attribute_type=attribute_type,
-                    family_event_detail=family_event_detail,
-                    tag_ext=tag_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FamAttrType = FamilyAttribute | list[FamilyAttribute] | None
 
@@ -7947,91 +5035,13 @@ FamilyEvent(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     occurred = {Formatter.codes(self.occurred, tabs)},
     event_type = {Formatter.codes(self.event_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
+    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        occurred: bool = True,
-        event_type: str = String.EMPTY,
-        event_detail: FamEvenDetailType = None,
-        tag_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FamilyEvent
-        gedcom_docs: str = Specs.FAMILY_EVENT
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FamilyEvent(
-                    tag=Tag.NONE,
-                    occurred=True,
-                    event_type='',
-                    event_detail=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FamilyEvent(
-                    tag=Tag.NONE,
-                    occurred=True,
-                    event_type='',
-                    event_detail=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FamilyEvent(
-                    tag=Tag.NONE,
-                    occurred=True,
-                    event_type='',
-                    event_detail=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FamilyEvent(
-                    tag=tag,
-                    occurred=occurred,
-                    event_type=event_type,
-                    event_detail=event_detail,
-                    tag_ext=tag_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FamEvenType = FamilyEvent | list[FamilyEvent] | None
 
@@ -8085,75 +5095,7 @@ Child(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: PhraseType = None,
-        chil_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Child
-        gedcom_docs: str = Specs.CHILD
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Child(
-                    individual_xref=Void.INDI,
-                    phrase=Phrase('Child'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Child(
-                    individual_xref=Void.INDI,
-                    phrase=Phrase('Child'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Child(
-                    individual_xref=Void.INDI,
-                    phrase=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Child(
-                    individual_xref=individual_xref,
-                    phrase=phrase,
-                    chil_ext=chil_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 ChilType = Child | list[Child] | None
 
@@ -8244,115 +5186,7 @@ LDSOrdinanceDetail(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        date: DateType = None,
-        time: TimeType = None,
-        phrase: PhraseType = None,
-        temple: str = String.EMPTY,
-        place: PlacType = None,
-        status: Tag = Tag.NONE,
-        status_date: DateType = None,
-        status_time: TimeType = None,
-        notes: NoteType = None,
-        source_citations: SourCiteType = None,
-        temple_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: LDSOrdinanceDetail
-        gedcom_docs: str = Specs.LDS_ORDINANCE_DETAIL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = LDSOrdinanceDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase('hello'),
-                    temple='',
-                    place=Place(),
-                    status=Tag.NONE,
-                    status_date=Date(),
-                    status_time=Time(),
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = LDSOrdinanceDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase('hello'),
-                    temple=Default.EMPTY,
-                    place=Place(),
-                    status=Tag.NONE,
-                    status_date=Date(),
-                    status_time=Time(),
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = LDSOrdinanceDetail(
-                    date=Date(),
-                    time=Time(),
-                    phrase=Phrase('hello'),
-                    temple=Default.EMPTY,
-                    place=Place(),
-                    status=Tag.NONE,
-                    status_date=Date(),
-                    status_time=Time(),
-                    notes=None,
-                    source_citations=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = LDSOrdinanceDetail(
-                    date=date,
-                    time=time,
-                    phrase=phrase,
-                    temple=temple,
-                    place=place,
-                    status=status,
-                    status_date=status_date,
-                    status_time=status_time,
-                    notes=notes,
-                    source_citations=source_citations,
-                    temple_ext=temple_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 LDSOrdDetailType = LDSOrdinanceDetail | None
 
@@ -8390,76 +5224,13 @@ class LDSSpouseSealing(NamedTuple):
         return indent(
             f"""
 LDSSpouseSealing(
-    detail = {Formatter.codes(self.detail, tabs+1)},
+    detail = {Formatter.codes(self.detail, tabs + 1)},
     slgs_ext = {Formatter.codes(self.slgs_ext, tabs)}, 
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        detail: LDSOrdDetailType = None,
-        slgs_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: LDSSpouseSealing
-        gedcom_docs: str = Specs.LDS_SPOUSE_SEALING
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = LDSSpouseSealing(
-                    detail=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = LDSSpouseSealing(
-                    detail=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = LDSSpouseSealing(
-                    detail=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = LDSSpouseSealing(
-                    detail=detail,
-                    slgs_ext=slgs_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 LDSSpouSealingType = LDSSpouseSealing | None
 
@@ -8534,87 +5305,14 @@ class LDSIndividualOrdinance(NamedTuple):
             f"""
 LDSIndividualOrdinance(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
-    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs+1)},
+    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs + 1)},
     family_xref = {Formatter.codes(self.family_xref, tabs, required=(self.tag == Tag.SLGC))},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        ordinance_detail: LDSOrdDetailType = None,
-        family_xref: FamilyXref = Void.FAM,
-        tag_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: LDSIndividualOrdinance
-        gedcom_docs: str = Specs.LDS_INDIVIDUAL_ORDINANCE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = LDSIndividualOrdinance(
-                    tag=Tag.BAPL,
-                    ordinance_detail=None,
-                    family_xref=Void.FAM,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = LDSIndividualOrdinance(
-                    tag=Tag.ENDL,
-                    ordinance_detail=None,
-                    family_xref=Void.FAM,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = LDSIndividualOrdinance(
-                    tag=Tag.CONL,
-                    ordinance_detail=None,
-                    family_xref=Void.FAM,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = LDSIndividualOrdinance(
-                    tag=tag,
-                    ordinance_detail=ordinance_detail,
-                    family_xref=family_xref,
-                    tag_ext=tag_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 LDSIndiOrd = LDSIndividualOrdinance | None
 
@@ -8663,85 +5361,14 @@ class IndividualEventDetail(NamedTuple):
         return indent(
             f"""
 IndividualEventDetail(
-    event_detail = {Formatter.codes(self.event_detail, tabs+1, required=True)},
+    event_detail = {Formatter.codes(self.event_detail, tabs + 1, required=True)},
     age = {Formatter.codes(self.age, tabs + 1)},
     phrase = {Formatter.codes(self.phrase, tabs + 1)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        event_detail: EvenDetailType = None,
-        age: AgeType = None,  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
-        phrase: PhraseType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: IndividualEventDetail
-        gedcom_docs: str = Specs.INDIVIDUAL_EVENT_DETAIL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = IndividualEventDetail(
-                    event_detail=None,
-                    age=Age(10),
-                    phrase=Phrase('Birthday'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = IndividualEventDetail(
-                    event_detail=None,
-                    age=Age(10),
-                    phrase=Phrase('Birthday'),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = IndividualEventDetail(
-                    event_detail=None,
-                    age=Age(10),
-                    phrase=Phrase('Birthday'),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = IndividualEventDetail(
-                    event_detail=event_detail,
-                    age=age,
-                    phrase=phrase,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 IndiEvenDetailType = IndividualEventDetail | list[IndividualEventDetail] | None
 
@@ -8862,94 +5489,14 @@ IndividualAttribute(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs, required=True)},
     tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag in [Tag.FACT, Tag.IDNO]))},
-    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
+    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
     type_ext = {Formatter.codes(self.type_ext, tabs)},
     tag_ext = {Formatter.codes(self.tag_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        payload: str = Default.EMPTY,
-        tag_type: str = Default.EMPTY,
-        event_detail: IndiEvenDetailType = None,
-        type_ext: ExtType = None,
-        tag_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: IndividualAttribute
-        gedcom_docs: str = Specs.INDIVIDUAL_ATTRIBUTE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = IndividualAttribute(
-                    tag=Tag.RELI,
-                    payload='Catholic',
-                    tag_type='',
-                    event_detail=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = IndividualAttribute(
-                    tag=Tag.IDNO,
-                    payload='Sir',
-                    tag_type='idno type',
-                    event_detail=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = IndividualAttribute(
-                    tag=Tag.FACT,
-                    payload='100 years old',
-                    tag_type='Age',
-                    event_detail=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = IndividualAttribute(
-                    tag=tag,
-                    payload=payload,
-                    tag_type=tag_type,
-                    event_detail=event_detail,
-                    type_ext=type_ext,
-                    tag_ext=tag_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 IndiAttrType = IndividualAttribute | list[IndividualAttribute] | None
 
@@ -9211,7 +5758,7 @@ IndividualEvent(
     tag = {Formatter.codes(self.tag, tabs, required=True)},
     payload = {Formatter.codes(self.payload, tabs)},
     tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs+1)},
+    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
     family_xref = {Formatter.codes(self.family_xref, tabs)},
     adoption = {Formatter.codes(self.adoption, tabs)},
     phrase = {Formatter.codes(self.phrase, tabs + 1)},
@@ -9220,100 +5767,7 @@ IndividualEvent(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tag: Tag = Tag.NONE,
-        payload: str = Default.EMPTY,
-        tag_type: str = Default.EMPTY,
-        event_detail: IndiEvenDetailType = None,
-        family_xref: FamilyXref = Void.FAM,
-        adoption: Tag = Tag.NONE,
-        phrase: PhraseType = None,
-        tag_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: IndividualEvent
-        gedcom_docs: str = Specs.INDIVIDUAL_EVENT
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = IndividualEvent(
-                    tag=Tag.ADOP,
-                    payload='payload',
-                    tag_type='',
-                    event_detail=None,
-                    family_xref=Void.FAM,
-                    adoption=Tag.BOTH,
-                    phrase=Phrase('Both husband and wife adopted the child.'),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = IndividualEvent(
-                    tag=Tag.NONE,
-                    payload='',
-                    tag_type='',
-                    event_detail=None,
-                    family_xref=Void.FAM,
-                    adoption=Tag.NONE,
-                    phrase=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = IndividualEvent(
-                    tag=Tag.NONE,
-                    payload='',
-                    tag_type='',
-                    event_detail=None,
-                    family_xref=Void.FAM,
-                    adoption=Tag.NONE,
-                    phrase=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = IndividualEvent(
-                    tag=tag,
-                    payload=payload,
-                    tag_type=tag_type,
-                    event_detail=event_detail,
-                    family_xref=family_xref,
-                    adoption=adoption,
-                    phrase=phrase,
-                    tag_ext=tag_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 IndiEvenType = IndividualEvent | list[IndividualEvent] | None
 
@@ -9386,76 +5840,7 @@ Alias(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        individual_xref: IndividualXref = Void.INDI,
-        phrase: PhraseType = None,
-        alia_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Alias
-        gedcom_docs: str = Specs.ALIAS
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Alias(
-                    individual_xref=Void.INDI,
-                    phrase=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Alias(
-                    individual_xref=Void.INDI,
-                    phrase=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Alias(
-                    individual_xref=Void.INDI,
-                    phrase=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Alias(
-                    individual_xref=individual_xref,
-                    phrase=phrase,
-                    alia_ext=alia_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
-
+    
 AliaType = Alias | list[Alias] | None
 
 
@@ -9526,10 +5911,10 @@ class FamilyChild(NamedTuple):
 FamilyChild(
     family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},  
     pedigree = {Formatter.codes(self.pedigree, tabs)},
-    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs+1)},
+    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs + 1)},
     status = {Formatter.codes(self.status, tabs)},
-    status_phrase = {Formatter.codes(self.status_phrase, tabs+1)},
-    notes = {Formatter.codes(self.notes, tabs+1)},
+    status_phrase = {Formatter.codes(self.status_phrase, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
     famc_ext = {Formatter.codes(self.famc_ext, tabs)},
     pedi_ext = {Formatter.codes(self.pedi_ext, tabs)},
     stat_ext = {Formatter.codes(self.stat_ext, tabs)},
@@ -9537,99 +5922,7 @@ FamilyChild(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        family_xref: FamilyXref = Void.FAM,
-        pedigree: Tag = Tag.NONE,
-        pedigree_phrase: PhraseType = None,
-        status: Tag = Tag.NONE,
-        status_phrase: PhraseType = None,
-        notes: list[Note] | None = None,
-        famc_ext: ExtType = None,
-        pedi_ext: ExtType = None,
-        stat_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FamilyChild
-        gedcom_docs: str = Specs.FAMILY_CHILD
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FamilyChild(
-                    family_xref=Void.FAM,
-                    pedigree=Tag.ADOPTED,
-                    pedigree_phrase=None,
-                    status=Tag.PROVEN,
-                    status_phrase=None,
-                    notes=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FamilyChild(
-                    family_xref=Void.FAM,
-                    pedigree=Tag.BIRTH,
-                    pedigree_phrase=None,
-                    status=Tag.CHALLENGED,
-                    status_phrase=None,
-                    notes=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FamilyChild(
-                    family_xref=Void.FAM,
-                    pedigree=Tag.FOSTER,
-                    pedigree_phrase=None,
-                    status=Tag.DISPROVEN,
-                    status_phrase=None,
-                    notes=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FamilyChild(
-                    family_xref=family_xref,
-                    pedigree=pedigree,
-                    pedigree_phrase=pedigree_phrase,
-                    status=status,
-                    status_phrase=status_phrase,
-                    notes=notes,
-                    famc_ext=famc_ext,
-                    pedi_ext=pedi_ext,
-                    stat_ext=stat_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FamcType = FamilyChild | list[FamilyChild] | None
 
@@ -9671,81 +5964,13 @@ class FamilySpouse(NamedTuple):
             f"""
 FamilySpouse(
     family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},
-    notes = {Formatter.codes(self.notes, tabs+1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
     fams_ext = {Formatter.codes(self.fams_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        family_xref: FamilyXref = Void.FAM,
-        notes: list[Note] | None = None,
-        fams_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FamilySpouse
-        gedcom_docs: str = Specs.FAMILY_SPOUSE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FamilySpouse(
-                    family_xref=Void.FAM,
-                    notes=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FamilySpouse(
-                    family_xref=Void.FAM,
-                    notes=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FamilySpouse(
-                    family_xref=Void.FAM,
-                    notes=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FamilySpouse(
-                    family_xref=family_xref,
-                    notes=notes,
-                    fams_ext=fams_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FamsType = FamilySpouse | list[FamilySpouse] | None
 
@@ -9803,77 +6028,7 @@ FileTranslation(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        tran: str = Default.EMPTY,
-        form: str = Default.MIME,
-        tran_ext: ExtType = None,
-        form_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: FileTranslation
-        gedcom_docs: str = Specs.FILE_TRANSLATION
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = FileTranslation(
-                    tran='',
-                    form='text/plain',
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = FileTranslation(
-                    tran='',
-                    form='pdf',
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = FileTranslation(
-                    tran='',
-                    form='text/html',
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = FileTranslation(
-                    tran=tran,
-                    form=form,
-                    tran_ext=tran_ext,
-                    form_ext=form_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 FileTranType = FileTranslation | list[FileTranslation] | None
 
@@ -9945,9 +6100,9 @@ File(
     file = {Formatter.codes(self.file, tabs, required=True)},
     form = {Formatter.codes(self.form, tabs, required=True)},
     medi = {Formatter.codes(self.medi, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs+1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
     titl = {Formatter.codes(self.titl, tabs)},
-    file_translations = {Formatter.codes(self.file_translations, tabs+1)},
+    file_translations = {Formatter.codes(self.file_translations, tabs + 1)},
     file_ext = {Formatter.codes(self.file_ext, tabs)},
     form_ext = {Formatter.codes(self.form_ext, tabs)},
     medi_ext = {Formatter.codes(self.medi_ext, tabs)},
@@ -9956,100 +6111,7 @@ File(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        file: str = Default.EMPTY,
-        form: str = Default.MIME,
-        medi: Tag = Tag.NONE,
-        phrase: PhraseType = None,
-        titl: str = Default.EMPTY,
-        file_translations: FileTranType = None,
-        file_ext: ExtType = None,
-        form_ext: ExtType = None,
-        medi_ext: ExtType = None,
-        titl_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: File
-        gedcom_docs: str = Specs.FILE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = File(
-                    file='',
-                    form='pdf',
-                    medi=Tag.NONE,
-                    phrase=None,
-                    titl='',
-                    file_translations=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = File(
-                    file='',
-                    form='text/html',
-                    medi=Tag.NONE,
-                    phrase=None,
-                    titl='',
-                    file_translations=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = File(
-                    file='',
-                    form='text/plain',
-                    medi=Tag.NONE,
-                    phrase=None,
-                    titl='',
-                    file_translations=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = File(
-                    file=file,
-                    form=form,
-                    medi=medi,
-                    phrase=phrase,
-                    titl=titl,
-                    file_translations=file_translations,
-                    file_ext=file_ext,
-                    form_ext=form_ext,
-                    medi_ext=medi_ext,
-                    titl_ext=titl_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 
 FileType = File | list[File] | None
@@ -10109,97 +6171,17 @@ class SourceDataEvent(NamedTuple):
         return indent(
             f"""
 SourceDataEvent(
-    event = {Formatter.codes(self.event, tabs+1, required=True)},
-    date_period = {Formatter.codes(self.date_period, tabs+1)},
-    phrase = {Formatter.codes(self.phrase, tabs+1)},
-    place = {Formatter.codes(self.place, tabs+1)},
+    event = {Formatter.codes(self.event, tabs + 1, required=True)},
+    date_period = {Formatter.codes(self.date_period, tabs + 1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
+    place = {Formatter.codes(self.place, tabs + 1)},
     even_ext = {Formatter.codes(self.even_ext, tabs)},
     date_ext = {Formatter.codes(self.date_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        event: Tag = Tag.NONE,
-        date_period: str = Default.EMPTY,
-        phrase: PhraseType = None,
-        place: PlacType = None,
-        even_ext: ExtType = None,
-        date_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SourceDataEvent
-        gedcom_docs: str = Specs.SOURCE_EVENT
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SourceDataEvent(
-                    event=Tag.NONE,
-                    date_period='',
-                    phrase=None,
-                    place=Place(),
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SourceDataEvent(
-                    event=Tag.NONE,
-                    date_period='',
-                    phrase=None,
-                    place=Place(),
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SourceDataEvent(
-                    event=Tag.NONE,
-                    date_period='',
-                    phrase=None,
-                    place=Place(),
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SourceDataEvent(
-                    event=event,
-                    date_period=date_period,
-                    phrase=phrase,
-                    place=place,
-                    even_ext=even_ext,
-                    date_ext=date_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 SourDataEvenType = SourceDataEvent | list[SourceDataEvent] | None
 
@@ -10251,99 +6233,16 @@ class NonEvent(NamedTuple):
             f"""
 NonEvent(
     no = {Formatter.codes(self.no, tabs, required=True)},
-    date = {Formatter.codes(self.date, tabs+1)},
-    phrase = {Formatter.codes(self.phrase, tabs+1)},
-    notes = {Formatter.codes(self.notes, tabs+1)},
-    sources = {Formatter.codes(self.sources, tabs+1)},
+    date = {Formatter.codes(self.date, tabs + 1)},
+    phrase = {Formatter.codes(self.phrase, tabs + 1)},
+    notes = {Formatter.codes(self.notes, tabs + 1)},
+    sources = {Formatter.codes(self.sources, tabs + 1)},
     no_ext = {Formatter.codes(self.no_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        no: Tag = Tag.NONE,
-        date: DateType = None,
-        phrase: PhraseType = None,
-        notes: NoteType = None,
-        sources: SourCiteType = None,
-        no_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: NonEvent
-        gedcom_docs: str = Specs.NON_EVENT
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = NonEvent(
-                    no=Tag.NONE,
-                    date=Date(),
-                    phrase=None,
-                    notes=None,
-                    sources=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = NonEvent(
-                    no=Tag.NONE,
-                    date=Date(),
-                    phrase=None,
-                    notes=None,
-                    sources=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = NonEvent(
-                    no=Tag.NONE,
-                    date=Date(),
-                    phrase=None,
-                    notes=None,
-                    sources=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = NonEvent(
-                    no=no,
-                    date=date,
-                    phrase=phrase,
-                    notes=notes,
-                    sources=sources,
-                    no_ext=no_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 NoType = NonEvent | list[NonEvent] | None
 
@@ -10437,9 +6336,9 @@ Submitter(
     emails = {Formatter.codes(self.emails, tabs + 2)},
     faxes = {Formatter.codes(self.faxes, tabs + 2)},
     wwws = {Formatter.codes(self.wwws, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)}, 
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)}, 
     languages = {Formatter.codes(self.languages, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
     notes = {Formatter.codes(self.notes, tabs + 2)},
     change = {Formatter.codes(self.change, tabs + 2)},
     creation = {Formatter.codes(self.creation, tabs + 2)},
@@ -10448,132 +6347,10 @@ Submitter(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: SubmitterXref = Void.SUBM,
-        name: str = Default.EMPTY,
-        address: AddrType = None,
-        phones: PhoneType = None,
-        emails: EmailType = None,
-        faxes: FaxType = None,
-        wwws: WWWType = None,
-        multimedia_links: MMLinkType = None,
-        languages: LangType = None,
-        identifiers: IdenType = None,
-        notes: NoteType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        name_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Submitter
-        gedcom_docs: str = Specs.SUBMITTER
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Submitter(
-                    xref=Void.SUBM,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    multimedia_links=None,
-                    languages=None,
-                    identifiers=None,
-                    notes=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Submitter(
-                    xref=xref,
-                    name=name,
-                    address=address,
-                    phones=phones,
-                    emails=emails,
-                    faxes=faxes,
-                    wwws=wwws,
-                    multimedia_links=multimedia_links,
-                    languages=languages,
-                    identifiers=identifiers,
-                    notes=notes,
-                    change=change,
-                    creation=creation,
-                    name_ext=name_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 SubmType = Submitter | list[Submitter] | None
+
 
 class Family(NamedTuple):
     """Store, validate and display a GEDCOM Family Record.
@@ -10721,155 +6498,10 @@ Family(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: FamilyXref = Void.FAM,
-        resn: Tag = Tag.NONE,
-        attributes: FamAttrType = None,
-        events: FamEvenType = None,
-        husband: IndividualXref = Void.INDI,
-        husband_phrase: PhraseType = None,
-        wife: IndividualXref = Void.INDI,
-        wife_phrase: PhraseType = None,
-        children: ChilType = None,
-        associations: AssoType = None,
-        submitters: StrList = None,
-        lds_spouse_sealings: LDSSpouSealingType = None,
-        identifiers: IdenType = None,
-        notes: NoteType = None,
-        citations: SourCiteType = None,
-        multimedia_links: MMLinkType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        husb_ext: ExtTagType = None,
-        wife_ext: ExtTagType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Family
-        gedcom_docs: str = Specs.FAMILY
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Family(
-                    xref=Void.FAM,
-                    resn=Tag.NONE,
-                    attributes=None,
-                    husband=Void.INDI,
-                    husband_phrase=None,
-                    wife=Void.INDI,
-                    wife_phrase=None,
-                    children=None,
-                    associations=None,
-                    submitters=None,
-                    lds_spouse_sealings=None,
-                    identifiers=None,
-                    notes=None,
-                    citations=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Family(
-                    xref=Void.FAM,
-                    resn=Tag.NONE,
-                    attributes=None,
-                    husband=Void.INDI,
-                    husband_phrase=None,
-                    wife=Void.INDI,
-                    wife_phrase=None,
-                    children=None,
-                    associations=None,
-                    submitters=None,
-                    lds_spouse_sealings=None,
-                    identifiers=None,
-                    notes=None,
-                    citations=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Family(
-                    xref=Void.FAM,
-                    resn=Tag.NONE,
-                    attributes=None,
-                    husband=Void.INDI,
-                    husband_phrase=None,
-                    wife=Void.INDI,
-                    wife_phrase=None,
-                    children=None,
-                    associations=None,
-                    submitters=None,
-                    lds_spouse_sealings=None,
-                    identifiers=None,
-                    notes=None,
-                    citations=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Family(
-                    xref=xref,
-                    resn=resn,
-                    attributes=attributes,
-                    events=events,
-                    husband=husband,
-                    husband_phrase=husband_phrase,
-                    wife=wife,
-                    wife_phrase=wife_phrase,
-                    children=children,
-                    associations=associations,
-                    submitters=submitters,
-                    lds_spouse_sealings=lds_spouse_sealings,
-                    identifiers=identifiers,
-                    notes=notes,
-                    citations=citations,
-                    multimedia_links=multimedia_links,
-                    change=change,
-                    creation=creation,
-                    husb_ext=husb_ext,
-                    wife_ext=wife_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 FamType = Family | list[Family] | None
+
 
 class Multimedia(NamedTuple):
     """Store, validate and display a GECDOM Multimedia Record.
@@ -10948,104 +6580,10 @@ Multimedia(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: MultimediaXref = Void.OBJE,
-        resn: Tag = Tag.NONE,
-        files: FileType = None,
-        identifiers: IdenType = None,
-        notes: NoteType = None,
-        sources: SourCiteType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Multimedia
-        gedcom_docs: str = Specs.MULTIMEDIA
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Multimedia(
-                    xref=Void.OBJE,
-                    resn=Tag.NONE,
-                    files=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Multimedia(
-                    xref=Void.OBJE,
-                    resn=Tag.NONE,
-                    files=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Multimedia(
-                    xref=Void.OBJE,
-                    resn=Tag.NONE,
-                    files=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Multimedia(
-                    xref=xref,
-                    resn=resn,
-                    files=files,
-                    identifiers=identifiers,
-                    notes=notes,
-                    sources=sources,
-                    change=change,
-                    creation=creation,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 ObjeType = Multimedia | list[Multimedia] | None
+
 
 class Source(NamedTuple):
     """Store, validate and display a GEDCOM Source Record.
@@ -11163,20 +6701,20 @@ class Source(NamedTuple):
             f"""
 Source(
     xref = {Formatter.codes(self.xref, tabs, required=True)},
-    source_data_events = {Formatter.codes(self.source_data_events, tabs+2)},
+    source_data_events = {Formatter.codes(self.source_data_events, tabs + 2)},
     agency = {Formatter.codes(self.agency, tabs)},
     data_notes = {Formatter.codes(self.data_notes, tabs)},
     author = {Formatter.codes(self.author, tabs)},
     title = {Formatter.codes(self.title, tabs)},
     abbreviation = {Formatter.codes(self.abbreviation, tabs)},
     published = {Formatter.codes(self.published, tabs)},
-    text = {Formatter.codes(self.text, tabs+2)},
-    repositories = {Formatter.codes(self.repositories, tabs+2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
-    notes = {Formatter.codes(self.notes, tabs+2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)},
-    change = {Formatter.codes(self.change, tabs+2)},
-    creation = {Formatter.codes(self.creation, tabs+2)},
+    text = {Formatter.codes(self.text, tabs + 2)},
+    repositories = {Formatter.codes(self.repositories, tabs + 2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)},
+    creation = {Formatter.codes(self.creation, tabs + 2)},
     data_ext = {Formatter.codes(self.data_ext, tabs)},
     agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
     auth_ext = {Formatter.codes(self.auth_ext, tabs)},
@@ -11187,150 +6725,8 @@ Source(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: SourceXref = Void.SOUR,
-        source_data_events: SourDataEvenType = None,
-        agency: str = Default.EMPTY,
-        data_notes: NoteType = None,
-        author: str = Default.EMPTY,
-        title: str = Default.EMPTY,
-        abbreviation: str = Default.EMPTY,
-        published: str = Default.EMPTY,
-        text: TextType = None,
-        repositories: SourRepoCiteType = None,
-        identifiers: IdenType = None,
-        notes: NoteType = None,
-        multimedia_links: MMLinkType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        data_ext: ExtType = None,
-        agnc_ext: ExtType = None,
-        auth_ext: ExtType = None,
-        titl_ext: ExtType = None,
-        abbr_ext: ExtType = None,
-        publ_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Source
-        gedcom_docs: str = Specs.SOURCE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Source(
-                    xref=Void.SOUR,
-                    source_data_events=None,
-                    agency=Default.EMPTY,
-                    data_notes=None,
-                    author='',
-                    title='',
-                    abbreviation='',
-                    published='',
-                    text=None,
-                    repositories=None,
-                    identifiers=None,
-                    notes=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Source(
-                    xref=Void.SOUR,
-                    source_data_events=None,
-                    agency=Default.EMPTY,
-                    data_notes=None,
-                    author='',
-                    title='',
-                    abbreviation='',
-                    published='',
-                    text=None,
-                    repositories=None,
-                    identifiers=None,
-                    notes=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Source(
-                    xref=Void.SOUR,
-                    source_data_events=None,
-                    agency=Default.EMPTY,
-                    data_notes=None,
-                    author='',
-                    title='',
-                    abbreviation='',
-                    published='',
-                    text=None,
-                    repositories=None,
-                    identifiers=None,
-                    notes=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Source(
-                    xref=xref,
-                    source_data_events=source_data_events,
-                    agency=agency,
-                    data_notes=data_notes,
-                    author=author,
-                    title=title,
-                    abbreviation=abbreviation,
-                    published=published,
-                    text=text,
-                    repositories=repositories,
-                    identifiers=identifiers,
-                    notes=notes,
-                    multimedia_links=multimedia_links,
-                    change=change,
-                    creation=creation,
-                    data_ext=data_ext,
-                    agnc_ext=agnc_ext,
-                    auth_ext=auth_ext,
-                    titl_ext=titl_ext,
-                    abbr_ext=abbr_ext,
-                    publ_ext=publ_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
     
+
 SourType = Source | list[Source] | None
 
 
@@ -11526,20 +6922,20 @@ class Individual(NamedTuple):
 Individual(
     xref = {Formatter.codes(self.xref, tabs, required=True)},
     resn = {Formatter.codes(self.resn, tabs)},
-    personal_names = {Formatter.codes(self.personal_names, tabs+2)},
+    personal_names = {Formatter.codes(self.personal_names, tabs + 2)},
     sex = {Formatter.codes(self.sex, tabs)},
-    attributes = {Formatter.codes(self.attributes, tabs+2)},
-    events = {Formatter.codes(self.events, tabs+2)},
-    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs+2)},
-    submitters = {Formatter.codes(self.submitters, tabs+2)},
-    associations = {Formatter.codes(self.associations, tabs+2)},
-    aliases = {Formatter.codes(self.aliases, tabs+2)},
-    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs+2)},
-    descendent_interest = {Formatter.codes(self.descendent_interest, tabs+2)},
+    attributes = {Formatter.codes(self.attributes, tabs + 2)},
+    events = {Formatter.codes(self.events, tabs + 2)},
+    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs + 2)},
+    submitters = {Formatter.codes(self.submitters, tabs + 2)},
+    associations = {Formatter.codes(self.associations, tabs + 2)},
+    aliases = {Formatter.codes(self.aliases, tabs + 2)},
+    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs + 2)},
+    descendent_interest = {Formatter.codes(self.descendent_interest, tabs + 2)},
     identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
     notes = {Formatter.codes(self.notes, tabs + 2)},
-    sources = {Formatter.codes(self.sources, tabs+2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs+2)},
+    sources = {Formatter.codes(self.sources, tabs + 2)},
+    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
     change = {Formatter.codes(self.change, tabs + 2)}
     creation = {Formatter.codes(self.creation, tabs + 2)}
     resn_ext = {Formatter.codes(self.resn_ext, tabs)},
@@ -11548,158 +6944,7 @@ Individual(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: IndividualXref = Void.INDI,
-        resn: Tag = Tag.NONE,
-        personal_names: PersonalNameType = None,
-        sex: Tag = Tag.NONE,
-        attributes: IndiAttrType = None,
-        events: IndiEvenType = None,
-        lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None,
-        families_child: FamcType = None,
-        submitters: SubmType = None,
-        associations: AssoType = None,
-        aliases: AliaType = None,
-        ancestor_interest: SubmType = None,
-        descendent_interest: SubmType = None,
-        identifiers: IdenType = None,
-        notes: NoteType = None,
-        sources: StrList = None,
-        multimedia_links: MMLinkType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        resn_ext: ExtType = None,
-        sex_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Individual
-        gedcom_docs: str = Specs.INDIVIDUAL
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Individual(
-                    xref=Void.INDI,
-                    resn=Tag.NONE,
-                    personal_names=None,
-                    sex=Tag.NONE,
-                    attributes=None,
-                    events=None,
-                    lds_individual_ordinances=None,
-                    submitters=None,
-                    associations=None,
-                    aliases=None,
-                    ancestor_interest=None,
-                    descendent_interest=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Individual(
-                    xref=Void.INDI,
-                    resn=Tag.NONE,
-                    personal_names=None,
-                    sex=Tag.NONE,
-                    attributes=None,
-                    events=None,
-                    lds_individual_ordinances=None,
-                    submitters=None,
-                    associations=None,
-                    aliases=None,
-                    ancestor_interest=None,
-                    descendent_interest=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Individual(
-                    xref=Void.INDI,
-                    resn=Tag.NONE,
-                    personal_names=None,
-                    sex=Tag.NONE,
-                    attributes=None,
-                    events=None,
-                    lds_individual_ordinances=None,
-                    submitters=None,
-                    associations=None,
-                    aliases=None,
-                    ancestor_interest=None,
-                    descendent_interest=None,
-                    identifiers=None,
-                    notes=None,
-                    sources=None,
-                    multimedia_links=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Individual(
-                    xref=xref,
-                    resn=resn,
-                    personal_names=personal_names,
-                    sex=sex,
-                    attributes=attributes,
-                    events=events,
-                    lds_individual_ordinances=lds_individual_ordinances,
-                    families_child=families_child,
-                    submitters=submitters,
-                    associations=associations,
-                    aliases=aliases,
-                    ancestor_interest=ancestor_interest,
-                    descendent_interest=descendent_interest,
-                    identifiers=identifiers,
-                    notes=notes,
-                    sources=sources,
-                    multimedia_links=multimedia_links,
-                    change=change,
-                    creation=creation,
-                    resn_ext=resn_ext,
-                    sex_ext=sex_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
 
 
 class Repository(NamedTuple):
@@ -11757,7 +7002,7 @@ class Repository(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            lines = Tagger.string(lines, level+1, Tag.NAME, self.name)
+            lines = Tagger.string(lines, level + 1, Tag.NAME, self.name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
             lines = Tagger.structure(lines, level + 1, self.address)
             lines = Tagger.structure(lines, level + 1, self.phones)
@@ -11774,134 +7019,21 @@ class Repository(NamedTuple):
 Repository(
     xref = {Formatter.codes(self.xref, tabs, required=True)},
     name = {Formatter.codes(self.name, tabs, required=True)},
-    address = {Formatter.codes(self.address, tabs+2)},
-    phones = {Formatter.codes(self.phones, tabs+2)},
-    emails = {Formatter.codes(self.emails, tabs+2)},
-    faxes = {Formatter.codes(self.faxes, tabs+2)},
-    wwws = {Formatter.codes(self.wwws, tabs+2)},
-    notes = {Formatter.codes(self.notes, tabs+2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
-    change = {Formatter.codes(self.change, tabs+2)},
-    creation = {Formatter.codes(self.creation, tabs+2)},
+    address = {Formatter.codes(self.address, tabs + 2)},
+    phones = {Formatter.codes(self.phones, tabs + 2)},
+    emails = {Formatter.codes(self.emails, tabs + 2)},
+    faxes = {Formatter.codes(self.faxes, tabs + 2)},
+    wwws = {Formatter.codes(self.wwws, tabs + 2)},
+    notes = {Formatter.codes(self.notes, tabs + 2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)},
+    creation = {Formatter.codes(self.creation, tabs + 2)},
     name_ext = {Formatter.codes(self.name_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: RepositoryXref = Void.REPO,
-        name: str = Default.EMPTY,
-        address: AddrType = None,
-        phones: PhoneType = None,
-        emails: EmailType = None,
-        faxes: FaxType = None,
-        wwws: WWWType = None,
-        notes: NoteType = None,
-        identifiers: IdenType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        name_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Repository
-        gedcom_docs: str = Specs.REPOSITORY
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Repository(
-                    xref=Void.REPO,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    notes=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Repository(
-                    xref=Void.REPO,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    notes=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Repository(
-                    xref=Void.REPO,
-                    name='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    notes=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Repository(
-                    xref=xref,
-                    name=name,
-                    address=address,
-                    phones=phones,
-                    emails=emails,
-                    faxes=faxes,
-                    wwws=wwws,
-                    notes=notes,
-                    identifiers=identifiers,
-                    change=change,
-                    creation=creation,
-                    name_ext=name_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 class SharedNote(NamedTuple):
     """Store, validate and display a GEDCOM Shared Note Record.
@@ -11973,124 +7105,19 @@ SharedNote(
     xref = {Formatter.codes(self.xref, tabs, required=True)},
     text = {Formatter.codes(self.text, tabs, required=True)},
     mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs+2)},
-    translations = {Formatter.codes(self.translations, tabs+2)},
-    sources = {Formatter.codes(self.sources, tabs+2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs+2)},
-    change = {Formatter.codes(self.change, tabs+2)},
-    creation = {Formatter.codes(self.creation, tabs+2)},
+    language = {Formatter.codes(self.language, tabs + 2)},
+    translations = {Formatter.codes(self.translations, tabs + 2)},
+    sources = {Formatter.codes(self.sources, tabs + 2)},
+    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
+    change = {Formatter.codes(self.change, tabs + 2)},
+    creation = {Formatter.codes(self.creation, tabs + 2)},
     snote_ext = {Formatter.codes(self.snote_ext, tabs)},
     mime_ext = {Formatter.codes(self.mime_ext, tabs)},
 )""",
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        xref: SharedNoteXref = Void.SNOTE,
-        text: str = Default.EMPTY,
-        mime: str = Default.MIME,
-        language: LangType = None,
-        translations: NoteTranType = None,
-        sources: SourCiteType = None,
-        identifiers: IdenType = None,
-        change: ChangeDateType = None,
-        creation: CreationDateType = None,
-        snote_ext: ExtType = None,
-        mime_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: SharedNote
-        gedcom_docs: str = Specs.SHARED_NOTE
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = SharedNote(
-                    xref=Void.SNOTE,
-                    text='This is a shared note.',
-                    mime=Default.MIME,
-                    language=Lang('en-US'),
-                    translations=None,
-                    sources=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = SharedNote(
-                    xref=Void.SNOTE,
-                    text='This is another shared note.',
-                    mime=Default.MIME,
-                    language=Lang('en-US'),
-                    translations=None,
-                    sources=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = SharedNote(
-                    xref=Void.SNOTE,
-                    text='',
-                    mime=Default.MIME,
-                    language=Lang('en-US'),
-                    translations=None,
-                    sources=None,
-                    identifiers=None,
-                    change=None,
-                    creation=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = SharedNote(
-                    xref=xref,
-                    text=text,
-                    mime=mime,
-                    language=language,
-                    translations=translations,
-                    sources=sources,
-                    identifiers=identifiers,
-                    change=change,
-                    creation=creation,
-                    snote_ext=snote_ext,
-                    mime_ext=mime_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
-
+    
 
 class Header(NamedTuple):
     """Hold data for the GEDCOM header special record.
@@ -12273,181 +7300,4 @@ Header(
             String.INDENT * tabs,
         )
 
-    def example(
-        self,
-        choice: int = Default.CHOICE,
-        exttags: ExtTagType = None,
-        source: str = Default.EMPTY,
-        vers: str = Default.EMPTY,
-        name: str = Default.EMPTY,
-        corporation: str = Default.EMPTY,
-        address: AddrType = None,
-        phones: PhoneType = None,
-        emails: EmailType = None,
-        faxes: FaxType = None,
-        wwws: WWWType = None,
-        data: str = Default.EMPTY,
-        data_date: DateType = None,
-        data_time: TimeType = None,
-        data_copyright: str = Default.EMPTY,
-        dest: str = Default.EMPTY,
-        header_date: DateType = None,
-        header_time: TimeType = None,
-        submitter: SubmitterXref = Void.SUBM,
-        subm_copyright: str = Default.EMPTY,
-        language: LangType = None,
-        note: NoteType = None,
-        head_ext: ExtType = None,
-        gedc_ext: ExtType = None,
-        vers_ext: ExtType = None,
-        dest_ext: ExtType = None,
-        subm_ext: ExtType = None,
-        copr_ext: ExtType = None,
-    ) -> None:
-        """Produce four examples of ChronoData code and GEDCOM output lines and link to
-        the GEDCOM documentation.
-
-        The following levels are available:
-        - 0 (Default) Produces an empty example with no GEDCOM lines.
-        - 1 Produces an example with all arguments containing data.
-        - 2 Produces an alternate example with possibly some arguments missing.
-        - 3 Produces either another alternate example or an example with non-Latin
-            character texts.
-
-        Any other value passed in will produce the same as the default level.
-
-        Args:
-            choice: The example one chooses to display.
-        """
-        show: Header
-        gedcom_docs: str = Specs.HEADER
-        genealogy_docs: str = 'To be constructed'
-        code_preface: str = String.EMPTY
-        gedcom_preface: str = String.EMPTY
-        ged_output: str = String.EMPTY
-        match choice:
-            case 1:
-                show = Header(
-                    exttags=None,
-                    source='Somewhere',
-                    vers='v7.0',
-                    name='My Name',
-                    corporation='My Corporation',
-                    address=Address(
-                        '234 High Low Street\nMiami, FL',
-                    ),
-                    phones=Phone('234-1234-3456'),
-                    emails=Email('myemail@corp.com'),
-                    faxes=[
-                        Fax('=1 234 567 2345'),
-                        Fax(Formatter.phone(1, 234, 123, 5678)),
-                    ],
-                    wwws=None,
-                    data='',
-                    data_date=Date(),
-                    data_time=Time(),
-                    data_copyright='',
-                    dest='',
-                    header_date=Date(),
-                    header_time=Time(),
-                    submitter=Void.SUBM,
-                    subm_copyright='',
-                    language=Lang('en-US'),
-                    note=None,
-                )
-                code_preface = Example.FULL
-                gedcom_preface = Example.GEDCOM
-            case 2:
-                show = Header(
-                    exttags=None,
-                    source='',
-                    vers='v7.0',
-                    name='',
-                    corporation='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    data='',
-                    data_date=Date(),
-                    data_time=Time(),
-                    data_copyright='',
-                    dest='',
-                    header_date=Date(),
-                    header_time=Time(),
-                    submitter=Void.SUBM,
-                    subm_copyright='',
-                    language=Lang('en-US'),
-                    note=None,
-                )
-                code_preface = Example.SECOND
-                gedcom_preface = Example.GEDCOM
-            case 3:
-                show = Header(
-                    exttags=None,
-                    source='',
-                    vers='v7.0',
-                    name='',
-                    corporation='',
-                    address=Address(),
-                    phones=None,
-                    emails=None,
-                    faxes=None,
-                    wwws=None,
-                    data='',
-                    data_date=Date(),
-                    data_time=Time(),
-                    data_copyright='',
-                    dest='',
-                    header_date=Date(),
-                    header_time=Time(),
-                    submitter=Void.SUBM,
-                    subm_copyright='',
-                    language=Lang('en-US'),
-                    note=None,
-                )
-                code_preface = Example.THIRD
-                gedcom_preface = Example.GEDCOM
-            case _:
-                show = Header(
-                    exttags=exttags,
-                    source=source,
-                    vers=vers,
-                    name=name,
-                    corporation=corporation,
-                    address=address,
-                    phones=phones,
-                    emails=emails,
-                    faxes=faxes,
-                    wwws=wwws,
-                    data=data,
-                    data_date=data_date,
-                    data_time=data_time,
-                    data_copyright=data_copyright,
-                    dest=dest,
-                    header_date=header_date,
-                    header_time=header_time,
-                    submitter=submitter,
-                    subm_copyright=subm_copyright,
-                    language=language,
-                    note=note,
-                    head_ext=head_ext,
-                    gedc_ext=gedc_ext,
-                    vers_ext=vers_ext,
-                    dest_ext=dest_ext,
-                    subm_ext=subm_ext,
-                    copr_ext=copr_ext,
-                )
-                code_preface = Example.EMPTY_CODE
-                gedcom_preface = Example.EMPTY_GEDCOM
-        with contextlib.suppress(Exception):
-            ged_output = show.ged()
-        return Formatter.example(
-            code_preface,
-            show.code(),
-            gedcom_preface,
-            ged_output,
-            gedcom_docs,
-            genealogy_docs,
-        )
+    
