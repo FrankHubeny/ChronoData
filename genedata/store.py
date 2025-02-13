@@ -100,6 +100,8 @@ from typing import Any, ClassVar, Literal, NamedTuple
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
+
+# from icecream import ic  # type: ignore[import-not-found]
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from calendars.calendars import CalendarDefinition
@@ -1005,7 +1007,9 @@ class Formatter:
         return f'+{country!s} {area!s} {prefix!s} {line!s}'
 
     @staticmethod
-    def codes_single(item: Any, tabs: int = 1, required: bool = False) -> str:
+    def codes_single(
+        item: Any, tabs: int, full: bool, required: bool = False
+    ) -> str:
         if isinstance(item, str):
             if required and item == Default.EMPTY:
                 return f'{item!r}{String.REQUIRED}'
@@ -1021,14 +1025,16 @@ class Formatter:
                 return f'Tag.{item.name}{String.REQUIRED}'
             return f'Tag.{item.name}'
         code_lines: str = (
-            item.code(tabs - 1)
+            item.code(tabs - 1, full=full)
             .replace(String.EOL, String.EMPTY, 1)
             .replace(String.INDENT, String.EMPTY, 1)
         )
         return code_lines
 
     @staticmethod
-    def codes(items: Any, tabs: int = 1, required: bool = False) -> str:
+    def codes(
+        items: Any, tabs: int = 1, full: bool = False, required: bool = False
+    ) -> str:
         if items is None:
             if required:
                 return ''.join([Default.NONE, String.REQUIRED])
@@ -1039,7 +1045,7 @@ class Formatter:
                     return String.LEFT_RIGHT_BRACKET_REQUIRED
                 return String.LEFT_RIGHT_BRACKET
             if len(items) == 1:
-                return Formatter.codes_single(items[0], tabs, required)
+                return Formatter.codes_single(items[0], tabs, full, required)
             lines: str = String.LEFT_BRACKET
             for item in items:
                 if isinstance(item, int | float | Xref):
@@ -1047,7 +1053,7 @@ class Formatter:
                         [
                             lines,
                             String.EOL,
-                            String.INDENT * tabs,
+                            String.INDENT * (tabs),
                             str(item),
                             String.COMMA,
                         ]
@@ -1060,7 +1066,7 @@ class Formatter:
                         [
                             lines,
                             String.EOL,
-                            String.INDENT * tabs,
+                            String.INDENT * (tabs),
                             quote_mark,
                             str(item),
                             quote_mark,
@@ -1072,14 +1078,16 @@ class Formatter:
                         [
                             lines,
                             String.EOL,
-                            String.INDENT * tabs,
+                            String.INDENT * (tabs),
                             'Tag.',
                             item.value,
                             String.COMMA,
                         ]
                     )
                 else:
-                    lines = ''.join([lines, item.code(tabs - 1), String.COMMA])
+                    lines = ''.join(
+                        [lines, item.code(tabs, full=full), String.COMMA]
+                    )
             return ''.join(
                 [
                     lines,
@@ -1088,35 +1096,30 @@ class Formatter:
                     String.RIGHT_BRACKET,
                 ]
             )
-        return Formatter.codes_single(items, tabs, required)
-        
+        return Formatter.codes_single(items, tabs, full, required)
 
-    # @staticmethod
-    # def example(
-    #     code_preface: str,
-    #     show_code: str,
-    #     gedcom_preface: str,
-    #     show_ged: str,
-    #     gedcom_docs: str,
-    #     genealogy_docs: str,
-    # ) -> None:
-    #     print(  
-    #         ''.join(
-    #             [
-    #                 code_preface,
-    #                 String.EOL,
-    #                 show_code,
-    #                 String.DOUBLE_NEWLINE,
-    #                 gedcom_preface,
-    #                 String.DOUBLE_NEWLINE,
-    #                 show_ged,
-    #                 String.EOL,
-    #                 gedcom_docs,
-    #                 String.EOL,
-    #                 genealogy_docs,
-    #             ]
-    #         )
-    #     )
+    @staticmethod
+    def codes_line(
+        initial: str, items: Any, tabs: int, full: bool, required: bool = False
+    ) -> str:
+        result: str = Formatter.codes(items, tabs, full, required)
+        keep: bool = required or full or result not in ['None', 'Tag.NONE']
+        if keep:
+            return ''.join([initial, result, String.COMMA])
+        return String.EMPTY
+
+    @staticmethod
+    def display_code(
+        name: str, *code_lines: tuple[str, Any, int, bool, bool]
+    ) -> str:
+        lines: str = ''.join([String.EOL, name, '('])
+        for line in code_lines:
+            returned_line = Formatter.codes_line(
+                line[0], line[1], line[2], line[3], line[4]
+            )
+            if returned_line != String.EMPTY:
+                lines = ''.join([lines, String.EOL, returned_line])
+        return ''.join([lines, String.EOL, ')'])
 
     @staticmethod
     def schema_example(
@@ -1169,7 +1172,7 @@ class Formatter:
         )
 
     @staticmethod
-    def display(named_tuple: Any) -> None:
+    def display(named_tuple: Any, full: bool = False) -> None:
         """Display the results of the ged and code methods for a named tuple.
 
         Args:
@@ -1185,15 +1188,19 @@ class Formatter:
             print('ERROR MESSAGE:\n')  # noqa: T201
             print(str(e))  # noqa: T201
             print()  # noqa: T201
-        print(f'CODE:{named_tuple.code()}')  # noqa: T201
+        print(f'CODE:{named_tuple.code(full=full)}')  # noqa: T201
         type_string: str = str(type(named_tuple))
         match type_string:
             case "<class 'genedata.store.Address'>":
                 print(OverView.ADDRESS_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Age'>":
+                print(OverView.FAMILY_EVENT_DETAIL)  # noqa: T201
             case "<class 'genedata.store.Alias'>":
                 print(OverView.INDIVIDUAL)  # noqa: T201
             case "<class 'genedata.store.Association'>":
                 print(OverView.ASSOCIATION_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.CallNumber'>":
+                print(OverView.SOURCE_REPOSITORY_CITATION)  # noqa: T201
             case "<class 'genedata.store.ChangeDate'>":
                 print(OverView.CHANGE_DATE)  # noqa: T201
             case "<class 'genedata.store.Child'>":
@@ -1202,10 +1209,12 @@ class Formatter:
                 print(OverView.CREATION_DATE)  # noqa: T201
             case "<class 'genedata.store.Date'>":
                 print(OverView.DATE_VALUE)  # noqa: T201
-            case "<class 'genedata.store.Time'>":
-                print(OverView.DATE_VALUE)  # noqa: T201
+            case "<class 'genedata.store.Email'>":
+                print(OverView.SUBMITTER)  # noqa: T201
             case "<class 'genedata.store.EventDetail'>":
                 print(OverView.EVENT_DETAIL)  # noqa: T201
+            case "<class 'genedata.store.ExtTag'>":
+                print(OverView.HEADER)  # noqa: T201
             case "<class 'genedata.store.Family'>":
                 print(OverView.FAMILY)  # noqa: T201
             case "<class 'genedata.store.FamilyAttribute'>":
@@ -1214,6 +1223,16 @@ class Formatter:
                 print(OverView.FAMILY_EVENT_DETAIL)  # noqa: T201
             case "<class 'genedata.store.FamilyEvent'>":
                 print(OverView.FAMILY_EVENT_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.FamilyChild'>":
+                print(OverView.INDIVIDUAL)  # noqa: T201
+            case "<class 'genedata.store.FamilySpouse'>":
+                print(OverView.INDIVIDUAL)  # noqa: T201
+            case "<class 'genedata.store.Fax'>":
+                print(OverView.SUBMITTER)  # noqa: T201
+            case "<class 'genedata.store.File'>":
+                print(OverView.MULTIMEDIA)  # noqa: T201
+            case "<class 'genedata.store.FileTranslation'>":
+                print(OverView.MULTIMEDIA)  # noqa: T201
             case "<class 'genedata.store.Header'>":
                 print(OverView.HEADER)  # noqa: T201
             case "<class 'genedata.store.Identifier'>":
@@ -1226,39 +1245,63 @@ class Formatter:
                 print(OverView.INDIVIDUAL_EVENT_DETAIL)  # noqa: T201
             case "<class 'genedata.store.IndividualEvent'>":
                 print(OverView.INDIVIDUAL_EVENT_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Lang'>":
+                print(OverView.SUBMITTER)  # noqa: T201
             case "<class 'genedata.store.LDSOrdinanceDetail'>":
                 print(OverView.LDS_ORDINANCE_DETAIL)  # noqa: T201
-            case "<class 'genedata.store.LDAIndividualOrdinance'>":
+            case "<class 'genedata.store.LDSIndividualOrdinance'>":
                 print(OverView.LDS_INDIVIDUAL_ORDINANCE)  # noqa: T201
-            case "<class 'genedata.store.LDSSPouseSealing'>":
+            case "<class 'genedata.store.LDSSpouseSealing'>":
                 print(OverView.LDS_SPOUSE_SEALING)  # noqa: T201
+            case "<class 'genedata.store.Map'>":
+                print(OverView.PLACE_STRUCTURE)  # noqa: T201
             case "<class 'genedata.store.Multimedia'>":
                 print(OverView.MULTIMEDIA)  # noqa: T201
             case "<class 'genedata.store.MultimediaLink'>":
                 print(OverView.MULTIMEDIA_LINK)  # noqa: T201
+            case "<class 'genedata.store.NameTranslation'>":
+                print(OverView.PERSONAL_NAME_STRUCTURE)  # noqa: T201
             case "<class 'genedata.store.NonEvent'>":
                 print(OverView.NON_EVENT_STRUCTURE)  # noqa: T201
             case "<class 'genedata.store.Note'>":
+                print(OverView.NOTE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.NoteTranslation'>":
                 print(OverView.NOTE_STRUCTURE)  # noqa: T201
             case "<class 'genedata.store.PersonalNamePieces'>":
                 print(OverView.PERSONAL_NAME_PIECES)  # noqa: T201
             case "<class 'genedata.store.PersonalName'>":
                 print(OverView.PERSONAL_NAME_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.Phone'>":
+                print(OverView.SUBMITTER)  # noqa: T201
             case "<class 'genedata.store.Phrase'>":
                 print(OverView.INDIVIDUAL)  # noqa: T201
             case "<class 'genedata.store.Place'>":
                 print(OverView.PLACE_STRUCTURE)  # noqa: T201
+            case "<class 'genedata.store.PlaceTranslation'>":
+                print(OverView.PLACE_STRUCTURE)  # noqa: T201
             case "<class 'genedata.store.Repository'>":
                 print(OverView.REPOSITORY)  # noqa: T201
+            case "<class 'genedata.store.SDate'>":
+                print(OverView.EVENT_DETAIL)  # noqa: T201
             case "<class 'genedata.store.SharedNote'>":
                 print(OverView.SHARED_NOTE)  # noqa: T201
             case "<class 'genedata.store.Source'>":
                 print(OverView.SOURCE)  # noqa: T201
             case "<class 'genedata.store.SourceCitation'>":
                 print(OverView.SOURCE_CITATION)  # noqa: T201
+            case "<class 'genedata.store.SourceData'>":
+                print(OverView.SOURCE)  # noqa: T201
+            case "<class 'genedata.store.SourceDataEvent'>":
+                print(OverView.SOURCE)  # noqa: T201
             case "<class 'genedata.store.SourceRepositoryCitation'>":
                 print(OverView.SOURCE_REPOSITORY_CITATION)  # noqa: T201
             case "<class 'genedata.store.Submitter'>":
+                print(OverView.SUBMITTER)  # noqa: T201
+            case "<class 'genedata.store.Text'>":
+                print(OverView.SOURCE)  # noqa: T201
+            case "<class 'genedata.store.Time'>":
+                print(OverView.DATE_VALUE)  # noqa: T201
+            case "<class 'genedata.store.WWW'>":
                 print(OverView.SUBMITTER)  # noqa: T201
             case _:
                 pass
@@ -1416,18 +1459,18 @@ class ExtTag(Structure):
             )
         return lines
 
-    def code(self, tabs: int = 1) -> str:
-        return indent(
-            f"""
-ExtTag(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    url = {Formatter.codes(self.url, tabs, required=True)},
-)""",
-            String.INDENT * tabs,
-        )
-
     def show(self) -> dict[str, Any]:
         return self.yamldict
+
+    def code(self, tabs: int = 1, full: bool = False) -> str:
+        return indent(
+            Formatter.display_code(
+                'ExtTag',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    url = ', self.url, tabs, full, True),
+            ),
+            String.INDENT * tabs,
+        )
 
 
 ExtTagType = ExtTag | list[ExtTag] | None
@@ -1691,16 +1734,16 @@ class Extension(NamedTuple):
             )
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Extension(
-    level = {Formatter.codes(self.level, tabs, required=True)},
-    exttag = {Formatter.codes(self.exttag, tabs, required=True)},
-    payload = {Formatter.codes(self.payload, tabs)},
-    extra = {Formatter.codes(self.extra, tabs)},
-    substructures = {Formatter.codes(self.substructures, tabs)},
-)""",
+            Formatter.display_code(
+                'Extension',
+                ('    level = ', self.level, tabs, full, True),
+                ('    exttag = ', self.exttag, tabs, full, True),
+                ('    payload = ', self.payload, tabs, full, False),
+                ('    extra = ', self.extra, tabs, full, False),
+                ('    substructures = ', self.substructures, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -1786,18 +1829,23 @@ class Date(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Date(
-    year = {Formatter.codes(self.year, tabs)},
-    month = {Formatter.codes(self.month, tabs)},
-    day = {Formatter.codes(self.day, tabs)},
-    # calendar = {'add in calendar codes later'},
-    iso = {Formatter.codes(self.iso, tabs)},
-    display_calendar = {Formatter.codes(self.display_calendar, tabs)},
-    date_ext = {Formatter.codes(self.date_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Date',
+                ('    year = ', self.year, tabs, full, False),
+                ('    month = ', self.month, tabs, full, False),
+                ('    day = ', self.day, tabs, full, False),
+                ('    iso = ', self.iso, tabs, full, False),
+                (
+                    '    display_calendar = ',
+                    self.display_calendar,
+                    tabs,
+                    full,
+                    False,
+                ),
+                ('    date_ext = ', self.date_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -1839,7 +1887,6 @@ class SDate(NamedTuple):
     day: int = Default.DATE_DAY
     calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN
     iso: str = Default.EMPTY
-    tag: Tag = Tag.SDATE
     display_calendar: bool = False
     date_ext: ExtType = None
 
@@ -1870,7 +1917,7 @@ class SDate(NamedTuple):
             formatted_calendar_date = ''.join(
                 [self.calendar.name, String.EMPTY, formatted_date]
             )
-        lines = Tagger.string(lines, level, self.tag, formatted_calendar_date)
+        lines = Tagger.string(lines, level, Tag.SDATE, formatted_calendar_date)
         return Tagger.structure(lines, level + 1, self.date_ext)
 
     def from_iso(self) -> str:
@@ -1885,19 +1932,23 @@ class SDate(NamedTuple):
             return f'{self.year}-{self.month}-{self.day}'
         return ''
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SDate(
-    year = {Formatter.codes(self.year, tabs)},
-    month = {Formatter.codes(self.month, tabs)},
-    day = {Formatter.codes(self.day, tabs)},
-    # calendar = {'add in calendar codes later'},
-    iso = {Formatter.codes(self.iso, tabs)},
-    tag = {Formatter.codes(self.tag, tabs)},
-    display_calendar = {Formatter.codes(self.display_calendar, tabs)},
-    date_ext = {Formatter.codes(self.date_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'SDate',
+                ('    year = ', self.year, tabs, full, False),
+                ('    month = ', self.month, tabs, full, False),
+                ('    day = ', self.day, tabs, full, False),
+                ('    iso = ', self.iso, tabs, full, False),
+                (
+                    '    display_calendar = ',
+                    self.display_calendar,
+                    tabs,
+                    full,
+                    False,
+                ),
+                ('    date_ext = ', self.date_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -1967,16 +2018,16 @@ class Time(NamedTuple):
             return f'{self.hour}:{self.minute}:{self.second}'
         return ''
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Time(
-    hour = {Formatter.codes(self.hour, tabs)},
-    minute = {Formatter.codes(self.minute, tabs)},
-    second = {Formatter.codes(self.second, tabs)},
-    UTC = {Formatter.codes(self.UTC, tabs)},
-    time_ext = {Formatter.codes(self.time_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Time',
+                ('    hour = ', self.hour, tabs, full, False),
+                ('    minute = ', self.minute, tabs, full, False),
+                ('    second = ', self.second, tabs, full, False),
+                ('    UTC = ', self.UTC, tabs, full, False),
+                ('    time_ext = ', self.time_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -2021,14 +2072,14 @@ class CreationDate(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.time)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-CreationDate(
-    date = {Formatter.codes(self.date, tabs + 1, required=True)},
-    time = {Formatter.codes(self.time, tabs + 1, required=True)},
-    crea_ext = {Formatter.codes(self.crea_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'CreationDate',
+                ('    date = ', self.date, tabs + 1, full, True),
+                ('    time = ', self.time, tabs + 1, full, True),
+                ('    crea_ext = ', self.crea_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -2095,16 +2146,22 @@ class Identifier(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.type_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Identifier(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    payload = {Formatter.codes(self.payload, tabs, required=True)},
-    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EXID))},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-    type_ext = {Formatter.codes(self.type_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Identifier',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    payload = ', self.payload, tabs, full, True),
+                (
+                    '    tag_type = ',
+                    self.tag_type,
+                    tabs,
+                    full,
+                    (self.tag == Tag.EXID),
+                ),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+                ('    type_ext = ', self.type_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -2163,17 +2220,16 @@ class Phone(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phon_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Phone(
-    phone = {Formatter.codes(self.phone, tabs, required=True)},
-    phon_ext = {Formatter.codes(self.phon_ext, tabs)}, 
-)""",
+            Formatter.display_code(
+                'Phone',
+                ('    phone = ', self.phone, tabs, full, True),
+                ('    phon_ext = ', self.phon_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 PhoneType = Phone | list[Phone] | None
 
@@ -2210,17 +2266,16 @@ class Email(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.email_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Email(
-    email = {Formatter.codes(self.email, tabs, required=True)},
-    email_ext = {Formatter.codes(self.email_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Email',
+                ('    email = ', self.email, tabs, full, True),
+                ('    email_ext = ', self.email_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 EmailType = Email | list[Email] | None
 
@@ -2257,17 +2312,16 @@ class Fax(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.fax_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Fax(
-    fax = {Formatter.codes(self.fax, tabs, required=True)},
-    fax_ext = {Formatter.codes(self.fax_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Fax',
+                ('    fax = ', self.fax, tabs, full, True),
+                ('    fax_ext = ', self.fax_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FaxType = Fax | list[Fax] | None
 
@@ -2304,17 +2358,16 @@ class WWW(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.www_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-WWW(
-    www = {Formatter.codes(self.www, tabs, required=True)},
-    www_ext = {Formatter.codes(self.www_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'WWW',
+                ('    www = ', self.www, tabs, full, True),
+                ('    www_ext = ', self.www_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 WWWType = WWW | list[WWW] | None
 
@@ -2351,17 +2404,16 @@ class Lang(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.lang_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Lang(
-    lang = {Formatter.codes(self.lang, tabs, required=True)},
-    lang_ext = {Formatter.codes(self.lang_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Lang',
+                ('    lang = ', self.lang, tabs, full, True),
+                ('    lang_ext = ', self.lang_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 LangType = Lang | list[Lang] | None
 
@@ -2417,17 +2469,15 @@ class Phrase(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Phrase(
-    phrase = {Formatter.codes(self.phrase, tabs, required=True)},
-    phrase_ext = {Formatter.codes(self.phrase_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Phrase',
+                ('    phrase = ', self.phrase, tabs, full, True),
+                ('    phrase_ext = ', self.phrase_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
-
-    
 
 
 PhraseType = Phrase | None
@@ -2533,21 +2583,21 @@ class Address(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.ctry_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Address(
-    address = {Formatter.codes(self.address, tabs, required=True)},
-    city = {Formatter.codes(self.city, tabs)},
-    state = {Formatter.codes(self.state, tabs)},
-    postal = {Formatter.codes(self.postal, tabs)},
-    country = {Formatter.codes(self.country, tabs)},
-    addr_ext = {Formatter.codes(self.addr_ext, tabs + 1)},
-    city_ext = {Formatter.codes(self.city_ext, tabs + 1)},
-    stae_ext = {Formatter.codes(self.stae_ext, tabs + 1)},
-    post_ext = {Formatter.codes(self.post_ext, tabs + 1)},
-    ctry_ext = {Formatter.codes(self.ctry_ext, tabs + 1)},
-)""",
+            Formatter.display_code(
+                'Address',
+                ('    address = ', self.address, tabs, full, True),
+                ('    city = ', self.city, tabs, full, False),
+                ('    state = ', self.state, tabs, full, False),
+                ('    postal = ', self.postal, tabs, full, False),
+                ('    country = ', self.country, tabs, full, False),
+                ('    addr_ext = ', self.addr_ext, tabs, full, False),
+                ('    city_ext = ', self.city_ext, tabs, full, False),
+                ('    stae_ext = ', self.stae_ext, tabs, full, False),
+                ('    post_ext = ', self.post_ext, tabs, full, False),
+                ('    ctry_ext = ', self.ctry_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -2660,23 +2710,27 @@ class Age(NamedTuple):
             line = Tagger.structure(line, level + 1, self.phrase)
         return line
 
-    def code(self, tabs: int = 1) -> str:
-        """Generate the ChronoData code that would produce the GEDCOM lines."""
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Age(
-    years = {Formatter.codes(self.years, tabs)},
-    months = {Formatter.codes(self.months, tabs)},
-    weeks = {Formatter.codes(self.weeks, tabs)},
-    days = {Formatter.codes(self.days, tabs)},
-    greater_less_than = {Formatter.codes(self.greater_less_than, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    age_ext = {Formatter.codes(self.age_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Age',
+                ('    years = ', self.years, tabs, full, False),
+                ('    months = ', self.months, tabs, full, False),
+                ('    weeks = ', self.weeks, tabs, full, False),
+                ('    days = ', self.days, tabs, full, False),
+                (
+                    '    greater_less_than = ',
+                    self.greater_less_than,
+                    tabs,
+                    full,
+                    False,
+                ),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    age_ext = ', self.age_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 AgeType = Age | None
 
@@ -2772,27 +2826,32 @@ class PersonalNamePieces(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.nsfx_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-PersonalNamePieces(
-    prefix = {Formatter.codes(self.prefix, tabs + 1)},
-    given = {Formatter.codes(self.given, tabs + 1)},
-    nickname = {Formatter.codes(self.nickname, tabs + 1)},
-    surname_prefix = {Formatter.codes(self.surname_prefix, tabs + 1)},
-    surname = {Formatter.codes(self.surname, tabs + 1)},
-    suffix = {Formatter.codes(self.suffix, tabs + 1)}, 
-    npfx_ext = {Formatter.codes(self.npfx_ext, tabs)},
-    givn_ext = {Formatter.codes(self.givn_ext, tabs)},
-    nick_ext = {Formatter.codes(self.nick_ext, tabs)},
-    spfx_ext = {Formatter.codes(self.spfx_ext, tabs)},
-    surn_ext = {Formatter.codes(self.surn_ext, tabs)},
-    nsfx_ext = {Formatter.codes(self.nsfx_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'PersonalNamePieces',
+                ('    prefix = ', self.prefix, tabs + 1, full, False),
+                ('    given = ', self.given, tabs + 1, full, False),
+                ('    nickname = ', self.nickname, tabs + 1, full, False),
+                (
+                    '    surname_prefix = ',
+                    self.surname_prefix,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    surname = ', self.surname, tabs + 1, full, False),
+                ('    suffix = ', self.suffix, tabs + 1, full, False),
+                ('    npfx_ext = ', self.npfx_ext, tabs, full, False),
+                ('    givn_ext = ', self.givn_ext, tabs, full, False),
+                ('    nick_ext = ', self.nick_ext, tabs, full, False),
+                ('    spfx_ext = ', self.spfx_ext, tabs, full, False),
+                ('    surn_ext = ', self.surn_ext, tabs, full, False),
+                ('    nsfx_ext = ', self.nsfx_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 PersonalNamePiecesType = PersonalNamePieces | None
 
@@ -2866,19 +2925,18 @@ class NameTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.pieces)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-NameTranslation(
-    translation = {Formatter.codes(self.translation, tabs, required=True)},
-    language = {Formatter.codes(self.language, tabs + 1, required=True)},
-    pieces = {Formatter.codes(self.pieces, tabs + 1)},
-    tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'NameTranslation',
+                ('    translation = ', self.translation, tabs, full, True),
+                ('    language = ', self.language, tabs + 1, full, True),
+                ('    pieces = ', self.pieces, tabs + 1, full, False),
+                ('    tran_ext = ', self.tran_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 NameTranType = NameTranslation | list[NameTranslation] | None
 
@@ -2957,20 +3015,19 @@ class NoteTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-NoteTranslation(
-    translation = {Formatter.codes(self.translation, tabs, required=True)},
-    mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-    mime_ext = {Formatter.codes(self.mime_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'NoteTranslation',
+                ('    translation = ', self.translation, tabs, full, True),
+                ('    mime = ', self.mime, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                ('    tran_ext = ', self.tran_ext, tabs, full, False),
+                ('    mime_ext = ', self.mime_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 NoteTranType = NoteTranslation | list[NoteTranslation] | None
 
@@ -3040,18 +3097,17 @@ class CallNumber(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-CallNumber(
-    call_number = {Formatter.codes(self.call_number, tabs, required=True)},
-    medium = {Formatter.codes(self.medium, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-)""",
+            Formatter.display_code(
+                'CallNumber',
+                ('    call_number = ', self.call_number, tabs, full, True),
+                ('    medium = ', self.medium, tabs, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 CalnType = CallNumber | list[CallNumber] | None
 
@@ -3114,20 +3170,19 @@ class Text(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Text(
-    text = {Formatter.codes(self.text, tabs, required=True)},
-    mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    text_ext = {Formatter.codes(self.text_ext, tabs)},
-    mime_ext = {Formatter.codes(self.mime_ext, tabs)},
-),""",
+            Formatter.display_code(
+                'Text',
+                ('    text = ', self.text, tabs, full, True),
+                ('    mime = ', self.mime, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                ('    text_ext = ', self.text_ext, tabs, full, False),
+                ('    mime_ext = ', self.mime_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 TextType = Text | list[Text] | None
 
@@ -3179,14 +3234,14 @@ class SourceData(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.texts)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SourceData(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    texts = {Formatter.codes(self.texts, tabs + 1)},
-    data_ext = {Formatter.codes(self.data_ext, tabs)},
-),""",
+            Formatter.display_code(
+                'SourceData',
+                ('    date = ', self.date, tabs + 1, full, False),
+                ('    texts = ', self.texts, tabs + 1, full, False),
+                ('    data_ext = ', self.data_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
@@ -3295,30 +3350,41 @@ class SourceCitation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SourceCitation(
-    source_xref = {Formatter.codes(self.source_xref, tabs, required=True)},
-    page = {Formatter.codes(self.page, tabs)},
-    source_data = {Formatter.codes(self.source_data, tabs + 1)},
-    event = {Formatter.codes(self.event, tabs + 1)},
-    event_phrase = {Formatter.codes(self.event_phrase, tabs + 1)},
-    role = {Formatter.codes(self.role, tabs)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs + 1)},
-    quality = {Formatter.codes(self.quality, tabs)},
-    multimedialinks = {Formatter.codes(self.multimedialinks, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    sour_ext = {Formatter.codes(self.sour_ext, tabs + 1)},
-    page_ext = {Formatter.codes(self.page_ext, tabs + 1)},
-    even_ext = {Formatter.codes(self.even_ext, tabs + 1)},
-    role_ext = {Formatter.codes(self.role_ext, tabs + 1)},
-    quay_ext = {Formatter.codes(self.quay_ext, tabs + 1)},
-),""",
+            Formatter.display_code(
+                'SourceCitation',
+                ('    source_xref = ', self.source_xref, tabs, full, True),
+                ('    page = ', self.page, tabs, full, False),
+                ('    source_data = ', self.source_data, tabs + 1, full, False),
+                ('    event = ', self.event, tabs + 1, full, False),
+                (
+                    '    event_phrase = ',
+                    self.event_phrase,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    role = ', self.role, tabs, full, False),
+                ('    role_phrase = ', self.role_phrase, tabs + 1, full, False),
+                ('    quality = ', self.quality, tabs, full, False),
+                (
+                    '    multimedialinks = ',
+                    self.multimedialinks,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    sour_ext = ', self.sour_ext, tabs, full, False),
+                ('    page_ext = ', self.page_ext, tabs, full, False),
+                ('    even_ext = ', self.even_ext, tabs, full, False),
+                ('    role_ext = ', self.role_ext, tabs, full, False),
+                ('    quay_ext = ', self.quay_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 SourCiteType = SourceCitation | list[SourceCitation] | None
 
@@ -3449,22 +3515,33 @@ class Note(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Note(
-    note = {Formatter.codes(self.note, tabs, required=True)},
-    mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    translations = {Formatter.codes(self.translations, tabs + 1)},
-    source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
-    note_ext = {Formatter.codes(self.note_ext, tabs + 1)},
-    mime_ext = {Formatter.codes(self.mime_ext, tabs + 1)},
-)""",
+            Formatter.display_code(
+                'Note',
+                ('    note = ', self.note, tabs, full, True),
+                ('    mime = ', self.mime, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                (
+                    '    translations = ',
+                    self.translations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                (
+                    '    soource_citations = ',
+                    self.source_citations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    note_ext = ', self.note_ext, tabs, full, False),
+                ('    mime_ext = ', self.mime_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 NoteType = Note | list[Note] | None
 
@@ -3516,17 +3593,16 @@ class SNote(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.snote_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SNote(
-    snote_xref = {Formatter.codes(self.snote_xref, tabs, required=True)}, 
-    snote_ext = {Formatter.codes(self.snote_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'SNote',
+                ('    snote_xref = ', self.snote_xref, tabs, full, True),
+                ('    snote_ext = ', self.snote_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 class ChangeDate(NamedTuple):
     """Store, validate and format change date information.
@@ -3569,19 +3645,18 @@ class ChangeDate(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-ChangeDate(
-    date = {Formatter.codes(self.date, tabs + 1, required=True)},
-    time = {Formatter.codes(self.time, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    chan_ext = {Formatter.codes(self.chan_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'ChangeDate',
+                ('    date = ', self.date, tabs + 1, full, True),
+                ('    time = ', self.time, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    chan_ext = ', self.chan_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 ChangeDateType = ChangeDate | None
 
@@ -3640,19 +3715,30 @@ class SourceRepositoryCitation(NamedTuple):
             lines = Tagger.structure(lines, level, self.call_numbers)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SourceRepositoryCitation(
-    repository_xref = {Formatter.codes(self.repository_xref, tabs, required=True)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    call_numbers = {Formatter.codes(self.call_numbers, tabs + 1)},
-    repo_ext = {Formatter.codes(self.repo_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'SourceRepositoryCitation',
+                (
+                    '    repository_xref = ',
+                    self.repository_xref,
+                    tabs,
+                    full,
+                    True,
+                ),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                (
+                    '    call_numbers = ',
+                    self.call_numbers,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    repo_ext = ', self.repo_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 SourRepoCiteType = (
     SourceRepositoryCitation | list[SourceRepositoryCitation] | None
@@ -3800,25 +3886,35 @@ class PersonalName(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-PersonalName(
-    name = {Formatter.codes(self.name, tabs, required=True)},
-    surname = {Formatter.codes(self.surname, tabs, required=True)},
-    type = {Formatter.codes(self.type, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    pieces = {Formatter.codes(self.pieces, tabs + 1)},
-    translations = {Formatter.codes(self.translations, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
-    name_ext = {Formatter.codes(self.name_ext, tabs + 1)},
-    type_ext = {Formatter.codes(self.type_ext, tabs + 1)},
-)""",
+            Formatter.display_code(
+                'PersonalName',
+                ('    name = ', self.name, tabs, full, True),
+                ('    surname = ', self.surname, tabs, full, True),
+                ('    type = ', self.type, tabs, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    pieces = ', self.pieces, tabs + 1, full, False),
+                (
+                    '    translations = ',
+                    self.translations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                (
+                    '    source_citations = ',
+                    self.source_citations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    name_ext = ', self.name_ext, tabs, full, False),
+                ('    type_ext = ', self.type_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
-
-    
 
 
 PersonalNameType = PersonalName | list[PersonalName] | None
@@ -4069,23 +4165,34 @@ class Association(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.citations)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Association(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
-    association_phrase = {Formatter.codes(self.association_phrase, tabs + 1)},
-    role = {Formatter.codes(self.role, tabs, required=True)},
-    role_phrase = {Formatter.codes(self.role_phrase, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    citations = {Formatter.codes(self.citations, tabs + 1)},
-    asso_ext = {Formatter.codes(self.asso_ext, tabs)}, 
-    role_ext = {Formatter.codes(self.role_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Association',
+                (
+                    '    individual_xref = ',
+                    self.individual_xref,
+                    tabs,
+                    full,
+                    True,
+                ),
+                (
+                    '    association_phrase = ',
+                    self.association_phrase,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    role = ', self.role, tabs, full, True),
+                ('    role_phrase = ', self.role_phrase, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 2, full, False),
+                ('    citations = ', self.citations, tabs + 1, full, False),
+                ('    asso_ext = ', self.asso_ext, tabs, full, False),
+                ('    role_ext = ', self.role_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 AssoType = Association | None
 
@@ -4174,29 +4281,34 @@ class MultimediaLink(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.title_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-MultimediaLink(
-    multimedia_xref = {Formatter.codes(self.multimedia_xref, tabs, required=True)},
-    top = {Formatter.codes(self.top, tabs)},
-    left = {Formatter.codes(self.left, tabs)},
-    height = {Formatter.codes(self.height, tabs)},
-    width = {Formatter.codes(self.width, tabs)},
-    title = {Formatter.codes(self.title, tabs)},
-    obje_ext = {Formatter.codes(self.obje_ext, tabs)},
-    top_ext = {Formatter.codes(self.top_ext, tabs)},
-    left_ext = {Formatter.codes(self.left_ext, tabs)},
-    height_ext = {Formatter.codes(self.height_ext, tabs)},
-    width_ext = {Formatter.codes(self.width_ext, tabs)}, 
-    title_ext = {Formatter.codes(self.title_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'MultimediaLink',
+                (
+                    '    multimedia_xref = ',
+                    self.multimedia_xref,
+                    tabs,
+                    full,
+                    True,
+                ),
+                ('    top = ', self.top, tabs, full, False),
+                ('    left = ', self.left, tabs, full, False),
+                ('    height = ', self.height, tabs, full, False),
+                ('    width = ', self.width, tabs, full, False),
+                ('    title = ', self.title, tabs, full, False),
+                ('    obje_ext = ', self.obje_ext, tabs, full, False),
+                ('    top_ext = ', self.top_ext, tabs, full, False),
+                ('    left_ext = ', self.left_ext, tabs, full, False),
+                ('    height_ext = ', self.height_ext, tabs, full, False),
+                ('    width_ext = ', self.width_ext, tabs, full, False),
+                ('    title_ext = ', self.title_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
-MMLinkType = MultimediaLink | list[MultimediaLink] | None
 
+MMLinkType = MultimediaLink | list[MultimediaLink] | None
 
 
 class Map(NamedTuple):
@@ -4304,20 +4416,19 @@ class Map(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.longitude_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Map(
-    latitude = {Formatter.codes(self.latitude, tabs, required=True)},
-    longitude = {Formatter.codes(self.longitude, tabs, required=True)},
-    map_ext = {Formatter.codes(self.map_ext, tabs)},
-    latitude_ext = {Formatter.codes(self.latitude_ext, tabs)},
-    longitude_ext = {Formatter.codes(self.longitude_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Map',
+                ('    latitude = ', self.latitude, tabs, full, True),
+                ('    longitude = ', self.longitude, tabs, full, True),
+                ('    map_ext = ', self.map_ext, tabs, full, False),
+                ('    latitude_ext = ', self.latitude_ext, tabs, full, False),
+                ('    longitude_ext = ', self.longitude_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 MapType = Map | None
 
@@ -4391,21 +4502,21 @@ class PlaceTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.language)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-PlaceTranslation(
-    place1 = {Formatter.codes(self.place1, tabs)},
-    place2 = {Formatter.codes(self.place2, tabs)},
-    place3 = {Formatter.codes(self.place3, tabs)},
-    place4 = {Formatter.codes(self.place4, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'PlaceTranslation',
+                ('    place1 = ', self.place1, tabs, full, False),
+                ('    place2 = ', self.place2, tabs, full, False),
+                ('    place3 = ', self.place3, tabs, full, False),
+                ('    place4 = ', self.place4, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                ('    tran_ext = ', self.tran_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
+
 PlacTranType = PlaceTranslation | list[PlaceTranslation] | None
 
 
@@ -4578,30 +4689,35 @@ class Place(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Place(
-    place1 = {Formatter.codes(self.place1, tabs)},
-    place2 = {Formatter.codes(self.place2, tabs)},
-    place3 = {Formatter.codes(self.place3, tabs)},
-    place4 = {Formatter.codes(self.place4, tabs)},
-    form1 = {Formatter.codes(self.form1, tabs)},
-    form2 = {Formatter.codes(self.form2, tabs)},
-    form3 = {Formatter.codes(self.form3, tabs)},
-    form4 = {Formatter.codes(self.form4, tabs)},
-    language = {Formatter.codes(self.language, tabs + 1)},
-    translations = {Formatter.codes(self.translations, tabs + 1)},
-    map = {Formatter.codes(self.map, tabs + 1)},
-    exids = {Formatter.codes(self.exids, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    plac_ext = {Formatter.codes(self.plac_ext, tabs)},
-    form_ext = {Formatter.codes(self.form_ext, tabs)}
-)""",
+            Formatter.display_code(
+                'Place',
+                ('    place1 = ', self.place1, tabs, full, False),
+                ('    place2 = ', self.place2, tabs, full, False),
+                ('    place3 = ', self.place3, tabs, full, False),
+                ('    place4 = ', self.place4, tabs, full, False),
+                ('    form1 = ', self.form1, tabs, full, False),
+                ('    form2 = ', self.form2, tabs, full, False),
+                ('    form3 = ', self.form3, tabs, full, False),
+                ('    form4 = ', self.form4, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                (
+                    '    translations = ',
+                    self.translations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    map = ', self.map, tabs + 1, full, False),
+                ('    exids = ', self.exids, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    plac_ext = ', self.plac_ext, tabs, full, False),
+                ('    form_ext = ', self.form_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 PlacType = Place | None
 
@@ -4718,39 +4834,50 @@ class EventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.uids)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-EventDetail(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    time = {Formatter.codes(self.time, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    place = {Formatter.codes(self.place, tabs + 1)},
-    address = {Formatter.codes(self.address, tabs + 1)},
-    phones = {Formatter.codes(self.phones, tabs + 1)},
-    emails = {Formatter.codes(self.emails, tabs + 1)},
-    faxes = {Formatter.codes(self.faxes, tabs + 1)}, 
-    wwws = {Formatter.codes(self.wwws, tabs + 1)},
-    agency = {Formatter.codes(self.agency, tabs)},
-    religion = {Formatter.codes(self.religion, tabs)},
-    cause = {Formatter.codes(self.cause, tabs)},
-    resn = {Formatter.codes(self.resn, tabs)},
-    sdate = {Formatter.codes(self.sdate, tabs + 1)},
-    stime = {Formatter.codes(self.stime, tabs + 1)},
-    sphrase = {Formatter.codes(self.sphrase, tabs + 1)},
-    associations = {Formatter.codes(self.associations, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    sources = {Formatter.codes(self.sources, tabs + 1)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 1)},
-    uids = {Formatter.codes(self.uids, tabs + 1)},
-    agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
-    reli_ext = {Formatter.codes(self.reli_ext, tabs)},
-    caus_ext = {Formatter.codes(self.caus_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'EventDetail',
+                ('    date = ', self.date, tabs + 1, full, False),
+                ('    time = ', self.time, tabs + 1, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    place = ', self.place, tabs + 1, full, False),
+                ('    address = ', self.address, tabs + 1, full, False),
+                ('    phones = ', self.phones, tabs + 1, full, False),
+                ('    emails = ', self.emails, tabs + 1, full, False),
+                ('    faxes = ', self.faxes, tabs + 1, full, False),
+                ('    wwws = ', self.wwws, tabs + 1, full, False),
+                ('    agency = ', self.agency, tabs, full, False),
+                ('    religion = ', self.religion, tabs, full, False),
+                ('    cause = ', self.cause, tabs, full, False),
+                ('    resn = ', self.resn, tabs, full, False),
+                ('    sdate = ', self.sdate, tabs + 1, full, False),
+                ('    stime = ', self.stime, tabs + 1, full, False),
+                ('    sphrase = ', self.sphrase, tabs + 1, full, False),
+                (
+                    '    associations = ',
+                    self.associations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    sources = ', self.sources, tabs + 1, full, False),
+                (
+                    '    multimedia_links = ',
+                    self.multimedia_links,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    uids = ', self.uids, tabs + 1, full, False),
+                ('    agnc_ext = ', self.agnc_ext, tabs, full, False),
+                ('    reli_ext = ', self.reli_ext, tabs, full, False),
+                ('    caus_ext = ', self.caus_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 EvenDetailType = EventDetail | list[EventDetail] | None
 
@@ -4821,20 +4948,25 @@ class FamilyEventDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FamilyEventDetail(
-    husband_age = {Formatter.codes(self.husband_age, tabs + 1, required=True)},
-    wife_age = {Formatter.codes(self.wife_age, tabs + 1, required=True)},
-    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
-    husb_ext = {Formatter.codes(self.husb_ext, tabs)},
-    wife_ext = {Formatter.codes(self.wife_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FamilyEventDetail',
+                ('    husband_age = ', self.husband_age, tabs + 1, full, True),
+                ('    wife_age = ', self.wife_age, tabs + 1, full, True),
+                (
+                    '    event_detail = ',
+                    self.event_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    husb_ext = ', self.husb_ext, tabs, full, False),
+                ('    wife_ext = ', self.wife_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamEvenDetailType = FamilyEventDetail | None
 
@@ -4898,20 +5030,31 @@ class FamilyAttribute(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.family_event_detail)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FamilyAttribute(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    payload = {Formatter.codes(self.payload, tabs, required=True)},
-    attribute_type = {Formatter.codes(self.attribute_type, tabs)},
-    family_event_detail = {Formatter.codes(self.family_event_detail, tabs + 1)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FamilyAttribute',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    payload = ', self.payload, tabs, full, True),
+                (
+                    '    attribute_type = ',
+                    self.attribute_type,
+                    tabs,
+                    full,
+                    False,
+                ),
+                (
+                    '    family_event_detail = ',
+                    self.family_event_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamAttrType = FamilyAttribute | list[FamilyAttribute] | None
 
@@ -5028,20 +5171,31 @@ class FamilyEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FamilyEvent(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    occurred = {Formatter.codes(self.occurred, tabs)},
-    event_type = {Formatter.codes(self.event_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FamilyEvent',
+                ('    tag = ', self.tag, tabs + 1, full, True),
+                ('    occurred = ', self.occurred, tabs, full, False),
+                (
+                    '    event_type = ',
+                    self.event_type,
+                    tabs,
+                    full,
+                    self.tag == Tag.EVEN,
+                ),
+                (
+                    '    event_detail = ',
+                    self.event_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamEvenType = FamilyEvent | list[FamilyEvent] | None
 
@@ -5084,18 +5238,23 @@ class Child(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Child(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    chil_ext = {Formatter.codes(self.chil_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Child',
+                (
+                    '    individual_xref = ',
+                    self.individual_xref,
+                    tabs + 1,
+                    full,
+                    True,
+                ),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    chil_ext = ', self.chil_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 ChilType = Child | list[Child] | None
 
@@ -5167,26 +5326,31 @@ class LDSOrdinanceDetail(NamedTuple):
             lines = Tagger.structure(lines, level, self.source_citations)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-LDSOrdinanceDetail(
-    date = {Formatter.codes(self.date, tabs + 1)},
-    time = {Formatter.codes(self.time, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    temple = {Formatter.codes(self.temple, tabs)},
-    place = {Formatter.codes(self.place, tabs + 1)},
-    status = {Formatter.codes(self.status, tabs)},
-    status_date = {Formatter.codes(self.status_date, tabs + 1)},
-    status_time = {Formatter.codes(self.status_time, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    source_citations = {Formatter.codes(self.source_citations, tabs + 1)},
-    temple_ext = {Formatter.codes(self.temple_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'LDSOrdinanceDetail',
+                ('    date = ', self.date, tabs + 1, full, False),
+                ('    time = ', self.time, tabs + 1, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    temple = ', self.temple, tabs, full, False),
+                ('    place = ', self.place, tabs + 1, full, False),
+                ('    status = ', self.status, tabs, full, False),
+                ('    status_date = ', self.status_date, tabs + 1, full, False),
+                ('    status_time = ', self.status_time, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                (
+                    '    source_citations = ',
+                    self.source_citations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    temple_ext = ', self.temple_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 LDSOrdDetailType = LDSOrdinanceDetail | None
 
@@ -5220,17 +5384,16 @@ class LDSSpouseSealing(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.detail)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-LDSSpouseSealing(
-    detail = {Formatter.codes(self.detail, tabs + 1)},
-    slgs_ext = {Formatter.codes(self.slgs_ext, tabs)}, 
-)""",
+            Formatter.display_code(
+                'LDSSpouseSealing',
+                ('    detail = ', self.detail, tabs + 1, full, False),
+                ('    slgs_ext = ', self.slgs_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 LDSSpouSealingType = LDSSpouseSealing | None
 
@@ -5300,19 +5463,30 @@ class LDSIndividualOrdinance(NamedTuple):
                 )
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-LDSIndividualOrdinance(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    ordinance_detail = {Formatter.codes(self.ordinance_detail, tabs + 1)},
-    family_xref = {Formatter.codes(self.family_xref, tabs, required=(self.tag == Tag.SLGC))},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'LDSIndividualOrdinance',
+                ('    tag = ', self.tag, tabs + 1, full, True),
+                (
+                    '    ordinance_detail = ',
+                    self.ordinance_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                (
+                    '    family_xref = ',
+                    self.family_xref,
+                    tabs,
+                    full,
+                    self.tag == Tag.SLGC,
+                ),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 LDSIndiOrd = LDSIndividualOrdinance | None
 
@@ -5357,18 +5531,23 @@ class IndividualEventDetail(NamedTuple):
                 lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-IndividualEventDetail(
-    event_detail = {Formatter.codes(self.event_detail, tabs + 1, required=True)},
-    age = {Formatter.codes(self.age, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-)""",
+            Formatter.display_code(
+                'IndividualEventDetail',
+                (
+                    '    event_detail = ',
+                    self.event_detail,
+                    tabs + 1,
+                    full,
+                    True,
+                ),
+                ('    age = ', self.age, tabs + 1, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 IndiEvenDetailType = IndividualEventDetail | list[IndividualEventDetail] | None
 
@@ -5482,21 +5661,32 @@ class IndividualAttribute(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.event_detail)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-IndividualAttribute(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    payload = {Formatter.codes(self.payload, tabs, required=True)},
-    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag in [Tag.FACT, Tag.IDNO]))},
-    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
-    type_ext = {Formatter.codes(self.type_ext, tabs)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'IndividualAttribute',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    payload = ', self.payload, tabs, full, True),
+                (
+                    '    tag_type = ',
+                    self.tag_type,
+                    tabs,
+                    full,
+                    self.tag in [Tag.FACT, Tag.IDNO],
+                ),
+                (
+                    '    event_detail = ',
+                    self.event_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    type_ext = ', self.type_ext, tabs, full, False),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 IndiAttrType = IndividualAttribute | list[IndividualAttribute] | None
 
@@ -5751,23 +5941,34 @@ class IndividualEvent(NamedTuple):
                         lines = Tagger.structure(lines, level + 3, self.phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-IndividualEvent(
-    tag = {Formatter.codes(self.tag, tabs, required=True)},
-    payload = {Formatter.codes(self.payload, tabs)},
-    tag_type = {Formatter.codes(self.tag_type, tabs, required=(self.tag == Tag.EVEN))},
-    event_detail = {Formatter.codes(self.event_detail, tabs + 1)},
-    family_xref = {Formatter.codes(self.family_xref, tabs)},
-    adoption = {Formatter.codes(self.adoption, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    tag_ext = {Formatter.codes(self.tag_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'IndividualEvent',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    payload = ', self.payload, tabs, full, False),
+                (
+                    '    tag_type = ',
+                    self.tag_type,
+                    tabs,
+                    full,
+                    self.tag == Tag.EVEN,
+                ),
+                (
+                    '    event_detail = ',
+                    self.event_detail,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    family_xref = ', self.family_xref, tabs, full, False),
+                ('    adoption = ', self.adoption, tabs, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 IndiEvenType = IndividualEvent | list[IndividualEvent] | None
 
@@ -5829,18 +6030,24 @@ class Alias(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Alias(
-    individual_xref = {Formatter.codes(self.individual_xref, tabs, required=True)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    alia_ext = {Formatter.codes(self.alia_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Alias',
+                (
+                    '    individual_xref = ',
+                    self.individual_xref,
+                    tabs,
+                    full,
+                    True,
+                ),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    alia_ext = ', self.alia_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
+
 AliaType = Alias | list[Alias] | None
 
 
@@ -5905,24 +6112,35 @@ class FamilyChild(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.status_phrase)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FamilyChild(
-    family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},  
-    pedigree = {Formatter.codes(self.pedigree, tabs)},
-    pedigree_phrase = {Formatter.codes(self.pedigree_phrase, tabs + 1)},
-    status = {Formatter.codes(self.status, tabs)},
-    status_phrase = {Formatter.codes(self.status_phrase, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    famc_ext = {Formatter.codes(self.famc_ext, tabs)},
-    pedi_ext = {Formatter.codes(self.pedi_ext, tabs)},
-    stat_ext = {Formatter.codes(self.stat_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FamilyChild',
+                ('    family_xref = ', self.family_xref, tabs, full, True),
+                ('    pedigree = ', self.pedigree, tabs, full, False),
+                (
+                    '    pedigree_phrase = ',
+                    self.pedigree_phrase,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    status = ', self.status, tabs, full, False),
+                (
+                    '    status_phrase = ',
+                    self.status_phrase,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    famc_ext = ', self.famc_ext, tabs, full, False),
+                ('    pedi_ext = ', self.pedi_ext, tabs, full, False),
+                ('    stat_ext = ', self.stat_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamcType = FamilyChild | list[FamilyChild] | None
 
@@ -5959,18 +6177,17 @@ class FamilySpouse(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FamilySpouse(
-    family_xref = {Formatter.codes(self.family_xref, tabs, required=True)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    fams_ext = {Formatter.codes(self.fams_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FamilySpouse',
+                ('    family_xref = ', self.family_xref, tabs, full, True),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    fams_ext = ', self.fams_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamsType = FamilySpouse | list[FamilySpouse] | None
 
@@ -6016,19 +6233,18 @@ class FileTranslation(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.form_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-FileTranslation(
-    tran = {Formatter.codes(self.tran, tabs, required=True)},
-    form = {Formatter.codes(self.form, tabs)},
-    tran_ext = {Formatter.codes(self.tran_ext, tabs)},
-    form_ext = {Formatter.codes(self.form_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'FileTranslation',
+                ('    tran = ', self.tran, tabs, full, True),
+                ('    form = ', self.form, tabs, full, False),
+                ('    tran_ext = ', self.tran_ext, tabs, full, False),
+                ('    form_ext = ', self.form_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FileTranType = FileTranslation | list[FileTranslation] | None
 
@@ -6093,25 +6309,29 @@ class File(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-File(
-    file = {Formatter.codes(self.file, tabs, required=True)},
-    form = {Formatter.codes(self.form, tabs, required=True)},
-    medi = {Formatter.codes(self.medi, tabs)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    titl = {Formatter.codes(self.titl, tabs)},
-    file_translations = {Formatter.codes(self.file_translations, tabs + 1)},
-    file_ext = {Formatter.codes(self.file_ext, tabs)},
-    form_ext = {Formatter.codes(self.form_ext, tabs)},
-    medi_ext = {Formatter.codes(self.medi_ext, tabs)},
-    titl_ext = {Formatter.codes(self.titl_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'File',
+                ('    file = ', self.file, tabs, full, True),
+                ('    form = ', self.form, tabs, full, True),
+                ('    medi = ', self.medi, tabs, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    titl = ', self.titl, tabs, full, False),
+                (
+                    '    file_translations = ',
+                    self.file_translations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    file_ext = ', self.file_ext, tabs, full, False),
+                ('    form_ext = ', self.form_ext, tabs, full, False),
+                ('    medi_ext = ', self.medi_ext, tabs, full, False),
+                ('    titl_ext = ', self.titl_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
-
-    
 
 
 FileType = File | list[File] | None
@@ -6140,7 +6360,7 @@ class SourceDataEvent(NamedTuple):
     phrase: PhraseType = None
     place: PlacType = None
     even_ext: ExtType = None
-    date_ext: ExtType = None
+    data_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6151,7 +6371,7 @@ class SourceDataEvent(NamedTuple):
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_type(self.place, Place, no_list=True)
             and Checker.verify_ext(Tag.EVEN, self.even_ext)
-            and Checker.verify_ext(Tag.DATE, self.date_ext)
+            and Checker.verify_ext(Tag.DATE, self.data_ext)
         )
         return check
 
@@ -6162,26 +6382,25 @@ class SourceDataEvent(NamedTuple):
             lines = Tagger.string(lines, level, Tag.EVEN, self.event.value)
             lines = Tagger.structure(lines, level + 1, self.even_ext)
             lines = Tagger.string(lines, level + 1, Tag.DATE, self.date_period)
-            lines = Tagger.structure(lines, level + 2, self.date_ext)
+            lines = Tagger.structure(lines, level + 2, self.data_ext)
             lines = Tagger.structure(lines, level + 2, self.phrase)
             lines = Tagger.structure(lines, level + 2, self.place)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SourceDataEvent(
-    event = {Formatter.codes(self.event, tabs + 1, required=True)},
-    date_period = {Formatter.codes(self.date_period, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    place = {Formatter.codes(self.place, tabs + 1)},
-    even_ext = {Formatter.codes(self.even_ext, tabs)},
-    date_ext = {Formatter.codes(self.date_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'SourceDataEvent',
+                ('    event = ', self.event, tabs + 1, full, True),
+                ('    date_period = ', self.date_period, tabs + 1, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    place = ', self.place, tabs + 1, full, False),
+                ('    even_ext = ', self.even_ext, tabs, full, False),
+                ('    data_ext = ', self.data_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 SourDataEvenType = SourceDataEvent | list[SourceDataEvent] | None
 
@@ -6228,21 +6447,20 @@ class NonEvent(NamedTuple):
             lines = Tagger.structure(lines, level + 2, self.sources)
         return lines
 
-    def code(self, tabs: int = 1) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-NonEvent(
-    no = {Formatter.codes(self.no, tabs, required=True)},
-    date = {Formatter.codes(self.date, tabs + 1)},
-    phrase = {Formatter.codes(self.phrase, tabs + 1)},
-    notes = {Formatter.codes(self.notes, tabs + 1)},
-    sources = {Formatter.codes(self.sources, tabs + 1)},
-    no_ext = {Formatter.codes(self.no_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'NonEvent',
+                ('    no = ', self.no, tabs, full, True),
+                ('    date = ', self.date, tabs + 1, full, False),
+                ('    phrase = ', self.phrase, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    sources = ', self.sources, tabs + 1, full, False),
+                ('    no_ext = ', self.no_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 NoType = NonEvent | list[NonEvent] | None
 
@@ -6325,7 +6543,7 @@ class Submitter(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code_ext(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Submitter(
@@ -6347,7 +6565,34 @@ Submitter(
             String.INDENT * tabs,
         )
 
-    
+    def code(self, tabs: int = 1, full: bool = False) -> str:
+        return indent(
+            Formatter.display_code(
+                'Submitter',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    name = ', self.name, tabs, full, True),
+                ('    address = ', self.address, tabs + 1, full, False),
+                ('    phones = ', self.phones, tabs + 1, full, False),
+                ('    emails = ', self.emails, tabs + 1, full, False),
+                ('    faxes = ', self.faxes, tabs + 1, full, False),
+                ('    wwws = ', self.wwws, tabs + 1, full, False),
+                (
+                    '    multimedia_links = ',
+                    self.multimedia_links,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    languages = ', self.languages, tabs + 1, full, False),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    name_ext = ', self.name_ext, tabs, full, False),
+            ),
+            String.INDENT * tabs,
+        )
+
 
 SubmType = Submitter | list[Submitter] | None
 
@@ -6470,35 +6715,58 @@ class Family(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Family(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    resn = {Formatter.codes(self.resn, tabs)},
-    attributes = {Formatter.codes(self.attributes, tabs + 2)},
-    events = {Formatter.codes(self.events, tabs)},
-    husband = {Formatter.codes(self.husband, tabs)},
-    husband_phrase = {Formatter.codes(self.husband_phrase, tabs + 2)},
-    wife = {Formatter.codes(self.wife, tabs)},
-    wife_phrase = {Formatter.codes(self.wife_phrase, tabs + 2)},
-    children = {Formatter.codes(self.children, tabs + 2)},
-    associations = {Formatter.codes(self.associations, tabs + 2)},
-    submitters = {Formatter.codes(self.submitters, tabs + 2)},
-    lds_spouse_sealings = {Formatter.codes(self.lds_spouse_sealings, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    citations = {Formatter.codes(self.citations, tabs)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)}
-    creation = {Formatter.codes(self.creation, tabs + 2)}
-    husb_ext = {Formatter.codes(self.husb_ext, tabs)}
-    wife_ext = {Formatter.codes(self.wife_ext, tabs)}
-)""",
+            Formatter.display_code(
+                'Family',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    resn = ', self.resn, tabs, full, False),
+                ('    attributes = ', self.attributes, tabs + 1, full, False),
+                ('    events = ', self.events, tabs + 1, full, False),
+                ('    husband = ', self.husband, tabs, full, False),
+                (
+                    '    husband_phrase = ',
+                    self.husband_phrase,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    wife = ', self.wife, tabs, full, False),
+                ('    wife_phrase = ', self.wife_phrase, tabs + 1, full, False),
+                ('    children = ', self.children, tabs + 1, full, False),
+                (
+                    '    associations = ',
+                    self.associations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    submitters = ', self.submitters, tabs + 1, full, False),
+                (
+                    '    lds_spouse_sealings = ',
+                    self.lds_spouse_sealings,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    citations = ', self.citations, tabs + 1, full, False),
+                (
+                    '    multimedia_links = ',
+                    self.multimedia_links,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    husb_ext = ', self.husb_ext, tabs, full, False),
+                ('    wife_ext = ', self.wife_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 FamType = Family | list[Family] | None
 
@@ -6564,23 +6832,22 @@ class Multimedia(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Multimedia(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    resn = {Formatter.codes(self.resn, tabs)},
-    files = {Formatter.codes(self.files, tabs, required=True)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    sources = {Formatter.codes(self.sources, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)},
-    creation = {Formatter.codes(self.creation, tabs + 2)},
-)""",
+            Formatter.display_code(
+                'Multimedia',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    resn = ', self.resn, tabs, full, False),
+                ('    files = ', self.files, tabs + 1, full, True),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    sources = ', self.sources, tabs + 1, full, False),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 ObjeType = Multimedia | list[Multimedia] | None
 
@@ -6696,36 +6963,53 @@ class Source(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Source(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    source_data_events = {Formatter.codes(self.source_data_events, tabs + 2)},
-    agency = {Formatter.codes(self.agency, tabs)},
-    data_notes = {Formatter.codes(self.data_notes, tabs)},
-    author = {Formatter.codes(self.author, tabs)},
-    title = {Formatter.codes(self.title, tabs)},
-    abbreviation = {Formatter.codes(self.abbreviation, tabs)},
-    published = {Formatter.codes(self.published, tabs)},
-    text = {Formatter.codes(self.text, tabs + 2)},
-    repositories = {Formatter.codes(self.repositories, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)},
-    creation = {Formatter.codes(self.creation, tabs + 2)},
-    data_ext = {Formatter.codes(self.data_ext, tabs)},
-    agnc_ext = {Formatter.codes(self.agnc_ext, tabs)},
-    auth_ext = {Formatter.codes(self.auth_ext, tabs)},
-    titl_ext = {Formatter.codes(self.titl_ext, tabs)},
-    abbr_ext = {Formatter.codes(self.abbr_ext, tabs)},
-    publ_ext = {Formatter.codes(self.publ_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Source',
+                ('    xref = ', self.xref, tabs, full, True),
+                (
+                    '    source_data_events = ',
+                    self.source_data_events,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    agency = ', self.agency, tabs, full, False),
+                ('    data_notes = ', self.data_notes, tabs + 1, full, False),
+                ('    author = ', self.author, tabs, full, False),
+                ('    title = ', self.title, tabs, full, False),
+                ('    abbreviation = ', self.abbreviation, tabs, full, False),
+                ('    published = ', self.published, tabs, full, False),
+                ('    text = ', self.text, tabs + 1, full, False),
+                (
+                    '    repositories = ',
+                    self.repositories,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                (
+                    '    multimedia_links = ',
+                    self.multimedia_links,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    data_ext = ', self.data_ext, tabs, full, False),
+                ('    agnc_ext = ', self.agnc_ext, tabs, full, False),
+                ('    auth_ext = ', self.auth_ext, tabs, full, False),
+                ('    titl_ext = ', self.titl_ext, tabs, full, False),
+                ('    abbr_ext = ', self.abbr_ext, tabs, full, False),
+                ('    publ_ext = ', self.publ_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 SourType = Source | list[Source] | None
 
@@ -6916,35 +7200,69 @@ class Individual(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Individual(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    resn = {Formatter.codes(self.resn, tabs)},
-    personal_names = {Formatter.codes(self.personal_names, tabs + 2)},
-    sex = {Formatter.codes(self.sex, tabs)},
-    attributes = {Formatter.codes(self.attributes, tabs + 2)},
-    events = {Formatter.codes(self.events, tabs + 2)},
-    lds_individual_ordinances = {Formatter.codes(self.lds_individual_ordinances, tabs + 2)},
-    submitters = {Formatter.codes(self.submitters, tabs + 2)},
-    associations = {Formatter.codes(self.associations, tabs + 2)},
-    aliases = {Formatter.codes(self.aliases, tabs + 2)},
-    ancestor_interest = {Formatter.codes(self.ancestor_interest, tabs + 2)},
-    descendent_interest = {Formatter.codes(self.descendent_interest, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    sources = {Formatter.codes(self.sources, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)}
-    creation = {Formatter.codes(self.creation, tabs + 2)}
-    resn_ext = {Formatter.codes(self.resn_ext, tabs)},
-    sex_ext = {Formatter.codes(self.sex_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Individual',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    resn = ', self.resn, tabs, full, False),
+                (
+                    '    personal_names = ',
+                    self.personal_names,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    sex = ', self.sex, tabs, full, False),
+                ('    attributes = ', self.attributes, tabs + 1, full, False),
+                ('    events = ', self.events, tabs + 1, full, False),
+                (
+                    '    lds_individual_ordinances = ',
+                    self.lds_individual_ordinances,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    submitters = ', self.submitters, tabs + 1, full, False),
+                (
+                    '    associations = ',
+                    self.associations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    aliases = ', self.aliases, tabs + 1, full, False),
+                (
+                    '    ancestor_interest = ',
+                    self.ancestor_interest,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                (
+                    '    descendent_interest = ',
+                    self.descendent_interest,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    sources = ', self.sources, tabs + 1, full, False),
+                (
+                    '    multimedia_links = ',
+                    self.multimedia_links,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    resn_ext = ', self.resn_ext, tabs, full, False),
+                ('    sex_ext = ', self.sex_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
-
-    
 
 
 class Repository(NamedTuple):
@@ -7013,27 +7331,26 @@ class Repository(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-Repository(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    name = {Formatter.codes(self.name, tabs, required=True)},
-    address = {Formatter.codes(self.address, tabs + 2)},
-    phones = {Formatter.codes(self.phones, tabs + 2)},
-    emails = {Formatter.codes(self.emails, tabs + 2)},
-    faxes = {Formatter.codes(self.faxes, tabs + 2)},
-    wwws = {Formatter.codes(self.wwws, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)},
-    creation = {Formatter.codes(self.creation, tabs + 2)},
-    name_ext = {Formatter.codes(self.name_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'Repository',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    name = ', self.name, tabs, full, True),
+                ('    address = ', self.address, tabs + 1, full, False),
+                ('    phones = ', self.phones, tabs + 1, full, False),
+                ('    emails = ', self.emails, tabs + 1, full, False),
+                ('    faxes = ', self.faxes, tabs + 1, full, False),
+                ('    wwws = ', self.wwws, tabs + 1, full, False),
+                ('    notes = ', self.notes, tabs + 1, full, False),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    name_ext = ', self.name_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 class SharedNote(NamedTuple):
     """Store, validate and display a GEDCOM Shared Note Record.
@@ -7098,26 +7415,31 @@ class SharedNote(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
-            f"""
-SharedNote(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    text = {Formatter.codes(self.text, tabs, required=True)},
-    mime = {Formatter.codes(self.mime, tabs)},
-    language = {Formatter.codes(self.language, tabs + 2)},
-    translations = {Formatter.codes(self.translations, tabs + 2)},
-    sources = {Formatter.codes(self.sources, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)},
-    creation = {Formatter.codes(self.creation, tabs + 2)},
-    snote_ext = {Formatter.codes(self.snote_ext, tabs)},
-    mime_ext = {Formatter.codes(self.mime_ext, tabs)},
-)""",
+            Formatter.display_code(
+                'SharedNote',
+                ('    xref = ', self.xref, tabs, full, True),
+                ('    text = ', self.text, tabs, full, True),
+                ('    mime = ', self.mime, tabs, full, False),
+                ('    language = ', self.language, tabs + 1, full, False),
+                (
+                    '    translations = ',
+                    self.translations,
+                    tabs + 1,
+                    full,
+                    False,
+                ),
+                ('    sources = ', self.sources, tabs + 1, full, False),
+                ('    identifiers = ', self.identifiers, tabs + 1, full, False),
+                ('    change = ', self.change, tabs + 1, full, False),
+                ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    snote_ext = ', self.snote_ext, tabs, full, False),
+                ('    mime_ext = ', self.mime_ext, tabs, full, False),
+            ),
             String.INDENT * tabs,
         )
 
-    
 
 class Header(NamedTuple):
     """Hold data for the GEDCOM header special record.
@@ -7265,7 +7587,7 @@ class Header(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.note)
         return lines
 
-    def code(self, tabs: int = 0) -> str:
+    def code_code(self, tabs: int = 0) -> str:
         return indent(
             f"""
 Header(
@@ -7300,4 +7622,39 @@ Header(
             String.INDENT * tabs,
         )
 
-    
+    def code(self, tabs: int = 1, full: bool = False) -> str:
+        return indent(
+            Formatter.display_code(
+                'Header',
+                ('    exttags = ', self.exttags, tabs + 1, full, False),
+                ('    source = ', self.source, tabs, full, False),
+                ('    vers = ', self.vers, tabs, full, False),
+                ('    name = ', self.name, tabs, full, False),
+                ('    corporation = ', self.corporation, tabs, full, False),
+                ('    address = ', self.address, tabs + 1, full, False),
+                ('    phones = ', self.phones, tabs + 1, full, False),
+                ('    emails = ', self.emails, tabs + 1, full, False),
+                ('    faxes = ', self.faxes, tabs + 1, full, False),
+                ('    wwws = ', self.wwws, tabs + 1, full, False),
+                ('    data = ', self.data, tabs, full, False),
+                ('    data_date = ', self.data_date, tabs + 1, full, False),
+                ('    data_time = ', self.data_time, tabs + 1, full, False),
+                ('    submitter = ', self.submitter, tabs, full, False),
+                (
+                    '    subm_copyright = ',
+                    self.subm_copyright,
+                    tabs,
+                    full,
+                    False,
+                ),
+                ('    language = ', self.language, tabs + 1, full, False),
+                ('    note = ', self.note, tabs + 1, full, False),
+                ('    head_ext = ', self.head_ext, tabs, full, False),
+                ('    gedc_ext = ', self.gedc_ext, tabs, full, False),
+                ('    vers_ext = ', self.vers_ext, tabs, full, False),
+                ('    dest_ext = ', self.dest_ext, tabs, full, False),
+                ('    subm_ext = ', self.subm_ext, tabs, full, False),
+                ('    copr_ext = ', self.copr_ext, tabs, full, False),
+            ),
+            String.INDENT * tabs,
+        )
