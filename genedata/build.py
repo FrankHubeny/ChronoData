@@ -959,10 +959,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Multimedia
+            >>> from genedata.store import File, Multimedia
             >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
-            >>> mm = Multimedia(xref=mm_id)
+            >>> mm = Multimedia(xref=mm_id, files=File(file='/path/to/file', form='pdf'))
             >>> a.multimedia(
             ...     [
             ...         mm,
@@ -970,13 +970,15 @@ class Genealogy:
             ... )
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
+            1 FILE /path/to/file
+            2 FORM pdf
             <BLANKLINE>
 
             There may be more than one multimedia record.  This example creates a second
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> mm_id2 = a.multimedia_xref()
-            >>> mm2 = Multimedia(xref=mm_id2)
+            >>> mm2 = Multimedia(xref=mm_id2,files=File(file='/path/to/otherfile', form='pdf'))
             >>> a.multimedia(
             ...     [
             ...         mm,
@@ -985,7 +987,11 @@ class Genealogy:
             ... )
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
+            1 FILE /path/to/file
+            2 FORM pdf
             0 @2@ OBJE
+            1 FILE /path/to/otherfile
+            2 FORM pdf
             <BLANKLINE>
 
         See Also:
@@ -1025,7 +1031,7 @@ class Genealogy:
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> repo_id2 = a.repository_xref()
-            >>> repo2 = Repository(xref=repo_id2)
+            >>> repo2 = Repository(xref=repo_id2, name='Second Repo Name')
             >>> a.repositories(
             ...     [
             ...         repo,
@@ -1034,7 +1040,9 @@ class Genealogy:
             ... )
             >>> print(a.ged_repository)
             0 @1@ REPO
+            1 NAME Repo Name
             0 @2@ REPO
+            1 NAME Second Repo Name
             <BLANKLINE>
 
         See Also:

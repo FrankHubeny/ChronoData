@@ -1026,6 +1026,8 @@ class Specs:
 
 @dataclass(frozen=True)
 class Default:
+    COMMA: str = ','
+    COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
     DATE_DAY: int = 0
     DATE_MONTH: int = 0
