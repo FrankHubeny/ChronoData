@@ -5450,8 +5450,7 @@ class FamilyAttribute(NamedTuple):
         payload: A value to be displayed on the same line as the tag.
         attribute_type: The type of the attribute.
         family_event_detail: Family event detail entered through `FamilyEventDetail`.
-        tag_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFe) 
-            entered through `Extension`.
+        tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
 
 
     See Also:
@@ -5568,6 +5567,19 @@ class FamilyEvent(NamedTuple):
         >>> event2.validate()
         Traceback (most recent call last):
         ValueError: The EVEN tag requires a non-empty TYPE.
+
+    Args:
+        tag: A tag from the FamEven enumeration set.
+        occurred: A rule value means the event occurred.  A false value that it did not.  This information
+            is displayed on the line with the tag.
+        event_type: The type of event.
+        event_detail: Details of the event entered through `FamilyEventDetail`.
+        tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
+
+    
+    See Also:
+        `Extension`
+        `FamilyEventDetail`
 
     References:
         [GEDCOM Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE)
@@ -5692,7 +5704,21 @@ FamEvenType = FamilyEvent | list[FamilyEvent] | None
 class Child(NamedTuple):
     """Store, validate and display GEDCOM child information.
 
+    Examples:
+
+    Args:
+        individual_xref: An individual cross-reference identified constructed using `genedata.build.individual_xref`.
+        phrase: A phrase entered through `Phrase`.
+        chil_ext: Optional substructures extending [CHIL tag](https://gedcom.io/terms/v7/CHIL) 
+            entered through `Extension`.
+    
+    See Also:
+        `Extension`
+        `genedata.build.individual_xref`
+        `Phrase`
+
     Reference:
+        [GEDCOM CHIL tag](https://gedcom.io/terms/v7/CHIL) 
         [GEDCOM Family Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
 
     This is a portion of the GEDCOM Family Record.
@@ -5754,7 +5780,33 @@ ChilType = Child | list[Child] | None
 class LDSOrdinanceDetail(NamedTuple):
     """Store, validate and display the GEDCOM LDS Ordinance Detail structure.
 
+    Examples:
+
+    Args:
+        date: A date entered through `Date`.
+        time: A time entered through `Time`.
+        phrase: A phrase entered through `Phrase`.
+        temple: The name of the tmeple where the ordinance occurred.
+        place: The place where the ordinance occurred entered through `Place`.
+        status: A tag from the enumeration set.
+        status_date: The status date entered through `Date`.
+        status_time: The status time entered through `Time`.
+        notes: Notes entered through `Note`.
+        source_citations: Citations entered through `SourceCitation`.
+        temple_ext: Optional substructures extending [TEMP tag](https://gedcom.io/terms/v7/TEMP) 
+            entered through `Extension`.
+
+    See Also:
+        `Date`
+        `Extension`
+        `Note`
+        `Phrase`
+        `Place`
+        `SourceCitation`
+        `Time`
+
     Reference:
+        [GEDCOM TEMP tag](https://gedcom.io/terms/v7/TEMP)
         [GEDCOM LDS Ordinance Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_ORDINANCE_DETAIL)
 
     > n <<DATE_VALUE>>                         {0:1}
@@ -5853,7 +5905,19 @@ LDSOrdDetailType = LDSOrdinanceDetail | None
 class LDSSpouseSealing(NamedTuple):
     """Store, validate and display the LDS Spouse Sealing structure.
 
+    Examples:
+
+    Args:
+        detail: The ordinance details enetered through `LDSOrdinanceDetail`.
+        slgs_ext: Optional substructures extending [SLGS tag](https://gedcom.io/terms/v7/SLGS) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `LDSOrdinanceDetail`
+
     Reference:
+        [GEDCOM SLGS tag](https://gedcom.io/terms/v7/SLGS)
         [GEDCOM LDS Spouse Sealing Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_SPOUSE_SEALING)
 
     > n SLGS                                     {1:1}  [g7:SLGS](https://gedcom.io/terms/v7/SLGS)
@@ -5898,6 +5962,19 @@ LDSSpouSealingType = LDSSpouseSealing | None
 
 class LDSIndividualOrdinance(NamedTuple):
     """Store, validate and display the GEDCOM LDS Individual Ordinances structure.
+
+    Examples:
+
+    Args:
+        tag: A tag from the enumeration set.
+        ordinance_detail: The ordination details entered through `LDSOrdinanceDetail`.
+        family_xref: A family cross-reference identifier constructed from `genedata.build.family_xref`.
+        tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `genedata.build.family_xref`
+        `LDSOrdinanceDetail`
 
     Reference:
         [GEDCOM LDS Individual Ordinances](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_INDIVIDUAL_ORDINANCE)
@@ -5995,10 +6072,15 @@ LDSIndiOrd = LDSIndividualOrdinance | None
 class IndividualEventDetail(NamedTuple):
     """Store, validate and display a GEDCOM Individual Event Detail structure.
 
-    Args:l
-        event_detail: A GEDCOM Event Detail structure.
-        age: The age of the individual.
-        phrase: Text describing the individual event.
+    Args:
+        event_detail: Event details entered through `IndividualEventDetail`.
+        age: The individual's age entered through `Age`.
+        phrase: A phrase entered through `Phrase`.
+
+    See Also:
+        `Age`
+        `IndividualEventDetail`
+        `Phrase`
 
     Reference:
         [GEDCOM Individual Event Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_DETAIL)
@@ -6059,7 +6141,24 @@ IndiEvenDetailType = IndividualEventDetail | list[IndividualEventDetail] | None
 class IndividualAttribute(NamedTuple):
     """Store, validate and display a GEDCOM Individual Attribute structure.
 
+    Examples:
+
+    Args:
+        tag: A tag from the enumeration set
+        payload: The value on the same GEDCOM output line as the tag.
+        tag_type: The type or additional information about the tag.
+        event_detail: Individual event details entered through `IndividualEventDetail`.
+        tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
+        type_ext: Optional substructures extending [TYPE tag](https://gedcom.io/terms/v7/TYPE) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `IndividualEventDetail`
+
     Reference:
+        [GEDCOM SLGS tag](https://gedcom.io/terms/v7/SLGS)
+        [GEDCOM TYPE tag](https://gedcom.io/terms/v7/TYPE) 
         [GEDCOM Individual Attribute Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_ATTRIBUTE_STRUCTURE)
 
     > [
@@ -6125,8 +6224,9 @@ class IndividualAttribute(NamedTuple):
     payload: str = Default.EMPTY
     tag_type: str = Default.EMPTY
     event_detail: IndiEvenDetailType = None
-    type_ext: ExtType = None
     tag_ext: ExtType = None
+    type_ext: ExtType = None
+    
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6185,8 +6285,8 @@ class IndividualAttribute(NamedTuple):
                     full,
                     False,
                 ),
-                ('    type_ext = ', self.type_ext, tabs, full, False),
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
+                ('    type_ext = ', self.type_ext, tabs, full, False),
             ),
             String.INDENT * tabs,
         )
@@ -6266,13 +6366,20 @@ class IndividualEvent(NamedTuple):
         <BLANKLINE>
 
     Args:
-        tag: Specifies the kind of event.
-        payload: Specifies that the event occurred if the default 'Y' is accepted. Otherwise use ''.
-        tag_type: A text describing the event which must not be the empty string.
-        event_detail: Information about the event in an IndividualEventDetail substructure.
-        family_xref: A family xref will be displayed only for the Tag.ADOP, Tag.BIRT or Tag.CHR events.
-        adoption: A tag for the kind of adoption will be displayed only for the Tag.ADOP event.
-        phrase: A phrase describing the adoption will be displayed only for the Tag.ADOP event.
+        tag: A tag from the enumeration set
+        payload: A value appearing on the same GEDCOM line as the tag.
+        tag_type: Information associated with the tag.
+        event_detail: Individual event details entered through `IndividualEventDetail`.
+        family_xref: A cross-reference identifier constructed from `genedata.build.family_xref` displayed only for the ADOP, BIRT or CHR tags.
+        adoption: A tag from the enumeration set that will be displayed only for the ADOP tag.
+        phrase: A phrase describing the adoption and displayed only for the ADOP event entered through `Phrase`.
+        tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `genedata.build.family_xref`
+        `IndividualEventDetail`
+        `Phrase`
 
     References:
         [GEDCOM INDI-EVEN](https://gedcom.io/terms/v7/INDI-EVEN)
@@ -6493,11 +6600,18 @@ class Alias(NamedTuple):
     be identified for a single individual.
 
     Args:
-        individual_xref: An individual cross-reference identifier containing information about
-            the individual referenced in the individual record.
-        phrase: Text associated with this other individual.
+        individual_xref: An individual cross-reference identifier constructed by `genedata.build.individual_xref`.
+        phrase: A phrase associated with this alias entered through `Phrase`.
+        alia_ext: Optional substructures extending [ALIA tag](https://gedcom.io/terms/v7/ALIA) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `genedata.build.individual_xref`
+        `Phrase`
 
     Reference:
+        [GEDCOM ALIA tag](https://gedcom.io/terms/v7/ALIA)
         [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
 
     > +1 ALIA @<XREF:INDI>@                    {0:M}  [g7:ALIA](https://gedcom.io/terms/v7/ALIA)
@@ -6569,6 +6683,28 @@ class FamilyChild(NamedTuple):
 
     Multiple FAMC records may be defined for a singe Indivdiual Record.  This class
     defines a single FAMC (Family Child) substructure.
+
+    Examples:
+
+    Args:
+        family_xref: A cross-reference identifier constructed with `genedata.build.family_xref`.
+        pedigree: A tag from the enumeration set.
+        pedigree_phrase: A phrase related to the pedigree entered through `Phrase`.
+        status: A tag from the enumeration set.
+        status_phrase: A phrase related to the status entered through `Phrase`.
+        notes: Notes entered through `Note`.
+        famc_ext: Optional substructures extending [FAMC tag](https://gedcom.io/terms/v7/FAMC) 
+            entered through `Extension`.
+        pedi_ext: Optional substructures extending [PEDI tag](https://gedcom.io/terms/v7/PEDI) 
+            entered through `Extension`.
+        stat_ext: Optional substructures extending [STAT tag](https://gedcom.io/terms/v7/STAT) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `genedata.build.family_xref`
+        `Note`
+        `Phrase`
 
     References:
         [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
@@ -6664,6 +6800,22 @@ FamcType = FamilyChild | list[FamilyChild] | None
 class FamilySpouse(NamedTuple):
     """Store, validate and display the GEDCOM Family Spouse structure.
 
+    Examples:
+
+    Args:
+        family_xref: A cross-reference identifier constructed by `genedata.build.family_xref`.
+        notes: Notes entered through `Note`.
+        fams_ext: Optional substructures extending [FAMS tag](https://gedcom.io/terms/v7/FAMS) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `genedata.build.family_xref`
+        `Note`
+
+    Reference:
+        [GEDCOM FAMS tag](https://gedcom.io/terms/v7/FAMS)
+
     > +1 FAMS @<XREF:FAM>@                     {0:M}  g7:FAMS
     >    +2 <<NOTE_STRUCTURE>>                 {0:M}
     """
@@ -6714,8 +6866,25 @@ FamsType = FamilySpouse | list[FamilySpouse] | None
 class FileTranslation(NamedTuple):
     """Store, validate and display the GEDCOM File structure.
 
+    Examples:
+
+    Args:
+        tran: A file reference to the translation.
+        form: The mime type of the file.
+        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+            entered through `Extension`.
+        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM) 
+            entered through `Extension`.
+
+
+    See Also:
+        `Exception`
+
     Reference:
+        [GEDCOM FORM tag](https://gedcom.io/terms/v7/FORM)
+        [GEDCOM TRAN tag](https://gedcom.io/terms/v7/TRAN)
         [GEDCOM Multimedia Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
+
     > +1 FILE <FilePath>                       {1:M}  g7:FILE
     >    +2 FORM <MediaType>                   {1:1}  g7:FORM
     >       +3 MEDI <Enum>                     {0:1}  g7:MEDI
@@ -6776,8 +6945,36 @@ class File(NamedTuple):
 
     Multiple files may be used in a Multimedia Record, but at least one exists.
 
+    Examples:
+
+    Args:
+        file: The location of the file.
+        form: The mime type of the file.
+        medi: A tag from the enumeration set.
+        phrase: A phrase associated with the file entered through `Phrase`.
+        titl: The title of the file.
+        file_translations: Translations entered through `FileTranslation`.
+        file_ext: Optional substructures extending [FILE tag](https://gedcom.io/terms/v7/FILE) 
+            entered through `Extension`.
+        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM) 
+            entered through `Extension`.
+        medi_ext: Optional substructures extending [MEDI tag](https://gedcom.io/terms/v7/MEDI) 
+            entered through `Extension`.
+        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) 
+            entered through `Extension`.
+
+    See Also:
+        `Extension`
+        `FileTranslation`
+        `Phrase`
+
     Reference:
+        [GEDCOM FILE tag](https://gedcom.io/terms/v7/FILE)
+        [GEDCOM FORM tag](https://gedcom.io/terms/v7/FORM)
+        [GEDCOM MEDI tag](https://gedcom.io/terms/v7/MEDI)
+        [GEDCOM TITL tag](https://gedcom.io/terms/v7/TITL)
         [GEDCOM Multimedia Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
+
     > +1 FILE <FilePath>                       {1:M}  g7:FILE
     >    +2 FORM <MediaType>                   {1:1}  g7:FORM
     >       +3 MEDI <Enum>                     {0:1}  g7:MEDI
@@ -6796,6 +6993,7 @@ class File(NamedTuple):
     file_ext: ExtType = None
     form_ext: ExtType = None
     medi_ext: ExtType = None
+    medi_tag_ext: ExtType = None
     titl_ext: ExtType = None
 
     def validate(self) -> bool:
@@ -6825,7 +7023,6 @@ class File(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.FORM, self.form)
             lines = Tagger.structure(lines, level + 2, self.form_ext)
             lines = Tagger.string(lines, level + 3, Tag.MEDI, self.medi.value)
-            lines = Tagger.structure(lines, level + 4, self.medi_ext)
             lines = Tagger.structure(lines, level + 4, self.phrase)
             lines = Tagger.string(lines, level + 1, Tag.TITL, self.titl)
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
@@ -6868,7 +7065,27 @@ class SourceDataEvent(NamedTuple):
     This is an optional part of the Source.Data Record placed as a separate class
     because there may be many of these events.
 
+    Examples:
+
+    Args:
+        event: A tag from the enumeration set.
+        date_period: A date period entered through `Date`.
+        phrase: A phrase entered through `Phrase`.
+        place: A place entered through `Place`.
+        even_ext: Optional substructures extending [EVEN tag](https://gedcom.io/terms/v7/EVEN) 
+            entered through `Extension`.
+        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA) 
+            entered through `Extension`.
+
+    See Also:
+        `Date`
+        `Extension`
+        `Phrase`
+        `Place`
+
     Reference:
+        [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA)
+        [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN) 
         [GEDCOM Source Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
 
     >   +1 DATA                                  {0:1}  [g7:DATA]()
@@ -6936,6 +7153,27 @@ SourDataEvenType = SourceDataEvent | list[SourceDataEvent] | None
 class NonEvent(NamedTuple):
     """Store, validate and display a GEDCOM Non Event structure.
 
+    Examples:
+
+    Args:
+        no: A tag from the enumeration set
+        date: A date entered through `Date`.
+        phrase: A phrase entered through `Phrase`.
+        notes: Notes entered through `Note`.
+        sources: Citations entered through `SourceCitation`.
+        no_ext: Optional substructures extending [NO tag](https://gedcom.io/terms/v7/NO) 
+            entered through `Extension`.
+
+    See Also:
+        `Date`
+        `Extension`
+        `Note`
+        `Phrase`
+        `SourceCitation`
+
+    References:
+        [GEDCOM NO tag](https://gedcom.io/terms/v7/NO)
+
     > n NO <Enum>                                {1:1}  [g7:NO](https://gedcom.io/terms/v7/NO)
     >   +1 DATE <DatePeriod>                     {0:1}  [g7:NO-DATE](https://gedcom.io/terms/v7/NO-DATE)
     >      +2 PHRASE <Text>                      {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
@@ -6999,7 +7237,43 @@ NoType = NonEvent | list[NonEvent] | None
 class Submitter(NamedTuple):
     """Store, validate and disply a GEDCOM Submitter Record.
 
+    Examples:
+
+    Args:
+        xref: A cross-reference identifier constructed with `genedata.build.submitter_xref`.
+        name: A name associated with the record.
+        address: An address entered through `Address`.
+        phones: Phones entered through `Phone`.
+        emails: Emails entered through `Email`.
+        faxes: Fax numbers entered through `Fax`.
+        wwws: Internet sites entered through `WWW`.
+        multimedia_links: Multimedia links entered through `MultimediaLink`.
+        languages: Languages entered through `Lang`.
+        identifiers: Identifiers entered through `Identifier`.
+        notes: Notes entered through `Note`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME) 
+            entered through `Extension`.
+
+
+    See Also:
+        `Address`
+        `ChangeDate`
+        `CreationDate`
+        `Email`
+        `Extension`
+        `Fax`
+        `genedata.build.submitter_xref`
+        `Identifier`
+        `Lang`
+        `MultimediaLink`
+        `Note`
+        `Phone`
+        `WWW`
+
     Reference:
+        [GEDCOM NAME tag](https://gedcom.io/terms/v7/NAME)
         [GEDCOM record-SUBM](https://gedcom.io/terms/v7/record-SUBM)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
 
@@ -7074,28 +7348,6 @@ class Submitter(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.creation)
         return lines
 
-    def code_ext(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Submitter(
-    xref = {Formatter.codes(self.xref, tabs, required=True)},
-    name = {Formatter.codes(self.name, tabs, required=True)},
-    address = {Formatter.codes(self.address, tabs + 2)},
-    phones = {Formatter.codes(self.phones, tabs + 2)}, 
-    emails = {Formatter.codes(self.emails, tabs + 2)},
-    faxes = {Formatter.codes(self.faxes, tabs + 2)},
-    wwws = {Formatter.codes(self.wwws, tabs + 2)},
-    multimedia_links = {Formatter.codes(self.multimedia_links, tabs + 2)}, 
-    languages = {Formatter.codes(self.languages, tabs + 2)},
-    identifiers = {Formatter.codes(self.identifiers, tabs + 2)},
-    notes = {Formatter.codes(self.notes, tabs + 2)},
-    change = {Formatter.codes(self.change, tabs + 2)},
-    creation = {Formatter.codes(self.creation, tabs + 2)},
-    name_ext = {Formatter.codes(self.name_ext, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
-
     def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
             Formatter.display_code(
@@ -7134,12 +7386,52 @@ SubmType = Submitter | list[Submitter] | None
 class Family(NamedTuple):
     """Store, validate and display a GEDCOM Family Record.
 
+    Examples:
+
     Args:
-    - `xref`: typed string obtained by running `chrono.family_xref()`.
-    - `resn`: restriction codes with the default being no restriction.
-    - `attributes`: a tuple of type Attribute.
+        xref: A cross-reference identifier constructed by `genedata.build.family_xref`.
+        resn: A tag from the enumeration set
+        attributes: Family attributes enterd through `FamilyAttribute`.
+        events: Events entered through `FamilyEvents`.
+        husband: A cross-reference identifier for the husband constructed by `genedata.build.individual_xref`.
+        husband_phrase: A phrase associated with the husband entered through `Phrase`.
+        wife: A cross-reference identifier for the wife constructed by `genedata.build.individual_xref`.
+        wife_phrase: A phrase associated with the wife entered through `Phrase`.
+        children: Children entered through `ChildFamily`.
+        associations: Associations entered through `Association`.
+        submitters: Submitters entered through `Submitter`.
+        lds_spouse_sealings: LDS spouse sealings entered through `LDSSpouseSealing`.
+        identifiers: Indentifiers entered through `Identifier`.
+        citations: Citations entered through `SourceCitation`.
+        multimedia_links: Multimedia links entered through `MultimediaLink`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+            entered through `Extension`.
+        husb_ext: Optional substructures extending [HUSB tag](https://gedcom.io/terms/v7/HUSB) 
+            entered through `Extension`.
+        wife_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFE) 
+            entered through `Extension`.
+
+    See Also:
+        `Association`
+        `ChangeDate`
+        `ChildFamily`
+        `CreationDate`
+        `Extension`
+        `FamilyAttribute`
+        `genedata.build.family_xref`
+        `Identifier`
+        `LDSSpouseSealing`
+        `MultimediaLink`
+        `Phrase`
+        `SourceCitation`
+        `Submitter`
+
 
     Reference:
+        [GEDCOM HUSB tag](https://gedcom.io/terms/v7/HUSB)
+        [GEDCOM WIFE tag](https://gedcom.io/terms/v7/WIFE)
         [GEDCOM record-FAM](https://gedcom.io/terms/v7/record-FAM)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
 
@@ -7183,6 +7475,7 @@ class Family(NamedTuple):
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
+    resn_ext: ExtTagType = None
     husb_ext: ExtTagType = None
     wife_ext: ExtTagType = None
 
@@ -7208,6 +7501,7 @@ class Family(NamedTuple):
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
+            and Checker.verify_ext(Tag.RESN, self.resn_ext)
             and Checker.verify_ext(Tag.HUSB, self.husb_ext)
             and Checker.verify_ext(Tag.WIFE, self.wife_ext)
         )
@@ -7218,9 +7512,8 @@ class Family(NamedTuple):
         lines: str = self.xref.ged()
         if self.validate():
             if self.resn != Tag.NONE:
-                lines = ''.join(
-                    [lines, Tagger.taginfo(level, Tag.RESN, self.resn.value)]
-                )
+                lines = Tagger.string(lines, level, Tag.RESN, self.resn.value)
+                lines = Tagger.structure(lines, level+1, self.resn_ext)
             lines = Tagger.structure(lines, level, self.attributes)
             lines = Tagger.structure(lines, level, self.events)
             if str(self.husband) != str(Void.INDI):
@@ -7295,6 +7588,7 @@ class Family(NamedTuple):
                 ),
                 ('    change = ', self.change, tabs + 1, full, False),
                 ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    resn_ext = ', self.husb_ext, tabs, full, False),
                 ('    husb_ext = ', self.husb_ext, tabs, full, False),
                 ('    wife_ext = ', self.wife_ext, tabs, full, False),
             ),
@@ -7311,7 +7605,33 @@ FamType = Family | list[Family] | None
 class Multimedia(NamedTuple):
     """Store, validate and display a GECDOM Multimedia Record.
 
+    Examples:
+
+    Args:
+        xref: A multimedia cross-reference identifier constructed by `genedata.build.multimedia_xref`.
+        resn: A tag from the enumeration set
+        files: Files entered through `File`.
+        identifiers: Identifiers entered through `Identifier`.
+        notes: Notes entered through `Note`.
+        sources: Citations entered through `SourceCitation`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+            entered through `Extension`.
+
+
+    See Also:
+        `ChangeDate`
+        `CreationDate`
+        `Extension`
+        `File`
+        `Identifier`
+        `genedata.build.multimedia_xref`
+        `Note`
+        `SourceCitation`
+
     Reference:
+        [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN) 
         [GEDCOM record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
 
@@ -7339,6 +7659,7 @@ class Multimedia(NamedTuple):
     sources: SourCiteType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
+    resn_ext: ExtTagType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7353,6 +7674,7 @@ class Multimedia(NamedTuple):
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
+            and Checker.verify_ext(Tag.RESN, self.resn_ext)
         )
         return check
 
@@ -7360,7 +7682,9 @@ class Multimedia(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            lines = Tagger.string(lines, level + 1, Tag.RESN, self.resn.value)
+            if self.resn != Tag.NONE:
+                lines = Tagger.string(lines, level + 1, Tag.RESN, self.resn.value)
+                lines = Tagger.structure(lines, level + 1, self.resn_ext)
             lines = Tagger.structure(lines, level + 1, self.files)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -7381,6 +7705,7 @@ class Multimedia(NamedTuple):
                 ('    sources = ', self.sources, tabs + 1, full, False),
                 ('    change = ', self.change, tabs + 1, full, False),
                 ('    creation = ', self.creation, tabs + 1, full, False),
+                ('    resn_ext = ', self.resn_ext, tabs, full, False),
             ),
             String.INDENT * tabs,
         )
@@ -7395,7 +7720,55 @@ ObjeType = Multimedia | list[Multimedia] | None
 class Source(NamedTuple):
     """Store, validate and display a GEDCOM Source Record.
 
+    Examples:
+
+    Args:
+        xref: A source cross-reference identifier constructed by `genedata.build.source_xref`.
+        source_data_events: Source data events entered through `SourceDataEvent`.
+        agency: The name of the agency associated with the source.
+        data_notes: Notes entered through `Note`.
+        author: The name of the author of the source.
+        title: The title of the source.
+        abbreviation: An abbreviation for the source.
+        published: Publication information for the source.
+        text: Text of the source entered through `Text`.
+        repositories: Repository citations entered thrugh `SourceRepositoryCitation`.
+        identifiers: Identifiers entered through `Identifier`.
+        notes: Notes entered through `Note`.
+        multimedia_links: Multimedia links entered through `MultimediaLink`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA) 
+            entered through `Extension`.
+        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC) 
+            entered through `Extension`.
+        auth_ext: Optional substructures extending [AUTH tag](https://gedcom.io/terms/v7/AUTH) 
+            entered through `Extension`.
+        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) 
+            entered through `Extension`.
+        abbr_ext: Optional substructures extending [ABBR tag](https://gedcom.io/terms/v7/ABBR) 
+            entered through `Extension`.
+        publ_ext: Optional substructures extending [PUBL tag](https://gedcom.io/terms/v7/PUBL) 
+            entered through `Extension`.
+
+    See Also:
+        `ChangeDate`
+        `CreationDate`
+        `Extension`
+        `Identifier`
+        `MultimediaLink`
+        `Note`
+        `SourceDataEvent`
+        `SourceRepositoryCitation`
+        `Text`
+
     Reference:
+        [GEDCOM ABBR tag](https://gedcom.io/terms/v7/ABBR)
+        [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC)
+        [GEDCOM AUTH tag](https://gedcom.io/terms/v7/AUTH)
+        [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA)
+        [GEDCOM PUBL tag](https://gedcom.io/terms/v7/PUBL)
+        [GEDCOM TITL tag](https://gedcom.io/terms/v7/TITL)
         [GEDCOM record-SOUR](https://gedcom.io/terms/v7/record-SOUR)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
 
@@ -7628,7 +8001,52 @@ class Individual(NamedTuple):
         Traceback (most recent call last):
         TypeError: "@MY_FAMILY@" has type <class 'genedata.store.FamilyXref'> but should have type <class 'genedata.store.IndividualXref'>.
 
+    Args:
+        xref: An individual cross-reference identifier constructed by `genedata.build.individual_xref`.
+        resn: A tag from the [RESN enumeration set]().
+        personal_names: Personal names entered through `PersonalName`.
+        sex: A tag from the [SEX enumeration set]().
+        attributes: Individual attributes entered through `IndividualAttribute`.
+        events: Individual events entered through `IndividualEvent`.
+        lds_individual_ordinances: LDS individual ordinances entered through `LDSIndividualOrdinance`.
+        families_child: Families in the individual is a child entered through `FamilyChild`.
+        submitters: Submitters entered through `Submitter`.
+        associations: Associations entered through `Association`.
+        aliases: Aliases entered through `Alias`.
+        ancestor_interest: Submitters interested in ancestors of the individual entered through `Submitter`.
+        descendent_interest: Submitters interested in the descendents of the individual entered through `Submitter`.
+        identifiers: Identifiers entered through `Identifier`.
+        notes: Notes entered through `Note`.
+        sources: Citations entered through `SourceCitations`.
+        multimedia_links: Multimedia links entered through `MultimediaLink`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+            entered through `Extension`.
+        sex_ext: Optional substructures extending [SEX tag](https://gedcom.io/terms/v7/SEX) 
+            entered through `Extension`.
+
+    See Also:
+        `Alias`
+        `Association`
+        `ChangeDate`
+        `CreationDate`
+        `Extension`
+        `FamilyChild`
+        `genedata.build.individual_xref`
+        `Identifier`
+        `IndividualAttribute`
+        `IndividualEvent`
+        `LDSIndividualOrdinances`
+        `MultimediaLink`
+        `Note`
+        `PersonalName`
+        `SourceCitation`
+        `Submitter`
+
     Reference:
+        [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN)
+        [GEDCOM SEX tag](https://gedcom.io/terms/v7/SEX) 
         [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
 
@@ -7812,8 +8230,31 @@ class Individual(NamedTuple):
 
 
 class Repository(NamedTuple):
-    """
+    """Store, validate and display the record-INDI GEDCOM structure.
+
+    Examples:
+
+    Args:
+        xref: A repository cross-reference identifier constructed by `genedata.build.repository_xref`.
+        name: The name of the repository.
+        address: The address of the repository entered through `Address`.
+        phones: Phones entered through `Phone`.
+        emails: Emails entered through `Email`.
+        faxes: Fax numbers entered through `Fax`.
+        wwws: Internet addresses entered through `WWW`.
+        notes: Notes entered through `Note`.
+        identifiers: Identifiers entered through `Identifier`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME) 
+            entered through `Extension`.
+
+
+    See Also:
+        `Extension`
+
     Reference:
+        [GEDCOM NAME tag](https://gedcom.io/terms/v7/NAME) 
         [GEDCOM Repository](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD)
 
     > n @XREF:REPO@ REPO                         {1:1}  [g7:record-REPO](https://gedcom.io/terms/v7/record-REPO)
@@ -7904,7 +8345,37 @@ class Repository(NamedTuple):
 class SharedNote(NamedTuple):
     """Store, validate and display a GEDCOM Shared Note Record.
 
+    Examples:
+
+    Args:
+        xref: A shared note cross-reference identifier constructed with `genedata.build.shared_note_xref`.
+        text: The text of the shared note.
+        mime: The mime type of the shared note.
+        language: The language of the shared note entered through `Lang`.
+        translations: Translations of the shared note entered through `NoteTranslation`.
+        sources: Citations of the shared note entered through `SourceCitation`.
+        identifiers: Identifiers of the shared note entered through `Identifier`.
+        change: A change date entered through `ChangeDate`.
+        creation: A creation date entered through `CreationDate`.
+        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE) 
+            entered through `Extension`.
+        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) 
+            entered through `Extension`.
+
+
+    See Also:
+        `ChangeDate`
+        `CreationDate`
+        `Extension`
+        `genedata.build.shared_note_xref`
+        `Identifier`
+        `Lang`
+        `NoteTranslation`
+        `SourceCitation`
+
     Reference:
+        [GEDCOM MIME tag](https://gedcom.io/terms/v7/MIME) 
+        [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
         [GEDCOM Shared Note Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
 
     > n @XREF:SNOTE@ SNOTE <Text>                {1:1}  g7:record-SNOTE
@@ -7996,9 +8467,65 @@ class SharedNote(NamedTuple):
 class Header(NamedTuple):
     """Hold data for the GEDCOM header special record.
 
-    Reference
-    ---------
-    - [GEDCOM Header](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
+    Examples:
+
+    Args:
+        exttags: Extension tag definitions entered through `ExtTag`.
+        source: The source name for the genealogy.
+        vers: The version of the genealogy.
+        name: The name of the genealogy.
+        corporation: The corporation associated with the genealogy.
+        address: The address entered by `Address`.
+        phones: Phones entered by `Phone`.
+        emails: Emails entered by `Email`.
+        faxes: Fax numbers entered by `Fax`.
+        wwws: Internet addresses entered by `WWW`
+        data: Data entry.
+        data_date: Date of the data entered by `Date`.
+        data_time: Time of the data entered by `Time`.
+        data_copyright: Copyright information of the data.
+        dest: Destination of the genealogy.
+        header_date: The date of the header entered by `Date`.
+        header_time: The time of the header entered by `Time`.
+        submitter: The submitter of the genealogy entered by `Submitter`.
+        subm_copyright: The submitter copyright of the genealogy.
+        language: The language of the genalogy entered by `Lang`.
+        note: Notes entered by `Note`.
+        head_ext: Optional substructures extending [HEAD tag](https://gedcom.io/terms/v7/HEAD) 
+            entered through `Extension`.
+        gedc_ext: Optional substructures extending [GEDC tag](https://gedcom.io/terms/v7/GEDC) 
+            entered through `Extension`.
+        vers_ext: Optional substructures extending [VERS tag](https://gedcom.io/terms/v7/VERS) 
+            entered through `Extension`.
+        dest_ext: Optional substructures extending [DEST tag](https://gedcom.io/terms/v7/DEST) 
+            entered through `Extension`.
+        subm_ext: Optional substructures extending [SUBM tag](https://gedcom.io/terms/v7/SUBM) 
+            entered through `Extension`.
+        copr_ext: Optional substructures extending [COPR tag](https://gedcom.io/terms/v7/COPR) 
+            entered through `Extension`.
+
+    See Also:
+        `Address`
+        `Date`
+        `Email`
+        `Extension`
+        `ExtTag`
+        `Fax`
+        `Lang`
+        `Note`
+        `Phone`
+        `Submitter`
+        `Time`
+        `WWW`
+
+    Reference:
+        [GEDCOM COPR tag](https://gedcom.io/terms/v7/COPR)
+        [GEDCOM DEST tag](https://gedcom.io/terms/v7/DEST)
+        [GEDCOM GEDC tag](https://gedcom.io/terms/v7/GEDC)
+        [GEDCOM HEAD tag](https://gedcom.io/terms/v7/HEAD)
+        [GEDCOM VERS tag](https://gedcom.io/terms/v7/VERS) 
+        [GEDCOM SUBM tag](https://gedcom.io/terms/v7/SUBM)
+        [GEDCOM Header](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
 
     >n HEAD                                     {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
     >  +1 GEDC                                  {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
