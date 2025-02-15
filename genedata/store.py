@@ -3256,8 +3256,9 @@ class CallNumber(NamedTuple):
 
     Args:
         call_number: A required value to use this structure containing the call number.
-        medium: One of the tags from the 
-            [MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI).
+        medium: A tag from the 
+            [MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         phrase: PhraseType = None
         caln_ext: Optional substructures extending [CALN tag](https://gedcom.io/terms/v7/CALN) 
             entered through `Extension`.
@@ -3270,9 +3271,9 @@ class CallNumber(NamedTuple):
         `Extension`
 
     Reference:
+        [GEDCOM MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
         [GEDCOM CALN tag](https://gedcom.io/terms/v7/CALN)
         [GEDCOM MEDI tag](https://gedcom.io/terms/v7/MEDI)
-        [GEDCOM Medium Enumeration Set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
         [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
 
     >   +1 CALN <Special>                        {0:M}  [g7:CALN](https://gedcom.io/terms/v7/CALN)
@@ -3491,11 +3492,14 @@ class SourceCitation(NamedTuple):
         source_xref: The source cross reference identifier constructed using `genedata.build.source_xref`.
         page: The page number of the citation.
         source_data: A reference to the source data entered through `SourceData`.
-        event: Tag = Tag.NONE
+        event: A tag from the [EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN).
+            entered by placing `Tag.` in front of the capitalized name from the set.
         event_phrase: A phrase describing the event entered through `Phrase`.
-        role: Tag = Tag.NONE
+        role: A tag from the [ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         role_phrase: A phrase describing the role entered through `Phrase`.
-        quality: Tag = Tag.NONE
+        quality: A tag from the [QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY) 
+            entered by placing `Tag.QUAY` in front of the number (0, 1, 2, 3) from the set.
         multimedialinks: Multimedia links entered through `MultimediaLink`.
         notes: Notes entered through `Note`.
         sour_ext: Optional substructures extending [SOUR tag](https://gedcom.io/terms/v7/SOUR) 
@@ -3518,6 +3522,9 @@ class SourceCitation(NamedTuple):
         `SourceData`
 
     Reference:
+        [GEDCOM EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
+        [GEDCOM QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY)
+        [GEDCOM ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
         [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN)
         [GEDCOM PAGE tag](https://gedcom.io/terms/v7/PAGE)
         [GEDCOM QUAY tag](https://gedcom.io/terms/v7/QUAY) 
@@ -4108,7 +4115,8 @@ class PersonalName(NamedTuple):
         name: The full name of the person including the surname required to use this structure.
         surname: The part of the name representing the surname or the last name of the person required to use
             this structure.  If no surname is known enter a space as ' '.
-        type: The name type from the NameType enumeration set.
+        type: A tag from the [NameType enumeration set](https://gedcom.io/terms/v7/enumset-NAME-TYPE)
+            entered by placing `Tag.` in front of the capitalized name of the tag.
         phrase: A phrase describing the name entered through `Phrase`.
         pieces: Personal name pieces entered through `PersonalNamePieces`.
         translations: Translations entered through `NameTranslation`.
@@ -4127,6 +4135,7 @@ class PersonalName(NamedTuple):
         `SourceCitation`
 
     Reference:
+        [GEDCOM NameType enumeration set](https://gedcom.io/terms/v7/enumset-NAME-TYPE)
         [GEDCOM NAME tag](https://gedcom.io/terms/v7/NAME)
         [GEDCOM TYPE tag](https://gedcom.io/terms/v7/TYPE)
         [GEDCOM Person Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
@@ -5133,7 +5142,8 @@ class EventDetail(NamedTuple):
         agency: The name of the agency associated with the event.
         religion: The name of a religion associated with the event.
         cause: The name of a cause associated with the event.
-        resn: A tag from the [Resn enumeration set](https://gedcom.io/terms/v7/enumset-RESN) if relevant to the event.
+        resn: A tag from the [RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         sdate: A sort date entered through `SDate`.
         stime: A sort time entered through `Time`.
         sphrase: A sort phrase entered through `Phrase`.
@@ -5168,6 +5178,7 @@ class EventDetail(NamedTuple):
         `WWW`
 
     Reference:
+        [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
         [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC) 
         [GEDCOM CAUS tag](https://gedcom.io/terms/v7/CAUS)
         [GEDCOM RELI tag](https://gedcom.io/terms/v7/RELI)
@@ -5446,7 +5457,8 @@ class FamilyAttribute(NamedTuple):
 
 
     Args:
-        tag: A tag from the [Family Attribute enumeration set]().
+        tag: A tag from the [Family Attribute enumeration set]()
+            entered by placing `Tag.` in front of the capitalized name from the set.
         payload: A value to be displayed on the same line as the tag.
         attribute_type: The type of the attribute.
         family_event_detail: Family event detail entered through `FamilyEventDetail`.
@@ -5569,7 +5581,7 @@ class FamilyEvent(NamedTuple):
         ValueError: The EVEN tag requires a non-empty TYPE.
 
     Args:
-        tag: A tag from the FamEven enumeration set.
+        tag: A tag from the [EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN).
         occurred: A rule value means the event occurred.  A false value that it did not.  This information
             is displayed on the line with the tag.
         event_type: The type of event.
@@ -5582,6 +5594,7 @@ class FamilyEvent(NamedTuple):
         `FamilyEventDetail`
 
     References:
+        [GEDCOM EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
         [GEDCOM Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE)
 
     > [
@@ -5788,7 +5801,8 @@ class LDSOrdinanceDetail(NamedTuple):
         phrase: A phrase entered through `Phrase`.
         temple: The name of the tmeple where the ordinance occurred.
         place: The place where the ordinance occurred entered through `Place`.
-        status: A tag from the enumeration set.
+        status: A tag from the [ord-STAT enumeration set](https://gedcom.io/terms/v7/enumset-ord-STAT)
+            entered by placing `Tag.` in front of the capitalized name of the tag.
         status_date: The status date entered through `Date`.
         status_time: The status time entered through `Time`.
         notes: Notes entered through `Note`.
@@ -5806,6 +5820,7 @@ class LDSOrdinanceDetail(NamedTuple):
         `Time`
 
     Reference:
+        [GEEDCOM ord-STAT enumeration set](https://gedcom.io/terms/v7/enumset-ord-STAT)
         [GEDCOM TEMP tag](https://gedcom.io/terms/v7/TEMP)
         [GEDCOM LDS Ordinance Detail](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_ORDINANCE_DETAIL)
 
@@ -6366,12 +6381,14 @@ class IndividualEvent(NamedTuple):
         <BLANKLINE>
 
     Args:
-        tag: A tag from the enumeration set
+        tag: A tag from the [EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         payload: A value appearing on the same GEDCOM line as the tag.
         tag_type: Information associated with the tag.
         event_detail: Individual event details entered through `IndividualEventDetail`.
         family_xref: A cross-reference identifier constructed from `genedata.build.family_xref` displayed only for the ADOP, BIRT or CHR tags.
-        adoption: A tag from the enumeration set that will be displayed only for the ADOP tag.
+        adoption: A tag from the [ADOP enumeration set](https://gedcom.io/terms/v7/enumset-ADOP) displayed only for the ADOP tag
+            entered by placing `Tag.` in front of the capitalized name from the set.
         phrase: A phrase describing the adoption and displayed only for the ADOP event entered through `Phrase`.
         tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
 
@@ -6382,6 +6399,8 @@ class IndividualEvent(NamedTuple):
         `Phrase`
 
     References:
+        [GEDCOM ADOP enumeration set](https://gedcom.io/terms/v7/enumset-ADOP)
+        [GEDCOM EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
         [GEDCOM INDI-EVEN](https://gedcom.io/terms/v7/INDI-EVEN)
         [GEDCOM Individual Event Tags](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-events)
         [GEDCOM Individual Event Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE)
@@ -6391,7 +6410,7 @@ class IndividualEvent(NamedTuple):
     >   +1 TYPE <Text>                           {0:1}  [g7:TYPE](https://gedcom.io/terms/v7/TYPE)
     >   +1 <<INDIVIDUAL_EVENT_DETAIL>>           {0:1}
     >   +1 FAMC @<XREF:FAM>@                     {0:1}  [g7:ADOP-FAMC](https://gedcom.io/terms/v7/ADOP-FAMC)
-    >      +2 ADOP <Enum>                        {0:1}  [g7:FAMC-ADOP](https://gedcom.io/terms/v7/FAMC-ADOP)
+    >      +2 ADOP <Enum>                        {0:1}  [g7:FAMC-ADOP](https://gedcom.io/terms/v7/enumset-ADOP)
     >         +3 PHRASE <Text>                   {0:1}  [g7:PHRASE](https://gedcom.io/terms/v7/PHRASE)
     > |
     > n BAPM [Y|<NULL>]                          {1:1}  [g7:BAPM](https://gedcom.io/terms/v7/BAPM)
@@ -6688,9 +6707,11 @@ class FamilyChild(NamedTuple):
 
     Args:
         family_xref: A cross-reference identifier constructed with `genedata.build.family_xref`.
-        pedigree: A tag from the enumeration set.
+        pedigree: A tag from the [PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         pedigree_phrase: A phrase related to the pedigree entered through `Phrase`.
-        status: A tag from the enumeration set.
+        status: A tag from the [FAMC-STAT enumeration set](https://gedcom.io/terms/v7/enumset-FAMC-STAT)
+            entered by placing `Tag.` in front of the capitalized name of the tag.
         status_phrase: A phrase related to the status entered through `Phrase`.
         notes: Notes entered through `Note`.
         famc_ext: Optional substructures extending [FAMC tag](https://gedcom.io/terms/v7/FAMC) 
@@ -6707,6 +6728,10 @@ class FamilyChild(NamedTuple):
         `Phrase`
 
     References:
+        [GEDCOM PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
+        [GEDCOM FAMC tag](https://gedcom.io/terms/v7/FAMC)
+        [GEDCOM PEDI tag](https://gedcom.io/terms/v7/PEDI)
+        [GEDCOM STAT tag](https://gedcom.io/terms/v7/STAT) 
         [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
 
     > +1 FAMC @<XREF:FAM>@                     {0:M}  [g7:INDI-FAMC](https://gedcom.io/terms/v7/INDI-FAMC)
@@ -6950,7 +6975,8 @@ class File(NamedTuple):
     Args:
         file: The location of the file.
         form: The mime type of the file.
-        medi: A tag from the enumeration set.
+        medi: A tag from the [MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         phrase: A phrase associated with the file entered through `Phrase`.
         titl: The title of the file.
         file_translations: Translations entered through `FileTranslation`.
@@ -6969,6 +6995,7 @@ class File(NamedTuple):
         `Phrase`
 
     Reference:
+        [GEDCOM MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
         [GEDCOM FILE tag](https://gedcom.io/terms/v7/FILE)
         [GEDCOM FORM tag](https://gedcom.io/terms/v7/FORM)
         [GEDCOM MEDI tag](https://gedcom.io/terms/v7/MEDI)
@@ -7068,7 +7095,8 @@ class SourceDataEvent(NamedTuple):
     Examples:
 
     Args:
-        event: A tag from the enumeration set.
+        event: A tag from the [EVENATTR enumeration set](https://gedcom.io/terms/v7/enumset-EVENATTR)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         date_period: A date period entered through `Date`.
         phrase: A phrase entered through `Phrase`.
         place: A place entered through `Place`.
@@ -7084,6 +7112,7 @@ class SourceDataEvent(NamedTuple):
         `Place`
 
     Reference:
+        [GEDCOM EVENATTR enumeration set](https://gedcom.io/terms/v7/enumset-EVENATTR)
         [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA)
         [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN) 
         [GEDCOM Source Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
@@ -7156,7 +7185,8 @@ class NonEvent(NamedTuple):
     Examples:
 
     Args:
-        no: A tag from the enumeration set
+        no: A tag from the [EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         date: A date entered through `Date`.
         phrase: A phrase entered through `Phrase`.
         notes: Notes entered through `Note`.
@@ -7172,6 +7202,7 @@ class NonEvent(NamedTuple):
         `SourceCitation`
 
     References:
+        [GEDCOM EVEN enumeration set](https://gedcom.io/terms/v7/enumset-EVEN)
         [GEDCOM NO tag](https://gedcom.io/terms/v7/NO)
 
     > n NO <Enum>                                {1:1}  [g7:NO](https://gedcom.io/terms/v7/NO)
@@ -7390,7 +7421,8 @@ class Family(NamedTuple):
 
     Args:
         xref: A cross-reference identifier constructed by `genedata.build.family_xref`.
-        resn: A tag from the enumeration set
+        resn: A tag from the [RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         attributes: Family attributes enterd through `FamilyAttribute`.
         events: Events entered through `FamilyEvents`.
         husband: A cross-reference identifier for the husband constructed by `genedata.build.individual_xref`.
@@ -7430,6 +7462,7 @@ class Family(NamedTuple):
 
 
     Reference:
+        [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
         [GEDCOM HUSB tag](https://gedcom.io/terms/v7/HUSB)
         [GEDCOM WIFE tag](https://gedcom.io/terms/v7/WIFE)
         [GEDCOM record-FAM](https://gedcom.io/terms/v7/record-FAM)
@@ -7609,7 +7642,8 @@ class Multimedia(NamedTuple):
 
     Args:
         xref: A multimedia cross-reference identifier constructed by `genedata.build.multimedia_xref`.
-        resn: A tag from the enumeration set
+        resn: A tag from the [RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         files: Files entered through `File`.
         identifiers: Identifiers entered through `Identifier`.
         notes: Notes entered through `Note`.
@@ -7631,6 +7665,7 @@ class Multimedia(NamedTuple):
         `SourceCitation`
 
     Reference:
+        [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
         [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN) 
         [GEDCOM record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
@@ -8003,9 +8038,11 @@ class Individual(NamedTuple):
 
     Args:
         xref: An individual cross-reference identifier constructed by `genedata.build.individual_xref`.
-        resn: A tag from the [RESN enumeration set]().
+        resn: A tag from the [RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         personal_names: Personal names entered through `PersonalName`.
-        sex: A tag from the [SEX enumeration set]().
+        sex: A tag from the [SEX enumeration set](https://gedcom.io/terms/v7/enumset-SEX)
+            entered by placing `Tag.` in front of the capitalized name from the set.
         attributes: Individual attributes entered through `IndividualAttribute`.
         events: Individual events entered through `IndividualEvent`.
         lds_individual_ordinances: LDS individual ordinances entered through `LDSIndividualOrdinance`.
@@ -8045,6 +8082,8 @@ class Individual(NamedTuple):
         `Submitter`
 
     Reference:
+        [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
+        [GEDCOM SEX enumeration set](https://gedcom.io/terms/v7/enumset-SEX)
         [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN)
         [GEDCOM SEX tag](https://gedcom.io/terms/v7/SEX) 
         [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)
