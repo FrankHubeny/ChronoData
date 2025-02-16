@@ -1328,14 +1328,14 @@ class Structure:
     def __str__(self) -> str:
         return self.ged()
 
-    def __repr__(self) -> str:
-        return (
-            self.code()
-            .replace(String.EOL, String.EMPTY)
-            .replace(String.INDENT, String.SPACE)
-            .replace('( ', '(')
-            .replace(',)', ')')
-        )
+    # def __repr__(self) -> str:
+    #     return (
+    #         self.code()
+    #         .replace(String.EOL, String.EMPTY)
+    #         .replace(String.INDENT, String.SPACE)
+    #         .replace('( ', '(')
+    #         .replace(',)', ')')
+    #     )
 
     def __eq__(self, other: Any) -> bool:
         check: bool = isinstance(other, Structure) and self.ged() == other.ged()
@@ -1791,10 +1791,6 @@ class Extension(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
-
 
 ExtType = Extension | list[Extension] | None
 
@@ -1899,9 +1895,6 @@ class Date(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 DateType = Date | None
@@ -2008,9 +2001,6 @@ class SDate(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SDateType = SDate | None
@@ -2101,10 +2091,6 @@ class Time(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
-
 
 TimeType = Time | None
 
@@ -2167,8 +2153,6 @@ class CreationDate(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 CreationDateType = CreationDate | None
@@ -2260,9 +2244,6 @@ class Identifier(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 IdenType = Identifier | list[Identifier] | None
@@ -2329,9 +2310,6 @@ class Phone(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 PhoneType = Phone | list[Phone] | None
@@ -2384,8 +2362,6 @@ class Email(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 EmailType = Email | list[Email] | None
@@ -2439,9 +2415,6 @@ class Fax(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
-
 
 FaxType = Fax | list[Fax] | None
 
@@ -2493,8 +2466,6 @@ class WWW(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 WWWType = WWW | list[WWW] | None
@@ -2547,9 +2518,6 @@ class Lang(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
-
 
 LangType = Lang | list[Lang] | None
 
@@ -2617,9 +2585,7 @@ class Phrase(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
+
 
 
 PhraseType = Phrase | None
@@ -2753,8 +2719,6 @@ class Address(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 AddrType = Address | None
@@ -2889,8 +2853,6 @@ class Age(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 AgeType = Age | None
@@ -3031,8 +2993,6 @@ class PersonalNamePieces(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 PersonalNamePiecesType = PersonalNamePieces | None
@@ -3123,9 +3083,6 @@ class NameTranslation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 NameTranType = NameTranslation | list[NameTranslation] | None
@@ -3222,9 +3179,6 @@ class NoteTranslation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 NoteTranType = NoteTranslation | list[NoteTranslation] | None
@@ -3322,9 +3276,6 @@ class CallNumber(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 CalnType = CallNumber | list[CallNumber] | None
@@ -3403,9 +3354,6 @@ class Text(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 TextType = Text | list[Text] | None
@@ -3473,9 +3421,6 @@ class SourceData(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SourDataType = SourceData | None
@@ -3650,9 +3595,6 @@ class SourceCitation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SourCiteType = SourceCitation | list[SourceCitation] | None
@@ -3819,9 +3761,6 @@ class Note(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 NoteType = Note | list[Note] | None
@@ -3887,9 +3826,6 @@ class SNote(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SNoteType = SNote | list[SNote] | None
@@ -3960,9 +3896,6 @@ class ChangeDate(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 ChangeDateType = ChangeDate | None
@@ -4050,9 +3983,6 @@ class SourceRepositoryCitation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SourRepoCiteType = (
@@ -4236,9 +4166,6 @@ class PersonalName(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 PersonalNameType = PersonalName | list[PersonalName] | None
@@ -4525,9 +4452,6 @@ class Association(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 AssoType = Association | None
@@ -4669,9 +4593,6 @@ class MultimediaLink(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 MMLinkType = MultimediaLink | list[MultimediaLink] | None
@@ -4798,9 +4719,6 @@ class Map(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 MapType = Map | None
@@ -4895,9 +4813,6 @@ class PlaceTranslation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 PlacTranType = PlaceTranslation | list[PlaceTranslation] | None
@@ -5116,9 +5031,6 @@ class Place(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 PlacType = Place | None
@@ -5334,9 +5246,6 @@ class EventDetail(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 EvenDetailType = EventDetail | list[EventDetail] | None
@@ -5442,9 +5351,6 @@ class FamilyEventDetail(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamEvenDetailType = FamilyEventDetail | None
@@ -5548,9 +5454,6 @@ class FamilyAttribute(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamAttrType = FamilyAttribute | list[FamilyAttribute] | None
@@ -5706,9 +5609,6 @@ class FamilyEvent(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamEvenType = FamilyEvent | list[FamilyEvent] | None
@@ -5782,9 +5682,6 @@ class Child(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 ChilType = Child | list[Child] | None
@@ -5909,9 +5806,6 @@ class LDSOrdinanceDetail(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 LDSOrdDetailType = LDSOrdinanceDetail | None
@@ -5967,9 +5861,6 @@ class LDSSpouseSealing(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 LDSSpouSealingType = LDSSpouseSealing | None
@@ -6076,9 +5967,6 @@ class LDSIndividualOrdinance(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 LDSIndiOrd = LDSIndividualOrdinance | None
@@ -6145,9 +6033,6 @@ class IndividualEventDetail(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 IndiEvenDetailType = IndividualEventDetail | list[IndividualEventDetail] | None
@@ -6305,9 +6190,6 @@ class IndividualAttribute(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 IndiAttrType = IndividualAttribute | list[IndividualAttribute] | None
@@ -6601,9 +6483,6 @@ class IndividualEvent(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 IndiEvenType = IndividualEvent | list[IndividualEvent] | None
@@ -6689,9 +6568,6 @@ class Alias(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 AliaType = Alias | list[Alias] | None
@@ -6814,9 +6690,6 @@ class FamilyChild(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamcType = FamilyChild | list[FamilyChild] | None
@@ -6880,9 +6753,6 @@ class FamilySpouse(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamsType = FamilySpouse | list[FamilySpouse] | None
@@ -6957,9 +6827,6 @@ class FileTranslation(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FileTranType = FileTranslation | list[FileTranslation] | None
@@ -7078,9 +6945,6 @@ class File(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FileType = File | list[File] | None
@@ -7171,9 +7035,6 @@ class SourceDataEvent(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 SourDataEvenType = SourceDataEvent | list[SourceDataEvent] | None
@@ -7257,9 +7118,6 @@ class NonEvent(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 NoType = NonEvent | list[NonEvent] | None
@@ -7406,9 +7264,7 @@ class Submitter(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
+
 
 
 SubmType = Submitter | list[Submitter] | None
@@ -7627,9 +7483,6 @@ class Family(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 FamType = Family | list[Family] | None
@@ -7744,9 +7597,6 @@ class Multimedia(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 ObjeType = Multimedia | list[Multimedia] | None
@@ -7958,9 +7808,6 @@ class Source(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
-
 
 SourType = Source | list[Source] | None
 
@@ -8264,8 +8111,6 @@ class Individual(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 class Repository(NamedTuple):
@@ -8376,9 +8221,6 @@ class Repository(NamedTuple):
             ),
             String.INDENT * tabs,
         )
-    
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 class SharedNote(NamedTuple):
@@ -8499,8 +8341,6 @@ class SharedNote(NamedTuple):
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
 
 
 class Header(NamedTuple):
@@ -8705,40 +8545,6 @@ class Header(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.note)
         return lines
 
-    def code_code(self, tabs: int = 0) -> str:
-        return indent(
-            f"""
-Header(
-    exttags = {Formatter.codes(self.exttags, tabs)},
-    source = {Formatter.codes(self.source, tabs)},
-    vers = {Formatter.codes(self.vers, tabs)},
-    name = {Formatter.codes(self.name, tabs)},
-    corporation = {Formatter.codes(self.corporation, tabs)},
-    address = {Formatter.codes(self.address, tabs + 2)},
-    phones = {Formatter.codes(self.phones, tabs + 2)},
-    emails = {Formatter.codes(self.emails, tabs + 2)},
-    faxes = {Formatter.codes(self.faxes, tabs + 2)},
-    wwws = {Formatter.codes(self.wwws, tabs + 2)},
-    data = {Formatter.codes(self.data, tabs)},
-    data_date = {Formatter.codes(self.data_date, tabs + 2)},
-    data_time = {Formatter.codes(self.data_time, tabs + 2)},
-    data_copyright = {Formatter.codes(self.data_copyright, tabs)},
-    dest = {Formatter.codes(self.dest, tabs)},
-    header_date = {Formatter.codes(self.header_date, tabs + 2)},
-    header_time = {Formatter.codes(self.header_time, tabs + 2)},
-    submitter = {Formatter.codes(self.submitter, tabs)},
-    subm_copyright = {Formatter.codes(self.subm_copyright, tabs)},
-    language = {Formatter.codes(self.language, tabs + 2)},
-    note = {Formatter.codes(self.note, tabs + 2)},
-    head_ext = {Formatter.codes(self.head_ext, tabs)},
-    gedc_ext = {Formatter.codes(self.gedc_ext, tabs)},
-    vers_ext = {Formatter.codes(self.vers_ext, tabs)},
-    dest_ext = {Formatter.codes(self.dest_ext, tabs)},
-    subm_ext = {Formatter.codes(self.subm_ext, tabs)},
-    copr_ext = {Formatter.codes(self.copr_ext, tabs)},
-)""",
-            String.INDENT * tabs,
-        )
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
@@ -8777,5 +8583,3 @@ Header(
             String.INDENT * tabs,
         )
     
-    def __repr__(self) -> str:
-        return self.code(full=True)
