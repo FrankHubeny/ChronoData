@@ -9,8 +9,8 @@
 
 import pytest
 
-from chronodata.messages import Msg
-from chronodata.store import Time
+from genedata.messages import Msg
+from genedata.store import Time
 
 testdata = [
     ('t1.ged(1)', '1 TIME 04:30:10\n'),

@@ -16,9 +16,9 @@
 
 import pytest
 
-from chronodata.build import Genealogy
-from chronodata.messages import Msg
-from chronodata.store import (
+from genedata.build import Genealogy
+from genedata.messages import Msg
+from genedata.store import (
     Checker,
     FamilyXref,
     IndividualXref,

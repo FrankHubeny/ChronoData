@@ -1,0 +1,25 @@
+
+%YAML 1.2
+---
+lang: en-US
+
+type: structure
+
+uri: tests/data/EXTSUBC
+
+specification:
+  - _EXTSUBSUBB
+  - This extension is for testing purposes only
+    
+label: 'Ext Sub Sub B'
+
+payload: xsd:string
+
+substructures:
+  "https://gedcom.io/terms/v7/PHRASE": "{0:1}"
+
+superstructures:
+  "./EXT": "{0:1}"
+
+contact: "testing data"
+...

@@ -96,7 +96,7 @@ import re
 import urllib.request
 from pathlib import Path
 from textwrap import indent
-from typing import Any, ClassVar, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
@@ -493,25 +493,24 @@ class Checker:
     @staticmethod
     def verify_ext(tag: Tag, extensions: Any) -> bool:
         check: bool = True
-        if extensions is None:
+        if extensions is None or (isinstance(extensions, list) and len(extensions) == 0):
             return check
         if isinstance(extensions, list):
-            for extension in extensions:
+            for ext in extensions:
                 if (
-                    len(extension.exttag.supers) > 0
-                    and tag.value not in extension.exttag.supers
+                    len(ext.exttag.supers) > 0
+                    and tag.value not in ext.exttag.supers
                 ):
                     check = False
                     raise ValueError(
-                        Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension)
+                        Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value)
                     )
             return check
         if (
-            len(extension.exttag.supers) > 0
-            and tag.value not in extension.exttag.supers
+            tag.value not in extensions.exttag.supers
         ):
             check = False
-            raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(extension))
+            raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value))
         return check
 
     @staticmethod
@@ -530,7 +529,7 @@ class Checker:
         if value is None:
             return check
         if isinstance(value, list):
-            if no_list and len(value) > 1:
+            if no_list and isinstance(value, list):
                 raise TypeError(Msg.NO_LIST)
             for item in value:
                 if not isinstance(item, value_type):
@@ -1008,21 +1007,15 @@ class Formatter:
 
     @staticmethod
     def codes_single(
-        item: Any, tabs: int, full: bool, required: bool = False
+        item: Any, tabs: int, full: bool
     ) -> str:
         if isinstance(item, str):
-            # if required and item == Default.EMPTY:
-            #     return f'{item!r}{String.REQUIRED}'
             return f'{item!r}'
         if isinstance(item, int | float):
             return f'{item!r}'
         if isinstance(item, Xref):
-            # if required and item.fullname == Default.POINTER:
-            #     return f'{item!r}{String.REQUIRED}'
             return f'{item!r}'
         if isinstance(item, Tag):
-            # if required and item == Tag.NONE:
-            #     return f'Tag.{item.name}{String.REQUIRED}'
             return f'Tag.{item.name}'
         code_lines: str = (
             item.code(tabs - 1, full=full)
@@ -1036,16 +1029,12 @@ class Formatter:
         items: Any, tabs: int = 1, full: bool = False, required: bool = False
     ) -> str:
         if items is None:
-            # if required:
-            #     return ''.join([Default.NONE, String.REQUIRED])
             return Default.NONE
         if isinstance(items, list):
             if len(items) == 0:
-                # if required:
-                #     return String.LEFT_RIGHT_BRACKET_REQUIRED
                 return String.LEFT_RIGHT_BRACKET
             if len(items) == 1:
-                return Formatter.codes_single(items[0], tabs, full, required)
+                return Formatter.codes_single(items[0], tabs, full)
             lines: str = String.LEFT_BRACKET
             for item in items:
                 line_end = Default.COMMA
@@ -1099,7 +1088,7 @@ class Formatter:
                     String.RIGHT_BRACKET,
                 ]
             )
-        return Formatter.codes_single(items, tabs, full, required)
+        return Formatter.codes_single(items, tabs, full)
 
     @staticmethod
     def codes_line(
@@ -1319,45 +1308,45 @@ class Formatter:
                 pass
 
 
-class Structure:
-    """A base class for the GEDCOM structure classes to define dunder methods."""
+# class Structure:
+#     """A base class for the GEDCOM structure classes to define dunder methods."""
 
-    def __init__(self) -> None:
-        pass
+#     def __init__(self) -> None:
+#         pass
 
-    def __str__(self) -> str:
-        return self.ged()
+#     def __str__(self) -> str:
+#         return self.ged()
 
-    # def __repr__(self) -> str:
-    #     return (
-    #         self.code()
-    #         .replace(String.EOL, String.EMPTY)
-    #         .replace(String.INDENT, String.SPACE)
-    #         .replace('( ', '(')
-    #         .replace(',)', ')')
-    #     )
+#     # def __repr__(self) -> str:
+#     #     return (
+#     #         self.code()
+#     #         .replace(String.EOL, String.EMPTY)
+#     #         .replace(String.INDENT, String.SPACE)
+#     #         .replace('( ', '(')
+#     #         .replace(',)', ')')
+#     #     )
 
-    def __eq__(self, other: Any) -> bool:
-        check: bool = isinstance(other, Structure) and self.ged() == other.ged()
-        return check
+#     def __eq__(self, other: Any) -> bool:
+#         check: bool = isinstance(other, Structure) and self.ged() == other.ged()
+#         return check
 
-    def ged(self) -> str:
-        return String.EMPTY
+#     def ged(self) -> str:
+#         return String.EMPTY
 
-    def code(self) -> str:
-        return String.EMPTY
+#     def code(self) -> str:
+#         return String.EMPTY
 
-    def example(self) -> None:
-        print(String.EMPTY)  # noqa: T201
+#     def example(self) -> None:
+#         print(String.EMPTY)  
 
 
-class ExtTag(Structure):
+class ExtTag:
     """Store, validate and display extension tag information.
 
     An underline is added to the front of the new tag if one is not there already.
-    Also the tag to made upper case.
+    Also the tag is made upper case.
 
-    This class holds multiple extension tags for the header record.  It is not a separate
+    This class holds multiple extension tags identified in the header record.  It is not a separate
     GEDCOM structure.
 
     Examples:
@@ -1400,8 +1389,6 @@ class ExtTag(Structure):
     >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
     """
 
-    structure: ClassVar[str] = Tag.SCHMA.value
-
     def __init__(self, tag: str, url: str) -> None:
         self.raw_tag: str = tag
         self.url: str = url
@@ -1421,18 +1408,38 @@ class ExtTag(Structure):
         raw2: str = raw[raw.find('%YAML') :]
         self.yaml: str = raw2[: raw2.find('...')]
         self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
-        self.lang: str = self.yamldict['lang']
-        self.type: str = self.yamldict['type']
-        self.uri: str = self.yamldict['uri']
-        self.label: str = self.yamldict['label']
-        self.payload: str = self.yamldict['payload']
-        self.specification: str = self.yamldict['specification']
-        self.contact: str = self.yamldict['contact']
+        self.lang: str = Default.EMPTY
+        if self.yamldict['lang'] is not None:
+            self.lang = self.yamldict['lang']
+        self.type: str = Default.EMPTY
+        if self.yamldict['type'] is not None:
+            self.type = self.yamldict['type']
+        self.uri: str = Default.EMPTY
+        if self.yamldict['uri'] is not None:
+            self.uri = self.yamldict['uri']
+        self.label: str = Default.EMPTY
+        if self.yamldict['label'] is not None:
+            self.label = self.yamldict['label']
+        self.payload: str = Default.EMPTY
+        if self.yamldict['payload'] is not None:
+            self.payload = self.yamldict['payload']
+        self.specification: str = Default.EMPTY
+        if self.yamldict['specification'] is not None:
+            self.specification = self.yamldict['specification']
+        self.contact: str = Default.EMPTY
+        if self.yamldict['contact'] is not None:
+            self.contact = self.yamldict['contact']
         self.value_of: list[str] = []
+        # if self.yamldict['value of'] is not None:
+        #     self.value_of = self.yamldict['value of']
         with contextlib.suppress(Exception):
             self.value_of = self.yamldict['value of']
-        self.substructures: dict[str, str] = self.yamldict['substructures']
-        self.superstructures: dict[str, str] = self.yamldict['superstructures']
+        self.substructures: dict[str, str] = {}
+        if self.yamldict['substructures'] is not None:
+            self.substructures = self.yamldict['substructures']
+        self.superstructures: dict[str, str] = {}
+        if self.yamldict['superstructures'] is not None:
+            self.superstructures = self.yamldict['superstructures']
         self.supers: set[str] = {
             super_name[super_name.rfind('/') + 1 :]
             for super_name in self.superstructures
@@ -1482,9 +1489,7 @@ class ExtTag(Structure):
             String.INDENT * tabs,
         )
 
-
 ExtTagType = ExtTag | list[ExtTag] | None
-
 
 class Xref:
     """Assign an extension cross-reference type to a string.
@@ -1750,20 +1755,17 @@ class Extension(NamedTuple):
         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
 
-    level: int
     exttag: ExtTag
     payload: str = String.EMPTY
     extra: str = String.EMPTY
-    substructures: list[Any] | None = None
+
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.level, int, no_list=True)
-            and Checker.verify_type(self.exttag, ExtTag, no_list=True)
+            Checker.verify_type(self.exttag, ExtTag, no_list=True)
             and Checker.verify_type(self.payload, str, no_list=True)
             and Checker.verify_type(self.extra, str, no_list=True)
-            and Checker.verify_type(self.substructures, Any)
         )
         return check
 
@@ -1782,12 +1784,10 @@ class Extension(NamedTuple):
     def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
             Formatter.display_code(
-                'Extension',
-                ('    level = ', self.level, tabs, full, True),
+                'Extension(',
                 ('    exttag = ', self.exttag, tabs, full, True),
                 ('    payload = ', self.payload, tabs, full, False),
                 ('    extra = ', self.extra, tabs, full, False),
-                ('    substructures = ', self.substructures, tabs, full, False),
             ),
             String.INDENT * tabs,
         )
@@ -3238,8 +3238,8 @@ class CallNumber(NamedTuple):
     call_number: str = Default.EMPTY
     medium: Tag = Tag.NONE
     phrase: PhraseType = None
-    caln_ext: ExtTagType = None
-    medi_ext: ExtTagType = None
+    caln_ext: ExtType = None
+    medi_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4650,9 +4650,9 @@ class Map(NamedTuple):
         longitude: The positive decimal value of the angle from the prime meridian.
         map_ext: Optional substructures extending [MAP tag](https://gedcom.io/terms/v7/MAP) 
             entered through `Extension`.
-        latitude_ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI) 
+        lati_ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI) 
             entered through `Extension`.
-        longitude_ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG) 
+        long_ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG) 
             entered through `Extension`.
 
     Reference:
@@ -4667,21 +4667,19 @@ class Map(NamedTuple):
     latitude: float = Default.MAP_LATITUDE
     longitude: float = Default.MAP_LONGITUDE
     map_ext: ExtType = None
-    latitude_ext: ExtType = None
-    longitude_ext: ExtType = None
+    lati_ext: ExtType = None
+    long_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_not_empty(self.latitude)
-            and Checker.verify_not_empty(self.longitude)
-            and Checker.verify_type(self.latitude, float, no_list=True)
+            Checker.verify_type(self.latitude, float, no_list=True)
             and Checker.verify_type(self.longitude, float, no_list=True)
             and Checker.verify_range(self.latitude, -90.0, 90.0)
             and Checker.verify_range(self.longitude, -180.0, 180.0)
             and Checker.verify_ext(Tag.MAP, self.map_ext)
-            and Checker.verify_ext(Tag.LATI, self.latitude_ext)
-            and Checker.verify_ext(Tag.LONG, self.longitude_ext)
+            and Checker.verify_ext(Tag.LATI, self.lati_ext)
+            and Checker.verify_ext(Tag.LONG, self.long_ext)
         )
         return check
 
@@ -4702,9 +4700,9 @@ class Map(NamedTuple):
             lines = Tagger.empty(lines, level, Tag.MAP)
             lines = Tagger.structure(lines, level + 1, self.map_ext)
             lines = Tagger.string(lines, level + 1, Tag.LATI, latitude)
-            lines = Tagger.structure(lines, level + 2, self.latitude_ext)
+            lines = Tagger.structure(lines, level + 2, self.lati_ext)
             lines = Tagger.string(lines, level + 1, Tag.LONG, longitude)
-            lines = Tagger.structure(lines, level + 2, self.longitude_ext)
+            lines = Tagger.structure(lines, level + 2, self.long_ext)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -4714,8 +4712,8 @@ class Map(NamedTuple):
                 ('    latitude = ', self.latitude, tabs, full, True),
                 ('    longitude = ', self.longitude, tabs, full, True),
                 ('    map_ext = ', self.map_ext, tabs, full, False),
-                ('    latitude_ext = ', self.latitude_ext, tabs, full, False),
-                ('    longitude_ext = ', self.longitude_ext, tabs, full, False),
+                ('    lati_ext = ', self.lati_ext, tabs, full, False),
+                ('    long_ext = ', self.long_ext, tabs, full, False),
             ),
             String.INDENT * tabs,
         )
@@ -7364,9 +7362,9 @@ class Family(NamedTuple):
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
-    resn_ext: ExtTagType = None
-    husb_ext: ExtTagType = None
-    wife_ext: ExtTagType = None
+    resn_ext: ExtType = None
+    husb_ext: ExtType = None
+    wife_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -7547,7 +7545,7 @@ class Multimedia(NamedTuple):
     sources: SourCiteType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
-    resn_ext: ExtTagType = None
+    resn_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""

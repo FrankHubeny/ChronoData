@@ -7,7 +7,7 @@
 
 import pytest
 
-from chronodata.build import Genealogy
+from genedata.build import Genealogy
 
 testdata = [('joe_someone', '@JOE_SOMEONE@')]
 

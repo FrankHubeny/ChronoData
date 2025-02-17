@@ -4,7 +4,7 @@
 
 import pytest
 
-from chronodata.store import Dater
+from genedata.store import Dater
 
 testdata = [
     ('creation_pieces[0][0]', '1'),

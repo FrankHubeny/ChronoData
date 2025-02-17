@@ -1,0 +1,26 @@
+
+%YAML 1.2
+---
+lang: en-US
+
+type: structure
+
+uri: tests/data/EXTSUBA
+
+specification:
+  - _EXTSUBA
+  - This extension is for testing purposes only
+    
+label: 'Bad Ext'
+
+payload: xsd:string
+
+substructures:
+  "./EXTSUBSUBA": "{0:1}"
+  "./EXTSUBSUBB": "{0:1}"
+
+superstructures:
+  "./EXT": "{0:1}"
+
+contact: "testing data"
+...

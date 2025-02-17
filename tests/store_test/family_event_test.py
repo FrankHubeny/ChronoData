@@ -3,12 +3,9 @@
 
 import pytest
 
-from chronodata.constants import FamEven, String, Tag
-from chronodata.messages import Msg
-from chronodata.store import (
-    Date,
-    DateValue,
-    EventDetail,
+from genedata.gedcom import FamEven, Tag
+from genedata.messages import Msg
+from genedata.store import (
     FamilyEvent,
     FamilyEventDetail,
 )
@@ -17,15 +14,15 @@ testdata_minimal = [
     ('anul[0]', '1 ANUL Y'),
     ('anul2[0]', '1 ANUL'),
     ('cens[0]', '1 CENS Y'),
-    ('div[0]', '1 DIV Y'),
+    ('div[0]', '1 DIV'),
     ('divf[0]', '1 DIVF Y'),
-    ('enga[0]', '1 ENGA Y'),
+    ('enga[0]', '1 ENGA'),
     ('marb[0]', '1 MARB Y'),
-    ('marc[0]', '1 MARC Y'),
+    ('marc[0]', '1 MARC'),
     ('marl[0]', '1 MARL Y'),
-    ('marr[0]', '1 MARR Y'),
+    ('marr[0]', '1 MARR'),
     ('mars[0]', '1 MARS Y'),
-    ('even[0]', '1 EVEN Y'),
+    ('even[0]', '1 EVEN'),
 ]
 
 
@@ -34,108 +31,109 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
     """Test that all the available tags can be used and payload can be empty."""
     anul = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.ANUL,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.ANUL,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     anul2 = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.ANUL,
-            payload=String.EMPTY,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.ANUL,
+            False,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     cens = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.CENS,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.CENS,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     div = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.DIV,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.DIV,
+            False,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     divf = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.DIVF,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.DIVF,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     enga = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.ENGA,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.ENGA,
+            False,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     marb = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.MARB,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.MARB,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     marc = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.MARC,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.MARC,
+            False,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     marl = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.MARL,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.MARL,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     marr = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.MARR,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.MARR,
+            False,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     mars = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.MARS,
-            payload=String.OCCURRED,
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            Tag.MARS,
+            True,
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
     )
     even = (  # noqa: F841
         FamilyEvent(
-            tag=Tag.EVEN,
+            Tag.EVEN,
+            False,
             event_type='some string',
-            event_detail=FamilyEventDetail(event_detail = EventDetail(date_value = DateValue( date=Date(2024,10,10))))
+            event_detail=None,
         )
         .ged(1)
         .split('\n')
@@ -143,23 +141,6 @@ def test_minimal(test_input: str, expected: str | int | bool) -> None:
 
     assert eval(test_input) == expected
 
-
-def test_payload() -> None:
-    """The payload for all tags except EVEN must be either 'Y' or ''."""
-    bad = FamilyEvent(Tag.ANUL, 'S')
-    with pytest.raises(
-        ValueError, match=Msg.TAG_PAYLOAD.format(Tag.ANUL.value)
-    ):
-        bad.validate()
-
-
-def test_event_type() -> None:
-    """The event_type for the EVEN tag cannot be empty."""
-    bad = FamilyEvent(Tag.EVEN, 'S')
-    with pytest.raises(
-        ValueError, match=Msg.EMPTY_EVENT_TYPE.format(Tag.EVEN.value)
-    ):
-        bad.validate()
 
 
 def test_bad_enum() -> None:
@@ -170,15 +151,6 @@ def test_bad_enum() -> None:
     ):
         bad.validate()
 
-
-def test_payload_bad_type() -> None:
-    """This event checks that the payload fails a type test."""
-    bad = FamilyEvent(Tag.ANUL, payload=1)  # type: ignore[arg-type]
-    with pytest.raises(
-        TypeError,
-        match=Msg.WRONG_TYPE.format(bad.payload, type(bad.payload), str),
-    ):
-        bad.validate()
 
 
 def test_event_type_bad_type() -> None:
@@ -197,7 +169,7 @@ def test_event_detail_bad_type() -> None:
     with pytest.raises(
         TypeError,
         match=Msg.WRONG_TYPE.format(
-            bad.event_detail, type(bad.event_detail), FamilyEventDetail | None
+            bad.event_detail, type(bad.event_detail), FamilyEventDetail
         ),
     ):
         bad.validate()

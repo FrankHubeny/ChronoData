@@ -10,7 +10,7 @@
 
 import pytest
 
-from chronodata.store import Age
+from genedata.store import Age, Phrase
 
 testdata = [
     ('a1.ged(1)', '1 AGE > 10y\n'),
@@ -29,7 +29,7 @@ def test_time(test_input: str, expected: str | int | bool) -> None:
     a3 = Age(greater_less_than='<', weeks=1)  # noqa: F841
     a4 = Age(1, 1, 1, 1, greater_less_than='')  # noqa: F841
     a5 = Age(greater_less_than='<', months=2)  # noqa: F841
-    a6 = Age(greater_less_than='<', months=2, phrase='not sure about the age')  # noqa: F841
+    a6 = Age(greater_less_than='<', months=2, phrase=Phrase('not sure about the age'))  # noqa: F841
 
     assert eval(test_input) == expected
 

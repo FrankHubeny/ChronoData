@@ -7,9 +7,9 @@
 
 import pytest
 
-from chronodata.constants import Tag
-from chronodata.messages import Msg
-from chronodata.store import Checker, Date, Tagger, Time
+from genedata.gedcom import Default, Tag
+from genedata.messages import Msg
+from genedata.store import Checker, Date, Tagger, Time
 
 testdata = [
     ('taginfo1', '1 TIME 01:01:01Z\n'),
@@ -42,7 +42,7 @@ def test_defs_tags_classes(test_input: str, expected: str | int | bool) -> None:
     taginfo3 = Tagger.taginfo(1, Tag.TIME, '01:01:01Z', 'hello')  # noqa: F841
 
     # Test the verify_enum method.
-    enum = Checker.verify_enum(Tag.HUSB.value, Tag)  # noqa: F841
+    enum = Checker.verify_enum(Tag.HUSB, Tag)  # noqa: F841
 
     # test the clean_input method.
     clean1 = Tagger.clean_input('hell\u0000o to you')  # noqa: F841
@@ -142,9 +142,9 @@ def test_range_float_high() -> None:
 
 def test_tag_enum() -> None:
     with pytest.raises(
-        ValueError, match=Msg.NOT_VALID_ENUM.format('hello', Tag)
+        ValueError, match=Msg.NEITHER_TAG_NOR_EXTTAG.format(Default.MIME)
     ):
-        Checker.verify_enum('hello', Tag)
+        Checker.verify_enum(Default.MIME, Tag)
 
 def test_verify() -> None:
     message: str = 'Got an error'

@@ -3,18 +3,17 @@
 
 import pytest
 
-from chronodata.build import Genealogy
-from chronodata.constants import Sex
-from chronodata.store import (
+from genedata.build import Genealogy
+from genedata.gedcom import Tag
+from genedata.store import (
     Checker,
     Child,
     Family,
     FamilyChild,
     FamilyXref,
-    Husband,
     Individual,
     IndividualXref,
-    Wife,
+    Phrase,
 )
 
 testdata_indi_xref = [
@@ -36,13 +35,9 @@ testdata_indi_xref = [
     ('mary.validate()', True),
     ('jesus.validate()', True),
     ('joe_mary.validate()', True),
-    ('joe_husband_type', True),
-    ('mary_wife_type', True),
     ('jesus_child_type', True),
     ('joe_mary_type', True),
     # Validate the above objects.
-    ('joe_husband.validate()', True),
-    ('mary_wife.validate()', True),
     ('jesus_child.validate()', True),
     # Check display at this point
     ('family[0]', '0 @JOE_&_MARY@ FAM'),
@@ -74,30 +69,32 @@ def test_create_individual_xrefs(
     joe_mary_xref_type = Checker.verify_type(joe_mary_xref, FamilyXref)  # noqa: F841
 
     # Create the individual records.
-    joe = Individual(xref=joe_xref, sex=Sex.M)
-    mary = Individual(xref=mary_xref, sex=Sex.F)
+    joe = Individual(xref=joe_xref, sex=Tag.M)
+    mary = Individual(xref=mary_xref, sex=Tag.F)
     jesus = Individual(
-        xref=jesus_xref, sex=Sex.M, families_child=[FamilyChild(joe_mary_xref),]
+        xref=jesus_xref, sex=Tag.M, families_child=[FamilyChild(joe_mary_xref),]
     )
     joe_type = Checker.verify_type(joe, Individual)  # noqa: F841
     mary_type = Checker.verify_type(mary, Individual)  # noqa: F841
     jesus_type = Checker.verify_type(jesus, Individual)  # noqa: F841
 
     # Create the family record.
-    joe_husband = Husband(joe_xref, 'Joe is the husband.')
-    mary_wife = Wife(mary_xref, 'Mary is the wife.')
-    jesus_child = Child(jesus_xref, 'Jesus is the child.')
+    # joe_husband = Husband(joe_xref, 'Joe is the husband.')
+    # mary_wife = Wife(mary_xref, 'Mary is the wife.')
+    jesus_child = Child(jesus_xref, Phrase('Jesus is the child.'))
 
     # Create the roles of Joe, Mary and Jesus in the family.
-    joe_husband_type = Checker.verify_type(joe_husband, Husband)  # noqa: F841
-    mary_wife_type = Checker.verify_type(mary_wife, Wife)  # noqa: F841
+    # joe_husband_type = Checker.verify_type(joe_husband, Husband)  
+    # mary_wife_type = Checker.verify_type(mary_wife, Wife)  
     jesus_child_type = Checker.verify_type(jesus_child, Child)  # noqa: F841
 
     # Create the family.
     joe_mary = Family(
         xref=joe_mary_xref,
-        husband=joe_husband,
-        wife=mary_wife,
+        husband=joe_xref,
+        husband_phrase=Phrase('Joe is the husband.'),
+        wife=mary_xref,
+        wife_phrase=Phrase('Mary is the wife.'),
         children=[jesus_child,],
     )
     joe_mary_type = Checker.verify_type(joe_mary, Family)  # noqa: F841

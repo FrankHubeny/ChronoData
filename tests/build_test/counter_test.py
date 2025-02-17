@@ -8,9 +8,9 @@ This module contains tests for the _counter method verify the returned values ar
 
 import pytest
 
-from chronodata.build import Genealogy
-from chronodata.messages import Msg
-from chronodata.store import Void
+from genedata.build import Genealogy
+from genedata.messages import Msg
+from genedata.store import Void
 
 testdata = [
     # TEST Initial counter value.
