@@ -72,6 +72,7 @@ class Msg:
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The tag {0} is not in the list of valid tags.'
+    PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'
     PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
     PHONE_AREA_CODE: str = 'The phone area code "{0}" is not greater than {1} and less than {2}.'
@@ -92,6 +93,7 @@ class Msg:
         'The tag {0} cannot have a payload different from "Y" or "".'
     )
     UNDOCUMENTED: str = 'Tags without adequate documentation are not supported.'
+    UNKNOWN_TAG: str = 'The structure at "{0}" does not have a name for its tag.'
     UNRECOGNIZED: str = 'The filename "{0}" is not recognized.'
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'

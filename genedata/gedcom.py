@@ -73,6 +73,17 @@ from enum import Enum
 from typing import Any, NamedTuple
 
 
+class Config:
+    """Values specifying which version of the GEDCOM specification are being used."""
+
+    VERSION: str = '7'
+    GEDVERSION: str = f'{VERSION}.0'
+    TERMS: str = f'https://gedcom.io/terms/v{VERSION}/'
+    SPECS: str = (
+        f'https://gedcom.io/specifications/FamilySearchGEDCOMv{VERSION}.html'
+    )
+
+
 class DataType(Enum):
     """Enumerate the GEDCOM data types.
 
@@ -110,963 +121,6 @@ class Line(NamedTuple):
 
     def show(self, level: int = 0) -> str:
         return f'{level + self.increment} {self.tag} {self.data_type} ({self.required}:{self.many}) {self.docs}'
-
-
-@dataclass(frozen=True)
-class Docs:
-    ABBR = 'https://gedcom.io/terms/v7/ABBR'
-    ADDR = 'https://gedcom.io/terms/v7/ADDR'
-    ADOP = 'https://gedcom.io/terms/v7/ADOP'
-    ADOP_FAMC = 'https://gedcom.io/terms/v7/ADOP-FAMC'
-    ADR1 = 'https://gedcom.io/terms/v7/ADR1'
-    ADR2 = 'https://gedcom.io/terms/v7/ADR2'
-    ADR3 = 'https://gedcom.io/terms/v7/ADR3'
-    AGE = 'https://gedcom.io/terms/v7/AGE'
-    AGNC = 'https://gedcom.io/terms/v7/AGNC'
-    ALIA = 'https://gedcom.io/terms/v7/ALIA'
-    ANCI = 'https://gedcom.io/terms/v7/ANCI'
-    ANUL = 'https://gedcom.io/terms/v7/ANUL'
-    ASSO = 'https://gedcom.io/terms/v7/ASSO'
-    AUTH = 'https://gedcom.io/terms/v7/AUTH'
-    BAPL = 'https://gedcom.io/terms/v7/BAPL'
-    BAPM = 'https://gedcom.io/terms/v7/BAPM'
-    BARM = 'https://gedcom.io/terms/v7/BARM'
-    BASM = 'https://gedcom.io/terms/v7/BASM'
-    BIRT = 'https://gedcom.io/terms/v7/BIRT'
-    BLES = 'https://gedcom.io/terms/v7/BLES'
-    BURI = 'https://gedcom.io/terms/v7/BURI'
-    CALN = 'https://gedcom.io/terms/v7/CALN'
-    CAST = 'https://gedcom.io/terms/v7/CAST'
-    CAUS = 'https://gedcom.io/terms/v7/CAUS'
-    CHAN = 'https://gedcom.io/terms/v7/CHAN'
-    CHIL = 'https://gedcom.io/terms/v7/CHIL'
-    CHR = 'https://gedcom.io/terms/v7/CHR'
-    CHRA = 'https://gedcom.io/terms/v7/CHRA'
-    CITY = 'https://gedcom.io/terms/v7/CITY'
-    CONF = 'https://gedcom.io/terms/v7/CONF'
-    CONL = 'https://gedcom.io/terms/v7/CONL'
-    COPR = 'https://gedcom.io/terms/v7/COPR'
-    CORP = 'https://gedcom.io/terms/v7/CORP'
-    CREA = 'https://gedcom.io/terms/v7/CREA'
-    CREM = 'https://gedcom.io/terms/v7/CREM'
-    CROP = 'https://gedcom.io/terms/v7/CROP'
-    CTRY = 'https://gedcom.io/terms/v7/CTRY'
-    DATA = 'https://gedcom.io/terms/v7/DATA'
-    DATA_EVEN = 'https://gedcom.io/terms/v7/DATA-EVEN'
-    DATA_EVEN_DATE = 'https://gedcom.io/terms/v7/DATA-EVEN-DATE'
-    DATE = 'https://gedcom.io/terms/v7/DATE'
-    DATE_EXACT = 'https://gedcom.io/terms/v7/DATE-exact'
-    DEAT = 'https://gedcom.io/terms/v7/DEAT'
-    DESI = 'https://gedcom.io/terms/v7/DESI'
-    DEST = 'https://gedcom.io/terms/v7/DEST'
-    DIV = 'https://gedcom.io/terms/v7/DIV'
-    DIVF = 'https://gedcom.io/terms/v7/DIVF'
-    DSCR = 'https://gedcom.io/terms/v7/DSCR'
-    EDUC = 'https://gedcom.io/terms/v7/EDUC'
-    EMAIL = 'https://gedcom.io/terms/v7/EMAIL'
-    EMIG = 'https://gedcom.io/terms/v7/EMIG'
-    ENDL = 'https://gedcom.io/terms/v7/ENDL'
-    ENGA = 'https://gedcom.io/terms/v7/ENGA'
-    EXID = 'https://gedcom.io/terms/v7/EXID'
-    EXID_TYPE = 'https://gedcom.io/terms/v7/EXID-TYPE'
-    FAM_CENS = 'https://gedcom.io/terms/v7/FAM-CENS'
-    FAM_EVEN = 'https://gedcom.io/terms/v7/FAM-EVEN'
-    FAM_FACT = 'https://gedcom.io/terms/v7/FAM-FACT'
-    FAM_HUSB = 'https://gedcom.io/terms/v7/FAM-HUSB'
-    FAM_NCHI = 'https://gedcom.io/terms/v7/FAM-NCHI'
-    FAM_RESI = 'https://gedcom.io/terms/v7/FAM-RESI'
-    FAM_WIFE = 'https://gedcom.io/terms/v7/FAM-WIFE'
-    FAMC = 'https://gedcom.io/terms/v7/FAMC'
-    FAMC_ADOP = 'https://gedcom.io/terms/v7/FAMC-ADOP'
-    FAMC_STAT = 'https://gedcom.io/terms/v7/FAMC-STAT'
-    FAMS = 'https://gedcom.io/terms/v7/FAMS'
-    FAX = 'https://gedcom.io/terms/v7/FAX'
-    FCOM = 'https://gedcom.io/terms/v7/FCOM'
-    FILE = 'https://gedcom.io/terms/v7/FILE'
-    FILE_TRAN = 'https://gedcom.io/terms/v7/FILE-TRAN'
-    FORM = 'https://gedcom.io/terms/v7/FORM'
-    GEDC = 'https://gedcom.io/terms/v7/GEDC'
-    GEDC_VERS = 'https://gedcom.io/terms/v7/GEDC-VERS'
-    GIVN = 'https://gedcom.io/terms/v7/GIVN'
-    GRAD = 'https://gedcom.io/terms/v7/GRAD'
-    HEAD = 'https://gedcom.io/terms/v7/HEAD'
-    HEAD_DATE = 'https://gedcom.io/terms/v7/HEAD-DATE'
-    HEAD_PLAC = 'https://gedcom.io/terms/v7/HEAD-PLAC'
-    HEAD_PLAC_FORM = 'https://gedcom.io/terms/v7/HEAD-PLAC-FORM'
-    HEAD_SOUR = 'https://gedcom.io/terms/v7/HEAD-SOUR'
-    HEAD_SOUR_DATA = 'https://gedcom.io/terms/v7/HEAD-SOUR-DATA'
-    HEIGHT = 'https://gedcom.io/terms/v7/HEIGHT'
-    HUSB = 'https://gedcom.io/terms/v7/HUSB'
-    IDNO = 'https://gedcom.io/terms/v7/IDNO'
-    IMMI = 'https://gedcom.io/terms/v7/IMMI'
-    INDI_CENS = 'https://gedcom.io/terms/v7/INDI-CENS'
-    INDI_EVEN = 'https://gedcom.io/terms/v7/INDI-EVEN'
-    INDI_FACT = 'https://gedcom.io/terms/v7/INDI-FACT'
-    INDI_FAMC = 'https://gedcom.io/terms/v7/INDI-FAMC'
-    INDI_NAME = 'https://gedcom.io/terms/v7/INDI-NAME'
-    INDI_NCHI = 'https://gedcom.io/terms/v7/INDI-NCHI'
-    INDI_RELI = 'https://gedcom.io/terms/v7/INDI-RELI'
-    INDI_RESI = 'https://gedcom.io/terms/v7/INDI-RESI'
-    INDI_TITL = 'https://gedcom.io/terms/v7/INDI-TITL'
-    INIL = 'https://gedcom.io/terms/v7/INIL'
-    LANG = 'https://gedcom.io/terms/v7/LANG'
-    LATI = 'https://gedcom.io/terms/v7/LATI'
-    LEFT = 'https://gedcom.io/terms/v7/LEFT'
-    LONG = 'https://gedcom.io/terms/v7/LONG'
-    MAP = 'https://gedcom.io/terms/v7/MAP'
-    MARB = 'https://gedcom.io/terms/v7/MARB'
-    MARC = 'https://gedcom.io/terms/v7/MARC'
-    MARL = 'https://gedcom.io/terms/v7/MARL'
-    MARR = 'https://gedcom.io/terms/v7/MARR'
-    MARS = 'https://gedcom.io/terms/v7/MARS'
-    MEDI = 'https://gedcom.io/terms/v7/MEDI'
-    MIME = 'https://gedcom.io/terms/v7/MIME'
-    NAME = 'https://gedcom.io/terms/v7/NAME'
-    NAME_TRAN = 'https://gedcom.io/terms/v7/NAME-TRAN'
-    NAME_TYPE = 'https://gedcom.io/terms/v7/NAME-TYPE'
-    NATI = 'https://gedcom.io/terms/v7/NATI'
-    NATU = 'https://gedcom.io/terms/v7/NATU'
-    NICK = 'https://gedcom.io/terms/v7/NICK'
-    NMR = 'https://gedcom.io/terms/v7/NMR'
-    NO = 'https://gedcom.io/terms/v7/NO'
-    NO_DATE = 'https://gedcom.io/terms/v7/NO-DATE'
-    NOTE = 'https://gedcom.io/terms/v7/NOTE'
-    NOTE_TRAN = 'https://gedcom.io/terms/v7/NOTE-TRAN'
-    NPFX = 'https://gedcom.io/terms/v7/NPFX'
-    NSFX = 'https://gedcom.io/terms/v7/NSFX'
-    OBJE = 'https://gedcom.io/terms/v7/OBJE'
-    OCCU = 'https://gedcom.io/terms/v7/OCCU'
-    ORD_STAT = 'https://gedcom.io/terms/v7/ord-STAT'
-    ORDN = 'https://gedcom.io/terms/v7/ORDN'
-    PAGE = 'https://gedcom.io/terms/v7/PAGE'
-    PEDI = 'https://gedcom.io/terms/v7/PEDI'
-    PHON = 'https://gedcom.io/terms/v7/PHON'
-    PHRASE = 'https://gedcom.io/terms/v7/PHRASE'
-    PLAC = 'https://gedcom.io/terms/v7/PLAC'
-    PLAC_FORM = 'https://gedcom.io/terms/v7/PLAC-FORM'
-    PLAC_TRAN = 'https://gedcom.io/terms/v7/PLAC-TRAN'
-    POST = 'https://gedcom.io/terms/v7/POST'
-    PROB = 'https://gedcom.io/terms/v7/PROB'
-    PROP = 'https://gedcom.io/terms/v7/PROP'
-    PUBL = 'https://gedcom.io/terms/v7/PUBL'
-    QUAY = 'https://gedcom.io/terms/v7/QUAY'
-    RECORD_FAM = 'https://gedcom.io/terms/v7/record-FAM'
-    RECORD_INDI = 'https://gedcom.io/terms/v7/record-INDI'
-    RECORD_OBJE = 'https://gedcom.io/terms/v7/record-OBJE'
-    RECORD_REPO = 'https://gedcom.io/terms/v7/record-REPO'
-    RECORD_SNOTE = 'https://gedcom.io/terms/v7/record-SNOTE'
-    RECORD_SOUR = 'https://gedcom.io/terms/v7/record-SOUR'
-    RECORD_SUBM = 'https://gedcom.io/terms/v7/record-SUBM'
-    REFN = 'https://gedcom.io/terms/v7/REFN'
-    RELI = 'https://gedcom.io/terms/v7/RELI'
-    REPO = 'https://gedcom.io/terms/v7/REPO'
-    RESN = 'https://gedcom.io/terms/v7/RESN'
-    RETI = 'https://gedcom.io/terms/v7/RETI'
-    ROLE = 'https://gedcom.io/terms/v7/ROLE'
-    SCHMA = 'https://gedcom.io/terms/v7/SCHMA'
-    SDATE = 'https://gedcom.io/terms/v7/SDATE'
-    SEX = 'https://gedcom.io/terms/v7/SEX'
-    SLGC = 'https://gedcom.io/terms/v7/SLGC'
-    SLGS = 'https://gedcom.io/terms/v7/SLGS'
-    SNOTE = 'https://gedcom.io/terms/v7/SNOTE'
-    SOUR = 'https://gedcom.io/terms/v7/SOUR'
-    SOUR_DATA = 'https://gedcom.io/terms/v7/SOUR-DATA'
-    SOUR_EVEN = 'https://gedcom.io/terms/v7/SOUR-EVEN'
-    SPFX = 'https://gedcom.io/terms/v7/SPFX'
-    SSN = 'https://gedcom.io/terms/v7/SSN'
-    STAE = 'https://gedcom.io/terms/v7/STAE'
-    SUBM = 'https://gedcom.io/terms/v7/SUBM'
-    SUBM_LANG = 'https://gedcom.io/terms/v7/SUBM-LANG'
-    SURN = 'https://gedcom.io/terms/v7/SURN'
-    TAG = 'https://gedcom.io/terms/v7/TAG'
-    TEMP = 'https://gedcom.io/terms/v7/TEMP'
-    TEXT = 'https://gedcom.io/terms/v7/TEXT'
-    TIME = 'https://gedcom.io/terms/v7/TIME'
-    TITL = 'https://gedcom.io/terms/v7/TITL'
-    TOP = 'https://gedcom.io/terms/v7/TOP'
-    TYPE = 'https://gedcom.io/terms/v7/TYPE'
-    UID = 'https://gedcom.io/terms/v7/UID'
-    VERS = 'https://gedcom.io/terms/v7/VERS'
-    WIDTH = 'https://gedcom.io/terms/v7/WIDTH'
-    WIFE = 'https://gedcom.io/terms/v7/WIFE'
-    WILL = 'https://gedcom.io/terms/v7/WILL'
-    WWW = 'https://gedcom.io/terms/v7/WWW'
-
-
-@dataclass(frozen=True)
-class OverView:
-    """Provide a description of the seven record types and the header record.
-
-    Descriptions of structures between `<<` and `>>` are structure names.  Below
-    these structure names are their expansion.
-    If the expansion has been given earlier, it is not repeated.
-    Since these start at level 0 the `+` is removed and the `n` is replaced
-    with 0 for this overview.
-    Individual tags have links to their yaml definitions.
-
-    The first number is the level of the line. Then comes the tag with payload description.
-    To the right is a quantity key `{optionality:quantity}`.  The optionality flag
-    can be either 1 for mandatory or 0 for optiona.  The quantity flag can be either
-    1 for single or M for multiple.  Following this is a link to the tag specfication.
-
-    The actual GEDCOM file does not contain the indentations.  The indentations are used here
-    and in the GEDCOM specification to make the different levels more evident.
-
-    Example:
-        To display this information import `OverView` from the gedcom module and print the
-        the desired record.  To print the Header record do the following.  Only the first line
-        is displayed in the example.
-        >>> from genedata.gedcom import OverView
-        >>> print(OverView.HEADER)  # doctest: +ELLIPSIS
-        <BLANKLINE>
-        0 HEAD                                 {1:1}  [g7:HEAD](https://gedcom.io/terms/v7/HEAD)
-          1 GEDC                               {1:1}  [g7:GEDC](https://gedcom.io/terms/v7/GEDC)
-            2 VERS <Special>                   {1:1}  [g7:GEDC-VERS](https://gedcom.io/terms/v7/GEDC-VERS)
-          1 SCHMA                              {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
-            2 TAG <Special>                    {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
-          1 SOUR <Special>                     {0:1}  [g7:HEAD-SOUR](https://gedcom.io/terms/v7/HEAD-SOUR)
-            2 VERS <Special>                   {0:1}  [g7:VERS](https://gedcom.io/terms/v7/VERS)
-            2 NAME <Text>                      {0:1}  [g7:NAME](https://gedcom.io/terms/v7/NAME)
-            2 CORP <Text>                      {0:1}  [g7:CORP](https://gedcom.io/terms/v7/CORP)
-              3 <<ADDRESS_STRUCTURE>>          {0:1}
-              3 PHON <Special>                 {0:M}  [g7:PHON](https://gedcom.io/terms/v7/PHON)
-              3 EMAIL <Special>                {0:M}  [g7:EMAIL](https://gedcom.io/terms/v7/EMAIL)
-              3 FAX <Special>                  {0:M}  [g7:FAX](https://gedcom.io/terms/v7/FAX)
-              3 WWW <Special>                  {0:M}  [g7:WWW](https://gedcom.io/terms/v7/WWW)
-            2 DATA <Text>                      {0:1}  [g7:HEAD-SOUR-DATA](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
-              3 DATE <DateExact>               {0:1}  [g7:DATE-exact](https://gedcom.io/terms/v7/DATE-exact)
-                4 TIME <Time>                  {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-              3 COPR <Text>                    {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-          1 DEST <Special>                     {0:1}  [g7:DEST](https://gedcom.io/terms/v7/DEST)
-          1 DATE <DateExact>                   {0:1}  [g7:HEAD-DATE](https://gedcom.io/terms/v7/HEAD-DATE)
-            2 TIME <Time>                      {0:1}  [g7:TIME](https://gedcom.io/terms/v7/TIME)
-          1 SUBM @<XREF:SUBM>@                 {0:1}  [g7:SUBM](https://gedcom.io/terms/v7/SUBM)
-          1 COPR <Text>                        {0:1}  [g7:COPR](https://gedcom.io/terms/v7/COPR)
-          1 LANG <Language>                    {0:1}  [g7:HEAD-LANG](https://gedcom.io/terms/v7/LANG)
-          1 PLAC                               {0:1}  [g7:HEAD-PLAC](https://gedcom.io/terms/v7/HEAD-PLAC)
-            2 FORM <List:Text>                 {1:1}  [g7:HEAD-PLAC-FORM](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
-          1 <<NOTE_STRUCTURE>>                 {0:1}
-        <BLANKLINE>
-
-    Reference:
-        [The FamilySearch GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
-    """
-
-    ADDRESS_STRUCTURE: str = f"""
-n ADDR <Special>                       {{1:1}}  [g7:ADDR]({Docs.ADDR})
-  +1 ADR1 <Special>                    {{0:1}}  [g7:ADR1]({Docs.ADR1})
-  +1 ADR2 <Special>                    {{0:1}}  [g7:ADR2]({Docs.ADR2})
-  +1 ADR3 <Special>                    {{0:1}}  [g7:ADR3]({Docs.ADR3})
-  +1 CITY <Special>                    {{0:1}}  [g7:CITY]({Docs.CITY})
-  +1 STAE <Special>                    {{0:1}}  [g7:STAE]({Docs.STAE})
-  +1 POST <Special>                    {{0:1}}  [g7:POST]({Docs.POST})
-  +1 CTRY <Special>                    {{0:1}}  [g7:CTRY]({Docs.CTRY})  
-"""
-    ASSOCIATION_STRUCTURE: str = f"""
-n ASSO @<XREF:INDI>@                   {{1:1}}  [g7:ASSO]({Docs.ASSO})
-  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  +1 ROLE <Enum>                       {{1:1}}  [g7:ROLE]({Docs.ROLE})
-     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-  +1 <<SOURCE_CITATION>>               {{0:M}}
-"""
-    CHANGE_DATE: str = f"""
-n CHAN                                 {{1:1}}  [g7:CHAN]({Docs.CHAN})
-  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
-     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-"""
-    CREATION_DATE: str = f"""
-n CREA                                 {{1:1}}  [g7:CREA]({Docs.CREA})
-  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
-     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
-"""
-    DATE_VALUE: str = f"""
-n DATE <DateValue>                     {{1:1}}  [g7:DATE]({Docs.DATE})
-  +1 TIME <Time>                       {{0:1}}  [g7:TIME]({Docs.TIME})
-  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-"""
-    EVENT_DETAIL: str = f"""
-n <<DATE_VALUE>>                       {{0:1}}
-n <<PLACE_STRUCTURE>>                  {{0:1}}
-n <<ADDRESS_STRUCTURE>>                {{0:1}}
-n PHON <Special>                       {{0:M}}  [g7:PHON]({Docs.PHON})
-n EMAIL <Special>                      {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
-n FAX <Special>                        {{0:M}}  [g7:FAX]({Docs.FAX})
-n WWW <Special>                        {{0:M}}  [g7:WWW]({Docs.WWW})
-n AGNC <Text>                          {{0:1}}  [g7:AGNC]({Docs.AGNC})
-n RELI <Text>                          {{0:1}}  [g7:RELI]({Docs.RELI})
-n CAUS <Text>                          {{0:1}}  [g7:CAUS]({Docs.CAUS})
-n RESN <List:Enum>                     {{0:1}}  [g7:RESN]({Docs.RESN})
-n SDATE <DateValue>                    {{0:1}}  [g7:SDATE]({Docs.SDATE})
-  +1 TIME <Time>                       {{0:1}}  [g7:TIME]({Docs.TIME})
-  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-n <<ASSOCIATION_STRUCTURE>>            {{0:M}}
-n <<NOTE_STRUCTURE>>                   {{0:M}}
-n <<SOURCE_CITATION>>                  {{0:M}}
-n <<MULTIMEDIA_LINK>>                  {{0:M}}
-n UID <Special>                        {{0:M}}  [g7:UID]()
-"""
-    FAMILY: str = f"""
-0 @XREF:FAM@ FAM                       {{1:1}}  [g7:record-FAM]({Docs.RECORD_FAM})
-  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
-  1 <<FAMILY_ATTRIBUTE_STRUCTURE>>     {{0:M}}
-  1 <<FAMILY_EVENT_STRUCTURE>>         {{0:M}}
-  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
-  1 HUSB @<XREF:INDI>@                 {{0:1}}  [g7:FAM-HUSB]({Docs.FAM_HUSB})
-    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  1 WIFE @<XREF:INDI>@                 {{0:1}}  [g7:FAM-WIFE]({Docs.FAM_WIFE})
-    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  1 CHIL @<XREF:INDI>@                 {{0:M}}  [g7:CHIL]({Docs.CHIL})
-    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
-  1 SUBM @<XREF:SUBM>@                 {{0:M}}  [g7:SUBM]({Docs.SUBM})
-  1 <<LDS_SPOUSE_SEALING>>             {{0:M}}
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<SOURCE_CITATION>>                {{0:M}}
-  1 <<MULTIMEDIA_LINK>>                {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    FAMILY_ATTRIBUTE_STRUCTURE: str = f"""
-[
-n NCHI <Integer>                       {{1:1}}  [g7:FAM-NCHI]({Docs.FAM_NCHI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n RESI <Text>                          {{1:1}}  [g7:FAM-RESI]({Docs.FAM_RESI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n FACT <Text>                          {{1:1}}  [g7:FAM-FACT]({Docs.FAM_FACT})
-  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-]
-"""
-    FAMILY_EVENT_DETAIL: str = f"""
-n HUSB                                 {{0:1}}  [g7:HUSB]({Docs.HUSB})
-  +1 AGE <Age>                         {{1:1}}  [g7:AGE]({Docs.AGE})
-     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-n WIFE                                 {{0:1}}  [g7:WIFE]({Docs.WIFE})
-  +1 AGE <Age>                         {{1:1}}  [g7:AGE]({Docs.AGE})
-     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-n <<EVENT_DETAIL>>                     {{0:1}}
-"""
-    FAMILY_EVENT_STRUCTURE: str = f"""
-[
-n ANUL [Y|<NULL>]                      {{1:1}}  [g7:ANUL]({Docs.ANUL})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n CENS [Y|<NULL>]                      {{1:1}}  [g7:FAM-CENS]({Docs.FAM_CENS})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n DIV [Y|<NULL>]                       {{1:1}}  [g7:DIV]({Docs.DIV})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n DIVF [Y|<NULL>]                      {{1:1}}  [g7:DIVF]({Docs.DIVF})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n ENGA [Y|<NULL>]                      {{1:1}}  [g7:ENGA]({Docs.ENGA})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n MARB [Y|<NULL>]                      {{1:1}}  [g7:MARB]({Docs.MARB})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n MARC [Y|<NULL>]                      {{1:1}}  [g7:MARC]({Docs.MARC})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n MARL [Y|<NULL>]                      {{1:1}}  [g7:MARL]({Docs.MARL})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n MARR [Y|<NULL>]                      {{1:1}}  [g7:MARR]({Docs.MARR})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n MARS [Y|<NULL>]                      {{1:1}}  [g7:MARS]({Docs.MARS})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-|
-n EVEN <Text>                          {{1:1}}  [g7:FAM-EVEN]({Docs.FAM_EVEN})
-  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
-]
-"""
-    HEADER: str = f"""
-0 HEAD                                 {{1:1}}  [g7:HEAD]({Docs.HEAD})
-  1 GEDC                               {{1:1}}  [g7:GEDC]({Docs.GEDC})
-    2 VERS <Special>                   {{1:1}}  [g7:GEDC-VERS]({Docs.GEDC_VERS})
-  1 SCHMA                              {{0:1}}  [g7:SCHMA]({Docs.SCHMA})
-    2 TAG <Special>                    {{0:M}}  [g7:TAG]({Docs.TAG})
-  1 SOUR <Special>                     {{0:1}}  [g7:HEAD-SOUR]({Docs.HEAD_SOUR})
-    2 VERS <Special>                   {{0:1}}  [g7:VERS]({Docs.VERS})
-    2 NAME <Text>                      {{0:1}}  [g7:NAME]({Docs.NAME})
-    2 CORP <Text>                      {{0:1}}  [g7:CORP]({Docs.CORP})
-      3 <<ADDRESS_STRUCTURE>>          {{0:1}}
-      3 PHON <Special>                 {{0:M}}  [g7:PHON]({Docs.PHON})
-      3 EMAIL <Special>                {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
-      3 FAX <Special>                  {{0:M}}  [g7:FAX]({Docs.FAX})
-      3 WWW <Special>                  {{0:M}}  [g7:WWW]({Docs.WWW})
-    2 DATA <Text>                      {{0:1}}  [g7:HEAD-SOUR-DATA]({Docs.HEAD_SOUR_DATA})
-      3 DATE <DateExact>               {{0:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
-        4 TIME <Time>                  {{0:1}}  [g7:TIME]({Docs.TIME})
-      3 COPR <Text>                    {{0:1}}  [g7:COPR]({Docs.COPR})
-  1 DEST <Special>                     {{0:1}}  [g7:DEST]({Docs.DEST})
-  1 DATE <DateExact>                   {{0:1}}  [g7:HEAD-DATE]({Docs.HEAD_DATE})
-    2 TIME <Time>                      {{0:1}}  [g7:TIME]({Docs.TIME})
-  1 SUBM @<XREF:SUBM>@                 {{0:1}}  [g7:SUBM]({Docs.SUBM})
-  1 COPR <Text>                        {{0:1}}  [g7:COPR]({Docs.COPR})
-  1 LANG <Language>                    {{0:1}}  [g7:HEAD-LANG]({Docs.LANG})
-  1 PLAC                               {{0:1}}  [g7:HEAD-PLAC]({Docs.HEAD_PLAC})
-    2 FORM <List:Text>                 {{1:1}}  [g7:HEAD-PLAC-FORM]({Docs.HEAD_PLAC_FORM})
-  1 <<NOTE_STRUCTURE>>                 {{0:1}}
-    """
-    IDENTIFIER_STRUCTURE: str = f"""
-[
-n REFN <Special>                       {{1:1}}  [g7:REFN]({Docs.REFN})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-|
-n UID <Special>                        {{1:1}}  [g7:UID]({Docs.UID})
-|
-n EXID <Special>                       {{1:1}}  [g7:EXID]({Docs.EXID})
-  +1 TYPE <Special>                    {{0:1}}  [g7:EXID-TYPE]({Docs.EXID_TYPE})
-]
-"""
-    INDIVIDUAL: str = f"""
-0 @XREF:INDI@ INDI                     {{1:1}}  [g7:record-INDI]({Docs.RECORD_INDI})
-  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
-  1 <<PERSONAL_NAME_STRUCTURE>>        {{0:M}}
-  1 SEX <Enum>                         {{0:1}}  [g7:SEX]({Docs.SEX})
-  1 <<INDIVIDUAL_ATTRIBUTE_STRUCTURE>> {{0:M}}
-  1 <<INDIVIDUAL_EVENT_STRUCTURE>>     {{0:M}}
-  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
-  1 <<LDS_INDIVIDUAL_ORDINANCE>>       {{0:M}}
-  1 FAMC @<XREF:FAM>@                  {{0:M}}  [g7:INDI-FAMC]({Docs.INDI_FAMC})
-    2 PEDI <Enum>                      {{0:1}}  [g7:PEDI]({Docs.PEDI})
-      3 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-    2 STAT <Enum>                      {{0:1}}  [g7:FAMC-STAT]({Docs.FAMC_STAT})
-      3 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-    2 <<NOTE_STRUCTURE>>               {{0:M}}
-  1 FAMS @<XREF:FAM>@                  {{0:M}}  [g7:FAMS]({Docs.FAMS})
-    2 <<NOTE_STRUCTURE>>               {{0:M}}
-  1 SUBM @<XREF:SUBM>@                 {{0:M}}  [g7:SUBM]({Docs.SUBM})
-  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
-  1 ALIA @<XREF:INDI>@                 {{0:M}}  [g7:ALIA]({Docs.ALIA})
-    2 PHRASE <Text>                    {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  1 ANCI @<XREF:SUBM>@                 {{0:M}}  [g7:ANCI]({Docs.ANCI})
-  1 DESI @<XREF:SUBM>@                 {{0:M}}  [g7:DESI]({Docs.DESI})
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<SOURCE_CITATION>>                {{0:M}}
-  1 <<MULTIMEDIA_LINK>>                {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    INDIVIDUAL_ATTRIBUTE_STRUCTURE: str = f"""
-[
-n CAST <Text>                          {{1:1}}  [g7:CAST]({Docs.CAST})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n DSCR <Text>                          {{1:1}}  [g7:DSCR]({Docs.DSCR})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n EDUC <Text>                          {{1:1}}  [g7:EDUC]({Docs.EDUC})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n IDNO <Special>                       {{1:1}}  [g7:IDNO]({Docs.IDNO})
-  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n NATI <Text>                          {{1:1}}  [g7:NATI]({Docs.NATI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n NCHI <Integer>                       {{1:1}}  [g7:INDI-NCHI]({Docs.INDI_NCHI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n NMR <Integer>                        {{1:1}}  [g7:NMR]({Docs.NMR})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n OCCU <Text>                          {{1:1}}  [g7:OCCU]({Docs.OCCU})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n PROP <Text>                          {{1:1}}  [g7:PROP]({Docs.PROP})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n RELI <Text>                          {{1:1}}  [g7:INDI-RELI]({Docs.INDI_RELI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n RESI <Text>                          {{1:1}}  [g7:INDI-RESI]({Docs.INDI_RESI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n SSN <Special>                        {{1:1}}  [g7:SSN]({Docs.SSN})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n TITL <Text>                          {{1:1}}  [g7:INDI-TITL]({Docs.INDI_TITL})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n FACT <Text>                          {{1:1}}  [g7:INDI-FACT]({Docs.INDI_FACT})
-  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-]
-"""
-    INDIVIDUAL_EVENT_DETAIL: str = f"""
-n <<EVENT_DETAIL>>                     {{1:1}}
-n AGE <Age>                            {{0:1}}  [g7:AGE]({Docs.AGE})
-  +1 PHRASE <Text>                     {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-"""
-    INDIVIDUAL_EVENT_STRUCTURE: str = f"""
-[
-n ADOP [Y|<NULL>]                      {{1:1}}  [g7:ADOP]({Docs.ADOP})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:ADOP-FAMC]({Docs.ADOP_FAMC})
-     +2 ADOP <Enum>                    {{0:1}}  [g7:FAMC-ADOP]({Docs.FAMC_ADOP})
-        +3 PHRASE <Text>               {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-|
-n BAPM [Y|<NULL>]                      {{1:1}}  [g7:BAPM]({Docs.BAPM})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n BARM [Y|<NULL>]                      {{1:1}}  [g7:BARM]({Docs.BARM})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n BASM [Y|<NULL>]                      {{1:1}}  [g7:BASM]({Docs.BASM})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n BIRT [Y|<NULL>]                      {{1:1}}  [g7:BIRT]({Docs.BIRT})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:FAMC]({Docs.TYPE})
-|
-n BLES [Y|<NULL>]                      {{1:1}}  [g7:BLES]({Docs.BLES})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n BURI [Y|<NULL>]                      {{1:1}}  [g7:BURI]({Docs.BURI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-
-n CENS [Y|<NULL>]                      {{1:1}}  [g7:INDI-CENS]({Docs.INDI_CENS})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n CHR [Y|<NULL>]                       {{1:1}}  [g7:CHR]({Docs.CHR})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-  +1 FAMC @<XREF:FAM>@                 {{0:1}}  [g7:FAMC]({Docs.FAMC})
-|
-n CHRA [Y|<NULL>]                      {{1:1}}  [g7:CHRA]({Docs.CHRA})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n CONF [Y|<NULL>]                      {{1:1}}  [g7:CONF]({Docs.CONF})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n CREM [Y|<NULL>]                      {{1:1}}  [g7:CREM]({Docs.CREM})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n DEAT [Y|<NULL>]                      {{1:1}}  [g7:DEAT]({Docs.DEAT})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n EMIG [Y|<NULL>]                      {{1:1}}  [g7:EMIG]({Docs.EMIG})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n FCOM [Y|<NULL>]                      {{1:1}}  [g7:FCOM]({Docs.FCOM})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n GRAD [Y|<NULL>]                      {{1:1}}  [g7:GRAD]({Docs.GRAD})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n IMMI [Y|<NULL>]                      {{1:1}}  [g7:IMMI]({Docs.IMMI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n NATU [Y|<NULL>]                      {{1:1}}  [g7:NATU]({Docs.NATU})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n ORDN [Y|<NULL>]                      {{1:1}}  [g7:ORDN]({Docs.ORDN})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n PROB [Y|<NULL>]                      {{1:1}}  [g7:PROB]({Docs.PROB})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n RETI [Y|<NULL>]                      {{1:1}}  [g7:RETI]({Docs.RETI})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n WILL [Y|<NULL>]                      {{1:1}}  [g7:WILL]({Docs.WILL})
-  +1 TYPE <Text>                       {{0:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-|
-n EVEN <Text>                          {{1:1}}  [g7:INDI-EVEN]({Docs.INDI_EVEN})
-  +1 TYPE <Text>                       {{1:1}}  [g7:TYPE]({Docs.TYPE})
-  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
-]
-"""
-    LDS_ORDINANCE_DETAIL: str = f"""
-n <<DATE_VALUE>>                       {{:1}}
-n TEMP <Text>                          {{0:1}}  [g7:TEMP]({Docs.TEMP})
-n <<PLACE_STRUCTURE>>                  {{0:1}}
-n STAT <Enum>                          {{0:1}}  [g7:ord-STAT]({Docs.ORD_STAT})
-  +1 DATE <DateExact>                  {{1:1}}  [g7:DATE-exact]({Docs.DATE_EXACT})
-     +2 TIME <Time>                    {{0:1}}  [g7:TIME]({Docs.TIME})
-n <<NOTE_STRUCTURE>>                   {{0:M}}
-n <<SOURCE_CITATION>>                  {{0:M}}
-"""
-    LDS_INDIVIDUAL_ORDINANCE: str = f"""
-[
-n BAPL                                 {{1:1}}  [g7:BAPL]({Docs.BAPL})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-|
-n CONL                                 {{1:1}}  [g7:CONL]({Docs.CONL})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-|
-n ENDL                                 {{1:1}}  [g7:ENDL]({Docs.ENDL})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-|
-n INIL                                 {{1:1}}  [g7:INIL]({Docs.INIL})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-|
-n SLGC                                 {{1:1}}  [g7:SLGC]({Docs.SLGC})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-  +1 FAMC @<XREF:FAM>@                 {{1:1}}  [g7:FAMC]({Docs.FAMC})
-]
-"""
-    LDS_SPOUSE_SEALING = f"""
-n SLGS                                 {{1:1}}  [g7:SLGS]({Docs.SLGS})
-  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
-"""
-    MULTIMEDIA: str = f"""
-0 @XREF:OBJE@ OBJE                     {{1:1}}  [g7:record-OBJE]({Docs.RECORD_OBJE})
-  1 RESN <List:Enum>                   {{0:1}}  [g7:RESN]({Docs.RESN})
-  1 FILE <FilePath>                    {{1:M}}  [g7:FILE]({Docs.FILE})
-    2 FORM <MediaType>                 {{1:1}}  [g7:FORM]({Docs.FORM})
-      3 MEDI <Enum>                    {{0:1}}  [g7:MEDI]({Docs.MEDI})
-        4 PHRASE <Text>                {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-    2 TITL <Text>                      {{0:1}}  [g7:TITL]({Docs.TITL})
-    2 TRAN <FilePath>                  {{0:M}}  [g7:FILE-TRAN]({Docs.FILE_TRAN})
-      3 FORM <MediaType>               {{1:1}}  [g7:FORM]({Docs.FORM})
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<SOURCE_CITATION>>                {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    MULTIMEDIA_LINK: str = f"""
-n OBJE @<XREF:OBJE>@                   {{1:1}} [g7:OBJE]({Docs.OBJE})
-  +1 CROP                              {{0:1}}  [g7:CROP]({Docs.CROP})
-    +2 TOP <Integer>                   {{0:1}}  [g7:TOP]({Docs.TOP})
-    +2 LEFT <Integer>                  {{0:1}}  [g7:LEFT]({Docs.LEFT})
-    +2 HEIGHT <Integer>                {{0:1}}  [g7:HEIGHT]({Docs.HEIGHT})
-    +2 WIDTH <Integer>                 {{0:1}}  [g7:WIDTH]({Docs.WIDTH})
-  +1 TITL <Text>                       {{0:1}}  [g7:TITL]({Docs.TITL})
-"""
-    NON_EVENT_STRUCTURE: str = f"""
-n NO <Enum>                            {{1:1}}  [g7:NO]({Docs.NO})
-  +1 DATE <DatePeriod>                 {{0:1}}  [g7:NO-DATE]({Docs.NO_DATE})
-     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-  +1 <<SOURCE_CITATION>>               {{0:M}}
-"""
-    NOTE_STRUCTURE: str = f"""
-[
-n NOTE <Text>                          {{1:1}}  [g7:NOTE]({Docs.NOTE})
-  +1 MIME <MediaType>                  {{0:1}}  [g7:MIME]({Docs.MIME})
-  +1 LANG <Language>                   {{0:1}}  [g7:LANG]({Docs.LANG})
-  +1 TRAN <Text>                       {{0:M}}  [g7:NOTE-TRAN]({Docs.NOTE_TRAN})
-    +2 MIME <MediaType>                {{0:1}}  [g7:MIME]({Docs.MIME})
-    +2 LANG <Language>                 {{0:1}}  [g7:LANG]({Docs.LANG})
-  +1 <<SOURCE_CITATION>>               {{0:M}}
-|
-n SNOTE @<XREF:SNOTE>@                 {{1:1}}  [g7:SNOTE]({Docs.SNOTE})
-]
-"""
-    PERSONAL_NAME_PIECES: str = f"""
-n NPFX <Text>                          {{0:M}}  [g7:NPFX]({Docs.NPFX})
-n GIVN <Text>                          {{0:M}}  [g7:GIVN]({Docs.GIVN})
-n NICK <Text>                          {{0:M}}  [g7:NICK]({Docs.NICK})
-n SPFX <Text>                          {{0:M}}  [g7:SPFX]({Docs.SPFX})
-n SURN <Text>                          {{0:M}}  [g7:SURN]({Docs.SURN})
-n NSFX <Text>                          {{0:M}}  [g7:NSFX]({Docs.NSFX})
-"""
-    PERSONAL_NAME_STRUCTURE: str = f"""
-n NAME <PersonalName>                  {{1:1}}  [g7:INDI-NAME]({Docs.INDI_NAME})
-  +1 TYPE <Enum>                       {{0:1}}  [g7:NAME-TYPE]({Docs.NAME_TYPE})
-     +2 PHRASE <Text>                  {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  +1 <<PERSONAL_NAME_PIECES>>          {{0:1}}
-  +1 TRAN <PersonalName>               {{0:M}}  [g7:NAME-TRAN]({Docs.NAME_TRAN})
-     +2 LANG <Language>                {{1:1}}  [g7:LANG]({Docs.LANG})
-     +2 <<PERSONAL_NAME_PIECES>>       {{0:1}}
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-  +1 <<SOURCE_CITATION>>               {{0:M}}
-"""
-    PLACE_STRUCTURE: str = f"""
-n PLAC <List:Text>                     {{1:1}}   [g7:PLAC]({Docs.PLAC})
-  +1 FORM <List:Text>                  {{0:1}}   [g7:PLAC-FORM]({Docs.PLAC_FORM})
-  +1 LANG <Language>                   {{0:1}}   [g7:LANG]({Docs.LANG})
-  +1 TRAN <List:Text>                  {{0:M}}   [g7:PLAC-TRAN]({Docs.PLAC_TRAN})
-     +2 LANG <Language>                {{1:1}}   [g7:LANG]({Docs.LANG})
-  +1 MAP                               {{0:1}}   [g7:MAP]({Docs.MAP})
-     +2 LATI <Special>                 {{1:1}}   [g7:LATI]({Docs.LATI})
-     +2 LONG <Special>                 {{1:1}}   [g7:LONG]({Docs.LONG})
-  +1 EXID <Special>                    {{0:M}}   [g7:EXID]({Docs.EXID})
-     +2 TYPE <Special>                 {{0:1}}   [g7:EXID-TYPE]({Docs.EXID_TYPE})
-  +1 <<NOTE_STRUCTURE>>                {{0:M}} 
-"""
-    REPOSITORY: str = f"""
-0 @XREF:REPO@ REPO                     {{1:1}}  [g7:record-REPO]({Docs.RECORD_REPO})
-  1 NAME <Text>                        {{1:1}}  [g7:NAME]({Docs.NAME})
-  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
-  1 PHON <Special>                     {{0:M}}  [g7:PHON]({Docs.PHON})
-  1 EMAIL <Special>                    {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
-  1 FAX <Special>                      {{0:M}}  [g7:FAX]({Docs.FAX})
-  1 WWW <Special>                      {{0:M}}  [g7:WWW]({Docs.WWW})
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    SHARED_NOTE: str = f"""
-0 @XREF:SNOTE@ SNOTE <Text>            {{1:1}}  [g7:record-SNOTE]({Docs.RECORD_SNOTE})
-  1 MIME <MediaType>                   {{0:1}}  [g7:MIME]({Docs.MIME})
-  1 LANG <Language>                    {{0:1}}  [g7:LANG]({Docs.LANG})
-  1 TRAN <Text>                        {{0:M}}  [g7:NOTE-TRAN]({Docs.NOTE_TRAN})
-    2 MIME <MediaType>                 {{0:1}}  [g7:MIME]({Docs.MIME})
-    2 LANG <Language>                  {{0:1}}  [g7:LANG]({Docs.LANG})
-  1 <<SOURCE_CITATION>>                {{0:M}}
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    SOURCE: str = f"""
-0 @XREF:SOUR@ SOUR                     {{1:1}}  [g7:record-SOUR]({Docs.RECORD_SOUR})
-  1 DATA                               {{0:1}}  [g7:DATA]({Docs.DATA})
-    2 EVEN <List:Enum>                 {{0:M}}  [g7:DATA-EVEN]({Docs.DATA_EVEN})
-      3 DATE <DatePeriod>              {{0:1}}  [g7:DATA-EVEN-DATE]({Docs.DATA_EVEN_DATE})
-        4 PHRASE <Text>                {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-      3 <<PLACE_STRUCTURE>>            {{0:1}}
-    2 AGNC <Text>                      {{0:1}}  [g7:AGNC]({Docs.AGNC})
-    2 <<NOTE_STRUCTURE>>               {{0:M}}
-  1 AUTH <Text>                        {{0:1}}  [g7:AUTH]({Docs.AUTH})
-  1 TITL <Text>                        {{0:1}}  [g7:TITL]({Docs.TITL})
-  1 ABBR <Text>                        {{0:1}}  [g7:ABBR]({Docs.ABBR})
-  1 PUBL <Text>                        {{0:1}}  [g7:PUBL]({Docs.PUBL})
-  1 TEXT <Text>                        {{0:1}}  [g7:TEXT]({Docs.TEXT})
-    2 MIME <MediaType>                 {{0:1}}  [g7:MIME]({Docs.MIME})
-    2 LANG <Language>                  {{0:1}}  [g7:LANG]({Docs.LANG})
-  1 <<SOURCE_REPOSITORY_CITATION>>     {{0:M}}
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<MULTIMEDIA_LINK>>                {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-    SOURCE_CITATION: str = f"""
-n SOUR @<XREF:SOUR>@                   {{1:1}}  [g7:SOUR]({Docs.SOUR})
-  +1 PAGE <Text>                       {{0:1}}  [g7:PAGE]({Docs.PAGE})
-  +1 DATA                              {{0:1}}  [g7:SOUR-DATA]({Docs.SOUR_DATA})
-    +2 <<DATE_VALUE>>                  {{0:1}}
-    +2 TEXT <Text>                     {{0:M}}  [g7:TEXT]({Docs.TEXT})
-      +3 MIME <MediaType>              {{0:1}}  [g7:MIME]({Docs.MIME})
-      +3 LANG <Language>               {{0:1}}  [g7:LANG]({Docs.LANG})
-  +1 EVEN <Enum>                       {{0:1}}  [g7:SOUR-EVEN]({Docs.SOUR_EVEN})
-    +2 PHRASE <Text>                   {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-    +2 ROLE <Enum>                     {{0:1}}  [g7:ROLE]({Docs.ROLE})
-      +3 PHRASE <Text>                 {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-  +1 QUAY <Enum>                       {{0:1}}  [g7:QUAY]({Docs.QUAY})
-  +1 <<MULTIMEDIA_LINK>>               {{0:M}}
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-"""
-    SOURCE_REPOSITORY_CITATION: str = f"""
-n REPO @<XREF:REPO>@                   {{1:1}}  [g7:REPO]({Docs.REPO})
-  +1 <<NOTE_STRUCTURE>>                {{0:M}}
-  +1 CALN <Special>                    {{0:M}}  [g7:CALN]({Docs.CALN})
-     +2 MEDI <Enum>                    {{0:1}}  [g7:MEDI]({Docs.MEDI})
-        +3 PHRASE <Text>               {{0:1}}  [g7:PHRASE]({Docs.PHRASE})
-"""
-    SUBMITTER: str = f"""
-0 @XREF:SUBM@ SUBM                     {{1:1}}  [g7:record-SUBM]({Docs.RECORD_SUBM})
-  1 NAME <Text>                        {{1:1}}  [g7:NAME]({Docs.NAME})
-  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
-  1 PHON <Special>                     {{0:M}}  [g7:PHON]({Docs.PHON})
-  1 EMAIL <Special>                    {{0:M}}  [g7:EMAIL]({Docs.EMAIL})
-  1 FAX <Special>                      {{0:M}}  [g7:FAX]({Docs.FAX})
-  1 WWW <Special>                      {{0:M}}  [g7:WWW]({Docs.WWW})
-  1 <<MULTIMEDIA_LINK>>                {{0:M}}
-  1 LANG <Language>                    {{0:M}}  [g7:SUBM-LANG]({Docs.SUBM_LANG})
-  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
-  1 <<NOTE_STRUCTURE>>                 {{0:M}}
-  1 <<CHANGE_DATE>>                    {{0:1}}
-  1 <<CREATION_DATE>>                  {{0:1}}
-"""
-
-
-@dataclass(frozen=True)
-class Specs:
-    ADDRESS: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ADDRESS_STRUCTURE'
-    AGE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age'
-    ALIAS: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ALIA'
-    )
-    ASSOCIATION: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#ASSOCIATION_STRUCTURE'
-    CHANGE_DATE: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CHANGE_DATE'
-    )
-    CHILD: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CHIL'
-    )
-    CREATION_DATE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#CREATION_DATE'
-    DATE: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date'
-    )
-    DATE_VALUE: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#DATE_VALUE'
-    )
-    EVENT_DETAIL: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EVENT_DETAIL'
-    EXID: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EXID'
-    )
-    EXTENSION: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions'
-    )
-    FAMILY: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD'
-    FAMILY_ATTRIBUTE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_ATTRIBUTE_STRUCTURE'
-    FAMILY_CHILD: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMC'
-    )
-    FAMILY_EVENT: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_STRUCTURE'
-    FAMILY_EVENT_DETAIL: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_EVENT_DETAIL'
-    FAMILY_SPOUSE: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMS'
-    )
-    FILE: str = ''
-    FILE_TRANSLATION: str = ''
-    FRENCH_R: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FRENCH_R'
-    )
-    GREGORIAN: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#GREGORIAN'
-    )
-    HEADER: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER'
-    )
-    HEBREW: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEBREW'
-    )
-    HUSBAND: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HUSB'
-    )
-    IDENTIFIER: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#IDENTIFIER_STRUCTURE'
-    INDIVIDUAL: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD'
-    INDIVIDUAL_ATTRIBUTE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_ATTRIBUTE_STRUCTURE'
-    INDIVIDUAL_EVENT: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE'
-    INDIVIDUAL_EVENT_DETAIL: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_DETAIL'
-    JULIAN: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#JULIAN'
-    )
-    LDS_INDIVIDUAL_ORDINANCE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_INDIVIDUAL_ORDINANCE'
-    LDS_ORDINANCE_DETAIL: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_ORDINANCE_DETAIL'
-    LDS_SPOUSE_SEALING: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LDS_SPOUSE_SEALING'
-    MAP: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MAP'
-    MULTIMEDIA: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD'
-    MULTIMEDIA_LINK: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_LINK'
-    NON_EVENT: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NON_EVENT_STRUCTURE'
-    NOTE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE'
-    PERSONAL_NAME: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE'
-    PERSONAL_NAME_PIECES: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_PIECES'
-    PLACE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE'
-    REPOSITORY: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD'
-    SCHEMA: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SCHMA'
-    )
-    SHARED_NOTE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD'
-    SOURCE: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD'
-    SOURCE_EVENT: str = ''
-    SOURCE_CITATION: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION'
-    SOURCE_REPOSITORY_CITATION: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION'
-    SUBMITTER: str = 'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD'
-    TIME: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time'
-    )
-    WIFE: str = (
-        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#WIFE'
-    )
-
-
-@dataclass(frozen=True)
-class Default:
-    COMMA: str = ','
-    COMMA_REQUIRED: str = ',  # REQUIRED'
-    CHOICE: int = 1
-    DATE_DAY: int = 0
-    DATE_MONTH: int = 0
-    DATE_YEAR: int = 0
-    DATE_WEEK: int = 0
-    DAYS: int = 0
-    EMPTY: str = ''
-    GREATER_LESS_THAN: str = '>'
-    HEIGHT: int = 0
-    LEFT: int = 0
-    MAP_LATITUDE: float = 0.0
-    MAP_LONGITUDE: float = 0.0
-    MIME: str = ''
-    MONTHS: int = 0
-    NONE: str = 'None'
-    PHONE_AREA_MIN: int = 0
-    PHONE_AREA_MAX: int = 1000
-    PHONE_COUNTRY_MIN: int = 0
-    PHONE_COUNTRY_MAX: int = 1000
-    PHONE_LINE_MIN: int = 0
-    PHONE_LINE_MAX: int = 10000
-    PHONE_PREFIX_MIN: int = 0
-    PHONE_PREFIX_MAX: int = 1000
-    PHONE_STRING_SET: str = '0123456789)(+ '
-    PLACE_FORM1: str = 'City'
-    PLACE_FORM2: str = 'County'
-    PLACE_FORM3: str = 'State'
-    PLACE_FORM4: str = 'Country'
-    POINTER: str = '@VOID@'
-    QUOTE_SINGLE: str = "'"
-    QUOTE_DOUBLE: str = '"'
-    TIME_HOUR: int = 0
-    TIME_MINUTE: int = 0
-    TIME_SECOND: float = 0.0
-    TIME_UTC: bool = False
-    TOP: int = 0
-    WEEKS: int = 0
-    WIDTH: int = 0
-    YEARS: int = 0
 
 
 class Tag(Enum):
@@ -1282,8 +336,1172 @@ class Tag(Enum):
     NONE = ''
 
 
+@dataclass(frozen=True)
+class Docs:
+    ABBR = f'{Config.TERMS}{Tag.ABBR.value}'
+    ADDR = f'{Config.TERMS}{Tag.ADDR.value}'
+    ADOP = f'{Config.TERMS}{Tag.ADOP.value}'
+    ADOP_FAMC = f'{Config.TERMS}{Tag.ADOP.value}-{Tag.FAMC.value}'
+    ADR1 = f'{Config.TERMS}{Tag.ADR1.value}'
+    ADR2 = f'{Config.TERMS}{Tag.ADR2.value}'
+    ADR3 = f'{Config.TERMS}{Tag.ADR3.value}'
+    AGE = f'{Config.TERMS}{Tag.AGE.value}'
+    AGNC = f'{Config.TERMS}{Tag.AGNC.value}'
+    ALIA = f'{Config.TERMS}{Tag.ALIA.value}'
+    ANCI = f'{Config.TERMS}{Tag.ANCI.value}'
+    ANUL = f'{Config.TERMS}{Tag.ANUL.value}'
+    ASSO = f'{Config.TERMS}{Tag.ASSO.value}'
+    AUTH = f'{Config.TERMS}{Tag.AUTH.value}'
+    BAPL = f'{Config.TERMS}{Tag.BAPL.value}'
+    BAPM = f'{Config.TERMS}{Tag.BAPM.value}'
+    BARM = f'{Config.TERMS}{Tag.BARM.value}'
+    BASM = f'{Config.TERMS}{Tag.BASM.value}'
+    BIRT = f'{Config.TERMS}{Tag.BIRT.value}'
+    BLES = f'{Config.TERMS}{Tag.BLES.value}'
+    BURI = f'{Config.TERMS}{Tag.BURI.value}'
+    CALN = f'{Config.TERMS}{Tag.CALN.value}'
+    CAST = f'{Config.TERMS}{Tag.CAST.value}'
+    CAUS = f'{Config.TERMS}{Tag.CAUS.value}'
+    CHAN = f'{Config.TERMS}{Tag.CHAN.value}'
+    CHIL = f'{Config.TERMS}{Tag.CHIL.value}'
+    CHR = f'{Config.TERMS}{Tag.CHR.value}'
+    CHRA = f'{Config.TERMS}{Tag.CHRA.value}'
+    CITY = f'{Config.TERMS}{Tag.CITY.value}'
+    CONF = f'{Config.TERMS}{Tag.CONF.value}'
+    CONL = f'{Config.TERMS}{Tag.CONL.value}'
+    COPR = f'{Config.TERMS}{Tag.COPR.value}'
+    CORP = f'{Config.TERMS}{Tag.CORP.value}'
+    CREA = f'{Config.TERMS}{Tag.CREA.value}'
+    CREM = f'{Config.TERMS}{Tag.CREM.value}'
+    CROP = f'{Config.TERMS}{Tag.CROP.value}'
+    CTRY = f'{Config.TERMS}{Tag.CTRY.value}'
+    DATA = f'{Config.TERMS}{Tag.DATA.value}'
+    DATA_EVEN = f'{Config.TERMS}{Tag.DATA.value}-{Tag.EVEN.value}'
+    DATA_EVEN_DATE = (
+        f'{Config.TERMS}{Tag.DATA.value}-{Tag.EVEN.value}-{Tag.DATE.value}'
+    )
+    DATE = f'{Config.TERMS}{Tag.DATE.value}'
+    DATE_EXACT = f'{Config.TERMS}{Tag.DATE.value}-exact'
+    DEAT = f'{Config.TERMS}{Tag.DEAT.value}'
+    DESI = f'{Config.TERMS}{Tag.DESI.value}'
+    DEST = f'{Config.TERMS}{Tag.DEST.value}'
+    DIV = f'{Config.TERMS}{Tag.DIV.value}'
+    DIVF = f'{Config.TERMS}{Tag.DIVF.value}'
+    DSCR = f'{Config.TERMS}{Tag.DSCR.value}'
+    EDUC = f'{Config.TERMS}{Tag.EDUC.value}'
+    EMAIL = f'{Config.TERMS}{Tag.EMAIL.value}'
+    EMIG = f'{Config.TERMS}{Tag.EMIG.value}'
+    ENDL = f'{Config.TERMS}{Tag.ENDL.value}'
+    ENGA = f'{Config.TERMS}{Tag.ENGA.value}'
+    EXID = f'{Config.TERMS}{Tag.EXID.value}'
+    EXID_TYPE = f'{Config.TERMS}{Tag.EXID.value}-{Tag.TYPE.value}'
+    FAM_CENS = f'{Config.TERMS}{Tag.FAM.value}-{Tag.CENS.value}'
+    FAM_EVEN = f'{Config.TERMS}{Tag.FAM.value}-{Tag.EVEN.value}'
+    FAM_FACT = f'{Config.TERMS}{Tag.FAM.value}-{Tag.FACT.value}'
+    FAM_HUSB = f'{Config.TERMS}{Tag.FAM.value}-{Tag.HUSB.value}'
+    FAM_NCHI = f'{Config.TERMS}{Tag.FAM.value}-{Tag.NCHI.value}'
+    FAM_RESI = f'{Config.TERMS}{Tag.FAM.value}-{Tag.RESI.value}'
+    FAM_WIFE = f'{Config.TERMS}{Tag.FAM.value}-{Tag.WIFE.value}'
+    FAMC = f'{Config.TERMS}{Tag.FAMC.value}'
+    FAMC_ADOP = f'{Config.TERMS}{Tag.FAMC.value}-{Tag.ADOP.value}'
+    FAMC_STAT = f'{Config.TERMS}{Tag.FAMC.value}-{Tag.STAT.value}'
+    FAMS = f'{Config.TERMS}{Tag.FAMS.value}'
+    FAX = f'{Config.TERMS}{Tag.FAX.value}'
+    FCOM = f'{Config.TERMS}{Tag.FCOM.value}'
+    FILE = f'{Config.TERMS}{Tag.FILE.value}'
+    FILE_TRAN = f'{Config.TERMS}{Tag.FILE.value}-{Tag.TRAN.value}'
+    FORM = f'{Config.TERMS}{Tag.FORM.value}'
+    GEDC = f'{Config.TERMS}{Tag.GEDC.value}'
+    GEDC_VERS = f'{Config.TERMS}{Tag.GEDC.value}-{Tag.VERS.value}'
+    GIVN = f'{Config.TERMS}{Tag.GIVN.value}'
+    GRAD = f'{Config.TERMS}{Tag.GRAD.value}'
+    HEAD = f'{Config.TERMS}{Tag.HEAD.value}'
+    HEAD_DATE = f'{Config.TERMS}{Tag.HEAD.value}-{Tag.DATE.value}'
+    HEAD_PLAC = f'{Config.TERMS}{Tag.HEAD.value}-{Tag.PLAC.value}'
+    HEAD_PLAC_FORM = (
+        f'{Config.TERMS}{Tag.HEAD.value}-{Tag.PLAC.value}-{Tag.FORM.value}'
+    )
+    HEAD_SOUR = f'{Config.TERMS}{Tag.HEAD.value}-{Tag.SOUR.value}'
+    HEAD_SOUR_DATA = (
+        f'{Config.TERMS}{Tag.HEAD.value}-{Tag.SOUR.value}-{Tag.DATA.value}'
+    )
+    HEIGHT = f'{Config.TERMS}{Tag.HEIGHT.value}'
+    HUSB = f'{Config.TERMS}{Tag.HUSB.value}'
+    IDNO = f'{Config.TERMS}{Tag.IDNO.value}'
+    IMMI = f'{Config.TERMS}{Tag.IMMI.value}'
+    INDI_CENS = f'{Config.TERMS}{Tag.INDI.value}-{Tag.CENS.value}'
+    INDI_EVEN = f'{Config.TERMS}{Tag.INDI.value}-{Tag.EVEN.value}'
+    INDI_FACT = f'{Config.TERMS}{Tag.INDI.value}-{Tag.FACT.value}'
+    INDI_FAMC = f'{Config.TERMS}{Tag.INDI.value}-{Tag.FAMC.value}'
+    INDI_NAME = f'{Config.TERMS}{Tag.INDI.value}-{Tag.NAME.value}'
+    INDI_NCHI = f'{Config.TERMS}{Tag.INDI.value}-{Tag.NCHI.value}'
+    INDI_RELI = f'{Config.TERMS}{Tag.INDI.value}-{Tag.RELI.value}'
+    INDI_RESI = f'{Config.TERMS}{Tag.INDI.value}-{Tag.RESI.value}'
+    INDI_TITL = f'{Config.TERMS}{Tag.INDI.value}-{Tag.TITL.value}'
+    INIL = f'{Config.TERMS}{Tag.INIL.value}'
+    LANG = f'{Config.TERMS}{Tag.LANG.value}'
+    LATI = f'{Config.TERMS}{Tag.LATI.value}'
+    LEFT = f'{Config.TERMS}{Tag.LEFT.value}'
+    LONG = f'{Config.TERMS}{Tag.LONG.value}'
+    MAP = f'{Config.TERMS}{Tag.MAP.value}'
+    MARB = f'{Config.TERMS}{Tag.MARB.value}'
+    MARC = f'{Config.TERMS}{Tag.MARC.value}'
+    MARL = f'{Config.TERMS}{Tag.MARL.value}'
+    MARR = f'{Config.TERMS}{Tag.MARR.value}'
+    MARS = f'{Config.TERMS}{Tag.MARS.value}'
+    MEDI = f'{Config.TERMS}{Tag.MEDI.value}'
+    MIME = f'{Config.TERMS}{Tag.MIME.value}'
+    NAME = f'{Config.TERMS}{Tag.NAME.value}'
+    NAME_TRAN = f'{Config.TERMS}{Tag.NAME.value}-{Tag.TRAN.value}'
+    NAME_TYPE = f'{Config.TERMS}{Tag.NAME.value}-{Tag.TYPE.value}'
+    NATI = f'{Config.TERMS}{Tag.NATI.value}'
+    NATU = f'{Config.TERMS}{Tag.NATU.value}'
+    NICK = f'{Config.TERMS}{Tag.NICK.value}'
+    NMR = f'{Config.TERMS}{Tag.NMR.value}'
+    NO = f'{Config.TERMS}{Tag.NO.value}'
+    NO_DATE = f'{Config.TERMS}{Tag.NO.value}-{Tag.DATE.value}'
+    NOTE = f'{Config.TERMS}{Tag.NOTE.value}'
+    NOTE_TRAN = f'{Config.TERMS}{Tag.NOTE.value}-{Tag.TRAN.value}'
+    NPFX = f'{Config.TERMS}{Tag.NPFX.value}'
+    NSFX = f'{Config.TERMS}{Tag.NSFX.value}'
+    OBJE = f'{Config.TERMS}{Tag.OBJE.value}'
+    OCCU = f'{Config.TERMS}{Tag.OCCU.value}'
+    ORD_STAT = f'{Config.TERMS}ord-{Tag.STAT.value}'
+    ORDN = f'{Config.TERMS}{Tag.ORDN.value}'
+    PAGE = f'{Config.TERMS}{Tag.PAGE.value}'
+    PEDI = f'{Config.TERMS}{Tag.PEDI.value}'
+    PHON = f'{Config.TERMS}{Tag.PHON.value}'
+    PHRASE = f'{Config.TERMS}{Tag.PHRASE.value}'
+    PLAC = f'{Config.TERMS}{Tag.PLAC.value}'
+    PLAC_FORM = f'{Config.TERMS}{Tag.PLAC.value}-{Tag.FORM.value}'
+    PLAC_TRAN = f'{Config.TERMS}{Tag.PLAC.value}-{Tag.TRAN.value}'
+    POST = f'{Config.TERMS}{Tag.POST.value}'
+    PROB = f'{Config.TERMS}{Tag.PROB.value}'
+    PROP = f'{Config.TERMS}{Tag.PROP.value}'
+    PUBL = f'{Config.TERMS}{Tag.PUBL.value}'
+    QUAY = f'{Config.TERMS}{Tag.QUAY.value}'
+    RECORD_FAM = f'{Config.TERMS}record-{Tag.FAM.value}'
+    RECORD_INDI = f'{Config.TERMS}record-{Tag.INDI.value}'
+    RECORD_OBJE = f'{Config.TERMS}record-{Tag.OBJE.value}'
+    RECORD_REPO = f'{Config.TERMS}record-{Tag.REPO.value}'
+    RECORD_SNOTE = f'{Config.TERMS}record-{Tag.SNOTE.value}'
+    RECORD_SOUR = f'{Config.TERMS}record-{Tag.SOUR.value}'
+    RECORD_SUBM = f'{Config.TERMS}record-{Tag.SUBM.value}'
+    REFN = f'{Config.TERMS}{Tag.REFN.value}'
+    RELI = f'{Config.TERMS}{Tag.RELI.value}'
+    REPO = f'{Config.TERMS}{Tag.REPO.value}'
+    RESN = f'{Config.TERMS}{Tag.RESN.value}'
+    RETI = f'{Config.TERMS}{Tag.RETI.value}'
+    ROLE = f'{Config.TERMS}{Tag.ROLE.value}'
+    SCHMA = f'{Config.TERMS}{Tag.SCHMA.value}'
+    SDATE = f'{Config.TERMS}{Tag.SDATE.value}'
+    SEX = f'{Config.TERMS}{Tag.SEX.value}'
+    SLGC = f'{Config.TERMS}{Tag.SLGC.value}'
+    SLGS = f'{Config.TERMS}{Tag.SLGS.value}'
+    SNOTE = f'{Config.TERMS}{Tag.SNOTE.value}'
+    SOUR = f'{Config.TERMS}{Tag.SOUR.value}'
+    SOUR_DATA = f'{Config.TERMS}{Tag.SOUR.value}-{Tag.DATA.value}'
+    SOUR_EVEN = f'{Config.TERMS}{Tag.SOUR.value}-{Tag.EVEN.value}'
+    SPFX = f'{Config.TERMS}{Tag.SPFX.value}'
+    SSN = f'{Config.TERMS}{Tag.SSN.value}'
+    STAE = f'{Config.TERMS}{Tag.STAE.value}'
+    SUBM = f'{Config.TERMS}{Tag.SUBM.value}'
+    SUBM_LANG = f'{Config.TERMS}{Tag.SUBM.value}-{Tag.LANG.value}'
+    SURN = f'{Config.TERMS}{Tag.SURN.value}'
+    TAG = f'{Config.TERMS}{Tag.TAG.value}'
+    TEMP = f'{Config.TERMS}{Tag.TEMP.value}'
+    TEXT = f'{Config.TERMS}{Tag.TEXT.value}'
+    TIME = f'{Config.TERMS}{Tag.TIME.value}'
+    TITL = f'{Config.TERMS}{Tag.TITL.value}'
+    TOP = f'{Config.TERMS}{Tag.TOP.value}'
+    TYPE = f'{Config.TERMS}{Tag.TYPE.value}'
+    UID = f'{Config.TERMS}{Tag.UID.value}'
+    VERS = f'{Config.TERMS}{Tag.VERS.value}'
+    WIDTH = f'{Config.TERMS}{Tag.WIDTH.value}'
+    WIFE = f'{Config.TERMS}{Tag.WIFE.value}'
+    WILL = f'{Config.TERMS}{Tag.WILL.value}'
+    WWW = f'{Config.TERMS}{Tag.WWW.value}'
+
+
+@dataclass(frozen=True)
+class OverView:
+    """Provide a description of the seven record types and the header record.
+
+    Descriptions of structures between `<<` and `>>` are structure names.  Below
+    these structure names are their expansion.
+    If the expansion has been given earlier, it is not repeated.
+    Since these start at level 0 the `+` is removed and the `n` is replaced
+    with 0 for this overview.
+    Individual tags have links to their yaml definitions.
+
+    The first number is the level of the line. Then comes the tag with payload description.
+    To the right is a quantity key `{optionality:quantity}`.  The optionality flag
+    can be either 1 for mandatory or 0 for optiona.  The quantity flag can be either
+    1 for single or M for multiple.  Following this is a link to the tag specfication.
+
+    The actual GEDCOM file does not contain the indentations.  The indentations are used here
+    and in the GEDCOM specification to make the different levels more evident.
+
+    Example:
+        To display this information import `OverView` from the gedcom module and print the
+        the desired record.  To print the Header record do the following.  Only the first line
+        is displayed in the example.
+        >>> from genedata.gedcom import OverView
+        >>> print(OverView.DATE_VALUE)  # doctest: +ELLIPSIS
+        <BLANKLINE>
+        n DATE <DateValue>                     {1:1}  [DATE](https://gedcom.io/terms/v7/DATE)
+          +1 TIME <Time>                       {0:1}  [TIME](https://gedcom.io/terms/v7/TIME)
+          +1 PHRASE <Text>                     {0:1}  [PHRASE](https://gedcom.io/terms/v7/PHRASE)
+        <BLANKLINE>
+
+    Reference:
+        [The FamilySearch GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    """
+
+    ADDRESS_STRUCTURE: str = f"""
+n {Tag.ADDR.value} <Special>                       {{1:1}}  [{Tag.ADDR.value}]({Docs.ADDR})
+  +1 {Tag.ADR1.value} <Special>                    {{0:1}}  [{Tag.ADR1.value}]({Docs.ADR1})
+  +1 {Tag.ADR2.value} <Special>                    {{0:1}}  [{Tag.ADR2.value}]({Docs.ADR2})
+  +1 {Tag.ADR3.value} <Special>                    {{0:1}}  [{Tag.ADR3.value}]({Docs.ADR3})
+  +1 {Tag.CITY.value} <Special>                    {{0:1}}  [{Tag.CITY.value}]({Docs.CITY})
+  +1 {Tag.STAE.value} <Special>                    {{0:1}}  [{Tag.STAE.value}]({Docs.STAE})
+  +1 {Tag.POST.value} <Special>                    {{0:1}}  [{Tag.POST.value}]({Docs.POST})
+  +1 {Tag.CTRY.value} <Special>                    {{0:1}}  [{Tag.CTRY.value}]({Docs.CTRY})  
+"""
+    ASSOCIATION_STRUCTURE: str = f"""
+n {Tag.ASSO.value} @<XREF:INDI>@                   {{1:1}}  [{Tag.ASSO.value}]({Docs.ASSO})
+  +1 {Tag.PHRASE.value} <Text>                     {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  +1 {Tag.ROLE.value} <Enum>                       {{1:1}}  [{Tag.ROLE.value}]({Docs.ROLE})
+     +2 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    CHANGE_DATE: str = f"""
+n {Tag.CHAN.value}                                 {{1:1}}  [{Tag.CHAN.value}]({Docs.CHAN})
+  +1 {Tag.DATE.value} <DateExact>                  {{1:1}}  [{Tag.DATE}-exact]({Docs.DATE_EXACT})
+     +2 {Tag.TIME.value} <Time>                    {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+"""
+    CREATION_DATE: str = f"""
+n {Tag.CREA.value}                                 {{1:1}}  [{Tag.CREA.value}]({Docs.CREA})
+  +1 {Tag.DATE.value} <DateExact>                  {{1:1}}  [{Tag.DATE.value}-exact]({Docs.DATE_EXACT})
+     +2 {Tag.TIME.value} <Time>                    {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+"""
+    DATE_VALUE: str = f"""
+n {Tag.DATE.value} <DateValue>                     {{1:1}}  [{Tag.DATE.value}]({Docs.DATE})
+  +1 {Tag.TIME.value} <Time>                       {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+  +1 {Tag.PHRASE.value} <Text>                     {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+"""
+    EVENT_DETAIL: str = f"""
+n <<DATE_VALUE>>                       {{0:1}}
+n <<PLACE_STRUCTURE>>                  {{0:1}}
+n <<ADDRESS_STRUCTURE>>                {{0:1}}
+n {Tag.PHON.value} <Special>                       {{0:M}}  [{Tag.PHON.value}]({Docs.PHON})
+n {Tag.EMAIL.value} <Special>                      {{0:M}}  [{Tag.EMAIL.value}]({Docs.EMAIL})
+n {Tag.FAX.value} <Special>                        {{0:M}}  [{Tag.FAX.value}]({Docs.FAX})
+n {Tag.WWW.value} <Special>                        {{0:M}}  [{Tag.WWW.value}]({Docs.WWW})
+n {Tag.AGNC.value} <Text>                          {{0:1}}  [{Tag.AGNC.value}]({Docs.AGNC})
+n {Tag.RELI.value} <Text>                          {{0:1}}  [{Tag.RELI.value}]({Docs.RELI})
+n {Tag.CAUS.value} <Text>                          {{0:1}}  [{Tag.CAUS.value}]({Docs.CAUS})
+n {Tag.RESN.value} <List:Enum>                     {{0:1}}  [{Tag.RESN.value}]({Docs.RESN})
+n {Tag.SDATE.value} <DateValue>                    {{0:1}}  [{Tag.SDATE.value}]({Docs.SDATE})
+  +1 {Tag.TIME.value} <Time>                       {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+  +1 {Tag.PHRASE.value} <Text>                     {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+n <<ASSOCIATION_STRUCTURE>>            {{0:M}}
+n <<NOTE_STRUCTURE>>                   {{0:M}}
+n <<SOURCE_CITATION>>                  {{0:M}}
+n <<MULTIMEDIA_LINK>>                  {{0:M}}
+n {Tag.UID.value} <Special>                        {{0:M}}  [{Tag.UID.value}]()
+"""
+    FAMILY: str = f"""
+0 @XREF:FAM@ {Tag.FAM.value}                       {{1:1}}  [record-{Tag.FAM.value}]({Docs.RECORD_FAM})
+  1 {Tag.RESN.value} <List:Enum>                   {{0:1}}  [{Tag.RESN.value}]({Docs.RESN})
+  1 <<FAMILY_ATTRIBUTE_STRUCTURE>>     {{0:M}}
+  1 <<FAMILY_EVENT_STRUCTURE>>         {{0:M}}
+  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
+  1 {Tag.HUSB.value} @<XREF:INDI>@                 {{0:1}}  [{Tag.FAM.value}-{Tag.HUSB.value}]({Docs.FAM_HUSB})
+    2 {Tag.PHRASE.value} <Text>                    {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  1 {Tag.WIFE.value} @<XREF:INDI>@                 {{0:1}}  [{Tag.FAM.value}-{Tag.WIFE.value}]({Docs.FAM_WIFE})
+    2 {Tag.PHRASE.value} <Text>                    {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  1 {Tag.CHIL.value} @<XREF:INDI>@                 {{0:M}}  [{Tag.CHIL.value}]({Docs.CHIL})
+    2 {Tag.PHRASE.value} <Text>                    {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
+  1 {Tag.SUBM.value} @<XREF:SUBM>@                 {{0:M}}  [{Tag.SUBM.value}]({Docs.SUBM})
+  1 <<LDS_SPOUSE_SEALING>>             {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    FAMILY_ATTRIBUTE_STRUCTURE: str = f"""
+[
+n {Tag.NCHI.value} <Integer>                       {{1:1}}  [{Tag.FAM.value}-{Tag.NCHI.value}]({Docs.FAM_NCHI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.RESI.value} <Text>                          {{1:1}}  [{Tag.FAM.value}-{Tag.RESI.value}]({Docs.FAM_RESI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.FACT.value} <Text>                          {{1:1}}  [{Tag.FAM.value}-{Tag.FACT.value}]({Docs.FAM_FACT})
+  +1 {Tag.TYPE.value} <Text>                       {{1:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+]
+"""
+    FAMILY_EVENT_DETAIL: str = f"""
+n {Tag.HUSB.value}                                 {{0:1}}  [{Tag.HUSB.value}]({Docs.HUSB})
+  +1 {Tag.AGE.value} <Age>                         {{1:1}}  [{Tag.AGE.value}]({Docs.AGE})
+     +2 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+n {Tag.WIFE.value}                                 {{0:1}}  [{Tag.WIFE.value}]({Docs.WIFE})
+  +1 {Tag.AGE.value} <Age>                         {{1:1}}  [{Tag.AGE.value}]({Docs.AGE})
+     +2 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+n <<EVENT_DETAIL>>                     {{0:1}}
+"""
+    FAMILY_EVENT_STRUCTURE: str = f"""
+[
+n {Tag.ANUL.value} [Y|<NULL>]                      {{1:1}}  [{Tag.ANUL.value}]({Docs.ANUL})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.CENS.value} [Y|<NULL>]                      {{1:1}}  [{Tag.FAM.value}-{Tag.CENS.value}]({Docs.FAM_CENS})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.DIV.value} [Y|<NULL>]                       {{1:1}}  [{Tag.DIV.value}]({Docs.DIV})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.DIVF.value} [Y|<NULL>]                      {{1:1}}  [{Tag.DIVF.value}]({Docs.DIVF})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.ENGA.value} [Y|<NULL>]                      {{1:1}}  [{Tag.ENGA.value}]({Docs.ENGA})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.MARB.value} [Y|<NULL>]                      {{1:1}}  [{Tag.MARB.value}]({Docs.MARB})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.MARC.value} [Y|<NULL>]                      {{1:1}}  [{Tag.MARC.value}]({Docs.MARC})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.MARL.value} [Y|<NULL>]                      {{1:1}}  [{Tag.MARL.value}]({Docs.MARL})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.MARR.value} [Y|<NULL>]                      {{1:1}}  [{Tag.MARR.value}]({Docs.MARR})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.MARS.value} [Y|<NULL>]                      {{1:1}}  [{Tag.MARS.value}]({Docs.MARS})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+|
+n {Tag.EVEN.value} <Text>                          {{1:1}}  [{Tag.FAM.value}-{Tag.EVEN.value}]({Docs.FAM_EVEN})
+  +1 {Tag.TYPE.value} <Text>                       {{1:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<FAMILY_EVENT_DETAIL>>           {{0:1}}
+]
+"""
+    HEADER: str = f"""
+0 {Tag.HEAD.value}                                 {{1:1}}  [{Tag.HEAD.value}]({Docs.HEAD})
+  1 {Tag.GEDC.value}                               {{1:1}}  [{Tag.GEDC.value}]({Docs.GEDC})
+    2 {Tag.VERS.value} <Special>                   {{1:1}}  [{Tag.GEDC.value}-{Tag.VERS.value}]({Docs.GEDC_VERS})
+  1 {Tag.SCHMA.value}                              {{0:1}}  [{Tag.SCHMA.value}]({Docs.SCHMA})
+    2 {Tag.TAG.value} <Special>                    {{0:M}}  [{Tag.TAG.value}]({Docs.TAG})
+  1 {Tag.SOUR.value} <Special>                     {{0:1}}  [{Tag.HEAD.value}-SOUR]({Docs.HEAD_SOUR})
+    2 {Tag.VERS.value} <Special>                   {{0:1}}  [{Tag.VERS.value}]({Docs.VERS})
+    2 {Tag.NAME.value} <Text>                      {{0:1}}  [{Tag.NAME.value}]({Docs.NAME})
+    2 {Tag.CORP.value} <Text>                      {{0:1}}  [{Tag.CORP.value}]({Docs.CORP})
+      3 <<ADDRESS_STRUCTURE>>          {{0:1}}
+      3 {Tag.PHON.value} <Special>                 {{0:M}}  [{Tag.PHON.value}]({Docs.PHON})
+      3 {Tag.EMAIL.value} <Special>                {{0:M}}  [{Tag.EMAIL.value}]({Docs.EMAIL})
+      3 {Tag.FAX.value} <Special>                  {{0:M}}  [{Tag.FAX.value}]({Docs.FAX})
+      3 {Tag.WWW.value} <Special>                  {{0:M}}  [{Tag.WWW.value}]({Docs.WWW})
+    2 {Tag.DATA.value} <Text>                      {{0:1}}  [{Tag.HEAD.value}-{Tag.SOUR.value}-{Tag.DATA.value}]({Docs.HEAD_SOUR_DATA})
+      3 {Tag.DATE.value} <DateExact>               {{0:1}}  [{Tag.DATE.value}-exact]({Docs.DATE_EXACT})
+        4 {Tag.TIME.value} <Time>                  {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+      3 {Tag.COPR.value} <Text>                    {{0:1}}  [{Tag.COPR.value}]({Docs.COPR})
+  1 {Tag.DEST.value} <Special>                     {{0:1}}  [{Tag.HEAD.value}-{Tag.DATE.value}]({Docs.HEAD_DATE})
+    2 {Tag.TIME.value} <Time>                      {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+  1 {Tag.SUBM.value} @<XREF:SUBM>@                 {{0:1}}  [{Tag.SUBM.value}]({Docs.SUBM})
+  1 {Tag.COPR.value} <Text>                        {{0:1}}  [{Tag.COPR.value}]({Docs.COPR})
+  1 {Tag.LANG.value} <Language>                    {{0:1}}  [{Tag.HEAD.value}-{Tag.LANG.value}]({Docs.LANG})
+  1 {Tag.PLAC.value}                               {{0:1}}  [{Tag.HEAD.value}-{Tag.PLAC.value}]({Docs.HEAD_PLAC})
+    2 {Tag.FORM.value} <List:Text>                 {{1:1}}  [{Tag.HEAD.value}-{Tag.PLAC.value}-{Tag.FORM.value}]({Docs.HEAD_PLAC_FORM})
+  1 <<NOTE_STRUCTURE>>                 {{0:1}}
+    """
+    IDENTIFIER_STRUCTURE: str = f"""
+[
+n {Tag.REFN.value} <Special>                       {{1:1}}  [{Tag.REFN.value}]({Docs.REFN})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+|
+n {Tag.UID.value} <Special>                        {{1:1}}  [{Tag.UID.value}]({Docs.UID})
+|
+n {Tag.EXID.value} <Special>                       {{1:1}}  [{Tag.EXID.value}]({Docs.EXID})
+  +1 {Tag.TYPE.value} <Special>                    {{0:1}}  [{Tag.EXID.value}-{Tag.TYPE.value}]({Docs.EXID_TYPE})
+]
+"""
+    INDIVIDUAL: str = f"""
+0 @XREF:INDI@ {Tag.INDI.value}                     {{1:1}}  [record-{Tag.INDI.value}]({Docs.RECORD_INDI})
+  1 {Tag.RESN.value} <List:Enum>                   {{0:1}}  [{Tag.RESN.value}]({Docs.RESN})
+  1 <<PERSONAL_NAME_STRUCTURE>>        {{0:M}}
+  1 {Tag.SEX.value} <Enum>                         {{0:1}}  [{Tag.SEX.value}]({Docs.SEX})
+  1 <<INDIVIDUAL_ATTRIBUTE_STRUCTURE>> {{0:M}}
+  1 <<INDIVIDUAL_EVENT_STRUCTURE>>     {{0:M}}
+  1 <<NON_EVENT_STRUCTURE>>            {{0:M}}
+  1 <<LDS_INDIVIDUAL_ORDINANCE>>       {{0:M}}
+  1 {Tag.FAMC.value} @<XREF:FAM>@                  {{0:M}}  [{Tag.INDI.value}-{Tag.FAMC.value}]({Docs.INDI_FAMC})
+    2 {Tag.PEDI.value} <Enum>                      {{0:1}}  [{Tag.PEDI.value}]({Docs.PEDI})
+      3 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+    2 {Tag.STAT.value} <Enum>                      {{0:1}}  [{Tag.FAMC.value}-{Tag.STAT.value}]({Docs.FAMC_STAT})
+      3 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 {Tag.FAMS.value} @<XREF:FAM>@                  {{0:M}}  [{Tag.FAMS.value}]({Docs.FAMS})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 {Tag.SUBM.value} @<XREF:SUBM>@                 {{0:M}}  [{Tag.SUBM.value}]({Docs.SUBM})
+  1 <<ASSOCIATION_STRUCTURE>>          {{0:M}}
+  1 {Tag.ALIA.value} @<XREF:INDI>@                 {{0:M}}  [{Tag.ALIA.value}]({Docs.ALIA})
+    2 {Tag.PHRASE.value} <Text>                    {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  1 {Tag.ANCI.value} @<XREF:SUBM>@                 {{0:M}}  [{Tag.ANCI.value}]({Docs.ANCI})
+  1 {Tag.DESI.value} @<XREF:SUBM>@                 {{0:M}}  [{Tag.DESI.value}]({Docs.DESI})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    INDIVIDUAL_ATTRIBUTE_STRUCTURE: str = f"""
+[
+n {Tag.CAST.value} <Text>                          {{1:1}}  [{Tag.CAST.value}]({Docs.CAST})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.DSCR.value} <Text>                          {{1:1}}  [{Tag.DSCR.value}]({Docs.DSCR})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.EDUC.value} <Text>                          {{1:1}}  [{Tag.EDUC.value}]({Docs.EDUC})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.IDNO.value} <Special>                       {{1:1}}  [{Tag.IDNO.value}]({Docs.IDNO})
+  +1 {Tag.TYPE.value} <Text>                       {{1:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.NATI.value} <Text>                          {{1:1}}  [{Tag.NATI.value}]({Docs.NATI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.NCHI.value} <Integer>                       {{1:1}}  [{Tag.INDI.value}-{Tag.NCHI.value}]({Docs.INDI_NCHI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.NMR.value} <Integer>                        {{1:1}}  [{Tag.NMR.value}]({Docs.NMR})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.OCCU.value} <Text>                          {{1:1}}  [{Tag.OCCU.value}]({Docs.OCCU})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.PROP.value} <Text>                          {{1:1}}  [{Tag.PROP.value}]({Docs.PROP})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.RELI.value} <Text>                          {{1:1}}  [{Tag.INDI.value}-{Tag.RELI.value}]({Docs.INDI_RELI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.RESI.value} <Text>                          {{1:1}}  [{Tag.INDI.value}-{Tag.RESI.value}]({Docs.INDI_RESI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.SSN.value} <Special>                        {{1:1}}  [{Tag.SSN.value}]({Docs.SSN})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.TITL.value} <Text>                          {{1:1}}  [{Tag.INDI.value}-{Tag.TITL.value}]({Docs.INDI_TITL})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.FACT.value} <Text>                          {{1:1}}  [{Tag.INDI.value}-{Tag.FACT.value}]({Docs.INDI_FACT})
+  +1 {Tag.TYPE.value} <Text>                       {{1:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+]
+"""
+    INDIVIDUAL_EVENT_DETAIL: str = f"""
+n <<EVENT_DETAIL>>                     {{1:1}}
+n {Tag.AGE.value} <Age>                            {{0:1}}  [{Tag.AGE.value}]({Docs.AGE})
+  +1 {Tag.PHRASE.value} <Text>                     {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+"""
+    INDIVIDUAL_EVENT_STRUCTURE: str = f"""
+[
+n {Tag.ADOP.value} [Y|<NULL>]                      {{1:1}}  [{Tag.ADOP.value}]({Docs.ADOP})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 {Tag.FAMC.value} @<XREF:FAM>@                 {{0:1}}  [{Tag.ADOP.value}-{Tag.FAMC.value}]({Docs.ADOP_FAMC})
+     +2 {Tag.ADOP.value} <Enum>                    {{0:1}}  [{Tag.FAMC.value}-{Tag.ADOP.value}]({Docs.FAMC_ADOP})
+        +3 {Tag.PHRASE.value} <Text>               {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+|
+n {Tag.BAPM.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BAPM.value}]({Docs.BAPM})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.BARM.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BARM.value}]({Docs.BARM})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.BASM.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BASM.value}]({Docs.BASM})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.BIRT.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BIRT.value}]({Docs.BIRT})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 {Tag.FAMC.value} @<XREF:FAM>@                 {{0:1}}  [{Tag.FAMC.value}]({Docs.TYPE})
+|
+n {Tag.BLES.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BLES.value}]({Docs.BLES})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.BURI.value} [Y|<NULL>]                      {{1:1}}  [{Tag.BURI.value}]({Docs.BURI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+
+n {Tag.CENS.value} [Y|<NULL>]                      {{1:1}}  [{Tag.INDI.value}-{Tag.CENS.value}]({Docs.INDI_CENS})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.CHR.value} [Y|<NULL>]                       {{1:1}}  [{Tag.CHR.value}]({Docs.CHR})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+  +1 {Tag.FAMC.value} @<XREF:FAM>@                 {{0:1}}  [{Tag.FAMC.value}]({Docs.FAMC})
+|
+n {Tag.CHRA.value} [Y|<NULL>]                      {{1:1}}  [{Tag.CHRA.value}]({Docs.CHRA})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.CONF.value} [Y|<NULL>]                      {{1:1}}  [{Tag.CONF.value}]({Docs.CONF})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.CREM.value} [Y|<NULL>]                      {{1:1}}  [{Tag.CREM.value}]({Docs.CREM})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.DEAT.value} [Y|<NULL>]                      {{1:1}}  [{Tag.DEAT.value}]({Docs.DEAT})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.EMIG.value} [Y|<NULL>]                      {{1:1}}  [{Tag.EMIG.value}]({Docs.EMIG})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.FCOM.value} [Y|<NULL>]                      {{1:1}}  [{Tag.FCOM.value}]({Docs.FCOM})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.GRAD.value} [Y|<NULL>]                      {{1:1}}  [{Tag.GRAD.value}]({Docs.GRAD})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.IMMI.value} [Y|<NULL>]                      {{1:1}}  [{Tag.IMMI.value}]({Docs.IMMI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.NATU.value} [Y|<NULL>]                      {{1:1}}  [{Tag.NATU.value}]({Docs.NATU})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.ORDN.value} [Y|<NULL>]                      {{1:1}}  [{Tag.ORDN.value}]({Docs.ORDN})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.PROB.value} [Y|<NULL>]                      {{1:1}}  [{Tag.PROB.value}]({Docs.PROB})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.RETI.value} [Y|<NULL>]                      {{1:1}}  [{Tag.RETI.value}]({Docs.RETI})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.WILL.value} [Y|<NULL>]                      {{1:1}}  [{Tag.WILL.value}]({Docs.WILL})
+  +1 {Tag.TYPE.value} <Text>                       {{0:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+|
+n {Tag.EVEN.value} <Text>                          {{1:1}}  [{Tag.INDI.value}-{Tag.EVEN.value}]({Docs.INDI_EVEN})
+  +1 {Tag.TYPE.value} <Text>                       {{1:1}}  [{Tag.TYPE.value}]({Docs.TYPE})
+  +1 <<INDIVIDUAL_EVENT_DETAIL>>       {{0:1}}
+]
+"""
+    LDS_ORDINANCE_DETAIL: str = f"""
+n <<DATE_VALUE>>                       {{:1}}
+n TEMP <Text>                          {{0:1}}  [{Tag.TEMP.value}]({Docs.TEMP})
+n <<PLACE_STRUCTURE>>                  {{0:1}}
+n {Tag.STAT.value} <Enum>                          {{0:1}}  [ord-{Tag.STAT.value}]({Docs.ORD_STAT})
+  +1 {Tag.DATE.value} <DateExact>                  {{1:1}}  [{Tag.DATE.value}-exact]({Docs.DATE_EXACT})
+     +2 {Tag.TIME.value} <Time>                    {{0:1}}  [{Tag.TIME.value}]({Docs.TIME})
+n <<NOTE_STRUCTURE>>                   {{0:M}}
+n <<SOURCE_CITATION>>                  {{0:M}}
+"""
+    LDS_INDIVIDUAL_ORDINANCE: str = f"""
+[
+n {Tag.BAPL.value}                                 {{1:1}}  [{Tag.BAPL.value}]({Docs.BAPL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n {Tag.CONL.value}                                 {{1:1}}  [{Tag.CONL.value}]({Docs.CONL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n {Tag.ENDL.value}                                 {{1:1}}  [{Tag.ENDL.value}]({Docs.ENDL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n {Tag.INIL.value}                                 {{1:1}}  [{Tag.INIL.value}]({Docs.INIL})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+|
+n {Tag.SLGC.value}                                 {{1:1}}  [{Tag.SLGC.value}]({Docs.SLGC})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+  +1 {Tag.FAMC.value} @<XREF:FAM>@                 {{1:1}}  [{Tag.FAMC.value}]({Docs.FAMC})
+]
+"""
+    LDS_SPOUSE_SEALING = f"""
+n {Tag.SLGS.value}                                 {{1:1}}  [{Tag.SLGS.value}]({Docs.SLGS})
+  +1 <<LDS_ORDINANCE_DETAIL>>          {{0:1}}
+"""
+    MULTIMEDIA: str = f"""
+0 @XREF:OBJE@ {Tag.OBJE.value}                     {{1:1}}  [record-{Tag.OBJE.value}]({Docs.RECORD_OBJE})
+  1 {Tag.RESN.value} <List:Enum>                   {{0:1}}  [{Tag.RESN.value}]({Docs.RESN})
+  1 {Tag.FILE.value} <FilePath>                    {{1:M}}  [{Tag.FILE.value}]({Docs.FILE})
+    2 {Tag.FORM.value} <MediaType>                 {{1:1}}  [{Tag.FORM.value}]({Docs.FORM})
+      3 {Tag.MEDI.value} <Enum>                    {{0:1}}  [{Tag.MEDI.value}]({Docs.MEDI})
+        4 {Tag.PHRASE.value} <Text>                {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+    2 {Tag.TITL.value} <Text>                      {{0:1}}  [{Tag.TITL.value}]({Docs.TITL})
+    2 {Tag.TRAN.value} <FilePath>                  {{0:M}}  [{Tag.FILE.value}-{Tag.TRAN.value}]({Docs.FILE_TRAN})
+      3 {Tag.FORM.value} <MediaType>               {{1:1}}  [{Tag.FORM.value}]({Docs.FORM})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    MULTIMEDIA_LINK: str = f"""
+n {Tag.OBJE.value} @<XREF:OBJE>@                   {{1:1}} [{Tag.OBJE.value}]({Docs.OBJE})
+  +1 {Tag.CROP.value}                              {{0:1}}  [{Tag.CROP.value}]({Docs.CROP})
+    +2 {Tag.TOP.value} <Integer>                   {{0:1}}  [{Tag.TOP.value}]({Docs.TOP})
+    +2 {Tag.LEFT.value} <Integer>                  {{0:1}}  [{Tag.LEFT.value}]({Docs.LEFT})
+    +2 {Tag.HEIGHT.value} <Integer>                {{0:1}}  [{Tag.HEIGHT.value}]({Docs.HEIGHT})
+    +2 {Tag.WIDTH.value} <Integer>                 {{0:1}}  [{Tag.WIDTH.value}]({Docs.WIDTH})
+  +1 {Tag.TITL.value} <Text>                       {{0:1}}  [{Tag.TITL.value}]({Docs.TITL})
+"""
+    NON_EVENT_STRUCTURE: str = f"""
+n {Tag.NO.value} <Enum>                            {{1:1}}  [{Tag.NO.value}]({Docs.NO})
+  +1 {Tag.DATE.value} <DatePeriod>                 {{0:1}}  [{Tag.NO.value}-{Tag.DATE.value}]({Docs.NO_DATE})
+     +2 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    NOTE_STRUCTURE: str = f"""
+[
+n {Tag.NOTE.value} <Text>                          {{1:1}}  [{Tag.NOTE.value}]({Docs.NOTE})
+  +1 {Tag.MIME.value} <MediaType>                  {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+  +1 {Tag.LANG.value} <Language>                   {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  +1 {Tag.TRAN.value} <Text>                       {{0:M}}  [{Tag.NOTE.value}-{Tag.TRAN.value}]({Docs.NOTE_TRAN})
+    +2 {Tag.MIME.value} <MediaType>                {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+    +2 {Tag.LANG.value} <Language>                 {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+|
+n {Tag.SNOTE.value} @<XREF:SNOTE>@                 {{1:1}}  [{Tag.SNOTE.value}]({Docs.SNOTE})
+]
+"""
+    PERSONAL_NAME_PIECES: str = f"""
+n {Tag.NPFX.value} <Text>                          {{0:M}}  [{Tag.NPFX.value}]({Docs.NPFX})
+n {Tag.GIVN.value} <Text>                          {{0:M}}  [{Tag.GIVN.value}]({Docs.GIVN})
+n {Tag.NICK.value} <Text>                          {{0:M}}  [{Tag.NICK.value}]({Docs.NICK})
+n {Tag.SPFX.value} <Text>                          {{0:M}}  [{Tag.SPFX.value}]({Docs.SPFX})
+n {Tag.SURN.value} <Text>                          {{0:M}}  [{Tag.SURN.value}]({Docs.SURN})
+n {Tag.NSFX.value} <Text>                          {{0:M}}  [{Tag.NSFX.value}]({Docs.NSFX})
+"""
+    PERSONAL_NAME_STRUCTURE: str = f"""
+n {Tag.NAME.value} <PersonalName>                  {{1:1}}  [{Tag.INDI.value}-{Tag.NAME.value}]({Docs.INDI_NAME})
+  +1 {Tag.TYPE.value} <Enum>                       {{0:1}}  [{Tag.NAME.value}-{Tag.TYPE.value}]({Docs.NAME_TYPE})
+     +2 {Tag.PHRASE.value} <Text>                  {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  +1 <<PERSONAL_NAME_PIECES>>          {{0:1}}
+  +1 {Tag.TRAN.value} <PersonalName>               {{0:M}}  [{Tag.NAME.value}-{Tag.TRAN.value}]({Docs.NAME_TRAN})
+     +2 {Tag.LANG.value} <Language>                {{1:1}}  [{Tag.LANG.value}]({Docs.LANG})
+     +2 <<PERSONAL_NAME_PIECES>>       {{0:1}}
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 <<SOURCE_CITATION>>               {{0:M}}
+"""
+    PLACE_STRUCTURE: str = f"""
+n {Tag.PLAC.value} <List:Text>                     {{1:1}}   [{Tag.PLAC.value}]({Docs.PLAC})
+  +1 {Tag.FORM.value} <List:Text>                  {{0:1}}   [{Tag.PLAC.value}-{Tag.FORM.value}]({Docs.PLAC_FORM})
+  +1 {Tag.LANG.value} <Language>                   {{0:1}}   [{Tag.LANG.value}]({Docs.LANG})
+  +1 {Tag.TRAN.value} <List:Text>                  {{0:M}}   [{Tag.PLAC.value}-{Tag.TRAN.value}]({Docs.PLAC_TRAN})
+     +2 {Tag.LANG.value} <Language>                {{1:1}}   [{Tag.LANG.value}]({Docs.LANG})
+  +1 {Tag.MAP.value}                               {{0:1}}   [{Tag.MAP.value}]({Docs.MAP})
+     +2 {Tag.LATI.value} <Special>                 {{1:1}}   [{Tag.LATI.value}]({Docs.LATI})
+     +2 {Tag.LONG.value} <Special>                 {{1:1}}   [{Tag.LONG.value}]({Docs.LONG})
+  +1 {Tag.EXID.value} <Special>                    {{0:M}}   [{Tag.EXID.value}]({Docs.EXID})
+     +2 {Tag.TYPE.value} <Special>                 {{0:1}}   [{Tag.EXID.value}-{Tag.TYPE.value}]({Docs.EXID_TYPE})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}} 
+"""
+    REPOSITORY: str = f"""
+0 @XREF:REPO@ {Tag.REPO.value}                     {{1:1}}  [record-{Tag.REPO.value}]({Docs.RECORD_REPO})
+  1 {Tag.NAME.value} <Text>                        {{1:1}}  [{Tag.NAME.value}]({Docs.NAME})
+  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
+  1 {Tag.PHON.value} <Special>                     {{0:M}}  [{Tag.PHON.value}]({Docs.PHON})
+  1 {Tag.EMAIL.value} <Special>                    {{0:M}}  [{Tag.EMAIL.value}]({Docs.EMAIL})
+  1 {Tag.FAX.value} <Special>                      {{0:M}}  [{Tag.FAX.value}]({Docs.FAX})
+  1 {Tag.WWW.value} <Special>                      {{0:M}}  [{Tag.WWW.value}]({Docs.WWW})
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SHARED_NOTE: str = f"""
+0 @XREF:SNOTE@ {Tag.SNOTE.value} <Text>            {{1:1}}  [record-{Tag.SNOTE.value}]({Docs.RECORD_SNOTE})
+  1 {Tag.MIME.value} <MediaType>                   {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+  1 {Tag.LANG.value} <Language>                    {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  1 {Tag.TRAN.value} <Text>                        {{0:M}}  [{Tag.NOTE.value}-{Tag.TRAN.value}]({Docs.NOTE_TRAN})
+    2 {Tag.MIME.value} <MediaType>                 {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+    2 {Tag.LANG.value} <Language>                  {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  1 <<SOURCE_CITATION>>                {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SOURCE: str = f"""
+0 @XREF:SOUR@ {Tag.SOUR.value}                     {{1:1}}  [record-{Tag.SOUR.value}]({Docs.RECORD_SOUR})
+  1 {Tag.DATA.value}                               {{0:1}}  [{Tag.DATA.value}]({Docs.DATA})
+    2 {Tag.EVEN.value} <List:Enum>                 {{0:M}}  [{Tag.DATA.value}-{Tag.EVEN.value}]({Docs.DATA_EVEN})
+      3 {Tag.DATE.value} <DatePeriod>              {{0:1}}  [{Tag.DATA.value}-{Tag.EVEN.value}-{Tag.DATE.value}]({Docs.DATA_EVEN_DATE})
+        4 {Tag.PHRASE.value} <Text>                {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+      3 <<PLACE_STRUCTURE>>            {{0:1}}
+    2 {Tag.AGNC.value} <Text>                      {{0:1}}  [{Tag.AGNC.value}]({Docs.AGNC})
+    2 <<NOTE_STRUCTURE>>               {{0:M}}
+  1 {Tag.AUTH.value} <Text>                        {{0:1}}  [{Tag.AUTH.value}]({Docs.AUTH})
+  1 {Tag.TITL.value} <Text>                        {{0:1}}  [{Tag.TITL.value}]({Docs.TITL})
+  1 {Tag.ABBR.value} <Text>                        {{0:1}}  [{Tag.ABBR.value}]({Docs.ABBR})
+  1 {Tag.PUBL.value} <Text>                        {{0:1}}  [{Tag.PUBL.value}]({Docs.PUBL})
+  1 {Tag.TEXT.value} <Text>                        {{0:1}}  [{Tag.TEXT.value}]({Docs.TEXT})
+    2 {Tag.MIME.value} <MediaType>                 {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+    2 {Tag.LANG.value} <Language>                  {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  1 <<SOURCE_REPOSITORY_CITATION>>     {{0:M}}
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+    SOURCE_CITATION: str = f"""
+n {Tag.SOUR.value} @<XREF:SOUR>@                   {{1:1}}  [{Tag.SOUR.value}]({Docs.SOUR})
+  +1 {Tag.PAGE.value} <Text>                       {{0:1}}  [{Tag.PAGE.value}]({Docs.PAGE})
+  +1 {Tag.DATA.value}                              {{0:1}}  [{Tag.SOUR.value}-{Tag.DATA.value}]({Docs.SOUR_DATA})
+    +2 <<DATE_VALUE>>                  {{0:1}}
+    +2 {Tag.TEXT.value} <Text>                     {{0:M}}  [{Tag.TEXT.value}]({Docs.TEXT})
+      +3 {Tag.MIME.value} <MediaType>              {{0:1}}  [{Tag.MIME.value}]({Docs.MIME})
+      +3 {Tag.LANG.value} <Language>               {{0:1}}  [{Tag.LANG.value}]({Docs.LANG})
+  +1 {Tag.EVEN.value} <Enum>                       {{0:1}}  [{Tag.SOUR.value}-{Tag.EVEN.value}]({Docs.SOUR_EVEN})
+    +2 {Tag.PHRASE.value} <Text>                   {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+    +2 {Tag.ROLE.value} <Enum>                     {{0:1}}  [{Tag.ROLE.value}]({Docs.ROLE})
+      +3 {Tag.PHRASE.value} <Text>                 {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+  +1 {Tag.QUAY.value} <Enum>                       {{0:1}}  [{Tag.QUAY.value}]({Docs.QUAY})
+  +1 <<MULTIMEDIA_LINK>>               {{0:M}}
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+"""
+    SOURCE_REPOSITORY_CITATION: str = f"""
+n {Tag.REPO.value} @<XREF:REPO>@                   {{1:1}}  [{Tag.REPO.value}]({Docs.REPO})
+  +1 <<NOTE_STRUCTURE>>                {{0:M}}
+  +1 {Tag.CALN.value} <Special>                    {{0:M}}  [{Tag.CALN.value}]({Docs.CALN})
+     +2 {Tag.MEDI.value} <Enum>                    {{0:1}}  [{Tag.MEDI.value}]({Docs.MEDI})
+        +3 {Tag.PHRASE.value} <Text>               {{0:1}}  [{Tag.PHRASE.value}]({Docs.PHRASE})
+"""
+    SUBMITTER: str = f"""
+0 @XREF:SUBM@ {Tag.SUBM.value}                     {{1:1}}  [record-{Tag.SUBM.value}]({Docs.RECORD_SUBM})
+  1 {Tag.NAME.value} <Text>                        {{1:1}}  [{Tag.NAME.value}]({Docs.NAME})
+  1 <<ADDRESS_STRUCTURE>>              {{0:1}}
+  1 {Tag.PHON.value} <Special>                     {{0:M}}  [{Tag.PHON.value}]({Docs.PHON})
+  1 {Tag.EMAIL.value} <Special>                    {{0:M}}  [{Tag.EMAIL.value}]({Docs.EMAIL})
+  1 {Tag.FAX.value} <Special>                      {{0:M}}  [{Tag.FAX.value}]({Docs.FAX})
+  1 {Tag.WWW.value} <Special>                      {{0:M}}  [{Tag.WWW.value}]({Docs.WWW})
+  1 <<MULTIMEDIA_LINK>>                {{0:M}}
+  1 {Tag.LANG.value} <Language>                    {{0:M}}  [{Tag.SUBM.value}-{Tag.LANG.value}]({Docs.SUBM_LANG})
+  1 <<IDENTIFIER_STRUCTURE>>           {{0:M}}
+  1 <<NOTE_STRUCTURE>>                 {{0:M}}
+  1 <<CHANGE_DATE>>                    {{0:1}}
+  1 <<CREATION_DATE>>                  {{0:1}}
+"""
+
+
+@dataclass(frozen=True)
+class Specs:
+    ADDRESS: str = f'{Config.SPECS}#ADDRESS_STRUCTURE'
+    AGE: str = f'{Config.SPECS}#age'
+    ALIAS: str = f'{Config.SPECS}#ALIA'
+    ASSOCIATION: str = f'{Config.SPECS}#ASSOCIATION_STRUCTURE'
+    CHANGE_DATE: str = f'{Config.SPECS}#CHANGE_DATE'
+    CHILD: str = f'{Config.SPECS}#CHIL'
+    CREATION_DATE: str = f'{Config.SPECS}#CREATION_DATE'
+    DATE: str = f'{Config.SPECS}#date'
+    DATE_VALUE: str = f'{Config.SPECS}#DATE_VALUE'
+    EVENT_DETAIL: str = f'{Config.SPECS}#EVENT_DETAIL'
+    EXID: str = f'{Config.SPECS}#EXID'
+    EXTENSION: str = f'{Config.SPECS}#extensions'
+    FAMILY: str = f'{Config.SPECS}#FAMILY_RECORD'
+    FAMILY_ATTRIBUTE: str = f'{Config.SPECS}#FAMILY_ATTRIBUTE_STRUCTURE'
+    FAMILY_CHILD: str = f'{Config.SPECS}#FAMC'
+    FAMILY_EVENT: str = f'{Config.SPECS}#FAMILY_EVENT_STRUCTURE'
+    FAMILY_EVENT_DETAIL: str = f'{Config.SPECS}#FAMILY_EVENT_DETAIL'
+    FAMILY_SPOUSE: str = f'{Config.SPECS}#FAMS'
+    FILE: str = ''
+    FILE_TRANSLATION: str = ''
+    FRENCH_R: str = f'{Config.SPECS}#FRENCH_R'
+    GREGORIAN: str = f'{Config.SPECS}#GREGORIAN'
+    HEADER: str = f'{Config.SPECS}#HEADER'
+    HEBREW: str = f'{Config.SPECS}#HEBREW'
+    HUSBAND: str = f'{Config.SPECS}#HUSB'
+    IDENTIFIER: str = f'{Config.SPECS}#IDENTIFIER_STRUCTURE'
+    INDIVIDUAL: str = f'{Config.SPECS}#INDIVIDUAL_RECORD'
+    INDIVIDUAL_ATTRIBUTE: str = f'{Config.SPECS}#INDIVIDUAL_ATTRIBUTE_STRUCTURE'
+    INDIVIDUAL_EVENT: str = f'{Config.SPECS}#INDIVIDUAL_EVENT_STRUCTURE'
+    INDIVIDUAL_EVENT_DETAIL: str = f'{Config.SPECS}#INDIVIDUAL_EVENT_DETAIL'
+    JULIAN: str = f'{Config.SPECS}#JULIAN'
+    LDS_INDIVIDUAL_ORDINANCE: str = f'{Config.SPECS}#LDS_INDIVIDUAL_ORDINANCE'
+    LDS_ORDINANCE_DETAIL: str = f'{Config.SPECS}#LDS_ORDINANCE_DETAIL'
+    LDS_SPOUSE_SEALING: str = f'{Config.SPECS}#LDS_SPOUSE_SEALING'
+    MAP: str = f'{Config.SPECS}#MAP'
+    MULTIMEDIA: str = f'{Config.SPECS}#MULTIMEDIA_RECORD'
+    MULTIMEDIA_LINK: str = f'{Config.SPECS}#MULTIMEDIA_LINK'
+    NON_EVENT: str = f'{Config.SPECS}#NON_EVENT_STRUCTURE'
+    NOTE: str = f'{Config.SPECS}#NOTE_STRUCTURE'
+    PERSONAL_NAME: str = f'{Config.SPECS}#PERSONAL_NAME_STRUCTURE'
+    PERSONAL_NAME_PIECES: str = f'{Config.SPECS}#PERSONAL_NAME_PIECES'
+    PLACE: str = f'{Config.SPECS}#PLACE_STRUCTURE'
+    REPOSITORY: str = f'{Config.SPECS}#REPOSITORY_RECORD'
+    SCHEMA: str = f'{Config.SPECS}#SCHMA'
+    SHARED_NOTE: str = f'{Config.SPECS}#SHARED_NOTE_RECORD'
+    SOURCE: str = f'{Config.SPECS}#SOURCE_RECORD'
+    SOURCE_EVENT: str = ''
+    SOURCE_CITATION: str = f'{Config.SPECS}#SOURCE_CITATION'
+    SOURCE_REPOSITORY_CITATION: str = (
+        f'{Config.SPECS}#SOURCE_REPOSITORY_CITATION'
+    )
+    SUBMITTER: str = f'{Config.SPECS}#SUBMITTER_RECORD'
+    TIME: str = f'{Config.SPECS}#time'
+    WIFE: str = f'{Config.SPECS}#WIFE'
+
+
+@dataclass(frozen=True)
+class Default:
+    AGE_DAY: str = 'd'
+    AGE_MONTH: str = 'm'
+    AGE_WEEK: str = 'w'
+    AGE_YEAR: str = 'y'
+    ATSIGN: str = '@'
+    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    BRACKET_RIGHT: str = ']'
+    BRACKET_LEFT: str = '['
+    BRACKET_LEFT_RIGHT: str = '[]'
+    COMMA: str = ','
+    COMMA_REQUIRED: str = ',  # REQUIRED'
+    CHOICE: int = 1
+    DATE_DAY: int = 0
+    DATE_MONTH: int = 0
+    DATE_YEAR: int = 0
+    DATE_WEEK: int = 0
+    DAYS: int = 0
+    EMPTY: str = ''
+    EOL: str = '\n'
+    EOL_DOUBLE: str = '\n\n'
+    GREATER_LESS_THAN: str = '>'
+    HEIGHT: int = 0
+    HYPHEN: str = '-'
+    INDENT: str = '    '
+    KIND_STANDARD: str = 'stdTag'
+    KIND_EXTENDED: str = 'extTag'
+    LEFT: int = 0
+    LIST_ITEM_SEPARATOR: str = ', '
+    MAP_LATITUDE: float = 0.0
+    MAP_LONGITUDE: float = 0.0
+    MIME: str = ''
+    MONTHS: int = 0
+    NONE: str = 'None'
+    OCCURRED: str = 'Y'
+    PAYLOAD_EMPTY: str = EMPTY
+    PHONE_AREA_MIN: int = 0
+    PHONE_AREA_MAX: int = 1000
+    PHONE_COUNTRY_MIN: int = 0
+    PHONE_COUNTRY_MAX: int = 1000
+    PHONE_LINE_MIN: int = 0
+    PHONE_LINE_MAX: int = 10000
+    PHONE_PREFIX_MIN: int = 0
+    PHONE_PREFIX_MAX: int = 1000
+    PHONE_STRING_SET: str = '0123456789)(+ '
+    PLACE_FORM1: str = 'City'
+    PLACE_FORM2: str = 'County'
+    PLACE_FORM3: str = 'State'
+    PLACE_FORM4: str = 'Country'
+    POINTER: str = '@VOID@'
+    QUOTE_SINGLE: str = "'"
+    QUOTE_DOUBLE: str = '"'
+    SLASH: str = '/'
+    SPACE: str = ' '
+    SPACE_DOUBLE: str = '  '
+    T: str = 'T'
+    TIME_HOUR: int = 0
+    TIME_MINUTE: int = 0
+    TIME_SECOND: float = 0.0
+    TIME_UTC: bool = False
+    TOP: int = 0
+    UNDERLINE: str = '_'
+    WEEKS: int = 0
+    WIDTH: int = 0
+    YEARS: int = 0
+    Z: str = 'Z'
+
+
+class TagTuple(NamedTuple):
+    """Store standard and extension tag information."""
+
+    value: str = Default.EMPTY
+    kind: str = Default.KIND_STANDARD
+    supers: set[str] | None = None
+    subs: set[str] | None = None
+    enumsets: set[str] | None = None
+    lang: str = Default.EMPTY
+    type: str = Default.EMPTY
+    uri: str = Default.EMPTY
+    standard_tag: str = Default.EMPTY
+    specification: str = Default.EMPTY
+    label: str = Default.EMPTY
+    payload: str = Default.EMPTY
+    substructures: dict[str, str] | None = None
+    superstructures: dict[str, str] | None = None
+    value_of: dict[str, str] | None = None
+    contact: str = Default.EMPTY
+    yamldict: dict[str, Any] | None = None
+
+    def show(self) -> None:
+        print(self.supers, self.subs, self.enumsets)  # noqa: T201
+
+
+class StdTag:
+    ABBR = TagTuple()
+    ADDR = TagTuple()
+    ADOP = TagTuple()
+    ADOPTED = TagTuple()
+    ADR1 = TagTuple()
+    ADR2 = TagTuple()
+    ADR3 = TagTuple()
+    AGE = TagTuple()
+    AGNC = TagTuple()
+    AKA = TagTuple()
+    ALIA = TagTuple()
+    ANCI = TagTuple()
+    ANUL = TagTuple()
+    ASSO = TagTuple()
+    AUDIO = TagTuple()
+    AUTH = TagTuple()
+    BAPL = TagTuple()
+    BAPM = TagTuple()
+    BARM = TagTuple()
+    BASM = TagTuple()
+    BIC = TagTuple()
+    BIRT = TagTuple()
+    BIRTH = TagTuple()
+    BLES = TagTuple()
+    BOOK = TagTuple()
+    BOTH = TagTuple()
+    BURI = TagTuple()
+    CALN = TagTuple()
+    CANCELED = TagTuple()
+    CARD = TagTuple()
+    CAST = TagTuple()
+    CAUS = TagTuple()
+    CENS = TagTuple()
+    CHALLENGED = TagTuple()
+    CHAN = TagTuple()
+    CHIL = TagTuple()
+    CHILD = TagTuple()
+    CHR = TagTuple()
+    CHRA = TagTuple()
+    CITY = TagTuple()
+    CLERGY = TagTuple()
+    COMPLETED = TagTuple()
+    CONC = TagTuple()
+    CONF = TagTuple()
+    CONFIDENTIAL = TagTuple()
+    CONL = TagTuple()
+    CONT = TagTuple()
+    COPR = TagTuple()
+    CORP = TagTuple()
+    CREA = TagTuple()
+    CREM = TagTuple()
+    CROP = TagTuple()
+    CTRY = TagTuple()
+    DATA = TagTuple()
+    DATE = TagTuple()
+    DEAT = TagTuple()
+    DESI = TagTuple()
+    DEST = TagTuple()
+    DISPROVEN = TagTuple()
+    DIV = TagTuple()
+    DIVF = TagTuple()
+    DNS = TagTuple()
+    DNS_CAN = TagTuple()
+    DSCR = TagTuple()
+    EDUC = TagTuple()
+    ELECTRONIC = TagTuple()
+    EMAIL = TagTuple()
+    EMIG = TagTuple()
+    ENDL = TagTuple()
+    ENGA = TagTuple()
+    EVEN = TagTuple()
+    EXCLUDED = TagTuple()
+    EXID = TagTuple()
+    F = TagTuple()
+    FACT = TagTuple()
+    FAM = TagTuple()
+    FATH = TagTuple()
+    FAMC = TagTuple()
+    FAMS = TagTuple()
+    FAX = TagTuple()
+    FCOM = TagTuple()
+    FICHE = TagTuple()
+    FILE = TagTuple()
+    FILM = TagTuple()
+    FORM = TagTuple()
+    FOSTER = TagTuple()
+    FRENCH_R = TagTuple()
+    FRIEND = TagTuple()
+    GEDC = TagTuple()
+    GIVN = TagTuple()
+    GODP = TagTuple()
+    GRAD = TagTuple()
+    GREGORIAN = TagTuple()
+    HEAD = TagTuple()
+    HEBREW = TagTuple()
+    HEIGHT = TagTuple()
+    HUSB = TagTuple()
+    IDNO = TagTuple()
+    IMMI = TagTuple()
+    IMMIGRANT = TagTuple()
+    INDI = TagTuple()
+    INFANT = TagTuple()
+    INIL = TagTuple()
+    JULIAN = TagTuple()
+    LANG = TagTuple()
+    LANG_ = TagTuple()
+    LATI = TagTuple()
+    LEFT = TagTuple()
+    LOCKED = TagTuple()
+    LONG = TagTuple()
+    M = TagTuple()
+    MAGAZINE = TagTuple()
+    MAIDEN = TagTuple()
+    MANUSCRIPT = TagTuple()
+    MAP = TagTuple()
+    MARB = TagTuple()
+    MARC = TagTuple()
+    MARL = TagTuple()
+    MARR = TagTuple()
+    MARRIED = TagTuple()
+    MARS = TagTuple()
+    MEDI = TagTuple()
+    MIME = TagTuple()
+    MOTH = TagTuple()
+    MULTIPLE = TagTuple()
+    NAME = TagTuple()
+    NATI = TagTuple()
+    NATU = TagTuple()
+    NCHI = TagTuple()
+    NEWSPAPER = TagTuple()
+    NGHBR = TagTuple()
+    NICK = TagTuple()
+    NMR = TagTuple()
+    NO = TagTuple()
+    NOTE = TagTuple()
+    NPFX = TagTuple()
+    NSFX = TagTuple()
+    OBJE = TagTuple()
+    OCCU = TagTuple()
+    OFFICIATOR = TagTuple()
+    ORDN = TagTuple()
+    OTHER = TagTuple()
+    PAGE = TagTuple()
+    PARENT = TagTuple()
+    PEDI = TagTuple()
+    PHON = TagTuple()
+    PHOTO = TagTuple()
+    PHRASE = TagTuple()
+    PLAC = TagTuple()
+    POST = TagTuple()
+    PROB = TagTuple()
+    PRE_1970 = TagTuple()
+    PRIVACY = TagTuple()
+    PROFESSIONAL = TagTuple()
+    PROP = TagTuple()
+    PROVEN = TagTuple()
+    PUBL = TagTuple()
+    QUAY = TagTuple()
+    QUAY0 = TagTuple()
+    QUAY1 = TagTuple()
+    QUAY2 = TagTuple()
+    QUAY3 = TagTuple()
+    REFN = TagTuple()
+    RELI = TagTuple()
+    REPO = TagTuple()
+    RESI = TagTuple()
+    RESN = TagTuple()
+    RETI = TagTuple()
+    ROLE = TagTuple()
+    SCHMA = TagTuple()
+    SDATE = TagTuple()
+    SEALING = TagTuple()
+    SEX = TagTuple()
+    SLGC = TagTuple()
+    SLGS = TagTuple()
+    SNOTE = TagTuple()
+    SOUR = TagTuple()
+    SPFX = TagTuple()
+    SPOU = TagTuple()
+    SSN = TagTuple()
+    STAE = TagTuple()
+    STAT = TagTuple()
+    STILLBORN = TagTuple()
+    SUBM = TagTuple()
+    SUBMITTED = TagTuple()
+    SURN = TagTuple()
+    TAG = TagTuple()
+    TEMP = TagTuple()
+    TEXT = TagTuple()
+    TIME = TagTuple()
+    TITL = TagTuple()
+    TOMBSTONE = TagTuple()
+    TOP = TagTuple()
+    TRAN = TagTuple()
+    TRLR = TagTuple()
+    TYPE = TagTuple()
+    U = TagTuple()
+    UID = TagTuple()
+    UNCLEARED = TagTuple()
+    VERS = TagTuple()
+    VIDEO = TagTuple()
+    WIDTH = TagTuple()
+    WIFE = TagTuple()
+    WILL = TagTuple()
+    WITN = TagTuple()
+    WWW = TagTuple()
+    X = TagTuple()
+
+
 class Even(Enum):
     """Tags used for events in general."""
+
     CENS = Tag.CENS.value
     ADOP = Tag.ADOP.value
     BAPM = Tag.BAPM.value

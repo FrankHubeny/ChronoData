@@ -118,6 +118,7 @@ from genedata.constants import (
 )
 from genedata.gedcom import (
     Adop,
+    Config,
     Default,
     Even,
     EvenAttr,
@@ -137,6 +138,7 @@ from genedata.gedcom import (
     Sex,
     Stat,
     Tag,
+    TagTuple,
 )
 from genedata.messages import Example, Msg
 
@@ -144,6 +146,279 @@ AnyList = Any | list[Any] | None
 FloatNone = float | None
 StrList = str | list[str] | None
 YNull = Literal['Y'] | None
+
+
+class TagData:
+    """File and internet access for tag and extension tag specifications."""
+
+    @staticmethod
+    def get(url: str, ext_tag_name: str = Default.EMPTY) -> TagTuple:
+        if url[0:4] == 'http':
+            webUrl = urllib.request.urlopen(url)
+            result_code = str(webUrl.getcode())
+            if result_code == '404':
+                raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+            raw: str = webUrl.read().decode('utf-8')
+        else:
+            with Path.open(Path(url)) as file:
+                raw = file.read()
+        raw2: str = raw[raw.find('%YAML') :]
+        # yaml.SafeLoader.yaml_implicit_resolvers.pop('=')
+        yaml_data: str = raw2[: raw2.find('...')]
+        yamldict: dict[str, Any] = yaml.safe_load(yaml_data)
+        lang: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            lang = yamldict['lang']
+        # if yamldict['lang'] is not None:
+        #     lang = yamldict['lang']
+        type: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            type = yamldict['type']
+        # if yamldict['type'] is not None:
+        #     type = yamldict['type']
+        uri: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            uri = yamldict['uri']
+        # if yamldict['uri'] is not None:
+        #     uri = yamldict['uri']
+        standard_tag: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            standard_tag = yamldict['standard tag']
+        # if yamldict['standard tag'] is not None:
+        #     standard_tag = yamldict['standard tag']
+        specification: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            specification = yamldict['specification']
+        # if yamldict['specification'] is not None:
+        #     specification = yamldict['specification']
+        label: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            label = yamldict['label']
+        # if yamldict['label'] is not None:
+        #     label = yamldict['label']
+        payload: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            payload = yamldict['payload']
+        # if yamldict['payload'] is not None:
+        #     payload = yamldict['payload']
+        substructures: dict[str, str] = {}
+        subs: set[str] = {}
+        with contextlib.suppress(Exception):
+            substructures = yamldict['substructures']
+        # if yamldict['substructures'] is not None:
+        #     substructures = yamldict['substructures']
+        if substructures != {} and substructures is not None:
+            subs = {
+                sub_name[sub_name.rfind('/') + 1 :]
+                for sub_name in substructures
+            }
+        superstructures: dict[str, str] = {}
+        supers: set[str] = {}
+        with contextlib.suppress(Exception):
+            superstructures = yamldict['superstructures']
+        # if yamldict['superstructures'] is not None:
+        #     superstructures = yamldict['superstructures']
+        if superstructures != {} and superstructures is not None:
+            supers = {
+                super_name[super_name.rfind('/') + 1 :]
+                for super_name in superstructures
+            }
+        value_of: dict[str, str] = {}
+        with contextlib.suppress(Exception):
+            value_of = yamldict['value of']
+        enumsets: set[str] = {
+            enum_name[enum_name.rfind('-') + 1 :] for enum_name in value_of
+        }
+        contact: str = Default.EMPTY
+        with contextlib.suppress(Exception):
+            contact = yamldict['contact']
+        # if yamldict['contact'] is not None:
+        #     contact = yamldict['contact']
+        value: str = Default.EMPTY
+        if ext_tag_name != Default.EMPTY:
+            if ext_tag_name[0] != Default.UNDERLINE:
+                value = ''.join([Default.UNDERLINE, ext_tag_name.upper()])
+            else:
+                value = ext_tag_name.upper()
+        elif standard_tag != Default.EMPTY:
+            value = standard_tag
+        else:
+            raise ValueError(Msg.UNKNOWN_TAG.format(url))
+        kind: str = Default.KIND_STANDARD
+        if ext_tag_name != Default.EMPTY:
+            kind = Default.KIND_EXTENDED
+        return TagTuple(
+            value=value,
+            kind=kind,
+            supers=supers,
+            subs=subs,
+            enumsets=enumsets,
+            lang=lang,
+            type=type,
+            uri=uri,
+            standard_tag=standard_tag,
+            specification=specification,
+            label=label,
+            payload=payload,
+            substructures=substructures,
+            superstructures=superstructures,
+            value_of=value_of,
+            contact=contact,
+            yamldict=yamldict,
+        )
+
+
+class ExtTag:
+    """Store, validate and display extension tag information.
+
+    An underline is added to the front of the new tag if one is not there already.
+    Also the tag is made upper case.
+
+    This class holds multiple extension tags identified in the header record.  It is not a separate
+    GEDCOM structure.
+
+    Examples:
+        Consider making a _DATE extention tag based on the GEDCOM specification for
+        the standard DATE tag.
+        >>> from genedata.store import ExtTag
+        >>> date = ExtTag('date', 'https://gedcom.io/terms/v7/DATE')
+        >>> print(date.ged(1))
+        2 TAG _DATE https://gedcom.io/terms/v7/DATE
+        <BLANKLINE>
+
+        We can put this into the header record as an extension tag as follows.
+        >>> from genedata.store import Header
+        >>> header = Header(exttags=[date])
+        >>> print(header.ged())
+        0 HEAD
+        1 GEDC
+        2 VERS 7.0
+        1 SCHMA
+        2 TAG _DATE https://gedcom.io/terms/v7/DATE
+        <BLANKLINE>
+
+    Args:
+        tag: The tag used for the schema information.
+        url: The required url defining the payload of the tag.  This url will be accessed
+            and its contents stored.  It will be used to check the proper placement
+            of the extension tag.
+
+    See Also:
+        `Header`
+        `Extension`
+
+    Returns:
+        A string representing a GEDCOM line for this tag.
+
+    Reference:
+        [GENCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+
+    >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
+    >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
+    """
+
+    def __init__(self, tag: str, url: str) -> None:
+        # self.raw_tag: str = tag
+        self.url: str = url
+        # self.tag: str = self.raw_tag.upper()
+        if self.url == Default.EMPTY and tag != Default.EMPTY:
+            raise ValueError(Msg.UNDOCUMENTED)
+        # self.value: str = self.tag
+        # if self.tag[0] != String.UNDERLINE:
+        #    self.tag = ''.join([String.UNDERLINE, self.raw_tag.upper()])
+        self.tag: TagTuple = TagData.get(url, tag)
+        self.value = self.tag.value
+        self.supers = self.tag.supers
+        # if self.url[0:4] == 'http':
+        #     self.webUrl = urllib.request.urlopen(self.url)
+        #     self.result_code = str(self.webUrl.getcode())
+        #     raw: str = self.webUrl.read().decode('utf-8')
+        # else:
+        #     with Path.open(Path(url)) as file:
+        #         raw = file.read()
+        # raw2: str = raw[raw.find('%YAML') :]
+        # self.yaml: str = raw2[: raw2.find('...')]
+        # self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
+        # self.lang: str = Default.EMPTY
+        # if self.yamldict['lang'] is not None:
+        #     self.lang = self.yamldict['lang']
+        # self.type: str = Default.EMPTY
+        # if self.yamldict['type'] is not None:
+        #     self.type = self.yamldict['type']
+        # self.uri: str = Default.EMPTY
+        # if self.yamldict['uri'] is not None:
+        #     self.uri = self.yamldict['uri']
+        # self.label: str = Default.EMPTY
+        # if self.yamldict['label'] is not None:
+        #     self.label = self.yamldict['label']
+        # self.payload: str = Default.EMPTY
+        # if self.yamldict['payload'] is not None:
+        #     self.payload = self.yamldict['payload']
+        # self.specification: str = Default.EMPTY
+        # if self.yamldict['specification'] is not None:
+        #     self.specification = self.yamldict['specification']
+        # self.contact: str = Default.EMPTY
+        # if self.yamldict['contact'] is not None:
+        #     self.contact = self.yamldict['contact']
+        # self.value_of: list[str] = []
+        # # if self.yamldict['value of'] is not None:
+        # #     self.value_of = self.yamldict['value of']
+        # with contextlib.suppress(Exception):
+        #     self.value_of = self.yamldict['value of']
+        # self.substructures: dict[str, str] = {}
+        # if self.yamldict['substructures'] is not None:
+        #     self.substructures = self.yamldict['substructures']
+        # self.superstructures: dict[str, str] = {}
+        # if self.yamldict['superstructures'] is not None:
+        #     self.superstructures = self.yamldict['superstructures']
+        # self.supers: set[str] = {
+        #     super_name[super_name.rfind('/') + 1 :]
+        #     for super_name in self.superstructures
+        # }
+        # self.subs: set[str] = {
+        #     sub_name[sub_name.rfind('/') + 1 :]
+        #     for sub_name in self.substructures
+        # }
+        # self.enumsets: set[str] = {
+        #     enum_name[enum_name.rfind('-') + 1 :] for enum_name in self.value_of
+        # }
+
+    def validate(self) -> bool:
+        for char in self.value:
+            if not (char.isalnum() or char == Default.UNDERLINE):
+                raise ValueError(Msg.SCHEMA_NAME.format(self.value, char))
+        check: bool = (
+            Checker.verify_type(self.tag, TagTuple, no_list=True)
+            and Checker.verify_not_empty(self.tag)
+            and Checker.verify_type(self.url, str, no_list=True)
+            and Checker.verify_not_empty(self.url)
+        )
+        return check
+
+    def ged(self, level: int = 0) -> str:
+        """Format to meet GEDCOM standards."""
+        lines: str = Default.EMPTY
+        if self.validate():
+            lines = Tagger.string(
+                lines, level + 1, Tag.TAG, self.value, str(self.url)
+            )
+        return lines
+
+    def show(self) -> dict[str, Any] | None:
+        return self.tag.yamldict
+
+    def code(self, tabs: int = 1, full: bool = False) -> str:
+        return indent(
+            Formatter.display_code(
+                'ExtTag',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    url = ', self.url, tabs, full, True),
+            ),
+            Default.INDENT * tabs,
+        )
+
+
+ExtTagType = ExtTag | list[ExtTag] | None
 
 
 class Tagger:
@@ -185,14 +460,14 @@ class Tagger:
             - [Python re Module](https://docs.python.org/3/library/re.html)
         """
 
-        return re.sub(String.BANNED, String.EMPTY, input)
+        return re.sub(Default.BANNED, Default.EMPTY, input)
 
     @staticmethod
     def taginfo(
         level: int,
-        tag: Tag,
-        payload: str = String.EMPTY,
-        extra: str = String.EMPTY,
+        tag: Tag | ExtTag,
+        payload: str = Default.EMPTY,
+        extra: str = Default.EMPTY,
         format: bool = True,
     ) -> str:
         """Return a GEDCOM formatted line for the information and level.
@@ -239,15 +514,13 @@ class Tagger:
 
         """
         lineval: str = payload
-        if format and lineval != String.EMPTY and lineval[0] == String.ATSIGN:
-            lineval = ''.join([String.ATSIGN, lineval])
-        if extra == String.EMPTY:
-            if lineval == String.EMPTY:
-                return f'{level} {tag.value}{String.EOL}'
-            return (
-                f'{level} {tag.value} {Tagger.clean_input(lineval)}{String.EOL}'
-            )
-        return f'{level} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{String.EOL}'
+        if format and lineval != Default.EMPTY and lineval[0] == Default.ATSIGN:
+            lineval = ''.join([Default.ATSIGN, lineval])
+        if extra == Default.EMPTY:
+            if lineval == Default.EMPTY:
+                return f'{level} {tag.value}{Default.EOL}'
+            return f'{level} {tag.value} {Tagger.clean_input(lineval)}{Default.EOL}'
+        return f'{level} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
 
     @staticmethod
     def empty(lines: str, level: int, tag: Tag) -> str:
@@ -281,9 +554,9 @@ class Tagger:
     def string(
         lines: str,
         level: int,
-        tag: Tag,
+        tag: Tag | ExtTag,
         payload: list[str] | str | None,
-        extra: str = String.EMPTY,
+        extra: str = Default.EMPTY,
         format: bool = True,
     ) -> str:
         """Join a string or a list of string to GEDCOM lines.
@@ -332,8 +605,8 @@ class Tagger:
             return lines
         if isinstance(payload, list):
             for item in payload:
-                if String.EOL in item:
-                    items: list[str] = item.split(String.EOL)
+                if Default.EOL in item:
+                    items: list[str] = item.split(Default.EOL)
                     lines = Tagger.string(
                         lines, level, tag, items[0], format=format
                     )
@@ -345,9 +618,9 @@ class Tagger:
                         [lines, Tagger.taginfo(level, tag, item, format=format)]
                     )
             return lines
-        if payload != String.EMPTY and payload is not None:
-            if String.EOL in payload:
-                payloads: list[str] = payload.split(String.EOL)
+        if payload != Default.EMPTY and payload is not None:
+            if Default.EOL in payload:
+                payloads: list[str] = payload.split(Default.EOL)
                 lines = Tagger.string(
                     lines, level, tag, payloads[0], format=format
                 )
@@ -370,8 +643,7 @@ class Tagger:
         lines: str,
         level: int,
         payload: list[Any] | Any,
-        # default: Any = None,
-        flag: str = String.EMPTY,
+        flag: str = Default.EMPTY,
     ) -> str:
         """Join a structure or a list of structure to GEDCOM lines.
 
@@ -417,13 +689,13 @@ class Tagger:
             unique_payload = OrderedSet(payload)
             for item in unique_payload:
                 # for item in payload:
-                if flag != String.EMPTY:
+                if flag != Default.EMPTY:
                     lines = ''.join([lines, item.ged(level, flag)])
                 else:
                     lines = ''.join([lines, item.ged(level)])
             return lines
         # if payload != default:
-        if flag != String.EMPTY:
+        if flag != Default.EMPTY:
             lines = ''.join([lines, payload.ged(level, flag)])
         else:
             lines = ''.join([lines, payload.ged(level)])
@@ -435,18 +707,18 @@ class Tagger:
         level: int,
         tag: str,
         payload: str,
-        extra: str = String.EMPTY,
+        extra: str = Default.EMPTY,
     ) -> str:
-        ext_line: str = String.EMPTY
-        if extra == String.EMPTY:
-            if payload == String.EMPTY:
-                ext_line = f'{level} {tag}{String.EOL}'
+        ext_line: str = Default.EMPTY
+        if extra == Default.EMPTY:
+            if payload == Default.EMPTY:
+                ext_line = f'{level} {tag}{Default.EOL}'
             else:
                 ext_line = (
-                    f'{level} {tag} {Tagger.clean_input(payload)}{String.EOL}'
+                    f'{level} {tag} {Tagger.clean_input(payload)}{Default.EOL}'
                 )
         else:
-            ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{String.EOL}'
+            ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{Default.EOL}'
         return ''.join([lines, ext_line])
 
 
@@ -493,7 +765,9 @@ class Checker:
     @staticmethod
     def verify_ext(tag: Tag, extensions: Any) -> bool:
         check: bool = True
-        if extensions is None or (isinstance(extensions, list) and len(extensions) == 0):
+        if extensions is None or (
+            isinstance(extensions, list) and len(extensions) == 0
+        ):
             return check
         if isinstance(extensions, list):
             for ext in extensions:
@@ -506,9 +780,7 @@ class Checker:
                         Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value)
                     )
             return check
-        if (
-            tag.value not in extensions.exttag.supers
-        ):
+        if tag.value not in extensions.exttag.supers:
             check = False
             raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value))
         return check
@@ -565,7 +837,10 @@ class Checker:
                 .replace("'>", '')
                 .upper()
             )
-            if enum_name not in tag.enumsets:
+            if (
+                tag.tag.enumsets is not None
+                and enum_name not in tag.tag.enumsets
+            ):
                 raise ValueError(
                     Msg.EXTENSION_ENUM_TAG.format(tag.value, enum_name)
                 )
@@ -650,13 +925,15 @@ class Dater:
     ) -> str:
         formatted: str = str(year)
         if year < 0:
-            formatted = ''.join([str(-year), String.SPACE, calendar.epoch_name])
+            formatted = ''.join(
+                [str(-year), Default.SPACE, calendar.epoch_name]
+            )
         if month > 0:
             formatted = ''.join(
-                [calendar.months[month].abbreviation, String.SPACE, formatted]
+                [calendar.months[month].abbreviation, Default.SPACE, formatted]
             )
         if day > 0:
-            formatted = ''.join([str(day), String.SPACE, formatted])
+            formatted = ''.join([str(day), Default.SPACE, formatted])
         return formatted
 
     @staticmethod
@@ -698,8 +975,8 @@ class Dater:
 
         """
         datetime: str = str(np.datetime64(iso_date))
-        date, time = datetime.split(String.T)
-        date_pieces = date.split(String.HYPHEN)
+        date, time = datetime.split(Default.T)
+        date_pieces = date.split(Default.HYPHEN)
         if len(date_pieces) == 3:
             year: str = date_pieces[0]
             month: str = date_pieces[1]
@@ -710,7 +987,7 @@ class Dater:
             day = date_pieces[3]
         if int(year) == 0:
             raise ValueError(Msg.ZERO_YEAR)
-        ged_time: str = ''.join([time, String.Z])
+        ged_time: str = ''.join([time, Default.Z])
         good_calendar: str | bool = Cal.CALENDARS.get(calendar, False)
         if not good_calendar:
             raise ValueError(Msg.BAD_CALENDAR.format(calendar))
@@ -724,32 +1001,32 @@ class Dater:
             ged_date = ''.join(
                 [
                     day,
-                    String.SPACE,
+                    Default.SPACE,
                     month_code,
-                    String.SPACE,
+                    Default.SPACE,
                     year,
-                    String.SPACE,
+                    Default.SPACE,
                     String.BC,
                 ]
             )
         else:
             ged_date = ''.join(
-                [day, String.SPACE, month_code, String.SPACE, year]
+                [day, Default.SPACE, month_code, Default.SPACE, year]
             )
         return ged_date, ged_time
 
     @staticmethod
     def iso_date(
         ged_date: str,
-        ged_time: str = String.EMPTY,
+        ged_time: str = Default.EMPTY,
         calendar: str = String.GREGORIAN,
     ) -> str:
         """Return an ISO date and time given a GEDCOM date and time."""
         day: str
         month: str
         year: str
-        day, month, year = ged_date.split(String.SPACE)
-        time: str = ged_time.split(String.Z)[0]
+        day, month, year = ged_date.split(Default.SPACE)
+        time: str = ged_time.split(Default.Z)[0]
         good_calendar: str | bool = Cal.CALENDARS[calendar].get(
             String.GREGORIAN, False
         )
@@ -763,11 +1040,11 @@ class Dater:
         iso_datetime: str = ''.join(
             [
                 year,
-                String.HYPHEN,
+                Default.HYPHEN,
                 month_code,
-                String.HYPHEN,
+                Default.HYPHEN,
                 day,
-                String.T,
+                Default.T,
                 time,
             ]
         )
@@ -913,11 +1190,11 @@ class Placer:
         return ''.join(
             [
                 form1,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 form2,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 form3,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 form4,
             ]
         )
@@ -927,11 +1204,11 @@ class Placer:
         return ''.join(
             [
                 place1,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 place2,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 place3,
-                String.LIST_ITEM_SEPARATOR,
+                Default.LIST_ITEM_SEPARATOR,
                 place4,
             ]
         )
@@ -1006,9 +1283,7 @@ class Formatter:
         return f'+{country!s} {area!s} {prefix!s} {line!s}'
 
     @staticmethod
-    def codes_single(
-        item: Any, tabs: int, full: bool
-    ) -> str:
+    def codes_single(item: Any, tabs: int, full: bool) -> str:
         if isinstance(item, str):
             return f'{item!r}'
         if isinstance(item, int | float):
@@ -1019,8 +1294,8 @@ class Formatter:
             return f'Tag.{item.name}'
         code_lines: str = (
             item.code(tabs - 1, full=full)
-            .replace(String.EOL, String.EMPTY, 1)
-            .replace(String.INDENT, String.EMPTY, 1)
+            .replace(Default.EOL, Default.EMPTY, 1)
+            .replace(Default.INDENT, Default.EMPTY, 1)
         )
         return code_lines
 
@@ -1032,10 +1307,10 @@ class Formatter:
             return Default.NONE
         if isinstance(items, list):
             if len(items) == 0:
-                return String.LEFT_RIGHT_BRACKET
+                return Default.BRACKET_LEFT_RIGHT
             if len(items) == 1:
                 return Formatter.codes_single(items[0], tabs, full)
-            lines: str = String.LEFT_BRACKET
+            lines: str = Default.BRACKET_LEFT
             for item in items:
                 line_end = Default.COMMA
                 if required:
@@ -1044,8 +1319,8 @@ class Formatter:
                     lines = ''.join(
                         [
                             lines,
-                            String.EOL,
-                            String.INDENT * (tabs),
+                            Default.EOL,
+                            Default.INDENT * (tabs),
                             str(item),
                             line_end,
                         ]
@@ -1057,8 +1332,8 @@ class Formatter:
                     lines = ''.join(
                         [
                             lines,
-                            String.EOL,
-                            String.INDENT * (tabs),
+                            Default.EOL,
+                            Default.INDENT * (tabs),
                             quote_mark,
                             str(item),
                             quote_mark,
@@ -1069,8 +1344,8 @@ class Formatter:
                     lines = ''.join(
                         [
                             lines,
-                            String.EOL,
-                            String.INDENT * (tabs),
+                            Default.EOL,
+                            Default.INDENT * (tabs),
                             'Tag.',
                             item.value,
                             line_end,
@@ -1083,9 +1358,9 @@ class Formatter:
             return ''.join(
                 [
                     lines,
-                    String.EOL,
-                    String.INDENT * (tabs - 1),
-                    String.RIGHT_BRACKET,
+                    Default.EOL,
+                    Default.INDENT * (tabs - 1),
+                    Default.BRACKET_RIGHT,
                 ]
             )
         return Formatter.codes_single(items, tabs, full)
@@ -1101,20 +1376,20 @@ class Formatter:
         keep: bool = required or full or result not in ['None', 'Tag.NONE']
         if keep:
             return ''.join([initial, result, line_end])
-        return String.EMPTY
+        return Default.EMPTY
 
     @staticmethod
     def display_code(
         name: str, *code_lines: tuple[str, Any, int, bool, bool]
     ) -> str:
-        lines: str = ''.join([String.EOL, name, '('])
+        lines: str = ''.join([Default.EOL, name, '('])
         for line in code_lines:
             returned_line = Formatter.codes_line(
                 line[0], line[1], line[2], line[3], line[4]
             )
-            if returned_line != String.EMPTY:
-                lines = ''.join([lines, String.EOL, returned_line])
-        return ''.join([lines, String.EOL, ')'])
+            if returned_line != Default.EMPTY:
+                lines = ''.join([lines, Default.EOL, returned_line])
+        return ''.join([lines, Default.EOL, ')'])
 
     @staticmethod
     def schema_example(
@@ -1127,40 +1402,44 @@ class Formatter:
         gedcom_docs: str,
         genealogy_docs: str,
     ) -> None:
-        superstructs: str = String.EMPTY
-        substructs: str = String.EMPTY
+        superstructs: str = Default.EMPTY
+        substructs: str = Default.EMPTY
         key: str
         value: str
         for key, value in superstructures.items():
             superstructs = ''.join(
                 [
                     superstructs,
-                    String.EOL,
-                    f'{String.INDENT}{key:<40} {value:<6}',
+                    Default.EOL,
+                    f'{Default.INDENT}{key:<40} {value:<6}',
                 ]
             )
         for key, value in substructures.items():
             substructs = ''.join(
-                [substructs, String.EOL, f'{String.INDENT}{key:<40} {value:<6}']
+                [
+                    substructs,
+                    Default.EOL,
+                    f'{Default.INDENT}{key:<40} {value:<6}',
+                ]
             )
         print(  # noqa: T201
             ''.join(
                 [
                     code_preface,
-                    String.EOL,
+                    Default.EOL,
                     show_code,
-                    String.DOUBLE_NEWLINE,
+                    Default.EOL_DOUBLE,
                     gedcom_preface,
-                    String.DOUBLE_NEWLINE,
+                    Default.EOL_DOUBLE,
                     show_ged,
-                    String.EOL,
+                    Default.EOL,
                     Example.SUPERSTRUCTURES,
                     superstructs,
                     Example.SUBSTRUCTURES,
                     substructs,
                     Example.GEDCOM_SPECIFICATION,
                     gedcom_docs,
-                    String.EOL,
+                    Default.EOL,
                     genealogy_docs,
                 ]
             )
@@ -1168,7 +1447,12 @@ class Formatter:
 
     @staticmethod
     def display_tuple(named_tuple: Any) -> None:
-        print(str(named_tuple).replace('(', '(\n     ', 1).replace(',',',\n    ').replace(')',',\n)'))  # noqa: T201
+        print(  # noqa: T201
+            str(named_tuple)
+            .replace('(', '(\n     ', 1)
+            .replace(',', ',\n    ')
+            .replace(')', ',\n)')
+        )
 
     @staticmethod
     def display(named_tuple: Any, full: bool = False) -> None:
@@ -1181,8 +1465,8 @@ class Formatter:
         1. `ged` runs validate() capturing any error message.
         2. `code` which runs even if the ged method fails.
         """
-        # print('DISPLAY:')  
-        # print(f'{Formatter.display_tuple(named_tuple)}\n')  
+        # print('DISPLAY:')
+        # print(f'{Formatter.display_tuple(named_tuple)}\n')
         try:
             print(f'GED:\n{named_tuple.ged()}')  # noqa: T201
         except Exception as e:
@@ -1308,189 +1592,6 @@ class Formatter:
                 pass
 
 
-# class Structure:
-#     """A base class for the GEDCOM structure classes to define dunder methods."""
-
-#     def __init__(self) -> None:
-#         pass
-
-#     def __str__(self) -> str:
-#         return self.ged()
-
-#     # def __repr__(self) -> str:
-#     #     return (
-#     #         self.code()
-#     #         .replace(String.EOL, String.EMPTY)
-#     #         .replace(String.INDENT, String.SPACE)
-#     #         .replace('( ', '(')
-#     #         .replace(',)', ')')
-#     #     )
-
-#     def __eq__(self, other: Any) -> bool:
-#         check: bool = isinstance(other, Structure) and self.ged() == other.ged()
-#         return check
-
-#     def ged(self) -> str:
-#         return String.EMPTY
-
-#     def code(self) -> str:
-#         return String.EMPTY
-
-#     def example(self) -> None:
-#         print(String.EMPTY)  
-
-
-class ExtTag:
-    """Store, validate and display extension tag information.
-
-    An underline is added to the front of the new tag if one is not there already.
-    Also the tag is made upper case.
-
-    This class holds multiple extension tags identified in the header record.  It is not a separate
-    GEDCOM structure.
-
-    Examples:
-        Consider making a _DATE extention tag based on the GEDCOM specification for
-        the standard DATE tag.
-        >>> from genedata.store import ExtTag
-        >>> date = ExtTag('date', 'https://gedcom.io/terms/v7/DATE')
-        >>> print(date.ged(1))
-        2 TAG _DATE https://gedcom.io/terms/v7/DATE
-        <BLANKLINE>
-
-        We can put this into the header record as an extension tag as follows.
-        >>> from genedata.store import Header
-        >>> header = Header(exttags=[date])
-        >>> print(header.ged())
-        0 HEAD
-        1 GEDC
-        2 VERS 7.0
-        1 SCHMA
-        2 TAG _DATE https://gedcom.io/terms/v7/DATE
-        <BLANKLINE>
-
-    Args:
-        tag: The tag used for the schema information.
-        url: The required url defining the payload of the tag.  This url will be accessed
-            and its contents stored.  It will be used to check the proper placement
-            of the extension tag.
-
-    See Also:
-        `Header`
-        `Extension`
-
-    Returns:
-        A string representing a GEDCOM line for this tag.
-
-    Reference:
-        [GENCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
-
-    >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
-    >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
-    """
-
-    def __init__(self, tag: str, url: str) -> None:
-        self.raw_tag: str = tag
-        self.url: str = url
-        self.tag: str = self.raw_tag.upper()
-        if self.url == Default.EMPTY and self.tag != Default.EMPTY:
-            raise ValueError(Msg.UNDOCUMENTED)
-        self.value: str = self.tag
-        if self.tag[0] != String.UNDERLINE:
-            self.tag = ''.join([String.UNDERLINE, self.raw_tag.upper()])
-        if self.url[0:4] == 'http':
-            self.webUrl = urllib.request.urlopen(self.url)
-            self.result_code = str(self.webUrl.getcode())
-            raw: str = self.webUrl.read().decode('utf-8')
-        else:
-            with Path.open(Path(url)) as file:
-                raw = file.read()
-        raw2: str = raw[raw.find('%YAML') :]
-        self.yaml: str = raw2[: raw2.find('...')]
-        self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
-        self.lang: str = Default.EMPTY
-        if self.yamldict['lang'] is not None:
-            self.lang = self.yamldict['lang']
-        self.type: str = Default.EMPTY
-        if self.yamldict['type'] is not None:
-            self.type = self.yamldict['type']
-        self.uri: str = Default.EMPTY
-        if self.yamldict['uri'] is not None:
-            self.uri = self.yamldict['uri']
-        self.label: str = Default.EMPTY
-        if self.yamldict['label'] is not None:
-            self.label = self.yamldict['label']
-        self.payload: str = Default.EMPTY
-        if self.yamldict['payload'] is not None:
-            self.payload = self.yamldict['payload']
-        self.specification: str = Default.EMPTY
-        if self.yamldict['specification'] is not None:
-            self.specification = self.yamldict['specification']
-        self.contact: str = Default.EMPTY
-        if self.yamldict['contact'] is not None:
-            self.contact = self.yamldict['contact']
-        self.value_of: list[str] = []
-        # if self.yamldict['value of'] is not None:
-        #     self.value_of = self.yamldict['value of']
-        with contextlib.suppress(Exception):
-            self.value_of = self.yamldict['value of']
-        self.substructures: dict[str, str] = {}
-        if self.yamldict['substructures'] is not None:
-            self.substructures = self.yamldict['substructures']
-        self.superstructures: dict[str, str] = {}
-        if self.yamldict['superstructures'] is not None:
-            self.superstructures = self.yamldict['superstructures']
-        self.supers: set[str] = {
-            super_name[super_name.rfind('/') + 1 :]
-            for super_name in self.superstructures
-        }
-        self.subs: set[str] = {
-            sub_name[sub_name.rfind('/') + 1 :]
-            for sub_name in self.substructures
-        }
-        self.enumsets: set[str] = {
-            enum_name[enum_name.rfind('-') + 1 :] for enum_name in self.value_of
-        }
-
-    def validate(self) -> bool:
-        for char in self.tag:
-            if not (char.isalnum() or char == '_'):
-                raise ValueError(Msg.SCHEMA_NAME.format(self.tag, char))
-        check: bool = (
-            Checker.verify_type(self.tag, str, no_list=True)
-            and Checker.verify_not_empty(self.tag)
-            and Checker.verify_type(self.url, str, no_list=True)
-            and Checker.verify_not_empty(self.url)
-        )
-        return check
-
-    def ged(self, level: int = 0) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
-        if self.validate():
-            ext_tag: str = self.tag.upper()
-            if ext_tag[0] != String.UNDERLINE:
-                ext_tag = ''.join([String.UNDERLINE, ext_tag])
-            lines = Tagger.string(
-                lines, level + 1, Tag.TAG, ext_tag, str(self.url)
-            )
-        return lines
-
-    def show(self) -> dict[str, Any]:
-        return self.yamldict
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'ExtTag',
-                ('    tag = ', self.tag, tabs, full, True),
-                ('    url = ', self.url, tabs, full, True),
-            ),
-            String.INDENT * tabs,
-        )
-
-ExtTagType = ExtTag | list[ExtTag] | None
-
 class Xref:
     """Assign an extension cross-reference type to a string.
 
@@ -1516,7 +1617,7 @@ class Xref:
 
     def __init__(self, name: str, tag: Tag | ExtTag = Tag.NONE):
         self.fullname: str = name.upper()
-        self.name: str = name.replace('@', '').replace('_', ' ')
+        self.name: str = name.replace('@', '').replace(Default.UNDERLINE, ' ')
         self.tag: Tag | ExtTag = tag
         self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
 
@@ -1527,11 +1628,11 @@ class Xref:
     def __repr__(self) -> str:
         return f"Xref('{self.fullname}')"
 
-    def ged(self, info: str = String.EMPTY) -> str:
+    def ged(self, info: str = Default.EMPTY) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
-        if info == String.EMPTY:
-            return f'0 {self.fullname} {self.tag.value}{String.EOL}'
-        return f'0 {self.fullname} {self.tag.value} {info}{String.EOL}'
+        if info == Default.EMPTY:
+            return f'0 {self.fullname} {self.tag.value}{Default.EOL}'
+        return f'0 {self.fullname} {self.tag.value} {info}{Default.EOL}'
 
     def code(self, tabs: int = 0) -> str:  # noqa: ARG002
         return self.fullname
@@ -1739,6 +1840,19 @@ class Void:
 class Extension(NamedTuple):
     """Store, validate and display extension tags.
 
+    The GEDCOM specification recommends the following:
+
+    > The recommended way to go beyond the set of standard structure types in this specification
+    > or to expand their usage is to submit a feature request on the FamilySearch GEDCOM development page
+    > so that the ramifications of the proposed addition and its interplay with other proposals
+    > may be discussed and the addition may be included in a subsequent version of this specification.
+    >
+    > This specification also provides multiple ways for extension authors to go beyond the specification
+    > without submitting a feature request, which are described in the remainder of this section.
+
+    This NamedTuple implements going beyond the specification without submitting
+    a feature request.
+
     Example:
 
     Args:
@@ -1746,7 +1860,9 @@ class Extension(NamedTuple):
         exttag: The tag used entered through ExtTag()
         payload: The value on the same line as the tag.
         extra: Extra values on the same line as the tag.
-        substructures: list[Any] | None = None
+        substructures: Substructures having this extension as a superstructure.  They are
+            placed in the ged file with a level one higher than this extension has.
+            They are also Extension tuples and may have substructures of their own.
 
     See Also:
         `ExtTag`
@@ -1756,9 +1872,9 @@ class Extension(NamedTuple):
     """
 
     exttag: ExtTag
-    payload: str = String.EMPTY
-    extra: str = String.EMPTY
-
+    payload: str = Default.EMPTY
+    extra: str = Default.EMPTY
+    substructures: Any = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1772,13 +1888,16 @@ class Extension(NamedTuple):
     def ged(self, level: int = 1) -> str:
         lines: str = ''
         if self.validate():
-            lines = Tagger.extension(
-                lines,
-                level,
-                ''.join([String.UNDERLINE, self.exttag.tag.upper()]),
-                self.payload,
-                self.extra,
+            lines = Tagger.string(
+                lines, level, self.exttag, self.payload, self.extra
             )
+            # lines = Tagger.extension(
+            #     lines,
+            #     level,
+            #     ''.join([String.UNDERLINE, self.exttag.tag.upper()]),
+            #     self.payload,
+            #     self.extra,
+            # )
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -1789,8 +1908,9 @@ class Extension(NamedTuple):
                 ('    payload = ', self.payload, tabs, full, False),
                 ('    extra = ', self.extra, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
+
 
 ExtType = Extension | list[Extension] | None
 
@@ -1853,14 +1973,14 @@ class Date(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         formatted_date: str = Dater.format(
             self.year, self.month, self.day, self.calendar
         )
         formatted_calendar_date: str = formatted_date
         if self.display_calendar:
             formatted_calendar_date = ''.join(
-                [self.calendar.name, String.EMPTY, formatted_date]
+                [self.calendar.name, Default.EMPTY, formatted_date]
             )
         lines = Tagger.string(lines, level, Tag.DATE, formatted_calendar_date)
         return Tagger.structure(lines, level + 1, self.date_ext)
@@ -1893,7 +2013,7 @@ class Date(NamedTuple):
                 ),
                 ('    date_ext = ', self.date_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -1949,7 +2069,7 @@ class SDate(NamedTuple):
             and Checker.verify_range(self.month, 0, 13)
             # and Checker.verify_type(self.calendar, CalendarDefinition)
             and Checker.verify_type(self.display_calendar, bool)
-            and Checker.verify_type(self.iso, str | None, no_list = True)
+            and Checker.verify_type(self.iso, str | None, no_list=True)
             # and self.calendar.validate(
             #     self.year, self.month, self.day, self.iso
             # )
@@ -1958,14 +2078,14 @@ class SDate(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         formatted_date: str = Dater.format(
             self.year, self.month, self.day, self.calendar
         )
         formatted_calendar_date: str = formatted_date
         if self.display_calendar:
             formatted_calendar_date = ''.join(
-                [self.calendar.name, String.EMPTY, formatted_date]
+                [self.calendar.name, Default.EMPTY, formatted_date]
             )
         lines = Tagger.string(lines, level, Tag.SDATE, formatted_calendar_date)
         return Tagger.structure(lines, level + 1, self.date_ext)
@@ -1999,7 +2119,7 @@ class SDate(NamedTuple):
                 ),
                 ('    date_ext = ', self.date_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -2052,7 +2172,7 @@ class Time(NamedTuple):
         hour_str: str = str(self.hour)
         minute_str: str = str(self.minute)
         second_str: str = str(self.second)
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             if 0 <= self.hour < 10:
                 hour_str = ''.join(['0', hour_str])
@@ -2089,8 +2209,9 @@ class Time(NamedTuple):
                 ('    UTC = ', self.UTC, tabs, full, False),
                 ('    time_ext = ', self.time_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
+
 
 TimeType = Time | None
 
@@ -2150,9 +2271,8 @@ class CreationDate(NamedTuple):
                 ('    time = ', self.time, tabs + 1, full, True),
                 ('    crea_ext = ', self.crea_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 CreationDateType = CreationDate | None
@@ -2242,7 +2362,7 @@ class Identifier(NamedTuple):
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
                 ('    type_ext = ', self.type_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -2308,7 +2428,7 @@ class Phone(NamedTuple):
                 ('    phone = ', self.phone, tabs, full, True),
                 ('    phon_ext = ', self.phon_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -2346,7 +2466,7 @@ class Email(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.string(lines, level, Tag.EMAIL, self.email)
             lines = Tagger.structure(lines, level + 1, self.email_ext)
@@ -2359,9 +2479,8 @@ class Email(NamedTuple):
                 ('    email = ', self.email, tabs, full, True),
                 ('    email_ext = ', self.email_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 EmailType = Email | list[Email] | None
@@ -2412,9 +2531,9 @@ class Fax(NamedTuple):
                 ('    fax = ', self.fax, tabs, full, True),
                 ('    fax_ext = ', self.fax_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
+
 
 FaxType = Fax | list[Fax] | None
 
@@ -2463,9 +2582,8 @@ class WWW(NamedTuple):
                 ('    www = ', self.www, tabs, full, True),
                 ('    www_ext = ', self.www_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 WWWType = WWW | list[WWW] | None
@@ -2515,9 +2633,9 @@ class Lang(NamedTuple):
                 ('    lang = ', self.lang, tabs, full, True),
                 ('    lang_ext = ', self.lang_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
+
 
 LangType = Lang | list[Lang] | None
 
@@ -2548,7 +2666,7 @@ class Phrase(NamedTuple):
 
     Args:
         phrase: The text of the phrase.
-        phrase_ext: Optional substructures extending [PHRASE tag](https://gedcom.io/terms/v7/PHRASE) 
+        phrase_ext: Optional substructures extending [PHRASE tag](https://gedcom.io/terms/v7/PHRASE)
             entered through `Extension`.
 
     Reference:
@@ -2583,9 +2701,8 @@ class Phrase(NamedTuple):
                 ('    phrase = ', self.phrase, tabs, full, True),
                 ('    phrase_ext = ', self.phrase_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-
 
 
 PhraseType = Phrase | None
@@ -2631,15 +2748,15 @@ class Address(NamedTuple):
         state: The state or an empty string to leave this blank.
         postal: The postal code or an empty string to leave this blank.
         country: The country or an empty string to leave this blank.
-        addr_ext: Optional substructures extending [ADDR tag](https://gedcom.io/terms/v7/ADDR) 
+        addr_ext: Optional substructures extending [ADDR tag](https://gedcom.io/terms/v7/ADDR)
             entered through `Extension`.
-        city_ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY) 
+        city_ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY)
             entered through `Extension`.
-        stae_ext: Optional substructures extending [STAE tag](https://gedcom.io/terms/v7/STAE) 
+        stae_ext: Optional substructures extending [STAE tag](https://gedcom.io/terms/v7/STAE)
             entered through `Extension`.
-        post_ext: Optional substructures extending [POST tag](https://gedcom.io/terms/v7/POST) 
+        post_ext: Optional substructures extending [POST tag](https://gedcom.io/terms/v7/POST)
             entered through `Extension`.
-        ctry_ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY) 
+        ctry_ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY)
             entered through `Extension`.
 
     See Also:
@@ -2687,7 +2804,7 @@ class Address(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.string(lines, level, Tag.ADDR, self.address)
             lines = Tagger.structure(lines, level + 1, self.addr_ext)
@@ -2716,9 +2833,8 @@ class Address(NamedTuple):
                 ('    post_ext = ', self.post_ext, tabs, full, False),
                 ('    ctry_ext = ', self.ctry_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 AddrType = Address | None
@@ -2758,7 +2874,7 @@ class Age(NamedTuple):
             is greater than the one provided.  The option `<` means
             that the actual age is less than the one provided.
         phrase: Addition information to clarify the data added.
-        age_ext: Optional substructures extending [AGE tag](https://gedcom.io/terms/v7/AGE) 
+        age_ext: Optional substructures extending [AGE tag](https://gedcom.io/terms/v7/AGE)
             entered through `Extension`.
 
     See Also:
@@ -2819,14 +2935,18 @@ class Age(NamedTuple):
             self.years > 0 or self.months > 0 or self.weeks > 0 or self.days > 0
         ):
             if self.years > 0:
-                info = ''.join([info, f' {self.years!s}y'])
+                info = ''.join([info, f' {self.years!s}{Default.AGE_YEAR}'])
             if self.months > 0:
-                info = ''.join([info, f' {self.months!s}m'])
+                info = ''.join([info, f' {self.months!s}{Default.AGE_MONTH}'])
             if self.weeks > 0:
-                info = ''.join([info, f' {self.weeks!s}w'])
+                info = ''.join([info, f' {self.weeks!s}{Default.AGE_WEEK}'])
             if self.days > 0:
-                info = ''.join([info, f' {self.days!s}d'])
-            info = info.replace('  ', ' ').replace('  ', ' ').strip()
+                info = ''.join([info, f' {self.days!s}{Default.AGE_DAY}'])
+            info = (
+                info.replace(Default.SPACE_DOUBLE, Default.SPACE)
+                .replace(Default.SPACE_DOUBLE, Default.SPACE)
+                .strip()
+            )
             line = Tagger.string(line, level, Tag.AGE, info)
             line = Tagger.structure(line, level + 1, self.age_ext)
             line = Tagger.structure(line, level + 1, self.phrase)
@@ -2850,9 +2970,8 @@ class Age(NamedTuple):
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
                 ('    age_ext = ', self.age_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 AgeType = Age | None
@@ -2875,17 +2994,17 @@ class PersonalNamePieces(NamedTuple):
         surname_prefix: An optional list of SPFX or surname prefixes of the name.
         surname: An optional list of SURN or surnames or last names of the name.
         suffix: An optional list NSFX or name suffixes of the name.
-        npfx_ext: Optional substructures extending [NPFX tag](https://gedcom.io/terms/v7/NPFX) 
+        npfx_ext: Optional substructures extending [NPFX tag](https://gedcom.io/terms/v7/NPFX)
             entered through `Extension`.
-        givn_ext: Optional substructures extending [GIVN tag](https://gedcom.io/terms/v7/GIVN) 
+        givn_ext: Optional substructures extending [GIVN tag](https://gedcom.io/terms/v7/GIVN)
             entered through `Extension`.
-        nick_ext: Optional substructures extending [NICK tag](https://gedcom.io/terms/v7/NICK) 
+        nick_ext: Optional substructures extending [NICK tag](https://gedcom.io/terms/v7/NICK)
             entered through `Extension`.
-        spfx_ext: Optional substructures extending [SPFX tag](https://gedcom.io/terms/v7/SPFX) 
+        spfx_ext: Optional substructures extending [SPFX tag](https://gedcom.io/terms/v7/SPFX)
             entered through `Extension`.
-        surn_ext: Optional substructures extending [SURN tag](https://gedcom.io/terms/v7/SURN) 
+        surn_ext: Optional substructures extending [SURN tag](https://gedcom.io/terms/v7/SURN)
             entered through `Extension`.
-        nsfx_ext: Optional substructures extending [NSFX tag](https://gedcom.io/terms/v7/NSFX) 
+        nsfx_ext: Optional substructures extending [NSFX tag](https://gedcom.io/terms/v7/NSFX)
             entered through `Extension`.
 
     See Also:
@@ -2990,9 +3109,8 @@ class PersonalNamePieces(NamedTuple):
                 ('    surn_ext = ', self.surn_ext, tabs, full, False),
                 ('    nsfx_ext = ', self.nsfx_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 PersonalNamePiecesType = PersonalNamePieces | None
@@ -3027,7 +3145,7 @@ class NameTranslation(NamedTuple):
         translation: The text of the translation.
         language: The BCP 47 language tag entered through `Lang`.
         name_pieces: an optional tuple of PersonalNamePieces entered through `PersonalNamePieces`.
-        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN)
             entered through `Extension`.
 
     See Also:
@@ -3036,7 +3154,7 @@ class NameTranslation(NamedTuple):
         `PersonalNamePieces`
 
     Reference:
-        [GEDCOM TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        [GEDCOM TRAN tag](https://gedcom.io/terms/v7/TRAN)
         [GEDCOM Pesonal Name Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PERSONAL_NAME_STRUCTURE)
 
     This is not a specified GEDCOM structure, but implements this portion of `PersonalNamePieces`.
@@ -3045,7 +3163,7 @@ class NameTranslation(NamedTuple):
     >    +2 <<PERSONAL_NAME_PIECES>>           {0:1}
     """
 
-    translation: str = String.EMPTY
+    translation: str = Default.EMPTY
     language: LangType = None
     pieces: PersonalNamePiecesType = None
     tran_ext: ExtType = None
@@ -3081,7 +3199,7 @@ class NameTranslation(NamedTuple):
                 ('    pieces = ', self.pieces, tabs + 1, full, False),
                 ('    tran_ext = ', self.tran_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3117,9 +3235,9 @@ class NoteTranslation(NamedTuple):
         translation: The text of the translation for the note.
         mime: The mime type of the translation.
         language: The BCP 47 language tag of the translation entered through `Lang`.
-        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN)
             entered through `Extension`.
-        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) 
+        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME)
             entered through `Extension`.
 
     See Also:
@@ -3159,7 +3277,7 @@ class NoteTranslation(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = ''
-        if self.translation != String.EMPTY and self.validate():
+        if self.translation != Default.EMPTY and self.validate():
             lines = Tagger.string(lines, level, Tag.TRAN, self.translation)
             lines = Tagger.structure(lines, level + 1, self.tran_ext)
             lines = Tagger.string(lines, level + 1, Tag.MIME, self.mime)
@@ -3177,7 +3295,7 @@ class NoteTranslation(NamedTuple):
                 ('    tran_ext = ', self.tran_ext, tabs, full, False),
                 ('    mime_ext = ', self.mime_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3210,13 +3328,13 @@ class CallNumber(NamedTuple):
 
     Args:
         call_number: A required value to use this structure containing the call number.
-        medium: A tag from the 
+        medium: A tag from the
             [MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
             entered by placing `Tag.` in front of the capitalized name from the set.
         phrase: PhraseType = None
-        caln_ext: Optional substructures extending [CALN tag](https://gedcom.io/terms/v7/CALN) 
+        caln_ext: Optional substructures extending [CALN tag](https://gedcom.io/terms/v7/CALN)
             entered through `Extension`.
-        medi_ext: Optional substructures extending [MEDI tag](https://gedcom.io/terms/v7/MEDI) 
+        medi_ext: Optional substructures extending [MEDI tag](https://gedcom.io/terms/v7/MEDI)
             entered through `Extension`.
 
 
@@ -3274,7 +3392,7 @@ class CallNumber(NamedTuple):
                 ('    caln_ext = ', self.caln_ext, tabs + 1, full, False),
                 ('    medi_ext = ', self.medi_ext, tabs + 1, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3293,9 +3411,9 @@ class Text(NamedTuple):
         text: The text being added.
         mime: The media type of the text.
         language: The BCP 47 language tag for the text entered through `Lang`.
-        text_ext: Optional substructures extending [TEXT tag](https://gedcom.io/terms/v7/TEXT) 
+        text_ext: Optional substructures extending [TEXT tag](https://gedcom.io/terms/v7/TEXT)
             entered through `Extension`.
-        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) 
+        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME)
             entered through `Extension`.
 
     See Also:
@@ -3352,7 +3470,7 @@ class Text(NamedTuple):
                 ('    text_ext = ', self.text_ext, tabs, full, False),
                 ('    mime_ext = ', self.mime_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3368,7 +3486,7 @@ class SourceData(NamedTuple):
     Args:
         date_value: The date entered through `Date`.
         texts: a list of texts associated with this source entered through `Text`.
-        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA) 
+        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA)
             entered through `Extension`.
 
     See Also:
@@ -3377,7 +3495,7 @@ class SourceData(NamedTuple):
         `Text`
 
     Reference:
-        [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA) 
+        [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA)
         [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
 
     This is not a GEDCOM structure, but part of the Source Citation structure.
@@ -3419,7 +3537,7 @@ class SourceData(NamedTuple):
                 ('    texts = ', self.texts, tabs + 1, full, False),
                 ('    data_ext = ', self.data_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3443,19 +3561,19 @@ class SourceCitation(NamedTuple):
         role: A tag from the [ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
             entered by placing `Tag.` in front of the capitalized name from the set.
         role_phrase: A phrase describing the role entered through `Phrase`.
-        quality: A tag from the [QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY) 
+        quality: A tag from the [QUAY enumeration set](https://gedcom.io/terms/v7/enumset-QUAY)
             entered by placing `Tag.QUAY` in front of the number (0, 1, 2, 3) from the set.
         multimedialinks: Multimedia links entered through `MultimediaLink`.
         notes: Notes entered through `Note`.
-        sour_ext: Optional substructures extending [SOUR tag](https://gedcom.io/terms/v7/SOUR) 
+        sour_ext: Optional substructures extending [SOUR tag](https://gedcom.io/terms/v7/SOUR)
             entered through `Extension`.
-        page_ext: Optional substructures extending [PAGE tag](https://gedcom.io/terms/v7/PAGE) 
+        page_ext: Optional substructures extending [PAGE tag](https://gedcom.io/terms/v7/PAGE)
             entered through `Extension`.
-        even_ext: Optional substructures extending [EVEN tag](https://gedcom.io/terms/v7/EVEN) 
+        even_ext: Optional substructures extending [EVEN tag](https://gedcom.io/terms/v7/EVEN)
             entered through `Extension`.
-        role_ext: Optional substructures extending [ROLE tag](https://gedcom.io/terms/v7/ROLE) 
+        role_ext: Optional substructures extending [ROLE tag](https://gedcom.io/terms/v7/ROLE)
             entered through `Extension`.
-        quay_ext: Optional substructures extending [QUAY tag](https://gedcom.io/terms/v7/QUAY) 
+        quay_ext: Optional substructures extending [QUAY tag](https://gedcom.io/terms/v7/QUAY)
             entered through `Extension`.
 
     See Also:
@@ -3472,7 +3590,7 @@ class SourceCitation(NamedTuple):
         [GEDCOM ROLE enumeration set](https://gedcom.io/terms/v7/enumset-ROLE)
         [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN)
         [GEDCOM PAGE tag](https://gedcom.io/terms/v7/PAGE)
-        [GEDCOM QUAY tag](https://gedcom.io/terms/v7/QUAY) 
+        [GEDCOM QUAY tag](https://gedcom.io/terms/v7/QUAY)
         [GEDCOM ROLE tag](https://gedcom.io/terms/v7/ROLE)
         [GEDCOM SOUR tag](https://gedcom.io/terms/v7/SOUR)
         [GEDCOM Source Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_CITATION)
@@ -3494,7 +3612,7 @@ class SourceCitation(NamedTuple):
     """
 
     source_xref: SourceXref = Void.SOUR
-    page: str = String.EMPTY
+    page: str = Default.EMPTY
     source_data: SourDataType = None
     event: Tag = Tag.NONE
     event_phrase: PhraseType = None
@@ -3593,7 +3711,7 @@ class SourceCitation(NamedTuple):
                 ('    role_ext = ', self.role_ext, tabs, full, False),
                 ('    quay_ext = ', self.quay_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3669,9 +3787,9 @@ class Note(NamedTuple):
         language: The optional BCP 47 language tag for the note entered through `Lang`.
         translations: Translations entered through `NoteTranslation`.
         citations: Citations entered through `SourceCitation`.
-        note_ext: Optional substructures extending [NOTE tag](https://gedcom.io/terms/v7/NOTE) 
+        note_ext: Optional substructures extending [NOTE tag](https://gedcom.io/terms/v7/NOTE)
             entered through `Extension`.
-        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) 
+        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME)
             entered through `Extension`.
 
     See Also:
@@ -3759,7 +3877,7 @@ class Note(NamedTuple):
                 ('    note_ext = ', self.note_ext, tabs, full, False),
                 ('    mime_ext = ', self.mime_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3779,7 +3897,7 @@ class SNote(NamedTuple):
 
     Args:
         snote_xref: The shared note cross reference identifier constructed from `genedata.build.shared_note_xref`.
-        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE) 
+        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
             entered through `Extension`.
 
     See Also:
@@ -3789,7 +3907,7 @@ class SNote(NamedTuple):
     Reference:
         [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
         [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
-        [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE) 
+        [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
 
     n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
@@ -3824,7 +3942,7 @@ class SNote(NamedTuple):
                 ('    snote_xref = ', self.snote_xref, tabs, full, True),
                 ('    snote_ext = ', self.snote_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3840,7 +3958,7 @@ class ChangeDate(NamedTuple):
         date: The date entered through `Date`.
         time: The time entered through `Time`.
         notes: Notes entered through `Note`.
-        chan_ext: Optional substructures extending [CHAN tag](https://gedcom.io/terms/v7/CHAN) 
+        chan_ext: Optional substructures extending [CHAN tag](https://gedcom.io/terms/v7/CHAN)
             entered through `Extension`.
 
     See Also:
@@ -3894,7 +4012,7 @@ class ChangeDate(NamedTuple):
                 ('    notes = ', self.notes, tabs + 1, full, False),
                 ('    chan_ext = ', self.chan_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -3911,7 +4029,7 @@ class SourceRepositoryCitation(NamedTuple):
         repo: The cross reference repository identifier constructed from `genedata.build.repository_xref`.
         notes: Notes entered through `Note`.
         call_numbers: Call numbers entered through `CallNumber`.
-        repo_ext: Optional substructures extending [REPO tag](https://gedcom.io/terms/v7/REPO) 
+        repo_ext: Optional substructures extending [REPO tag](https://gedcom.io/terms/v7/REPO)
             entered through `Extension`.
 
     See Also:
@@ -3920,7 +4038,7 @@ class SourceRepositoryCitation(NamedTuple):
         `genedata.build.repository_xref`
 
     Reference:
-        [GEDCOM REPO tag](https://gedcom.io/terms/v7/REPO) 
+        [GEDCOM REPO tag](https://gedcom.io/terms/v7/REPO)
         [GEDCOM Source Repository Citation](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_REPOSITORY_CITATION)
 
     > n REPO @<XREF:REPO>@                       {1:1}  [g7:REPO](https://gedcom.io/terms/v7/REPO)
@@ -3981,7 +4099,7 @@ class SourceRepositoryCitation(NamedTuple):
                 ),
                 ('    repo_ext = ', self.repo_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4052,9 +4170,9 @@ class PersonalName(NamedTuple):
         translations: Translations entered through `NameTranslation`.
         notes: Notes entered through `Note`.
         sources: Citations entered through `SourceCitation`.
-        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME) 
+        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME)
             entered through `Extension`.
-        type_ext: Optional substructures extending [TYPE tag](https://gedcom.io/terms/v7/TYPE) 
+        type_ext: Optional substructures extending [TYPE tag](https://gedcom.io/terms/v7/TYPE)
             entered through `Extension`.
 
     See Also:
@@ -4118,14 +4236,14 @@ class PersonalName(NamedTuple):
         if self.validate():
             name_surname: str = ''.join(
                 [
-                    String.SLASH,
+                    Default.SLASH,
                     self.surname,
-                    String.SLASH,
+                    Default.SLASH,
                 ]
             )
             new_name: str = self.name.replace(self.surname, name_surname)
             if self.surname not in self.name:
-                new_name = ''.join([self.name, String.SPACE, name_surname])
+                new_name = ''.join([self.name, Default.SPACE, name_surname])
             lines = Tagger.string(lines, level, Tag.NAME, new_name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
@@ -4164,7 +4282,7 @@ class PersonalName(NamedTuple):
                 ('    name_ext = ', self.name_ext, tabs, full, False),
                 ('    type_ext = ', self.type_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4358,9 +4476,9 @@ class Association(NamedTuple):
         role_phrase: A phrase describing the role entered through `Phrase`.
         notes: Notes entered through `Note`.
         citations: Citations entered through `SourceCitation`.
-        asso_ext: Optional substructures extending [ASSO tag](https://gedcom.io/terms/v7/ASSO) 
+        asso_ext: Optional substructures extending [ASSO tag](https://gedcom.io/terms/v7/ASSO)
             entered through `Extension`.
-        role_ext: Optional substructures extending [ROLE tag](https://gedcom.io/terms/v7/ROLE) 
+        role_ext: Optional substructures extending [ROLE tag](https://gedcom.io/terms/v7/ROLE)
             entered through `Extension`.
 
     See Also:
@@ -4411,7 +4529,7 @@ class Association(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.string(
                 lines, level, Tag.ASSO, str(self.individual_xref), format=False
@@ -4450,7 +4568,7 @@ class Association(NamedTuple):
                 ('    asso_ext = ', self.asso_ext, tabs, full, False),
                 ('    role_ext = ', self.role_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4470,17 +4588,17 @@ class MultimediaLink(NamedTuple):
         height: int = Default.HEIGHT
         width: int = Default.WIDTH
         title: str = Default.EMPTY
-        obje_ext: Optional substructures extending [OBJE tag](https://gedcom.io/terms/v7/OBJE) 
+        obje_ext: Optional substructures extending [OBJE tag](https://gedcom.io/terms/v7/OBJE)
             entered through `Extension`.
-        top_ext: Optional substructures extending [TOP tag](https://gedcom.io/terms/v7/TOP) 
+        top_ext: Optional substructures extending [TOP tag](https://gedcom.io/terms/v7/TOP)
             entered through `Extension`.
-        left_ext: Optional substructures extending [LEFT tag](https://gedcom.io/terms/v7/LEFT) 
+        left_ext: Optional substructures extending [LEFT tag](https://gedcom.io/terms/v7/LEFT)
             entered through `Extension`.
-        height_ext: Optional substructures extending [HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT) 
+        height_ext: Optional substructures extending [HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT)
             entered through `Extension`.
-        width_ext: Optional substructures extending [WIDTH tag](https://gedcom.io/terms/v7/WIDTH) 
+        width_ext: Optional substructures extending [WIDTH tag](https://gedcom.io/terms/v7/WIDTH)
             entered through `Extension`.
-        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) 
+        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL)
             entered through `Extension`.
 
 
@@ -4540,7 +4658,7 @@ class MultimediaLink(NamedTuple):
         return check
 
     def ged(self, level: int = 1) -> str:
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             # display only if there is an image file under the multimedia xref
             # need to find out how to identify this and the pixels in that file
@@ -4591,7 +4709,7 @@ class MultimediaLink(NamedTuple):
                 ('    width_ext = ', self.width_ext, tabs, full, False),
                 ('    titl_ext = ', self.titl_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4648,17 +4766,17 @@ class Map(NamedTuple):
     Args:
         latitude: The positive decimal value of the angle from the equator.
         longitude: The positive decimal value of the angle from the prime meridian.
-        map_ext: Optional substructures extending [MAP tag](https://gedcom.io/terms/v7/MAP) 
+        map_ext: Optional substructures extending [MAP tag](https://gedcom.io/terms/v7/MAP)
             entered through `Extension`.
-        lati_ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI) 
+        lati_ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI)
             entered through `Extension`.
-        long_ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG) 
+        long_ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG)
             entered through `Extension`.
 
     Reference:
-        [GEDCOM LATI tag](https://gedcom.io/terms/v7/LATI) 
+        [GEDCOM LATI tag](https://gedcom.io/terms/v7/LATI)
         [GEDCOM LONG tag](https://gedcom.io/terms/v7/LONG)
-        [GEDCOM MAP tag](https://gedcom.io/terms/v7/MAP) 
+        [GEDCOM MAP tag](https://gedcom.io/terms/v7/MAP)
         [GEDCOM Map Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MAP)
         [GEDCOM Latitude Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LATI)
         [GEDCOM Longitude Structure Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#LONG)
@@ -4715,7 +4833,7 @@ class Map(NamedTuple):
                 ('    lati_ext = ', self.lati_ext, tabs, full, False),
                 ('    long_ext = ', self.long_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4742,7 +4860,7 @@ class PlaceTranslation(NamedTuple):
         place3: A part of the place corresponding to the next highest region above `place2`.
         place4: A part of the place corresponding to the next highest region above `place3`.
         language: The language used to report the four places values entered through `Lang`.
-        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN)
             entered through `Extension`.
 
     See Also:
@@ -4750,7 +4868,7 @@ class PlaceTranslation(NamedTuple):
         `Lang`
 
     Reference:
-        [GEDCOM TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        [GEDCOM TRAN tag](https://gedcom.io/terms/v7/TRAN)
         [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
 
@@ -4784,7 +4902,7 @@ class PlaceTranslation(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.string(
                 lines,
@@ -4809,7 +4927,7 @@ class PlaceTranslation(NamedTuple):
                 ('    language = ', self.language, tabs + 1, full, False),
                 ('    tran_ext = ', self.tran_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -4900,9 +5018,9 @@ class Place(NamedTuple):
         maps: Maps entered through `Map`.
         exid: Identifiers associated with the place entered through `Identifier`.
         notes: Notes entered through `Note`.
-        plac_ext: Optional substructures extending [PLAC tag](https://gedcom.io/terms/v7/PLAC) 
+        plac_ext: Optional substructures extending [PLAC tag](https://gedcom.io/terms/v7/PLAC)
             entered through `Extension`.
-        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM) 
+        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM)
             entered through `Extension`.
 
     See Also:
@@ -4916,7 +5034,7 @@ class Place(NamedTuple):
 
     Reference:
         [GEDCOM FORM tag](https://gedcom.io/terms/v7/FORM)
-        [GEDCOM PLAC tag](https://gedcom.io/terms/v7/PLAC) 
+        [GEDCOM PLAC tag](https://gedcom.io/terms/v7/PLAC)
         [GEDCOM Place Form](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLAC-FORM)
         [GEDCOM Place Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#PLACE_STRUCTURE)
 
@@ -4976,7 +5094,7 @@ class Place(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.string(
                 lines,
@@ -5027,7 +5145,7 @@ class Place(NamedTuple):
                 ('    plac_ext = ', self.plac_ext, tabs, full, False),
                 ('    form_ext = ', self.form_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5062,11 +5180,11 @@ class EventDetail(NamedTuple):
         sources: Citations entered through `SourceCitation`.
         multimedia_links: Multimedia links entered through `MultimediaLink`.
         uids: Identifiers entered through `Identifier`.
-        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC) 
+        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC)
             entered through `Extension`.
-        reli_ext: Optional substructures extending [RELI tag](https://gedcom.io/terms/v7/RELI) 
+        reli_ext: Optional substructures extending [RELI tag](https://gedcom.io/terms/v7/RELI)
             entered through `Extension`.
-        caus_ext: Optional substructures extending [CAUS tag](https://gedcom.io/terms/v7/CAUS) 
+        caus_ext: Optional substructures extending [CAUS tag](https://gedcom.io/terms/v7/CAUS)
             entered through `Extension`.
 
     See Also:
@@ -5089,7 +5207,7 @@ class EventDetail(NamedTuple):
 
     Reference:
         [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
-        [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC) 
+        [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC)
         [GEDCOM CAUS tag](https://gedcom.io/terms/v7/CAUS)
         [GEDCOM RELI tag](https://gedcom.io/terms/v7/RELI)
         [GEDCOM Resn enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
@@ -5173,7 +5291,7 @@ class EventDetail(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             lines = Tagger.structure(lines, level, self.date)
             lines = Tagger.structure(lines, level, self.time)
@@ -5242,7 +5360,7 @@ class EventDetail(NamedTuple):
                 ('    reli_ext = ', self.reli_ext, tabs, full, False),
                 ('    caus_ext = ', self.caus_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5271,9 +5389,9 @@ class FamilyEventDetail(NamedTuple):
         husband_age: The husband's age entered through `Age`.
         wife_age: The wife's age entered through `Age`.
         event_detail: The details of the event entered through `EventDetail`.
-        husb_ext: Optional substructures extending [HUSB tag](https://gedcom.io/terms/v7/HUSB) 
+        husb_ext: Optional substructures extending [HUSB tag](https://gedcom.io/terms/v7/HUSB)
             entered through `Extension`.
-        wife_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFe) 
+        wife_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFe)
             entered through `Extension`.
 
     See Also:
@@ -5318,7 +5436,7 @@ class FamilyEventDetail(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if self.validate():
             if self.husband_age != Age():
                 lines = Tagger.empty(lines, level, Tag.HUSB)
@@ -5347,7 +5465,7 @@ class FamilyEventDetail(NamedTuple):
                 ('    husb_ext = ', self.husb_ext, tabs, full, False),
                 ('    wife_ext = ', self.wife_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5450,7 +5568,7 @@ class FamilyAttribute(NamedTuple):
                 ),
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5489,7 +5607,7 @@ class FamilyEvent(NamedTuple):
         event_detail: Details of the event entered through `FamilyEventDetail`.
         tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
 
-    
+
     See Also:
         `Extension`
         `FamilyEventDetail`
@@ -5577,7 +5695,7 @@ class FamilyEvent(NamedTuple):
             if not self.occurred:
                 lines = Tagger.empty(lines, level, self.tag)
             else:
-                lines = Tagger.string(lines, level, self.tag, String.OCCURRED)
+                lines = Tagger.string(lines, level, self.tag, Default.OCCURRED)
             lines = Tagger.structure(lines, level + 1, self.tag_ext)
             lines = Tagger.string(lines, level + 1, Tag.TYPE, self.event_type)
             lines = Tagger.structure(lines, level + 1, self.event_detail)
@@ -5605,7 +5723,7 @@ class FamilyEvent(NamedTuple):
                 ),
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5620,16 +5738,16 @@ class Child(NamedTuple):
     Args:
         individual_xref: An individual cross-reference identified constructed using `genedata.build.individual_xref`.
         phrase: A phrase entered through `Phrase`.
-        chil_ext: Optional substructures extending [CHIL tag](https://gedcom.io/terms/v7/CHIL) 
+        chil_ext: Optional substructures extending [CHIL tag](https://gedcom.io/terms/v7/CHIL)
             entered through `Extension`.
-    
+
     See Also:
         `Extension`
         `genedata.build.individual_xref`
         `Phrase`
 
     Reference:
-        [GEDCOM CHIL tag](https://gedcom.io/terms/v7/CHIL) 
+        [GEDCOM CHIL tag](https://gedcom.io/terms/v7/CHIL)
         [GEDCOM Family Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
 
     This is a portion of the GEDCOM Family Record.
@@ -5655,7 +5773,7 @@ class Child(NamedTuple):
 
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
-        lines: str = String.EMPTY
+        lines: str = Default.EMPTY
         if str(self.individual_xref) != Void.NAME and self.validate():
             lines = Tagger.string(
                 lines, level, Tag.CHIL, str(self.individual_xref), format=False
@@ -5678,7 +5796,7 @@ class Child(NamedTuple):
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
                 ('    chil_ext = ', self.chil_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5702,7 +5820,7 @@ class LDSOrdinanceDetail(NamedTuple):
         status_time: The status time entered through `Time`.
         notes: Notes entered through `Note`.
         source_citations: Citations entered through `SourceCitation`.
-        temple_ext: Optional substructures extending [TEMP tag](https://gedcom.io/terms/v7/TEMP) 
+        temple_ext: Optional substructures extending [TEMP tag](https://gedcom.io/terms/v7/TEMP)
             entered through `Extension`.
 
     See Also:
@@ -5732,7 +5850,7 @@ class LDSOrdinanceDetail(NamedTuple):
     date: DateType = None
     time: TimeType = None
     phrase: PhraseType = None
-    temple: str = String.EMPTY
+    temple: str = Default.EMPTY
     place: PlacType = None
     status: Tag = Tag.NONE
     status_date: DateType = None
@@ -5802,7 +5920,7 @@ class LDSOrdinanceDetail(NamedTuple):
                 ),
                 ('    temple_ext = ', self.temple_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5816,7 +5934,7 @@ class LDSSpouseSealing(NamedTuple):
 
     Args:
         detail: The ordinance details enetered through `LDSOrdinanceDetail`.
-        slgs_ext: Optional substructures extending [SLGS tag](https://gedcom.io/terms/v7/SLGS) 
+        slgs_ext: Optional substructures extending [SLGS tag](https://gedcom.io/terms/v7/SLGS)
             entered through `Extension`.
 
     See Also:
@@ -5857,7 +5975,7 @@ class LDSSpouseSealing(NamedTuple):
                 ('    detail = ', self.detail, tabs + 1, full, False),
                 ('    slgs_ext = ', self.slgs_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5963,7 +6081,7 @@ class LDSIndividualOrdinance(NamedTuple):
                 ),
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -5992,7 +6110,7 @@ class IndividualEventDetail(NamedTuple):
     """
 
     event_detail: EvenDetailType = None
-    age: AgeType = None  # Age(0, 0, 0, 0, String.EMPTY, String.EMPTY)
+    age: AgeType = None
     phrase: PhraseType = None
 
     def validate(self) -> bool:
@@ -6029,7 +6147,7 @@ class IndividualEventDetail(NamedTuple):
                 ('    age = ', self.age, tabs + 1, full, False),
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6047,7 +6165,7 @@ class IndividualAttribute(NamedTuple):
         tag_type: The type or additional information about the tag.
         event_detail: Individual event details entered through `IndividualEventDetail`.
         tag_ext: Optional substructures extending whichever tag was used and entered through `Extension`.
-        type_ext: Optional substructures extending [TYPE tag](https://gedcom.io/terms/v7/TYPE) 
+        type_ext: Optional substructures extending [TYPE tag](https://gedcom.io/terms/v7/TYPE)
             entered through `Extension`.
 
     See Also:
@@ -6056,7 +6174,7 @@ class IndividualAttribute(NamedTuple):
 
     Reference:
         [GEDCOM SLGS tag](https://gedcom.io/terms/v7/SLGS)
-        [GEDCOM TYPE tag](https://gedcom.io/terms/v7/TYPE) 
+        [GEDCOM TYPE tag](https://gedcom.io/terms/v7/TYPE)
         [GEDCOM Individual Attribute Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_ATTRIBUTE_STRUCTURE)
 
     > [
@@ -6124,7 +6242,6 @@ class IndividualAttribute(NamedTuple):
     event_detail: IndiEvenDetailType = None
     tag_ext: ExtType = None
     type_ext: ExtType = None
-    
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6186,7 +6303,7 @@ class IndividualAttribute(NamedTuple):
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
                 ('    type_ext = ', self.type_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6424,7 +6541,7 @@ class IndividualEvent(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            if self.payload == String.EMPTY:
+            if self.payload == Default.EMPTY:
                 lines = Tagger.empty(lines, level, self.tag)
             else:
                 lines = Tagger.string(lines, level, self.tag, self.payload)
@@ -6479,7 +6596,7 @@ class IndividualEvent(NamedTuple):
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
                 ('    tag_ext = ', self.tag_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6498,7 +6615,7 @@ class Alias(NamedTuple):
     Args:
         individual_xref: An individual cross-reference identifier constructed by `genedata.build.individual_xref`.
         phrase: A phrase associated with this alias entered through `Phrase`.
-        alia_ext: Optional substructures extending [ALIA tag](https://gedcom.io/terms/v7/ALIA) 
+        alia_ext: Optional substructures extending [ALIA tag](https://gedcom.io/terms/v7/ALIA)
             entered through `Extension`.
 
     See Also:
@@ -6564,7 +6681,7 @@ class Alias(NamedTuple):
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
                 ('    alia_ext = ', self.alia_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6588,11 +6705,11 @@ class FamilyChild(NamedTuple):
             entered by placing `Tag.` in front of the capitalized name of the tag.
         status_phrase: A phrase related to the status entered through `Phrase`.
         notes: Notes entered through `Note`.
-        famc_ext: Optional substructures extending [FAMC tag](https://gedcom.io/terms/v7/FAMC) 
+        famc_ext: Optional substructures extending [FAMC tag](https://gedcom.io/terms/v7/FAMC)
             entered through `Extension`.
-        pedi_ext: Optional substructures extending [PEDI tag](https://gedcom.io/terms/v7/PEDI) 
+        pedi_ext: Optional substructures extending [PEDI tag](https://gedcom.io/terms/v7/PEDI)
             entered through `Extension`.
-        stat_ext: Optional substructures extending [STAT tag](https://gedcom.io/terms/v7/STAT) 
+        stat_ext: Optional substructures extending [STAT tag](https://gedcom.io/terms/v7/STAT)
             entered through `Extension`.
 
     See Also:
@@ -6605,7 +6722,7 @@ class FamilyChild(NamedTuple):
         [GEDCOM PEDI enumeration set](https://gedcom.io/terms/v7/enumset-PEDI)
         [GEDCOM FAMC tag](https://gedcom.io/terms/v7/FAMC)
         [GEDCOM PEDI tag](https://gedcom.io/terms/v7/PEDI)
-        [GEDCOM STAT tag](https://gedcom.io/terms/v7/STAT) 
+        [GEDCOM STAT tag](https://gedcom.io/terms/v7/STAT)
         [GEDCOM Individual Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
 
     > +1 FAMC @<XREF:FAM>@                     {0:M}  [g7:INDI-FAMC](https://gedcom.io/terms/v7/INDI-FAMC)
@@ -6686,7 +6803,7 @@ class FamilyChild(NamedTuple):
                 ('    pedi_ext = ', self.pedi_ext, tabs, full, False),
                 ('    stat_ext = ', self.stat_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6701,7 +6818,7 @@ class FamilySpouse(NamedTuple):
     Args:
         family_xref: A cross-reference identifier constructed by `genedata.build.family_xref`.
         notes: Notes entered through `Note`.
-        fams_ext: Optional substructures extending [FAMS tag](https://gedcom.io/terms/v7/FAMS) 
+        fams_ext: Optional substructures extending [FAMS tag](https://gedcom.io/terms/v7/FAMS)
             entered through `Extension`.
 
     See Also:
@@ -6749,7 +6866,7 @@ class FamilySpouse(NamedTuple):
                 ('    notes = ', self.notes, tabs + 1, full, False),
                 ('    fams_ext = ', self.fams_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6764,9 +6881,9 @@ class FileTranslation(NamedTuple):
     Args:
         tran: A file reference to the translation.
         form: The mime type of the file.
-        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN) 
+        tran_ext: Optional substructures extending [TRAN tag](https://gedcom.io/terms/v7/TRAN)
             entered through `Extension`.
-        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM) 
+        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM)
             entered through `Extension`.
 
 
@@ -6823,7 +6940,7 @@ class FileTranslation(NamedTuple):
                 ('    tran_ext = ', self.tran_ext, tabs, full, False),
                 ('    form_ext = ', self.form_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6845,13 +6962,13 @@ class File(NamedTuple):
         phrase: A phrase associated with the file entered through `Phrase`.
         titl: The title of the file.
         file_translations: Translations entered through `FileTranslation`.
-        file_ext: Optional substructures extending [FILE tag](https://gedcom.io/terms/v7/FILE) 
+        file_ext: Optional substructures extending [FILE tag](https://gedcom.io/terms/v7/FILE)
             entered through `Extension`.
-        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM) 
+        form_ext: Optional substructures extending [FORM tag](https://gedcom.io/terms/v7/FORM)
             entered through `Extension`.
-        medi_ext: Optional substructures extending [MEDI tag](https://gedcom.io/terms/v7/MEDI) 
+        medi_ext: Optional substructures extending [MEDI tag](https://gedcom.io/terms/v7/MEDI)
             entered through `Extension`.
-        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) 
+        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL)
             entered through `Extension`.
 
     See Also:
@@ -6941,7 +7058,7 @@ class File(NamedTuple):
                 ('    medi_ext = ', self.medi_ext, tabs, full, False),
                 ('    titl_ext = ', self.titl_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -6962,9 +7079,9 @@ class SourceDataEvent(NamedTuple):
         date_period: A date period entered through `Date`.
         phrase: A phrase entered through `Phrase`.
         place: A place entered through `Place`.
-        even_ext: Optional substructures extending [EVEN tag](https://gedcom.io/terms/v7/EVEN) 
+        even_ext: Optional substructures extending [EVEN tag](https://gedcom.io/terms/v7/EVEN)
             entered through `Extension`.
-        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA) 
+        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA)
             entered through `Extension`.
 
     See Also:
@@ -6976,7 +7093,7 @@ class SourceDataEvent(NamedTuple):
     Reference:
         [GEDCOM EVENATTR enumeration set](https://gedcom.io/terms/v7/enumset-EVENATTR)
         [GEDCOM DATA tag](https://gedcom.io/terms/v7/DATA)
-        [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN) 
+        [GEDCOM EVEN tag](https://gedcom.io/terms/v7/EVEN)
         [GEDCOM Source Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SOURCE_RECORD)
 
     >   +1 DATA                                  {0:1}  [g7:DATA]()
@@ -7031,7 +7148,7 @@ class SourceDataEvent(NamedTuple):
                 ('    even_ext = ', self.even_ext, tabs, full, False),
                 ('    data_ext = ', self.data_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -7050,7 +7167,7 @@ class NonEvent(NamedTuple):
         phrase: A phrase entered through `Phrase`.
         notes: Notes entered through `Note`.
         sources: Citations entered through `SourceCitation`.
-        no_ext: Optional substructures extending [NO tag](https://gedcom.io/terms/v7/NO) 
+        no_ext: Optional substructures extending [NO tag](https://gedcom.io/terms/v7/NO)
             entered through `Extension`.
 
     See Also:
@@ -7114,7 +7231,7 @@ class NonEvent(NamedTuple):
                 ('    sources = ', self.sources, tabs + 1, full, False),
                 ('    no_ext = ', self.no_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -7140,7 +7257,7 @@ class Submitter(NamedTuple):
         notes: Notes entered through `Note`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME) 
+        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME)
             entered through `Extension`.
 
 
@@ -7260,9 +7377,8 @@ class Submitter(NamedTuple):
                 ('    creation = ', self.creation, tabs + 1, full, False),
                 ('    name_ext = ', self.name_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-
 
 
 SubmType = Submitter | list[Submitter] | None
@@ -7292,11 +7408,11 @@ class Family(NamedTuple):
         multimedia_links: Multimedia links entered through `MultimediaLink`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN)
             entered through `Extension`.
-        husb_ext: Optional substructures extending [HUSB tag](https://gedcom.io/terms/v7/HUSB) 
+        husb_ext: Optional substructures extending [HUSB tag](https://gedcom.io/terms/v7/HUSB)
             entered through `Extension`.
-        wife_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFE) 
+        wife_ext: Optional substructures extending [WIFE tag](https://gedcom.io/terms/v7/WIFE)
             entered through `Extension`.
 
     See Also:
@@ -7400,7 +7516,7 @@ class Family(NamedTuple):
         if self.validate():
             if self.resn != Tag.NONE:
                 lines = Tagger.string(lines, level, Tag.RESN, self.resn.value)
-                lines = Tagger.structure(lines, level+1, self.resn_ext)
+                lines = Tagger.structure(lines, level + 1, self.resn_ext)
             lines = Tagger.structure(lines, level, self.attributes)
             lines = Tagger.structure(lines, level, self.events)
             if str(self.husband) != str(Void.INDI):
@@ -7479,7 +7595,7 @@ class Family(NamedTuple):
                 ('    husb_ext = ', self.husb_ext, tabs, full, False),
                 ('    wife_ext = ', self.wife_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -7501,7 +7617,7 @@ class Multimedia(NamedTuple):
         sources: Citations entered through `SourceCitation`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN)
             entered through `Extension`.
 
 
@@ -7517,7 +7633,7 @@ class Multimedia(NamedTuple):
 
     Reference:
         [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
-        [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN) 
+        [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN)
         [GEDCOM record-OBJE](https://gedcom.io/terms/v7/record-OBJE)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
 
@@ -7569,7 +7685,9 @@ class Multimedia(NamedTuple):
         lines: str = self.xref.ged()
         if self.validate():
             if self.resn != Tag.NONE:
-                lines = Tagger.string(lines, level + 1, Tag.RESN, self.resn.value)
+                lines = Tagger.string(
+                    lines, level + 1, Tag.RESN, self.resn.value
+                )
                 lines = Tagger.structure(lines, level + 1, self.resn_ext)
             lines = Tagger.structure(lines, level + 1, self.files)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
@@ -7593,7 +7711,7 @@ class Multimedia(NamedTuple):
                 ('    creation = ', self.creation, tabs + 1, full, False),
                 ('    resn_ext = ', self.resn_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -7621,17 +7739,17 @@ class Source(NamedTuple):
         multimedia_links: Multimedia links entered through `MultimediaLink`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA) 
+        data_ext: Optional substructures extending [DATA tag](https://gedcom.io/terms/v7/DATA)
             entered through `Extension`.
-        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC) 
+        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC)
             entered through `Extension`.
-        auth_ext: Optional substructures extending [AUTH tag](https://gedcom.io/terms/v7/AUTH) 
+        auth_ext: Optional substructures extending [AUTH tag](https://gedcom.io/terms/v7/AUTH)
             entered through `Extension`.
-        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) 
+        titl_ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL)
             entered through `Extension`.
-        abbr_ext: Optional substructures extending [ABBR tag](https://gedcom.io/terms/v7/ABBR) 
+        abbr_ext: Optional substructures extending [ABBR tag](https://gedcom.io/terms/v7/ABBR)
             entered through `Extension`.
-        publ_ext: Optional substructures extending [PUBL tag](https://gedcom.io/terms/v7/PUBL) 
+        publ_ext: Optional substructures extending [PUBL tag](https://gedcom.io/terms/v7/PUBL)
             entered through `Extension`.
 
     See Also:
@@ -7803,9 +7921,9 @@ class Source(NamedTuple):
                 ('    abbr_ext = ', self.abbr_ext, tabs, full, False),
                 ('    publ_ext = ', self.publ_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
+
 
 SourType = Source | list[Source] | None
 
@@ -7903,9 +8021,9 @@ class Individual(NamedTuple):
         multimedia_links: Multimedia links entered through `MultimediaLink`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN) 
+        resn_ext: Optional substructures extending [RESN tag](https://gedcom.io/terms/v7/RESN)
             entered through `Extension`.
-        sex_ext: Optional substructures extending [SEX tag](https://gedcom.io/terms/v7/SEX) 
+        sex_ext: Optional substructures extending [SEX tag](https://gedcom.io/terms/v7/SEX)
             entered through `Extension`.
 
     See Also:
@@ -7930,7 +8048,7 @@ class Individual(NamedTuple):
         [GEDCOM RESN enumeration set](https://gedcom.io/terms/v7/enumset-RESN)
         [GEDCOM SEX enumeration set](https://gedcom.io/terms/v7/enumset-SEX)
         [GEDCOM RESN tag](https://gedcom.io/terms/v7/RESN)
-        [GEDCOM SEX tag](https://gedcom.io/terms/v7/SEX) 
+        [GEDCOM SEX tag](https://gedcom.io/terms/v7/SEX)
         [GEDCOM record-INDI](https://gedcom.io/terms/v7/record-INDI)
         [GEDCOM specification](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
 
@@ -8106,9 +8224,8 @@ class Individual(NamedTuple):
                 ('    resn_ext = ', self.resn_ext, tabs, full, False),
                 ('    sex_ext = ', self.sex_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 class Repository(NamedTuple):
@@ -8128,7 +8245,7 @@ class Repository(NamedTuple):
         identifiers: Identifiers entered through `Identifier`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME) 
+        name_ext: Optional substructures extending [NAME tag](https://gedcom.io/terms/v7/NAME)
             entered through `Extension`.
 
 
@@ -8136,7 +8253,7 @@ class Repository(NamedTuple):
         `Extension`
 
     Reference:
-        [GEDCOM NAME tag](https://gedcom.io/terms/v7/NAME) 
+        [GEDCOM NAME tag](https://gedcom.io/terms/v7/NAME)
         [GEDCOM Repository](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD)
 
     > n @XREF:REPO@ REPO                         {1:1}  [g7:record-REPO](https://gedcom.io/terms/v7/record-REPO)
@@ -8217,7 +8334,7 @@ class Repository(NamedTuple):
                 ('    creation = ', self.creation, tabs + 1, full, False),
                 ('    name_ext = ', self.name_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
 
 
@@ -8236,9 +8353,9 @@ class SharedNote(NamedTuple):
         identifiers: Identifiers of the shared note entered through `Identifier`.
         change: A change date entered through `ChangeDate`.
         creation: A creation date entered through `CreationDate`.
-        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE) 
+        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
             entered through `Extension`.
-        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) 
+        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME)
             entered through `Extension`.
 
 
@@ -8253,7 +8370,7 @@ class SharedNote(NamedTuple):
         `SourceCitation`
 
     Reference:
-        [GEDCOM MIME tag](https://gedcom.io/terms/v7/MIME) 
+        [GEDCOM MIME tag](https://gedcom.io/terms/v7/MIME)
         [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
         [GEDCOM Shared Note Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
 
@@ -8336,9 +8453,8 @@ class SharedNote(NamedTuple):
                 ('    snote_ext = ', self.snote_ext, tabs, full, False),
                 ('    mime_ext = ', self.mime_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    
 
 
 class Header(NamedTuple):
@@ -8368,17 +8484,17 @@ class Header(NamedTuple):
         subm_copyright: The submitter copyright of the genealogy.
         language: The language of the genalogy entered by `Lang`.
         note: Notes entered by `Note`.
-        head_ext: Optional substructures extending [HEAD tag](https://gedcom.io/terms/v7/HEAD) 
+        head_ext: Optional substructures extending [HEAD tag](https://gedcom.io/terms/v7/HEAD)
             entered through `Extension`.
-        gedc_ext: Optional substructures extending [GEDC tag](https://gedcom.io/terms/v7/GEDC) 
+        gedc_ext: Optional substructures extending [GEDC tag](https://gedcom.io/terms/v7/GEDC)
             entered through `Extension`.
-        vers_ext: Optional substructures extending [VERS tag](https://gedcom.io/terms/v7/VERS) 
+        vers_ext: Optional substructures extending [VERS tag](https://gedcom.io/terms/v7/VERS)
             entered through `Extension`.
-        dest_ext: Optional substructures extending [DEST tag](https://gedcom.io/terms/v7/DEST) 
+        dest_ext: Optional substructures extending [DEST tag](https://gedcom.io/terms/v7/DEST)
             entered through `Extension`.
-        subm_ext: Optional substructures extending [SUBM tag](https://gedcom.io/terms/v7/SUBM) 
+        subm_ext: Optional substructures extending [SUBM tag](https://gedcom.io/terms/v7/SUBM)
             entered through `Extension`.
-        copr_ext: Optional substructures extending [COPR tag](https://gedcom.io/terms/v7/COPR) 
+        copr_ext: Optional substructures extending [COPR tag](https://gedcom.io/terms/v7/COPR)
             entered through `Extension`.
 
     See Also:
@@ -8400,7 +8516,7 @@ class Header(NamedTuple):
         [GEDCOM DEST tag](https://gedcom.io/terms/v7/DEST)
         [GEDCOM GEDC tag](https://gedcom.io/terms/v7/GEDC)
         [GEDCOM HEAD tag](https://gedcom.io/terms/v7/HEAD)
-        [GEDCOM VERS tag](https://gedcom.io/terms/v7/VERS) 
+        [GEDCOM VERS tag](https://gedcom.io/terms/v7/VERS)
         [GEDCOM SUBM tag](https://gedcom.io/terms/v7/SUBM)
         [GEDCOM Header](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
 
@@ -8502,7 +8618,7 @@ class Header(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.head_ext)
             lines = Tagger.empty(lines, level + 1, Tag.GEDC)
             lines = Tagger.structure(lines, level + 2, self.gedc_ext)
-            lines = Tagger.string(lines, level + 2, Tag.VERS, String.VERSION)
+            lines = Tagger.string(lines, level + 2, Tag.VERS, Config.GEDVERSION)
             lines = Tagger.structure(lines, level + 3, self.vers_ext)
             if self.exttags is not None and (
                 (isinstance(self.exttags, list) and len(self.exttags) > 0)
@@ -8543,7 +8659,6 @@ class Header(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.note)
         return lines
 
-
     def code(self, tabs: int = 1, full: bool = False) -> str:
         return indent(
             Formatter.display_code(
@@ -8578,6 +8693,5 @@ class Header(NamedTuple):
                 ('    subm_ext = ', self.subm_ext, tabs, full, False),
                 ('    copr_ext = ', self.copr_ext, tabs, full, False),
             ),
-            String.INDENT * tabs,
+            Default.INDENT * tabs,
         )
-    

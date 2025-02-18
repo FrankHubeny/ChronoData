@@ -25,7 +25,7 @@ from genedata.constants import (
     Number,
     String,
 )
-from genedata.gedcom import Tag
+from genedata.gedcom import Default, Tag
 from genedata.messages import Issue, Msg
 from genedata.store import (
     ExtensionXref,
@@ -300,10 +300,10 @@ class Genealogy:
     def _format_name(self, name: str = '', counter: str = '') -> str:
         return ''.join(
             [
-                String.ATSIGN,
+                Default.ATSIGN,
                 name.strip().upper().replace(' ', '_'),
                 counter,
-                String.ATSIGN,
+                Default.ATSIGN,
             ]
         )
 
