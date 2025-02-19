@@ -137,6 +137,7 @@ from genedata.gedcom import (
     Role,
     Sex,
     Stat,
+    StdTag,
     Tag,
     TagTuple,
 )
@@ -152,7 +153,7 @@ class TagData:
     """File and internet access for tag and extension tag specifications."""
 
     @staticmethod
-    def get(url: str, ext_tag_name: str = Default.EMPTY) -> TagTuple:
+    def get(tag: str = Default.EMPTY, url: str = Default.EMPTY) -> TagTuple:
         if url[0:4] == 'http':
             webUrl = urllib.request.urlopen(url)
             result_code = str(webUrl.getcode())
@@ -163,95 +164,81 @@ class TagData:
             with Path.open(Path(url)) as file:
                 raw = file.read()
         raw2: str = raw[raw.find('%YAML') :]
-        # yaml.SafeLoader.yaml_implicit_resolvers.pop('=')
         yaml_data: str = raw2[: raw2.find('...')]
         yamldict: dict[str, Any] = yaml.safe_load(yaml_data)
         lang: str = Default.EMPTY
         with contextlib.suppress(Exception):
             lang = yamldict['lang']
-        # if yamldict['lang'] is not None:
-        #     lang = yamldict['lang']
         type: str = Default.EMPTY
         with contextlib.suppress(Exception):
             type = yamldict['type']
-        # if yamldict['type'] is not None:
-        #     type = yamldict['type']
         uri: str = Default.EMPTY
         with contextlib.suppress(Exception):
             uri = yamldict['uri']
-        # if yamldict['uri'] is not None:
-        #     uri = yamldict['uri']
         standard_tag: str = Default.EMPTY
         with contextlib.suppress(Exception):
             standard_tag = yamldict['standard tag']
-        # if yamldict['standard tag'] is not None:
-        #     standard_tag = yamldict['standard tag']
         specification: str = Default.EMPTY
         with contextlib.suppress(Exception):
             specification = yamldict['specification']
-        # if yamldict['specification'] is not None:
-        #     specification = yamldict['specification']
         label: str = Default.EMPTY
         with contextlib.suppress(Exception):
             label = yamldict['label']
-        # if yamldict['label'] is not None:
-        #     label = yamldict['label']
         payload: str = Default.EMPTY
         with contextlib.suppress(Exception):
             payload = yamldict['payload']
-        # if yamldict['payload'] is not None:
-        #     payload = yamldict['payload']
         substructures: dict[str, str] = {}
-        subs: set[str] = {}
+        subs: list[str] = []
+        required: list[str] = []
+        single: list[str] = []
         with contextlib.suppress(Exception):
             substructures = yamldict['substructures']
-        # if yamldict['substructures'] is not None:
-        #     substructures = yamldict['substructures']
         if substructures != {} and substructures is not None:
-            subs = {
-                sub_name[sub_name.rfind('/') + 1 :]
-                for sub_name in substructures
-            }
+            for key, dictvalue in substructures.items():
+                name = key[key.rfind('/') + 1 :]
+                subs.append(name)
+                if dictvalue[0:3] == '{1:':
+                    required.append(name)
+                if dictvalue[2:5] == ':1}':
+                    single.append(name)
         superstructures: dict[str, str] = {}
-        supers: set[str] = {}
+        supers: list[str] = []
         with contextlib.suppress(Exception):
             superstructures = yamldict['superstructures']
-        # if yamldict['superstructures'] is not None:
-        #     superstructures = yamldict['superstructures']
         if superstructures != {} and superstructures is not None:
-            supers = {
+            supers = [
                 super_name[super_name.rfind('/') + 1 :]
                 for super_name in superstructures
-            }
+            ]
         value_of: dict[str, str] = {}
         with contextlib.suppress(Exception):
             value_of = yamldict['value of']
-        enumsets: set[str] = {
+        enumsets: list[str] = [
             enum_name[enum_name.rfind('-') + 1 :] for enum_name in value_of
-        }
+        ]
         contact: str = Default.EMPTY
         with contextlib.suppress(Exception):
             contact = yamldict['contact']
-        # if yamldict['contact'] is not None:
-        #     contact = yamldict['contact']
         value: str = Default.EMPTY
-        if ext_tag_name != Default.EMPTY:
-            if ext_tag_name[0] != Default.UNDERLINE:
-                value = ''.join([Default.UNDERLINE, ext_tag_name.upper()])
+        if tag != Default.EMPTY:
+            if tag[0] != Default.UNDERLINE:
+                value = ''.join([Default.UNDERLINE, tag.upper()])
             else:
-                value = ext_tag_name.upper()
+                value = tag.upper()
         elif standard_tag != Default.EMPTY:
             value = standard_tag
         else:
             raise ValueError(Msg.UNKNOWN_TAG.format(url))
         kind: str = Default.KIND_STANDARD
-        if ext_tag_name != Default.EMPTY:
+        if tag != Default.EMPTY:
             kind = Default.KIND_EXTENDED
         return TagTuple(
             value=value,
             kind=kind,
             supers=supers,
             subs=subs,
+            required=required,
+            single=single,
             enumsets=enumsets,
             lang=lang,
             type=type,
@@ -266,6 +253,15 @@ class TagData:
             contact=contact,
             yamldict=yamldict,
         )
+
+    @staticmethod
+    def generate() -> None:
+        """This method generates definitions for the `StdTag` class used to check extensions."""
+        for tag in Tag:
+            with contextlib.suppress(Exception):
+                print(  # noqa: T201
+                    TagData.get(url=f'{Config.TERMS}{tag.name}').show()
+                )
 
 
 class ExtTag:
@@ -317,71 +313,20 @@ class ExtTag:
     >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
     """
 
-    def __init__(self, tag: str, url: str) -> None:
-        # self.raw_tag: str = tag
+    def __init__(self, tag: str, url: str = Default.EMPTY) -> None:
         self.url: str = url
-        # self.tag: str = self.raw_tag.upper()
-        if self.url == Default.EMPTY and tag != Default.EMPTY:
-            raise ValueError(Msg.UNDOCUMENTED)
-        # self.value: str = self.tag
-        # if self.tag[0] != String.UNDERLINE:
-        #    self.tag = ''.join([String.UNDERLINE, self.raw_tag.upper()])
-        self.tag: TagTuple = TagData.get(url, tag)
-        self.value = self.tag.value
-        self.supers = self.tag.supers
-        # if self.url[0:4] == 'http':
-        #     self.webUrl = urllib.request.urlopen(self.url)
-        #     self.result_code = str(self.webUrl.getcode())
-        #     raw: str = self.webUrl.read().decode('utf-8')
-        # else:
-        #     with Path.open(Path(url)) as file:
-        #         raw = file.read()
-        # raw2: str = raw[raw.find('%YAML') :]
-        # self.yaml: str = raw2[: raw2.find('...')]
-        # self.yamldict: dict[str, Any] = yaml.safe_load(self.yaml)
-        # self.lang: str = Default.EMPTY
-        # if self.yamldict['lang'] is not None:
-        #     self.lang = self.yamldict['lang']
-        # self.type: str = Default.EMPTY
-        # if self.yamldict['type'] is not None:
-        #     self.type = self.yamldict['type']
-        # self.uri: str = Default.EMPTY
-        # if self.yamldict['uri'] is not None:
-        #     self.uri = self.yamldict['uri']
-        # self.label: str = Default.EMPTY
-        # if self.yamldict['label'] is not None:
-        #     self.label = self.yamldict['label']
-        # self.payload: str = Default.EMPTY
-        # if self.yamldict['payload'] is not None:
-        #     self.payload = self.yamldict['payload']
-        # self.specification: str = Default.EMPTY
-        # if self.yamldict['specification'] is not None:
-        #     self.specification = self.yamldict['specification']
-        # self.contact: str = Default.EMPTY
-        # if self.yamldict['contact'] is not None:
-        #     self.contact = self.yamldict['contact']
-        # self.value_of: list[str] = []
-        # # if self.yamldict['value of'] is not None:
-        # #     self.value_of = self.yamldict['value of']
-        # with contextlib.suppress(Exception):
-        #     self.value_of = self.yamldict['value of']
-        # self.substructures: dict[str, str] = {}
-        # if self.yamldict['substructures'] is not None:
-        #     self.substructures = self.yamldict['substructures']
-        # self.superstructures: dict[str, str] = {}
-        # if self.yamldict['superstructures'] is not None:
-        #     self.superstructures = self.yamldict['superstructures']
-        # self.supers: set[str] = {
-        #     super_name[super_name.rfind('/') + 1 :]
-        #     for super_name in self.superstructures
-        # }
-        # self.subs: set[str] = {
-        #     sub_name[sub_name.rfind('/') + 1 :]
-        #     for sub_name in self.substructures
-        # }
-        # self.enumsets: set[str] = {
-        #     enum_name[enum_name.rfind('-') + 1 :] for enum_name in self.value_of
-        # }
+        self.stdtag: StdTag
+        try:
+            self.stdtag = eval(''.join(['StdTag.', tag]))
+            self.tag: TagTuple = self.stdtag.value
+        except AttributeError:
+            if url == Default.EMPTY and tag != Default.EMPTY:
+                raise ValueError(Msg.UNDOCUMENTED) from None
+            self.tag = TagData.get(tag, url)
+        self.value: str = self.tag.value
+        self.supers: list[str] | None = self.tag.supers
+        self.subs: list[str] | None = self.tag.subs
+        self.enumsets: list[str] | None = self.tag.enumsets
 
     def validate(self) -> bool:
         for char in self.value:
@@ -771,6 +716,7 @@ class Checker:
             return check
         if isinstance(extensions, list):
             for ext in extensions:
+                # if isinstance(ext.exttag, ExtTag):
                 if (
                     len(ext.exttag.supers) > 0
                     and tag.value not in ext.exttag.supers
@@ -779,6 +725,17 @@ class Checker:
                     raise ValueError(
                         Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value)
                     )
+                check = Checker.verify_ext(ext.exttag, ext.substructures)
+                # if isinstance(ext.exttag, Tag):
+                #     if (
+                #         len(ext.exttag.supers) > 0
+                #         and tag.value not in ext.exttag.supers
+                #     ):
+                #         check = False
+                #         raise ValueError(
+                #             Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value)
+                #         )
+                #     check = Checker.verify_ext(ext.exttag, ext.substructures)
             return check
         if tag.value not in extensions.exttag.supers:
             check = False
@@ -1856,7 +1813,6 @@ class Extension(NamedTuple):
     Example:
 
     Args:
-        level: The level of the extension.
         exttag: The tag used entered through ExtTag()
         payload: The value on the same line as the tag.
         extra: Extra values on the same line as the tag.
@@ -1871,7 +1827,7 @@ class Extension(NamedTuple):
         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
 
-    exttag: ExtTag
+    exttag: ExtTag | Tag
     payload: str = Default.EMPTY
     extra: str = Default.EMPTY
     substructures: Any = None
@@ -1879,7 +1835,7 @@ class Extension(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.exttag, ExtTag, no_list=True)
+            Checker.verify_type(self.exttag, ExtTag | Tag, no_list=True)
             and Checker.verify_type(self.payload, str, no_list=True)
             and Checker.verify_type(self.extra, str, no_list=True)
         )
@@ -1891,13 +1847,6 @@ class Extension(NamedTuple):
             lines = Tagger.string(
                 lines, level, self.exttag, self.payload, self.extra
             )
-            # lines = Tagger.extension(
-            #     lines,
-            #     level,
-            #     ''.join([String.UNDERLINE, self.exttag.tag.upper()]),
-            #     self.payload,
-            #     self.extra,
-            # )
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
