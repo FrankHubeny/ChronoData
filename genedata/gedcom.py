@@ -1260,6 +1260,29 @@ class Default:
     UNDERLINE: str = '_'
     WEEKS: int = 0
     WIDTH: int = 0
+    YAML_CALENDARS: str = 'calendars'
+    YAML_CHANGE_CONTROLLER: str = 'change controller'
+    YAML_CONTACT: str = 'contact'
+    YAML_DIRECTIVE: str = '%YAML 1.2'
+    YAML_DIRECTIVE_END_MARKER: str = '---'
+    YAML_DOCUMENT_END_MARKER: str = '...'
+    YAML_DOCUMENTATION: str = 'documentation'
+    YAML_ENUMERATION_VALUES: str = 'enumeration values'
+    YAML_EPOCHS: str = 'epochs'
+    YAML_EXTENSION_TAGS: str = 'extension tags'
+    YAML_FRAGMENT: str = 'fragment'
+    YAML_HELP_TEXT: str = 'help text'
+    YAML_LABEL: str = 'label'
+    YAML_LANG: str = 'lang'
+    YAML_MONTHS: str = 'months'
+    YAML_PAYLOAD: str = 'payload'
+    YAML_SPECIFICATION: str = 'specification'
+    YAML_STANDARD_TAG: str = 'standard tag'
+    YAML_SUBSTRUCTURES: str = 'substructures'
+    YAML_SUPERSTRUCTURES: str = 'superstructures'
+    YAML_TYPE: str = 'type'
+    YAML_URI: str = 'uri'
+    YAML_VALUE_OF: str = 'value of'
     YEARS: int = 0
     Z: str = 'Z'
 
@@ -1643,14 +1666,23 @@ class TagTuple(NamedTuple):
     lang: str = Default.EMPTY
     type: str = Default.EMPTY
     uri: str = Default.EMPTY
+    fragment: str = Default.EMPTY
     standard_tag: str = Default.EMPTY
+    extension_tags: list[str] | None = None
     specification: str = Default.EMPTY
     label: str = Default.EMPTY
+    help_text: str = Default.EMPTY
+    documentation: list[str] | None = None
     payload: str = Default.EMPTY
     substructures: dict[str, str] | None = None
     superstructures: dict[str, str] | None = None
-    value_of: dict[str, str] | None = None
+    enumeration_values: list[str] | None = None
+    value_of: dict[str, str] = {}  # noqa: RUF012
+    calendars: list[str] | None = None
+    months: list[str] | None = None
+    epochs: list[str] | None = None
     contact: str = Default.EMPTY
+    change_controller: str = Default.EMPTY
     yamldict: dict[str, Any] | None = None
 
     def show(self) -> str:
@@ -1660,7 +1692,7 @@ class TagTuple(NamedTuple):
 class StdTag(Enum):
     """Generated definitions based on the enumeration class `Tag` and used to check extensions.
 
-    When a new version of the GEDCOM standard `genedata.store.TagData.generate` should be rerun
+    When a new version of the GEDCOM standard `genedata.store.TagYaml.generate` should be rerun
     in a Notebook cell.  Copy the definitions into this class.
     """
 

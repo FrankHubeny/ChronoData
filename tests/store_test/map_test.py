@@ -14,23 +14,35 @@ import pytest
 from genedata.messages import Msg
 from genedata.store import Extension, ExtTag, Map
 
-ext_taga = ExtTag('_EXTA', 'tests/data/EXT.yaml')
-ext_tagb = ExtTag('_EXTB', 'tests/data/EXT.yaml')
-extsuba_tag = ExtTag('_EXTSUBA', 'tests/data/EXTSUBA.yaml')
-extsubb_tag = ExtTag('_EXTSUBB', 'tests/data/EXTSUBB.yaml')
-extsubc_tag = ExtTag('_EXTSUBC', 'tests/data/EXTSUBC.yaml')
-extsubsuba_tag = ExtTag('_EXTSUBSUBA', 'tests/data/EXTSUBSUBA.yaml')
-extsubsubb_tag = ExtTag('_EXTSUBSUBB', 'tests/data/EXTSUBSUBB.yaml')
-bad_ext_tag = ExtTag('_BADEXT', 'tests/data/BAD_EXT.yaml')
+ext_taga = ExtTag('_EXTA', 'tests/data/_EXT.yaml')
+ext_tagb = ExtTag('_EXTB', 'tests/data/_EXT.yaml')
+extrec_tag = ExtTag('EXTREC', 'tests/data/_EXTREC.yaml')
+extsuba_tag = ExtTag('_EXTSUBA', 'tests/data/_EXTSUBA.yaml')
+extsubb_tag = ExtTag('_EXTSUBB', 'tests/data/_EXTSUBB.yaml')
+extsubc_tag = ExtTag('_EXTSUBC', 'tests/data/_EXTSUBC.yaml')
+extsubm_tag = ExtTag('_EXTSUBM', 'tests/data/_EXTSUBM.yaml')
+extsubsuba_tag = ExtTag('_EXTSUBSUBA', 'tests/data/_EXTSUBSUBA.yaml')
+extsubsubb_tag = ExtTag('_EXTSUBSUBB', 'tests/data/_EXTSUBSUBB.yaml')
+extsubsubm_tag = ExtTag('_EXTSUBSUBM', 'tests/data/_EXTSUBSUBM.yaml')
+extsubsubr_tag = ExtTag('_EXTSUBSUBR', 'tests/data/_EXTSUBSUBR.yaml')
+bad_ext_tag = ExtTag('_BADEXT', 'tests/data/_BAD_EXT.yaml')
 
 exta = Extension(ext_taga, payload='something', extra='else')
 extb = Extension(ext_tagb, payload='something', extra='else')
+extrec = Extension(extrec_tag, payload='something', extra='else')
 extsuba = Extension(extsuba_tag, payload='something', extra='else')
+extsuba2 = Extension(extsuba_tag, payload='some', extra='thing')
 extsubb = Extension(extsubb_tag, payload='something', extra='else')
 extsubc = Extension(extsubc_tag, payload='something', extra='else')
+extsubm = Extension(extsubm_tag, payload='something', extra='else')
 extsubsuba = Extension(extsubsuba_tag, payload='something', extra='else')
 extsubsubb = Extension(extsubsubb_tag, payload='something', extra='else')
+extsubsubm = Extension(extsubsubm_tag, payload='something', extra='else')
+extsubsubr = Extension(extsubsubr_tag, payload='something', extra='else')
 bad_ext = Extension(bad_ext_tag, payload='something', extra='else')
+exta_one = Extension(ext_taga, payload='something', extra='else', substructures=extsuba)
+exta_two = Extension(ext_taga, payload='something', extra='else', substructures=[extsuba, extsubb])
+exta_two_single = Extension(ext_taga, payload='something', extra='else', substructures=[extsuba, extsuba2])
 
 
 # Validate Section
@@ -108,6 +120,41 @@ def test_long_ext() -> None:
         ValueError, match=Msg.NOT_DEFINED_FOR_STRUCTURE.format('LONG')
     ):
         Map(1.0, 10.0, long_ext=bad_ext).validate()
+
+def test_map_ext_one_substructure() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, map_ext=exta_one).validate() is True
+
+
+def test_lati_ext_one_substructure() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, lati_ext=exta_one).validate() is True
+
+
+def test_long_ext_one_substructure() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, long_ext=exta_one).validate() is True
+
+def test_map_ext_two_substructures() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, map_ext=exta_two).validate() is True
+
+
+def test_lati_ext_two_substructures() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, lati_ext=exta_two).validate() is True
+
+
+def test_long_ext_two_substructures() -> None:
+    """Check that the tag is not in the superstructures of the extension tag."""
+    assert Map(1.0, 10.0, long_ext=exta_two).validate() is True
+
+def test_map_ext_single_test() -> None:
+    """Check that a tag restricted to appearing only once does not appear more than once."""
+    with pytest.raises(
+        ValueError, match=Msg.ONLY_ONCE.format('_EXTSUBA', '_EXT')
+    ):
+        Map(1.0, 10.0, map_ext=exta_two_single).validate()
 
 
 # Ged Section

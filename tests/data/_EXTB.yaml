@@ -16,8 +16,8 @@ label: 'Ext'
 payload: xsd:string
 
 substructures:
-  "./EXTSUBA": "{0:1}"
-  "./EXTSUBB": "{0:1}"
+  "./_EXTSUBA": "{0:1}"
+  "./_EXTSUBB": "{0:1}"
 
 superstructures:
   "https://gedcom.io/terms/v7/ABBR": "{0:1}"

@@ -5,22 +5,21 @@ lang: en-US
 
 type: structure
 
-uri: tests/data/EXTSUBA
+uri: tests/data/EXTSUBSUBR
 
 specification:
-  - _EXTSUBA
+  - _EXTSUBSUBB
   - This extension is for testing purposes only
     
-label: 'Bad Ext'
+label: 'Ext Sub Sub B'
 
 payload: xsd:string
 
 substructures:
-  "./EXTSUBSUBA": "{0:1}"
-  "./EXTSUBSUBB": "{0:1}"
+  "https://gedcom.io/terms/v7/PHRASE": "{0:1}"
 
 superstructures:
-  "./EXT": "{0:1}"
+  "./_EXTSUBA": "{0:1}"
 
 contact: "testing data"
 ...

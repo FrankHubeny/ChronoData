@@ -1,14 +1,14 @@
 
 %YAML 1.2
 ---
-lang: en-US
+lang:
 
 type: structure
 
-uri: tests/data/EXTSUBB
+uri: tests/data/BAD_EXT
 
 specification:
-  - _EXTSUBB
+  - _BADEXT
   - This extension is for testing purposes only
     
 label: 'Bad Ext'
@@ -16,11 +16,10 @@ label: 'Bad Ext'
 payload: xsd:string
 
 substructures:
-  "./EXTSUBSUBA": "{0:1}"
-  "./EXTSUBSUBB": "{0:1}"
+  "./_EXTSUBA": "{0:1}"
+  "./_EXTSUBB": "{0:1}"
 
 superstructures:
-  "./EXT": "{0:1}"
 
 contact: "testing data"
 ...

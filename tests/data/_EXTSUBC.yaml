@@ -5,7 +5,7 @@ lang: en-US
 
 type: structure
 
-uri: tests/data/EXTSUBSUBB
+uri: tests/data/EXTSUBC
 
 specification:
   - _EXTSUBSUBB
@@ -19,7 +19,7 @@ substructures:
   "https://gedcom.io/terms/v7/PHRASE": "{0:1}"
 
 superstructures:
-  "./EXTSUBA": "{0:1}"
+  "./_EXT": "{0:1}"
 
 contact: "testing data"
 ...

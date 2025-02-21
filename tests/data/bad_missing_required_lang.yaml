@@ -1,25 +1,23 @@
 
 %YAML 1.2
 ---
-lang: en-US
-
 type: structure
 
-uri: tests/data/EXTSUBSUBA
+uri: tests/data/BAD_EXT
 
 specification:
-  - _EXTSUBSUBA
+  - _BADEXT
   - This extension is for testing purposes only
     
-label: 'Ext Sub Sub A'
+label: 'Bad Ext'
 
 payload: xsd:string
 
 substructures:
-  "https://gedcom.io/terms/v7/PHRASE": "{0:1}"
+  "./_EXTSUBA": "{0:1}"
+  "./_EXTSUBB": "{0:1}"
 
 superstructures:
-  "./EXTSUBA": "{0:1}"
 
 contact: "testing data"
 ...

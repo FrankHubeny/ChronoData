@@ -1,0 +1,25 @@
+
+%YAML 1.2
+---
+lang: en-US
+
+type: structure
+
+uri: tests/data/EXTREC
+
+specification:
+  - _EXT
+  - This extension is for testing purposes only
+    
+label: 'Ext Record'
+
+payload: xsd:string
+
+substructures:
+  "./_EXTSUBA": "{0:1}"
+  "./_EXTSUBB": "{0:1}"
+
+superstructures:
+
+contact: "testing data"
+...

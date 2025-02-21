@@ -61,7 +61,7 @@ def test_empty_record_lists(
 # )
 
 
-# @pytest.mark.parametrize('test_input,expected', testdata_one)  # noqa: PT006
+# @pytest.mark.parametrize('test_input,expected', testdata_one)  
 # def test_one_record(test_input: str, expected: str) -> None:
 #     a = Genealogy('test')
 #     familyxref = a.family_xref()
@@ -100,7 +100,7 @@ def test_empty_record_lists(
 # ]
 
 
-# @pytest.mark.parametrize('test_input,expected', testdata_three)  # noqa: PT006
+# @pytest.mark.parametrize('test_input,expected', testdata_three)  
 # def test_three_records(test_input: str, expected: str | int | bool) -> None:
 #     a = Genealogy('test')
 #     family1 = Family(a.family_xref())

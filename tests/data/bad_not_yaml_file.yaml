@@ -1,0 +1,24 @@
+
+---
+lang: en-US
+
+type: structure
+
+uri: tests/data/BAD_EXT
+
+specification:
+  - _BADEXT
+  - This extension is for testing purposes only
+    
+label: 'Bad Ext'
+
+payload: xsd:string
+
+substructures:
+  "./_EXTSUBA": "{0:1}"
+  "./_EXTSUBB": "{0:1}"
+
+superstructures:
+
+contact: "testing data"
+...
