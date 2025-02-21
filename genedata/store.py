@@ -194,7 +194,7 @@ class TagYaml:
             result_code = str(webUrl.getcode())
             if result_code == '404':
                 raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-            raw: str = webUrl.read().decode('utf-8')
+            raw: str = webUrl.read().decode(Default.UTF8)
         else:
             with Path.open(Path(url)) as file:
                 raw = file.read()
@@ -278,11 +278,11 @@ class TagYaml:
             substructures = yamldict[Default.YAML_SUBSTRUCTURES]
         if substructures != {} and substructures is not None:
             for key, dictvalue in substructures.items():
-                name = key[key.rfind('/') + 1 :]
+                name = key[key.rfind(Default.SLASH) + 1 :]
                 subs.append(name)
-                if dictvalue[0:3] == '{1:':
+                if dictvalue[0:3] == Default.REQUIRED_CODE:
                     required.append(name)
-                if dictvalue[2:5] == ':1}':
+                if dictvalue[2:5] == Default.SINGLE_CODE:
                     single.append(name)
 
         # Store the superstructures.
@@ -292,7 +292,7 @@ class TagYaml:
             superstructures = yamldict[Default.YAML_SUPERSTRUCTURES]
         if superstructures != {} and superstructures is not None:
             supers = [
-                super_name[super_name.rfind('/') + 1 :]
+                super_name[super_name.rfind(Default.SLASH) + 1 :]
                 for super_name in superstructures
             ]
 

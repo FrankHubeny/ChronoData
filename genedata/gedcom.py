@@ -70,6 +70,7 @@ __all__ = [
 
 from dataclasses import dataclass
 from enum import Enum
+from textwrap import indent
 from typing import Any, NamedTuple
 
 
@@ -1248,6 +1249,8 @@ class Default:
     POINTER: str = '@VOID@'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
+    REQUIRED_CODE: str = '{1:'
+    SINGLE_CODE: str = ':1}'
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
@@ -1258,6 +1261,7 @@ class Default:
     TIME_UTC: bool = False
     TOP: int = 0
     UNDERLINE: str = '_'
+    UTF8: str = 'utf-8'
     WEEKS: int = 0
     WIDTH: int = 0
     YAML_CALENDARS: str = 'calendars'
@@ -1670,8 +1674,8 @@ class TagTuple(NamedTuple):
     standard_tag: str = Default.EMPTY
     extension_tags: list[str] | None = None
     specification: str = Default.EMPTY
-    label: str = Default.EMPTY
-    help_text: str = Default.EMPTY
+    label: str | None = None
+    help_text: str | None = None
     documentation: list[str] | None = None
     payload: str = Default.EMPTY
     substructures: dict[str, str] | None = None
@@ -1687,6 +1691,40 @@ class TagTuple(NamedTuple):
 
     def show(self) -> str:
         return f"{self.value} = TagTuple(value='{self.value}', supers={self.supers}, subs={self.subs}, required={self.required}, single={self.single}, enumsets={self.enumsets})"
+    
+    def code(self) -> str:
+        return f"""
+TagTuple(
+  value = {self.value},
+  kind = {self.kind},
+  supers = {self.supers},
+  subs = {self.subs},
+  required = {self.required},
+  single = {self.single},
+  enumsets = {self.enumsets},
+  lang = '{self.lang}',
+  type = '{self.type}',
+  uri = '{self.uri}',
+  fragment = '{self.fragment}',
+  standard_tag = '{self.standard_tag}',
+  extension_tags = {self.extension_tags},
+  specification = '{self.specification}',
+  label = {self.label},
+  help_text = {self.help_text},
+  documentation = {self.documentation},
+  payload = '{self.payload}',
+  substructures = {self.substructures},
+  superstructures = {self.superstructures},
+  enumeration_values = {self.enumeration_values},
+  value_of = {self.value_of},
+  calendars = {self.calendars},
+  months = {self.months},
+  epochs = {self.epochs},
+  contact = '{self.contact}',
+  change_controller = '{self.change_controller}',
+  yamldict = {self.yamldict},
+)
+"""
 
 
 class StdTag(Enum):
