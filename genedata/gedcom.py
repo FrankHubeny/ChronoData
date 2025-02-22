@@ -70,7 +70,6 @@ __all__ = [
 
 from dataclasses import dataclass
 from enum import Enum
-from textwrap import indent
 from typing import Any, NamedTuple
 
 
@@ -1207,6 +1206,10 @@ class Default:
     BRACKET_RIGHT: str = ']'
     BRACKET_LEFT: str = '['
     BRACKET_LEFT_RIGHT: str = '[]'
+    CARDINALITY_ANY_NUMBER: str = ':M}'
+    CARDINALITY_OPTIONAL: str = '{0:'
+    CARDINALITY_REQUIRED: str = '{1:'
+    CARDINALITY_SINGULAR: str = ':1}'
     COMMA: str = ','
     COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
@@ -1246,11 +1249,9 @@ class Default:
     PLACE_FORM2: str = 'County'
     PLACE_FORM3: str = 'State'
     PLACE_FORM4: str = 'Country'
-    POINTER: str = '@VOID@'
+    #POINTER: str = '@VOID@'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
-    REQUIRED_CODE: str = '{1:'
-    SINGLE_CODE: str = ':1}'
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
@@ -1260,8 +1261,10 @@ class Default:
     TIME_SECOND: float = 0.0
     TIME_UTC: bool = False
     TOP: int = 0
+    TRAILER: str = '0 TRLR'
     UNDERLINE: str = '_'
     UTF8: str = 'utf-8'
+    VOID_POINTER: str = '@VOID@'
     WEEKS: int = 0
     WIDTH: int = 0
     YAML_CALENDARS: str = 'calendars'

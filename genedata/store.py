@@ -103,7 +103,6 @@ from typing import Any, Literal, NamedTuple
 
 import numpy as np
 import yaml  # type: ignore[import-untyped]
-from icecream import ic  # type: ignore[import-not-found]
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from calendars.calendars import CalendarDefinition
@@ -147,6 +146,7 @@ from genedata.messages import Example, Msg
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
+IntNone = int | None
 StrList = str | list[str] | None
 YNull = Literal['Y'] | None
 
@@ -280,9 +280,9 @@ class TagYaml:
             for key, dictvalue in substructures.items():
                 name = key[key.rfind(Default.SLASH) + 1 :]
                 subs.append(name)
-                if dictvalue[0:3] == Default.REQUIRED_CODE:
+                if dictvalue[0:3] == Default.CARDINALITY_REQUIRED:
                     required.append(name)
-                if dictvalue[2:5] == Default.SINGLE_CODE:
+                if dictvalue[2:5] == Default.CARDINALITY_SINGULAR:
                     single.append(name)
 
         # Store the superstructures.
@@ -544,6 +544,7 @@ class Tagger:
         payload: str = Default.EMPTY,
         extra: str = Default.EMPTY,
         format: bool = True,
+        xref: str = Default.EMPTY,
     ) -> str:
         """Return a GEDCOM formatted line for the information and level.
 
@@ -591,14 +592,20 @@ class Tagger:
         lineval: str = payload
         if format and lineval != Default.EMPTY and lineval[0] == Default.ATSIGN:
             lineval = ''.join([Default.ATSIGN, lineval])
+        if xref == Default.EMPTY:
+            if extra == Default.EMPTY:
+                if lineval == Default.EMPTY:
+                    return f'{level} {tag.value}{Default.EOL}'
+                return f'{level} {tag.value} {Tagger.clean_input(lineval)}{Default.EOL}'
+            return f'{level} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
         if extra == Default.EMPTY:
             if lineval == Default.EMPTY:
-                return f'{level} {tag.value}{Default.EOL}'
-            return f'{level} {tag.value} {Tagger.clean_input(lineval)}{Default.EOL}'
-        return f'{level} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
+                return f'{level} {xref} {tag.value}{Default.EOL}'
+            return f'{level} {xref} {tag.value} {Tagger.clean_input(lineval)}{Default.EOL}'
+        return f'{level} {xref} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
 
     @staticmethod
-    def empty(lines: str, level: int, tag: Tag) -> str:
+    def empty(lines: str, level: int, tag: Tag | ExtTag, xref: str = Default.EMPTY) -> str:
         """Join a GEDCOM line that has only a level and a tag to a string.
 
         This method implements the
@@ -621,9 +628,12 @@ class Tagger:
             lines: The prefix of the returned string.
             level: The GEDCOM level of the structure.
             tag: The tag to apply to this line.
+            xref: The cross reference identifier.
 
         """
-        return ''.join([lines, Tagger.taginfo(level, tag)])
+        if xref == Default.EMPTY:
+            return ''.join([lines, Tagger.taginfo(level, tag)])
+        return ''.join([lines, Tagger.taginfo(level, tag, xref=xref)])
 
     @staticmethod
     def string(
@@ -633,6 +643,7 @@ class Tagger:
         payload: list[str] | str | None,
         extra: str = Default.EMPTY,
         format: bool = True,
+        xref: str = Default.EMPTY,
     ) -> str:
         """Join a string or a list of string to GEDCOM lines.
 
@@ -674,6 +685,7 @@ class Tagger:
             tag: The tag to apply to this line.
             records: The list of strings to tag.
             format: If true and '@' begins the line then escape it with another '@' otherwise not.
+            xref: The cross reference identifier.
         """
 
         if payload is None:
@@ -683,21 +695,21 @@ class Tagger:
                 if Default.EOL in item:
                     items: list[str] = item.split(Default.EOL)
                     lines = Tagger.string(
-                        lines, level, tag, items[0], format=format
+                        lines, level, tag, items[0], format=format, xref=xref
                     )
                     lines = Tagger.string(
                         lines, level + 1, Tag.CONT, items[1:], format=format
                     )
                 else:
                     lines = ''.join(
-                        [lines, Tagger.taginfo(level, tag, item, format=format)]
+                        [lines, Tagger.taginfo(level, tag, item, format=format, xref=xref)]
                     )
             return lines
         if payload != Default.EMPTY and payload is not None:
             if Default.EOL in payload:
                 payloads: list[str] = payload.split(Default.EOL)
                 lines = Tagger.string(
-                    lines, level, tag, payloads[0], format=format
+                    lines, level, tag, payloads[0], format=format, xref=xref
                 )
                 lines = Tagger.string(
                     lines, level + 1, Tag.CONT, payloads[1:], format=format
@@ -707,7 +719,7 @@ class Tagger:
                     [
                         lines,
                         Tagger.taginfo(
-                            level, tag, payload, extra, format=format
+                            level, tag, payload, extra, format=format, xref=xref
                         ),
                     ]
                 )
@@ -993,10 +1005,16 @@ class Checker:
             raise ValueError(Msg.NO_EMPTY_LIST)
         if isinstance(value, Tag) and value == Tag.NONE:
             raise ValueError(Msg.NO_EMPTY_TAG)
-        if isinstance(value, Xref) and value.fullname == Default.POINTER:
-            raise ValueError(Msg.NO_EMPTY_POINTER)
         return True
 
+    @staticmethod
+    def verify_not_all_none(*values: Any) -> bool:
+        check: bool = False
+        for item in values:
+            if item is not None:
+                check = True
+        return check
+    
     @staticmethod
     def verify_range(
         value: int | float, low: int | float, high: int | float
@@ -1007,9 +1025,9 @@ class Checker:
         return True
 
     @staticmethod
-    def verify_not_negative(value: int | float) -> bool:
+    def verify_not_negative(value: int | float | None) -> bool:
         """Check if the value is a positive number."""
-        if value < 0:
+        if value is not None and value < 0:
             raise ValueError(Msg.NEGATIVE_ERROR.format(value))
         return True
 
@@ -1731,9 +1749,13 @@ class Xref:
 
     def ged(self, info: str = Default.EMPTY) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
+        lines: str = Default.EMPTY
+        xref_name: str = self.fullname
+        if self.fullname == Default.VOID_POINTER:
+            xref_name = Default.EMPTY
         if info == Default.EMPTY:
-            return f'0 {self.fullname} {self.tag.value}{Default.EOL}'
-        return f'0 {self.fullname} {self.tag.value} {info}{Default.EOL}'
+            lines = Tagger.empty(lines, level=0, tag=self.tag, xref=xref_name)
+        return Tagger.string(lines, level=0, tag=self.tag, payload=info, xref=xref_name)
 
     def code(self, tabs: int = 0) -> str:  # noqa: ARG002
         return self.fullname
@@ -1927,7 +1949,7 @@ class SubmitterXref(Xref):
 
 
 class Void:
-    NAME: str = Default.POINTER
+    NAME: str = Default.VOID_POINTER
     FAM: FamilyXref = FamilyXref(NAME)
     INDI: IndividualXref = IndividualXref(NAME)
     OBJE: MultimediaXref = MultimediaXref(NAME)
@@ -3002,10 +3024,10 @@ class Age(NamedTuple):
     > days    = Integer %x64    ; 21d
     """
 
-    years: int = Default.YEARS
-    months: int = Default.MONTHS
-    weeks: int = Default.WEEKS
-    days: int = Default.DAYS
+    years: IntNone = None
+    months: IntNone = None
+    weeks: IntNone = None
+    days: IntNone = None
     greater_less_than: str = Default.GREATER_LESS_THAN
     phrase: PhraseType = None
     age_ext: ExtType = None
@@ -3013,10 +3035,11 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_type(self.years, int, no_list=True)
-            and Checker.verify_type(self.months, int, no_list=True)
-            and Checker.verify_type(self.weeks, int, no_list=True)
-            and Checker.verify_type(self.days, int, no_list=True)
+            Checker.verify_not_all_none(self.years, self.months, self.weeks, self.days, self.phrase)
+            and Checker.verify_type(self.years, IntNone, no_list=True)
+            and Checker.verify_type(self.months, IntNone, no_list=True)
+            and Checker.verify_type(self.weeks, IntNone, no_list=True)
+            and Checker.verify_type(self.days, IntNone, no_list=True)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_not_negative(self.years)
             and Checker.verify_not_negative(self.months)
@@ -3030,23 +3053,24 @@ class Age(NamedTuple):
         """Format the GEDCOM Age data type."""
         line: str = ''
         info: str = self.greater_less_than
-        if self.validate() and (
-            self.years > 0 or self.months > 0 or self.weeks > 0 or self.days > 0
-        ):
-            if self.years > 0:
+        if self.validate():
+            if self.years is not None and self.years >= 0:
                 info = ''.join([info, f' {self.years!s}{Default.AGE_YEAR}'])
-            if self.months > 0:
+            if self.months is not None and self.months >= 0:
                 info = ''.join([info, f' {self.months!s}{Default.AGE_MONTH}'])
-            if self.weeks > 0:
+            if self.weeks is not None and self.weeks >= 0:
                 info = ''.join([info, f' {self.weeks!s}{Default.AGE_WEEK}'])
-            if self.days > 0:
+            if self.days is not None and self.days >= 0:
                 info = ''.join([info, f' {self.days!s}{Default.AGE_DAY}'])
             info = (
                 info.replace(Default.SPACE_DOUBLE, Default.SPACE)
                 .replace(Default.SPACE_DOUBLE, Default.SPACE)
                 .strip()
             )
-            line = Tagger.string(line, level, Tag.AGE, info)
+            if info == Default.EMPTY:
+                line = Tagger.empty(line, level, Tag.AGE)
+            else:
+                line = Tagger.string(line, level, Tag.AGE, info)
             line = Tagger.structure(line, level + 1, self.age_ext)
             line = Tagger.structure(line, level + 1, self.phrase)
         return line
@@ -6210,7 +6234,6 @@ class IndividualEventDetail(NamedTuple):
 
     event_detail: EvenDetailType = None
     age: AgeType = None
-    phrase: PhraseType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -6218,7 +6241,6 @@ class IndividualEventDetail(NamedTuple):
             Checker.verify_type(self.event_detail, EventDetail, no_list=True)
             and Checker.verify_not_empty(self.event_detail)
             and Checker.verify_type(self.age, Age, no_list=True)
-            and Checker.verify_type(self.phrase, Phrase, no_list=True)
         )
         return check
 
@@ -6227,9 +6249,7 @@ class IndividualEventDetail(NamedTuple):
         lines: str = ''
         if self.validate():
             lines = Tagger.structure(lines, level, self.event_detail)
-            if self.age is not None:
-                lines = Tagger.structure(lines, level, self.age)
-                lines = Tagger.structure(lines, level + 1, self.phrase)
+            lines = Tagger.structure(lines, level, self.age)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -6244,7 +6264,6 @@ class IndividualEventDetail(NamedTuple):
                     True,
                 ),
                 ('    age = ', self.age, tabs + 1, full, False),
-                ('    phrase = ', self.phrase, tabs + 1, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -7414,7 +7433,7 @@ class Submitter(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SubmitterXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.name, str, no_list=True)
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.address, Address, no_list=True)
@@ -7431,6 +7450,9 @@ class Submitter(NamedTuple):
             and Checker.verify_ext(Tag.NAME, self.name_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -7449,6 +7471,7 @@ class Submitter(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.notes)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -7585,7 +7608,7 @@ class Family(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, FamilyXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.attributes, FamilyAttribute)
             and Checker.verify_type(self.events, FamilyEvent)
@@ -7608,6 +7631,9 @@ class Family(NamedTuple):
             and Checker.verify_ext(Tag.WIFE, self.wife_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -7642,6 +7668,7 @@ class Family(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -7766,7 +7793,7 @@ class Multimedia(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, MultimediaXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.files, File)
             and Checker.verify_not_empty(self.files)
@@ -7778,6 +7805,9 @@ class Multimedia(NamedTuple):
             and Checker.verify_ext(Tag.RESN, self.resn_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -7794,6 +7824,7 @@ class Multimedia(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.sources)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -7921,7 +7952,7 @@ class Source(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SourceXref)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.author, str, no_list=True)
             and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(self.abbreviation, str, no_list=True)
@@ -7941,6 +7972,9 @@ class Source(NamedTuple):
             and Checker.verify_ext(Tag.PUBL, self.publ_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -7974,6 +8008,7 @@ class Source(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -8208,7 +8243,7 @@ class Individual(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, IndividualXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.personal_names, PersonalName)
             and Checker.verify_enum(self.sex, Sex)
@@ -8233,6 +8268,9 @@ class Individual(NamedTuple):
             and Checker.verify_ext(Tag.SEX, self.sex_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -8260,6 +8298,7 @@ class Individual(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.multimedia_links)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -8385,7 +8424,7 @@ class Repository(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, RepositoryXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.name, str, no_list=True)
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.address, Address, no_list=True)
@@ -8400,6 +8439,9 @@ class Repository(NamedTuple):
             and Checker.verify_ext(Tag.RESN, self.name_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -8414,6 +8456,7 @@ class Repository(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.wwws)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:
@@ -8485,7 +8528,7 @@ class SharedNote(NamedTuple):
     >   +1 <<CREATION_DATE>>                     {0:1}
     """
 
-    xref: SharedNoteXref
+    xref: SharedNoteXref = Void.SNOTE
     text: str = Default.EMPTY
     mime: str = Default.MIME
     language: LangType = None
@@ -8501,7 +8544,7 @@ class SharedNote(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SharedNoteXref, no_list=True)
-            and Checker.verify_not_empty(self.xref)
+            #and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.text, str, no_list=True)
             and Checker.verify_not_empty(self.text)
             and Checker.verify_type(self.mime, str, no_list=True)
@@ -8515,6 +8558,9 @@ class SharedNote(NamedTuple):
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
         )
         return check
+    
+    def post_validate(self, lines: str) -> None:
+        """Use this for tests after the record has been constructed."""
 
     def ged(self, level: int = 0) -> str:
         """Format to meet GEDCOM standards."""
@@ -8528,6 +8574,7 @@ class SharedNote(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.change)
             lines = Tagger.structure(lines, level + 1, self.creation)
+            self.post_validate(lines)
         return lines
 
     def code(self, tabs: int = 1, full: bool = False) -> str:

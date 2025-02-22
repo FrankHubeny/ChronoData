@@ -69,9 +69,9 @@ class Msg:
     )
     NO_NONE: str = 'The value is required to be other than "None".'
     NO_EMPTY_LIST: str = 'The list is required to be not empty.'
-    NO_EMPTY_POINTER: str = (
-        'The cross reference identify must be other than VOID'
-    )
+    # NO_EMPTY_POINTER: str = (
+    #     'The cross reference identify must be other than VOID'
+    # )
     NO_EMPTY_STRING: str = (
         'The value is required to be other than the empty string.'
     )
