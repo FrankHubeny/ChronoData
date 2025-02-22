@@ -167,6 +167,7 @@ def test_good_structure(test_input: str, expected: str | int | bool) -> None:  #
     s = TagYaml.get(url='tests/data/good_structure.yaml')  # noqa: F841
 
 ## Enumeration type
+## Enumeration set type
 
 enumeration_set_test = [
     ('s.value', 'RESN'),
@@ -202,7 +203,7 @@ def test_good_enumeration(test_input: str, expected: str | int | bool) -> None: 
     s = TagYaml.get(url='tests/data/good_enumeration_set.yaml')  # noqa: F841
 
 
-## Enumeration set type
+
 ## Calendar type
 
 
