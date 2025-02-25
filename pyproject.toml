@@ -64,10 +64,10 @@ addopts = [
   "--strict-markers", 
   "--strict-config",
   "--import-mode=importlib",	
-  "--cov=calendars",
+  #"--cov=calendars",
   "--cov=genedata",
-  "--cov=chronodata",
-  "--cov-report=term-missing",
+  #"--cov=chronodata",
+  #"--cov-report=term-missing",
   "--doctest-modules",
   "--ignore=chronodata/separate",
 ]
@@ -81,9 +81,9 @@ testpaths = [
   "chronodata",
   "calendars",
 ]
-markers = [
-  "description",
-]
+# markers = [
+#  "description",
+# ]
 
 [tool.mypy]
 mypy_path = [

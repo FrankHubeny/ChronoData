@@ -69,9 +69,9 @@ class Msg:
     )
     NO_NONE: str = 'The value is required to be other than "None".'
     NO_EMPTY_LIST: str = 'The list is required to be not empty.'
-    # NO_EMPTY_POINTER: str = (
-    #     'The cross reference identify must be other than VOID'
-    # )
+    NO_EMPTY_POINTER: str = (
+        'The cross reference identifier must be other than VOID'
+    )
     NO_EMPTY_STRING: str = (
         'The value is required to be other than the empty string.'
     )
@@ -85,7 +85,7 @@ class Msg:
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
-    NOT_VALID_ENUM: str = 'The tag {0} is not in the list of valid tags.'
+    NOT_VALID_ENUM: str = 'The tag "{0}" is not an enumerated value.'
 
     ONLY_ONCE: str = 'The substructure "{0}" can appear only once under "{1}".'
     PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'

@@ -30,6 +30,7 @@ __all__ = [
     'Date',
     'Dater',
     'Email',
+    'EnumTag',
     'EventDetail',
     'ExtTag',
     'Family',
@@ -244,8 +245,10 @@ class TagYaml:
         extension_tags: list[str] | None = None
         with contextlib.suppress(Exception):
             extension_tags = yamldict[Default.YAML_EXTENSION_TAGS]
-        if standard_tag == Default.EMPTY and spectype == YamlType.STRUCTURE and (
-            extension_tags is None or len(extension_tags) == 0
+        if (
+            standard_tag == Default.EMPTY
+            and spectype == YamlType.STRUCTURE
+            and (extension_tags is None or len(extension_tags) == 0)
         ):
             raise ValueError(Msg.YAML_NO_TAG_NAME)
 
@@ -262,13 +265,13 @@ class TagYaml:
         specification: str = Default.EMPTY
         with contextlib.suppress(Exception):
             specification = yamldict[Default.YAML_SPECIFICATION]
-        
+
         # Store the payload definition.
         payload: str = Default.EMPTY
         with contextlib.suppress(Exception):
             payload = yamldict[Default.YAML_PAYLOAD]
 
-        # Store the substructures identifying the required structures 
+        # Store the substructures identifying the required structures
         # those which may appear only once.
         substructures: dict[str, str] = {}
         subs: list[str] = []
@@ -297,7 +300,11 @@ class TagYaml:
             ]
 
         # Check that a structure type contains both superstructures and substructures.
-        if spectype is YamlType.STRUCTURE and superstructures == {} and substructures == {}:
+        if (
+            spectype is YamlType.STRUCTURE
+            and superstructures == {}
+            and substructures == {}
+        ):
             raise ValueError(Msg.YAML_STRUCTURE_MISSING_VALUES)
 
         # Store the enumeration definitions.
@@ -310,7 +317,6 @@ class TagYaml:
         enumeration_values: list[str] = []
         # with contextlib.suppress(Exception):
         #     enumeration_values = yamldict[Default.YAML_ENUMERATION_VALUES]
-
 
         # Store the calendar definitions.
         calendars: list[str] | None = None
@@ -344,7 +350,7 @@ class TagYaml:
             value = standard_tag
         elif spectype == YamlType.STRUCTURE:
             raise ValueError(Msg.UNKNOWN_TAG.format(url))
-        
+
         # Identify whether it is a standard or extension definition.
         kind: str = Default.KIND_STANDARD
         if extension_tags is not None:
@@ -494,6 +500,7 @@ class ExtTag:
 
 
 ExtTagType = ExtTag | list[ExtTag] | None
+TagType = Tag | ExtTag | None
 
 
 class Tagger:
@@ -605,7 +612,9 @@ class Tagger:
         return f'{level} {xref} {tag.value} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
 
     @staticmethod
-    def empty(lines: str, level: int, tag: Tag | ExtTag, xref: str = Default.EMPTY) -> str:
+    def empty(
+        lines: str, level: int, tag: Tag | ExtTag, xref: str = Default.EMPTY
+    ) -> str:
         """Join a GEDCOM line that has only a level and a tag to a string.
 
         This method implements the
@@ -702,7 +711,12 @@ class Tagger:
                     )
                 else:
                     lines = ''.join(
-                        [lines, Tagger.taginfo(level, tag, item, format=format, xref=xref)]
+                        [
+                            lines,
+                            Tagger.taginfo(
+                                level, tag, item, format=format, xref=xref
+                            ),
+                        ]
                     )
             return lines
         if payload != Default.EMPTY and payload is not None:
@@ -939,6 +953,8 @@ class Checker:
     @staticmethod
     def verify_enum(tag: Any, enumeration: Any) -> bool:
         """Check if the value is in the proper enumation."""
+        if tag == Tag.NONE:
+            return True
         if not isinstance(tag, Tag) and not isinstance(tag, ExtTag):
             raise ValueError(Msg.NEITHER_TAG_NOR_EXTTAG.format(str(tag)))
         if isinstance(tag, Tag) and tag.value not in enumeration:
@@ -1005,6 +1021,8 @@ class Checker:
             raise ValueError(Msg.NO_EMPTY_LIST)
         if isinstance(value, Tag) and value == Tag.NONE:
             raise ValueError(Msg.NO_EMPTY_TAG)
+        if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
+            raise ValueError(Msg.NO_EMPTY_POINTER)
         return True
 
     @staticmethod
@@ -1014,7 +1032,7 @@ class Checker:
             if item is not None:
                 check = True
         return check
-    
+
     @staticmethod
     def verify_range(
         value: int | float, low: int | float, high: int | float
@@ -1411,6 +1429,30 @@ class Formatter:
             return f'{item!r}'
         if isinstance(item, Tag):
             return f'Tag.{item.name}'
+        if isinstance(item, Adop):
+            return f'Adop.{item.name}'
+        if isinstance(item, Even):
+            return f'Even.{item.name}'
+        # elif isinstance(self.tag, EvenAttr):
+        #     enum_name = Tag.EVEN
+        if isinstance(item, Medium):
+            return f'Medi.{item.name}'
+        if isinstance(item, Pedi):
+            return f'Pedi.{item.name}'
+        if isinstance(item, Quay):
+            return f'Quay.{item.name}'
+        if isinstance(item, Resn):
+            return f'Resn.{item.name}'
+        if isinstance(item, Role):
+            return f'Role.{item.name}'
+        if isinstance(item, Sex):
+            return f'Sex.{item.name}'
+        if isinstance(item, FamcStat):
+            return f'FamcStat.{item.name}'
+        if isinstance(item, Stat):
+            return f'Stat.{item.name}'
+        if isinstance(item, NameType):
+            return f'NameType.{item.name}'
         code_lines: str = (
             item.code(tabs - 1, full=full)
             .replace(Default.EOL, Default.EMPTY, 1)
@@ -1755,7 +1797,9 @@ class Xref:
             xref_name = Default.EMPTY
         if info == Default.EMPTY:
             lines = Tagger.empty(lines, level=0, tag=self.tag, xref=xref_name)
-        return Tagger.string(lines, level=0, tag=self.tag, payload=info, xref=xref_name)
+        return Tagger.string(
+            lines, level=0, tag=self.tag, payload=info, xref=xref_name
+        )
 
     def code(self, tabs: int = 0) -> str:  # noqa: ARG002
         return self.fullname
@@ -2034,6 +2078,89 @@ class Extension(NamedTuple):
 
 
 ExtType = Extension | list[Extension] | None
+
+EnumType = (
+    Even
+    | EvenAttr
+    | ExtTag
+    | FamAttr
+    | FamcStat
+    | FamEven
+    | Id
+    | IndiAttr
+    | IndiEven
+    | Medium
+    | NameType
+    | Pedi
+    | Quay
+    | Resn
+    | Role
+    | Sex
+    | Stat
+    | None
+)
+
+
+class EnumTag(NamedTuple):
+    """Store, validate and display all enumeration tags including extensions."""
+
+    tag: EnumType = None
+    tag_ext: ExtType = None
+
+    def validate(self) -> bool:
+        """Validate the stored value."""
+        check: bool = Checker.verify_not_empty(self.tag)
+        return check
+
+    def ged(self, level: int = 1) -> str:
+        lines: str = Default.EMPTY
+        if self.validate():
+            if self.tag is None:
+                return lines
+            enum_name: Tag = Tag.NONE
+            if isinstance(self.tag, Adop):
+                enum_name = Tag.ADOP
+            elif isinstance(self.tag, Even):
+                enum_name = Tag.EVEN
+            # elif isinstance(self.tag, EvenAttr):
+            #     enum_name = Tag.EVEN
+            elif isinstance(self.tag, Medium):
+                enum_name = Tag.MEDI
+            elif isinstance(self.tag, Pedi):
+                enum_name = Tag.PEDI
+            elif isinstance(self.tag, Quay):
+                enum_name = Tag.QUAY
+            elif isinstance(self.tag, Resn):
+                enum_name = Tag.RESN
+            elif isinstance(self.tag, Role):
+                enum_name = Tag.ROLE
+            elif isinstance(self.tag, Sex):
+                enum_name = Tag.SEX
+            elif isinstance(self.tag, FamcStat):
+                enum_name = Tag.FAMC
+            elif isinstance(self.tag, Stat):
+                enum_name = Tag.STAT
+            elif isinstance(self.tag, NameType):
+                enum_name = Tag.NAME
+            else:
+                raise ValueError(Msg.NOT_VALID_ENUM.format(self.tag))
+            if Checker.verify_ext(enum_name, self.tag_ext):
+                lines = Tagger.string(lines, level, enum_name, self.tag.value)
+                lines = Tagger.structure(lines, level + 1, self.tag_ext)
+        return lines
+
+    def code(self, tabs: int = 1, full: bool = False) -> str:
+        return indent(
+            Formatter.display_code(
+                'EnumTag',
+                ('    tag = ', self.tag, tabs, full, True),
+                ('    tag_ext = ', self.tag_ext, tabs, full, False),
+            ),
+            Default.INDENT * (tabs + 1),
+        )
+
+
+EnumTagType = EnumTag | None
 
 
 class Date(NamedTuple):
@@ -3035,7 +3162,9 @@ class Age(NamedTuple):
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_not_all_none(self.years, self.months, self.weeks, self.days, self.phrase)
+            Checker.verify_not_all_none(
+                self.years, self.months, self.weeks, self.days, self.phrase
+            )
             and Checker.verify_type(self.years, IntNone, no_list=True)
             and Checker.verify_type(self.months, IntNone, no_list=True)
             and Checker.verify_type(self.weeks, IntNone, no_list=True)
@@ -3477,7 +3606,7 @@ class CallNumber(NamedTuple):
     """
 
     call_number: str = Default.EMPTY
-    medium: Tag = Tag.NONE
+    medium: EnumTagType = None
     phrase: PhraseType = None
     caln_ext: ExtType = None
     medi_ext: ExtType = None
@@ -3487,10 +3616,8 @@ class CallNumber(NamedTuple):
         check: bool = (
             Checker.verify_type(self.call_number, str)
             and Checker.verify_not_empty(self.call_number)
-            and Checker.verify_enum(self.medium, Medium)
             and Checker.verify_type(self.phrase, Phrase)
             and Checker.verify_ext(Tag.CALN, self.caln_ext)
-            and Checker.verify_ext(Tag.MEDI, self.medi_ext)
         )
         return check
 
@@ -3500,8 +3627,7 @@ class CallNumber(NamedTuple):
         if self.validate():
             lines = Tagger.string(lines, level, Tag.CALN, self.call_number)
             lines = Tagger.structure(lines, level + 1, self.caln_ext)
-            lines = Tagger.string(lines, level + 1, Tag.MEDI, self.medium.value)
-            lines = Tagger.structure(lines, level + 2, self.medi_ext)
+            lines = Tagger.structure(lines, level + 1, self.medium)
             lines = Tagger.structure(lines, level + 2, self.phrase)
         return lines
 
@@ -3513,7 +3639,6 @@ class CallNumber(NamedTuple):
                 ('    medium = ', self.medium, tabs, full, False),
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
                 ('    caln_ext = ', self.caln_ext, tabs + 1, full, False),
-                ('    medi_ext = ', self.medi_ext, tabs + 1, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -3737,11 +3862,11 @@ class SourceCitation(NamedTuple):
     source_xref: SourceXref = Void.SOUR
     page: str = Default.EMPTY
     source_data: SourDataType = None
-    event: Tag = Tag.NONE
+    event: EnumTagType = None
     event_phrase: PhraseType = None
-    role: Tag = Tag.NONE
+    role: EnumTagType = None
     role_phrase: PhraseType = None
-    quality: Tag = Tag.NONE
+    quality: EnumTagType = None
     multimedialinks: AnyList = None
     notes: AnyList = None
     sour_ext: ExtType = None
@@ -3757,18 +3882,12 @@ class SourceCitation(NamedTuple):
             and Checker.verify_not_empty(self.source_xref)
             and Checker.verify_type(self.page, str, no_list=True)
             and Checker.verify_type(self.source_data, SourceData, no_list=True)
-            and Checker.verify_enum(self.event, Even)
             and Checker.verify_type(self.event_phrase, Phrase, no_list=True)
-            and Checker.verify_enum(self.role, Role)
             and Checker.verify_type(self.role_phrase, Phrase, no_list=True)
-            and Checker.verify_enum(self.quality, Quay)
             and Checker.verify_type(self.multimedialinks, MultimediaLink)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_ext(Tag.SOUR, self.sour_ext)
             and Checker.verify_ext(Tag.PAGE, self.page_ext)
-            and Checker.verify_ext(Tag.EVEN, self.even_ext)
-            and Checker.verify_ext(Tag.ROLE, self.role_ext)
-            and Checker.verify_ext(Tag.QUAY, self.quay_ext)
         )
         return check
 
@@ -3783,20 +3902,14 @@ class SourceCitation(NamedTuple):
             lines = Tagger.string(lines, level + 1, Tag.PAGE, self.page)
             lines = Tagger.structure(lines, level + 2, self.page_ext)
             lines = Tagger.structure(lines, level + 1, self.source_data)
-            if self.event != Tag.NONE:
-                lines = Tagger.string(
-                    lines, level + 1, Tag.EVEN, self.event.value
-                )
+            if self.event is not None:
+                lines = Tagger.structure(lines, level + 1, self.event)
                 lines = Tagger.structure(lines, level + 1, self.even_ext)
                 lines = Tagger.structure(lines, level + 2, self.event_phrase)
-                lines = Tagger.string(
-                    lines, level + 2, Tag.ROLE, self.role.value
-                )
+                lines = Tagger.structure(lines, level + 2, self.role)
                 lines = Tagger.structure(lines, level + 1, self.role_ext)
                 lines = Tagger.structure(lines, level + 2, self.role_phrase)
-            lines = Tagger.string(
-                lines, level + 1, Tag.QUAY, self.quality.value
-            )
+            lines = Tagger.structure(lines, level + 1, self.quality)
             lines = Tagger.structure(lines, level + 1, self.quay_ext)
             lines = Tagger.structure(lines, level + 1, self.multimedialinks)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -4004,7 +4117,7 @@ class Note(NamedTuple):
         )
 
 
-NoteType = Note | list[Note] | None
+# NoteType = Note | list[Note] | None
 
 
 class SNote(NamedTuple):
@@ -4070,6 +4183,7 @@ class SNote(NamedTuple):
 
 
 SNoteType = SNote | list[SNote] | None
+NoteSNoteType = Note | SNote | list[Note | SNote] | None
 
 
 class ChangeDate(NamedTuple):
@@ -4102,7 +4216,7 @@ class ChangeDate(NamedTuple):
 
     date: DateType = None
     time: TimeType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     chan_ext: ExtType = None
 
     def validate(self) -> bool:
@@ -4111,7 +4225,7 @@ class ChangeDate(NamedTuple):
             Checker.verify_type(self.date, Date, no_list=True)
             and Checker.verify_not_empty(self.date)
             and Checker.verify_type(self.time, Time, no_list=True)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_ext(Tag.CHAN, self.chan_ext)
         )
         return check
@@ -4172,7 +4286,7 @@ class SourceRepositoryCitation(NamedTuple):
     """
 
     repository_xref: RepositoryXref = Void.REPO
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     call_numbers: CalnType = None
     repo_ext: ExtType = None
 
@@ -4183,7 +4297,7 @@ class SourceRepositoryCitation(NamedTuple):
                 self.repository_xref, RepositoryXref, no_list=True
             )
             and Checker.verify_not_empty(self.repository_xref)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.call_numbers, CallNumber)
             and Checker.verify_ext(Tag.REPO, self.repo_ext)
         )
@@ -4324,11 +4438,11 @@ class PersonalName(NamedTuple):
 
     name: str = Default.EMPTY
     surname: str = Default.EMPTY
-    type: Tag = Tag.NONE
+    type: EnumTagType = None
     phrase: PhraseType = None
     pieces: PersonalNamePiecesType = None
     translations: NameTranType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     source_citations: SourCiteType = None
     name_ext: ExtType = None
     type_ext: ExtType = None
@@ -4340,13 +4454,12 @@ class PersonalName(NamedTuple):
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.surname, str, no_list=True)
             and Checker.verify_not_empty(self.surname)
-            and Checker.verify_enum(self.type, NameType)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_type(
                 self.pieces, PersonalNamePieces, no_list=True
             )
             and Checker.verify_type(self.translations, NameTranslation)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.source_citations, SourceCitation)
             and Checker.verify_ext(Tag.NAME, self.name_ext)
             and Checker.verify_ext(Tag.TYPE, self.type_ext)
@@ -4369,7 +4482,7 @@ class PersonalName(NamedTuple):
                 new_name = ''.join([self.name, Default.SPACE, name_surname])
             lines = Tagger.string(lines, level, Tag.NAME, new_name)
             lines = Tagger.structure(lines, level + 1, self.name_ext)
-            lines = Tagger.string(lines, level + 1, Tag.TYPE, self.type.value)
+            lines = Tagger.structure(lines, level + 1, self.type)
             lines = Tagger.structure(lines, level + 2, self.type_ext)
             lines = Tagger.structure(lines, level + 2, self.phrase)
             lines = Tagger.structure(lines, level + 1, self.pieces)
@@ -4625,12 +4738,12 @@ class Association(NamedTuple):
 
     individual_xref: IndividualXref = Void.INDI
     association_phrase: PhraseType = None
-    role: Tag = Tag.NONE
+    role: EnumTagType = None
     role_phrase: PhraseType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     citations: SourCiteType = None
     asso_ext: ExtType = None
-    role_ext: ExtType = None
+    
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -4642,10 +4755,8 @@ class Association(NamedTuple):
             and Checker.verify_type(
                 self.association_phrase, Phrase, no_list=True
             )
-            and Checker.verify_enum(self.role, Role)
-            and Checker.verify_not_empty(self.role)
             and Checker.verify_type(self.role_phrase, Phrase, no_list=True)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.citations, SourceCitation)
         )
         return check
@@ -4659,8 +4770,7 @@ class Association(NamedTuple):
             )
             lines = Tagger.structure(lines, level + 1, self.asso_ext)
             lines = Tagger.structure(lines, level + 1, self.association_phrase)
-            lines = Tagger.string(lines, level + 1, Tag.ROLE, self.role.value)
-            lines = Tagger.structure(lines, level + 2, self.role_ext)
+            lines = Tagger.structure(lines, level + 1, self.role)
             lines = Tagger.structure(lines, level + 2, self.role_phrase)
             lines = Tagger.structure(lines, level + 1, self.notes)
             lines = Tagger.structure(lines, level + 1, self.citations)
@@ -4689,7 +4799,6 @@ class Association(NamedTuple):
                 ('    notes = ', self.notes, tabs + 2, full, False),
                 ('    citations = ', self.citations, tabs + 1, full, False),
                 ('    asso_ext = ', self.asso_ext, tabs, full, False),
-                ('    role_ext = ', self.role_ext, tabs, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -4747,10 +4856,10 @@ class MultimediaLink(NamedTuple):
     """
 
     multimedia_xref: MultimediaXref = Void.OBJE
-    top: int = Default.TOP
-    left: int = Default.LEFT
-    height: int = Default.HEIGHT
-    width: int = Default.WIDTH
+    top: IntNone = None
+    left: IntNone = None
+    height: IntNone = None
+    width: IntNone = None
     title: str = Default.EMPTY
     obje_ext: ExtType = None
     top_ext: ExtType = None
@@ -4766,10 +4875,10 @@ class MultimediaLink(NamedTuple):
                 self.multimedia_xref, MultimediaXref, no_list=True
             )
             and Checker.verify_not_empty(self.multimedia_xref)
-            and Checker.verify_type(self.top, int, no_list=True)
-            and Checker.verify_type(self.left, int, no_list=True)
-            and Checker.verify_type(self.height, int, no_list=True)
-            and Checker.verify_type(self.width, int, no_list=True)
+            and Checker.verify_type(self.top, IntNone, no_list=True)
+            and Checker.verify_type(self.left, IntNone, no_list=True)
+            and Checker.verify_type(self.height, IntNone, no_list=True)
+            and Checker.verify_type(self.width, IntNone, no_list=True)
             and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_ext(Tag.OBJE, self.obje_ext)
             and Checker.verify_ext(Tag.TOP, self.top_ext)
@@ -4793,18 +4902,28 @@ class MultimediaLink(NamedTuple):
                 format=False,
             )
             lines = Tagger.structure(lines, level + 1, self.obje_ext)
-            lines = Tagger.empty(lines, level + 1, Tag.CROP)
-            lines = Tagger.structure(lines, level + 2, self.top_ext)
-            lines = Tagger.string(lines, level + 2, Tag.TOP, str(self.top))
-            lines = Tagger.structure(lines, level + 3, self.top_ext)
-            lines = Tagger.string(lines, level + 2, Tag.LEFT, str(self.left))
-            lines = Tagger.structure(lines, level + 3, self.left_ext)
-            lines = Tagger.string(
-                lines, level + 2, Tag.HEIGHT, str(self.height)
-            )
-            lines = Tagger.structure(lines, level + 3, self.height_ext)
-            lines = Tagger.string(lines, level + 2, Tag.WIDTH, str(self.width))
-            lines = Tagger.structure(lines, level + 3, self.width_ext)
+            if (
+                self.top is not None
+                or self.left is not None
+                or self.width is not None
+                or self.height is not None
+            ):
+                lines = Tagger.empty(lines, level + 1, Tag.CROP)
+                lines = Tagger.structure(lines, level + 2, self.top_ext)
+                lines = Tagger.string(lines, level + 2, Tag.TOP, str(self.top))
+                lines = Tagger.structure(lines, level + 3, self.top_ext)
+                lines = Tagger.string(
+                    lines, level + 2, Tag.LEFT, str(self.left)
+                )
+                lines = Tagger.structure(lines, level + 3, self.left_ext)
+                lines = Tagger.string(
+                    lines, level + 2, Tag.HEIGHT, str(self.height)
+                )
+                lines = Tagger.structure(lines, level + 3, self.height_ext)
+                lines = Tagger.string(
+                    lines, level + 2, Tag.WIDTH, str(self.width)
+                )
+                lines = Tagger.structure(lines, level + 3, self.width_ext)
             lines = Tagger.string(lines, level + 1, Tag.TITL, self.title)
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
         return lines
@@ -5187,7 +5306,7 @@ class Place(NamedTuple):
     translations: PlacTranType = None
     map: MapType = None
     exids: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     plac_ext: ExtType = None
     form_ext: ExtType = None
 
@@ -5209,7 +5328,7 @@ class Place(NamedTuple):
             and Checker.verify_type(self.translations, PlaceTranslation)
             and Checker.verify_type(self.map, Map, no_list=True)
             and Checker.verify_type(self.exids, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_ext(Tag.PLAC, self.plac_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
         )
@@ -5369,12 +5488,12 @@ class EventDetail(NamedTuple):
     agency: str = Default.EMPTY
     religion: str = Default.EMPTY
     cause: str = Default.EMPTY
-    resn: Tag = Tag.NONE
+    resn: EnumTagType = None
     sdate: SDateType = None
     stime: TimeType = None
     sphrase: PhraseType = None
     associations: AssoType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     sources: SourCiteType = None
     multimedia_links: MMLinkType = None
     uids: IdenType = None
@@ -5397,12 +5516,11 @@ class EventDetail(NamedTuple):
             and Checker.verify_type(self.agency, str, no_list=True)
             and Checker.verify_type(self.religion, str, no_list=True)
             and Checker.verify_type(self.cause, str, no_list=True)
-            and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.sdate, SDate, no_list=True)
             and Checker.verify_type(self.stime, Time, no_list=True)
             and Checker.verify_type(self.sphrase, Phrase, no_list=True)
             and Checker.verify_type(self.associations, Association)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.uids, Identifier)
@@ -5431,7 +5549,7 @@ class EventDetail(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.reli_ext)
             lines = Tagger.string(lines, level, Tag.CAUS, self.cause)
             lines = Tagger.structure(lines, level + 1, self.caus_ext)
-            lines = Tagger.string(lines, level, Tag.RESN, self.resn.value)
+            lines = Tagger.structure(lines, level, self.resn)
             lines = Tagger.structure(lines, level, self.sdate)
             lines = Tagger.structure(lines, level, self.stime)
             lines = Tagger.structure(lines, level, self.sphrase)
@@ -5888,7 +6006,6 @@ class Child(NamedTuple):
             Checker.verify_type(
                 self.individual_xref, IndividualXref, no_list=True
             )
-            and Checker.verify_not_empty(self.individual_xref)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_ext(Tag.CHIL, self.chil_ext)
         )
@@ -5897,7 +6014,7 @@ class Child(NamedTuple):
     def ged(self, level: int = 1) -> str:
         """Format to meet GEDCOM standards."""
         lines: str = Default.EMPTY
-        if str(self.individual_xref) != Void.NAME and self.validate():
+        if self.validate():
             lines = Tagger.string(
                 lines, level, Tag.CHIL, str(self.individual_xref), format=False
             )
@@ -5975,10 +6092,10 @@ class LDSOrdinanceDetail(NamedTuple):
     phrase: PhraseType = None
     temple: str = Default.EMPTY
     place: PlacType = None
-    status: Tag = Tag.NONE
+    status: EnumTagType = None
     status_date: DateType = None
     status_time: TimeType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     source_citations: SourCiteType = None
     temple_ext: ExtType = None
 
@@ -5990,15 +6107,14 @@ class LDSOrdinanceDetail(NamedTuple):
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_type(self.temple, str, no_list=True)
             and Checker.verify_type(self.place, Place, no_list=True)
-            and Checker.verify_enum(self.status, Stat)
             and Checker.verify_type(self.status_date, Date, no_list=True)
             and Checker.verify_type(self.status_time, Time, no_list=True)
             and Checker.verify(
-                self.status != Tag.NONE,
+                self.status is not None,
                 self.date is not None,
                 Msg.STAT_REQUIRES_DATE,
             )
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.source_citations, SourceCitation)
             and Checker.verify_ext(Tag.TEMP, self.temple_ext)
         )
@@ -6625,7 +6741,7 @@ class IndividualEvent(NamedTuple):
     tag_type: str = Default.EMPTY
     event_detail: IndiEvenDetailType = None
     family_xref: FamilyXref = Void.FAM
-    adoption: Tag = Tag.NONE
+    adoption: EnumTagType = None
     phrase: PhraseType = None
     tag_ext: ExtType = None
 
@@ -6649,7 +6765,6 @@ class IndividualEvent(NamedTuple):
                 self.event_detail, IndividualEventDetail, no_list=True
             )
             and Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
-            and Checker.verify_enum(self.adoption, Adop)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
             and Checker.verify_ext(self.tag, self.tag_ext)
         )
@@ -6682,10 +6797,10 @@ class IndividualEvent(NamedTuple):
                     self.tag.value == Tag.ADOP.value
                     and self.family_xref.name != Void.FAM.name
                 ):
-                    lines = Tagger.string(
-                        lines, level + 2, Tag.ADOP, self.adoption.value
+                    lines = Tagger.structure(
+                        lines, level + 2, self.adoption
                     )
-                    if self.adoption.value != Tag.NONE.value:
+                    if self.adoption is not None:
                         lines = Tagger.structure(lines, level + 3, self.phrase)
         return lines
 
@@ -6852,28 +6967,19 @@ class FamilyChild(NamedTuple):
     """
 
     family_xref: FamilyXref = Void.FAM
-    pedigree: Tag = Tag.NONE
+    pedigree: EnumTagType = None
     pedigree_phrase: PhraseType = None
-    status: Tag = Tag.NONE
+    status: EnumTagType = None
     status_phrase: PhraseType = None
     notes: list[Note] | None = None
-    famc_ext: ExtType = None
-    pedi_ext: ExtType = None
-    stat_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
-            and Checker.verify_not_empty(self.family_xref)
-            and Checker.verify_enum(self.pedigree, Pedi)
             and Checker.verify_type(self.pedigree_phrase, Phrase, no_list=True)
-            and Checker.verify_enum(self.status, FamcStat)
             and Checker.verify_type(self.status_phrase, Phrase, no_list=True)
-            and Checker.verify_type(self.notes, Note)
-            and Checker.verify_ext(Tag.FAMC, self.famc_ext)
-            and Checker.verify_ext(Tag.PEDI, self.pedi_ext)
-            and Checker.verify_ext(Tag.STAT, self.stat_ext)
+            and Checker.verify_type(self.notes, Note | SNote)
         )
         return check
 
@@ -6884,14 +6990,11 @@ class FamilyChild(NamedTuple):
             lines = Tagger.string(
                 lines, level, Tag.FAMC, self.family_xref.fullname, format=False
             )
-            lines = Tagger.structure(lines, level + 1, self.famc_ext)
-            lines = Tagger.string(
-                lines, level + 1, Tag.PEDI, self.pedigree.value
+            lines = Tagger.structure(
+                lines, level + 1, self.pedigree
             )
-            lines = Tagger.structure(lines, level + 1, self.pedi_ext)
             lines = Tagger.structure(lines, level + 2, self.pedigree_phrase)
-            lines = Tagger.string(lines, level + 1, Tag.STAT, self.status.value)
-            lines = Tagger.structure(lines, level + 2, self.stat_ext)
+            lines = Tagger.structure(lines, level + 1, self.status)
             lines = Tagger.structure(lines, level + 2, self.status_phrase)
         return lines
 
@@ -6917,9 +7020,6 @@ class FamilyChild(NamedTuple):
                     False,
                 ),
                 ('    notes = ', self.notes, tabs + 1, full, False),
-                ('    famc_ext = ', self.famc_ext, tabs, full, False),
-                ('    pedi_ext = ', self.pedi_ext, tabs, full, False),
-                ('    stat_ext = ', self.stat_ext, tabs, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -6952,15 +7052,14 @@ class FamilySpouse(NamedTuple):
     """
 
     family_xref: FamilyXref = Void.FAM
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     fams_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.family_xref, FamilyXref, no_list=True)
-            and Checker.verify_not_empty(self.family_xref)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_ext(Tag.FAMS, self.fams_ext)
         )
         return check
@@ -7078,7 +7177,7 @@ class File(NamedTuple):
         medi: A tag from the [MEDI enumeration set](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#enumset-MEDI)
             entered by placing `Tag.` in front of the capitalized name from the set.
         phrase: A phrase associated with the file entered through `Phrase`.
-        titl: The title of the file.
+        title: The title of the file.
         file_translations: Translations entered through `FileTranslation`.
         file_ext: Optional substructures extending [FILE tag](https://gedcom.io/terms/v7/FILE)
             entered through `Extension`.
@@ -7113,13 +7212,12 @@ class File(NamedTuple):
 
     file: str = Default.EMPTY
     form: str = Default.MIME
-    medi: Tag = Tag.NONE
+    medium: EnumTagType = None
     phrase: PhraseType = None
-    titl: str = Default.EMPTY
+    title: str = Default.EMPTY
     file_translations: FileTranType = None
     file_ext: ExtType = None
     form_ext: ExtType = None
-    medi_ext: ExtType = None
     medi_tag_ext: ExtType = None
     titl_ext: ExtType = None
 
@@ -7130,13 +7228,11 @@ class File(NamedTuple):
             and Checker.verify_not_empty(self.file)
             and Checker.verify_type(self.form, str, no_list=True)
             and Checker.verify_not_empty(self.form)
-            and Checker.verify_enum(self.medi, Medium)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
-            and Checker.verify_type(self.titl, str, no_list=True)
+            and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(self.file_translations, FileTranslation)
             and Checker.verify_ext(Tag.FILE, self.file_ext)
             and Checker.verify_ext(Tag.FORM, self.form_ext)
-            and Checker.verify_ext(Tag.MEDI, self.medi_ext)
             and Checker.verify_ext(Tag.TITL, self.titl_ext)
         )
         return check
@@ -7149,9 +7245,9 @@ class File(NamedTuple):
             lines = Tagger.structure(lines, level + 1, self.file_ext)
             lines = Tagger.string(lines, level + 1, Tag.FORM, self.form)
             lines = Tagger.structure(lines, level + 2, self.form_ext)
-            lines = Tagger.string(lines, level + 3, Tag.MEDI, self.medi.value)
-            lines = Tagger.structure(lines, level + 4, self.phrase)
-            lines = Tagger.string(lines, level + 1, Tag.TITL, self.titl)
+            lines = Tagger.structure(lines, level + 2, self.medium)
+            lines = Tagger.structure(lines, level + 3, self.phrase)
+            lines = Tagger.string(lines, level + 1, Tag.TITL, self.title)
             lines = Tagger.structure(lines, level + 2, self.titl_ext)
         return lines
 
@@ -7161,9 +7257,9 @@ class File(NamedTuple):
                 'File',
                 ('    file = ', self.file, tabs, full, True),
                 ('    form = ', self.form, tabs, full, True),
-                ('    medi = ', self.medi, tabs, full, False),
+                ('    medium = ', self.medium, tabs, full, False),
                 ('    phrase = ', self.phrase, tabs + 1, full, False),
-                ('    titl = ', self.titl, tabs, full, False),
+                ('    title = ', self.title, tabs, full, False),
                 (
                     '    file_translations = ',
                     self.file_translations,
@@ -7173,7 +7269,6 @@ class File(NamedTuple):
                 ),
                 ('    file_ext = ', self.file_ext, tabs, full, False),
                 ('    form_ext = ', self.form_ext, tabs, full, False),
-                ('    medi_ext = ', self.medi_ext, tabs, full, False),
                 ('    titl_ext = ', self.titl_ext, tabs, full, False),
             ),
             Default.INDENT * tabs,
@@ -7306,21 +7401,19 @@ class NonEvent(NamedTuple):
     >   +1 <<SOURCE_CITATION>>                   {0:M}
     """
 
-    no: Tag = Tag.NONE
+    no: EnumTagType = None
     date: DateType = None
     phrase: PhraseType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     sources: SourCiteType = None
     no_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
-            Checker.verify_enum(self.no, Even)
-            and Checker.verify_not_empty(self.no)
-            and Checker.verify_type(self.date, Date, no_list=True)
+            Checker.verify_type(self.date, Date, no_list=True)
             and Checker.verify_type(self.phrase, Phrase, no_list=True)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.sources, SourceCitation)
             and Checker.verify_ext(Tag.NO, self.no_ext)
         )
@@ -7330,7 +7423,7 @@ class NonEvent(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = ''
         if self.validate():
-            lines = Tagger.string(lines, level, Tag.NO, self.no.value)
+            lines = Tagger.structure(lines, level, self.no)
             lines = Tagger.structure(lines, level + 1, self.no_ext)
             lines = Tagger.structure(lines, level + 1, self.date)
             lines = Tagger.structure(lines, level + 2, self.phrase)
@@ -7424,7 +7517,7 @@ class Submitter(NamedTuple):
     multimedia_links: MMLinkType = None
     languages: LangType = None
     identifiers: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
     name_ext: ExtType = None
@@ -7433,7 +7526,7 @@ class Submitter(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SubmitterXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
+            # and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.name, str, no_list=True)
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.address, Address, no_list=True)
@@ -7444,13 +7537,13 @@ class Submitter(NamedTuple):
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.languages, Lang)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.NAME, self.name_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -7583,7 +7676,7 @@ class Family(NamedTuple):
     """
 
     xref: FamilyXref = Void.FAM
-    resn: Tag = Tag.NONE
+    resn: EnumTagType = None
     attributes: FamAttrType = None
     events: FamEvenType = None
     husband: IndividualXref = Void.INDI
@@ -7595,7 +7688,7 @@ class Family(NamedTuple):
     submitters: StrList = None
     lds_spouse_sealings: LDSSpouSealingType = None
     identifiers: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     citations: SourCiteType = None
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
@@ -7608,8 +7701,6 @@ class Family(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, FamilyXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
-            and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.attributes, FamilyAttribute)
             and Checker.verify_type(self.events, FamilyEvent)
             and Checker.verify_type(self.husband, IndividualXref, no_list=True)
@@ -7621,17 +7712,16 @@ class Family(NamedTuple):
             and Checker.verify_type(self.submitters, SubmitterXref)
             and Checker.verify_type(self.lds_spouse_sealings, LDSSpouseSealing)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.citations, SourceCitation)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
-            and Checker.verify_ext(Tag.RESN, self.resn_ext)
             and Checker.verify_ext(Tag.HUSB, self.husb_ext)
             and Checker.verify_ext(Tag.WIFE, self.wife_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -7639,9 +7729,7 @@ class Family(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            if self.resn != Tag.NONE:
-                lines = Tagger.string(lines, level, Tag.RESN, self.resn.value)
-                lines = Tagger.structure(lines, level + 1, self.resn_ext)
+            lines = Tagger.structure(lines, level, self.resn)
             lines = Tagger.structure(lines, level, self.attributes)
             lines = Tagger.structure(lines, level, self.events)
             if str(self.husband) != str(Void.INDI):
@@ -7717,7 +7805,6 @@ class Family(NamedTuple):
                 ),
                 ('    change = ', self.change, tabs + 1, full, False),
                 ('    creation = ', self.creation, tabs + 1, full, False),
-                ('    resn_ext = ', self.husb_ext, tabs, full, False),
                 ('    husb_ext = ', self.husb_ext, tabs, full, False),
                 ('    wife_ext = ', self.wife_ext, tabs, full, False),
             ),
@@ -7780,32 +7867,28 @@ class Multimedia(NamedTuple):
     """
 
     xref: MultimediaXref = Void.OBJE
-    resn: Tag = Tag.NONE
+    resn: EnumTagType = None
     files: FileType = None
     identifiers: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     sources: SourCiteType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
-    resn_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, MultimediaXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
-            and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.files, File)
             and Checker.verify_not_empty(self.files)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
-            and Checker.verify_ext(Tag.RESN, self.resn_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -7813,11 +7896,7 @@ class Multimedia(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            if self.resn != Tag.NONE:
-                lines = Tagger.string(
-                    lines, level + 1, Tag.RESN, self.resn.value
-                )
-                lines = Tagger.structure(lines, level + 1, self.resn_ext)
+            lines = Tagger.structure(lines, level + 1, self.resn)
             lines = Tagger.structure(lines, level + 1, self.files)
             lines = Tagger.structure(lines, level + 1, self.identifiers)
             lines = Tagger.structure(lines, level + 1, self.notes)
@@ -7839,7 +7918,6 @@ class Multimedia(NamedTuple):
                 ('    sources = ', self.sources, tabs + 1, full, False),
                 ('    change = ', self.change, tabs + 1, full, False),
                 ('    creation = ', self.creation, tabs + 1, full, False),
-                ('    resn_ext = ', self.resn_ext, tabs, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -7929,7 +8007,7 @@ class Source(NamedTuple):
     xref: SourceXref = Void.SOUR
     source_data_events: SourDataEvenType = None
     agency: str = Default.EMPTY
-    data_notes: NoteType = None
+    data_notes: NoteSNoteType = None
     author: str = Default.EMPTY
     title: str = Default.EMPTY
     abbreviation: str = Default.EMPTY
@@ -7937,7 +8015,7 @@ class Source(NamedTuple):
     text: TextType = None
     repositories: SourRepoCiteType = None
     identifiers: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
@@ -7952,7 +8030,7 @@ class Source(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SourceXref)
-            #and Checker.verify_not_empty(self.xref)
+            # and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.author, str, no_list=True)
             and Checker.verify_type(self.title, str, no_list=True)
             and Checker.verify_type(self.abbreviation, str, no_list=True)
@@ -7960,7 +8038,7 @@ class Source(NamedTuple):
             and Checker.verify_type(self.text, Text, no_list=True)
             and Checker.verify_type(self.repositories, Repository)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
@@ -7972,7 +8050,7 @@ class Source(NamedTuple):
             and Checker.verify_ext(Tag.PUBL, self.publ_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -7992,7 +8070,7 @@ class Source(NamedTuple):
                 )
                 lines = Tagger.string(lines, level + 2, Tag.AGNC, self.agency)
                 lines = Tagger.structure(lines, level + 3, self.agnc_ext)
-                lines = Tagger.structure(lines, level + 1, self.notes)
+                lines = Tagger.structure(lines, level + 1, self.data_notes)
             lines = Tagger.string(lines, level + 1, Tag.AUTH, self.author)
             lines = Tagger.structure(lines, level + 2, self.auth_ext)
             lines = Tagger.string(lines, level + 1, Tag.TITL, self.title)
@@ -8144,6 +8222,7 @@ class Individual(NamedTuple):
         events: Individual events entered through `IndividualEvent`.
         lds_individual_ordinances: LDS individual ordinances entered through `LDSIndividualOrdinance`.
         families_child: Families in the individual is a child entered through `FamilyChild`.
+        family_spouse: The family the individual belonged to.
         submitters: Submitters entered through `Submitter`.
         associations: Associations entered through `Association`.
         aliases: Aliases entered through `Alias`.
@@ -8218,40 +8297,37 @@ class Individual(NamedTuple):
     """
 
     xref: IndividualXref = Void.INDI
-    resn: Tag = Tag.NONE
+    resn: EnumTagType = None
     personal_names: PersonalNameType = None
-    sex: Tag = Tag.NONE
+    sex: EnumTagType = None
     attributes: IndiAttrType = None
     events: IndiEvenType = None
     lds_individual_ordinances: list[LDSIndividualOrdinance] | None = None
     families_child: FamcType = None
+    family_spouse: FamsType = None
     submitters: SubmType = None
     associations: AssoType = None
     aliases: AliaType = None
     ancestor_interest: SubmType = None
     descendent_interest: SubmType = None
     identifiers: IdenType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     sources: StrList = None
     multimedia_links: MMLinkType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
-    resn_ext: ExtType = None
-    sex_ext: ExtType = None
 
     def validate(self) -> bool:
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, IndividualXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
-            and Checker.verify_enum(self.resn, Resn)
             and Checker.verify_type(self.personal_names, PersonalName)
-            and Checker.verify_enum(self.sex, Sex)
             and Checker.verify_type(self.attributes, IndividualAttribute)
             and Checker.verify_type(self.events, IndividualEvent)
             and Checker.verify_type(
                 self.lds_individual_ordinances, LDSIndividualOrdinance
             )
+            and Checker.verify_type(self.family_spouse, FamilySpouse)
             and Checker.verify_type(self.families_child, FamilyChild)
             and Checker.verify_type(self.submitters, Submitter)
             and Checker.verify_type(self.associations, Association)
@@ -8259,16 +8335,14 @@ class Individual(NamedTuple):
             and Checker.verify_type(self.ancestor_interest, Submitter)
             and Checker.verify_type(self.descendent_interest, Submitter)
             and Checker.verify_type(self.identifiers, Identifier)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.sources, Source)
             and Checker.verify_type(self.multimedia_links, MultimediaLink)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
-            and Checker.verify_ext(Tag.RESN, self.resn_ext)
-            and Checker.verify_ext(Tag.SEX, self.sex_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -8276,17 +8350,16 @@ class Individual(NamedTuple):
         """Format to meet GEDCOM standards."""
         lines: str = self.xref.ged()
         if self.validate():
-            lines = Tagger.string(lines, level + 1, Tag.RESN, self.resn.value)
-            lines = Tagger.structure(lines, level + 2, self.resn_ext)
+            lines = Tagger.structure(lines, level + 1, self.resn)
             lines = Tagger.structure(lines, level + 1, self.personal_names)
-            lines = Tagger.string(lines, level + 1, Tag.SEX, self.sex.value)
-            lines = Tagger.structure(lines, level + 2, self.sex_ext)
+            lines = Tagger.structure(lines, level + 1, self.sex)
             lines = Tagger.structure(lines, level + 1, self.attributes)
             lines = Tagger.structure(lines, level + 1, self.events)
             lines = Tagger.structure(
                 lines, level + 1, self.lds_individual_ordinances
             )
             lines = Tagger.structure(lines, level + 1, self.families_child)
+            lines = Tagger.structure(lines, level + 1, self.family_spouse)
             lines = Tagger.structure(lines, level + 1, self.submitters)
             lines = Tagger.structure(lines, level + 1, self.associations)
             lines = Tagger.structure(lines, level + 1, self.aliases)
@@ -8359,8 +8432,6 @@ class Individual(NamedTuple):
                 ),
                 ('    change = ', self.change, tabs + 1, full, False),
                 ('    creation = ', self.creation, tabs + 1, full, False),
-                ('    resn_ext = ', self.resn_ext, tabs, full, False),
-                ('    sex_ext = ', self.sex_ext, tabs, full, False),
             ),
             Default.INDENT * tabs,
         )
@@ -8414,7 +8485,7 @@ class Repository(NamedTuple):
     emails: EmailType = None
     faxes: FaxType = None
     wwws: WWWType = None
-    notes: NoteType = None
+    notes: NoteSNoteType = None
     identifiers: IdenType = None
     change: ChangeDateType = None
     creation: CreationDateType = None
@@ -8424,7 +8495,7 @@ class Repository(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, RepositoryXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
+            # and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.name, str, no_list=True)
             and Checker.verify_not_empty(self.name)
             and Checker.verify_type(self.address, Address, no_list=True)
@@ -8432,14 +8503,14 @@ class Repository(NamedTuple):
             and Checker.verify_type(self.emails, Email)
             and Checker.verify_type(self.faxes, Fax)
             and Checker.verify_type(self.wwws, WWW)
-            and Checker.verify_type(self.notes, Note)
+            and Checker.verify_type(self.notes, Note | SNote)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
             and Checker.verify_ext(Tag.RESN, self.name_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -8544,13 +8615,13 @@ class SharedNote(NamedTuple):
         """Validate the stored value."""
         check: bool = (
             Checker.verify_type(self.xref, SharedNoteXref, no_list=True)
-            #and Checker.verify_not_empty(self.xref)
+            # and Checker.verify_not_empty(self.xref)
             and Checker.verify_type(self.text, str, no_list=True)
             and Checker.verify_not_empty(self.text)
             and Checker.verify_type(self.mime, str, no_list=True)
             and Checker.verify_type(self.language, Lang, no_list=True)
             and Checker.verify_type(self.translations, NoteTranslation)
-            and Checker.verify_type(self.sources, Source)
+            and Checker.verify_type(self.sources, SourceCitation)
             and Checker.verify_type(self.identifiers, Identifier)
             and Checker.verify_type(self.change, ChangeDate, no_list=True)
             and Checker.verify_type(self.creation, CreationDate, no_list=True)
@@ -8558,7 +8629,7 @@ class SharedNote(NamedTuple):
             and Checker.verify_ext(Tag.MIME, self.mime_ext)
         )
         return check
-    
+
     def post_validate(self, lines: str) -> None:
         """Use this for tests after the record has been constructed."""
 
@@ -8715,7 +8786,7 @@ class Header(NamedTuple):
     submitter: SubmitterXref = Void.SUBM
     subm_copyright: str = Default.EMPTY
     language: LangType = None
-    note: NoteType = None
+    note: NoteSNoteType = None
     head_ext: ExtType = None
     gedc_ext: ExtType = None
     vers_ext: ExtType = None
@@ -8746,7 +8817,7 @@ class Header(NamedTuple):
             and Checker.verify_type(self.submitter, SubmitterXref, no_list=True)
             and Checker.verify_type(self.subm_copyright, str, no_list=True)
             and Checker.verify_type(self.language, Lang, no_list=True)
-            and Checker.verify_type(self.note, Note, no_list=True)
+            and Checker.verify_type(self.note, Note | SNote, no_list=True)
             and Checker.verify_ext(Tag.HEAD, self.head_ext)
             and Checker.verify_ext(Tag.GEDC, self.gedc_ext)
             and Checker.verify_ext(Tag.VERS, self.vers_ext)
@@ -8772,7 +8843,11 @@ class Header(NamedTuple):
             ):
                 lines = Tagger.empty(lines, level + 1, Tag.SCHMA)
                 lines = Tagger.structure(lines, level + 1, self.exttags)
-            lines = Tagger.structure(lines, level + 2, self.address)
+            lines = Tagger.string(lines, level + 1, Tag.SOUR, self.source)
+            lines = Tagger.string(lines, level + 2, Tag.VERS, self.vers)
+            lines = Tagger.string(lines, level + 2, Tag.NAME, self.name)
+            lines = Tagger.string(lines, level + 2, Tag.CORP, self.corporation)
+            lines = Tagger.structure(lines, level + 3, self.address)
             lines = Tagger.structure(lines, level + 3, self.phones)
             lines = Tagger.structure(lines, level + 3, self.emails)
             lines = Tagger.structure(lines, level + 3, self.faxes)

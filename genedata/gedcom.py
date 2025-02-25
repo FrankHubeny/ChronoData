@@ -1249,7 +1249,6 @@ class Default:
     PLACE_FORM2: str = 'County'
     PLACE_FORM3: str = 'State'
     PLACE_FORM4: str = 'Country'
-    #POINTER: str = '@VOID@'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
     SLASH: str = '/'
