@@ -42,6 +42,7 @@ class Msg:
     BAD_CHAR: str = 'The character "{0}" is not in the set of characters "{1}".'
     BAD_MONTH: str = 'The month "{1}" for calend "{0}" is not recognized.'
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
+    CANNOT_SHOW: str = 'Cannot show item "{0}".'
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
     )
@@ -59,6 +60,7 @@ class Msg:
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
     MISSING: str = 'These xref values {0} are missing record definitions.'
+    MISSING_REQUIRED_TUPLE: str = 'The tuple type "{0}" is required for this structure.'
     NEGATIVE_ERROR: str = 'The value "{0}" is less than zero.'
     NEG_YEAR: str = 'Negative year but a negative label "{0}".'
     NEITHER_TAG_NOR_EXTTAG: str = (
@@ -68,6 +70,7 @@ class Msg:
         'Only single values, not lists are permitted for this structure type.'
     )
     NO_NONE: str = 'The value is required to be other than "None".'
+    NO_SUBS: str = 'No substructures are permitted for the "{0}" structure.'
     NO_EMPTY_LIST: str = 'The list is required to be not empty.'
     NO_EMPTY_POINTER: str = (
         'The cross reference identifier must be other than VOID'
@@ -83,11 +86,13 @@ class Msg:
         'The extension "{0}" is not defined for the current structure.'
     )
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
+    NOT_PERMITTED: str = 'The named tuple "{0}" is not permitted in this structure.'
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The tag "{0}" is not an enumerated value.'
 
     ONLY_ONCE: str = 'The substructure "{0}" can appear only once under "{1}".'
+    ONLY_ONE_PERMITTED: str = 'The substructure "{0}" can appear only once.'
     PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'
     PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
@@ -128,6 +133,7 @@ class Msg:
         'The structure at "{0}" does not have a name for its tag.'
     )
     UNRECOGNIZED: str = 'The filename "{0}" is not recognized.'
+    UNRECOGNIZED_XREF: str = 'The cross reference identifier "{0}" is not recognized.'
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'
     YAML_NOT_YAML_FILE: str = (

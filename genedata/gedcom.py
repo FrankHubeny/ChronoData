@@ -44,28 +44,30 @@ a GEDCOM line rather than the Tag part of the line.
 """
 
 __all__ = [
-    'Adop',
-    'Even',
-    'EvenAttr',
-    'FamAttr',
-    'FamEven',
-    'FamcStat',
-    'Id',
-    'IndiAttr',
-    'IndiEven',
-    'Medium',
-    'NameType',
+    'AdopEnum',
+    'EvenAttrEnum',
+    'EvenEnum',
+    'FamAttrEnum',
+    'FamEvenEnum',
+    'FamcStatEnum',
+    'IdEnum',
+    'IndiAttrEnum',
+    'IndiEvenEnum',
+    'MediumEnum',
+    'NameTypeEnum',
     'OverView',
-    'Pedi',
+    'PediEnum',
     'PersonalNamePieceTag',
-    'Quay',
+    'QuayEnum',
     'Record',
-    'Resn',
-    'Role',
-    'Sex',
+    'ResnEnum',
+    'RoleEnum',
+    'SexEnum',
     'Specs',
-    'Stat',
+    'StatEnum',
+    'StdTag',
     'Tag',
+    'Terms',
 ]
 
 from dataclasses import dataclass
@@ -1227,10 +1229,20 @@ class Default:
     INDENT: str = '    '
     KIND_STANDARD: str = 'stdTag'
     KIND_EXTENDED: str = 'extTag'
+    LATI_DEFAULT: float = 0.0
+    LATI_HIGH: float = 90.0
+    LATI_LOW: float = -90.0
+    LATI_NORTH: str = 'N'
+    LATI_PRECISION: str = '.6f'
+    LATI_SOUTH: str = 'S'
     LEFT: int = 0
     LIST_ITEM_SEPARATOR: str = ', '
-    MAP_LATITUDE: float = 0.0
-    MAP_LONGITUDE: float = 0.0
+    LONG_DEFAULT: float = 0.0
+    LONG_EAST: str = 'E'
+    LONG_HIGH: float = 180.0
+    LONG_LOW: float = -180.0
+    LONG_PRECISION: str = '.6f'
+    LONG_WEST: str = 'W'
     MIME: str = ''
     MONTHS: int = 0
     NONE: str = 'None'
@@ -1293,7 +1305,7 @@ class Default:
     Z: str = 'Z'
 
 
-class Even(Enum):
+class EvenEnum(Enum):
     """Tags used for events in general."""
 
     CENS = Tag.CENS.value
@@ -1327,9 +1339,10 @@ class Even(Enum):
     MARL = Tag.MARL.value
     MARR = Tag.MARR.value
     MARS = Tag.MARS.value
+    NONE = Tag.NONE.value
 
 
-class FamAttr(Enum):
+class FamAttrEnum(Enum):
     """Tags used for family attributes.
 
     This is a sub-enumeration of the Tag enumeration class.
@@ -1344,14 +1357,14 @@ class FamAttr(Enum):
     NONE = Tag.NONE.value
 
 
-class FamcStat(Enum):
+class FamcStatEnum(Enum):
     CHALLENGED = 'CHALLENGED'
     DISPROVEN = 'DISPROVEN'
     PROVEN = 'PROVEN'
-    NONE = ''
+    NONE = Tag.NONE.value
 
 
-class FamEven(Enum):
+class FamEvenEnum(Enum):
     """Tags used for family events.
 
     This is a sub-enumeration of the Tag enumeration class.
@@ -1374,7 +1387,7 @@ class FamEven(Enum):
     NONE = Tag.NONE.value
 
 
-class Id(Enum):
+class IdEnum(Enum):
     """Tags used for identifier values.
 
     This is a sub-enumeration of the Tag enumeration class.
@@ -1389,7 +1402,7 @@ class Id(Enum):
     NONE = Tag.NONE.value
 
 
-class IndiAttr(Enum):
+class IndiAttrEnum(Enum):
     """Tags used for individual attributes.
 
     This is a sub-enumeration of the Tag enumeration class.
@@ -1415,7 +1428,7 @@ class IndiAttr(Enum):
     NONE = Tag.NONE.value
 
 
-class IndiEven(Enum):
+class IndiEvenEnum(Enum):
     """Tags used for individual events.
 
     This is a sub-enumeration of the Tag enumeration class.
@@ -1487,7 +1500,7 @@ class Record(str, Enum):
     NONE = Tag.NONE.value
 
 
-class Adop(Enum):
+class AdopEnum(Enum):
     """Implement the GEDCOM enumeration set ADOP as an enumeration class.
 
     Reference:
@@ -1500,7 +1513,7 @@ class Adop(Enum):
     NONE = Tag.NONE.value
 
 
-class EvenAttr(Enum):
+class EvenAttrEnum(Enum):
     """Implement the GEDCOM enumeration set EVENATTR as an enumeration class.
 
     Reference:
@@ -1513,9 +1526,50 @@ class EvenAttr(Enum):
     FACT = Tag.FACT.value
     EVEN = Tag.EVEN.value
     NONE = Tag.NONE.value
+    ADOP = Tag.ADOP
+    BAPM = Tag.BAPM
+    BARM = Tag.BARM
+    BASM = Tag.BASM
+    BIRT = Tag.BIRT
+    BLES = Tag.BLES
+    BURI = Tag.BURI
+    CHR = Tag.CHR
+    CHRA = Tag.CHRA
+    CONF = Tag.CONF
+    CREM = Tag.CREM
+    DEAT = Tag.DEAT
+    EMIG = Tag.EMIG
+    FCOM = Tag.FCOM
+    GRAD = Tag.GRAD
+    IMMI = Tag.IMMI
+    NATU = Tag.NATU
+    ORDN = Tag.ORDN
+    PROB = Tag.PROB
+    RETI = Tag.RETI
+    WILL = Tag.WILL
+    ANUL = Tag.ANUL
+    DIV = Tag.DIV
+    DIVF = Tag.DIVF
+    ENGA = Tag.ENGA
+    MARB = Tag.MARB
+    MARC = Tag.MARC
+    MARL = Tag.MARL
+    MARR = Tag.MARR
+    MARS = Tag.MARS
+    CAST = Tag.CAST
+    DSCR = Tag.DSCR
+    EDUC = Tag.EDUC
+    IDNO = Tag.IDNO
+    NATI = Tag.NATI
+    NMR = Tag.NMR
+    OCCU = Tag.OCCU
+    PROP = Tag.PROP
+    RELI = Tag.RELI
+    SSN = Tag.SSN
+    TITL = Tag.TITL
 
 
-class Medium(Enum):
+class MediumEnum(Enum):
     """Implement the GEDCOM enumeration set MEDI as an enumeration class.
 
     Reference:
@@ -1539,7 +1593,7 @@ class Medium(Enum):
     NONE = Tag.NONE.value
 
 
-class NameType(Enum):
+class NameTypeEnum(Enum):
     """Implement the GEDCOM enumeration set NAME-TYPE as an eneration class.
 
     Reference:
@@ -1556,7 +1610,7 @@ class NameType(Enum):
     NONE = Tag.NONE.value
 
 
-class Pedi(Enum):
+class PediEnum(Enum):
     """Implement the GEDCOM enumeration set PEDI as an enumeration class.
 
     Reference:
@@ -1571,7 +1625,7 @@ class Pedi(Enum):
     NONE = Tag.NONE.value
 
 
-class Quay(Enum):
+class QuayEnum(Enum):
     """Implement the GEDCOM enumeration set QUAY as an enumeration class.
 
     Reference:
@@ -1585,7 +1639,7 @@ class Quay(Enum):
     NONE = Tag.NONE.value
 
 
-class Resn(Enum):
+class ResnEnum(Enum):
     """Implement the GEDCOM enumeration set RESN as an enumeration class.
 
     Reference:
@@ -1598,7 +1652,7 @@ class Resn(Enum):
     NONE = Tag.NONE.value
 
 
-class Role(Enum):
+class RoleEnum(Enum):
     """Implement the GEDCOM enumeration set ROLE as an enumeration class.
 
     Reference:
@@ -1623,7 +1677,7 @@ class Role(Enum):
     NONE = Tag.NONE.value
 
 
-class Sex(Enum):
+class SexEnum(Enum):
     """Implement the GEDCOM SEX enumeration set as an enumeration class.
 
     Reference:
@@ -1637,7 +1691,7 @@ class Sex(Enum):
     NONE = Tag.NONE.value
 
 
-class Stat(Enum):
+class StatEnum(Enum):
     """Implement the GEDCOM enumeration set ord-STAT as an enumeration class.
 
     Reference:
@@ -1669,6 +1723,7 @@ class TagTuple(NamedTuple):
     required: list[str] | None = None
     single: list[str] | None = None
     enumsets: list[str] | None = None
+    enums: list[str] | None = None
     lang: str = Default.EMPTY
     type: str = Default.EMPTY
     uri: str = Default.EMPTY
@@ -1692,7 +1747,7 @@ class TagTuple(NamedTuple):
     yamldict: dict[str, Any] | None = None
 
     def show(self) -> str:
-        return f"{self.value} = TagTuple(value='{self.value}', supers={self.supers}, subs={self.subs}, required={self.required}, single={self.single}, enumsets={self.enumsets})"
+        return f"    {self.value} = TagTuple(value='{self.value.upper()}', standard_tag='{self.standard_tag}', supers={self.supers}, subs={self.subs}, required={self.required}, single={self.single}, enumsets={self.enumsets}, enums={self.enums})"
     
     def code(self) -> str:
         return f"""
@@ -1704,6 +1759,7 @@ TagTuple(
   required = {self.required},
   single = {self.single},
   enumsets = {self.enumsets},
+  enums = {self.enums},
   lang = '{self.lang}',
   type = '{self.type}',
   uri = '{self.uri}',
@@ -1728,6 +1784,341 @@ TagTuple(
 )
 """
 
+class Terms(Enum):
+    """Terms containing GEDCOM specifications.
+
+    For each version of GEDCOM this data is collected and stored in a module.
+    The methods reference this data to identify the name of the tag, whether
+    the substructure is required or not and the cardinality of the substructure.
+
+    The `TagYaml` class retrieves these and stores data in a `TagTuple` NamedTuple
+    which is made visible in `StdTag`.
+
+    See Also:
+      `StdTag`
+      `TagTuple`
+      `TagYaml`
+
+    Reference:
+      [GEDCOM Tags](https://github.com/FamilySearch/GEDCOM/tree/main/extracted-files/tags)
+    """
+
+    ABBR = 'ABBR'
+    ADDR = 'ADDR'
+    ADOP = 'ADOP'
+    ADOP_FAMC = 'ADOP-FAMC'
+    ADR1 = 'ADR1'
+    ADR2 = 'ADR2'
+    ADR3 = 'ADR3'
+    AFN = 'AFN'
+    AGE = 'AGE'
+    AGNC = 'AGNC'
+    ALIA = 'ALIA'
+    ANCI = 'ANCI'
+    ANUL = 'ANUL'
+    ASSO = 'ASSO'
+    AUTH = 'AUTH'
+    BAPL = 'BAPL'
+    BAPM = 'BAPM'
+    BARM = 'BARM'
+    BASM = 'BASM'
+    BIRT = 'BIRT'
+    BLES = 'BLES'
+    CALN = 'CALN'
+    CAST = 'CAST'
+    CAUS = 'CAUS'
+    CHAN = 'CHAN'
+    CHIL = 'CHIL'
+    CHR = 'CHR'
+    CHRA = 'CHRA'
+    CITY = 'CITY'
+    CONF = 'CONF'
+    CONL = 'CONL'
+    CONT = 'CONT'
+    COPR = 'COPR'
+    CORP = 'CORP'
+    CREA = 'CREA'
+    CREM = 'CREM'
+    CROP = 'CROP'
+    CTRY = 'CTRY'
+    DATA = 'DATA'
+    DATA_EVEN = 'DATA-EVEN'
+    DATA_EVEN_DATE = 'DATA-EVEN-DATE'
+    DATE = 'DATE'
+    DATE_EXACT = 'DATE-exact'
+    DEAT = 'DEAT'
+    DESI = 'DESI'
+    DEST = 'DEST'
+    DIV = 'DIV'
+    DIVF = 'DIVF'
+    DSCR = 'DSCR'
+    EDUC = 'EDUC'
+    EMAIL = 'EMAIL'
+    EMIG = 'EMIG'
+    ENDL = 'ENDL'
+    ENGA = 'ENGA'
+    EXID = 'EXID'
+    EXID_TYPE = 'EXID-TYPE'
+    FAM_CENS = 'FAM-CENS'
+    FAM_EVEN = 'FAM-EVEN'
+    FAM_FACT = 'FAM-FACT'
+    FAM_HUSB = 'FAM-HUSB'
+    FAM_NCHI = 'FAM-NCHI'
+    FAM_RESI = 'FAM-RESI'
+    FAM_WIFE = 'FAM-WIFE'
+    FAMC = 'FAMC'
+    FAMC_ADOP = 'FAMC-ADOP'
+    FAMC_STAT = 'FAMC-STAT'
+    FAMS = 'FAMS'
+    FAX = 'FAX'
+    FCOM = 'FCOM'
+    FILE = 'FILE'
+    FILE_TRAN = 'FILE-TRAN'
+    FORM = 'FORM'
+    GEDC = 'GEDC'
+    GEDC_VERS = 'GEDC-VERS'
+    GIVN = 'GIVN'
+    GRAD = 'GRAD'
+    HEAD = 'HEAD'
+    HEAD_DATE = 'HEAD-DATE'
+    HEAD_LANG = 'HEAD-LANG'
+    HEAD_PLAC = 'HEAD-PLAC'
+    HEAD_PLAC_FORM = 'HEAD-PLAC-FORM'
+    HEAD_SOUR = 'HEAD-SOUR'
+    HEAD_SOUR_DATA = 'HEAD-SOUR-DATA'
+    HEIGHT = 'HEIGHT'
+    HUSB = 'HUSB'
+    IDNO = 'IDNO'
+    IMMI = 'IMMI'
+    INDI_CENS = 'INDI-CENS'
+    INDI_EVEN = 'INDI-EVEN'
+    INDI_FACT = 'INDI-FACT'
+    INDI_FAMC = 'INDI-FAMC'
+    INDI_NAME = 'INDI-NAME'
+    INDI_NCHI = 'INDI-NCHI'
+    INDI_RELI = 'INDI-RELI'
+    INDI_RESI = 'INDI-RESI'
+    INDI_TITL = 'INDI-TITL'
+    INIL = 'INIL'
+    LANG = 'LANG'
+    LATI = 'LATI'
+    LEFT = 'LEFT'
+    LONG = 'LONG'
+    MAP = 'MAP'
+    MARB = 'MARB'
+    MARC = 'MARC'
+    MARL = 'MARL'
+    MARR = 'MARR'
+    MARS = 'MARS'
+    MEDI = 'MEDI'
+    MIME = 'MIME'
+    NAME = 'NAME'
+    NAME_TRAN = 'NAME-TRAN'
+    NAME_TYPE = 'NAME-TYPE'
+    NATI = 'NATI'
+    NATU = 'NATU'
+    NICK = 'NICK'
+    NMR = 'NMR'
+    NO = 'NO'
+    NO_DATE = 'NO-DATE'
+    NOTE = 'NOTE'
+    NOTE_TRAN = 'NOTE-TRAN'
+    NPFX = 'NPFX'
+    NSFX = 'NSFX'
+    OBJE = 'OBJE'
+    OCCU = 'OCCU'
+    ORDN = 'ORDN'
+    PAGE = 'PAGE'
+    PEDI = 'PEDI'
+    PHON = 'PHON'
+    PHRASE = 'PHRASE'
+    PLAC = 'PLAC'
+    PLAC_FORM = 'PLAC-FORM'
+    PLAC_TRAN = 'PLAC-TRAN'
+    POST = 'POST'
+    PROB = 'PROB'
+    PROP = 'PROP'
+    PUBL = 'PUBL'
+    QUAY = 'QUAY'
+    REFN = 'REFN'
+    RELI = 'RELI'
+    REPO = 'REPO'
+    RESN = 'RESN'
+    RETI = 'RETI'
+    RFN = 'RFN'
+    RIN = 'RIN'
+    ROLE = 'ROLE'
+    SCHMA = 'SCHMA'
+    SDATE = 'SDATE'
+    SEX = 'SEX'
+    SLGC = 'SLGC'
+    SLGS = 'SLGS'
+    SNOTE = 'SNOTE'
+    SOUR = 'SOUR'
+    SOUR_DATA = 'SOUR-DATA'
+    SOUR_EVEN = 'SOUR-EVEN'
+    SPFX = 'SPFX'
+    SSN = 'SSN'
+    STAE = 'STAE'
+    SUBM = 'SUBM'
+    SUBM_LANG = 'SUBM-LANG'
+    SURN = 'SURN'
+    TAG = 'TAG'
+    TEMP = 'TEMP'
+    TEXT = 'TEXT'
+    TIME = 'TIME'
+    TITL = 'TITL'
+    TOP = 'TOP'
+    TRLR = 'TRLR'
+    TYPE = 'TYPE'
+    UID = 'UID'
+    VERS = 'VERS'
+    WIDTH = 'WIDTH'
+    WIFE = 'WIFE'
+    WILL = 'WILL'
+    WWW = 'WWW'
+    CAL_FRENCH_R = 'cal-FRENCH_R'
+    CAL_GREGORIAN = 'cal-GREGORIAN'
+    CAL_HEBREW = 'cal-HEBREW'
+    CAL_JULIAN = 'cal-JULIAN'
+    ENUM_0 = 'enum-0'
+    ENUM_1 = 'enum-1'
+    ENUM_2 = 'enum-2'
+    ENUM_3 = 'enum-3'
+    ENUM_ADOP_HUSB = 'enum-ADOP-HUSB'
+    ENUM_ADOP_WIFE = 'enum-ADOP-WIFE'
+    ENUM_ADOPTED = 'enum-ADOPTED'
+    ENUM_AKA = 'enum-AKA'
+    ENUM_AUDIO = 'enum-AUDIO'
+    ENUM_BIC = 'enum-BIC'
+    ENUM_BIRTH = 'enum-BIRTH'
+    ENUM_BOOK = 'enum-BOOK'
+    ENUM_BOTH = 'enum-BOTH'
+    ENUM_CANCELED = 'enum-CANCELED'
+    ENUM_CARD = 'enum-CARD'
+    ENUM_CENS = 'enum-CENS'
+    ENUM_CHALLENGED = 'enum-CHALLENGED'
+    ENUM_CHIL = 'enum-CHIL'
+    ENUM_CHILD = 'enum-CHILD'
+    ENUM_CLERGY = 'enum-CLERGY'
+    ENUM_COMPLETED = 'enum-COMPLETED'
+    ENUM_CONFIDENTIAL = 'enum-CONFIDENTIAL'
+    ENUM_DISPROVEN = 'enum-DISPROVEN'
+    ENUM_DNS = 'enum-DNS'
+    ENUM_DNS_CAN = 'enum-DNS_CAN'
+    ENUM_ELECTRONIC = 'enum-ELECTRONIC'
+    ENUM_EVEN = 'enum-EVEN'
+    ENUM_EXCLUDED = 'enum-EXCLUDED'
+    ENUM_F = 'enum-F'
+    ENUM_FACT = 'enum-FACT'
+    ENUM_FATH = 'enum-FATH'
+    ENUM_FICHE = 'enum-FICHE'
+    ENUM_FILM = 'enum-FILM'
+    ENUM_FOSTER = 'enum-FOSTER'
+    ENUM_FRIEND = 'enum-FRIEND'
+    ENUM_GODP = 'enum-GODP'
+    ENUM_HUSB = 'enum-HUSB'
+    ENUM_IMMIGRANT = 'enum-IMMIGRANT'
+    ENUM_INFANT = 'enum-INFANT'
+    ENUM_LOCKED = 'enum-LOCKED'
+    ENUM_M = 'enum-M'
+    ENUM_MAGAZINE = 'enum-MAGAZINE'
+    ENUM_MAIDEN = 'enum-MAIDEN'
+    ENUM_MANUSCRIPT = 'enum-MANUSCRIPT'
+    ENUM_MAP = 'enum-MAP'
+    ENUM_MARRIED = 'enum-MARRIED'
+    ENUM_MOTH = 'enum-MOTH'
+    ENUM_MULTIPLE = 'enum-MULTIPLE'
+    ENUM_NCHI = 'enum-NCHI'
+    ENUM_NEWSPAPER = 'enum-NEWSPAPER'
+    ENUM_NGHBR = 'enum-NGHBR'
+    ENUM_OFFICIATOR = 'enum-OFFICIATOR'
+    ENUM_OTHER = 'enum-OTHER'
+    ENUM_PARENT = 'enum-PARENT'
+    ENUM_PHOTO = 'enum-PHOTO'
+    ENUM_PRE_1970 = 'enum-PRE_1970'
+    ENUM_PRIVACY = 'enum-PRIVACY'
+    ENUM_PROFESSIONAL = 'enum-PROFESSIONAL'
+    ENUM_PROVEN = 'enum-PROVEN'
+    ENUM_RESI = 'enum-RESI'
+    ENUM_SEALING = 'enum-SEALING'
+    ENUM_SPOU = 'enum-SPOU'
+    ENUM_STILLBORN = 'enum-STILLBORN'
+    ENUM_SUBMITTED = 'enum-SUBMITTED'
+    ENUM_TOMBSTONE = 'enum-TOMBSTONE'
+    ENUM_U = 'enum-U'
+    ENUM_UNCLEARED = 'enum-UNCLEARED'
+    ENUM_VIDEO = 'enum-VIDEO'
+    ENUM_WIFE = 'enum-WIFE'
+    ENUM_WITN = 'enum-WITN'
+    ENUM_X = 'enum-X'
+    ENUMSET_ADOP = 'enumset-ADOP'
+    ENUMSET_EVEN = 'enumset-EVEN'
+    ENUMSET_EVENATTR = 'enumset-EVENATTR'
+    ENUMSET_MEDI = 'enumset-MEDI'
+    ENUMSET_NAME_TYPE = 'enumset-NAME-TYPE'
+    ENUMSET_PEDI = 'enumset-PEDI'
+    ENUMSET_QUAY = 'enumset-QUAY'
+    ENUMSET_RESN = 'enumset-RESN'
+    ENUMSET_ROLE = 'enumset-ROLE'
+    ENUMSET_SEX = 'enumset-SEX'
+    ENUMSET_ORD_STAT = 'enumset-ord-STAT'
+    MONTH_AAV = 'month-AAV'
+    MONTH_ADR = 'month-ADR'
+    MONTH_ADS = 'month-ADS'
+    MONTH_APR = 'month-APR'
+    MONTH_AUG = 'month-AUG'
+    MONTH_BRUM = 'month-BRUM'
+    MONTH_COMP = 'month-COMP'
+    MONTH_CSH = 'month-CSH'
+    MONTH_DEC = 'month-DEC'
+    MONTH_ELL = 'month-ELL'
+    MONTH_FEB = 'month-FEB'
+    MONTH_FLOR = 'month-FLOR'
+    MONTH_FRIM = 'month-FRIM'
+    MONTH_FRUC = 'month-FRUC'
+    MONTH_GERM = 'month-GERM'
+    MONTH_IYR = 'month-IYR'
+    MONTH_JAN = 'month-JAN'
+    MONTH_JUL = 'month-JUL'
+    MONTH_JUN = 'month-JUN'
+    MONTH_KSL = 'month-KSL'
+    MONTH_MAR = 'month-MAR'
+    MONTH_MAY = 'month-MAY'
+    MONTH_MESS = 'month-MESS'
+    MONTH_NIVO = 'month-NIVO'
+    MONTH_NOV = 'month-NOV'
+    MONTH_NSN = 'month-NSN'
+    MONTH_OCT = 'month-OCT'
+    MONTH_PLUV = 'month-PLUV'
+    MONTH_PRAI = 'month-PRAI'
+    MONTH_SEP = 'month-SEP'
+    MONTH_SHV = 'month-SHV'
+    MONTH_SVN = 'month-SVN'
+    MONTH_THER = 'month-THER'
+    MONTH_TMZ = 'month-TMZ'
+    MONTH_TSH = 'month-TSH'
+    MONTH_TVT = 'month-TVT'
+    MONTH_VEND = 'month-VEND'
+    MONTH_VENT = 'month-VENT'
+    ORD_STAT = 'ord-STAT'
+    RECORD_FAM = 'record-FAM'
+    RECORD_INDI = 'record-INDI'
+    RECORD_OBJE = 'record-OBJE'
+    RECORD_REPO = 'record-REPO'
+    RECORD_SNOTE = 'record-SNOTE'
+    RECORD_SOUR = 'record-SOUR'
+    RECORD_SUBM = 'record-SUBM'
+    TYPE_AGE = 'type-Age'
+    TYPE_DATE = 'type-Date'
+    TYPE_ENUM = 'type-Enum'
+    TYPE_FILEPATH = 'type-FilePath'
+    TYPE_LIST = 'type-List'
+    TYPE_NAME = 'type-Name'
+    TYPE_TIME = 'type-Time'
+
+
+
 
 class StdTag(Enum):
     """Generated definitions based on the enumeration class `Tag` and used to check extensions.
@@ -1736,135 +2127,316 @@ class StdTag(Enum):
     in a Notebook cell.  Copy the definitions into this class.
     """
 
-    ABBR = TagTuple(value='ABBR', supers=['record-SOUR'], subs=[], required=[], single=[], enumsets=[])
-    ADDR = TagTuple(value='ADDR', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CORP', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-REPO', 'record-SUBM'], subs=['ADR1', 'ADR2', 'ADR3', 'CITY', 'CTRY', 'POST', 'STAE'], required=[], single=['ADR1', 'ADR2', 'ADR3', 'CITY', 'CTRY', 'POST', 'STAE'], enumsets=[])
-    ADOP = TagTuple(value='ADOP', supers=['record-INDI'], subs=['ADDR', 'ADOP-FAMC', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'ADOP-FAMC', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    ADR1 = TagTuple(value='ADR1', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    ADR2 = TagTuple(value='ADR2', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    ADR3 = TagTuple(value='ADR3', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    AGE = TagTuple(value='AGE', supers=['ADOP', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DSCR', 'EDUC', 'EMIG', 'FCOM', 'GRAD', 'HUSB', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WIFE', 'WILL'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    AGNC = TagTuple(value='AGNC', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DATA', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL'], subs=[], required=[], single=[], enumsets=[])
-    ALIA = TagTuple(value='ALIA', supers=['record-INDI'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    ANCI = TagTuple(value='ANCI', supers=['record-INDI'], subs=[], required=[], single=[], enumsets=[])
-    ANUL = TagTuple(value='ANUL', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    ASSO = TagTuple(value='ASSO', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-FAM', 'record-INDI'], subs=['NOTE', 'PHRASE', 'ROLE', 'SNOTE', 'SOUR'], required=['ROLE'], single=['PHRASE', 'ROLE'], enumsets=[])
-    AUTH = TagTuple(value='AUTH', supers=['record-SOUR'], subs=[], required=[], single=[], enumsets=[])
-    BAPL = TagTuple(value='BAPL', supers=['record-INDI'], subs=['DATE', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=[], single=['DATE', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    BAPM = TagTuple(value='BAPM', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    BARM = TagTuple(value='BARM', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    BASM = TagTuple(value='BASM', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    BIRT = TagTuple(value='BIRT', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAMC', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'FAMC', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    BLES = TagTuple(value='BLES', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    BURI = TagTuple(value='BURI', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    CALN = TagTuple(value='CALN', supers=['REPO'], subs=['MEDI'], required=[], single=['MEDI'], enumsets=[])
-    CAST = TagTuple(value='CAST', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    CAUS = TagTuple(value='CAUS', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL'], subs=[], required=[], single=[], enumsets=[])
-    CHAN = TagTuple(value='CHAN', supers=['record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SNOTE', 'record-SOUR', 'record-SUBM'], subs=['DATE-exact', 'NOTE', 'SNOTE'], required=['DATE-exact'], single=['DATE-exact'], enumsets=[])
-    CHIL = TagTuple(value='CHIL', supers=['record-FAM'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    CHR = TagTuple(value='CHR', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAMC', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'FAMC', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    CHRA = TagTuple(value='CHRA', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    CITY = TagTuple(value='CITY', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    CONF = TagTuple(value='CONF', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    CONL = TagTuple(value='CONL', supers=['record-INDI'], subs=['DATE', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=[], single=['DATE', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    CONT = TagTuple(value='CONT', supers=[], subs=[], required=[], single=[], enumsets=[])
-    COPR = TagTuple(value='COPR', supers=['HEAD', 'HEAD-SOUR-DATA'], subs=[], required=[], single=[], enumsets=[])
-    CORP = TagTuple(value='CORP', supers=['HEAD-SOUR'], subs=['ADDR', 'EMAIL', 'FAX', 'PHON', 'WWW'], required=[], single=['ADDR'], enumsets=[])
-    CREA = TagTuple(value='CREA', supers=['record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SNOTE', 'record-SOUR', 'record-SUBM'], subs=['DATE-exact'], required=['DATE-exact'], single=['DATE-exact'], enumsets=[])
-    CREM = TagTuple(value='CREM', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    CROP = TagTuple(value='CROP', supers=['OBJE'], subs=['HEIGHT', 'LEFT', 'TOP', 'WIDTH'], required=[], single=['HEIGHT', 'LEFT', 'TOP', 'WIDTH'], enumsets=[])
-    CTRY = TagTuple(value='CTRY', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    DATA = TagTuple(value='DATA', supers=['record-SOUR'], subs=['AGNC', 'DATA-EVEN', 'NOTE', 'SNOTE'], required=[], single=['AGNC'], enumsets=[])
-    DATE = TagTuple(value='DATE', supers=['ADOP', 'ANUL', 'BAPL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CONL', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENDL', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'INIL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SLGC', 'SLGS', 'SOUR-DATA', 'SSN', 'WILL'], subs=['PHRASE', 'TIME'], required=[], single=['PHRASE', 'TIME'], enumsets=[])
-    DEAT = TagTuple(value='DEAT', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    DESI = TagTuple(value='DESI', supers=['record-INDI'], subs=[], required=[], single=[], enumsets=[])
-    DEST = TagTuple(value='DEST', supers=['HEAD'], subs=[], required=[], single=[], enumsets=[])
-    DIV = TagTuple(value='DIV', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    DIVF = TagTuple(value='DIVF', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    DSCR = TagTuple(value='DSCR', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    EDUC = TagTuple(value='EDUC', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    EMAIL = TagTuple(value='EMAIL', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CORP', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-REPO', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    EMIG = TagTuple(value='EMIG', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    ENDL = TagTuple(value='ENDL', supers=['record-INDI'], subs=['DATE', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=[], single=['DATE', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    ENGA = TagTuple(value='ENGA', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    EXID = TagTuple(value='EXID', supers=['PLAC', 'record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SNOTE', 'record-SOUR', 'record-SUBM'], subs=['EXID-TYPE'], required=[], single=['EXID-TYPE'], enumsets=[])
-    FAMC = TagTuple(value='FAMC', supers=['BIRT', 'CHR', 'SLGC'], subs=[], required=[], single=[], enumsets=[])
-    FAMS = TagTuple(value='FAMS', supers=['record-INDI'], subs=['NOTE', 'SNOTE'], required=[], single=[], enumsets=[])
-    FAX = TagTuple(value='FAX', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CORP', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-REPO', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    FCOM = TagTuple(value='FCOM', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    FILE = TagTuple(value='FILE', supers=['record-OBJE'], subs=['FILE-TRAN', 'FORM', 'TITL'], required=['FORM'], single=['FORM', 'TITL'], enumsets=[])
-    FORM = TagTuple(value='FORM', supers=['FILE', 'FILE-TRAN'], subs=['MEDI'], required=[], single=['MEDI'], enumsets=[])
-    GEDC = TagTuple(value='GEDC', supers=['HEAD'], subs=['GEDC-VERS'], required=['GEDC-VERS'], single=['GEDC-VERS'], enumsets=[])
-    GIVN = TagTuple(value='GIVN', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    GRAD = TagTuple(value='GRAD', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    HEAD = TagTuple(value='HEAD', supers=[], subs=['COPR', 'DEST', 'GEDC', 'HEAD-DATE', 'HEAD-LANG', 'HEAD-PLAC', 'HEAD-SOUR', 'NOTE', 'SCHMA', 'SNOTE', 'SUBM'], required=['GEDC'], single=['COPR', 'DEST', 'GEDC', 'HEAD-DATE', 'HEAD-LANG', 'HEAD-PLAC', 'HEAD-SOUR', 'NOTE', 'SCHMA', 'SNOTE', 'SUBM'], enumsets=[])
-    HEIGHT = TagTuple(value='HEIGHT', supers=['CROP'], subs=[], required=[], single=[], enumsets=[])
-    HUSB = TagTuple(value='HUSB', supers=['ANUL', 'DIV', 'DIVF', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS'], subs=['AGE'], required=['AGE'], single=['AGE'], enumsets=[])
-    IDNO = TagTuple(value='IDNO', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=['TYPE'], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    IMMI = TagTuple(value='IMMI', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    INIL = TagTuple(value='INIL', supers=['record-INDI'], subs=['DATE', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=[], single=['DATE', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    LANG = TagTuple(value='LANG', supers=['NAME-TRAN', 'NOTE', 'NOTE-TRAN', 'PLAC', 'PLAC-TRAN', 'TEXT', 'record-SNOTE'], subs=[], required=[], single=[], enumsets=[])
-    LATI = TagTuple(value='LATI', supers=['MAP'], subs=[], required=[], single=[], enumsets=[])
-    LEFT = TagTuple(value='LEFT', supers=['CROP'], subs=[], required=[], single=[], enumsets=[])
-    LONG = TagTuple(value='LONG', supers=['MAP'], subs=[], required=[], single=[], enumsets=[])
-    MAP = TagTuple(value='MAP', supers=['PLAC'], subs=['LATI', 'LONG'], required=['LATI', 'LONG'], single=['LATI', 'LONG'], enumsets=[])
-    MARB = TagTuple(value='MARB', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    MARC = TagTuple(value='MARC', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    MARL = TagTuple(value='MARL', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    MARR = TagTuple(value='MARR', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    MARS = TagTuple(value='MARS', supers=['record-FAM'], subs=['ADDR', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'HUSB', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WIFE', 'WWW'], required=[], single=['ADDR', 'AGNC', 'CAUS', 'DATE', 'HUSB', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE', 'WIFE'], enumsets=['EVEN', 'EVENATTR'])
-    MEDI = TagTuple(value='MEDI', supers=['CALN', 'FORM'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    MIME = TagTuple(value='MIME', supers=[], subs=[], required=[], single=[], enumsets=[])
-    NAME = TagTuple(value='NAME', supers=['HEAD-SOUR', 'record-REPO', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    NATI = TagTuple(value='NATI', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    NATU = TagTuple(value='NATU', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    NICK = TagTuple(value='NICK', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    NMR = TagTuple(value='NMR', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    NO = TagTuple(value='NO', supers=['record-FAM', 'record-INDI'], subs=['NO-DATE', 'NOTE', 'SNOTE', 'SOUR'], required=[], single=['NO-DATE'], enumsets=[])
-    NOTE = TagTuple(value='NOTE', supers=['ADOP', 'ANUL', 'ASSO', 'BAPL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHAN', 'CHR', 'CHRA', 'CONF', 'CONL', 'CREM', 'DATA', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENDL', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FAMS', 'FCOM', 'GRAD', 'HEAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-FAMC', 'INDI-NAME', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'INIL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'NO', 'OCCU', 'ORDN', 'PLAC', 'PROB', 'PROP', 'REPO', 'RETI', 'SLGC', 'SLGS', 'SOUR', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SOUR', 'record-SUBM'], subs=['LANG', 'MIME', 'NOTE-TRAN', 'SOUR'], required=[], single=['LANG', 'MIME'], enumsets=[])
-    NPFX = TagTuple(value='NPFX', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    NSFX = TagTuple(value='NSFX', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    OBJE = TagTuple(value='OBJE', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SOUR', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-SOUR', 'record-SUBM'], subs=['CROP', 'TITL'], required=[], single=['CROP', 'TITL'], enumsets=[])
-    OCCU = TagTuple(value='OCCU', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    ORDN = TagTuple(value='ORDN', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    PAGE = TagTuple(value='PAGE', supers=['SOUR'], subs=[], required=[], single=[], enumsets=[])
-    PEDI = TagTuple(value='PEDI', supers=['INDI-FAMC'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    PHON = TagTuple(value='PHON', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CORP', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-REPO', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    PHRASE = TagTuple(value='PHRASE', supers=['AGE', 'ALIA', 'ASSO', 'CHIL', 'DATA-EVEN-DATE', 'DATE', 'FAM-HUSB', 'FAM-WIFE', 'FAMC-ADOP', 'FAMC-STAT', 'MEDI', 'NAME-TYPE', 'NO-DATE', 'PEDI', 'ROLE', 'SDATE', 'SOUR-EVEN'], subs=[], required=[], single=[], enumsets=[])
-    PLAC = TagTuple(value='PLAC', supers=['ADOP', 'ANUL', 'BAPL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CONL', 'CREM', 'DATA-EVEN', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENDL', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'INIL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SLGC', 'SLGS', 'SSN', 'WILL'], subs=['EXID', 'LANG', 'MAP', 'NOTE', 'PLAC-FORM', 'PLAC-TRAN', 'SNOTE'], required=[], single=['LANG', 'MAP', 'PLAC-FORM'], enumsets=[])
-    POST = TagTuple(value='POST', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    PROB = TagTuple(value='PROB', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    PROP = TagTuple(value='PROP', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    PUBL = TagTuple(value='PUBL', supers=['record-SOUR'], subs=[], required=[], single=[], enumsets=[])
-    QUAY = TagTuple(value='QUAY', supers=['SOUR'], subs=[], required=[], single=[], enumsets=[])
-    REFN = TagTuple(value='REFN', supers=['record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SNOTE', 'record-SOUR', 'record-SUBM'], subs=['TYPE'], required=[], single=['TYPE'], enumsets=[])
-    RELI = TagTuple(value='RELI', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL'], subs=[], required=[], single=[], enumsets=['EVENATTR'])
-    REPO = TagTuple(value='REPO', supers=['record-SOUR'], subs=['CALN', 'NOTE', 'SNOTE'], required=[], single=[], enumsets=[])
-    RESN = TagTuple(value='RESN', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-OBJE'], subs=[], required=[], single=[], enumsets=[])
-    RETI = TagTuple(value='RETI', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    ROLE = TagTuple(value='ROLE', supers=['ASSO', 'SOUR-EVEN'], subs=['PHRASE'], required=[], single=['PHRASE'], enumsets=[])
-    SCHMA = TagTuple(value='SCHMA', supers=['HEAD'], subs=['TAG'], required=[], single=[], enumsets=[])
-    SDATE = TagTuple(value='SDATE', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL'], subs=['PHRASE', 'TIME'], required=[], single=['PHRASE', 'TIME'], enumsets=[])
-    SEX = TagTuple(value='SEX', supers=['record-INDI'], subs=[], required=[], single=[], enumsets=[])
-    SLGC = TagTuple(value='SLGC', supers=['record-INDI'], subs=['DATE', 'FAMC', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=['FAMC'], single=['DATE', 'FAMC', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    SLGS = TagTuple(value='SLGS', supers=['record-FAM'], subs=['DATE', 'NOTE', 'PLAC', 'SNOTE', 'SOUR', 'TEMP', 'ord-STAT'], required=[], single=['DATE', 'PLAC', 'TEMP', 'ord-STAT'], enumsets=[])
-    SNOTE = TagTuple(value='SNOTE', supers=['ADOP', 'ANUL', 'ASSO', 'BAPL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHAN', 'CHR', 'CHRA', 'CONF', 'CONL', 'CREM', 'DATA', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENDL', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FAMS', 'FCOM', 'GRAD', 'HEAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-FAMC', 'INDI-NAME', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'INIL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'NO', 'OCCU', 'ORDN', 'PLAC', 'PROB', 'PROP', 'REPO', 'RETI', 'SLGC', 'SLGS', 'SOUR', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SOUR', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    SOUR = TagTuple(value='SOUR', supers=['ADOP', 'ANUL', 'ASSO', 'BAPL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CONL', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENDL', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NAME', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'INIL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'NO', 'NOTE', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SLGC', 'SLGS', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-OBJE', 'record-SNOTE'], subs=['NOTE', 'OBJE', 'PAGE', 'QUAY', 'SNOTE', 'SOUR-DATA', 'SOUR-EVEN'], required=[], single=['PAGE', 'QUAY', 'SOUR-DATA', 'SOUR-EVEN'], enumsets=[])
-    SPFX = TagTuple(value='SPFX', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    SSN = TagTuple(value='SSN', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVENATTR'])
-    STAE = TagTuple(value='STAE', supers=['ADDR'], subs=[], required=[], single=[], enumsets=[])
-    SUBM = TagTuple(value='SUBM', supers=['HEAD', 'record-FAM', 'record-INDI'], subs=[], required=[], single=[], enumsets=[])
-    SURN = TagTuple(value='SURN', supers=['INDI-NAME', 'NAME-TRAN'], subs=[], required=[], single=[], enumsets=[])
-    TAG = TagTuple(value='TAG', supers=['SCHMA'], subs=[], required=[], single=[], enumsets=[])
-    TEMP = TagTuple(value='TEMP', supers=['BAPL', 'CONL', 'ENDL', 'INIL', 'SLGC', 'SLGS'], subs=[], required=[], single=[], enumsets=[])
-    TEXT = TagTuple(value='TEXT', supers=['SOUR-DATA', 'record-SOUR'], subs=['LANG', 'MIME'], required=[], single=['LANG', 'MIME'], enumsets=[])
-    TIME = TagTuple(value='TIME', supers=['DATE', 'DATE-exact', 'HEAD-DATE', 'SDATE'], subs=[], required=[], single=[], enumsets=[])
-    TITL = TagTuple(value='TITL', supers=['FILE', 'OBJE', 'record-SOUR'], subs=[], required=[], single=[], enumsets=['EVENATTR'])
-    TOP = TagTuple(value='TOP', supers=['CROP'], subs=[], required=[], single=[], enumsets=[])
-    TRLR = TagTuple(value='TRLR', supers=[], subs=[], required=[], single=[], enumsets=[])
-    TYPE = TagTuple(value='TYPE', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'REFN', 'RETI', 'SSN', 'WILL'], subs=[], required=[], single=[], enumsets=[])
-    UID = TagTuple(value='UID', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-FAM', 'record-INDI', 'record-OBJE', 'record-REPO', 'record-SNOTE', 'record-SOUR', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
-    VERS = TagTuple(value='VERS', supers=['HEAD-SOUR'], subs=[], required=[], single=[], enumsets=[])
-    WIDTH = TagTuple(value='WIDTH', supers=['CROP'], subs=[], required=[], single=[], enumsets=[])
-    WIFE = TagTuple(value='WIFE', supers=['ANUL', 'DIV', 'DIVF', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS'], subs=['AGE'], required=['AGE'], single=['AGE'], enumsets=[])
-    WILL = TagTuple(value='WILL', supers=['record-INDI'], subs=['ADDR', 'AGE', 'AGNC', 'ASSO', 'CAUS', 'DATE', 'EMAIL', 'FAX', 'NOTE', 'OBJE', 'PHON', 'PLAC', 'RELI', 'RESN', 'SDATE', 'SNOTE', 'SOUR', 'TYPE', 'UID', 'WWW'], required=[], single=['ADDR', 'AGE', 'AGNC', 'CAUS', 'DATE', 'PLAC', 'RELI', 'RESN', 'SDATE', 'TYPE'], enumsets=['EVEN', 'EVENATTR'])
-    WWW = TagTuple(value='WWW', supers=['ADOP', 'ANUL', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CAST', 'CHR', 'CHRA', 'CONF', 'CORP', 'CREM', 'DEAT', 'DIV', 'DIVF', 'DSCR', 'EDUC', 'EMIG', 'ENGA', 'FAM-CENS', 'FAM-EVEN', 'FAM-FACT', 'FAM-NCHI', 'FAM-RESI', 'FCOM', 'GRAD', 'IDNO', 'IMMI', 'INDI-CENS', 'INDI-EVEN', 'INDI-FACT', 'INDI-NCHI', 'INDI-RELI', 'INDI-RESI', 'INDI-TITL', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'NATI', 'NATU', 'NMR', 'OCCU', 'ORDN', 'PROB', 'PROP', 'RETI', 'SSN', 'WILL', 'record-REPO', 'record-SUBM'], subs=[], required=[], single=[], enumsets=[])
+    Abbr = TagTuple(value='ABBR', standard_tag='ABBR', supers=['RecordSour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Addr = TagTuple(value='ADDR', standard_tag='ADDR', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Corp', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordRepo', 'RecordSubm'], subs=['Adr1', 'Adr2', 'Adr3', 'City', 'Ctry', 'Post', 'Stae'], required=[], single=['Adr1', 'Adr2', 'Adr3', 'City', 'Ctry', 'Post', 'Stae'], enumsets=[], enums=[])
+    Adop = TagTuple(value='ADOP', standard_tag='ADOP', supers=['RecordIndi'], subs=['Addr', 'AdopFamc', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'AdopFamc', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    AdopFamc = TagTuple(value='ADOPFAMC', standard_tag='FAMC', supers=['Adop'], subs=['FamcAdop'], required=[], single=['FamcAdop'], enumsets=[], enums=[])
+    Adr1 = TagTuple(value='ADR1', standard_tag='ADR1', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Adr2 = TagTuple(value='ADR2', standard_tag='ADR2', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Adr3 = TagTuple(value='ADR3', standard_tag='ADR3', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Afn = TagTuple(value='AFN', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Age = TagTuple(value='AGE', standard_tag='AGE', supers=['Adop', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Dscr', 'Educ', 'Emig', 'Fcom', 'Grad', 'Husb', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Wife', 'Will'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Agnc = TagTuple(value='AGNC', standard_tag='AGNC', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Data', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Alia = TagTuple(value='ALIA', standard_tag='ALIA', supers=['RecordIndi'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Anci = TagTuple(value='ANCI', standard_tag='ANCI', supers=['RecordIndi'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Anul = TagTuple(value='ANUL', standard_tag='ANUL', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Asso = TagTuple(value='ASSO', standard_tag='ASSO', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordFam', 'RecordIndi'], subs=['Note', 'Phrase', 'Role', 'Snote', 'Sour'], required=['Role'], single=['Phrase', 'Role'], enumsets=[], enums=[])
+    Auth = TagTuple(value='AUTH', standard_tag='AUTH', supers=['RecordSour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Bapl = TagTuple(value='BAPL', standard_tag='BAPL', supers=['RecordIndi'], subs=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=[], single=['Date', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Bapm = TagTuple(value='BAPM', standard_tag='BAPM', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Barm = TagTuple(value='BARM', standard_tag='BARM', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Basm = TagTuple(value='BASM', standard_tag='BASM', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Birt = TagTuple(value='BIRT', standard_tag='BIRT', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Famc', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Famc', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Bles = TagTuple(value='BLES', standard_tag='BLES', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Caln = TagTuple(value='CALN', standard_tag='CALN', supers=['Repo'], subs=['Medi'], required=[], single=['Medi'], enumsets=[], enums=[])
+    Cast = TagTuple(value='CAST', standard_tag='CAST', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Caus = TagTuple(value='CAUS', standard_tag='CAUS', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Chan = TagTuple(value='CHAN', standard_tag='CHAN', supers=['RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSnote', 'RecordSour', 'RecordSubm'], subs=['DateExact', 'Note', 'Snote'], required=['DateExact'], single=['DateExact'], enumsets=[], enums=[])
+    Chil = TagTuple(value='CHIL', standard_tag='CHIL', supers=['RecordFam'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Chr = TagTuple(value='CHR', standard_tag='CHR', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Famc', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Famc', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Chra = TagTuple(value='CHRA', standard_tag='CHRA', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    City = TagTuple(value='CITY', standard_tag='CITY', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Conf = TagTuple(value='CONF', standard_tag='CONF', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Conl = TagTuple(value='CONL', standard_tag='CONL', supers=['RecordIndi'], subs=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=[], single=['Date', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Cont = TagTuple(value='CONT', standard_tag='CONT', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Copr = TagTuple(value='COPR', standard_tag='COPR', supers=['Head', 'HeadSourData'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Corp = TagTuple(value='CORP', standard_tag='CORP', supers=['HeadSour'], subs=['Addr', 'Email', 'Fax', 'Phon', 'Www'], required=[], single=['Addr'], enumsets=[], enums=[])
+    Crea = TagTuple(value='CREA', standard_tag='CREA', supers=['RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSnote', 'RecordSour', 'RecordSubm'], subs=['DateExact'], required=['DateExact'], single=['DateExact'], enumsets=[], enums=[])
+    Crem = TagTuple(value='CREM', standard_tag='CREM', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Crop = TagTuple(value='CROP', standard_tag='CROP', supers=['Obje'], subs=['Height', 'Left', 'Top', 'Width'], required=[], single=['Height', 'Left', 'Top', 'Width'], enumsets=[], enums=[])
+    Ctry = TagTuple(value='CTRY', standard_tag='CTRY', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Data = TagTuple(value='DATA', standard_tag='DATA', supers=['RecordSour'], subs=['Agnc', 'DataEven', 'Note', 'Snote'], required=[], single=['Agnc'], enumsets=[], enums=[])
+    DataEven = TagTuple(value='DATAEVEN', standard_tag='EVEN', supers=['Data'], subs=['DataEvenDate', 'Plac'], required=[], single=['DataEvenDate', 'Plac'], enumsets=[], enums=[])
+    DataEvenDate = TagTuple(value='DATAEVENDATE', standard_tag='DATE', supers=['DataEven'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Date = TagTuple(value='DATE', standard_tag='DATE', supers=['Adop', 'Anul', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Conl', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Endl', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Slgc', 'Slgs', 'SourData', 'Ssn', 'Will'], subs=['Phrase', 'Time'], required=[], single=['Phrase', 'Time'], enumsets=[], enums=[])
+    DateExact = TagTuple(value='DATEEXACT', standard_tag='DATE', supers=['Chan', 'Crea', 'HeadSourData', 'OrdStat'], subs=['Time'], required=[], single=['Time'], enumsets=[], enums=[])
+    Deat = TagTuple(value='DEAT', standard_tag='DEAT', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Desi = TagTuple(value='DESI', standard_tag='DESI', supers=['RecordIndi'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Dest = TagTuple(value='DEST', standard_tag='DEST', supers=['Head'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Div = TagTuple(value='DIV', standard_tag='DIV', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Divf = TagTuple(value='DIVF', standard_tag='DIVF', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Dscr = TagTuple(value='DSCR', standard_tag='DSCR', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Educ = TagTuple(value='EDUC', standard_tag='EDUC', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Email = TagTuple(value='EMAIL', standard_tag='EMAIL', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Corp', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordRepo', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Emig = TagTuple(value='EMIG', standard_tag='EMIG', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Endl = TagTuple(value='ENDL', standard_tag='ENDL', supers=['RecordIndi'], subs=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=[], single=['Date', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Enga = TagTuple(value='ENGA', standard_tag='ENGA', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Exid = TagTuple(value='EXID', standard_tag='EXID', supers=['Plac', 'RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSnote', 'RecordSour', 'RecordSubm'], subs=['ExidType'], required=[], single=['ExidType'], enumsets=[], enums=[])
+    ExidType = TagTuple(value='EXIDTYPE', standard_tag='TYPE', supers=['Exid'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    FamCens = TagTuple(value='FAMCENS', standard_tag='CENS', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=[], enums=[])
+    FamEven = TagTuple(value='FAMEVEN', standard_tag='EVEN', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=['Type'], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=[], enums=[])
+    FamFact = TagTuple(value='FAMFACT', standard_tag='FACT', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=['Type'], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=[], enums=[])
+    FamHusb = TagTuple(value='FAMHUSB', standard_tag='HUSB', supers=['RecordFam'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    FamNchi = TagTuple(value='FAMNCHI', standard_tag='NCHI', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=[], enums=[])
+    FamResi = TagTuple(value='FAMRESI', standard_tag='RESI', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=[], enums=[])
+    FamWife = TagTuple(value='FAMWIFE', standard_tag='WIFE', supers=['RecordFam'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Famc = TagTuple(value='FAMC', standard_tag='FAMC', supers=['Birt', 'Chr', 'Slgc'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    FamcAdop = TagTuple(value='FAMCADOP', standard_tag='ADOP', supers=['AdopFamc'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    FamcStat = TagTuple(value='FAMCSTAT', standard_tag='STAT', supers=['IndiFamc'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Fams = TagTuple(value='FAMS', standard_tag='FAMS', supers=['RecordIndi'], subs=['Note', 'Snote'], required=[], single=[], enumsets=[], enums=[])
+    Fax = TagTuple(value='FAX', standard_tag='FAX', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Corp', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordRepo', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Fcom = TagTuple(value='FCOM', standard_tag='FCOM', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    File = TagTuple(value='FILE', standard_tag='FILE', supers=['RecordObje'], subs=['FileTran', 'Form', 'Titl'], required=['Form'], single=['Form', 'Titl'], enumsets=[], enums=[])
+    FileTran = TagTuple(value='FILETRAN', standard_tag='TRAN', supers=['File'], subs=['Form'], required=['Form'], single=['Form'], enumsets=[], enums=[])
+    Form = TagTuple(value='FORM', standard_tag='FORM', supers=['File', 'FileTran'], subs=['Medi'], required=[], single=['Medi'], enumsets=[], enums=[])
+    Gedc = TagTuple(value='GEDC', standard_tag='GEDC', supers=['Head'], subs=['GedcVers'], required=['GedcVers'], single=['GedcVers'], enumsets=[], enums=[])
+    GedcVers = TagTuple(value='GEDCVERS', standard_tag='VERS', supers=['Gedc'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Givn = TagTuple(value='GIVN', standard_tag='GIVN', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Grad = TagTuple(value='GRAD', standard_tag='GRAD', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Head = TagTuple(value='HEAD', standard_tag='HEAD', supers=[], subs=['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm'], required=['Gedc'], single=['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm'], enumsets=[], enums=[])
+    HeadDate = TagTuple(value='HEADDATE', standard_tag='DATE', supers=['Head'], subs=['Time'], required=[], single=['Time'], enumsets=[], enums=[])
+    HeadLang = TagTuple(value='HEADLANG', standard_tag='LANG', supers=['Head'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    HeadPlac = TagTuple(value='HEADPLAC', standard_tag='PLAC', supers=['Head'], subs=['HeadPlacForm'], required=['HeadPlacForm'], single=['HeadPlacForm'], enumsets=[], enums=[])
+    HeadPlacForm = TagTuple(value='HEADPLACFORM', standard_tag='FORM', supers=['HeadPlac'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    HeadSour = TagTuple(value='HEADSOUR', standard_tag='SOUR', supers=['Head'], subs=['Corp', 'HeadSourData', 'Name', 'Vers'], required=[], single=['Corp', 'HeadSourData', 'Name', 'Vers'], enumsets=[], enums=[])
+    HeadSourData = TagTuple(value='HEADSOURDATA', standard_tag='DATA', supers=['HeadSour'], subs=['Copr', 'DateExact'], required=[], single=['Copr', 'DateExact'], enumsets=[], enums=[])
+    Height = TagTuple(value='HEIGHT', standard_tag='HEIGHT', supers=['Crop'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Husb = TagTuple(value='HUSB', standard_tag='HUSB', supers=['Anul', 'Div', 'Divf', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars'], subs=['Age'], required=['Age'], single=['Age'], enumsets=[], enums=[])
+    Idno = TagTuple(value='IDNO', standard_tag='IDNO', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=['Type'], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Immi = TagTuple(value='IMMI', standard_tag='IMMI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    IndiCens = TagTuple(value='INDICENS', standard_tag='CENS', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiEven = TagTuple(value='INDIEVEN', standard_tag='EVEN', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=['Type'], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiFact = TagTuple(value='INDIFACT', standard_tag='FACT', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=['Type'], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiFamc = TagTuple(value='INDIFAMC', standard_tag='FAMC', supers=['RecordIndi'], subs=['FamcStat', 'Note', 'Pedi', 'Snote'], required=[], single=['FamcStat', 'Pedi'], enumsets=[], enums=[])
+    IndiName = TagTuple(value='INDINAME', standard_tag='NAME', supers=['RecordIndi'], subs=['Givn', 'NameTran', 'NameType', 'Nick', 'Note', 'Npfx', 'Nsfx', 'Snote', 'Sour', 'Spfx', 'Surn'], required=[], single=['NameType'], enumsets=[], enums=[])
+    IndiNchi = TagTuple(value='INDINCHI', standard_tag='NCHI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiReli = TagTuple(value='INDIRELI', standard_tag='RELI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiResi = TagTuple(value='INDIRESI', standard_tag='RESI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    IndiTitl = TagTuple(value='INDITITL', standard_tag='TITL', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=[], enums=[])
+    Inil = TagTuple(value='INIL', standard_tag='INIL', supers=['RecordIndi'], subs=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=[], single=['Date', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Lang = TagTuple(value='LANG', standard_tag='LANG', supers=['NameTran', 'Note', 'NoteTran', 'Plac', 'PlacTran', 'Text', 'RecordSnote'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Lati = TagTuple(value='LATI', standard_tag='LATI', supers=['Map'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Left = TagTuple(value='LEFT', standard_tag='LEFT', supers=['Crop'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Long = TagTuple(value='LONG', standard_tag='LONG', supers=['Map'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Map = TagTuple(value='MAP', standard_tag='MAP', supers=['Plac'], subs=['Lati', 'Long'], required=['Lati', 'Long'], single=['Lati', 'Long'], enumsets=[], enums=[])
+    Marb = TagTuple(value='MARB', standard_tag='MARB', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Marc = TagTuple(value='MARC', standard_tag='MARC', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Marl = TagTuple(value='MARL', standard_tag='MARL', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Marr = TagTuple(value='MARR', standard_tag='MARR', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Mars = TagTuple(value='MARS', standard_tag='MARS', supers=['RecordFam'], subs=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'], required=[], single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Medi = TagTuple(value='MEDI', standard_tag='MEDI', supers=['Caln', 'Form'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Mime = TagTuple(value='MIME', standard_tag='MIME', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Name = TagTuple(value='NAME', standard_tag='NAME', supers=['HeadSour', 'RecordRepo', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    NameTran = TagTuple(value='NAMETRAN', standard_tag='TRAN', supers=['IndiName'], subs=['Givn', 'Lang', 'Nick', 'Npfx', 'Nsfx', 'Spfx', 'Surn'], required=['Lang'], single=['Lang'], enumsets=[], enums=[])
+    NameType = TagTuple(value='NAMETYPE', standard_tag='TYPE', supers=['IndiName'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Nati = TagTuple(value='NATI', standard_tag='NATI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Natu = TagTuple(value='NATU', standard_tag='NATU', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Nick = TagTuple(value='NICK', standard_tag='NICK', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Nmr = TagTuple(value='NMR', standard_tag='NMR', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    No = TagTuple(value='NO', standard_tag='NO', supers=['RecordFam', 'RecordIndi'], subs=['NoDate', 'Note', 'Snote', 'Sour'], required=[], single=['NoDate'], enumsets=[], enums=[])
+    NoDate = TagTuple(value='NODATE', standard_tag='DATE', supers=['No'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Note = TagTuple(value='NOTE', standard_tag='NOTE', supers=['Adop', 'Anul', 'Asso', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chan', 'Chr', 'Chra', 'Conf', 'Conl', 'Crem', 'Data', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Endl', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fams', 'Fcom', 'Grad', 'Head', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiFamc', 'IndiName', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'No', 'Occu', 'Ordn', 'Plac', 'Prob', 'Prop', 'Repo', 'Reti', 'Slgc', 'Slgs', 'Sour', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSour', 'RecordSubm'], subs=['Lang', 'Mime', 'NoteTran', 'Sour'], required=[], single=['Lang', 'Mime'], enumsets=[], enums=[])
+    NoteTran = TagTuple(value='NOTETRAN', standard_tag='TRAN', supers=['Note', 'RecordSnote'], subs=['Lang', 'Mime'], required=[], single=['Lang', 'Mime'], enumsets=[], enums=[])
+    Npfx = TagTuple(value='NPFX', standard_tag='NPFX', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Nsfx = TagTuple(value='NSFX', standard_tag='NSFX', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Obje = TagTuple(value='OBJE', standard_tag='OBJE', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Sour', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordSour', 'RecordSubm'], subs=['Crop', 'Titl'], required=[], single=['Crop', 'Titl'], enumsets=[], enums=[])
+    Occu = TagTuple(value='OCCU', standard_tag='OCCU', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Ordn = TagTuple(value='ORDN', standard_tag='ORDN', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Page = TagTuple(value='PAGE', standard_tag='PAGE', supers=['Sour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Pedi = TagTuple(value='PEDI', standard_tag='PEDI', supers=['IndiFamc'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Phon = TagTuple(value='PHON', standard_tag='PHON', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Corp', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordRepo', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Phrase = TagTuple(value='PHRASE', standard_tag='PHRASE', supers=['Age', 'Alia', 'Asso', 'Chil', 'DataEvenDate', 'Date', 'FamHusb', 'FamWife', 'FamcAdop', 'FamcStat', 'Medi', 'NameType', 'NoDate', 'Pedi', 'Role', 'Sdate', 'SourEven'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Plac = TagTuple(value='PLAC', standard_tag='PLAC', supers=['Adop', 'Anul', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Conl', 'Crem', 'DataEven', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Endl', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Slgc', 'Slgs', 'Ssn', 'Will'], subs=['Exid', 'Lang', 'Map', 'Note', 'PlacForm', 'PlacTran', 'Snote'], required=[], single=['Lang', 'Map', 'PlacForm'], enumsets=[], enums=[])
+    PlacForm = TagTuple(value='PLACFORM', standard_tag='FORM', supers=['Plac'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    PlacTran = TagTuple(value='PLACTRAN', standard_tag='TRAN', supers=['Plac'], subs=['Lang'], required=['Lang'], single=['Lang'], enumsets=[], enums=[])
+    Post = TagTuple(value='POST', standard_tag='POST', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Prob = TagTuple(value='PROB', standard_tag='PROB', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Prop = TagTuple(value='PROP', standard_tag='PROP', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Publ = TagTuple(value='PUBL', standard_tag='PUBL', supers=['RecordSour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Quay = TagTuple(value='QUAY', standard_tag='QUAY', supers=['Sour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Refn = TagTuple(value='REFN', standard_tag='REFN', supers=['RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSnote', 'RecordSour', 'RecordSubm'], subs=['Type'], required=[], single=['Type'], enumsets=[], enums=[])
+    Reli = TagTuple(value='RELI', standard_tag='RELI', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will'], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    Repo = TagTuple(value='REPO', standard_tag='REPO', supers=['RecordSour'], subs=['Caln', 'Note', 'Snote'], required=[], single=[], enumsets=[], enums=[])
+    Resn = TagTuple(value='RESN', standard_tag='RESN', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordObje'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Reti = TagTuple(value='RETI', standard_tag='RETI', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Rfn = TagTuple(value='RFN', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Rin = TagTuple(value='RIN', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Role = TagTuple(value='ROLE', standard_tag='ROLE', supers=['Asso', 'SourEven'], subs=['Phrase'], required=[], single=['Phrase'], enumsets=[], enums=[])
+    Schma = TagTuple(value='SCHMA', standard_tag='SCHMA', supers=['Head'], subs=['Tag'], required=[], single=[], enumsets=[], enums=[])
+    Sdate = TagTuple(value='SDATE', standard_tag='SDATE', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will'], subs=['Phrase', 'Time'], required=[], single=['Phrase', 'Time'], enumsets=[], enums=[])
+    Sex = TagTuple(value='SEX', standard_tag='SEX', supers=['RecordIndi'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Slgc = TagTuple(value='SLGC', standard_tag='SLGC', supers=['RecordIndi'], subs=['Date', 'Famc', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=['Famc'], single=['Date', 'Famc', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Slgs = TagTuple(value='SLGS', standard_tag='SLGS', supers=['RecordFam'], subs=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'], required=[], single=['Date', 'Plac', 'Temp', 'OrdStat'], enumsets=[], enums=[])
+    Snote = TagTuple(value='SNOTE', standard_tag='SNOTE', supers=['Adop', 'Anul', 'Asso', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chan', 'Chr', 'Chra', 'Conf', 'Conl', 'Crem', 'Data', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Endl', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fams', 'Fcom', 'Grad', 'Head', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiFamc', 'IndiName', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'No', 'Occu', 'Ordn', 'Plac', 'Prob', 'Prop', 'Repo', 'Reti', 'Slgc', 'Slgs', 'Sour', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSour', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Sour = TagTuple(value='SOUR', standard_tag='SOUR', supers=['Adop', 'Anul', 'Asso', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Conl', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Endl', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiName', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'No', 'Note', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Slgc', 'Slgs', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordObje', 'RecordSnote'], subs=['Note', 'Obje', 'Page', 'Quay', 'Snote', 'SourData', 'SourEven'], required=[], single=['Page', 'Quay', 'SourData', 'SourEven'], enumsets=[], enums=[])
+    SourData = TagTuple(value='SOURDATA', standard_tag='DATA', supers=['Sour'], subs=['Date', 'Text'], required=[], single=['Date'], enumsets=[], enums=[])
+    SourEven = TagTuple(value='SOUREVEN', standard_tag='EVEN', supers=['Sour'], subs=['Phrase', 'Role'], required=[], single=['Phrase', 'Role'], enumsets=[], enums=[])
+    Spfx = TagTuple(value='SPFX', standard_tag='SPFX', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Ssn = TagTuple(value='SSN', standard_tag='SSN', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVENATTR'], enums=[])
+    Stae = TagTuple(value='STAE', standard_tag='STAE', supers=['Addr'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Subm = TagTuple(value='SUBM', standard_tag='SUBM', supers=['Head', 'RecordFam', 'RecordIndi'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    SubmLang = TagTuple(value='SUBMLANG', standard_tag='LANG', supers=['RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Surn = TagTuple(value='SURN', standard_tag='SURN', supers=['IndiName', 'NameTran'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Tag = TagTuple(value='TAG', standard_tag='TAG', supers=['Schma'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Temp = TagTuple(value='TEMP', standard_tag='TEMP', supers=['Bapl', 'Conl', 'Endl', 'Inil', 'Slgc', 'Slgs'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Text = TagTuple(value='TEXT', standard_tag='TEXT', supers=['SourData', 'RecordSour'], subs=['Lang', 'Mime'], required=[], single=['Lang', 'Mime'], enumsets=[], enums=[])
+    Time = TagTuple(value='TIME', standard_tag='TIME', supers=['Date', 'DateExact', 'HeadDate', 'Sdate'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Titl = TagTuple(value='TITL', standard_tag='TITL', supers=['File', 'Obje', 'RecordSour'], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    Top = TagTuple(value='TOP', standard_tag='TOP', supers=['Crop'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Trlr = TagTuple(value='TRLR', standard_tag='TRLR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Type = TagTuple(value='TYPE', standard_tag='TYPE', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Refn', 'Reti', 'Ssn', 'Will'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Uid = TagTuple(value='UID', standard_tag='UID', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordFam', 'RecordIndi', 'RecordObje', 'RecordRepo', 'RecordSnote', 'RecordSour', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Vers = TagTuple(value='VERS', standard_tag='VERS', supers=['HeadSour'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Width = TagTuple(value='WIDTH', standard_tag='WIDTH', supers=['Crop'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Wife = TagTuple(value='WIFE', standard_tag='WIFE', supers=['Anul', 'Div', 'Divf', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars'], subs=['Age'], required=['Age'], single=['Age'], enumsets=[], enums=[])
+    Will = TagTuple(value='WILL', standard_tag='WILL', supers=['RecordIndi'], subs=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'], required=[], single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    Www = TagTuple(value='WWW', standard_tag='WWW', supers=['Adop', 'Anul', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chr', 'Chra', 'Conf', 'Corp', 'Crem', 'Deat', 'Div', 'Divf', 'Dscr', 'Educ', 'Emig', 'Enga', 'FamCens', 'FamEven', 'FamFact', 'FamNchi', 'FamResi', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'Nati', 'Natu', 'Nmr', 'Occu', 'Ordn', 'Prob', 'Prop', 'Reti', 'Ssn', 'Will', 'RecordRepo', 'RecordSubm'], subs=[], required=[], single=[], enumsets=[], enums=[])
+    CalFrench_R = TagTuple(value='CALFRENCH_R', standard_tag='FRENCH_R', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    CalGregorian = TagTuple(value='CALGREGORIAN', standard_tag='GREGORIAN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    CalHebrew = TagTuple(value='CALHEBREW', standard_tag='HEBREW', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    CalJulian = TagTuple(value='CALJULIAN', standard_tag='JULIAN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    Enum0 = TagTuple(value='ENUM0', standard_tag='0', supers=[], subs=[], required=[], single=[], enumsets=['QUAY'], enums=[])
+    Enum1 = TagTuple(value='ENUM1', standard_tag='1', supers=[], subs=[], required=[], single=[], enumsets=['QUAY'], enums=[])
+    Enum2 = TagTuple(value='ENUM2', standard_tag='2', supers=[], subs=[], required=[], single=[], enumsets=['QUAY'], enums=[])
+    Enum3 = TagTuple(value='ENUM3', standard_tag='3', supers=[], subs=[], required=[], single=[], enumsets=['QUAY'], enums=[])
+    EnumAdopHusb = TagTuple(value='ENUMADOPHUSB', standard_tag='HUSB', supers=[], subs=[], required=[], single=[], enumsets=['ADOP'], enums=[])
+    EnumAdopWife = TagTuple(value='ENUMADOPWIFE', standard_tag='WIFE', supers=[], subs=[], required=[], single=[], enumsets=['ADOP'], enums=[])
+    EnumAdopted = TagTuple(value='ENUMADOPTED', standard_tag='ADOPTED', supers=[], subs=[], required=[], single=[], enumsets=['PEDI'], enums=[])
+    EnumAka = TagTuple(value='ENUMAKA', standard_tag='AKA', supers=[], subs=[], required=[], single=[], enumsets=['TYPE'], enums=[])
+    EnumAudio = TagTuple(value='ENUMAUDIO', standard_tag='AUDIO', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumBic = TagTuple(value='ENUMBIC', standard_tag='BIC', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumBirth = TagTuple(value='ENUMBIRTH', standard_tag='BIRTH', supers=[], subs=[], required=[], single=[], enumsets=['TYPE', 'PEDI'], enums=[])
+    EnumBook = TagTuple(value='ENUMBOOK', standard_tag='BOOK', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumBoth = TagTuple(value='ENUMBOTH', standard_tag='BOTH', supers=[], subs=[], required=[], single=[], enumsets=['ADOP'], enums=[])
+    EnumCanceled = TagTuple(value='ENUMCANCELED', standard_tag='CANCELED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumCard = TagTuple(value='ENUMCARD', standard_tag='CARD', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumCens = TagTuple(value='ENUMCENS', standard_tag='CENS', supers=[], subs=[], required=[], single=[], enumsets=['EVEN', 'EVENATTR'], enums=[])
+    EnumChallenged = TagTuple(value='ENUMCHALLENGED', standard_tag='CHALLENGED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumChil = TagTuple(value='ENUMCHIL', standard_tag='CHIL', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumChild = TagTuple(value='ENUMCHILD', standard_tag='CHILD', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumClergy = TagTuple(value='ENUMCLERGY', standard_tag='CLERGY', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumCompleted = TagTuple(value='ENUMCOMPLETED', standard_tag='COMPLETED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumConfidential = TagTuple(value='ENUMCONFIDENTIAL', standard_tag='CONFIDENTIAL', supers=[], subs=[], required=[], single=[], enumsets=['RESN'], enums=[])
+    EnumDisproven = TagTuple(value='ENUMDISPROVEN', standard_tag='DISPROVEN', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumDns = TagTuple(value='ENUMDNS', standard_tag='DNS', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumDns_Can = TagTuple(value='ENUMDNS_CAN', standard_tag='DNS_CAN', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumElectronic = TagTuple(value='ENUMELECTRONIC', standard_tag='ELECTRONIC', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumEven = TagTuple(value='ENUMEVEN', standard_tag='EVEN', supers=[], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    EnumExcluded = TagTuple(value='ENUMEXCLUDED', standard_tag='EXCLUDED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumF = TagTuple(value='ENUMF', standard_tag='F', supers=[], subs=[], required=[], single=[], enumsets=['SEX'], enums=[])
+    EnumFact = TagTuple(value='ENUMFACT', standard_tag='FACT', supers=[], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    EnumFath = TagTuple(value='ENUMFATH', standard_tag='FATH', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumFiche = TagTuple(value='ENUMFICHE', standard_tag='FICHE', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumFilm = TagTuple(value='ENUMFILM', standard_tag='FILM', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumFoster = TagTuple(value='ENUMFOSTER', standard_tag='FOSTER', supers=[], subs=[], required=[], single=[], enumsets=['PEDI'], enums=[])
+    EnumFriend = TagTuple(value='ENUMFRIEND', standard_tag='FRIEND', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumGodp = TagTuple(value='ENUMGODP', standard_tag='GODP', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumHusb = TagTuple(value='ENUMHUSB', standard_tag='HUSB', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumImmigrant = TagTuple(value='ENUMIMMIGRANT', standard_tag='IMMIGRANT', supers=[], subs=[], required=[], single=[], enumsets=['TYPE'], enums=[])
+    EnumInfant = TagTuple(value='ENUMINFANT', standard_tag='INFANT', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumLocked = TagTuple(value='ENUMLOCKED', standard_tag='LOCKED', supers=[], subs=[], required=[], single=[], enumsets=['RESN'], enums=[])
+    EnumM = TagTuple(value='ENUMM', standard_tag='M', supers=[], subs=[], required=[], single=[], enumsets=['SEX'], enums=[])
+    EnumMagazine = TagTuple(value='ENUMMAGAZINE', standard_tag='MAGAZINE', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumMaiden = TagTuple(value='ENUMMAIDEN', standard_tag='MAIDEN', supers=[], subs=[], required=[], single=[], enumsets=['TYPE'], enums=[])
+    EnumManuscript = TagTuple(value='ENUMMANUSCRIPT', standard_tag='MANUSCRIPT', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumMap = TagTuple(value='ENUMMAP', standard_tag='MAP', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumMarried = TagTuple(value='ENUMMARRIED', standard_tag='MARRIED', supers=[], subs=[], required=[], single=[], enumsets=['TYPE'], enums=[])
+    EnumMoth = TagTuple(value='ENUMMOTH', standard_tag='MOTH', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumMultiple = TagTuple(value='ENUMMULTIPLE', standard_tag='MULTIPLE', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumNchi = TagTuple(value='ENUMNCHI', standard_tag='NCHI', supers=[], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    EnumNewspaper = TagTuple(value='ENUMNEWSPAPER', standard_tag='NEWSPAPER', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumNghbr = TagTuple(value='ENUMNGHBR', standard_tag='NGHBR', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumOfficiator = TagTuple(value='ENUMOFFICIATOR', standard_tag='OFFICIATOR', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumOther = TagTuple(value='ENUMOTHER', standard_tag='OTHER', supers=[], subs=[], required=[], single=[], enumsets=['MEDI', 'TYPE', 'PEDI', 'ROLE'], enums=[])
+    EnumParent = TagTuple(value='ENUMPARENT', standard_tag='PARENT', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumPhoto = TagTuple(value='ENUMPHOTO', standard_tag='PHOTO', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumPre_1970 = TagTuple(value='ENUMPRE_1970', standard_tag='PRE_1970', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumPrivacy = TagTuple(value='ENUMPRIVACY', standard_tag='PRIVACY', supers=[], subs=[], required=[], single=[], enumsets=['RESN'], enums=[])
+    EnumProfessional = TagTuple(value='ENUMPROFESSIONAL', standard_tag='PROFESSIONAL', supers=[], subs=[], required=[], single=[], enumsets=['TYPE'], enums=[])
+    EnumProven = TagTuple(value='ENUMPROVEN', standard_tag='PROVEN', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumResi = TagTuple(value='ENUMRESI', standard_tag='RESI', supers=[], subs=[], required=[], single=[], enumsets=['EVENATTR'], enums=[])
+    EnumSealing = TagTuple(value='ENUMSEALING', standard_tag='SEALING', supers=[], subs=[], required=[], single=[], enumsets=['PEDI'], enums=[])
+    EnumSpou = TagTuple(value='ENUMSPOU', standard_tag='SPOU', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumStillborn = TagTuple(value='ENUMSTILLBORN', standard_tag='STILLBORN', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumSubmitted = TagTuple(value='ENUMSUBMITTED', standard_tag='SUBMITTED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumTombstone = TagTuple(value='ENUMTOMBSTONE', standard_tag='TOMBSTONE', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumU = TagTuple(value='ENUMU', standard_tag='U', supers=[], subs=[], required=[], single=[], enumsets=['SEX'], enums=[])
+    EnumUncleared = TagTuple(value='ENUMUNCLEARED', standard_tag='UNCLEARED', supers=[], subs=[], required=[], single=[], enumsets=['STAT'], enums=[])
+    EnumVideo = TagTuple(value='ENUMVIDEO', standard_tag='VIDEO', supers=[], subs=[], required=[], single=[], enumsets=['MEDI'], enums=[])
+    EnumWife = TagTuple(value='ENUMWIFE', standard_tag='WIFE', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumWitn = TagTuple(value='ENUMWITN', standard_tag='WITN', supers=[], subs=[], required=[], single=[], enumsets=['ROLE'], enums=[])
+    EnumX = TagTuple(value='ENUMX', standard_tag='X', supers=[], subs=[], required=[], single=[], enumsets=['SEX'], enums=[])
+    EnumsetAdop = TagTuple(value='ENUMSETADOP', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['HUSB', 'WIFE', 'BOTH'])
+    EnumsetEven = TagTuple(value='ENUMSETEVEN', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['CENS', 'https://gedcom.io/terms/v7/ADOP', 'https://gedcom.io/terms/v7/BAPM', 'https://gedcom.io/terms/v7/BARM', 'https://gedcom.io/terms/v7/BASM', 'https://gedcom.io/terms/v7/BIRT', 'https://gedcom.io/terms/v7/BLES', 'https://gedcom.io/terms/v7/BURI', 'https://gedcom.io/terms/v7/CHR', 'https://gedcom.io/terms/v7/CHRA', 'https://gedcom.io/terms/v7/CONF', 'https://gedcom.io/terms/v7/CREM', 'https://gedcom.io/terms/v7/DEAT', 'https://gedcom.io/terms/v7/EMIG', 'https://gedcom.io/terms/v7/FCOM', 'https://gedcom.io/terms/v7/GRAD', 'https://gedcom.io/terms/v7/IMMI', 'https://gedcom.io/terms/v7/NATU', 'https://gedcom.io/terms/v7/ORDN', 'https://gedcom.io/terms/v7/PROB', 'https://gedcom.io/terms/v7/RETI', 'https://gedcom.io/terms/v7/WILL', 'https://gedcom.io/terms/v7/ANUL', 'https://gedcom.io/terms/v7/DIV', 'https://gedcom.io/terms/v7/DIVF', 'https://gedcom.io/terms/v7/ENGA', 'https://gedcom.io/terms/v7/MARB', 'https://gedcom.io/terms/v7/MARC', 'https://gedcom.io/terms/v7/MARL', 'https://gedcom.io/terms/v7/MARR', 'https://gedcom.io/terms/v7/MARS'])
+    EnumsetEvenattr = TagTuple(value='ENUMSETEVENATTR', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['CENS', 'NCHI', 'RESI', 'FACT', 'EVEN', 'https://gedcom.io/terms/v7/ADOP', 'https://gedcom.io/terms/v7/BAPM', 'https://gedcom.io/terms/v7/BARM', 'https://gedcom.io/terms/v7/BASM', 'https://gedcom.io/terms/v7/BIRT', 'https://gedcom.io/terms/v7/BLES', 'https://gedcom.io/terms/v7/BURI', 'https://gedcom.io/terms/v7/CHR', 'https://gedcom.io/terms/v7/CHRA', 'https://gedcom.io/terms/v7/CONF', 'https://gedcom.io/terms/v7/CREM', 'https://gedcom.io/terms/v7/DEAT', 'https://gedcom.io/terms/v7/EMIG', 'https://gedcom.io/terms/v7/FCOM', 'https://gedcom.io/terms/v7/GRAD', 'https://gedcom.io/terms/v7/IMMI', 'https://gedcom.io/terms/v7/NATU', 'https://gedcom.io/terms/v7/ORDN', 'https://gedcom.io/terms/v7/PROB', 'https://gedcom.io/terms/v7/RETI', 'https://gedcom.io/terms/v7/WILL', 'https://gedcom.io/terms/v7/ANUL', 'https://gedcom.io/terms/v7/DIV', 'https://gedcom.io/terms/v7/DIVF', 'https://gedcom.io/terms/v7/ENGA', 'https://gedcom.io/terms/v7/MARB', 'https://gedcom.io/terms/v7/MARC', 'https://gedcom.io/terms/v7/MARL', 'https://gedcom.io/terms/v7/MARR', 'https://gedcom.io/terms/v7/MARS', 'https://gedcom.io/terms/v7/CAST', 'https://gedcom.io/terms/v7/DSCR', 'https://gedcom.io/terms/v7/EDUC', 'https://gedcom.io/terms/v7/IDNO', 'https://gedcom.io/terms/v7/NATI', 'https://gedcom.io/terms/v7/NMR', 'https://gedcom.io/terms/v7/OCCU', 'https://gedcom.io/terms/v7/PROP', 'https://gedcom.io/terms/v7/RELI', 'https://gedcom.io/terms/v7/SSN', 'https://gedcom.io/terms/v7/TITL'])
+    EnumsetMedi = TagTuple(value='ENUMSETMEDI', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['AUDIO', 'BOOK', 'CARD', 'ELECTRONIC', 'FICHE', 'FILM', 'MAGAZINE', 'MANUSCRIPT', 'MAP', 'NEWSPAPER', 'PHOTO', 'TOMBSTONE', 'VIDEO', 'OTHER'])
+    EnumsetNameType = TagTuple(value='ENUMSETNAMETYPE', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['AKA', 'BIRTH', 'IMMIGRANT', 'MAIDEN', 'MARRIED', 'PROFESSIONAL', 'OTHER'])
+    EnumsetPedi = TagTuple(value='ENUMSETPEDI', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['ADOPTED', 'BIRTH', 'FOSTER', 'SEALING', 'OTHER'])
+    EnumsetQuay = TagTuple(value='ENUMSETQUAY', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['0', '1', '2', '3'])
+    EnumsetResn = TagTuple(value='ENUMSETRESN', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['CONFIDENTIAL', 'LOCKED', 'PRIVACY'])
+    EnumsetRole = TagTuple(value='ENUMSETROLE', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['CHIL', 'CLERGY', 'FATH', 'FRIEND', 'GODP', 'HUSB', 'MOTH', 'MULTIPLE', 'NGHBR', 'OFFICIATOR', 'PARENT', 'SPOU', 'WIFE', 'WITN', 'OTHER'])
+    EnumsetSex = TagTuple(value='ENUMSETSEX', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['M', 'F', 'X', 'U'])
+    EnumsetOrdStat = TagTuple(value='ENUMSETORDSTAT', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=['BIC', 'CANCELED', 'CHILD', 'COMPLETED', 'EXCLUDED', 'DNS', 'DNS_CAN', 'INFANT', 'PRE_1970', 'STILLBORN', 'SUBMITTED', 'UNCLEARED'])
+    MonthAav = TagTuple(value='MONTHAAV', standard_tag='AAV', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthAdr = TagTuple(value='MONTHADR', standard_tag='ADR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthAds = TagTuple(value='MONTHADS', standard_tag='ADS', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthApr = TagTuple(value='MONTHAPR', standard_tag='APR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthAug = TagTuple(value='MONTHAUG', standard_tag='AUG', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthBrum = TagTuple(value='MONTHBRUM', standard_tag='BRUM', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthComp = TagTuple(value='MONTHCOMP', standard_tag='COMP', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthCsh = TagTuple(value='MONTHCSH', standard_tag='CSH', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthDec = TagTuple(value='MONTHDEC', standard_tag='DEC', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthEll = TagTuple(value='MONTHELL', standard_tag='ELL', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthFeb = TagTuple(value='MONTHFEB', standard_tag='FEB', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthFlor = TagTuple(value='MONTHFLOR', standard_tag='FLOR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthFrim = TagTuple(value='MONTHFRIM', standard_tag='FRIM', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthFruc = TagTuple(value='MONTHFRUC', standard_tag='FRUC', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthGerm = TagTuple(value='MONTHGERM', standard_tag='GERM', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthIyr = TagTuple(value='MONTHIYR', standard_tag='IYR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthJan = TagTuple(value='MONTHJAN', standard_tag='JAN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthJul = TagTuple(value='MONTHJUL', standard_tag='JUL', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthJun = TagTuple(value='MONTHJUN', standard_tag='JUN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthKsl = TagTuple(value='MONTHKSL', standard_tag='KSL', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthMar = TagTuple(value='MONTHMAR', standard_tag='MAR', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthMay = TagTuple(value='MONTHMAY', standard_tag='MAY', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthMess = TagTuple(value='MONTHMESS', standard_tag='MESS', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthNivo = TagTuple(value='MONTHNIVO', standard_tag='NIVO', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthNov = TagTuple(value='MONTHNOV', standard_tag='NOV', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthNsn = TagTuple(value='MONTHNSN', standard_tag='NSN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthOct = TagTuple(value='MONTHOCT', standard_tag='OCT', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthPluv = TagTuple(value='MONTHPLUV', standard_tag='PLUV', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthPrai = TagTuple(value='MONTHPRAI', standard_tag='PRAI', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthSep = TagTuple(value='MONTHSEP', standard_tag='SEP', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthShv = TagTuple(value='MONTHSHV', standard_tag='SHV', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthSvn = TagTuple(value='MONTHSVN', standard_tag='SVN', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthTher = TagTuple(value='MONTHTHER', standard_tag='THER', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthTmz = TagTuple(value='MONTHTMZ', standard_tag='TMZ', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthTsh = TagTuple(value='MONTHTSH', standard_tag='TSH', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthTvt = TagTuple(value='MONTHTVT', standard_tag='TVT', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthVend = TagTuple(value='MONTHVEND', standard_tag='VEND', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    MonthVent = TagTuple(value='MONTHVENT', standard_tag='VENT', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    OrdStat = TagTuple(value='ORDSTAT', standard_tag='STAT', supers=['Bapl', 'Conl', 'Endl', 'Inil', 'Slgc', 'Slgs'], subs=['DateExact'], required=['DateExact'], single=['DateExact'], enumsets=[], enums=[])
+    RecordFam = TagTuple(value='RECORDFAM', standard_tag='FAM', supers=[], subs=['Anul', 'Asso', 'Chan', 'Chil', 'Crea', 'Div', 'Divf', 'Enga', 'Exid', 'FamCens', 'FamEven', 'FamFact', 'FamHusb', 'FamNchi', 'FamResi', 'FamWife', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'No', 'Note', 'Obje', 'Refn', 'Resn', 'Slgs', 'Snote', 'Sour', 'Subm', 'Uid'], required=[], single=['Chan', 'Crea', 'FamHusb', 'FamWife', 'Resn'], enumsets=[], enums=[])
+    RecordIndi = TagTuple(value='RECORDINDI', standard_tag='INDI', supers=[], subs=['Adop', 'Alia', 'Anci', 'Asso', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chan', 'Chr', 'Chra', 'Conf', 'Conl', 'Crea', 'Crem', 'Deat', 'Desi', 'Dscr', 'Educ', 'Emig', 'Endl', 'Exid', 'Fams', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiFamc', 'IndiName', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Nati', 'Natu', 'Nmr', 'No', 'Note', 'Obje', 'Occu', 'Ordn', 'Prob', 'Prop', 'Refn', 'Resn', 'Reti', 'Sex', 'Slgc', 'Snote', 'Sour', 'Ssn', 'Subm', 'Uid', 'Will'], required=[], single=['Chan', 'Crea', 'Resn', 'Sex'], enumsets=[], enums=[])
+    RecordObje = TagTuple(value='RECORDOBJE', standard_tag='OBJE', supers=[], subs=['Chan', 'Crea', 'Exid', 'File', 'Note', 'Refn', 'Resn', 'Snote', 'Sour', 'Uid'], required=['File'], single=['Chan', 'Crea', 'Resn'], enumsets=[], enums=[])
+    RecordRepo = TagTuple(value='RECORDREPO', standard_tag='REPO', supers=[], subs=['Addr', 'Chan', 'Crea', 'Email', 'Exid', 'Fax', 'Name', 'Note', 'Phon', 'Refn', 'Snote', 'Uid', 'Www'], required=['Name'], single=['Addr', 'Chan', 'Crea', 'Name'], enumsets=[], enums=[])
+    RecordSnote = TagTuple(value='RECORDSNOTE', standard_tag='SNOTE', supers=[], subs=['Chan', 'Crea', 'Exid', 'Lang', 'Mime', 'NoteTran', 'Refn', 'Sour', 'Uid'], required=[], single=['Chan', 'Crea', 'Lang', 'Mime'], enumsets=[], enums=[])
+    RecordSour = TagTuple(value='RECORDSOUR', standard_tag='SOUR', supers=[], subs=['Abbr', 'Auth', 'Chan', 'Crea', 'Data', 'Exid', 'Note', 'Obje', 'Publ', 'Refn', 'Repo', 'Snote', 'Text', 'Titl', 'Uid'], required=[], single=['Abbr', 'Auth', 'Chan', 'Crea', 'Data', 'Publ', 'Text', 'Titl'], enumsets=[], enums=[])
+    RecordSubm = TagTuple(value='RECORDSUBM', standard_tag='SUBM', supers=[], subs=['Addr', 'Chan', 'Crea', 'Email', 'Exid', 'Fax', 'Name', 'Note', 'Obje', 'Phon', 'Refn', 'Snote', 'SubmLang', 'Uid', 'Www'], required=['Name'], single=['Addr', 'Chan', 'Crea', 'Name'], enumsets=[], enums=[])
+    TypeAge = TagTuple(value='TYPEAGE', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeDate = TagTuple(value='TYPEDATE', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeEnum = TagTuple(value='TYPEENUM', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeFilepath = TagTuple(value='TYPEFILEPATH', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeList = TagTuple(value='TYPELIST', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeName = TagTuple(value='TYPENAME', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
+    TypeTime = TagTuple(value='TYPETIME', standard_tag='', supers=[], subs=[], required=[], single=[], enumsets=[], enums=[])
