@@ -151,6 +151,7 @@ from genedata.gedcom import (
     Tag,
     TagTuple,
 )
+from genedata.gedcom7 import Structure
 from genedata.messages import Example, Msg
 
 AnyList = Any | list[Any] | None
@@ -219,8 +220,6 @@ class TagYaml:
         yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
         return yaml_dict
-    
-
 
     @staticmethod
     def get(
@@ -444,7 +443,7 @@ class TagYaml:
     # def generate() -> None:
     #     """This method generates definitions for the `StdTag` class used to check extensions."""
     #     for item in Terms:
-    #         print( 
+    #         print(
     #             TagYaml.get(
     #                 url=f'{Config.TERMS}{item.value}', alt_name=item.value
     #             ).show()
@@ -554,6 +553,60 @@ class ExtTag:
 
 ExtTagType = ExtTag | list[ExtTag] | None
 TagType = Tag | ExtTag | None
+
+
+class Xref:
+    """Assign an extension cross-reference type to a string.
+
+    This base class is instantiated through the other cross reference classes.
+
+    Args:
+        name: The name of the identifier.
+        tag: The tag associated with this identifier.
+
+    See Also:
+        `ExtensionXref`
+        `FamilyXref`
+        `IndividualXref`
+        `MultimediaXref`
+        `SharedNoteXref`
+        `SourceXref`
+        `RepositoryXref`
+        `SubmitterXref`
+
+    Reference:
+        [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    """
+
+    def __init__(self, name: str, tag: Tag | ExtTag = Tag.NONE):
+        self.fullname: str = name.upper()
+        self.name: str = name.replace('@', '').replace(Default.UNDERLINE, ' ')
+        self.tag: Tag | ExtTag = tag
+        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
+
+    def __str__(self) -> str:
+        """Return the name used by the GEDCOM standard."""
+        return self.fullname
+
+    def __repr__(self) -> str:
+        return f"Xref('{self.fullname}')"
+
+    def ged(self, info: str = Default.EMPTY) -> str:
+        """Return the identifier formatted according to the GEDCOM standard."""
+        lines: str = Default.EMPTY
+        xref_name: str = self.fullname
+        if self.fullname == Default.VOID_POINTER:
+            xref_name = Default.EMPTY
+        if info == Default.EMPTY:
+            lines = Tagger.empty(
+                lines, level=0, tag=self.tag.value, xref=xref_name
+            )
+        return Tagger.string(
+            lines, level=0, tag=self.tag.value, payload=info, xref=xref_name
+        )
+
+    def code(self, tabs: int = 0) -> str:  # noqa: ARG002
+        return self.fullname
 
 
 class Tagger:
@@ -998,6 +1051,19 @@ class Checker:
         )
         return check
 
+    @staticmethod
+    def nosubs_validate(
+        name: dict[str, Any], subs: Any = None, ext: Any = None
+    ) -> bool:
+        counted = Checker.count_named_tuples(subs)
+        check: bool = (
+            Checker.required(name['required'], counted)
+            and Checker.only_permitted(name['subs'], counted)
+            and Checker.only_one(name['single'], counted)
+            and Checker.verify_ext(name['standard tag'], ext)
+        )
+        return check
+
     # @staticmethod
     # def base_record(xref: Any, tag: TagTuple, counted: dict[str, int], extension: Any) -> bool:
     #     check: bool = True
@@ -1149,6 +1215,15 @@ class Checker:
                 raise ValueError(
                     Msg.EXTENSION_ENUM_TAG.format(tag.value, enum_name)
                 )
+        return True
+
+    @staticmethod
+    def permitted_enum(value: str | int | Xref, enums: list[str]) -> bool:
+        """Check if the value is in the proper enumeration."""
+        if len(enums) == 0:
+            return True
+        if value not in enums:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(value, enums))
         return True
 
     @staticmethod
@@ -2029,60 +2104,6 @@ class Formatter:
                 pass
 
 
-class Xref:
-    """Assign an extension cross-reference type to a string.
-
-    This base class is instantiated through the other cross reference classes.
-
-    Args:
-        name: The name of the identifier.
-        tag: The tag associated with this identifier.
-
-    See Also:
-        `ExtensionXref`
-        `FamilyXref`
-        `IndividualXref`
-        `MultimediaXref`
-        `SharedNoteXref`
-        `SourceXref`
-        `RepositoryXref`
-        `SubmitterXref`
-
-    Reference:
-        [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
-    """
-
-    def __init__(self, name: str, tag: Tag | ExtTag = Tag.NONE):
-        self.fullname: str = name.upper()
-        self.name: str = name.replace('@', '').replace(Default.UNDERLINE, ' ')
-        self.tag: Tag | ExtTag = tag
-        self.code_xref = f'{self.tag.value.lower()}_{self.name.lower()}_xref'
-
-    def __str__(self) -> str:
-        """Return the name used by the GEDCOM standard."""
-        return self.fullname
-
-    def __repr__(self) -> str:
-        return f"Xref('{self.fullname}')"
-
-    def ged(self, info: str = Default.EMPTY) -> str:
-        """Return the identifier formatted according to the GEDCOM standard."""
-        lines: str = Default.EMPTY
-        xref_name: str = self.fullname
-        if self.fullname == Default.VOID_POINTER:
-            xref_name = Default.EMPTY
-        if info == Default.EMPTY:
-            lines = Tagger.empty(
-                lines, level=0, tag=self.tag.value, xref=xref_name
-            )
-        return Tagger.string(
-            lines, level=0, tag=self.tag.value, payload=info, xref=xref_name
-        )
-
-    def code(self, tabs: int = 0) -> str:  # noqa: ARG002
-        return self.fullname
-
-
 class ExtensionXref(Xref):
     """Assign an extension cross-reference type to a string.
 
@@ -2359,548 +2380,2887 @@ class Extension(NamedTuple):
 ExtType = Extension | list[Extension] | None
 
 
-class Abbr(NamedTuple):
-    """Store, validate and format the ABBR tag.
-
-    Example:
+class BaseStructure:
+    """The base class for structures with only substructures and extensions.
 
     Args:
-        value: The abbreviation of the document.
-        ext: Optional substructures extending [ABBR tag](https://gedcom.io/terms/v7/ABBR) entered through `Extension`.
-
-    See Also:
-        `Extension`
-
-    Reference:
-        [GEDCOM ABBR tag](https://gedcom.io/terms/v7/ABBR)
-
+        value: The value associated with the tag.
+        ext: Extensions for the tag.
     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+    def __init__(
+        self,
+        value: str | int | Xref,
+        subs: SubsType,
+        ext: ExtType,
+        name: dict[str, Any],
+    ):
+        self.value: str | int | Xref = value
+        self.subs: SubsType = subs
+        self.ext: ExtType = ext
+        self.name: dict[str, Any] = name
+        self.tag: str = self.name[Default.YAML_STANDARD_TAG]
+        self.permitted: list[str] = self.name[Default.YAML_PERMITTED]
+        self.required: list[str] = self.name[Default.YAML_REQUIRED]
+        self.single: list[str] = self.name[Default.YAML_SINGULAR]
+        self.enums: list[str] = self.name[Default.YAML_ENUMS]
+        self.class_name: str = self.tag.title().replace('_', '')
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        return Checker.validate(StdTag.Abbr.value, subs=None, ext=self.ext)
+        counted = Checker.count_named_tuples(self.subs)
+        check: bool = (
+            Checker.required(self.required, counted)
+            and Checker.only_permitted(self.permitted, counted)
+            and Checker.only_one(self.single, counted)
+            and Checker.verify_ext(self.tag, self.ext)
+            and Checker.permitted_enum(self.value, self.enums)
+        )
+        return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level,
-                StdTag.Abbr.value,
-                self.value,
-                subs=None,
-                ext=self.ext,
+    def ged(self, level: int = 1, format: bool = True) -> str:
+        """Generate the GEDCOM lines."""
+        lines: str = Default.EMPTY
+        if self.value == Default.EMPTY:
+            lines = Tagger.empty(lines, level, self.tag)
+        else:
+            lines = Tagger.string(
+                lines, level, self.tag, str(self.value), format=format
             )
-        return Default.EMPTY
+        lines = Tagger.structure(lines, level + 1, Tagger.order(self.subs))
+        return Tagger.structure(lines, level + 1, self.ext)
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Abbr.__name__, self.ext, tabs, full
+    def code(self, tabs: int = 1, full: bool = True) -> str:
+        if self.subs is None and self.ext is None:
+            return indent(
+                Formatter.display_code(f"{self.class_name}('{self.value}')"),
+                Default.INDENT * tabs,
+            )
+        if self.subs is None and self.ext is not None:
+            return indent(
+                Formatter.display_code(
+                    f'{self.class_name}',
+                    (
+                        f'    {Default.CODE_VALUE} = ',
+                        self.value,
+                        tabs,
+                        full,
+                        False,
+                    ),
+                    (
+                        f'    {Default.CODE_EXT} = ',
+                        self.ext,
+                        tabs + 1,
+                        full,
+                        True,
+                    ),
+                ),
+                Default.INDENT * tabs,
+            )
+        if self.subs is not None and self.ext is None:
+            return indent(
+                Formatter.display_code(
+                    f'{self.class_name}',
+                    (
+                        f'    {Default.CODE_VALUE} = ',
+                        self.value,
+                        tabs,
+                        full,
+                        False,
+                    ),
+                    (
+                        f'    {Default.CODE_SUBS} = ',
+                        self.subs,
+                        tabs + 1,
+                        full,
+                        True,
+                    ),
+                ),
+                Default.INDENT * tabs,
+            )
+        return indent(
+            Formatter.display_code(
+                f'{self.class_name}',
+                (f'    {Default.CODE_VALUE} = ', self.value, tabs, full, False),
+                (
+                    f'    {Default.CODE_SUBS} = ',
+                    self.subs,
+                    tabs + 1,
+                    full,
+                    True,
+                ),
+                (f'    {Default.CODE_EXT} = ', self.ext, tabs + 1, full, True),
+            ),
+            Default.INDENT * tabs,
         )
 
 
-class Agnc(NamedTuple):
-    """Store, validate and format the AGNC tag.
+###########################################################################
 
-    Example:
 
+class Abbr(BaseStructure):
+    '''Store, validate and format the ABBR structure.
+
+    GEDCOM Specification:
+    > Abbreviation
+    > A short name of a title, description, or name used for sorting, filing, and
+    > retrieving records.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Abbr
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
     Args:
-        value: The name of the agency providing the source.
-        agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC) entered through `Extension`.
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
 
-    See Also:
-        `Extension`
+    References:
+    - [GEDCOM ABBR Structure](https://gedcom.io/terms/v7/ABBR)
+    '''
 
-    Reference:
-        [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC)
+    name: dict[str, Any] = Structure['ABBR']
+    subs: SubsType = None
 
-    """
-
-    value: str = Default.EMPTY
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Agnc.value, subs=None, ext=self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level,
-                StdTag.Agnc.value,
-                self.value,
-                subs=None,
-                ext=self.ext,
-            )
-        return Default.EMPTY
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Agnc.__name__, self.ext, tabs, full
-        )
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
 
 
-class Auth(NamedTuple):
-    """Store, validate and format the AUTH tag.
+class Adr1(BaseStructure):
+    '''Store, validate and format the ADR1 structure.
 
-    Example:
+    GEDCOM Specification:
+    > Address Line 1
+    > The first line of the address, used for indexing. This structure's payload
+    > should be a single line of text equal to the first line of the
+    > corresponding `ADDR`. See `ADDRESS_STRUCTURE` for more details.  <div
+    > class="deprecation">  `ADR1` should not be added to new files; see
+    > `ADDRESS_STRUCTURE` for more details.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Adr1
+    
+    <BLANKLINE>
 
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
     Args:
-        value: The name of the author.
-        auth_ext: Optional substructures extending [AUTH tag](https://gedcom.io/terms/v7/AuTH) entered through `Extension`.
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
 
-    See Also:
-        `Extension`
+    References:
+    - [GEDCOM ADR1 Structure](https://gedcom.io/terms/v7/ADR1)
+    '''
 
-    Reference:
-        [GEDCOM AUTH tag](https://gedcom.io/terms/v7/AUTH)
+    name: dict[str, Any] = Structure['ADR1']
+    subs: SubsType = None
 
-    """
-
-    value: str = Default.EMPTY
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Auth.value, subs=None, ext=self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Auth.value, self.value, subs=None, ext=self.ext
-            )
-        return Default.EMPTY
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Auth.__name__, self.ext, tabs, full
-        )
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
 
 
-class Email(NamedTuple):
-    """Store, validate and format email information.
+class Adr2(BaseStructure):
+    '''Store, validate and format the ADR2 structure.
 
-    Example:
+    GEDCOM Specification:
+    > Address Line 2
+    > The second line of the address, used for indexing. This structure's payload
+    > should be a single line of text equal to the second line of the
+    > corresponding `ADDR`. See `ADDRESS_STRUCTURE` for more details.  <div
+    > class="deprecation">  `ADR2` should not be added to new files; see
+    > `ADDRESS_STRUCTURE` for more details.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Adr2
+    
+    <BLANKLINE>
 
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
     Args:
-        value: The string containing the email.
-        email_ext: Optional substructures extending [EMAIL tag](https://gedcom.io/terms/v7/EMAIL) entered through `Extension`.
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
 
-    See Also:
-        `Extension`
+    References:
+    - [GEDCOM ADR2 Structure](https://gedcom.io/terms/v7/ADR2)
+    '''
 
-    Reference:
-        [GEDCOM EMAIL tag](https://gedcom.io/terms/v7/EMAIL)
+    name: dict[str, Any] = Structure['ADR2']
+    subs: SubsType = None
 
-    """
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Email.value, subs=None, ext=self.ext)
+class Adr3(BaseStructure):
+    '''Store, validate and format the ADR3 structure.
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Email.value, self.value, subs=None, ext=self.ext
-            )
-        return Default.EMPTY
+    GEDCOM Specification:
+    > Address Line 3
+    > The third line of the address, used for indexing. This structure's payload
+    > should be a single line of text equal to the third line of the
+    > corresponding `ADDR`. See `ADDRESS_STRUCTURE` for more details.  <div
+    > class="deprecation">  `ADR3` should not be added to new files; see
+    > `ADDRESS_STRUCTURE` for more details.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Adr3
+    
+    <BLANKLINE>
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Email.__name__, self.ext, tabs, full
-        )
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM ADR3 Structure](https://gedcom.io/terms/v7/ADR3)
+    '''
+
+    name: dict[str, Any] = Structure['ADR3']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Agnc(BaseStructure):
+    '''Store, validate and format the AGNC structure.
+
+    GEDCOM Specification:
+    > Responsible agency
+    > The organization, institution, corporation, person, or other entity that
+    > has responsibility for the associated context. Examples are an employer of
+    > a person of an associated occupation, or a church that administered rites
+    > or events, or an organization responsible for creating or archiving
+    > records.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Agnc
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM AGNC Structure](https://gedcom.io/terms/v7/AGNC)
+    '''
+
+    name: dict[str, Any] = Structure['AGNC']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Anci(BaseStructure):
+    '''Store, validate and format the ANCI structure.
+
+    GEDCOM Specification:
+    > Ancestor interest
+    > Indicates an interest in additional research for ancestors of this
+    > individual. (See also `DESI`).
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Anci
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype @<https://gedcom.io/terms/v7/record-SUBM>@.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM ANCI Structure](https://gedcom.io/terms/v7/ANCI)
+    '''
+
+    name: dict[str, Any] = Structure['ANCI']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Auth(BaseStructure):
+    '''Store, validate and format the AUTH structure.
+
+    GEDCOM Specification:
+    > Author
+    > The person, agency, or entity who created the record. For a published work,
+    > this could be the author, compiler, transcriber, abstractor, or editor. For
+    > an unpublished source, this may be an individual, a government agency,
+    > church organization, or private organization.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Auth
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM AUTH Structure](https://gedcom.io/terms/v7/AUTH)
+    '''
+
+    name: dict[str, Any] = Structure['AUTH']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Caus(BaseStructure):
+    '''Store, validate and format the CAUS structure.
+
+    GEDCOM Specification:
+    > Cause
+    > The reasons which precipitated an event. It is often used subordinate to a
+    > death event to show cause of death, such as might be listed on a death
+    > certificate.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Caus
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM CAUS Structure](https://gedcom.io/terms/v7/CAUS)
+    '''
+
+    name: dict[str, Any] = Structure['CAUS']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class City(BaseStructure):
+    '''Store, validate and format the CITY structure.
+
+    GEDCOM Specification:
+    > City
+    > The name of the city used in the address. See `ADDRESS_STRUCTURE` for more
+    > details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import City
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM CITY Structure](https://gedcom.io/terms/v7/CITY)
+    '''
+
+    name: dict[str, Any] = Structure['CITY']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Copr(BaseStructure):
+    '''Store, validate and format the COPR structure.
+
+    GEDCOM Specification:
+    > Copyright
+    > A copyright statement, as appropriate for the copyright laws applicable to
+    > this data.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Copr
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM COPR Structure](https://gedcom.io/terms/v7/COPR)
+    '''
+
+    name: dict[str, Any] = Structure['COPR']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Ctry(BaseStructure):
+    '''Store, validate and format the CTRY structure.
+
+    GEDCOM Specification:
+    > Country
+    > The name of the country that pertains to the associated address. See
+    > `ADDRESS_STRUCTURE` for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Ctry
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM CTRY Structure](https://gedcom.io/terms/v7/CTRY)
+    '''
+
+    name: dict[str, Any] = Structure['CTRY']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Desi(BaseStructure):
+    '''Store, validate and format the DESI structure.
+
+    GEDCOM Specification:
+    > Descendant Interest
+    > Indicates an interest in research to identify additional descendants of
+    > this individual. See also `ANCI`.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Desi
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype @<https://gedcom.io/terms/v7/record-SUBM>@.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM DESI Structure](https://gedcom.io/terms/v7/DESI)
+    '''
+
+    name: dict[str, Any] = Structure['DESI']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Dest(BaseStructure):
+    '''Store, validate and format the DEST structure.
+
+    GEDCOM Specification:
+    > Destination
+    > An identifier for the system expected to receive this document. See
+    > `HEAD`.`SOUR` for guidance on choosing identifiers.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Dest
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM DEST Structure](https://gedcom.io/terms/v7/DEST)
+    '''
+
+    name: dict[str, Any] = Structure['DEST']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Email(BaseStructure):
+    '''Store, validate and format the EMAIL structure.
+
+    GEDCOM Specification:
+    > Email
+    > An electronic mail address, as defined by any relevant standard such as
+    > [RFC 3696], [RFC 5321], or [RFC 5322].  If an invalid email address is
+    > present upon import, it should be preserved as-is on export.  <div
+    > class="note">  The version 5.5.1 specification contained a typo where this
+    > tag was sometimes written `EMAI` and sometimes written `EMAIL`. `EMAIL`
+    > should be used in version 7.0 and later.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Email
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM EMAIL Structure](https://gedcom.io/terms/v7/EMAIL)
+    '''
+
+    name: dict[str, Any] = Structure['EMAIL']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Type(BaseStructure):
+    '''Store, validate and format the TYPE structure.
+
+    GEDCOM Specification:
+    > Type
+    > The authority issuing the `EXID`, represented as a URI. It is recommended
+    > that this be a URL.  If the authority maintains stable URLs for each
+    > identifier it issues, it is recommended that the `TYPE` payload be selected
+    > such that appending the `EXID` payload to it yields that URL. However, this
+    > is not required and a different URI for the set of issued identifiers may
+    > be used instead.  Registered URIs are listed in the [exid-types registry],
+    > where fields are defined using the [YAML file format].  Additional type
+    > URIs can be registered by filing a [GitHub pull request].
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Type
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/EXID-TYPE)
+    '''
+
+    name: dict[str, Any] = Structure['TYPE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Famc(BaseStructure):
+    '''Store, validate and format the FAMC structure.
+
+    GEDCOM Specification:
+    > Family child
+    > The family with which this individual event is associated.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Famc
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype @<https://gedcom.io/terms/v7/record-FAM>@.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/FAMC)
+    '''
+
+    name: dict[str, Any] = Structure['FAMC']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Fax(BaseStructure):
+    '''Store, validate and format the FAX structure.
+
+    GEDCOM Specification:
+    > Facsimile
+    > A fax telephone number appropriate for sending data facsimiles. See `PHON`
+    > for additional comments on telephone numbers.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Fax
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM FAX Structure](https://gedcom.io/terms/v7/FAX)
+    '''
+
+    name: dict[str, Any] = Structure['FAX']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Vers(BaseStructure):
+    '''Store, validate and format the VERS structure.
+
+    GEDCOM Specification:
+    > Version
+    > The version number of the official specification that this document's data
+    > conforms to. This must include the major and minor version (for example,
+    > "`7.0`"); it may include the patch as well (for example, "`7.0.1`"), but
+    > doing so is not required. See [A Guide to Version Numbers] for more details
+    > about version numbers.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Vers
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/GEDC-VERS)
+    '''
+
+    name: dict[str, Any] = Structure['VERS']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Givn(BaseStructure):
+    '''Store, validate and format the GIVN structure.
+
+    GEDCOM Specification:
+    > Given name
+    > A given or earned name used for official identification of a person.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Givn
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM GIVN Structure](https://gedcom.io/terms/v7/GIVN)
+    '''
+
+    name: dict[str, Any] = Structure['GIVN']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Lang(BaseStructure):
+    '''Store, validate and format the LANG structure.
+
+    GEDCOM Specification:
+    > Language
+    > A default language which may be used to interpret any `Text`-typed payloads
+    > that lack a specific language tag from a `https://gedcom.io/terms/v7/LANG`
+    > structure. An application may choose to use a different default based on
+    > its knowledge of the language preferences of the user.  The payload of the
+    > `LANG` structure is a language tag, as defined by [BCP 47].  <div
+    > class="note">  Some algorithms on text are language-specific. Examples
+    > include sorting sequences, name comparison and phonetic name matching
+    > algorithms, spell-checking, computer-synthesized speech, Braille
+    > transcription, and language translation. When the language of the text is
+    > given through a `https://gedcom.io/terms/v7/LANG`, that should be used.
+    > When `https://gedcom.io/terms/v7/LANG` is not available,
+    > `https://gedcom.io/terms/v7/HEAD-LANG` provides the file creator's
+    > suggested default language. For some language-specific algorithms, the
+    > user's preferred language may be a more appropriate default than the file's
+    > default language. User language preferences can be found in a variety of
+    > platform-specific places, such as the default language from operating
+    > system settings, user locales, Input Method Editors (IMEs), etc.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Lang
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#Language.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/HEAD-LANG)
+    '''
+
+    name: dict[str, Any] = Structure['LANG']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Form(BaseStructure):
+    '''Store, validate and format the FORM structure.
+
+    GEDCOM Specification:
+    > Format
+    > Any `PLAC` with no [`FORM`] shall be treated as if it has this [`FORM`].
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Form
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype https://gedcom.io/terms/v7/type-List#Text.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
+    '''
+
+    name: dict[str, Any] = Structure['FORM']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Height(BaseStructure):
+    '''Store, validate and format the HEIGHT structure.
+
+    GEDCOM Specification:
+    > Height in pixels
+    > How many pixels to display vertically for the image. See `CROP` for more
+    > details.  <div class="note">  `HEIGHT` is a number of pixels. The correct
+    > tag for the height of an individual is the `DSCR` attribute.  <div
+    > class="example">  ```gedcom 0 @I45@ INDI 1 DSCR brown eyes, 5ft 10in, 198
+    > pounds ```  </div>  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Height
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#nonNegativeInteger.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM HEIGHT Structure](https://gedcom.io/terms/v7/HEIGHT)
+    '''
+
+    name: dict[str, Any] = Structure['HEIGHT']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Lang(BaseStructure):
+    '''Store, validate and format the LANG structure.
+
+    GEDCOM Specification:
+    > Language
+    > The primary human language of the superstructure. The primary language in
+    > which the `Text`-typed payloads of the superstructure and its substructures
+    > appear.  The payload of the `LANG` structure is a language tag, as defined
+    > by [BCP 47]. A [registry of component subtags] is maintained publicly by
+    > the IANA.  In the absence of a `LANG` structure, the language is assumed to
+    > be unspecified; that may also be recorded explicitly with language tag
+    > `und` (meaning "undetermined"). See `https://gedcom.io/terms/v7/HEAD-LANG`
+    > for information about applying language-specific algorithms to text in an
+    > unspecified language.  If the text is primarily in one language with a few
+    > parts in a different language, it is recommended that a language tag
+    > identifying the primary language be used. If no one language is primary,
+    > the language tag `mul` (meaning "multiple") may be used, but most language-
+    > specific algorithms will treat `mul` the same way they do `und`.  <div
+    > class="note">  Conversations are ongoing about adding part-of-payload
+    > language tagging in a future version of the specification to provide more
+    > fidelity for multilingual text.  </div>  If the text is not in any human
+    > language and should not be treated as lingual content, the language tag
+    > `zxx` (meaning "no linguistic content" or "not applicable") may be used. An
+    > example of `zxx` text might be a diagram approximated using characters for
+    > their shape, not their meaning.  <div class="note">  This specification
+    > does not permit `LANG` in every place where human language text might
+    > appear. Conversations are ongoing about adding it in more places in a
+    > future version of the specification. Using the current specification,
+    > additional language tagging can be accomplished using a [documented
+    > extension tag] by including the following in the header:  ```gedcom 1
+    > SCHEMA 2 TAG _LANG https://gedcom.io/terms/v7/LANG ```  and using the
+    > extension tag like so:  ```gedcom 2 DATE 31 AUG 2018 3 PHRASE 2018年8月31日 4
+    > _LANG cmn ```  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Lang
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#Language.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/LANG)
+    '''
+
+    name: dict[str, Any] = Structure['LANG']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Lati(BaseStructure):
+    '''Store, validate and format the LATI structure.
+
+    GEDCOM Specification:
+    > Latitude
+    > A latitudinal coordinate. The payload is either `N` (for a coordinate north
+    > of the equator) or `S` (for a coordinate south of the equator) followed by
+    > a decimal number of degrees. Minutes and seconds are not used and should be
+    > converted to fractional degrees prior to encoding.  <div class="example">
+    > 18 degrees, 9 minutes, and 3.4 seconds North would be formatted as
+    > `N18.150944`.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Lati
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LATI Structure](https://gedcom.io/terms/v7/LATI)
+    '''
+
+    name: dict[str, Any] = Structure['LATI']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Left(BaseStructure):
+    '''Store, validate and format the LEFT structure.
+
+    GEDCOM Specification:
+    > Left crop width
+    > Left is a number of pixels to not display from the left side of the image.
+    > See `CROP` for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Left
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#nonNegativeInteger.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LEFT Structure](https://gedcom.io/terms/v7/LEFT)
+    '''
+
+    name: dict[str, Any] = Structure['LEFT']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Long(BaseStructure):
+    '''Store, validate and format the LONG structure.
+
+    GEDCOM Specification:
+    > Longitude
+    > A longitudinal coordinate. The payload is either `E` (for a coordinate east
+    > of the prime meridian) or `W` (for a coordinate west of the prime meridian)
+    > followed by a decimal number of degrees. Minutes and seconds are not used
+    > and should be converted to fractional degrees prior to encoding.  <div
+    > class="example">  168 degrees, 9 minutes, and 3.4 seconds East would be
+    > formatted as `E168.150944`.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Long
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LONG Structure](https://gedcom.io/terms/v7/LONG)
+    '''
+
+    name: dict[str, Any] = Structure['LONG']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Mime(BaseStructure):
+    '''Store, validate and format the MIME structure.
+
+    GEDCOM Specification:
+    > Media type
+    > Indicates the [media type] of the payload of the superstructure.  As of
+    > version 7.0, only 2 media types are supported by this structure:  -
+    > `text/plain` shall be presented to the user as-is, preserving all spacing,
+    > line breaks, and so forth.  - `text/html` uses HTML tags to provide
+    > presentation information. Applications   should support at least the
+    > following:    - `p` and `br` elements for paragraphing and line breaks.   -
+    > `b`, `i`, `u`, and `s` elements for bold, italic, underlined, and
+    > strike-through text (or corresponding display in other locales; see [HTML
+    > §4.5] for more).   - `sup` and `sub` elements for super- and sub-script.
+    > - The 3 XML entities that appear in text: `&amp;`, `&lt;` `&gt;`. Note that
+    > `&quote;` and `&apos;` are only needed in attributes. Other entities should
+    > be represented as their respective Unicode characters instead.
+    > Supporting more of HTML is encouraged. Unsupported tags should be ignored
+    > during display.  <div class="note">  Applications are welcome to support
+    > more XML entities or HTML character references in their user interface.
+    > However, exporting must only use the core XML entities, translating any
+    > other entities into their corresponding Unicode characters.  </div>  <div
+    > class="note">  Applications are welcome to support additional HTML
+    > elements, but they should ensure that content is meaningful if those extra
+    > elements are ignored and only their content text is displayed.  </div>
+    > <div class="note">  Media types are also used by external files, as
+    > described under `FORM`. External file media types are not limited to
+    > `text/plain` and `text/html`.  </div>  If needed, `text/html` can be
+    > converted to `text/plain` using the following steps:  1. Replace any
+    > sequence of 1 or more spaces, tabs, and line breaks with a    single space
+    > 2. Case-insensitively replace each `<p`
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Mime
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM MIME Structure](https://gedcom.io/terms/v7/MIME)
+    '''
+
+    name: dict[str, Any] = Structure['MIME']
+    value = Default.EMPTY
+    subs: SubsType = None
+
+    def __init__(self, ext: ExtType = None):
+        super().__init__(self.value, self.subs, ext, self.name)
+
+
+class Name(BaseStructure):
+    '''Store, validate and format the NAME structure.
+
+    GEDCOM Specification:
+    > Name
+    > The name of the superstructure's subject, represented as a simple string.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Name
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/NAME)
+    '''
+
+    name: dict[str, Any] = Structure['NAME']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Nick(BaseStructure):
+    '''Store, validate and format the NICK structure.
+
+    GEDCOM Specification:
+    > Nickname
+    > A descriptive or familiar name that is used instead of, or in addition to,
+    > one’s official or legal name.  <div class="note">  The label "nickname" and
+    > description text of this structure were introduced with version 5.5 in
+    > 1996, but are understood differently by different users. Some use `NICK`
+    > only for names that would be inappropriate in formal settings. Some use it
+    > for pseudonyms regardless of where they are used. Some use it for any
+    > variant of a name that is not the one used on legal documents. Because all
+    > of these uses, and likely others as well, are common in existing data, no
+    > further clarification of the meaning of the `NICK` structure is possible
+    > without contradicting some existing data.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Nick
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM NICK Structure](https://gedcom.io/terms/v7/NICK)
+    '''
+
+    name: dict[str, Any] = Structure['NICK']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Npfx(BaseStructure):
+    '''Store, validate and format the NPFX structure.
+
+    GEDCOM Specification:
+    > Name prefix
+    > Text that appears on a name line before the given and surname parts of a
+    > name.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Npfx
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM NPFX Structure](https://gedcom.io/terms/v7/NPFX)
+    '''
+
+    name: dict[str, Any] = Structure['NPFX']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Nsfx(BaseStructure):
+    '''Store, validate and format the NSFX structure.
+
+    GEDCOM Specification:
+    > Name suffix
+    > Text which appears on a name line after or behind the given and surname
+    > parts of a name.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Nsfx
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM NSFX Structure](https://gedcom.io/terms/v7/NSFX)
+    '''
+
+    name: dict[str, Any] = Structure['NSFX']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Page(BaseStructure):
+    '''Store, validate and format the PAGE structure.
+
+    GEDCOM Specification:
+    > Page
+    > A specific location within the information referenced. For a published
+    > work, this could include the volume of a multi-volume work and the page
+    > number or numbers. For a periodical, it could include volume, issue, and
+    > page numbers. For a newspaper, it could include a date, page number, and
+    > column number. For an unpublished source or microfilmed works, this could
+    > be a film or sheet number, page number, or frame number. A census record
+    > might have an enumerating district, page number, line number, dwelling
+    > number, and family number.  It is recommended that the data in this field
+    > be formatted comma-separated with label: value pairs  <div class="example">
+    > ```gedcom 2 SOUR @S1@ 3 PAGE Film: 1234567, Frame: 344, Line: 28 ```
+    > </div>  If the superstructure's pointer is `@VOID@` then there is no
+    > information referenced and the `PAGE` may describe the entire source.  <div
+    > class="example">  ```gedcom 1 DSCR Tall enough his head touched the ceiling
+    > 2 SOUR @VOID@ 3 PAGE His grand-daughter Lydia told me this in 1980 ```
+    > </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Page
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM PAGE Structure](https://gedcom.io/terms/v7/PAGE)
+    '''
+
+    name: dict[str, Any] = Structure['PAGE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Phon(BaseStructure):
+    '''Store, validate and format the PHON structure.
+
+    GEDCOM Specification:
+    > Phone
+    > A telephone number. Telephone numbers have many regional variations and can
+    > contain non-digit characters. Users should be encouraged to use
+    > internationalized telephone numbers rather than local versions. As a
+    > starting point for this recommendation, there are international standards
+    > that use a "'+'" shorthand for the international prefix (for example, in
+    > place of "011" in the US or "00" in the UK). Examples are `+1 (555)
+    > 555-1234` (US) or `+44 20 1234 1234` (UK).  See ITU standards [E.123] and
+    > [E.164] for more information.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Phon
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM PHON Structure](https://gedcom.io/terms/v7/PHON)
+    '''
+
+    name: dict[str, Any] = Structure['PHON']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Phrase(BaseStructure):
+    '''Store, validate and format the PHRASE structure.
+
+    GEDCOM Specification:
+    > Phrase
+    > Textual information that cannot be expressed in the superstructure due to
+    > the limitations of its data type. A `PHRASE` may restate information
+    > contained in the superstructure, but doing so is not recommended unless it
+    > is needed for clarity.  <div class="example">  A date interpreted from the
+    > phrase "The Feast of St John" might be  ```gedcom 2 DATE 24 JUN 1852 3
+    > PHRASE During the feast of St John ```  </div>  <div class="example">  A
+    > record using `1648/9` to indicate a change in new year might become
+    > ```gedcom 2 DATE 30 JAN 1649 3 PHRASE 30th of January, 1648/9 ```  </div>
+    > <div class="example">  A record using `1648/9` to indicate uncertainty in
+    > the year might become  ```gedcom 2 DATE BET 1648 AND 1649 3 PHRASE 1648/9
+    > ```  </div>  <div class="example">  A record using `Q1 1867` to indicate an
+    > event occurred sometime within the first quarter of 1867 might become
+    > ```gedcom 2 DATE BET 1 JAN 1867 AND 31 MAR 1867 3 PHRASE Q1 1867 ```
+    > </div>  <div class="example">  A record defining the Maid of Honor in a
+    > marriage might become  ```gedcom 1 MARR 2 ASSO @I2@ 3 ROLE OTHER 4 PHRASE
+    > Maid of Honor ```  </div>  <div class="example">  A name given to a
+    > foundling orphan might be  ```gedcom 1 NAME Mary // 2 GIVN Mary 2 TYPE
+    > OTHER 3 PHRASE given by orphanage ```  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Phrase
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM PHRASE Structure](https://gedcom.io/terms/v7/PHRASE)
+    '''
+
+    name: dict[str, Any] = Structure['PHRASE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Form(BaseStructure):
+    '''Store, validate and format the FORM structure.
+
+    GEDCOM Specification:
+    > Format
+    > A comma-separated list of jurisdictional titles, which has the same number
+    > of elements and in the same order as the `PLAC` structure. As with `PLAC`,
+    > this shall be ordered from lowest to highest jurisdiction.  <div
+    > class="example">  The following represents Baltimore, a city that is not
+    > within a county.  ```gedcom 2 PLAC Baltimore, , Maryland, USA 3 FORM City,
+    > County, State, Country ```  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Form
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype https://gedcom.io/terms/v7/type-List#Text.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/PLAC-FORM)
+    '''
+
+    name: dict[str, Any] = Structure['FORM']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Post(BaseStructure):
+    '''Store, validate and format the POST structure.
+
+    GEDCOM Specification:
+    > Postal code
+    > A code used by a postal service to identify an area to facilitate mail
+    > handling. See `ADDRESS_STRUCTURE` for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Post
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM POST Structure](https://gedcom.io/terms/v7/POST)
+    '''
+
+    name: dict[str, Any] = Structure['POST']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Publ(BaseStructure):
+    '''Store, validate and format the PUBL structure.
+
+    GEDCOM Specification:
+    > Publication
+    > When and where the record was created. For published works, this includes
+    > information such as the city of publication, name of the publisher, and
+    > year of publication.  For an unpublished work, it includes the date the
+    > record was created and the place where it was created, such as the county
+    > and state of residence of a person making a declaration for a pension or
+    > the city and state of residence of the writer of a letter.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Publ
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM PUBL Structure](https://gedcom.io/terms/v7/PUBL)
+    '''
+
+    name: dict[str, Any] = Structure['PUBL']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Quay(BaseStructure):
+    '''Store, validate and format the QUAY structure.
+
+    GEDCOM Specification:
+    > Quality of data
+    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-QUAY`
+    > indicating the credibility of a piece of information, based on its
+    > supporting evidence. Some systems use this feature to rank multiple
+    > conflicting opinions for display of most likely information first. It is
+    > not intended to eliminate the receivers' need to evaluate the evidence for
+    > themselves.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Quay
+    >>> m = Quay('3')
+    >>> m.ged(1)
+    1 QUAY 3
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Enumeration set string values to be used in the `value` argument
+    and their GEDCOM descriptions:
+    - '0': Unreliable evidence or estimated data
+    - '1': Questionable reliability of evidence (interviews, census, oral genealogies, or potential for bias, such as an autobiography)
+    - '2': Secondary evidence, data officially recorded sometime after the event
+    - '3': Direct and primary evidence used, or by dominance of the evidence
+    
+    Args:
+        value: A value from the [enumeration set](https://gedcom.io/terms/v7/enumset-QUAY).
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM QUAY Structure](https://gedcom.io/terms/v7/QUAY)
+    '''
+
+    name: dict[str, Any] = Structure['QUAY']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Reli(BaseStructure):
+    '''Store, validate and format the RELI structure.
+
+    GEDCOM Specification:
+    > Religion
+    > A religious denomination associated with the event or attribute described
+    > by the superstructure.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Reli
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/RELI)
+    '''
+
+    name: dict[str, Any] = Structure['RELI']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Resn(BaseStructure):
+    '''Store, validate and format the RESN structure.
+
+    GEDCOM Specification:
+    > Restriction
+    > A [List] of enumerated values from set `https://gedcom.io/terms/v7/enumset-
+    > RESN` signifying access to information may be denied or otherwise
+    > restricted.  The `RESN` structure is provided to assist software in
+    > filtering data that should not be exported or otherwise used in a
+    > particular context. It is recommended that tools provide an interface to
+    > allow users to filter data on export such that certain `RESN` structure
+    > payload entries result in the `RESN` structure and its superstructure being
+    > removed from the export. Such removal must abide by some constraints: see
+    > [Removing data] for more details.  This is metadata about the structure
+    > itself, not data about its subject.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Resn
+    >>> m = Resn('PRIVACY')
+    >>> m.ged(1)
+    1 RESN PRIVACY
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Enumeration set string values to be used in the `value` argument
+    and their GEDCOM descriptions:
+    - 'CONFIDENTIAL': This data was marked as confidential by the user.
+    - 'LOCKED': Some systems may ignore changes to this data.
+    - 'PRIVACY': This data is not to be shared outside of a trusted circle, generally because it contains information about living individuals. This definition is known to admit multiple interpretations, so use of the `PRIVACY` restriction notice is not recommended.
+    
+    Args:
+        value: A value from the [enumeration set](https://gedcom.io/terms/v7/enumset-RESN).
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM RESN Structure](https://gedcom.io/terms/v7/RESN)
+    '''
+
+    name: dict[str, Any] = Structure['RESN']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Sex(BaseStructure):
+    '''Store, validate and format the SEX structure.
+
+    GEDCOM Specification:
+    > Sex
+    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-SEX` that
+    > indicates the sex of the individual at birth.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Sex
+    >>> m = Sex('X')
+    >>> m.ged(1)
+    1 SEX X
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Enumeration set string values to be used in the `value` argument
+    and their GEDCOM descriptions:
+    - 'F': Female
+    - 'M': Male
+    - 'U': Cannot be determined from available sources
+    - 'X': Does not fit the typical definition of only Male or only Female
+    
+    Args:
+        value: A value from the [enumeration set](https://gedcom.io/terms/v7/enumset-SEX).
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM SEX Structure](https://gedcom.io/terms/v7/SEX)
+    '''
+
+    name: dict[str, Any] = Structure['SEX']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Snote(BaseStructure):
+    '''Store, validate and format the SNOTE structure.
+
+    GEDCOM Specification:
+    > Shared note
+    > A pointer to a note that is shared by multiple structures. See
+    > `NOTE_STRUCTURE` for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Snote
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype @<https://gedcom.io/terms/v7/record-SNOTE>@.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/SNOTE)
+    '''
+
+    name: dict[str, Any] = Structure['SNOTE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Spfx(BaseStructure):
+    '''Store, validate and format the SPFX structure.
+
+    GEDCOM Specification:
+    > Surname prefix
+    > A name piece used as a non-indexing pre-part of a surname.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Spfx
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM SPFX Structure](https://gedcom.io/terms/v7/SPFX)
+    '''
+
+    name: dict[str, Any] = Structure['SPFX']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Stae(BaseStructure):
+    '''Store, validate and format the STAE structure.
+
+    GEDCOM Specification:
+    > State
+    > A geographical division of a larger jurisdictional area, such as a state
+    > within the United States of America. See `ADDRESS_STRUCTURE` for more
+    > details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Stae
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM STAE Structure](https://gedcom.io/terms/v7/STAE)
+    '''
+
+    name: dict[str, Any] = Structure['STAE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Lang(BaseStructure):
+    '''Store, validate and format the LANG structure.
+
+    GEDCOM Specification:
+    > Language
+    > A language the subject of that record understands.  The payload of the
+    > `LANG` structure is a language tag, as defined by [BCP 47].
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Lang
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#Language.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/SUBM-LANG)
+    '''
+
+    name: dict[str, Any] = Structure['LANG']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Subm(BaseStructure):
+    '''Store, validate and format the SUBM structure.
+
+    GEDCOM Specification:
+    > Submitter
+    > A contributor of information in the substructure. This is metadata about
+    > the structure itself, not data about its subject.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Subm
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype @<https://gedcom.io/terms/v7/record-SUBM>@.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/SUBM)
+    '''
+
+    name: dict[str, Any] = Structure['SUBM']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Surn(BaseStructure):
+    '''Store, validate and format the SURN structure.
+
+    GEDCOM Specification:
+    > Surname
+    > A family name passed on or used by members of a family.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Surn
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM SURN Structure](https://gedcom.io/terms/v7/SURN)
+    '''
+
+    name: dict[str, Any] = Structure['SURN']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Tag(BaseStructure):
+    '''Store, validate and format the TAG structure.
+
+    GEDCOM Specification:
+    > Extension tag
+    > Information relating to a single extension tag as used in this document.
+    > See [Extensions] for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Tag
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TAG Structure](https://gedcom.io/terms/v7/TAG)
+    '''
+
+    name: dict[str, Any] = Structure['TAG']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Temp(BaseStructure):
+    '''Store, validate and format the TEMP structure.
+
+    GEDCOM Specification:
+    > Temple
+    > The name of a temple of The Church of Jesus Christ of Latter-day Saints.
+    > Previous versions recommended using a set of abbreviations for temple
+    > names, but the list of abbreviations is no longer published by the Church
+    > and using abbreviations is no longer recommended.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Temp
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TEMP Structure](https://gedcom.io/terms/v7/TEMP)
+    '''
+
+    name: dict[str, Any] = Structure['TEMP']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Time(BaseStructure):
+    '''Store, validate and format the TIME structure.
+
+    GEDCOM Specification:
+    > Time
+    > A `Time` value in a 24-hour clock format.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Time
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype https://gedcom.io/terms/v7/type-Time.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TIME Structure](https://gedcom.io/terms/v7/TIME)
+    '''
+
+    name: dict[str, Any] = Structure['TIME']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Titl(BaseStructure):
+    '''Store, validate and format the TITL structure.
+
+    GEDCOM Specification:
+    > Title
+    > The title, formal or informal, of the superstructure.  A published work,
+    > such as a book, might have a title plus the title of the series of which
+    > the book is a part. A magazine article would have a title plus the title of
+    > the magazine that published the article.  For an unpublished work,
+    > including most digital files, titles should be descriptive and appropriate
+    > to the work.  <div class="example">  <p></p>  - The `TITL` of a letter
+    > might include the date, the sender, and the receiver. - The `TITL` of a
+    > transaction between a buyer and seller might have their names   and the
+    > transaction date. - The `TITL` of a family Bible containing genealogical
+    > information might have   past and present owners and a physical description
+    > of the book. - The `TITL` of a personal interview would cite the informant
+    > and interviewer.  </div>  Some sources may have a citation text that cannot
+    > readily be represented using the `SOURCE_RECORD` substructures `AUTH`,
+    > `PUBL`, `REPO`, and so on. In such cases, the entire citation text may be
+    > presented as the payload of the `SOUR`.`TITL`.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Titl
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/TITL)
+    '''
+
+    name: dict[str, Any] = Structure['TITL']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Top(BaseStructure):
+    '''Store, validate and format the TOP structure.
+
+    GEDCOM Specification:
+    > Top crop width
+    > A number of pixels to not display from the top side of the image. See
+    > `CROP` for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Top
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#nonNegativeInteger.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TOP Structure](https://gedcom.io/terms/v7/TOP)
+    '''
+
+    name: dict[str, Any] = Structure['TOP']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Trlr(BaseStructure):
+    '''Store, validate and format the TRLR structure.
+
+    GEDCOM Specification:
+    > Trailer
+    > A pseudo-structure marking the end of a dataset. See [The Header and
+    > Trailer] for more details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Trlr
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TRLR Structure](https://gedcom.io/terms/v7/TRLR)
+    '''
+
+    name: dict[str, Any] = Structure['TRLR']
+    value = Default.EMPTY
+    subs: SubsType = None
+
+    def __init__(self, ext: ExtType = None):
+        super().__init__(self.value, self.subs, ext, self.name)
+
+
+class Type(BaseStructure):
+    '''Store, validate and format the TYPE structure.
+
+    GEDCOM Specification:
+    > Type
+    > A descriptive word or phrase used to further classify the superstructure.
+    > When both a `NOTE` and free-text `TYPE` are permitted as substructures of
+    > the same structure, the displaying systems should always display the `TYPE`
+    > value when they display the data from the associated structure; `NOTE` will
+    > typically be visible only in a detailed view.  `TYPE` must be used whenever
+    > the generic `EVEN`, `FACT` and `IDNO` tags are used. It may also be used
+    > for any other event or attribute.  Using the subordinate `TYPE`
+    > classification method provides a further classification of the
+    > superstructure but does not change its basic meaning.  <div
+    > class="example">  A `ORDN` with a `TYPE` could clarify what kind of
+    > ordination was performed:  ```gedcom 0 @I1@ INDI 1 ORDN 2 TYPE Bishop ```
+    > This classifies the entry as an ordination as a bishop, which is still a
+    > ordination event. The event could be further clarified with `RELI`, `DATE`,
+    > and other substructures.  Other descriptor values might include, for
+    > example,  - "Stillborn" as a qualifier to `BIRT` (birth) - "Civil" as a
+    > qualifier to `MARR` (marriage) - "College" as a qualifier to `GRAD`
+    > (graduation) - "Oral" as a qualifier to `WILL`  See also `FACT` and `EVEN`
+    > for additional examples.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Type
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/TYPE)
+    '''
+
+    name: dict[str, Any] = Structure['TYPE']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Uid(BaseStructure):
+    '''Store, validate and format the UID structure.
+
+    GEDCOM Specification:
+    > Unique Identifier
+    > A globally-unique identifier of the superstructure, to be preserved across
+    > edits. If a globally-unique identifier for the record already exists, it
+    > should be used without modification, not even whitespace or letter case
+    > normalization. New globally unique identifiers should be created and
+    > formatted as described in [RFC 4122].  This is metadata about the structure
+    > itself, not data about its subject. Multiple structures describing
+    > different aspects of the same subject would have different `UID` values.
+    > Because the `UID` identifies a structure, it can facilitate inter-tool
+    > collaboration by distinguishing between a structure being edited and a new
+    > structure being created. If an application allows structures to be edited
+    > in a way that completely changes their meaning (e.g., changing all the
+    > contents of an `INDI` record to have it describe a completely different
+    > person) then any `UID`s should also be changed.  <div class="note">  Some
+    > systems used a 16-byte UUID with a custom 2-byte checksum for a total of 18
+    > bytes:  - checksum byte 1 = (sum of (byte~*i*~) for *i* 1 through 16) mod
+    > 256 - checksum byte 2 = (sum of ((16 − *i*) × (byte~*i*~)) for *i* 1
+    > through 16)   mod 256  Use of checksums for UIDs is discouraged except in
+    > cases where error-prone input is expected and an appropriate action to take
+    > in case of an error is known.  </div>
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Uid
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM UID Structure](https://gedcom.io/terms/v7/UID)
+    '''
+
+    name: dict[str, Any] = Structure['UID']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Vers(BaseStructure):
+    '''Store, validate and format the VERS structure.
+
+    GEDCOM Specification:
+    > Version
+    > An identifier that represents the version level assigned to the associated
+    > product. It is defined and changed by the creators of the product.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Vers
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/VERS)
+    '''
+
+    name: dict[str, Any] = Structure['VERS']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Width(BaseStructure):
+    '''Store, validate and format the WIDTH structure.
+
+    GEDCOM Specification:
+    > Width in pixels
+    > How many pixels to display horizontally for the image. See `CROP` for more
+    > details.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Width
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#nonNegativeInteger.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM WIDTH Structure](https://gedcom.io/terms/v7/WIDTH)
+    '''
+
+    name: dict[str, Any] = Structure['WIDTH']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+class Www(BaseStructure):
+    '''Store, validate and format the WWW structure.
+
+    GEDCOM Specification:
+    > Web address
+    > A URL or other locator for a World Wide Web page of the subject of the
+    > superstructure, as defined by any relevant standard such as [whatwg/url],
+    > [RFC 3986], [RFC 3987], and so forth.  Like other substructures, the `WWW`
+    > structure provides details about the subject of its superstructure. For
+    > example, a `MARR`.`WWW` is a world wide web page of the marriage event, not
+    > the personal website of the couple or an entry in an online database
+    > serving as a source documenting the marriage. However, the meaning of `WWW`
+    > was only implicit when it was introduced in version 5.5.1 and many files
+    > were created that use `WWW` to store a more tangentially-related web
+    > address, so applications are recommended to interpret the `WWW` structure's
+    > meaning cautiously.  If an invalid or no longer existing web address is
+    > present upon import, it should be preserved as-is on export.
+    
+    Examples:
+    The first example generates lines for a GEDCOM file.
+    >>> from genedata.store import Www
+    
+    <BLANKLINE>
+
+    The second example generates code that outputs these lines.
+    It is used when reading in a GEDCOM file or to format code.
+    >>> print(m.code())
+    <BLANKLINE>
+    
+    Args:
+        value: Payload of datatype http://www.w3.org/2001/XMLSchema#string.
+        ext: Optional extensions entered through `Extension`.
+
+    References:
+    - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
+    '''
+
+    name: dict[str, Any] = Structure['WWW']
+    subs: SubsType = None
+
+    def __init__(self, value: str, ext: ExtType = None):
+        super().__init__(value, self.subs, ext, self.name)
+
+
+
+##############################################################################################################
+
+
+# class Abbr(NamedTuple):
+#     """Store, validate and format the ABBR tag.
+
+#     Example:
+
+#     Args:
+#         value: The abbreviation of the document.
+#         ext: Optional substructures extending [ABBR tag](https://gedcom.io/terms/v7/ABBR) entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM ABBR tag](https://gedcom.io/terms/v7/ABBR)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Abbr.value, subs=None, ext=self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level,
+#                 StdTag.Abbr.value,
+#                 self.value,
+#                 subs=None,
+#                 ext=self.ext,
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Abbr.__name__, self.ext, tabs, full
+#         )
+
+
+# class Agnc(NamedTuple):
+#     """Store, validate and format the AGNC tag.
+
+#     Example:
+
+#     Args:
+#         value: The name of the agency providing the source.
+#         agnc_ext: Optional substructures extending [AGNC tag](https://gedcom.io/terms/v7/AGNC) entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM AGNC tag](https://gedcom.io/terms/v7/AGNC)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Agnc.value, subs=None, ext=self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level,
+#                 StdTag.Agnc.value,
+#                 self.value,
+#                 subs=None,
+#                 ext=self.ext,
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Agnc.__name__, self.ext, tabs, full
+#         )
+
+
+# class Auth(NamedTuple):
+#     """Store, validate and format the AUTH tag.
+
+#     Example:
+
+#     Args:
+#         value: The name of the author.
+#         auth_ext: Optional substructures extending [AUTH tag](https://gedcom.io/terms/v7/AuTH) entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM AUTH tag](https://gedcom.io/terms/v7/AUTH)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Auth.value, subs=None, ext=self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Auth.value, self.value, subs=None, ext=self.ext
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Auth.__name__, self.ext, tabs, full
+#         )
+
+
+# class Email(NamedTuple):
+#     """Store, validate and format email information.
+
+#     Example:
+
+#     Args:
+#         value: The string containing the email.
+#         email_ext: Optional substructures extending [EMAIL tag](https://gedcom.io/terms/v7/EMAIL) entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM EMAIL tag](https://gedcom.io/terms/v7/EMAIL)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Email.value, subs=None, ext=self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Email.value, self.value, subs=None, ext=self.ext
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Email.__name__, self.ext, tabs, full
+#         )
 
 
 EmailType = Email | list[Email] | None
 
 
-class Fax(NamedTuple):
-    """Store, validate and format fax information.
+# class Fax(NamedTuple):
+#     """Store, validate and format fax information.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The string containing the fax optionally entered through `Formatter.phone`.
-        fax_ext: Optional substructures extending [FAX tag](https://gedcom.io/terms/v7/FAX) entered through `Extension`.
+#     Args:
+#         value: The string containing the fax optionally entered through `Formatter.phone`.
+#         fax_ext: Optional substructures extending [FAX tag](https://gedcom.io/terms/v7/FAX) entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Formatter.phone`
+#     See Also:
+#         `Extension`
+#         `Formatter.phone`
 
-    Reference:
-        [GEDCOM FAX tag](https://gedcom.io/terms/v7/FAX)
+#     Reference:
+#         [GEDCOM FAX tag](https://gedcom.io/terms/v7/FAX)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Fax.value, subs=None, ext=self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Fax.value, subs=None, ext=self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Fax.value, self.value, subs=None, ext=self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Fax.value, self.value, subs=None, ext=self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Fax.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Fax.__name__, self.ext, tabs, full
+#         )
 
 
 FaxType = Fax | list[Fax] | None
 
 
-class Lang(NamedTuple):
-    """Store, validate and format fax information.
+# class Lang(NamedTuple):
+#     """Store, validate and format fax information.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The string containing the language.
-        lang_ext: Optional substructures extending [LANG tag](https://gedcom.io/terms/v7/LANG) entered through `Extension`.
+#     Args:
+#         value: The string containing the language.
+#         lang_ext: Optional substructures extending [LANG tag](https://gedcom.io/terms/v7/LANG) entered through `Extension`.
 
-    See Also:
-        `Extension`
+#     See Also:
+#         `Extension`
 
-    Reference:
-        [GEDCOM LANG tag](https://gedcom.io/terms/v7/LANG)
+#     Reference:
+#         [GEDCOM LANG tag](https://gedcom.io/terms/v7/LANG)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Lang.value, subs=None, ext=self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Lang.value, subs=None, ext=self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Lang.value, self.value, subs=None, ext=self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Lang.value, self.value, subs=None, ext=self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Lang.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Lang.__name__, self.ext, tabs, full
+#         )
 
 
 LangType = Lang | list[Lang] | None
 
 
-class Mime(NamedTuple):
-    """Store, validate and format the MIME tag.
+# class Mime(NamedTuple):
+#     """Store, validate and format the MIME tag.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The mime information of the document.
-        mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) entered through `Extension`.
+#     Args:
+#         value: The mime information of the document.
+#         mime_ext: Optional substructures extending [MIME tag](https://gedcom.io/terms/v7/MIME) entered through `Extension`.
 
-    See Also:
-        `Extension`
+#     See Also:
+#         `Extension`
 
-    Reference:
-        [GEDCOM MIME tag](https://gedcom.io/terms/v7/MIME)
+#     Reference:
+#         [GEDCOM MIME tag](https://gedcom.io/terms/v7/MIME)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Mime.value, subs=None, ext=self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Mime.value, subs=None, ext=self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Mime.value, self.value, subs=None, ext=self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Mime.value, self.value, subs=None, ext=self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Mime.__name__, self.ext, tabs, full
-        )
-
-
-class Name(NamedTuple):
-    """Store, validate and display strings for the NAME tag."""
-
-    value: str = Default.EMPTY
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Name.value, None, self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Name.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Name.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Mime.__name__, self.ext, tabs, full
+#         )
 
 
-class Phon(NamedTuple):
-    """Store, validate and format phone information.
+# class Name(NamedTuple):
+#     """Store, validate and display strings for the NAME tag."""
 
-    Example:
-        One can enter a phone number as a string of characters.
-        >>> from genedata.store import Phon
-        >>> p = Phon('(123) 456-7890')
-        >>> print(p.ged(1))
-        1 PHON (123) 456-7890
-        <BLANKLINE>
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-        One can also use `Formatter.phone` to make sure the number is formatted
-        according to the GEDCOM recommended International Standard.
-        >>> q = Phon(Formatter.phone(1, 123, 456, 7890))
-        >>> print(q.ged(2))
-        2 PHON +1 123 456 7890
-        <BLANKLINE>
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Name.value, None, self.ext)
 
-    Args:
-        value: The string containing the phone number optionally formatted through `Formatter.phone`.
-        extension: Optional substructures extending [PHON tag](https://gedcom.io/terms/v7/PHON) entered through `Extension`.
+#     def ged(self, level: int = 1) -> str:
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Name.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    See Also:
-        `Extension`
-        `Formatter.phone`
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Name.__name__, self.ext, tabs, full
+#         )
 
-    Reference:
-        [GEDCOM PHON tag](https://gedcom.io/terms/v7/PHON)
-        [ITU E-123 Standard](https://www.itu.int/rec/T-REC-E.123-200102-I/en)
 
-    """
+# class Phon(NamedTuple):
+#     """Store, validate and format phone information.
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     Example:
+#         One can enter a phone number as a string of characters.
+#         >>> from genedata.store import Phon
+#         >>> p = Phon('(123) 456-7890')
+#         >>> print(p.ged(1))
+#         1 PHON (123) 456-7890
+#         <BLANKLINE>
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Phon.value, None, self.ext)
+#         One can also use `Formatter.phone` to make sure the number is formatted
+#         according to the GEDCOM recommended International Standard.
+#         >>> q = Phon(Formatter.phone(1, 123, 456, 7890))
+#         >>> print(q.ged(2))
+#         2 PHON +1 123 456 7890
+#         <BLANKLINE>
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Phon.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     Args:
+#         value: The string containing the phone number optionally formatted through `Formatter.phone`.
+#         extension: Optional substructures extending [PHON tag](https://gedcom.io/terms/v7/PHON) entered through `Extension`.
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Phon.__name__, self.ext, tabs, full
-        )
+#     See Also:
+#         `Extension`
+#         `Formatter.phone`
+
+#     Reference:
+#         [GEDCOM PHON tag](https://gedcom.io/terms/v7/PHON)
+#         [ITU E-123 Standard](https://www.itu.int/rec/T-REC-E.123-200102-I/en)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Phon.value, None, self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Phon.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Phon.__name__, self.ext, tabs, full
+#         )
 
 
 PhonType = Phon | list[Phon] | None
 
 
-class Phrase(NamedTuple):
-    """Store, validate and format fax information.
+# class Phrase(NamedTuple):
+#     """Store, validate and format fax information.
 
-    Example:
-        A phrase is a string which will be broken into separate GEDCOM lines if
-        any line break is present.  A line break is present either by putting
-        on in explicitly with "\n" or by using a multiline string.  Here is an
-        example of using "\n".
-        >>> from genedata.store import Phrase
-        >>> print(Phrase('This is a\\ntest phrase with two lines.').ged(1))
-        1 PHRASE This is a
-        2 CONT test phrase with two lines.
-        <BLANKLINE>
+#     Example:
+#         A phrase is a string which will be broken into separate GEDCOM lines if
+#         any line break is present.  A line break is present either by putting
+#         on in explicitly with "\n" or by using a multiline string.  Here is an
+#         example of using "\n".
+#         >>> from genedata.store import Phrase
+#         >>> print(Phrase('This is a\\ntest phrase with two lines.').ged(1))
+#         1 PHRASE This is a
+#         2 CONT test phrase with two lines.
+#         <BLANKLINE>
 
-        One may also use a multiline string.
-        >>> from genedata.store import Phrase
-        >>> print(
-        ...     Phrase('''This is a
-        ... test phrase with two lines.''').ged(1)
-        ... )
-        1 PHRASE This is a
-        2 CONT test phrase with two lines.
-        <BLANKLINE>
+#         One may also use a multiline string.
+#         >>> from genedata.store import Phrase
+#         >>> print(
+#         ...     Phrase('''This is a
+#         ... test phrase with two lines.''').ged(1)
+#         ... )
+#         1 PHRASE This is a
+#         2 CONT test phrase with two lines.
+#         <BLANKLINE>
 
-    Args:
-        phrase: The text of the phrase.
-        phrase_ext: Optional substructures extending [PHRASE tag](https://gedcom.io/terms/v7/PHRASE)
-            entered through `Extension`.
+#     Args:
+#         phrase: The text of the phrase.
+#         phrase_ext: Optional substructures extending [PHRASE tag](https://gedcom.io/terms/v7/PHRASE)
+#             entered through `Extension`.
 
-    Reference:
-        [GEDCOM PHRASE tag](https://gedcom.io/terms/v7/PHRASE)
+#     Reference:
+#         [GEDCOM PHRASE tag](https://gedcom.io/terms/v7/PHRASE)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Phrase.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Phrase.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Phrase.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Phrase.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Phrase.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Phrase.__name__, self.ext, tabs, full
+#         )
 
 
 PhraseType = Phrase | None
 
 
-class Publ(NamedTuple):
-    """Store, validate and format the PUBL tag.
+# class Publ(NamedTuple):
+#     """Store, validate and format the PUBL tag.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The publication information of the document.
-        publ_ext: Optional substructures extending [PUBL tag](https://gedcom.io/terms/v7/PUBL) entered through `Extension`.
+#     Args:
+#         value: The publication information of the document.
+#         publ_ext: Optional substructures extending [PUBL tag](https://gedcom.io/terms/v7/PUBL) entered through `Extension`.
 
-    See Also:
-        `Extension`
+#     See Also:
+#         `Extension`
 
-    Reference:
-        [GEDCOM PUBL tag](https://gedcom.io/terms/v7/PUBL)
+#     Reference:
+#         [GEDCOM PUBL tag](https://gedcom.io/terms/v7/PUBL)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Publ.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Publ.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Publ.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Publ.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value,
-            Publ.__name__,
-            self.ext,
-            tabs,
-            full,
-        )
-
-
-class Titl(NamedTuple):
-    """Store, validate and format the TITL tag.
-
-    Example:
-
-    Args:
-        value: The title of the document.
-        ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) entered through `Extension`.
-
-    See Also:
-        `Extension`
-
-    Reference:
-        [GEDCOM TITL tag](https://gedcom.io/terms/v7/TITL)
-
-    """
-
-    value: str = Default.EMPTY
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Titl.value, None, self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Titl.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Titl.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value,
+#             Publ.__name__,
+#             self.ext,
+#             tabs,
+#             full,
+#         )
 
 
-class Www(NamedTuple):
-    """Store, validate and format WWW tagged information.
+# class Titl(NamedTuple):
+#     """Store, validate and format the TITL tag.
 
-    Example:
-    >>> from genedata.store import Formatter, Www
-    >>> www = Www('https://some.url.com')
-    >>> print(www.ged(1))
-    1 WWW https://some.url.com
-    <BLANKLINE>
+#     Example:
 
-    Args:
-        value: The string containing the internet url.
-        ext: Optional substructures extending [WWW tag](https://gedcom.io/terms/v7/WWW) entered through `Extension`.
+#     Args:
+#         value: The title of the document.
+#         ext: Optional substructures extending [TITL tag](https://gedcom.io/terms/v7/TITL) entered through `Extension`.
 
-    See Also:
-        `Extension`
+#     See Also:
+#         `Extension`
 
-    Reference:
-        [GEDCOM WWW tag](https://gedcom.io/terms/v7/WWW)
+#     Reference:
+#         [GEDCOM TITL tag](https://gedcom.io/terms/v7/TITL)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Www.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Titl.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Www.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Titl.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Www.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Titl.__name__, self.ext, tabs, full
+#         )
+
+
+# class Www(NamedTuple):
+#     """Store, validate and format WWW tagged information.
+
+#     Example:
+#     >>> from genedata.store import Formatter, Www
+#     >>> www = Www('https://some.url.com')
+#     >>> print(www.ged(1))
+#     1 WWW https://some.url.com
+#     <BLANKLINE>
+
+#     Args:
+#         value: The string containing the internet url.
+#         ext: Optional substructures extending [WWW tag](https://gedcom.io/terms/v7/WWW) entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM WWW tag](https://gedcom.io/terms/v7/WWW)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Www.value, None, self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Www.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Www.__name__, self.ext, tabs, full
+#         )
 
 
 class Event(NamedTuple):
@@ -3002,40 +5362,40 @@ class Quality(NamedTuple):
         )
 
 
-class Resn(NamedTuple):
-    """Store, validate and display the RESN enumeration including extensions."""
+# class Resn(NamedTuple):
+#     """Store, validate and display the RESN enumeration including extensions."""
 
-    tag: ResnEnum = ResnEnum.NONE
-    phrase: PhraseType = None
-    resn_ext: ExtType = None
+#     tag: ResnEnum = ResnEnum.NONE
+#     phrase: PhraseType = None
+#     resn_ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_enum(self.tag, ResnEnum)
-            and Checker.verify_not_empty(self.tag)
-            and Checker.verify_ext(Tag.RESN.value, self.resn_ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_enum(self.tag, ResnEnum)
+#             and Checker.verify_not_empty(self.tag)
+#             and Checker.verify_ext(Tag.RESN.value, self.resn_ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        lines: str = Default.EMPTY
-        if self.validate():
-            lines = Tagger.string(lines, level, Tag.RESN.value, self.tag.value)
-            lines = Tagger.structure(lines, level + 1, self.resn_ext)
-            lines = Tagger.structure(lines, level + 1, self.phrase)
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             lines = Tagger.string(lines, level, Tag.RESN.value, self.tag.value)
+#             lines = Tagger.structure(lines, level + 1, self.resn_ext)
+#             lines = Tagger.structure(lines, level + 1, self.phrase)
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'Resn',
-                ('    tag = ', self.tag, tabs, full, True),
-                ('    phrase = ', self.phrase, tabs, full, True),
-                ('    resn_ext = ', self.resn_ext, tabs, full, False),
-            ),
-            Default.INDENT * (tabs + 1),
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return indent(
+#             Formatter.display_code(
+#                 'Resn',
+#                 ('    tag = ', self.tag, tabs, full, True),
+#                 ('    phrase = ', self.phrase, tabs, full, True),
+#                 ('    resn_ext = ', self.resn_ext, tabs, full, False),
+#             ),
+#             Default.INDENT * (tabs + 1),
+#         )
 
 
 class Role(NamedTuple):
@@ -3071,37 +5431,37 @@ class Role(NamedTuple):
         )
 
 
-class Sex(NamedTuple):
-    """Store, validate and display the SEX enumeration including extensions."""
+# class Sex(NamedTuple):
+#     """Store, validate and display the SEX enumeration including extensions."""
 
-    tag: SexEnum = SexEnum.NONE
-    sex_ext: ExtType = None
+#     tag: SexEnum = SexEnum.NONE
+#     sex_ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_enum(self.tag, SexEnum)
-            and Checker.verify_not_empty(self.tag)
-            and Checker.verify_ext(Tag.SEX.value, self.sex_ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_enum(self.tag, SexEnum)
+#             and Checker.verify_not_empty(self.tag)
+#             and Checker.verify_ext(Tag.SEX.value, self.sex_ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        lines: str = Default.EMPTY
-        if self.validate():
-            lines = Tagger.string(lines, level, Tag.SEX.value, self.tag.value)
-            lines = Tagger.structure(lines, level + 1, self.sex_ext)
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             lines = Tagger.string(lines, level, Tag.SEX.value, self.tag.value)
+#             lines = Tagger.structure(lines, level + 1, self.sex_ext)
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'Sex',
-                ('    tag = ', self.tag, tabs, full, True),
-                ('    sex_ext = ', self.sex_ext, tabs, full, False),
-            ),
-            Default.INDENT * (tabs + 1),
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return indent(
+#             Formatter.display_code(
+#                 'Sex',
+#                 ('    tag = ', self.tag, tabs, full, True),
+#                 ('    sex_ext = ', self.sex_ext, tabs, full, False),
+#             ),
+#             Default.INDENT * (tabs + 1),
+#         )
 
 
 # class EnumTag(NamedTuple):
@@ -3383,94 +5743,94 @@ class SDate(NamedTuple):
 SDateType = SDate | None
 
 
-class Time(NamedTuple):
-    """Validate and display time data in various formats.
+# class Time(NamedTuple):
+#     """Validate and display time data in various formats.
 
-    The standard does not permit leap seconds nor end of day instant (24:00:00).
+#     The standard does not permit leap seconds nor end of day instant (24:00:00).
 
-    Examples:
+#     Examples:
 
-    Args:
-        hour: The hour of the time.
-        minute: The minute of the time.
-        second: The second of the time including fractional seconds.
-        UTC: A boolean declaring whether the date is in UTC time or in some time zone.
-        time_ext: Optional substructures extending [TIME tag](https://gedcom.io/terms/v7/TIME) entered through `Extension`.
+#     Args:
+#         hour: The hour of the time.
+#         minute: The minute of the time.
+#         second: The second of the time including fractional seconds.
+#         UTC: A boolean declaring whether the date is in UTC time or in some time zone.
+#         time_ext: Optional substructures extending [TIME tag](https://gedcom.io/terms/v7/TIME) entered through `Extension`.
 
-    See Also:
-        `Extension`
+#     See Also:
+#         `Extension`
 
-    Reference:
-        [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
-    """
+#     Reference:
+#         [GEDCOM Time Data Type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
+#     """
 
-    hour: int = Default.TIME_HOUR
-    minute: int = Default.TIME_MINUTE
-    second: int | float = Default.TIME_SECOND
-    UTC: bool = False
-    time_ext: ExtType = None
+#     hour: int = Default.TIME_HOUR
+#     minute: int = Default.TIME_MINUTE
+#     second: int | float = Default.TIME_SECOND
+#     UTC: bool = False
+#     time_ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.hour, int)
-            and Checker.verify_type(self.minute, int)
-            and Checker.verify_type(self.second, int | float)
-            and Checker.verify_type(self.UTC, bool)
-            and Checker.verify_range(self.hour, 0, 23)
-            and Checker.verify_range(self.minute, 0, 59)
-            and Checker.verify_range(self.second, 0, 59.999999999999)
-            and Checker.verify_ext(Tag.TIME.value, self.time_ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.hour, int)
+#             and Checker.verify_type(self.minute, int)
+#             and Checker.verify_type(self.second, int | float)
+#             and Checker.verify_type(self.UTC, bool)
+#             and Checker.verify_range(self.hour, 0, 23)
+#             and Checker.verify_range(self.minute, 0, 59)
+#             and Checker.verify_range(self.second, 0, 59.999999999999)
+#             and Checker.verify_ext(Tag.TIME.value, self.time_ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        hour_str: str = str(self.hour)
-        minute_str: str = str(self.minute)
-        second_str: str = str(self.second)
-        lines: str = Default.EMPTY
-        if self.validate():
-            if 0 <= self.hour < 10:
-                hour_str = ''.join(['0', hour_str])
-            if 0 <= self.minute < 10:
-                minute_str = ''.join(['0', minute_str])
-            if 0 <= self.second < 10:
-                second_str = ''.join(['0', second_str])
-            if self.UTC:
-                second_str = ''.join([second_str, 'Z'])
-            lines = Tagger.string(
-                lines,
-                level,
-                Tag.TIME.value,
-                f'{hour_str}:{minute_str}:{second_str}',
-            )
-            lines = Tagger.structure(lines, level + 1, self.time_ext)
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         hour_str: str = str(self.hour)
+#         minute_str: str = str(self.minute)
+#         second_str: str = str(self.second)
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             if 0 <= self.hour < 10:
+#                 hour_str = ''.join(['0', hour_str])
+#             if 0 <= self.minute < 10:
+#                 minute_str = ''.join(['0', minute_str])
+#             if 0 <= self.second < 10:
+#                 second_str = ''.join(['0', second_str])
+#             if self.UTC:
+#                 second_str = ''.join([second_str, 'Z'])
+#             lines = Tagger.string(
+#                 lines,
+#                 level,
+#                 Tag.TIME.value,
+#                 f'{hour_str}:{minute_str}:{second_str}',
+#             )
+#             lines = Tagger.structure(lines, level + 1, self.time_ext)
+#         return lines
 
-    def iso(self) -> str:
-        """Return the validated ISO format for the time.
+#     def iso(self) -> str:
+#         """Return the validated ISO format for the time.
 
-        References:
-            [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
-            [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
-        """
-        if self.validate():
-            return f'{self.hour}:{self.minute}:{self.second}'
-        return ''
+#         References:
+#             [ISO 8601 Standard](https://www.iso.org/iso-8601-date-and-time-format.html)
+#             [Wikipedia Overview](https://en.wikipedia.org/wiki/ISO_8601)
+#         """
+#         if self.validate():
+#             return f'{self.hour}:{self.minute}:{self.second}'
+#         return ''
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'Time',
-                ('    hour = ', self.hour, tabs, full, False),
-                ('    minute = ', self.minute, tabs, full, False),
-                ('    second = ', self.second, tabs, full, False),
-                ('    UTC = ', self.UTC, tabs, full, False),
-                ('    time_ext = ', self.time_ext, tabs, full, False),
-            ),
-            Default.INDENT * tabs,
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return indent(
+#             Formatter.display_code(
+#                 'Time',
+#                 ('    hour = ', self.hour, tabs, full, False),
+#                 ('    minute = ', self.minute, tabs, full, False),
+#                 ('    second = ', self.second, tabs, full, False),
+#                 ('    UTC = ', self.UTC, tabs, full, False),
+#                 ('    time_ext = ', self.time_ext, tabs, full, False),
+#             ),
+#             Default.INDENT * tabs,
+#         )
 
 
 TimeType = Time | None
@@ -3794,168 +6154,168 @@ class Identifier(NamedTuple):
 IdenType = Identifier | list[Identifier] | None
 
 
-class City(NamedTuple):
-    """Store, validate and format CITY information.
+# class City(NamedTuple):
+#     """Store, validate and format CITY information.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The name of the city.
-        ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY) entered through `Extension`.
+#     Args:
+#         value: The name of the city.
+#         ext: Optional substructures extending [CITY tag](https://gedcom.io/terms/v7/CITY) entered through `Extension`.
 
-    See Also:
-        `Addr`
-        `Extension`
+#     See Also:
+#         `Addr`
+#         `Extension`
 
-    Reference:
-        [GEDCOM CITY tag](https://gedcom.io/terms/v7/CITY)
+#     Reference:
+#         [GEDCOM CITY tag](https://gedcom.io/terms/v7/CITY)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.City.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.City.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.City.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.City.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, City.__name__, self.ext, tabs, full
-        )
-
-
-class Ctry(NamedTuple):
-    """Store, validate and format CTRY or country information.
-
-    Example:
-
-    Args:
-        value: The name of the country.
-        ext: Optional substructures extending [CTRY tag](https://gedcom.io/terms/v7/CTRY) entered through `Extension`.
-
-    See Also:
-        `Addr`
-        `Extension`
-
-    Reference:
-        [GEDCOM CTRY tag](https://gedcom.io/terms/v7/CTRY)
-
-    """
-
-    value: str = Default.EMPTY
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Ctry.value, None, self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level,
-                StdTag.Ctry.value,
-                self.value,
-                None,
-                self.ext,
-            )
-        return Default.EMPTY
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Ctry.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, City.__name__, self.ext, tabs, full
+#         )
 
 
-class Post(NamedTuple):
-    """Store, validate and format POST or postal code information.
+# class Ctry(NamedTuple):
+#     """Store, validate and format CTRY or country information.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The name of the country.
-        ext: Optional substructures extending [POST tag](https://gedcom.io/terms/v7/POST) entered through `Extension`.
+#     Args:
+#         value: The name of the country.
+#         ext: Optional substructures extending [CTRY tag](https://gedcom.io/terms/v7/CTRY) entered through `Extension`.
 
-    See Also:
-        `Addr`
-        `Extension`
+#     See Also:
+#         `Addr`
+#         `Extension`
 
-    Reference:
-        [GEDCOM POST tag](https://gedcom.io/terms/v7/POST)
+#     Reference:
+#         [GEDCOM CTRY tag](https://gedcom.io/terms/v7/CTRY)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Post.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Ctry.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Post.value, self.value, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level,
+#                 StdTag.Ctry.value,
+#                 self.value,
+#                 None,
+#                 self.ext,
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Post.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Ctry.__name__, self.ext, tabs, full
+#         )
 
 
-class Stae(NamedTuple):
-    """Store, validate and format STAE or state information.
+# class Post(NamedTuple):
+#     """Store, validate and format POST or postal code information.
 
-    Example:
+#     Example:
 
-    Args:
-        value: The name of the state.
-        ext: Optional substructures extending [STAE tag](https://gedcom.io/terms/v7/STAE) entered through `Extension`.
+#     Args:
+#         value: The name of the country.
+#         ext: Optional substructures extending [POST tag](https://gedcom.io/terms/v7/POST) entered through `Extension`.
 
-    See Also:
-        `Addr`
-        `Extension`
+#     See Also:
+#         `Addr`
+#         `Extension`
 
-    Reference:
-        [GEDCOM STAE tag](https://gedcom.io/terms/v7/STAE)
+#     Reference:
+#         [GEDCOM POST tag](https://gedcom.io/terms/v7/POST)
 
-    """
+#     """
 
-    value: str = Default.EMPTY
-    ext: ExtType = None
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Stae.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Post.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        if self.validate():
-            return Tagger.ged(
-                level,
-                StdTag.Stae.value,
-                self.value,
-                None,
-                self.ext,
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Post.value, self.value, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value, Stae.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Post.__name__, self.ext, tabs, full
+#         )
+
+
+# class Stae(NamedTuple):
+#     """Store, validate and format STAE or state information.
+
+#     Example:
+
+#     Args:
+#         value: The name of the state.
+#         ext: Optional substructures extending [STAE tag](https://gedcom.io/terms/v7/STAE) entered through `Extension`.
+
+#     See Also:
+#         `Addr`
+#         `Extension`
+
+#     Reference:
+#         [GEDCOM STAE tag](https://gedcom.io/terms/v7/STAE)
+
+#     """
+
+#     value: str = Default.EMPTY
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Stae.value, None, self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         if self.validate():
+#             return Tagger.ged(
+#                 level,
+#                 StdTag.Stae.value,
+#                 self.value,
+#                 None,
+#                 self.ext,
+#             )
+#         return Default.EMPTY
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value, Stae.__name__, self.ext, tabs, full
+#         )
 
 
 class Addr(NamedTuple):
@@ -5062,65 +7422,65 @@ class Note(NamedTuple):
 # NoteType = Note | list[Note] | None
 
 
-class Snote(NamedTuple):
-    """Store, validate and display a shared note substructure of the GEDCOM standard.
+# class Snote(NamedTuple):
+#     """Store, validate and display a shared note substructure of the GEDCOM standard.
 
-    The BCP 47 language tag is a hyphenated list of subtags.
-    The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-    guide will help one make a decision on which tags to use.
-    The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
-    can assist with finding and checking the language tag one would like to use.
+#     The BCP 47 language tag is a hyphenated list of subtags.
+#     The [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+#     guide will help one make a decision on which tags to use.
+#     The [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+#     can assist with finding and checking the language tag one would like to use.
 
-    Example:
+#     Example:
 
-    Args:
-        snote_xref: The shared note cross reference identifier constructed from `genedata.build.shared_note_xref`.
-        snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
-            entered through `Extension`.
+#     Args:
+#         snote_xref: The shared note cross reference identifier constructed from `genedata.build.shared_note_xref`.
+#         snote_ext: Optional substructures extending [SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `genedata.build.shared_note_xref`
+#     See Also:
+#         `Extension`
+#         `genedata.build.shared_note_xref`
 
-    Reference:
-        [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
-        [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
-        [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
-        [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
+#     Reference:
+#         [W3C Internationalization](https://www.w3.org/International/questions/qa-choosing-language-tags)
+#         [Language Subtag Lookup Tool](https://r12a.github.io/app-subtags/)
+#         [GEDCOM SNOTE tag](https://gedcom.io/terms/v7/SNOTE)
+#         [GEDCOM Note Structure](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#NOTE_STRUCTURE)
 
-    n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
-    """
+#     n SNOTE @<XREF:SNOTE>@                     {1:1}  g7:SNOTE
+#     """
 
-    value: SharedNoteXref = Void.SNOTE
-    ext: ExtType = None
+#     value: SharedNoteXref = Void.SNOTE
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.value, SharedNoteXref, no_list=True)
-            and Checker.verify_not_empty(self.value)
-            and Checker.validate(StdTag.Snote.value, None, self.ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.value, SharedNoteXref, no_list=True)
+#             and Checker.verify_not_empty(self.value)
+#             and Checker.validate(StdTag.Snote.value, None, self.ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = ''
-        if self.validate():
-            return Tagger.ged(
-                level,
-                StdTag.Snote.value,
-                self.value.fullname,
-                None,
-                self.ext,
-                format=False,
-            )
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = ''
+#         if self.validate():
+#             return Tagger.ged(
+#                 level,
+#                 StdTag.Snote.value,
+#                 self.value.fullname,
+#                 None,
+#                 self.ext,
+#                 format=False,
+#             )
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            self.value.fullname, Snote.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             self.value.fullname, Snote.__name__, self.ext, tabs, full
+#         )
 
 
 SNoteType = Snote | list[Snote] | None
@@ -5816,120 +8176,120 @@ class Obje(NamedTuple):
 MMLinkType = Obje | list[Obje] | None
 
 
-class Lati(NamedTuple):
-    """Store, validate and save the LATI or latitude value.
+# class Lati(NamedTuple):
+#     """Store, validate and save the LATI or latitude value.
 
-    Examples:
-    This example shows the GEDCOM line produced by `Lati` without any extension.
-    >>> from genedata.store import Lati
-    >>> latitude = Lati(49.297222).ged(1)
-    >>> print(latitude)
-    1 LATI N49.297222
-    <BLANKLINE>
+#     Examples:
+#     This example shows the GEDCOM line produced by `Lati` without any extension.
+#     >>> from genedata.store import Lati
+#     >>> latitude = Lati(49.297222).ged(1)
+#     >>> print(latitude)
+#     1 LATI N49.297222
+#     <BLANKLINE>
 
-    Args:
-        value: The float value representing the latitude.
-        ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI)
-            entered through `Extension`.
+#     Args:
+#         value: The float value representing the latitude.
+#         ext: Optional substructures extending [LATI tag](https://gedcom.io/terms/v7/LATI)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Long`
-        `Map`
+#     See Also:
+#         `Extension`
+#         `Long`
+#         `Map`
 
-    References:
-        [GEDCOM LATI tag](https://gedcom.io/terms/v7/LATI)
-    """
+#     References:
+#         [GEDCOM LATI tag](https://gedcom.io/terms/v7/LATI)
+#     """
 
-    value: float = Default.LATI_DEFAULT
-    ext: ExtType = None
+#     value: float = Default.LATI_DEFAULT
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.value, float, no_list=True)
-            and Checker.verify_range(
-                self.value, Default.LATI_LOW, Default.LATI_HIGH
-            )
-            and Checker.validate(StdTag.Lati.value, None, self.ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.value, float, no_list=True)
+#             and Checker.verify_range(
+#                 self.value, Default.LATI_LOW, Default.LATI_HIGH
+#             )
+#             and Checker.validate(StdTag.Lati.value, None, self.ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        north_south: str = Default.LATI_NORTH
-        if self.value < 0.0:
-            north_south = Default.LATI_SOUTH
-        latitude: str = format(abs(self.value), Default.LATI_PRECISION)
-        latitude = ''.join([north_south, latitude])
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Lati.value, latitude, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         north_south: str = Default.LATI_NORTH
+#         if self.value < 0.0:
+#             north_south = Default.LATI_SOUTH
+#         latitude: str = format(abs(self.value), Default.LATI_PRECISION)
+#         latitude = ''.join([north_south, latitude])
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Lati.value, latitude, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Lati.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Lati.__name__, self.ext, tabs, full
+#         )
 
 
-class Long(NamedTuple):
-    """Store, validate and save the LONG or longitude value.
+# class Long(NamedTuple):
+#     """Store, validate and save the LONG or longitude value.
 
-    Examples:
-    This example shows the GEDCOM line produced by Long without any extension.
-    >>> from genedata.store import Long
-    >>> longitude = Long(-14.470833).ged(1)
-    >>> print(longitude)
-    1 LONG W14.470833
-    <BLANKLINE>
+#     Examples:
+#     This example shows the GEDCOM line produced by Long without any extension.
+#     >>> from genedata.store import Long
+#     >>> longitude = Long(-14.470833).ged(1)
+#     >>> print(longitude)
+#     1 LONG W14.470833
+#     <BLANKLINE>
 
-    Args:
-        value: The float value representing the longitude.
-        ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG)
-            entered through `Extension`.
+#     Args:
+#         value: The float value representing the longitude.
+#         ext: Optional substructures extending [LONG tag](https://gedcom.io/terms/v7/LONG)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Lati`
-        `Map`
+#     See Also:
+#         `Extension`
+#         `Lati`
+#         `Map`
 
-    References:
-        [GEDCOM LONG tag](https://gedcom.io/terms/v7/LONG)
-    """
+#     References:
+#         [GEDCOM LONG tag](https://gedcom.io/terms/v7/LONG)
+#     """
 
-    value: float = Default.LONG_DEFAULT
-    ext: ExtType = None
+#     value: float = Default.LONG_DEFAULT
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.value, float, no_list=True)
-            and Checker.verify_range(
-                self.value, Default.LONG_LOW, Default.LONG_HIGH
-            )
-            and Checker.validate(StdTag.Long.value, None, self.ext)
-        )
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.value, float, no_list=True)
+#             and Checker.verify_range(
+#                 self.value, Default.LONG_LOW, Default.LONG_HIGH
+#             )
+#             and Checker.validate(StdTag.Long.value, None, self.ext)
+#         )
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        east_west: str = Default.LONG_EAST
-        if self.value < 0.0:
-            east_west = Default.LONG_WEST
-        longitude: str = format(abs(self.value), Default.LONG_PRECISION)
-        longitude = ''.join([east_west, longitude])
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Long.value, longitude, None, self.ext
-            )
-        return Default.EMPTY
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         east_west: str = Default.LONG_EAST
+#         if self.value < 0.0:
+#             east_west = Default.LONG_WEST
+#         longitude: str = format(abs(self.value), Default.LONG_PRECISION)
+#         longitude = ''.join([east_west, longitude])
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Long.value, longitude, None, self.ext
+#             )
+#         return Default.EMPTY
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Long.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Long.__name__, self.ext, tabs, full
+#         )
 
 
 class Map(NamedTuple):
@@ -6023,168 +8383,168 @@ class Map(NamedTuple):
         )
 
 
-class Height(NamedTuple):
-    """Store, validate and save the multimedia HEIGHT structure.
+# class Height(NamedTuple):
+#     """Store, validate and save the multimedia HEIGHT structure.
 
-    Args:
-        subs: List containing dimension structures.
-        ext: Optional substructures extending [HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT)
-            entered through `Extension`.
+#     Args:
+#         subs: List containing dimension structures.
+#         ext: Optional substructures extending [HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Height`
-        `Left`
-        `Top`
-        `Width`
+#     See Also:
+#         `Extension`
+#         `Height`
+#         `Left`
+#         `Top`
+#         `Width`
 
-    Reference:
-        [GEDCOM HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT)
-    """
+#     Reference:
+#         [GEDCOM HEIGHT tag](https://gedcom.io/terms/v7/HEIGHT)
+#     """
 
-    value: int = 0
-    ext: ExtType = None
+#     value: int = 0
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Height.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Height.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = Default.EMPTY
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Height.value, str(self.value), None, self.ext
-            )
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Height.value, str(self.value), None, self.ext
+#             )
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Height.__name__, self.ext, tabs, full
-        )
-
-
-class Left(NamedTuple):
-    """Store, validate and save the multimedia LEFT structure.
-
-    Args:
-        value: The value for left.
-        ext: Optional substructures extending [Left tag](https://gedcom.io/terms/v7/LEFT)
-            entered through `Extension`.
-
-    See Also:
-        `Extension`
-        `Height`
-        `Left`
-        `Top`
-        `Width`
-
-    Reference:
-        [GEDCOM LEFT tag](https://gedcom.io/terms/v7/LEFT)
-    """
-
-    value: int = 0
-    ext: ExtType = None
-
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Left.value, None, self.ext)
-
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = Default.EMPTY
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Left.value, str(self.value), None, self.ext
-            )
-        return lines
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Left.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Height.__name__, self.ext, tabs, full
+#         )
 
 
-class Top(NamedTuple):
-    """Store, validate and save the multimedia TOP structure.
+# class Left(NamedTuple):
+#     """Store, validate and save the multimedia LEFT structure.
 
-    Args:
-        value: The value for top.
-        ext: Optional substructures extending [TOP tag](https://gedcom.io/terms/v7/TOP)
-            entered through `Extension`.
+#     Args:
+#         value: The value for left.
+#         ext: Optional substructures extending [Left tag](https://gedcom.io/terms/v7/LEFT)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Height`
-        `Left`
-        `Top`
-        `Width`
+#     See Also:
+#         `Extension`
+#         `Height`
+#         `Left`
+#         `Top`
+#         `Width`
 
-    Reference:
-        [GEDCOM TOP tag](https://gedcom.io/terms/v7/TOP)
-    """
+#     Reference:
+#         [GEDCOM LEFT tag](https://gedcom.io/terms/v7/LEFT)
+#     """
 
-    value: int = 0
-    ext: ExtType = None
+#     value: int = 0
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Top.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Left.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = Default.EMPTY
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Top.value, str(self.value), None, self.ext
-            )
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Left.value, str(self.value), None, self.ext
+#             )
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Top.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Left.__name__, self.ext, tabs, full
+#         )
 
 
-class Width(NamedTuple):
-    """Store, validate and save the multimedia WIDTH structure.
+# class Top(NamedTuple):
+#     """Store, validate and save the multimedia TOP structure.
 
-    Args:
-        value: The value for width.
-        ext: Optional substructures extending [WIDTH tag](https://gedcom.io/terms/v7/WIDTH)
-            entered through `Extension`.
+#     Args:
+#         value: The value for top.
+#         ext: Optional substructures extending [TOP tag](https://gedcom.io/terms/v7/TOP)
+#             entered through `Extension`.
 
-    See Also:
-        `Extension`
-        `Height`
-        `Left`
-        `Top`
-        `Width`
+#     See Also:
+#         `Extension`
+#         `Height`
+#         `Left`
+#         `Top`
+#         `Width`
 
-    Reference:
-        [GEDCOM WIDTH tag](https://gedcom.io/terms/v7/WIDTH)
-    """
+#     Reference:
+#         [GEDCOM TOP tag](https://gedcom.io/terms/v7/TOP)
+#     """
 
-    value: int = 0
-    ext: ExtType = None
+#     value: int = 0
+#     ext: ExtType = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        return Checker.validate(StdTag.Width.value, None, self.ext)
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Top.value, None, self.ext)
 
-    def ged(self, level: int = 1) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = Default.EMPTY
-        if self.validate():
-            return Tagger.ged(
-                level, StdTag.Width.value, str(self.value), None, self.ext
-            )
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Top.value, str(self.value), None, self.ext
+#             )
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return Formatter.base_string(
-            str(self.value), Width.__name__, self.ext, tabs, full
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Top.__name__, self.ext, tabs, full
+#         )
+
+
+# class Width(NamedTuple):
+#     """Store, validate and save the multimedia WIDTH structure.
+
+#     Args:
+#         value: The value for width.
+#         ext: Optional substructures extending [WIDTH tag](https://gedcom.io/terms/v7/WIDTH)
+#             entered through `Extension`.
+
+#     See Also:
+#         `Extension`
+#         `Height`
+#         `Left`
+#         `Top`
+#         `Width`
+
+#     Reference:
+#         [GEDCOM WIDTH tag](https://gedcom.io/terms/v7/WIDTH)
+#     """
+
+#     value: int = 0
+#     ext: ExtType = None
+
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         return Checker.validate(StdTag.Width.value, None, self.ext)
+
+#     def ged(self, level: int = 1) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             return Tagger.ged(
+#                 level, StdTag.Width.value, str(self.value), None, self.ext
+#             )
+#         return lines
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return Formatter.base_string(
+#             str(self.value), Width.__name__, self.ext, tabs, full
+#         )
 
 
 class Crop(NamedTuple):
@@ -9247,7 +11607,7 @@ class RecordObje(NamedTuple):
         # )
 
 
-#ObjeType = RecordObje | list[RecordObje] | None
+# ObjeType = RecordObje | list[RecordObje] | None
 
 
 class EventData(NamedTuple):
@@ -9561,7 +11921,7 @@ class RecordSour(NamedTuple):
         # )
 
 
-#SourType = RecordSour | list[RecordSour] | None
+# SourType = RecordSour | list[RecordSour] | None
 
 
 class RecordIndi(NamedTuple):
@@ -10118,7 +12478,7 @@ class RecordSnote(NamedTuple):
                 ('    text = ', self.text, tabs, full, True),
                 ('    subs = ', self.subs, tabs, full, False),
                 ('    ext = ', self.ext, tabs + 1, full, False),
-                ),
+            ),
             Default.INDENT * tabs,
         )
         # return indent(

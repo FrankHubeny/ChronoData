@@ -29,6 +29,149 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ClassVar, Literal
 
+
+class Config:
+    """Values specifying which version of the GEDCOM specification are being used."""
+
+    VERSION: str = '7'
+    GEDVERSION: str = f'{VERSION}.0'
+    TERMS: str = f'https://gedcom.io/terms/v{VERSION}/'
+    SPECS: str = (
+        f'https://gedcom.io/specifications/FamilySearchGEDCOMv{VERSION}.html'
+    )
+
+@dataclass(frozen=True)
+class Default:
+    AGE_DAY: str = 'd'
+    AGE_MONTH: str = 'm'
+    AGE_WEEK: str = 'w'
+    AGE_YEAR: str = 'y'
+    ATSIGN: str = '@'
+    BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    BRACKET_RIGHT: str = ']'
+    BRACKET_LEFT: str = '['
+    BRACKET_LEFT_RIGHT: str = '[]'
+    CARDINALITY_ANY_NUMBER: str = ':M}'
+    CARDINALITY_OPTIONAL: str = '{0:'
+    CARDINALITY_REQUIRED: str = '{1:'
+    CARDINALITY_SINGULAR: str = ':1}'
+    CODE_VALUE: str = 'value'
+    CODE_SUBS: str = 'subs'
+    CODE_EXT: str = 'ext'
+    COMMA: str = ','
+    COMMA_REQUIRED: str = ',  # REQUIRED'
+    CHOICE: int = 1
+    CONT: str = 'CONT'
+    DATE_DAY: int = 0
+    DATE_MONTH: int = 0
+    DATE_YEAR: int = 0
+    DATE_WEEK: int = 0
+    DAYS: int = 0
+    EMPTY: str = ''
+    EOL: str = '\n'
+    EOL_DOUBLE: str = '\n\n'
+    GREATER_LESS_THAN: str = '>'
+    HEIGHT: int = 0
+    HYPHEN: str = '-'
+    INDENT: str = '    '
+    KIND_STANDARD: str = 'stdTag'
+    KIND_EXTENDED: str = 'extTag'
+    LATI_DEFAULT: float = 0.0
+    LATI_HIGH: float = 90.0
+    LATI_LOW: float = -90.0
+    LATI_NORTH: str = 'N'
+    LATI_PRECISION: str = '.6f'
+    LATI_SOUTH: str = 'S'
+    LEFT: int = 0
+    LIST_ITEM_SEPARATOR: str = ', '
+    LONG_DEFAULT: float = 0.0
+    LONG_EAST: str = 'E'
+    LONG_HIGH: float = 180.0
+    LONG_LOW: float = -180.0
+    LONG_PRECISION: str = '.6f'
+    LONG_WEST: str = 'W'
+    MIME: str = ''
+    MONTHS: int = 0
+    NONE: str = 'None'
+    OCCURRED: str = 'Y'
+    PAYLOAD_EMPTY: str = EMPTY
+    PHONE_AREA_MIN: int = 0
+    PHONE_AREA_MAX: int = 1000
+    PHONE_COUNTRY_MIN: int = 0
+    PHONE_COUNTRY_MAX: int = 1000
+    PHONE_LINE_MIN: int = 0
+    PHONE_LINE_MAX: int = 10000
+    PHONE_PREFIX_MIN: int = 0
+    PHONE_PREFIX_MAX: int = 1000
+    PHONE_STRING_SET: str = '0123456789)(+ '
+    PLACE_FORM1: str = 'City'
+    PLACE_FORM2: str = 'County'
+    PLACE_FORM3: str = 'State'
+    PLACE_FORM4: str = 'Country'
+    QUOTE_SINGLE: str = "'"
+    QUOTE_DOUBLE: str = '"'
+    SLASH: str = '/'
+    SPACE: str = ' '
+    SPACE_DOUBLE: str = '  '
+    T: str = 'T'
+    TIME_HOUR: int = 0
+    TIME_MINUTE: int = 0
+    TIME_SECOND: float = 0.0
+    TIME_UTC: bool = False
+    TOP: int = 0
+    TRAILER: str = '0 TRLR'
+    UNDERLINE: str = '_'
+    UTF8: str = 'utf-8'
+    VOID_POINTER: str = '@VOID@'
+    WEEKS: int = 0
+    WIDTH: int = 0
+    YAML_CALENDARS: str = 'calendars'
+    YAML_CARDINALITY_ANY_NUMBER: str = ':M}'
+    YAML_CARDINALITY_OPTIONAL: str = '{0:'
+    YAML_CARDINALITY_REQUIRED: str = '{1:'
+    YAML_CARDINALITY_SINGULAR: str = ':1}'
+    YAML_CHANGE_CONTROLLER: str = 'change controller'
+    YAML_CONTACT: str = 'contact'
+    YAML_DIRECTIVE: str = '%YAML 1.2'
+    YAML_DIRECTIVE_END_MARKER: str = '---'
+    YAML_DOCUMENT_END_MARKER: str = '...'
+    YAML_DOCUMENTATION: str = 'documentation'
+    YAML_ENUMERATION_SET: str = 'enumeration set'
+    YAML_ENUMS: str = 'enums'
+    YAML_ENUMERATION_VALUES: str = 'enumeration values'
+    YAML_EPOCHS: str = 'epochs'
+    YAML_EXTENSION_TAGS: str = 'extension tags'
+    YAML_FRAGMENT: str = 'fragment'
+    YAML_HELP_TEXT: str = 'help text'
+    YAML_LABEL: str = 'label'
+    YAML_LANG: str = 'lang'
+    YAML_MONTHS: str = 'months'
+    YAML_PAYLOAD: str = 'payload'
+    YAML_PERMITTED: str = 'permitted'
+    YAML_REQUIRED: str = 'required'
+    YAML_SINGULAR: str = 'single'
+    YAML_SPECIFICATION: str = 'specification'
+    YAML_STANDARD_TAG: str = 'standard tag'
+    YAML_SUBSTRUCTURES: str = 'substructures'
+    YAML_SUPERSTRUCTURES: str = 'superstructures'
+    YAML_TYPE: str = 'type'
+    YAML_URI: str = 'uri'
+    YAML_VALUE_OF: str = 'value of'
+    YEARS: int = 0
+    Z: str = 'Z'
+
+
+@dataclass(frozen=True)
+class XrefTag:
+    EXT: str = 'EXT'
+    FAM: str = 'FAM'
+    INDI: str = 'INDI'
+    OBJE: str = 'OBJE'
+    REPO: str = 'REPO'
+    SNOTE: str = 'SNOTE'
+    SOUR: str = 'SOUR'
+    SUBM: str = 'SUBM'
+
 # class AgeConstants:
 #     """Age enumerations for the Age NamedTuple."""
 

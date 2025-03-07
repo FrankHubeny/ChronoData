@@ -21,28 +21,27 @@ from pathlib import Path
 from typing import Any
 
 from genedata.constants import (
-    # Key,
+    Default,
     Number,
     String,
 )
-from genedata.gedcom import Default, Tag
 from genedata.messages import Issue, Msg
-from genedata.store import (
+from genedata.structure import (
     ExtensionXref,
-    Family,
     FamilyXref,
-    Header,
-    Individual,
+    Head,
     IndividualXref,
-    Multimedia,
     MultimediaXref,
-    Repository,
+    RecordFam,
+    RecordIndi,
+    RecordObje,
+    RecordRepo,
+    RecordSnote,
+    RecordSour,
+    RecordSubm,
     RepositoryXref,
-    SharedNote,
     SharedNoteXref,
-    Source,
     SourceXref,
-    Submitter,
     SubmitterXref,
     Tagger,
     Void,
@@ -66,7 +65,7 @@ class Genealogy:
         self.ged_issues: list[Any] = []
         self.ged_in_version: str = ''
         self.ged_header: str = ''
-        self.ged_trailer: str = f'0 {Tag.TRLR.value}'
+        self.ged_trailer: str = Default.TRAILER
         self.ged_extension: str = ''
         self.ged_family: str = ''
         self.ged_individual: str = ''
@@ -844,7 +843,7 @@ class Genealogy:
             raise ValueError(Msg.MISSING.format(missing))
         return destination
 
-    def families(self, records: list[Family]) -> None:
+    def families(self, records: list[RecordFam]) -> None:
         """Collect and store all family records for the genealogy.
 
         After importing `genedata.build` and `genedata.store`
@@ -902,7 +901,7 @@ class Genealogy:
         """
         self.ged_family = self._gather(records, self.family_xreflist)
 
-    def individuals(self, records: list[Individual]) -> None:
+    def individuals(self, records: list[RecordIndi]) -> None:
         """Collect and store all individual records for the genealogy.
 
         Args:
@@ -950,7 +949,7 @@ class Genealogy:
         """
         self.ged_individual = self._gather(records, self.individual_xreflist)
 
-    def multimedia(self, records: list[Multimedia]) -> None:
+    def multimedia(self, records: list[RecordObje]) -> None:
         """Collect and store all multimedia records for the genealogy.
 
         Args:
@@ -1004,7 +1003,7 @@ class Genealogy:
         """
         self.ged_multimedia = self._gather(records, self.multimedia_xreflist)
 
-    def repositories(self, records: list[Repository]) -> None:
+    def repositories(self, records: list[RecordRepo]) -> None:
         """Collect and store all repository records for the genealogy.
 
         Args:
@@ -1055,7 +1054,7 @@ class Genealogy:
         """
         self.ged_repository = self._gather(records, self.repository_xreflist)
 
-    def shared_notes(self, records: list[SharedNote]) -> None:
+    def shared_notes(self, records: list[RecordSnote]) -> None:
         """Collect and store all shared note records for the genealogy.
 
         Args:
@@ -1103,7 +1102,7 @@ class Genealogy:
         """
         self.ged_shared_note = self._gather(records, self.shared_note_xreflist)
 
-    def sources(self, records: list[Source]) -> None:
+    def sources(self, records: list[RecordSour]) -> None:
         """Collect and store all source records for the genealogy.
 
         Args:
@@ -1151,7 +1150,7 @@ class Genealogy:
         """
         self.ged_source = self._gather(records, self.source_xreflist)
 
-    def submitters(self, records: list[Submitter]) -> None:
+    def submitters(self, records: list[RecordSubm]) -> None:
         """Collect and store all submitter records for the genealogy.
 
         Args:
@@ -1202,7 +1201,7 @@ class Genealogy:
         """
         self.ged_submitter = self._gather(records, self.submitter_xreflist)
 
-    def header(self, ged_header: Header) -> None:
+    def header(self, ged_header: Head) -> None:
         """Collect and store the header record.
 
         
