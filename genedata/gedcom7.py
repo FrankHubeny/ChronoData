@@ -35,6 +35,7 @@ __all__ = [
     'DataType',
     'Enumeration',
     'EnumerationSet',
+    'Examples',
     'ExtensionStructure',
     'Month',
     'Structure',
@@ -389,4 +390,172 @@ Uri: dict[str, dict[str, Any]] = {
     'RFN': {'label': 'Record File Number', 'lang': 'en', 'type': 'uri', 'uri': 'https://gedcom.io/terms/v7/RFN', 'specification': ['Permanent Record ID', 'This URI is defined to support conversion from GEDCOM 5.5.1 to FamilySearch\nGEDCOM 7.0 and beyond. It is intended for use as the \nhttps://gedcom.io/terms/v7/TYPE of an \nhttps://gedcom.io/terms/v7/EXID replacing 5.5.1\'s RFN structure.\n\nGEDCOM versions 5.0 through 5.5.1 had a notion of a "registered resource\nidentifier". The registration process was never widely followed and ceased\nbeing used in the early 2000s. URLs beginning\nhttps://gedcom.io/terms/v7/RFN are placeholders for such "registered\nresource identifiers", which may or may not have been registered and hence\nmay or may not be a unique resource identifier.\n\nThe fragment identifer of this URI (the part after the #) is the\nregistered resource identifier; the payload of the EXID is the record\nidentifier within that resource. If there is no fragment identifier,\nthe EXID may represent either a registered number of a submitter of\nAncestral File data (see https://gedcom.io/terms/v7/AFN) or may have been\ncreated by a user omitting to indicate the resource in 5.5.1 or earlier.\n\nIt is recommend that the 5.5.1 structure\n\n    2 RFN xyz:123abc\n\nbe converted to 7.0 structures\n\n    2 EXID xyz\n    3 TYPE https://gedcom.io/terms/v7/RFN#123abc\n'], 'contact': 'GEDCOM@familysearch.org', 'change controller': 'FamilySearch', 'fragment': 'Resource ID', 'documentation': ['https://gedcom.io/migrate/#afn-rfn-rin']},
     'RIN': {'label': 'Record ID Number', 'lang': 'en', 'type': 'uri', 'uri': 'https://gedcom.io/terms/v7/RIN', 'specification': ['Automated Record ID', 'This URI is defined to support conversion from GEDCOM 5.5.1 to FamilySearch\nGEDCOM 7.0 and beyond. It is intended for use as the\nhttps://gedcom.io/terms/v7/TYPE of an \nhttps://gedcom.io/terms/v7/EXID replacing 5.5.1\'s RIN structure.\n\nGEDCOM 5.5 and 5.5.1 defined RIN as follows:\n\n> A unique record identification number assigned to the record by the\n> source system. This number is intended to serve as a more sure means of\n> identification of a record for reconciling differences in data between\n> two interfacing systems.\n\nURLs beginning https://gedcom.io/terms/v7/RIN are used to represent\nsuch source systems if they did not have a dedicated URI. The fragment\nidentifer of this URI (the part after the #) represents how the source\nsystem was identified in the 5.5 or 5.5.1 file\'s header; the payload of the\nEXID is the record identifier within that resource. If there is no fragment\nidentifier, the EXID was an RIN given without a source system identifier.\n\nIt is recommend that the 5.5.1 structure\n\n    2 RIN 123abc\n\nin a file with HEAD.SOUR line value "XYZ"\nbe converted to 7.0 structures\n\n    2 EXID 123abc\n    3 TYPE https://gedcom.io/terms/v7/RIN#XYZ\n'], 'contact': 'GEDCOM@familysearch.org', 'fragment': 'Source System', 'documentation': ['https://gedcom.io/migrate/#afn-rfn-rin']},
     'WikiTree-PersonId': {'label': 'WikiTree Person ID', 'lang': 'en', 'type': 'uri', 'uri': 'https://www.wikitree.com/wiki/', 'specification': ['WikiTree Person ID'], 'contact': 'GEDCOM@familysearch.org', 'change controller': 'wikitree.com', 'documentation': ['https://www.wikitree.com/wiki/Help:WikiTree_ID']},
+}
+
+Examples: dict[str, str] = {
+    'LATI': """
+
+    Examples:
+        The following example shows how to enter the latitude (Lati))
+        coordinates into a Map structure to produce the GEDCOM example
+        mentioned in the GEDCOM Specification section.
+        >>> from genedata.structure import Lati, Long, Map
+        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> print(m.ged())
+        1 MAP
+        2 LATI N18.150944
+        2 LONG E168.150944
+        <BLANKLINE>
+        
+        Since it may be difficult to convert from degrees, minutes
+        and seconds to a floating point value, the `Input` class provides
+        a utility to do so for Lati.  A similar one exists for Long.
+        >>> from genedata.structure import Input
+        >>> m = Map([Lati(Input.lati(18, 9, 3.4)), Long('E168.150944')]
+        >>> print(m.ged())
+        1 MAP
+        2 LATI N18.150944
+        2 LONG E168.150944
+        <BLANKLINE>""",
+    'LONG': """
+
+    Examples:
+        The following example howss how to enter the longitude (Long)
+        coordinates into a map structure to produce the GEDCOM output
+        mentioned in the GEDCOM Specification.
+        >>> from genedata.structure import Lati, Long, Map
+        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> print(m.ged())
+        1 MAP
+        2 LATI N18.150944
+        2 LONG E168.150944
+        <BLANKLINE>
+        
+        Since it may be difficult to convert from degrees, minutes
+        and seconds to a floating point value, the `Input` class provides
+        a utility to do so for Long.  A similar one exists for Lati.
+        >>> from genedata.structure import Input
+        >>> m = Map([Lati('N18.150944'), Long(Input.long(168, 9, 3.4))]
+        >>> print(m.ged())
+        1 MAP
+        2 LATI N18.150944
+        2 LONG E168.150944
+        <BLANKLINE>""",
+    'MAP': """
+
+    Examples:
+        The following example illustrates how to enter latitude (Lati) and longitude (Long)
+        coordinates into a map structure to produce the GEDCOM output.
+        >>> from genedata.structure import Input, Lati, Long, Map
+        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> print(m.ged())
+        1 MAP
+        2 LATI N18.150944
+        2 LONG E168.150944
+        <BLANKLINE>""",
+    'MEDI': """
+
+    Examples:
+        This example shows a successful run of the Medi structure using
+        the enumeration value 'AUDIO'.
+        >>> from genedata.structure import Medi
+        >>> m = Medi('AUDIO')
+        >>> print(m.ged(2))
+        2 MEDI AUDIO
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Medi('AUDIO')""",
+    'ord-STAT': """
+
+    Examples:
+        This example shows a successful run of the OrdStat structure using
+        the enumeration value 'BIC'.
+        >>> from genedata.structure import OrdStat
+        >>> m = OrdStat('BIC')
+        >>> print(m.ged(1))
+        1 STAT BIC
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        OrdStat('BIC')""",
+    'PEDI': """
+
+    Examples:
+        This example shows a successful run of the Pedi structure using
+        the enumeration value 'ADOPTED'.
+        >>> from genedata.structure import Pedi
+        >>> m = Pedi('ADOPTED')
+        >>> print(m.ged(1))
+        1 PEDI ADOPTED
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Pedi('ADOPTED')""",
+    'QUAY': """
+
+    Examples:
+        This example shows a successful run of the Quay structure using
+        the enumeration value '0'.
+        >>> from genedata.structure import Quay
+        >>> m = Quay('0')
+        >>> print(m.ged(1))
+        1 QUAY 0
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Quay('0')""",
+    'RESN': """
+
+    Examples:
+        This example shows a successful run of the Resn structure using
+        the enumeration value 'CONFIDENTIAL'.
+        >>> from genedata.structure import Resn
+        >>> m = Resn('CONFIDENTIAL')
+        >>> print(m.ged(1))
+        1 RESN CONFIDENTIAL
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Resn('CONFIDENTIAL')""",
+    'ROLE': """
+
+    Examples:
+        This example shows a successful run of the Role structure using
+        the enumeration value 'CHIL'.
+        >>> from genedata.structure import Role
+        >>> m = Role('CHIL')
+        >>> print(m.ged(1))
+        1 ROLE CHIL
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Role('CHIL')""",
+    'SEX': """
+
+    Examples:
+        This example shows a successful run of the Sex structure using
+        the enumeration value 'F'.
+        >>> from genedata.structure import Sex
+        >>> m = Sex('F')
+        >>> print(m.ged(1))
+        1 SEX F
+        <BLANKLINE>
+
+        This example shows the code that is generated to produce the same result as above.
+        >>> print(m.code())
+        <BLANKLINE>
+        Sex('F')""",
 }

@@ -5,22 +5,21 @@ from internationalization.
 
 from dataclasses import dataclass
 
-
-@dataclass(frozen=True)
-class Example:
-    EMPTY_CODE: str = 'Empty Example'
-    EMPTY_GEDCOM: str = 'There should be no GEDCOM lines produced.'
-    ERROR_EXPECTED: str = 'An error is expected since the default must be changed to use the structure.'
-    FULL: str = 'First Example'
-    FIRST: str = 'First Example'
-    GEDCOM: str = 'The following GEDCOM lines are produced.'
-    GEDCOM_SPECIFICATION: str = '\n\nGEDCOM Specification\n'
-    SECOND: str = 'Second Example'
-    SUBSTRUCTURES: str = '\n\nSubstructures\n'
-    SUPERSTRUCTURES: str = '\nSuperstructures\n'
-    THIRD: str = 'Third Example'
-    USER_PROVIDED: str = 'User Provided Example'
-    USER_PROVIDED_EXAMPLE: str = 'The example data was provided by the user.'
+# @dataclass(frozen=True)
+# class Example:
+#     EMPTY_CODE: str = 'Empty Example'
+#     EMPTY_GEDCOM: str = 'There should be no GEDCOM lines produced.'
+#     ERROR_EXPECTED: str = 'An error is expected since the default must be changed to use the structure.'
+#     FULL: str = 'First Example'
+#     FIRST: str = 'First Example'
+#     GEDCOM: str = 'The following GEDCOM lines are produced.'
+#     GEDCOM_SPECIFICATION: str = '\n\nGEDCOM Specification\n'
+#     SECOND: str = 'Second Example'
+#     SUBSTRUCTURES: str = '\n\nSubstructures\n'
+#     SUPERSTRUCTURES: str = '\nSuperstructures\n'
+#     THIRD: str = 'Third Example'
+#     USER_PROVIDED: str = 'User Provided Example'
+#     USER_PROVIDED_EXAMPLE: str = 'The example data was provided by the user.'
 
 
 @dataclass(frozen=True)
@@ -60,7 +59,9 @@ class Msg:
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
     MISSING: str = 'These xref values {0} are missing record definitions.'
-    MISSING_REQUIRED_TUPLE: str = 'The tuple type "{0}" is required for this structure.'
+    MISSING_REQUIRED_TUPLE: str = (
+        'The tuple type "{0}" is required for this structure.'
+    )
     NEGATIVE_ERROR: str = 'The value "{0}" is less than zero.'
     NEG_YEAR: str = 'Negative year but a negative label "{0}".'
     NEITHER_TAG_NOR_EXTTAG: str = (
@@ -79,15 +80,44 @@ class Msg:
         'The value is required to be other than the empty string.'
     )
     NO_EMPTY_TAG: str = 'The tag is required to be not the empty tag.'
+    NOT_AGE: str = 'The value "{0}" is not an age.'
+    NOT_DATE: str = 'The value "{0}" is not a date.'
+    NOT_DATE_EXACT: str = 'The value "{0}" is not an exact date.'
+    NOT_DATE_PERIOD: str = 'The value "{0}" is not a date period.'
     NOT_DEFAULT: str = (
         'GEDCOM requires a specific value different from the default "{0}".'
     )
     NOT_DEFINED_FOR_STRUCTURE: str = (
         'The extension "{0}" is not defined for the current structure.'
     )
+    NOT_FAMILY_XREF: str = 'The value "{0}" is not a family cross reference.'
+    NOT_FILE_PATH: str = 'The value "{0}" is not a file path.'
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
-    NOT_PERMITTED: str = 'The named tuple "{0}" is not permitted in this structure.'
+    NOT_INDIVIDUAL_XREF: str = (
+        'The value "{0}" is not an individual cross reference.'
+    )
+    NOT_LANGUAGE: str = 'The value "{0}" is not a language code.'
+    NOT_LIST: str = 'The value "{0}" is not a list.'
+    NOT_MEDIA_TYPE: str = 'The value "{0}" is not a media type.'
+    NOT_MULTIMEDIA_XREF: str = (
+        'The value "{0}" is not a multimedia cross reference.'
+    )
+    NOT_NAME: str = 'The value "{0}" is not a name.'
+    NOT_PERMITTED: str = (
+        'The named tuple "{0}" is not in permitted list "{1}".'
+    )
     NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value.'
+    NOT_REPOSITORY_XREF: str = (
+        'The value "{0}" is not a repository cross reference.'
+    )
+    NOT_SHARED_NOTE_XREF: str = (
+        'The value "{0}" is not a shared note cross reference.'
+    )
+    NOT_SOURCE_XREF: str = 'The value "{0}" is not a source cross reference.'
+    NOT_SUBMITTER_XREF: str = (
+        'The value "{0}" is not a submitter cross reference.'
+    )
+    NOT_TIME: str = 'The value "{0}" is not a time.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The tag "{0}" is not an enumerated value.'
 
@@ -133,8 +163,13 @@ class Msg:
         'The structure at "{0}" does not have a name for its tag.'
     )
     UNRECOGNIZED: str = 'The filename "{0}" is not recognized.'
-    UNRECOGNIZED_XREF: str = 'The cross reference identifier "{0}" is not recognized.'
+    UNRECOGNIZED_XREF: str = (
+        'The cross reference identifier "{0}" is not recognized.'
+    )
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
+    VALUE_NOT_Y_OR_NULL: str = (
+        'The value "{0}" is neither "Y" nor the empty string.'
+    )
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'
     YAML_NOT_YAML_FILE: str = (
         'The file "{0}" does not contain the YAML directive "{1}".'
@@ -148,8 +183,12 @@ class Msg:
     YAML_MISSING_REQUIRED_URI: str = (
         'The yaml file "{0}" did not have the required `uri` specification.'
     )
-    YAML_NO_CALENDAR: str = 'Months or epochs are defined but without a calendar type.'
+    YAML_NO_CALENDAR: str = (
+        'Months or epochs are defined but without a calendar type.'
+    )
     YAML_NO_TAG_NAME: str = 'Neither standard nor extension tags were defined.'
-    YAML_STRUCTURE_MISSING_VALUES: str = 'The structure type has no superstructures nor substructures.'
-    YAML_UNRECOGNIZED_TYPE: str = ('The type "{0}" is not a valid type')
+    YAML_STRUCTURE_MISSING_VALUES: str = (
+        'The structure type has no superstructures nor substructures.'
+    )
+    YAML_UNRECOGNIZED_TYPE: str = 'The type "{0}" is not a valid type'
     ZERO_YEAR: str = 'The calendar has no zero year.'
