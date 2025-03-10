@@ -411,7 +411,12 @@ Examples: dict[str, str] = {
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
         >>> from genedata.structure import Input
-        >>> m = Map([Lati(Input.lati(18, 9, 3.4)), Long('E168.150944')]
+        >>> m = Map(
+        ...     [
+        ...         Lati(Input.lati(18, 9, 3.4)), 
+        ...         Long('E168.150944'),
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -435,7 +440,12 @@ Examples: dict[str, str] = {
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
         >>> from genedata.structure import Input
-        >>> m = Map([Lati('N18.150944'), Long(Input.long(168, 9, 3.4))]
+        >>> m = Map(
+        ...     [
+        ...         Lati('N18.150944'), 
+        ...         Long(Input.long(168, 9, 3.4)),
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944

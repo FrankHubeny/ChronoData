@@ -2503,32 +2503,162 @@ class BaseStructure:
         ext: ExtType,
         key: str,
     ):
+        # Process value argument
         self.value: str | int | Xref = value
+
+        # Process subs argument
         self.subs: SubsType = subs
-        self.counted: dict[str, int] = Checker.count_named_tuples(self.subs)
+        self.counted: dict[str, int] = {}
+        if isinstance(self.subs, list):
+            self.counted = collections.Counter(
+                [type(sub).__name__ for sub in self.subs]
+            )
+        elif self.subs is not None:
+            self.counted = collections.Counter([type(self.subs).__name__])
+
+        # Process ext argument
         self.ext: ExtType = ext
-        self.structure: dict[str, Any] = Structure[key]
-        self.tag: str = self.structure[Default.YAML_STANDARD_TAG]
-        self.permitted: list[str] = self.structure[Default.YAML_PERMITTED]
-        self.required: list[str] = self.structure[Default.YAML_REQUIRED]
-        self.single: list[str] = self.structure[Default.YAML_SINGULAR]
-        self.enums: list[str] = self.structure[Default.YAML_ENUMS]
-        self.payload: str | None = self.structure[Default.YAML_PAYLOAD]
-        self.class_name: str = key.title().replace('_', '').replace('-', '')
+
+        # Process key argument
         self.key = key
+        self.tag: str = Structure[self.key][Default.YAML_STANDARD_TAG]
+        self.permitted: list[str] = Structure[self.key][Default.YAML_PERMITTED]
+        self.required: list[str] = Structure[self.key][Default.YAML_REQUIRED]
+        self.single: list[str] = Structure[self.key][Default.YAML_SINGULAR]
+        self.enums: list[str] = Structure[self.key][Default.YAML_ENUMS]
+        self.payload: str | None = Structure[self.key][Default.YAML_PAYLOAD]
+        self.class_name: str = (
+            self.key.title().replace('_', '').replace('-', '')
+        )
 
     def validate(self) -> bool:
         """Validate the stored value."""
-        # counted = Checker.count_named_tuples(self.subs)
-        check: bool = (
-            Checker.required(self.required, self.counted)
-            and Checker.only_permitted(self.permitted, self.counted)
-            and Checker.only_one(self.single, self.counted)
-            and Checker.verify_ext(self.tag, self.ext)
-            and Checker.permitted_enum(self.value, self.enums)
-            and Checker.payload(self.value, self.payload)
-        )
-        return check
+        for name in self.required:
+            if name not in self.counted:
+                raise ValueError(Msg.MISSING_REQUIRED_TUPLE.format(name))
+        for name in self.single:
+            if name in self.counted and self.counted[name] > 1:
+                raise ValueError(Msg.ONLY_ONE_PERMITTED.format(name))
+        if len(self.permitted) == 0 and len(self.counted) > 0:
+            raise ValueError(Msg.NO_SUBS)
+        for name in self.counted:
+            if name not in self.permitted:
+                raise ValueError(Msg.NOT_PERMITTED.format(name, self.permitted))
+        if len(self.enums) > 0 and self.value not in self.enums:
+            raise ValueError(Msg.NOT_VALID_ENUM.format(self.value, self.enums))
+        if self.payload not in [
+            'https://gedcom.io/terms/v7/type-Enum',
+            'https://gedcom.io/terms/v7/type-List#Enum',
+        ]:
+            match self.payload:
+                case 'Y|<NULL>':
+                    if not isinstance(self.value, str) or str(
+                        self.value
+                    ) not in ['Y', '']:
+                        raise ValueError(
+                            Msg.VALUE_NOT_Y_OR_NULL.format(str(self.value))
+                        )
+                    return True
+                case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+                    if not isinstance(self.value, int) or int(self.value) < 0:
+                        raise ValueError(
+                            Msg.NEGATIVE_ERROR.format(str(self.value))
+                        )
+                    return True
+                case '@<https://gedcom.io/terms/v7/record-INDI>@':
+                    if not isinstance(self.value, IndividualXref):
+                        raise ValueError(
+                            Msg.NOT_INDIVIDUAL_XREF.format(str(self.value))
+                        )
+                case '@<https://gedcom.io/terms/v7/record-FAM>@':
+                    if not isinstance(self.value, FamilyXref):
+                        raise ValueError(
+                            Msg.NOT_FAMILY_XREF.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-List#Text':
+                    if not isinstance(self.value, str) or not re.match(
+                        ',', str(self.value)
+                    ):
+                        raise ValueError(Msg.NOT_LIST.format(str(self.value)))
+                case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+                    if not isinstance(self.value, SubmitterXref):
+                        raise ValueError(
+                            Msg.NOT_SUBMITTER_XREF.format(str(self.value))
+                        )
+                case 'http://www.w3.org/2001/XMLSchema#Language':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(
+                            Msg.NOT_LANGUAGE.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-Date#period':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(
+                            Msg.NOT_DATE_PERIOD.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-Date#exact':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(
+                            Msg.NOT_DATE_EXACT.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-Date':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(Msg.NOT_DATE.format(str(self.value)))
+                case 'https://gedcom.io/terms/v7/type-FilePath':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(
+                            Msg.NOT_FILE_PATH.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-Name':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', (str(self.value))
+                    ):
+                        raise ValueError(Msg.NOT_NAME.format(str(self.value)))
+                case 'https://gedcom.io/terms/v7/type-Age':
+                    if not re.match('', str(self.value)):
+                        raise ValueError(Msg.NOT_AGE.format(str(self.value)))
+                case 'http://www.w3.org/ns/dcat#mediaType':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(
+                            Msg.NOT_MEDIA_TYPE.format(str(self.value))
+                        )
+                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                    if not isinstance(self.value, MultimediaXref):
+                        raise ValueError(
+                            Msg.NOT_MULTIMEDIA_XREF.format(str(self.value))
+                        )
+                case '@<https://gedcom.io/terms/v7/record-REPO>@':
+                    if not isinstance(self.value, RepositoryXref):
+                        raise ValueError(
+                            Msg.NOT_REPOSITORY_XREF.format(str(self.value))
+                        )
+                case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                    if not isinstance(self.value, SharedNoteXref):
+                        raise ValueError(
+                            Msg.NOT_SHARED_NOTE_XREF.format(str(self.value))
+                        )
+                case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+                    if not isinstance(self.value, SourceXref):
+                        raise ValueError(
+                            Msg.NOT_SOURCE_XREF.format(str(self.value))
+                        )
+                case 'https://gedcom.io/terms/v7/type-Time':
+                    if not isinstance(self.value, str) or not re.match(
+                        '', str(self.value)
+                    ):
+                        raise ValueError(Msg.NOT_TIME.format(str(self.value)))
+        return True
 
     def ged(self, level: int = 1, format: bool = True) -> str:
         """Generate the GEDCOM lines."""
@@ -2704,6 +2834,7 @@ class BaseStructure:
 
 
 # Classes below this marker were genered by the class_generation.ipynb notebook.
+
 
 
 class Abbr(BaseStructure):
@@ -6612,12 +6743,12 @@ class Lati(BaseStructure):
     > 
 
     Examples:
-        The following example howss how to enter the latitude (Lati))
-        coordinates into a map structure to produce the GEDCOM output
-        mentioned in the GEDCOM Specification.
+        The following example shows how to enter the latitude (Lati))
+        coordinates into a Map structure to produce the GEDCOM example
+        mentioned in the GEDCOM Specification section.
         >>> from genedata.structure import Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
-        print(m.ged())
+        >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
@@ -6627,8 +6758,13 @@ class Lati(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
         >>> from genedata.structure import Input
-        >>> m = Map([Lati(Input.lati(18, 9, 3.4)), Long('E168.150944')]
-        print(m.ged())
+        >>> m = Map(
+        ...     [
+        ...         Lati(Input.lati(18, 9, 3.4)), 
+        ...         Long('E168.150944'),
+        ...     ]
+        ... )
+        >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
@@ -6696,7 +6832,7 @@ class Long(BaseStructure):
         mentioned in the GEDCOM Specification.
         >>> from genedata.structure import Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
-        print(m.ged())
+        >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
@@ -6706,8 +6842,13 @@ class Long(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
         >>> from genedata.structure import Input
-        >>> m = Map([Lati('N18.150944'), Long(Input.long(168, 9, 3.4))]
-        print(m.ged())
+        >>> m = Map(
+        ...     [
+        ...         Lati('N18.150944'), 
+        ...         Long(Input.long(168, 9, 3.4)),
+        ...     ]
+        ... )
+        >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
@@ -6747,7 +6888,7 @@ class Map(BaseStructure):
         coordinates into a map structure to produce the GEDCOM output.
         >>> from genedata.structure import Input, Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
-        print(m.ged())
+        >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
@@ -7066,8 +7207,8 @@ class Medi(BaseStructure):
         the enumeration value 'AUDIO'.
         >>> from genedata.structure import Medi
         >>> m = Medi('AUDIO')
-        >>> print(m.ged(1))
-        1 MEDI AUDIO
+        >>> print(m.ged(2))
+        2 MEDI AUDIO
         <BLANKLINE>
 
         This example shows the code that is generated to produce the same result as above.
