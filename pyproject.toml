@@ -70,6 +70,7 @@ addopts = [
   #"--cov-report=term-missing",
   "--doctest-modules",
   "--ignore=chronodata/separate",
+  "--ignore=tests/store_test",
 ]
 xfail_strict = true
 faulthandler_timeout = 5

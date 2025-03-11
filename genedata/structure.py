@@ -181,6 +181,7 @@ __all__ = [
 
 import collections
 import contextlib
+import io
 import math
 import re
 import urllib.request
@@ -196,7 +197,7 @@ from genedata.constants import (
     Default,
     XrefTag,
 )
-from genedata.gedcom7 import Structure
+from genedata.gedcom7 import Enumeration, ExtensionStructure, Structure
 from genedata.messages import Msg
 
 AnyList = Any | list[Any] | None
@@ -752,18 +753,63 @@ class Input:
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> str:
         latitude = Input.to_decimal(degrees, minutes, seconds, precision)
+        if latitude > Default.LATI_HIGH or latitude < Default.LATI_LOW:
+            raise ValueError(
+                Msg.LATI_RANGE_METHOD.format(
+                    latitude, Default.LATI_LOW, Default.LATI_HIGH
+                )
+            )
         if degrees >= 0:
             return f'{Default.LATI_NORTH}{latitude!s}'
-        return f'{Default.LATI_SOUTH}{latitude!s}'
+        return f'{Default.LATI_SOUTH}{abs(latitude)!s}'
 
     @staticmethod
     def long(
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> str:
         longitude = Input.to_decimal(degrees, minutes, seconds, precision)
+        if longitude > Default.LONG_HIGH or longitude < Default.LONG_LOW:
+            raise ValueError(
+                Msg.LONG_RANGE_METHOD.format(
+                    longitude, Default.LONG_LOW, Default.LONG_HIGH
+                )
+            )
         if degrees >= 0:
             return f'{Default.LONG_EAST}{longitude!s}'
-        return f'{Default.LONG_WEST}{longitude!s}'
+        return f'{Default.LONG_WEST}{abs(longitude)!s}'
+    
+    @staticmethod
+    def from_ged(lines: str | list[list[str]]) -> str:
+        if isinstance(lines, str):
+            strlist: list[list[str]] = [
+                a.split(' ') for a in lines.split('\n') if a != ''
+            ]
+            return Input.from_ged(strlist)
+        level: int = int(lines[0][0])
+        tag: str = lines[0][1]
+        payload: str = Default.EMPTY
+        output: str = Default.EMPTY
+        number_of_lines: int = len(lines)
+        if len(lines[0]) == 3:
+            payload = lines[0][2]
+        output = f'{tag}({payload}'
+        intermediate_lines: list[list[str]] = []
+        number_of_lines = len(lines[1:])
+        for i in range(number_of_lines):
+            if int(lines[i][0]) == level and len(intermediate_lines) > 0:
+                output = ''.join(
+                    [output, '[', Input.from_ged(intermediate_lines), '])']
+                )
+                intermediate_lines = []
+            elif int(lines[i][0]) == level:
+                output = ''.join([output, ')'])
+                if i < number_of_lines:
+                    return ''.join([',', output, Input.from_ged(lines[i:]), ')'])
+                return output
+            else:
+                intermediate_lines.append(lines[i])
+        return output
+
 
 
 class Tagger:
@@ -1087,330 +1133,235 @@ class Tagger:
                     ordered.append(sub)
         return ordered
 
-    @staticmethod
-    def base_ged(
-        level: int,
-        tag: str,
-        value: str,
-        subs: Any | None = None,
-        extension: Any = None,
-    ) -> str:
-        lines: str = ''
-        lines = Tagger.string(lines, level, tag, value)
-        lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
-        return Tagger.structure(lines, level + 1, extension)
+    # @staticmethod
+    # def base_ged(
+    #     level: int,
+    #     tag: str,
+    #     value: str,
+    #     subs: Any | None = None,
+    #     extension: Any = None,
+    # ) -> str:
+    #     lines: str = ''
+    #     lines = Tagger.string(lines, level, tag, value)
+    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
+    #     return Tagger.structure(lines, level + 1, extension)
 
-    @staticmethod
-    def ged(
-        level: int,
-        tag: TagTuple,
-        value: str,
-        subs: Any | None,
-        ext: Any | None,
-        format: bool = True,
-    ) -> str:
-        lines: str = Default.EMPTY
-        if value == Default.EMPTY:
-            lines = Tagger.empty(lines, level, tag.standard_tag)
-        else:
-            lines = Tagger.string(
-                lines, level, tag.standard_tag, value, format=format
-            )
-        lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
-        return Tagger.structure(lines, level + 1, ext)
+    # @staticmethod
+    # def ged(
+    #     level: int,
+    #     tag: TagTuple,
+    #     value: str,
+    #     subs: Any | None,
+    #     ext: Any | None,
+    #     format: bool = True,
+    # ) -> str:
+    #     lines: str = Default.EMPTY
+    #     if value == Default.EMPTY:
+    #         lines = Tagger.empty(lines, level, tag.standard_tag)
+    #     else:
+    #         lines = Tagger.string(
+    #             lines, level, tag.standard_tag, value, format=format
+    #         )
+    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
+    #     return Tagger.structure(lines, level + 1, ext)
 
-    @staticmethod
-    def extension(
-        lines: str,
-        level: int,
-        tag: str,
-        payload: str,
-        extra: str = Default.EMPTY,
-    ) -> str:
-        ext_line: str = Default.EMPTY
-        if extra == Default.EMPTY:
-            if payload == Default.EMPTY:
-                ext_line = f'{level} {tag}{Default.EOL}'
-            else:
-                ext_line = (
-                    f'{level} {tag} {Tagger.clean_input(payload)}{Default.EOL}'
-                )
-        else:
-            ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{Default.EOL}'
-        return ''.join([lines, ext_line])
+    # @staticmethod
+    # def extension(
+    #     lines: str,
+    #     level: int,
+    #     tag: str,
+    #     payload: str,
+    #     extra: str = Default.EMPTY,
+    # ) -> str:
+    #     ext_line: str = Default.EMPTY
+    #     if extra == Default.EMPTY:
+    #         if payload == Default.EMPTY:
+    #             ext_line = f'{level} {tag}{Default.EOL}'
+    #         else:
+    #             ext_line = (
+    #                 f'{level} {tag} {Tagger.clean_input(payload)}{Default.EOL}'
+    #             )
+    #     else:
+    #         ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{Default.EOL}'
+    #     return ''.join([lines, ext_line])
 
 
 class Checker:
     """Global methods supporting validation of data."""
 
-    @staticmethod
-    def count_named_tuples(named_tuples: Any | None) -> dict[str, int]:
-        """Return the count of the number of named tuples by name in the list of named tuples."""
-        if named_tuples is None:
-            return {}
-        if isinstance(named_tuples, list):
-            named_tuple_counted = [
-                type(named_tuple).__name__ for named_tuple in named_tuples
-            ]
-        else:
-            named_tuple_counted = [type(named_tuples).__name__]
-        return collections.Counter(named_tuple_counted)
-
-    @staticmethod
-    def only_one(names: list[str] | None, counted: dict[str, int]) -> bool:
-        if names is None:
-            return True
-        for name in names:
-            if name in counted and counted[name] > 1:
-                raise ValueError(Msg.ONLY_ONE_PERMITTED.format(name))
-        return True
-
-    @staticmethod
-    def only_permitted(
-        permitted: list[str] | None, counted: dict[str, int]
-    ) -> bool:
-        if permitted is None and len(counted) > 0:
-            raise ValueError(Msg.NO_SUBS)
-        if permitted is not None:
-            for key in counted:
-                if key not in permitted:
-                    raise ValueError(Msg.NOT_PERMITTED.format(key, permitted))
-        return True
-
-    @staticmethod
-    def required(names: list[str] | None, counted: dict[str, int]) -> bool:
-        if names is None:
-            return True
-        for name in names:
-            if name not in counted:
-                raise ValueError(Msg.MISSING_REQUIRED_TUPLE.format(name))
-        return True
-
-    @staticmethod
-    def permitted_enum(value: str | int | Xref, enums: list[str]) -> bool:
-        """Check if the value is in the proper enumeration."""
-        if len(enums) == 0:
-            return True
-        if value not in enums:
-            raise ValueError(Msg.NOT_VALID_ENUM.format(value, enums))
-        return True
-
-    @staticmethod
-    def payload(
-        value: str | int | Xref | None = None, payload: str | None = None
-    ) -> bool:
-        """Check that the data types of the payloads are as expected.
-
-        Enumerations are handled separately by `Checker.permitted_enum`.
-
-        Empty, or None, payloads do not have a value input argument.  So there is
-        nothing to check.
-
-        Reference:
-        - [GEDCOM Data Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#datatypes)
-        """
-        if payload is None or payload in [
-            'https://gedcom.io/terms/v7/type-Enum',
-            'https://gedcom.io/terms/v7/type-List#Enum',
-        ]:
-            return True
-        match payload:
-            case 'Y|<NULL>':
-                if not isinstance(value, str) or str(value) not in ['Y', '']:
-                    raise ValueError(Msg.VALUE_NOT_Y_OR_NULL.format(str(value)))
-                return True
-            case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                if not isinstance(value, int) or int(value) < 0:
-                    raise ValueError(Msg.NEGATIVE_ERROR.format(str(value)))
-                return True
-            case '@<https://gedcom.io/terms/v7/record-INDI>@':
-                if not isinstance(value, IndividualXref):
-                    raise ValueError(Msg.NOT_INDIVIDUAL_XREF.format(str(value)))
-            case '@<https://gedcom.io/terms/v7/record-FAM>@':
-                if not isinstance(value, FamilyXref):
-                    raise ValueError(Msg.NOT_FAMILY_XREF.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-List#Text':
-                if not isinstance(value, str) or not re.match(',', str(value)):
-                    raise ValueError(Msg.NOT_LIST.format(str(value)))
-            case '@<https://gedcom.io/terms/v7/record-SUBM>@':
-                if not isinstance(value, SubmitterXref):
-                    raise ValueError(Msg.NOT_SUBMITTER_XREF.format(str(value)))
-            case 'http://www.w3.org/2001/XMLSchema#Language':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_LANGUAGE.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Date#period':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_DATE_PERIOD.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Date#exact':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_DATE_EXACT.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Date':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_DATE.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-FilePath':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_FILE_PATH.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Name':
-                if not isinstance(value, str) or not re.match('', (str(value))):
-                    raise ValueError(Msg.NOT_NAME.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Age':
-                if not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_AGE.format(str(value)))
-            case 'http://www.w3.org/ns/dcat#mediaType':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_MEDIA_TYPE.format(str(value)))
-            case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                if not isinstance(value, MultimediaXref):
-                    raise ValueError(Msg.NOT_MULTIMEDIA_XREF.format(str(value)))
-            case '@<https://gedcom.io/terms/v7/record-REPO>@':
-                if not isinstance(value, RepositoryXref):
-                    raise ValueError(Msg.NOT_REPOSITORY_XREF.format(str(value)))
-            case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                if not isinstance(value, SharedNoteXref):
-                    raise ValueError(
-                        Msg.NOT_SHARED_NOTE_XREF.format(str(value))
-                    )
-            case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-                if not isinstance(value, SourceXref):
-                    raise ValueError(Msg.NOT_SOURCE_XREF.format(str(value)))
-            case 'https://gedcom.io/terms/v7/type-Time':
-                if not isinstance(value, str) or not re.match('', str(value)):
-                    raise ValueError(Msg.NOT_TIME.format(str(value)))
-            case _:
-                return True
-        return True
+    # @staticmethod
+    # def count_named_tuples(named_tuples: Any | None) -> dict[str, int]:
+    #     """Return the count of the number of named tuples by name in the list of named tuples."""
+    #     if named_tuples is None:
+    #         return {}
+    #     if isinstance(named_tuples, list):
+    #         named_tuple_counted = [
+    #             type(named_tuple).__name__ for named_tuple in named_tuples
+    #         ]
+    #     else:
+    #         named_tuple_counted = [type(named_tuples).__name__]
+    #     return collections.Counter(named_tuple_counted)
 
     # @staticmethod
-    # def base_string(value: str, tag: str, extension: Any) -> bool:
-    #     check: bool = (
-    #         Checker.verify_type(value, str, no_list=True)
-    #         and Checker.verify_not_empty(value)
-    #         and Checker.verify_ext(tag, extension)
-    #     )
-    #     return check
+    # def only_one(names: list[str] | None, counted: dict[str, int]) -> bool:
+    #     if names is None:
+    #         return True
+    #     for name in names:
+    #         if name in counted and counted[name] > 1:
+    #             raise ValueError(Msg.ONLY_ONE_PERMITTED.format(name))
+    #     return True
 
     # @staticmethod
-    # def validate(tag: TagTuple, subs: Any = None, ext: Any = None) -> bool:
-    #     counted = Checker.count_named_tuples(subs)
-    #     check: bool = (
-    #         Checker.required(tag.required, counted)
-    #         and Checker.only_permitted(tag.subs, counted)
-    #         and Checker.only_one(tag.single, counted)
-    #         and Checker.verify_ext(tag.standard_tag, ext)
-    #     )
-    #     return check
-
-    # @staticmethod
-    # def nosubs_validate(
-    #     name: dict[str, Any], subs: Any = None, ext: Any = None
+    # def only_permitted(
+    #     permitted: list[str] | None, counted: dict[str, int]
     # ) -> bool:
-    #     counted = Checker.count_named_tuples(subs)
-    #     check: bool = (
-    #         Checker.required(name['required'], counted)
-    #         and Checker.only_permitted(name['subs'], counted)
-    #         and Checker.only_one(name['single'], counted)
-    #         and Checker.verify_ext(name['standard tag'], ext)
-    #     )
-    #     return check
+    #     if permitted is None and len(counted) > 0:
+    #         raise ValueError(Msg.NO_SUBS)
+    #     if permitted is not None:
+    #         for key in counted:
+    #             if key not in permitted:
+    #                 raise ValueError(Msg.NOT_PERMITTED.format(key, permitted))
+    #     return True
 
     # @staticmethod
-    # def base_record(xref: Any, tag: TagTuple, counted: dict[str, int], extension: Any) -> bool:
-    #     check: bool = True
-    #     for item in tag.required:
-    #         check = check and Checker.required(item, counted)
-    #     for item in tag.single:
-    #         check = check and Checker.single(item, counted)
-    #     return check and Checker.only_permitted(tag.subs, counted)
-
-    @staticmethod
-    def verify(when: bool, then: bool, message: str) -> bool:
-        """Use conditional logic to test whether to raise a ValueError exception.
-
-        The only time this fails is when the `when` is True,
-        but the `then` is False.  In that case a ValueError is raised
-        with the value in `message`.  In all other cases, True is returned.
-
-        This helps verify that more complicated GEDCOM criteria are met.
-
-        Examples:
-            >>> from genedata.structure import Checker
-            >>> message = 'Error!'
-            >>> Checker.verify(True, 1 == 2, message)
-            Traceback (most recent call last):
-            ValueError: Error!
-
-            >>> Checker.verify(True, 1 == 1, message)
-            True
-
-            When `when` is False, then True is returned no matter what the
-            value of `then` happens to be.
-            >>> Checker.verify(False, False, message)
-            True
-
-            >>> Checker.verify(False, True, message)
-            True
-
-        Args:
-            when: If this is True then check the `then` condition, otherwise return True.
-            then: If `when` is True and this is not, raise the ValueError.
-            message: This is the message used by the ValueError.
-        """
-        if when and not then:
-            raise ValueError(message)
-        return True
-
-    @staticmethod
-    def verify_ext(tag: str, extensions: Any) -> bool:
-        check: bool = True
-        if extensions is None or (
-            isinstance(extensions, list) and len(extensions) == 0
-        ):
-            return check
-        if isinstance(extensions, list):
-            tag_list: list[str] = []
-            for ext in extensions:
-                if isinstance(ext, Extension):
-                    tag_list.append(str(ext.exttag))
-                # if isinstance(ext.exttag, ExtTag):
-                if len(ext.exttag.supers) > 0 and tag not in ext.exttag.supers:
-                    check = False
-                    raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag))
-                check = Checker.verify_ext(ext.exttag, ext.substructures)
-                # if isinstance(ext.exttag, Tag):
-                #     if (
-                #         len(ext.exttag.supers) > 0
-                #         and tag.value not in ext.exttag.supers
-                #     ):
-                #         check = False
-                #         raise ValueError(
-                #             Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag.value)
-                #         )
-                #     check = Checker.verify_ext(ext.exttag, ext.substructures)
-            tag_counts: dict[str, int] = collections.Counter(tag_list)
-            for value in ext.exttag.single:
-                if tag_counts[value] > 1:
-                    raise ValueError(
-                        Msg.ONLY_ONCE.format(value, ext.exttag.value)
-                    )
-            for value in ext.exttag.required:
-                if value not in tag_list:
-                    raise ValueError(
-                        Msg.TAG_REQUIRED.format(value, ext.exttag.value)
-                    )
-            return check
-        if tag not in extensions.exttag.supers:
-            check = False
-            raise ValueError(Msg.NOT_DEFINED_FOR_STRUCTURE.format(tag))
-        return check
+    # def required(names: list[str] | None, counted: dict[str, int]) -> bool:
+    #     if names is None:
+    #         return True
+    #     for name in names:
+    #         if name not in counted:
+    #             raise ValueError(Msg.MISSING_REQUIRED.format(name))
+    #     return True
 
     # @staticmethod
-    # def verify_string_set(string: str, string_set: str) -> bool:
-    #     """Check that each character of a string isin the set of permitted characters."""
-    #     check: bool = True
-    #     for char in string:
-    #         if char not in string_set:
-    #             raise ValueError(Msg.BAD_CHAR.format(char, string_set))
-    #     return check
+    # def permitted_enum(value: str | int | Xref, enums: list[str]) -> bool:
+    #     """Check if the value is in the proper enumeration."""
+    #     if len(enums) == 0:
+    #         return True
+    #     if value not in enums:
+    #         raise ValueError(Msg.NOT_VALID_ENUM.format(value, enums))
+    #     return True
+
+    # @staticmethod
+    # def payload(
+    #     value: str | int | Xref | None = None, payload: str | None = None
+    # ) -> bool:
+    #     """Check that the data types of the payloads are as expected.
+
+    #     Enumerations are handled separately by `Checker.permitted_enum`.
+
+    #     Empty, or None, payloads do not have a value input argument.  So there is
+    #     nothing to check.
+
+    #     Reference:
+    #     - [GEDCOM Data Types](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#datatypes)
+    #     """
+    #     if payload is None or payload in [
+    #         'https://gedcom.io/terms/v7/type-Enum',
+    #         'https://gedcom.io/terms/v7/type-List#Enum',
+    #     ]:
+    #         return True
+    #     match payload:
+    #         case 'Y|<NULL>':
+    #             if not isinstance(value, str) or str(value) not in ['Y', '']:
+    #                 raise ValueError(Msg.VALUE_NOT_Y_OR_NULL.format(str(value)))
+    #             return True
+    #         case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+    #             if not isinstance(value, int) or int(value) < 0:
+    #                 raise ValueError(Msg.NEGATIVE_ERROR.format(str(value)))
+    #             return True
+    #         case '@<https://gedcom.io/terms/v7/record-INDI>@':
+    #             if not isinstance(value, IndividualXref):
+    #                 raise ValueError(Msg.NOT_INDIVIDUAL_XREF.format(str(value)))
+    #         case '@<https://gedcom.io/terms/v7/record-FAM>@':
+    #             if not isinstance(value, FamilyXref):
+    #                 raise ValueError(Msg.NOT_FAMILY_XREF.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-List#Text':
+    #             if not isinstance(value, str) or not re.match(',', str(value)):
+    #                 raise ValueError(Msg.NOT_LIST.format(str(value)))
+    #         case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+    #             if not isinstance(value, SubmitterXref):
+    #                 raise ValueError(Msg.NOT_SUBMITTER_XREF.format(str(value)))
+    #         case 'http://www.w3.org/2001/XMLSchema#Language':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_LANGUAGE.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Date#period':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_DATE_PERIOD.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Date#exact':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_DATE_EXACT.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Date':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_DATE.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-FilePath':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_FILE_PATH.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Name':
+    #             if not isinstance(value, str) or not re.match('', (str(value))):
+    #                 raise ValueError(Msg.NOT_NAME.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Age':
+    #             if not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_AGE.format(str(value)))
+    #         case 'http://www.w3.org/ns/dcat#mediaType':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_MEDIA_TYPE.format(str(value)))
+    #         case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+    #             if not isinstance(value, MultimediaXref):
+    #                 raise ValueError(Msg.NOT_MULTIMEDIA_XREF.format(str(value)))
+    #         case '@<https://gedcom.io/terms/v7/record-REPO>@':
+    #             if not isinstance(value, RepositoryXref):
+    #                 raise ValueError(Msg.NOT_REPOSITORY_XREF.format(str(value)))
+    #         case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+    #             if not isinstance(value, SharedNoteXref):
+    #                 raise ValueError(
+    #                     Msg.NOT_SHARED_NOTE_XREF.format(str(value))
+    #                 )
+    #         case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+    #             if not isinstance(value, SourceXref):
+    #                 raise ValueError(Msg.NOT_SOURCE_XREF.format(str(value)))
+    #         case 'https://gedcom.io/terms/v7/type-Time':
+    #             if not isinstance(value, str) or not re.match('', str(value)):
+    #                 raise ValueError(Msg.NOT_TIME.format(str(value)))
+    #         case _:
+    #             return True
+    #     return True
+
+    # @staticmethod
+    # def verify(when: bool, then: bool, message: str) -> bool:
+    #     """Use conditional logic to test whether to raise a ValueError exception.
+
+    #     The only time this fails is when the `when` is True,
+    #     but the `then` is False.  In that case a ValueError is raised
+    #     with the value in `message`.  In all other cases, True is returned.
+
+    #     This helps verify that more complicated GEDCOM criteria are met.
+
+    #     Examples:
+    #         >>> from genedata.structure import Checker
+    #         >>> message = 'Error!'
+    #         >>> Checker.verify(True, 1 == 2, message)
+    #         Traceback (most recent call last):
+    #         ValueError: Error!
+
+    #         >>> Checker.verify(True, 1 == 1, message)
+    #         True
+
+    #         When `when` is False, then True is returned no matter what the
+    #         value of `then` happens to be.
+    #         >>> Checker.verify(False, False, message)
+    #         True
+
+    #         >>> Checker.verify(False, True, message)
+    #         True
+
+    #     Args:
+    #         when: If this is True then check the `then` condition, otherwise return True.
+    #         then: If `when` is True and this is not, raise the ValueError.
+    #         message: This is the message used by the ValueError.
+    #     """
+    #     if when and not then:
+    #         raise ValueError(message)
+    #     return True
 
     @staticmethod
     def verify_type(value: Any, value_type: Any, no_list: bool = False) -> bool:
@@ -1441,67 +1392,6 @@ class Checker:
                 Checker.verify_type(value, value_type)
         return True
 
-    # @staticmethod
-    # def verify_enum(tag: Any, enumeration: Any) -> bool:
-    #     """Check if the value is in the proper enumation."""
-    #     if tag == Tag.NONE:
-    #         return True
-    #     if not isinstance(tag, Tag) and not isinstance(tag, ExtTag):
-    #         raise ValueError(Msg.NEITHER_TAG_NOR_EXTTAG.format(str(tag)))
-    #     if isinstance(tag, Tag) and tag.value not in enumeration:
-    #         raise ValueError(Msg.NOT_VALID_ENUM.format(tag.name, enumeration))
-    #     if isinstance(tag, ExtTag):
-    #         enum_name: str = (
-    #             str(enumeration)
-    #             .replace("<enum '", '')
-    #             .replace("'>", '')
-    #             .upper()
-    #         )
-    #         if (
-    #             tag.tag.enumsets is not None
-    #             and enum_name not in tag.tag.enumsets
-    #         ):
-    #             raise ValueError(
-    #                 Msg.EXTENSION_ENUM_TAG.format(tag.value, enum_name)
-    #             )
-    #     return True
-
-    # @staticmethod
-    # def verify_not_default(value: Any, default: Any) -> bool:
-    #     """Check that the value is not the default value.
-
-    #     If the value equals the default value in certain structures,
-    #     the structure is empty.  Further processing on it can stop.
-    #     In particular the output of its `ged` method is the empty string.
-
-    #     Examples:
-    #         The first example checks that the empty string is recognized
-    #         as the default value of the empty string.
-    #         >>> from genedata.store import Checker
-    #         >>> Checker.verify_not_default('', '')
-    #         Traceback (most recent call last):
-    #         ValueError: GEDCOM requires a specific value different from the default "".
-
-    #         The second example checks that a non-empty string
-    #         is not identified as the default.
-    #         >>> Checker.verify_not_default('not empty', '')
-    #         True
-
-    #     Args:
-    #         value: What needs to be checked against the `default` value.
-    #         default: The value to compare with `value`.
-
-    #     Exception:
-    #         ValueError: An exception is raised if the value is the default value.
-
-    #     Returns:
-    #         True: If the value does not equal the default value and an exception
-    #             has not been raised.
-    #     """
-    #     if value == default:
-    #         raise ValueError(Msg.NOT_DEFAULT.format(default))
-    #     return True
-
     @staticmethod
     def verify_not_empty(value: Any) -> bool:
         if value is None:
@@ -1514,29 +1404,29 @@ class Checker:
             raise ValueError(Msg.NO_EMPTY_POINTER)
         return True
 
-    @staticmethod
-    def verify_not_all_none(*values: Any) -> bool:
-        check: bool = False
-        for item in values:
-            if item is not None:
-                check = True
-        return check
+    # @staticmethod
+    # def verify_not_all_none(*values: Any) -> bool:
+    #     check: bool = False
+    #     for item in values:
+    #         if item is not None:
+    #             check = True
+    #     return check
 
-    @staticmethod
-    def verify_range(
-        value: int | float, low: int | float, high: int | float
-    ) -> bool:
-        """Check if the value is inclusively between low and high boundaries."""
-        if not low <= value <= high:
-            raise ValueError(Msg.RANGE_ERROR.format(value, low, high))
-        return True
+    # @staticmethod
+    # def verify_range(
+    #     value: int | float, low: int | float, high: int | float
+    # ) -> bool:
+    #     """Check if the value is inclusively between low and high boundaries."""
+    #     if not low <= value <= high:
+    #         raise ValueError(Msg.RANGE_ERROR.format(value, low, high))
+    #     return True
 
-    @staticmethod
-    def verify_not_negative(value: int | float | None) -> bool:
-        """Check if the value is a positive number."""
-        if value is not None and value < 0:
-            raise ValueError(Msg.NEGATIVE_ERROR.format(value))
-        return True
+    # @staticmethod
+    # def verify_not_negative(value: int | float | None) -> bool:
+    #     """Check if the value is a positive number."""
+    #     if value is not None and value < 0:
+    #         raise ValueError(Msg.NEGATIVE_ERROR.format(value))
+    #     return True
 
 
 # class Dater:
@@ -2411,80 +2301,81 @@ class Void:
     XREF: Xref = Xref(NAME)
 
 
-class Extension(NamedTuple):
-    """Store, validate and display extension tags.
+# class Extension(NamedTuple):
+#     """Store, validate and display extension tags.
 
-    The GEDCOM specification recommends the following:
+#     The GEDCOM specification recommends the following:
 
-    > The recommended way to go beyond the set of standard structure types in this specification
-    > or to expand their usage is to submit a feature request on the FamilySearch GEDCOM development page
-    > so that the ramifications of the proposed addition and its interplay with other proposals
-    > may be discussed and the addition may be included in a subsequent version of this specification.
-    >
-    > This specification also provides multiple ways for extension authors to go beyond the specification
-    > without submitting a feature request, which are described in the remainder of this section.
+#     > The recommended way to go beyond the set of standard structure types in this specification
+#     > or to expand their usage is to submit a feature request on the FamilySearch GEDCOM development page
+#     > so that the ramifications of the proposed addition and its interplay with other proposals
+#     > may be discussed and the addition may be included in a subsequent version of this specification.
+#     >
+#     > This specification also provides multiple ways for extension authors to go beyond the specification
+#     > without submitting a feature request, which are described in the remainder of this section.
 
-    This NamedTuple implements going beyond the specification without submitting
-    a feature request.
+#     This NamedTuple implements going beyond the specification without submitting
+#     a feature request.
 
-    Example:
+#     Example:
 
-    Args:
-        exttag: The tag used entered through ExtTag()
-        payload: The value on the same line as the tag.
-        extra: Extra values on the same line as the tag.
-        substructures: Substructures having this extension as a superstructure.  They are
-            placed in the ged file with a level one higher than this extension has.
-            They are also Extension tuples and may have substructures of their own.
+#     Args:
+#         exttag: The tag used entered through ExtTag()
+#         payload: The value on the same line as the tag.
+#         extra: Extra values on the same line as the tag.
+#         substructures: Substructures having this extension as a superstructure.  They are
+#             placed in the ged file with a level one higher than this extension has.
+#             They are also Extension tuples and may have substructures of their own.
 
-    See Also:
-        `ExtTag`
+#     See Also:
+#         `ExtTag`
 
-    Reference:
-        [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
-    """
+#     Reference:
+#         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+#     """
 
-    exttag: str
-    payload: str = Default.EMPTY
-    extra: str = Default.EMPTY
-    substructures: Any = None
+#     exttag: str
+#     payload: str = Default.EMPTY
+#     extra: str = Default.EMPTY
+#     substructures: Any = None
 
-    def validate(self) -> bool:
-        """Validate the stored value."""
-        check: bool = (
-            Checker.verify_type(self.exttag, ExtTag | Tag, no_list=True)
-            and Checker.verify_type(self.payload, str, no_list=True)
-            and Checker.verify_type(self.extra, str, no_list=True)
-        )
-        if self.substructures is not None:
-            for sub in self.substructures:
-                if check:
-                    check = sub.validate()
-        return check
+#     def validate(self) -> bool:
+#         """Validate the stored value."""
+#         check: bool = (
+#             Checker.verify_type(self.exttag, ExtTag | Tag, no_list=True)
+#             and Checker.verify_type(self.payload, str, no_list=True)
+#             and Checker.verify_type(self.extra, str, no_list=True)
+#         )
+#         if self.substructures is not None:
+#             for sub in self.substructures:
+#                 if check:
+#                     check = sub.validate()
+#         return check
 
-    def ged(self, level: int = 1) -> str:
-        lines: str = ''
-        if self.validate():
-            lines = Tagger.string(
-                lines, level, self.exttag, self.payload, self.extra
-            )
-            lines = Tagger.structure(lines, level + 1, self.substructures)
-        return lines
+#     def ged(self, level: int = 1) -> str:
+#         lines: str = ''
+#         if self.validate():
+#             lines = Tagger.string(
+#                 lines, level, self.exttag, self.payload, self.extra
+#             )
+#             lines = Tagger.structure(lines, level + 1, self.substructures)
+#         return lines
 
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'Extension(',
-                ('    exttag = ', self.exttag, tabs, full, True),
-                ('    payload = ', self.payload, tabs, full, False),
-                ('    extra = ', self.extra, tabs, full, False),
-                ('    substructures = ', self.substructures, tabs, full, False),
-            ),
-            Default.INDENT * tabs,
-        )
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return indent(
+#             Formatter.display_code(
+#                 'Extension(',
+#                 ('    exttag = ', self.exttag, tabs, full, True),
+#                 ('    payload = ', self.payload, tabs, full, False),
+#                 ('    extra = ', self.extra, tabs, full, False),
+#                 ('    substructures = ', self.substructures, tabs, full, False),
+#             ),
+#             Default.INDENT * tabs,
+#         )
 
 
-ExtType = Extension | list[Extension] | None
+# ExtType = Extension | list[Extension] | None
+ExtType = Any | list[Any] | None
 
 
 class BaseStructure:
@@ -2493,21 +2384,19 @@ class BaseStructure:
     Args:
         value: The value associated with the tag.
         subs: One or more substructures permitted by the structure.
-        ext: Extensions for the tag.
     """
 
     def __init__(
         self,
         value: str | int | Xref,
-        subs: SubsType,
-        ext: ExtType,
+        subs: Any,
         key: str,
     ):
         # Process value argument
         self.value: str | int | Xref = value
 
         # Process subs argument
-        self.subs: SubsType = subs
+        self.subs: Any = subs
         self.counted: dict[str, int] = {}
         if isinstance(self.subs, list):
             self.counted = collections.Counter(
@@ -2515,9 +2404,6 @@ class BaseStructure:
             )
         elif self.subs is not None:
             self.counted = collections.Counter([type(self.subs).__name__])
-
-        # Process ext argument
-        self.ext: ExtType = ext
 
         # Process key argument
         self.key = key
@@ -2533,19 +2419,56 @@ class BaseStructure:
 
     def validate(self) -> bool:
         """Validate the stored value."""
+
+        # Does it have all required substructures?
         for name in self.required:
             if name not in self.counted:
-                raise ValueError(Msg.MISSING_REQUIRED_TUPLE.format(name))
+                raise ValueError(
+                    Msg.MISSING_REQUIRED.format(name, self.class_name)
+                )
+
+        # Does a single substructure appear only once?
         for name in self.single:
             if name in self.counted and self.counted[name] > 1:
-                raise ValueError(Msg.ONLY_ONE_PERMITTED.format(name))
+                raise ValueError(
+                    Msg.ONLY_ONE_PERMITTED.format(name, self.class_name)
+                )
+
+        # Are there substructures when none are permitted?
         if len(self.permitted) == 0 and len(self.counted) > 0:
-            raise ValueError(Msg.NO_SUBS)
+            raise ValueError(Msg.NO_SUBS.format(self.class_name))
+
+        # Are there substructures not in the permitted list of substructures?
         for name in self.counted:
             if name not in self.permitted:
-                raise ValueError(Msg.NOT_PERMITTED.format(name, self.permitted))
+                raise ValueError(
+                    Msg.NOT_PERMITTED.format(
+                        name, self.permitted, self.class_name
+                    )
+                )
+
+        # Is the value of an enumeration substructure in its list of enumerated values?
         if len(self.enums) > 0 and self.value not in self.enums:
-            raise ValueError(Msg.NOT_VALID_ENUM.format(self.value, self.enums))
+            raise ValueError(
+                Msg.NOT_VALID_ENUM.format(
+                    self.value, self.enums, self.class_name
+                )
+            )
+
+        # Check that extenions meet requirements.
+        # if self.ext is not None:
+        #     # Is an extension tag the same as a standard tag?
+        #     if isinstance(self.ext, list):
+        #         for extension in self.ext:
+        #             for yamlkey, yamlvalue in Structure:
+        #                 if extension.tag == yamlvalue[Default.YAML_STANDARD_TAG]:
+        #                     raise ValueError(Msg.EXTENSION_DUPLICATES_TAG.format(extension.tag, yamlvalue[Default.YAML_STANDARD_TAG]))
+        #     else:
+        #         for key, value in Structure:
+        #             if self.ext.tag == value[Default.YAML_STANDARD_TAG]:
+        #                 raise ValueError(Msg.EXTENSION_DUPLICATES_TAG.format(self.ext.tag, value[Default.YAML_STANDARD_TAG]))
+
+        # Does value have the required data type?
         if self.payload not in [
             'https://gedcom.io/terms/v7/type-Enum',
             'https://gedcom.io/terms/v7/type-List#Enum',
@@ -2556,55 +2479,55 @@ class BaseStructure:
                         self.value
                     ) not in ['Y', '']:
                         raise ValueError(
-                            Msg.VALUE_NOT_Y_OR_NULL.format(str(self.value))
+                            Msg.VALUE_NOT_Y_OR_NULL.format(str(self.value), self.class_name)
                         )
                     return True
                 case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                     if not isinstance(self.value, int) or int(self.value) < 0:
                         raise ValueError(
-                            Msg.NEGATIVE_ERROR.format(str(self.value))
+                            Msg.NEGATIVE_ERROR.format(str(self.value), self.class_name)
                         )
                     return True
                 case '@<https://gedcom.io/terms/v7/record-INDI>@':
                     if not isinstance(self.value, IndividualXref):
                         raise ValueError(
-                            Msg.NOT_INDIVIDUAL_XREF.format(str(self.value))
+                            Msg.NOT_INDIVIDUAL_XREF.format(str(self.value), self.class_name)
                         )
                 case '@<https://gedcom.io/terms/v7/record-FAM>@':
                     if not isinstance(self.value, FamilyXref):
                         raise ValueError(
-                            Msg.NOT_FAMILY_XREF.format(str(self.value))
+                            Msg.NOT_FAMILY_XREF.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-List#Text':
                     if not isinstance(self.value, str) or not re.match(
                         ',', str(self.value)
                     ):
-                        raise ValueError(Msg.NOT_LIST.format(str(self.value)))
+                        raise ValueError(Msg.NOT_LIST.format(str(self.value), self.class_name))
                 case '@<https://gedcom.io/terms/v7/record-SUBM>@':
                     if not isinstance(self.value, SubmitterXref):
                         raise ValueError(
-                            Msg.NOT_SUBMITTER_XREF.format(str(self.value))
+                            Msg.NOT_SUBMITTER_XREF.format(str(self.value), self.class_name)
                         )
                 case 'http://www.w3.org/2001/XMLSchema#Language':
                     if not isinstance(self.value, str) or not re.match(
                         '', str(self.value)
                     ):
                         raise ValueError(
-                            Msg.NOT_LANGUAGE.format(str(self.value))
+                            Msg.NOT_LANGUAGE.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-Date#period':
                     if not isinstance(self.value, str) or not re.match(
                         '', str(self.value)
                     ):
                         raise ValueError(
-                            Msg.NOT_DATE_PERIOD.format(str(self.value))
+                            Msg.NOT_DATE_PERIOD.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-Date#exact':
                     if not isinstance(self.value, str) or not re.match(
                         '', str(self.value)
                     ):
                         raise ValueError(
-                            Msg.NOT_DATE_EXACT.format(str(self.value))
+                            Msg.NOT_DATE_EXACT.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-Date':
                     if not isinstance(self.value, str) or not re.match(
@@ -2616,53 +2539,95 @@ class BaseStructure:
                         '', str(self.value)
                     ):
                         raise ValueError(
-                            Msg.NOT_FILE_PATH.format(str(self.value))
+                            Msg.NOT_FILE_PATH.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-Name':
                     if not isinstance(self.value, str) or not re.match(
                         '', (str(self.value))
                     ):
-                        raise ValueError(Msg.NOT_NAME.format(str(self.value)))
+                        raise ValueError(Msg.NOT_NAME.format(str(self.value), self.class_name))
                 case 'https://gedcom.io/terms/v7/type-Age':
                     if not re.match('', str(self.value)):
-                        raise ValueError(Msg.NOT_AGE.format(str(self.value)))
+                        raise ValueError(Msg.NOT_AGE.format(str(self.value), self.class_name))
                 case 'http://www.w3.org/ns/dcat#mediaType':
                     if not isinstance(self.value, str) or not re.match(
                         '', str(self.value)
                     ):
                         raise ValueError(
-                            Msg.NOT_MEDIA_TYPE.format(str(self.value))
+                            Msg.NOT_MEDIA_TYPE.format(str(self.value), self.class_name)
                         )
                 case '@<https://gedcom.io/terms/v7/record-OBJE>@':
                     if not isinstance(self.value, MultimediaXref):
                         raise ValueError(
-                            Msg.NOT_MULTIMEDIA_XREF.format(str(self.value))
+                            Msg.NOT_MULTIMEDIA_XREF.format(str(self.value), self.class_name)
                         )
                 case '@<https://gedcom.io/terms/v7/record-REPO>@':
                     if not isinstance(self.value, RepositoryXref):
                         raise ValueError(
-                            Msg.NOT_REPOSITORY_XREF.format(str(self.value))
+                            Msg.NOT_REPOSITORY_XREF.format(str(self.value), self.class_name)
                         )
                 case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
                     if not isinstance(self.value, SharedNoteXref):
                         raise ValueError(
-                            Msg.NOT_SHARED_NOTE_XREF.format(str(self.value))
+                            Msg.NOT_SHARED_NOTE_XREF.format(str(self.value), self.class_name)
                         )
                 case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                     if not isinstance(self.value, SourceXref):
                         raise ValueError(
-                            Msg.NOT_SOURCE_XREF.format(str(self.value))
+                            Msg.NOT_SOURCE_XREF.format(str(self.value), self.class_name)
                         )
                 case 'https://gedcom.io/terms/v7/type-Time':
                     if not isinstance(self.value, str) or not re.match(
                         '', str(self.value)
                     ):
-                        raise ValueError(Msg.NOT_TIME.format(str(self.value)))
+                        raise ValueError(Msg.NOT_TIME.format(str(self.value), self.class_name))
+
+        # Is value formatted correctly for its structure specification?
+        match self.class_name:
+            case 'Lati':
+                if not isinstance(self.value, str):
+                    raise ValueError(Msg.NOT_STRING.format(str(self.value)))
+                if self.value[0] not in [Default.LATI_NORTH, Default.LATI_SOUTH]:
+                    raise ValueError(
+                        Msg.LATI_NORTH_SOUTH.format(self.value[0], self.value, Default.LATI_NORTH, Default.LATI_SOUTH, self.class_name)
+                    )
+                if (
+                    float(self.value[1:]) > Default.LATI_HIGH
+                    or float(self.value[1:]) < Default.LATI_LOW
+                ):
+                    raise ValueError(
+                        Msg.LATI_RANGE.format(
+                            self.value, Default.LATI_LOW, Default.LATI_HIGH, self.class_name
+                        )
+                    )
+            case 'Long':
+                if not isinstance(self.value, str):
+                    raise ValueError(Msg.NOT_STRING.format(str(self.value)))
+                if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
+                    raise ValueError(
+                        Msg.LONG_EAST_WEST.format(self.value[0], self.value, Default.LONG_EAST, Default.LONG_WEST, self.class_name)
+                    )
+                if (
+                    float(self.value[1:]) > Default.LONG_HIGH
+                    or float(self.value[1:]) < Default.LONG_LOW
+                ):
+                    raise ValueError(
+                        Msg.LONG_RANGE.format(
+                            self.value, Default.LONG_LOW, Default.LONG_HIGH, self.class_name
+                        )
+                    )
+
+        # Check if all subs validate.
+        if self.subs is not None:
+            for sub in self.subs:
+                sub.validate()
         return True
 
     def ged(self, level: int = 1, format: bool = True) -> str:
         """Generate the GEDCOM lines."""
         if self.validate():
+            if self.class_name[0:6] == 'Record' or self.class_name == 'Trlr':
+                level = 0
             lines: str = Default.EMPTY
             if self.value == Default.EMPTY:
                 lines = Tagger.empty(lines, level, self.tag)
@@ -2671,13 +2636,20 @@ class BaseStructure:
                     lines, level, self.tag, str(self.value), format=format
                 )
             lines = Tagger.structure(lines, level + 1, Tagger.order(self.subs))
-        return Tagger.structure(lines, level + 1, self.ext)
+        return lines  # Tagger.structure(lines, level + 1, self.ext)
 
     def code(self, tabs: int = 0, full: bool = True) -> str:
         if (
+            self.payload is None
+            and (self.subs is None or len(self.subs) == 0)
+        ):
+            return indent(
+                Formatter.display_code(f'{self.class_name}()'),
+                Default.INDENT * tabs,
+            )
+        if (
             self.payload is not None
             and (self.subs is None or len(self.subs) == 0)
-            and (self.ext is None or len(self.ext) == 0)
         ):
             return indent(
                 Formatter.display_code(f"{self.class_name}('{self.value}')"),
@@ -2685,34 +2657,8 @@ class BaseStructure:
             )
         if (
             self.payload is not None
-            and (self.subs is None or len(self.subs) == 0)
-            and self.ext is not None
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        f'    {Default.CODE_VALUE} = ',
-                        self.value,
-                        tabs + 1,
-                        full,
-                        False,
-                    ),
-                    (
-                        f'    {Default.CODE_EXT} = ',
-                        self.ext,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        if (
-            self.payload is not None
             and self.subs is not None
             and len(self.subs) > 0
-            and self.ext is None
         ):
             return indent(
                 Formatter.display_code(
@@ -2735,61 +2681,9 @@ class BaseStructure:
                 Default.INDENT * tabs,
             )
         if (
-            self.payload is not None
-            and self.subs is not None
-            and len(self.subs) > 0
-            and self.ext is not None
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        f'    {Default.CODE_VALUE} = ',
-                        self.value,
-                        tabs + 1,
-                        full,
-                        False,
-                    ),
-                    (
-                        f'    {Default.CODE_SUBS} = ',
-                        self.subs,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                    (
-                        f'    {Default.CODE_EXT} = ',
-                        self.ext,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        if (
-            self.payload is None
-            and (self.subs is None or len(self.subs) == 0)
-            and self.ext is not None
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        f'    {Default.CODE_EXT} = ',
-                        self.ext,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        if (
             self.payload is None
             and self.subs is not None
             and len(self.subs) > 0
-            and self.ext is None
         ):
             return indent(
                 Formatter.display_code(
@@ -2797,32 +2691,6 @@ class BaseStructure:
                     (
                         f'    {Default.CODE_SUBS} = ',
                         self.subs,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        if (
-            self.payload is None
-            and self.subs is not None
-            and len(self.subs) > 0
-            and self.ext is not None
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        f'    {Default.CODE_SUBS} = ',
-                        self.subs,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                    (
-                        f'    {Default.CODE_EXT} = ',
-                        self.ext,
                         tabs + 2,
                         full,
                         True,
@@ -2831,6 +2699,89 @@ class BaseStructure:
                 Default.INDENT * tabs,
             )
         return Default.EMPTY
+
+
+class Ext(BaseStructure):
+    """Store, validate and format an extension structure."""
+
+    def __init__(self, key: str, value: str, subs: SubsType):
+        super().__init__(value, subs, Default.EMPTY)
+
+        self.tag: str = Default.EMPTY
+        self.permitted: list[str] = []
+        self.required: list[str] = []
+        self.single: list[str] = []
+        self.enums: list[str] = []
+        self.payload: str | None = Default.EMPTY
+        self.yamldict: dict[str, Any] = {}
+        if '.yaml' in key:
+            if key[0:4] == 'http':
+                webUrl = urllib.request.urlopen(key)
+                result_code = str(webUrl.getcode())
+                if result_code == '404':
+                    raise ValueError(Msg.PAGE_NOT_FOUND.format(key))
+                raw: str = webUrl.read().decode(Default.UTF8)
+            else:
+                with io.open(key, 'r', encoding='utf8') as file:  # noqa: UP020
+                    raw = file.read()
+
+            # Check that file has proper yaml directive.
+            if Default.YAML_DIRECTIVE not in raw:
+                raise ValueError(
+                    Msg.YAML_NOT_YAML_FILE.format(key, Default.YAML_DIRECTIVE)
+                )
+
+            # Put the yaml data into a dictionary.
+            raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
+            yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
+            yamldict = yaml.safe_load(yaml_data)
+            required = []
+            single = []
+            permitted = []
+            enums = []
+            if Default.YAML_SUBSTRUCTURES in yamldict:
+                for yamlkey, yamlvalue in yamldict[
+                    Default.YAML_SUBSTRUCTURES
+                ].items():
+                    tag = (
+                        yamlkey[yamlkey.rfind(Default.SLASH) + 1 :]
+                        .title()
+                        .replace('-', '')
+                    )
+                    permitted.append(tag)
+                    if Default.YAML_CARDINALITY_REQUIRED in yamlvalue:
+                        required.append(tag)
+                    if Default.YAML_CARDINALITY_SINGULAR in yamlvalue:
+                        single.append(tag)
+            yamldict[Default.YAML_PERMITTED] = permitted
+            yamldict[Default.YAML_REQUIRED] = required
+            yamldict[Default.YAML_SINGULAR] = single
+            if Default.YAML_ENUMERATION_SET in yamldict:
+                enumset = yamldict[Default.YAML_ENUMERATION_SET]
+                for yamlkey, yamlvalue in Enumeration.items():  # noqa: B007
+                    if enumset in yamlvalue[Default.YAML_VALUE_OF]:
+                        enums.append(yamlvalue[Default.YAML_STANDARD_TAG])
+            yamldict[Default.YAML_ENUMS] = enums
+            self.tag = yamldict[Default.YAML_EXTENSION_TAGS][0]
+            self.permitted = yamldict[Default.YAML_PERMITTED]
+            self.required = yamldict[Default.YAML_REQUIRED]
+            self.single = yamldict[Default.YAML_SINGULAR]
+            self.enums = yamldict[Default.YAML_ENUMS]
+            self.payload = yamldict[Default.YAML_PAYLOAD]
+        else:
+            self.tag = ExtensionStructure[self.key][
+                Default.YAML_EXTENSION_TAGS
+            ][0]
+            self.permitted = ExtensionStructure[self.key][
+                Default.YAML_PERMITTED
+            ]
+            self.required = ExtensionStructure[self.key][Default.YAML_REQUIRED]
+            self.single = ExtensionStructure[self.key][Default.YAML_SINGULAR]
+            self.enums = ExtensionStructure[self.key][Default.YAML_ENUMS]
+            self.payload = ExtensionStructure[self.key][Default.YAML_PAYLOAD]
+            # self.class_name: str = (
+            #     self.key.title().replace('_', '').replace('-', '')
+            # )
 
 
 # Classes below this marker were genered by the class_generation.ipynb notebook.
@@ -2848,7 +2799,7 @@ class Abbr(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the ABBR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ABBR Structure](https://gedcom.io/terms/v7/ABBR)
@@ -2856,8 +2807,8 @@ class Abbr(BaseStructure):
 
     key: str = 'ABBR'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Addr(BaseStructure):
@@ -2910,8 +2861,7 @@ class Addr(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ADDR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADDR Structure](https://gedcom.io/terms/v7/ADDR)
@@ -2919,8 +2869,8 @@ class Addr(BaseStructure):
 
     key: str = 'ADDR'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class AdopFamc(BaseStructure):
@@ -2945,8 +2895,7 @@ class AdopFamc(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FAMC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/ADOP-FAMC)
@@ -2954,8 +2903,8 @@ class AdopFamc(BaseStructure):
 
     key: str = 'ADOP-FAMC'
     
-    def __init__(self, value: FamilyXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: FamilyXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Adop(BaseStructure):
@@ -2996,8 +2945,7 @@ class Adop(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ADOP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/ADOP)
@@ -3005,8 +2953,8 @@ class Adop(BaseStructure):
 
     key: str = 'ADOP'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Adr1(BaseStructure):
@@ -3029,7 +2977,7 @@ class Adr1(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the ADR1 structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADR1 Structure](https://gedcom.io/terms/v7/ADR1)
@@ -3037,8 +2985,8 @@ class Adr1(BaseStructure):
 
     key: str = 'ADR1'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Adr2(BaseStructure):
@@ -3061,7 +3009,7 @@ class Adr2(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the ADR2 structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADR2 Structure](https://gedcom.io/terms/v7/ADR2)
@@ -3069,8 +3017,8 @@ class Adr2(BaseStructure):
 
     key: str = 'ADR2'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Adr3(BaseStructure):
@@ -3093,7 +3041,7 @@ class Adr3(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the ADR3 structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADR3 Structure](https://gedcom.io/terms/v7/ADR3)
@@ -3101,8 +3049,8 @@ class Adr3(BaseStructure):
 
     key: str = 'ADR3'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Age(BaseStructure):
@@ -3121,8 +3069,7 @@ class Age(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Age
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the AGE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM AGE Structure](https://gedcom.io/terms/v7/AGE)
@@ -3130,8 +3077,8 @@ class Age(BaseStructure):
 
     key: str = 'AGE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Agnc(BaseStructure):
@@ -3148,7 +3095,7 @@ class Agnc(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the AGNC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM AGNC Structure](https://gedcom.io/terms/v7/AGNC)
@@ -3156,8 +3103,8 @@ class Agnc(BaseStructure):
 
     key: str = 'AGNC'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Alia(BaseStructure):
@@ -3189,8 +3136,7 @@ class Alia(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ALIA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ALIA Structure](https://gedcom.io/terms/v7/ALIA)
@@ -3198,8 +3144,8 @@ class Alia(BaseStructure):
 
     key: str = 'ALIA'
     
-    def __init__(self, value: IndividualXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Anci(BaseStructure):
@@ -3213,7 +3159,7 @@ class Anci(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
-        ext: Optional extensions to the ANCI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ANCI Structure](https://gedcom.io/terms/v7/ANCI)
@@ -3221,8 +3167,8 @@ class Anci(BaseStructure):
 
     key: str = 'ANCI'
     
-    def __init__(self, value: SubmitterXref, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: SubmitterXref) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Anul(BaseStructure):
@@ -3262,8 +3208,7 @@ class Anul(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ANUL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ANUL Structure](https://gedcom.io/terms/v7/ANUL)
@@ -3271,8 +3216,8 @@ class Anul(BaseStructure):
 
     key: str = 'ANUL'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Asso(BaseStructure):
@@ -3320,8 +3265,7 @@ class Asso(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ASSO structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ASSO Structure](https://gedcom.io/terms/v7/ASSO)
@@ -3329,8 +3273,8 @@ class Asso(BaseStructure):
 
     key: str = 'ASSO'
     
-    def __init__(self, value: IndividualXref, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Auth(BaseStructure):
@@ -3346,7 +3290,7 @@ class Auth(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the AUTH structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM AUTH Structure](https://gedcom.io/terms/v7/AUTH)
@@ -3354,8 +3298,8 @@ class Auth(BaseStructure):
 
     key: str = 'AUTH'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Bapl(BaseStructure):
@@ -3381,8 +3325,7 @@ class Bapl(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BAPL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BAPL Structure](https://gedcom.io/terms/v7/BAPL)
@@ -3390,8 +3333,8 @@ class Bapl(BaseStructure):
 
     key: str = 'BAPL'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Bapm(BaseStructure):
@@ -3430,8 +3373,7 @@ class Bapm(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BAPM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BAPM Structure](https://gedcom.io/terms/v7/BAPM)
@@ -3439,8 +3381,8 @@ class Bapm(BaseStructure):
 
     key: str = 'BAPM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Barm(BaseStructure):
@@ -3479,8 +3421,7 @@ class Barm(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BARM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BARM Structure](https://gedcom.io/terms/v7/BARM)
@@ -3488,8 +3429,8 @@ class Barm(BaseStructure):
 
     key: str = 'BARM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Basm(BaseStructure):
@@ -3529,8 +3470,7 @@ class Basm(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BASM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BASM Structure](https://gedcom.io/terms/v7/BASM)
@@ -3538,8 +3478,8 @@ class Basm(BaseStructure):
 
     key: str = 'BASM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Birt(BaseStructure):
@@ -3579,8 +3519,7 @@ class Birt(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BIRT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BIRT Structure](https://gedcom.io/terms/v7/BIRT)
@@ -3588,8 +3527,8 @@ class Birt(BaseStructure):
 
     key: str = 'BIRT'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Bles(BaseStructure):
@@ -3629,8 +3568,7 @@ class Bles(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BLES structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BLES Structure](https://gedcom.io/terms/v7/BLES)
@@ -3638,8 +3576,8 @@ class Bles(BaseStructure):
 
     key: str = 'BLES'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Buri(BaseStructure):
@@ -3686,8 +3624,7 @@ class Buri(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the BURI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM BURI Structure](https://gedcom.io/terms/v7/BURI)
@@ -3695,8 +3632,8 @@ class Buri(BaseStructure):
 
     key: str = 'BURI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Caln(BaseStructure):
@@ -3716,8 +3653,7 @@ class Caln(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CALN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CALN Structure](https://gedcom.io/terms/v7/CALN)
@@ -3725,8 +3661,8 @@ class Caln(BaseStructure):
 
     key: str = 'CALN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Cast(BaseStructure):
@@ -3767,8 +3703,7 @@ class Cast(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CAST structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CAST Structure](https://gedcom.io/terms/v7/CAST)
@@ -3776,8 +3711,8 @@ class Cast(BaseStructure):
 
     key: str = 'CAST'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Caus(BaseStructure):
@@ -3792,7 +3727,7 @@ class Caus(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the CAUS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CAUS Structure](https://gedcom.io/terms/v7/CAUS)
@@ -3800,8 +3735,8 @@ class Caus(BaseStructure):
 
     key: str = 'CAUS'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Chan(BaseStructure):
@@ -3829,8 +3764,7 @@ class Chan(BaseStructure):
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CHAN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CHAN Structure](https://gedcom.io/terms/v7/CHAN)
@@ -3838,8 +3772,8 @@ class Chan(BaseStructure):
 
     key: str = 'CHAN'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Chil(BaseStructure):
@@ -3858,8 +3792,7 @@ class Chil(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CHIL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CHIL Structure](https://gedcom.io/terms/v7/CHIL)
@@ -3867,8 +3800,8 @@ class Chil(BaseStructure):
 
     key: str = 'CHIL'
     
-    def __init__(self, value: IndividualXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Chr(BaseStructure):
@@ -3908,8 +3841,7 @@ class Chr(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CHR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CHR Structure](https://gedcom.io/terms/v7/CHR)
@@ -3917,8 +3849,8 @@ class Chr(BaseStructure):
 
     key: str = 'CHR'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Chra(BaseStructure):
@@ -3957,8 +3889,7 @@ class Chra(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CHRA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CHRA Structure](https://gedcom.io/terms/v7/CHRA)
@@ -3966,8 +3897,8 @@ class Chra(BaseStructure):
 
     key: str = 'CHRA'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class City(BaseStructure):
@@ -3981,7 +3912,7 @@ class City(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the CITY structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CITY Structure](https://gedcom.io/terms/v7/CITY)
@@ -3989,8 +3920,8 @@ class City(BaseStructure):
 
     key: str = 'CITY'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Conf(BaseStructure):
@@ -4029,8 +3960,7 @@ class Conf(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CONF structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CONF Structure](https://gedcom.io/terms/v7/CONF)
@@ -4038,8 +3968,8 @@ class Conf(BaseStructure):
 
     key: str = 'CONF'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Conl(BaseStructure):
@@ -4065,8 +3995,7 @@ class Conl(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CONL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CONL Structure](https://gedcom.io/terms/v7/CONL)
@@ -4074,8 +4003,8 @@ class Conl(BaseStructure):
 
     key: str = 'CONL'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Copr(BaseStructure):
@@ -4089,7 +4018,7 @@ class Copr(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the COPR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM COPR Structure](https://gedcom.io/terms/v7/COPR)
@@ -4097,8 +4026,8 @@ class Copr(BaseStructure):
 
     key: str = 'COPR'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Corp(BaseStructure):
@@ -4121,8 +4050,7 @@ class Corp(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CORP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CORP Structure](https://gedcom.io/terms/v7/CORP)
@@ -4130,8 +4058,8 @@ class Corp(BaseStructure):
 
     key: str = 'CORP'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Crea(BaseStructure):
@@ -4153,8 +4081,7 @@ class Crea(BaseStructure):
     | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CREA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CREA Structure](https://gedcom.io/terms/v7/CREA)
@@ -4162,8 +4089,8 @@ class Crea(BaseStructure):
 
     key: str = 'CREA'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Crem(BaseStructure):
@@ -4202,8 +4129,7 @@ class Crem(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CREM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CREM Structure](https://gedcom.io/terms/v7/CREM)
@@ -4211,8 +4137,8 @@ class Crem(BaseStructure):
 
     key: str = 'CREM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Crop(BaseStructure):
@@ -4253,8 +4179,7 @@ class Crop(BaseStructure):
     | https://gedcom.io/terms/v7/WIDTH           | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CROP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CROP Structure](https://gedcom.io/terms/v7/CROP)
@@ -4262,8 +4187,8 @@ class Crop(BaseStructure):
 
     key: str = 'CROP'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Ctry(BaseStructure):
@@ -4277,7 +4202,7 @@ class Ctry(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the CTRY structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CTRY Structure](https://gedcom.io/terms/v7/CTRY)
@@ -4285,8 +4210,8 @@ class Ctry(BaseStructure):
 
     key: str = 'CTRY'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class DataEvenDate(BaseStructure):
@@ -4305,8 +4230,7 @@ class DataEvenDate(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATA-EVEN-DATE)
@@ -4314,8 +4238,8 @@ class DataEvenDate(BaseStructure):
 
     key: str = 'DATA-EVEN-DATE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class DataEven(BaseStructure):
@@ -4355,8 +4279,7 @@ class DataEven(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EVEN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/DATA-EVEN)
@@ -4364,8 +4287,8 @@ class DataEven(BaseStructure):
 
     key: str = 'DATA-EVEN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Data(BaseStructure):
@@ -4388,8 +4311,7 @@ class Data(BaseStructure):
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/DATA)
@@ -4397,8 +4319,8 @@ class Data(BaseStructure):
 
     key: str = 'DATA'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class DateExact(BaseStructure):
@@ -4417,8 +4339,7 @@ class DateExact(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE-exact)
@@ -4426,8 +4347,8 @@ class DateExact(BaseStructure):
 
     key: str = 'DATE-exact'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Date(BaseStructure):
@@ -4474,8 +4395,7 @@ class Date(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE)
@@ -4483,8 +4403,8 @@ class Date(BaseStructure):
 
     key: str = 'DATE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Deat(BaseStructure):
@@ -4523,8 +4443,7 @@ class Deat(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DEAT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DEAT Structure](https://gedcom.io/terms/v7/DEAT)
@@ -4532,8 +4451,8 @@ class Deat(BaseStructure):
 
     key: str = 'DEAT'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Desi(BaseStructure):
@@ -4547,7 +4466,7 @@ class Desi(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
-        ext: Optional extensions to the DESI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DESI Structure](https://gedcom.io/terms/v7/DESI)
@@ -4555,8 +4474,8 @@ class Desi(BaseStructure):
 
     key: str = 'DESI'
     
-    def __init__(self, value: SubmitterXref, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: SubmitterXref) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Dest(BaseStructure):
@@ -4570,7 +4489,7 @@ class Dest(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the DEST structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DEST Structure](https://gedcom.io/terms/v7/DEST)
@@ -4578,8 +4497,8 @@ class Dest(BaseStructure):
 
     key: str = 'DEST'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Div(BaseStructure):
@@ -4619,8 +4538,7 @@ class Div(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DIV structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DIV Structure](https://gedcom.io/terms/v7/DIV)
@@ -4628,8 +4546,8 @@ class Div(BaseStructure):
 
     key: str = 'DIV'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Divf(BaseStructure):
@@ -4669,8 +4587,7 @@ class Divf(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DIVF structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DIVF Structure](https://gedcom.io/terms/v7/DIVF)
@@ -4678,8 +4595,8 @@ class Divf(BaseStructure):
 
     key: str = 'DIVF'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Dscr(BaseStructure):
@@ -4718,8 +4635,7 @@ class Dscr(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DSCR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DSCR Structure](https://gedcom.io/terms/v7/DSCR)
@@ -4727,8 +4643,8 @@ class Dscr(BaseStructure):
 
     key: str = 'DSCR'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Educ(BaseStructure):
@@ -4767,8 +4683,7 @@ class Educ(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EDUC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EDUC Structure](https://gedcom.io/terms/v7/EDUC)
@@ -4776,8 +4691,8 @@ class Educ(BaseStructure):
 
     key: str = 'EDUC'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Email(BaseStructure):
@@ -4803,7 +4718,7 @@ class Email(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the EMAIL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EMAIL Structure](https://gedcom.io/terms/v7/EMAIL)
@@ -4811,8 +4726,8 @@ class Email(BaseStructure):
 
     key: str = 'EMAIL'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Emig(BaseStructure):
@@ -4851,8 +4766,7 @@ class Emig(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EMIG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EMIG Structure](https://gedcom.io/terms/v7/EMIG)
@@ -4860,8 +4774,8 @@ class Emig(BaseStructure):
 
     key: str = 'EMIG'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Endl(BaseStructure):
@@ -4888,8 +4802,7 @@ class Endl(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ENDL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ENDL Structure](https://gedcom.io/terms/v7/ENDL)
@@ -4897,8 +4810,8 @@ class Endl(BaseStructure):
 
     key: str = 'ENDL'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Enga(BaseStructure):
@@ -4938,8 +4851,7 @@ class Enga(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ENGA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ENGA Structure](https://gedcom.io/terms/v7/ENGA)
@@ -4947,8 +4859,8 @@ class Enga(BaseStructure):
 
     key: str = 'ENGA'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class ExidType(BaseStructure):
@@ -4973,7 +4885,7 @@ class ExidType(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the TYPE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/EXID-TYPE)
@@ -4981,8 +4893,8 @@ class ExidType(BaseStructure):
 
     key: str = 'EXID-TYPE'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Exid(BaseStructure):
@@ -5013,8 +4925,7 @@ class Exid(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EXID structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EXID Structure](https://gedcom.io/terms/v7/EXID)
@@ -5022,8 +4933,8 @@ class Exid(BaseStructure):
 
     key: str = 'EXID'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamCens(BaseStructure):
@@ -5064,8 +4975,7 @@ class FamCens(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CENS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/FAM-CENS)
@@ -5073,8 +4983,8 @@ class FamCens(BaseStructure):
 
     key: str = 'FAM-CENS'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamEven(BaseStructure):
@@ -5112,8 +5022,7 @@ class FamEven(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EVEN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/FAM-EVEN)
@@ -5121,8 +5030,8 @@ class FamEven(BaseStructure):
 
     key: str = 'FAM-EVEN'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamFact(BaseStructure):
@@ -5160,8 +5069,7 @@ class FamFact(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FACT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/FAM-FACT)
@@ -5169,8 +5077,8 @@ class FamFact(BaseStructure):
 
     key: str = 'FAM-FACT'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamHusb(BaseStructure):
@@ -5188,8 +5096,7 @@ class FamHusb(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the HUSB structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/FAM-HUSB)
@@ -5197,8 +5104,8 @@ class FamHusb(BaseStructure):
 
     key: str = 'FAM-HUSB'
     
-    def __init__(self, value: IndividualXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamNchi(BaseStructure):
@@ -5238,8 +5145,7 @@ class FamNchi(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NCHI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/FAM-NCHI)
@@ -5247,8 +5153,8 @@ class FamNchi(BaseStructure):
 
     key: str = 'FAM-NCHI'
     
-    def __init__(self, value: int, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: int, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamResi(BaseStructure):
@@ -5292,8 +5198,7 @@ class FamResi(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the RESI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM RESI Structure](https://gedcom.io/terms/v7/FAM-RESI)
@@ -5301,8 +5206,8 @@ class FamResi(BaseStructure):
 
     key: str = 'FAM-RESI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamWife(BaseStructure):
@@ -5320,8 +5225,7 @@ class FamWife(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the WIFE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/FAM-WIFE)
@@ -5329,8 +5233,8 @@ class FamWife(BaseStructure):
 
     key: str = 'FAM-WIFE'
     
-    def __init__(self, value: IndividualXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamcAdop(BaseStructure):
@@ -5357,8 +5261,7 @@ class FamcAdop(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ADOP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/FAMC-ADOP)
@@ -5366,8 +5269,8 @@ class FamcAdop(BaseStructure):
 
     key: str = 'FAMC-ADOP'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FamcStat(BaseStructure):
@@ -5397,8 +5300,7 @@ class FamcStat(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the STAT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/FAMC-STAT)
@@ -5406,8 +5308,8 @@ class FamcStat(BaseStructure):
 
     key: str = 'FAMC-STAT'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Famc(BaseStructure):
@@ -5420,7 +5322,7 @@ class Famc(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
-        ext: Optional extensions to the FAMC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/FAMC)
@@ -5428,8 +5330,8 @@ class Famc(BaseStructure):
 
     key: str = 'FAMC'
     
-    def __init__(self, value: FamilyXref, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: FamilyXref) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Fams(BaseStructure):
@@ -5449,8 +5351,7 @@ class Fams(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FAMS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAMS Structure](https://gedcom.io/terms/v7/FAMS)
@@ -5458,8 +5359,8 @@ class Fams(BaseStructure):
 
     key: str = 'FAMS'
     
-    def __init__(self, value: FamilyXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: FamilyXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Fax(BaseStructure):
@@ -5473,7 +5374,7 @@ class Fax(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the FAX structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAX Structure](https://gedcom.io/terms/v7/FAX)
@@ -5481,8 +5382,8 @@ class Fax(BaseStructure):
 
     key: str = 'FAX'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Fcom(BaseStructure):
@@ -5521,8 +5422,7 @@ class Fcom(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FCOM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FCOM Structure](https://gedcom.io/terms/v7/FCOM)
@@ -5530,8 +5430,8 @@ class Fcom(BaseStructure):
 
     key: str = 'FCOM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class FileTran(BaseStructure):
@@ -5593,8 +5493,7 @@ class FileTran(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TRAN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/FILE-TRAN)
@@ -5602,8 +5501,8 @@ class FileTran(BaseStructure):
 
     key: str = 'FILE-TRAN'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class File(BaseStructure):
@@ -5623,8 +5522,7 @@ class File(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FILE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FILE Structure](https://gedcom.io/terms/v7/FILE)
@@ -5632,8 +5530,8 @@ class File(BaseStructure):
 
     key: str = 'FILE'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Form(BaseStructure):
@@ -5651,8 +5549,7 @@ class Form(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/ns/dcat#mediaType
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FORM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/FORM)
@@ -5660,8 +5557,8 @@ class Form(BaseStructure):
 
     key: str = 'FORM'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class GedcVers(BaseStructure):
@@ -5678,7 +5575,7 @@ class GedcVers(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the VERS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/GEDC-VERS)
@@ -5686,8 +5583,8 @@ class GedcVers(BaseStructure):
 
     key: str = 'GEDC-VERS'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Gedc(BaseStructure):
@@ -5708,8 +5605,7 @@ class Gedc(BaseStructure):
     | https://gedcom.io/terms/v7/GEDC-VERS       | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the GEDC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM GEDC Structure](https://gedcom.io/terms/v7/GEDC)
@@ -5717,8 +5613,8 @@ class Gedc(BaseStructure):
 
     key: str = 'GEDC'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Givn(BaseStructure):
@@ -5731,7 +5627,7 @@ class Givn(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the GIVN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM GIVN Structure](https://gedcom.io/terms/v7/GIVN)
@@ -5739,8 +5635,8 @@ class Givn(BaseStructure):
 
     key: str = 'GIVN'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Grad(BaseStructure):
@@ -5779,8 +5675,7 @@ class Grad(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the GRAD structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM GRAD Structure](https://gedcom.io/terms/v7/GRAD)
@@ -5788,8 +5683,8 @@ class Grad(BaseStructure):
 
     key: str = 'GRAD'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class HeadDate(BaseStructure):
@@ -5807,8 +5702,7 @@ class HeadDate(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/HEAD-DATE)
@@ -5816,8 +5710,8 @@ class HeadDate(BaseStructure):
 
     key: str = 'HEAD-DATE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class HeadLang(BaseStructure):
@@ -5853,7 +5747,7 @@ class HeadLang(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
-        ext: Optional extensions to the LANG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/HEAD-LANG)
@@ -5861,8 +5755,8 @@ class HeadLang(BaseStructure):
 
     key: str = 'HEAD-LANG'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class HeadPlacForm(BaseStructure):
@@ -5875,7 +5769,7 @@ class HeadPlacForm(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
-        ext: Optional extensions to the FORM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
@@ -5883,8 +5777,8 @@ class HeadPlacForm(BaseStructure):
 
     key: str = 'HEAD-PLAC-FORM'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class HeadPlac(BaseStructure):
@@ -5902,8 +5796,7 @@ class HeadPlac(BaseStructure):
     | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the PLAC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/HEAD-PLAC)
@@ -5911,8 +5804,8 @@ class HeadPlac(BaseStructure):
 
     key: str = 'HEAD-PLAC'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class HeadSourData(BaseStructure):
@@ -5934,8 +5827,7 @@ class HeadSourData(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
@@ -5943,8 +5835,8 @@ class HeadSourData(BaseStructure):
 
     key: str = 'HEAD-SOUR-DATA'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Head(BaseStructure):
@@ -5992,8 +5884,7 @@ class Head(BaseStructure):
     | https://gedcom.io/terms/v7/SUBM            | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the HEAD structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM HEAD Structure](https://gedcom.io/terms/v7/HEAD)
@@ -6001,8 +5892,8 @@ class Head(BaseStructure):
 
     key: str = 'HEAD'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Height(BaseStructure):
@@ -6033,7 +5924,7 @@ class Height(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        ext: Optional extensions to the HEIGHT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM HEIGHT Structure](https://gedcom.io/terms/v7/HEIGHT)
@@ -6041,8 +5932,8 @@ class Height(BaseStructure):
 
     key: str = 'HEIGHT'
     
-    def __init__(self, value: int, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: int) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Husb(BaseStructure):
@@ -6061,8 +5952,7 @@ class Husb(BaseStructure):
     | https://gedcom.io/terms/v7/AGE             | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the HUSB structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/HUSB)
@@ -6070,8 +5960,8 @@ class Husb(BaseStructure):
 
     key: str = 'HUSB'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Idno(BaseStructure):
@@ -6112,8 +6002,7 @@ class Idno(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the IDNO structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM IDNO Structure](https://gedcom.io/terms/v7/IDNO)
@@ -6121,8 +6010,8 @@ class Idno(BaseStructure):
 
     key: str = 'IDNO'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Immi(BaseStructure):
@@ -6161,8 +6050,7 @@ class Immi(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the IMMI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM IMMI Structure](https://gedcom.io/terms/v7/IMMI)
@@ -6170,8 +6058,8 @@ class Immi(BaseStructure):
 
     key: str = 'IMMI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiCens(BaseStructure):
@@ -6211,8 +6099,7 @@ class IndiCens(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the CENS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/INDI-CENS)
@@ -6220,8 +6107,8 @@ class IndiCens(BaseStructure):
 
     key: str = 'INDI-CENS'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiEven(BaseStructure):
@@ -6279,8 +6166,7 @@ class IndiEven(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EVEN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/INDI-EVEN)
@@ -6288,8 +6174,8 @@ class IndiEven(BaseStructure):
 
     key: str = 'INDI-EVEN'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiFact(BaseStructure):
@@ -6344,8 +6230,7 @@ class IndiFact(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FACT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/INDI-FACT)
@@ -6353,8 +6238,8 @@ class IndiFact(BaseStructure):
 
     key: str = 'INDI-FACT'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiFamc(BaseStructure):
@@ -6377,8 +6262,7 @@ class IndiFamc(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FAMC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/INDI-FAMC)
@@ -6386,8 +6270,8 @@ class IndiFamc(BaseStructure):
 
     key: str = 'INDI-FAMC'
     
-    def __init__(self, value: FamilyXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: FamilyXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiName(BaseStructure):
@@ -6445,8 +6329,7 @@ class IndiName(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NAME structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/INDI-NAME)
@@ -6454,8 +6337,8 @@ class IndiName(BaseStructure):
 
     key: str = 'INDI-NAME'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiNchi(BaseStructure):
@@ -6495,8 +6378,7 @@ class IndiNchi(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NCHI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/INDI-NCHI)
@@ -6504,8 +6386,8 @@ class IndiNchi(BaseStructure):
 
     key: str = 'INDI-NCHI'
     
-    def __init__(self, value: int, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: int, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiReli(BaseStructure):
@@ -6545,8 +6427,7 @@ class IndiReli(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the RELI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/INDI-RELI)
@@ -6554,8 +6435,8 @@ class IndiReli(BaseStructure):
 
     key: str = 'INDI-RELI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class IndiTitl(BaseStructure):
@@ -6595,8 +6476,7 @@ class IndiTitl(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TITL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/INDI-TITL)
@@ -6604,8 +6484,8 @@ class IndiTitl(BaseStructure):
 
     key: str = 'INDI-TITL'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Inil(BaseStructure):
@@ -6635,8 +6515,7 @@ class Inil(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the INIL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM INIL Structure](https://gedcom.io/terms/v7/INIL)
@@ -6644,8 +6523,8 @@ class Inil(BaseStructure):
 
     key: str = 'INIL'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Lang(BaseStructure):
@@ -6711,7 +6590,7 @@ class Lang(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
-        ext: Optional extensions to the LANG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/LANG)
@@ -6719,8 +6598,8 @@ class Lang(BaseStructure):
 
     key: str = 'LANG'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Lati(BaseStructure):
@@ -6772,7 +6651,7 @@ class Lati(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the LATI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LATI Structure](https://gedcom.io/terms/v7/LATI)
@@ -6780,8 +6659,8 @@ class Lati(BaseStructure):
 
     key: str = 'LATI'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Left(BaseStructure):
@@ -6795,7 +6674,7 @@ class Left(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        ext: Optional extensions to the LEFT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LEFT Structure](https://gedcom.io/terms/v7/LEFT)
@@ -6803,8 +6682,8 @@ class Left(BaseStructure):
 
     key: str = 'LEFT'
     
-    def __init__(self, value: int, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: int) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Long(BaseStructure):
@@ -6856,7 +6735,7 @@ class Long(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the LONG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LONG Structure](https://gedcom.io/terms/v7/LONG)
@@ -6864,8 +6743,8 @@ class Long(BaseStructure):
 
     key: str = 'LONG'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Map(BaseStructure):
@@ -6901,8 +6780,7 @@ class Map(BaseStructure):
     | https://gedcom.io/terms/v7/LONG            | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MAP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MAP Structure](https://gedcom.io/terms/v7/MAP)
@@ -6910,8 +6788,8 @@ class Map(BaseStructure):
 
     key: str = 'MAP'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Marb(BaseStructure):
@@ -6951,8 +6829,7 @@ class Marb(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MARB structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MARB Structure](https://gedcom.io/terms/v7/MARB)
@@ -6960,8 +6837,8 @@ class Marb(BaseStructure):
 
     key: str = 'MARB'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Marc(BaseStructure):
@@ -7003,8 +6880,7 @@ class Marc(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MARC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MARC Structure](https://gedcom.io/terms/v7/MARC)
@@ -7012,8 +6888,8 @@ class Marc(BaseStructure):
 
     key: str = 'MARC'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Marl(BaseStructure):
@@ -7053,8 +6929,7 @@ class Marl(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MARL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MARL Structure](https://gedcom.io/terms/v7/MARL)
@@ -7062,8 +6937,8 @@ class Marl(BaseStructure):
 
     key: str = 'MARL'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Marr(BaseStructure):
@@ -7104,8 +6979,7 @@ class Marr(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MARR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MARR Structure](https://gedcom.io/terms/v7/MARR)
@@ -7113,8 +6987,8 @@ class Marr(BaseStructure):
 
     key: str = 'MARR'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Mars(BaseStructure):
@@ -7156,8 +7030,7 @@ class Mars(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MARS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MARS Structure](https://gedcom.io/terms/v7/MARS)
@@ -7165,8 +7038,8 @@ class Mars(BaseStructure):
 
     key: str = 'MARS'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Medi(BaseStructure):
@@ -7253,8 +7126,7 @@ class Medi(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the MEDI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MEDI Structure](https://gedcom.io/terms/v7/MEDI)
@@ -7262,8 +7134,8 @@ class Medi(BaseStructure):
 
     key: str = 'MEDI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Mime(BaseStructure):
@@ -7326,7 +7198,8 @@ class Mime(BaseStructure):
     > 2. Case-insensitively replace each <p
     
     Args:
-        ext: Optional extensions to the MIME structure entered through `Extension`.
+        value: A value of data type http://www.w3.org/ns/dcat#mediaType
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM MIME Structure](https://gedcom.io/terms/v7/MIME)
@@ -7334,8 +7207,8 @@ class Mime(BaseStructure):
 
     key: str = 'MIME'
     
-    def __init__(self, ext: ExtType = None):
-        super().__init__(Default.EMPTY, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class NameTran(BaseStructure):
@@ -7395,8 +7268,7 @@ class NameTran(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TRAN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NAME-TRAN)
@@ -7404,8 +7276,8 @@ class NameTran(BaseStructure):
 
     key: str = 'NAME-TRAN'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class NameType(BaseStructure):
@@ -7440,8 +7312,7 @@ class NameType(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TYPE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/NAME-TYPE)
@@ -7449,8 +7320,8 @@ class NameType(BaseStructure):
 
     key: str = 'NAME-TYPE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Name(BaseStructure):
@@ -7463,7 +7334,7 @@ class Name(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the NAME structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/NAME)
@@ -7471,8 +7342,8 @@ class Name(BaseStructure):
 
     key: str = 'NAME'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Nati(BaseStructure):
@@ -7512,8 +7383,7 @@ class Nati(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NATI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NATI Structure](https://gedcom.io/terms/v7/NATI)
@@ -7521,8 +7391,8 @@ class Nati(BaseStructure):
 
     key: str = 'NATI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Natu(BaseStructure):
@@ -7561,8 +7431,7 @@ class Natu(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NATU structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NATU Structure](https://gedcom.io/terms/v7/NATU)
@@ -7570,8 +7439,8 @@ class Natu(BaseStructure):
 
     key: str = 'NATU'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Nick(BaseStructure):
@@ -7599,7 +7468,7 @@ class Nick(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the NICK structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NICK Structure](https://gedcom.io/terms/v7/NICK)
@@ -7607,8 +7476,8 @@ class Nick(BaseStructure):
 
     key: str = 'NICK'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Nmr(BaseStructure):
@@ -7648,8 +7517,7 @@ class Nmr(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NMR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NMR Structure](https://gedcom.io/terms/v7/NMR)
@@ -7657,8 +7525,8 @@ class Nmr(BaseStructure):
 
     key: str = 'NMR'
     
-    def __init__(self, value: int, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: int, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class NoDate(BaseStructure):
@@ -7677,8 +7545,7 @@ class NoDate(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/NO-DATE)
@@ -7686,8 +7553,8 @@ class NoDate(BaseStructure):
 
     key: str = 'NO-DATE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class NoteTran(BaseStructure):
@@ -7752,8 +7619,7 @@ class NoteTran(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TRAN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NOTE-TRAN)
@@ -7761,8 +7627,8 @@ class NoteTran(BaseStructure):
 
     key: str = 'NOTE-TRAN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Note(BaseStructure):
@@ -7789,8 +7655,7 @@ class Note(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the NOTE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NOTE Structure](https://gedcom.io/terms/v7/NOTE)
@@ -7798,8 +7663,8 @@ class Note(BaseStructure):
 
     key: str = 'NOTE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Npfx(BaseStructure):
@@ -7812,7 +7677,7 @@ class Npfx(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the NPFX structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NPFX Structure](https://gedcom.io/terms/v7/NPFX)
@@ -7820,8 +7685,8 @@ class Npfx(BaseStructure):
 
     key: str = 'NPFX'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Nsfx(BaseStructure):
@@ -7835,7 +7700,7 @@ class Nsfx(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the NSFX structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM NSFX Structure](https://gedcom.io/terms/v7/NSFX)
@@ -7843,8 +7708,8 @@ class Nsfx(BaseStructure):
 
     key: str = 'NSFX'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Obje(BaseStructure):
@@ -7871,8 +7736,7 @@ class Obje(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-OBJE>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the OBJE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/OBJE)
@@ -7880,8 +7744,8 @@ class Obje(BaseStructure):
 
     key: str = 'OBJE'
     
-    def __init__(self, value: MultimediaXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: MultimediaXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Occu(BaseStructure):
@@ -7920,8 +7784,7 @@ class Occu(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the OCCU structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM OCCU Structure](https://gedcom.io/terms/v7/OCCU)
@@ -7929,8 +7792,8 @@ class Occu(BaseStructure):
 
     key: str = 'OCCU'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class OrdStat(BaseStructure):
@@ -7989,8 +7852,7 @@ class OrdStat(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the STAT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/ord-STAT)
@@ -7998,8 +7860,8 @@ class OrdStat(BaseStructure):
 
     key: str = 'ord-STAT'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Ordn(BaseStructure):
@@ -8038,8 +7900,7 @@ class Ordn(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ORDN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ORDN Structure](https://gedcom.io/terms/v7/ORDN)
@@ -8047,8 +7908,8 @@ class Ordn(BaseStructure):
 
     key: str = 'ORDN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Page(BaseStructure):
@@ -8093,7 +7954,7 @@ class Page(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the PAGE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PAGE Structure](https://gedcom.io/terms/v7/PAGE)
@@ -8101,8 +7962,8 @@ class Page(BaseStructure):
 
     key: str = 'PAGE'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Pedi(BaseStructure):
@@ -8148,8 +8009,7 @@ class Pedi(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the PEDI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PEDI Structure](https://gedcom.io/terms/v7/PEDI)
@@ -8157,8 +8017,8 @@ class Pedi(BaseStructure):
 
     key: str = 'PEDI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Phon(BaseStructure):
@@ -8180,7 +8040,7 @@ class Phon(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the PHON structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PHON Structure](https://gedcom.io/terms/v7/PHON)
@@ -8188,8 +8048,8 @@ class Phon(BaseStructure):
 
     key: str = 'PHON'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Phrase(BaseStructure):
@@ -8277,7 +8137,7 @@ class Phrase(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the PHRASE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PHRASE Structure](https://gedcom.io/terms/v7/PHRASE)
@@ -8285,8 +8145,8 @@ class Phrase(BaseStructure):
 
     key: str = 'PHRASE'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class PlacForm(BaseStructure):
@@ -8313,7 +8173,7 @@ class PlacForm(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
-        ext: Optional extensions to the FORM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/PLAC-FORM)
@@ -8321,8 +8181,8 @@ class PlacForm(BaseStructure):
 
     key: str = 'PLAC-FORM'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class PlacTran(BaseStructure):
@@ -8377,8 +8237,7 @@ class PlacTran(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TRAN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/PLAC-TRAN)
@@ -8386,8 +8245,8 @@ class PlacTran(BaseStructure):
 
     key: str = 'PLAC-TRAN'
     
-    def __init__(self, value: str, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Plac(BaseStructure):
@@ -8476,8 +8335,7 @@ class Plac(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the PLAC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/PLAC)
@@ -8485,8 +8343,8 @@ class Plac(BaseStructure):
 
     key: str = 'PLAC'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Post(BaseStructure):
@@ -8500,7 +8358,7 @@ class Post(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the POST structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM POST Structure](https://gedcom.io/terms/v7/POST)
@@ -8508,8 +8366,8 @@ class Post(BaseStructure):
 
     key: str = 'POST'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Prob(BaseStructure):
@@ -8549,8 +8407,7 @@ class Prob(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the PROB structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PROB Structure](https://gedcom.io/terms/v7/PROB)
@@ -8558,8 +8415,8 @@ class Prob(BaseStructure):
 
     key: str = 'PROB'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Publ(BaseStructure):
@@ -8580,7 +8437,7 @@ class Publ(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the PUBL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM PUBL Structure](https://gedcom.io/terms/v7/PUBL)
@@ -8588,8 +8445,8 @@ class Publ(BaseStructure):
 
     key: str = 'PUBL'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Quay(BaseStructure):
@@ -8632,7 +8489,7 @@ class Quay(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        ext: Optional extensions to the QUAY structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM QUAY Structure](https://gedcom.io/terms/v7/QUAY)
@@ -8640,8 +8497,8 @@ class Quay(BaseStructure):
 
     key: str = 'QUAY'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class RecordFam(BaseStructure):
@@ -8752,8 +8609,7 @@ class RecordFam(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the FAM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM FAM Structure](https://gedcom.io/terms/v7/record-FAM)
@@ -8761,8 +8617,8 @@ class RecordFam(BaseStructure):
 
     name: str = 'record-FAM'
     
-    def __init__(self, value: FamilyXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: FamilyXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordIndi(BaseStructure):
@@ -8881,8 +8737,7 @@ class RecordIndi(BaseStructure):
     | https://gedcom.io/terms/v7/WILL            | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the INDI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM INDI Structure](https://gedcom.io/terms/v7/record-INDI)
@@ -8890,8 +8745,8 @@ class RecordIndi(BaseStructure):
 
     name: str = 'record-INDI'
     
-    def __init__(self, value: IndividualXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: IndividualXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordObje(BaseStructure):
@@ -8927,8 +8782,7 @@ class RecordObje(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the OBJE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/record-OBJE)
@@ -8936,8 +8790,8 @@ class RecordObje(BaseStructure):
 
     name: str = 'record-OBJE'
     
-    def __init__(self, value: MultimediaXref, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: MultimediaXref, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordRepo(BaseStructure):
@@ -8979,8 +8833,7 @@ class RecordRepo(BaseStructure):
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the REPO structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/record-REPO)
@@ -8988,8 +8841,8 @@ class RecordRepo(BaseStructure):
 
     name: str = 'record-REPO'
     
-    def __init__(self, value: RepositoryXref, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: RepositoryXref, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordSnote(BaseStructure):
@@ -9059,8 +8912,7 @@ class RecordSnote(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SNOTE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/record-SNOTE)
@@ -9068,8 +8920,8 @@ class RecordSnote(BaseStructure):
 
     key: str = 'record-SNOTE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordSour(BaseStructure):
@@ -9117,8 +8969,7 @@ class RecordSour(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SOUR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/record-SOUR)
@@ -9126,8 +8977,8 @@ class RecordSour(BaseStructure):
 
     name: str = 'record-SOUR'
     
-    def __init__(self, value: SourceXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: SourceXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class RecordSubm(BaseStructure):
@@ -9164,8 +9015,7 @@ class RecordSubm(BaseStructure):
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SUBM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/record-SUBM)
@@ -9173,8 +9023,8 @@ class RecordSubm(BaseStructure):
 
     name: str = 'record-SUBM'
     
-    def __init__(self, value: SubmitterXref, subs: SubsType, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: SubmitterXref, subs: Any) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Refn(BaseStructure):
@@ -9200,8 +9050,7 @@ class Refn(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the REFN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM REFN Structure](https://gedcom.io/terms/v7/REFN)
@@ -9209,8 +9058,8 @@ class Refn(BaseStructure):
 
     key: str = 'REFN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Reli(BaseStructure):
@@ -9224,7 +9073,7 @@ class Reli(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the RELI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/RELI)
@@ -9232,8 +9081,8 @@ class Reli(BaseStructure):
 
     key: str = 'RELI'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Repo(BaseStructure):
@@ -9259,8 +9108,7 @@ class Repo(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-REPO>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the REPO structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/REPO)
@@ -9268,8 +9116,8 @@ class Repo(BaseStructure):
 
     key: str = 'REPO'
     
-    def __init__(self, value: RepositoryXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: RepositoryXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Resn(BaseStructure):
@@ -9319,7 +9167,7 @@ class Resn(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
-        ext: Optional extensions to the RESN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM RESN Structure](https://gedcom.io/terms/v7/RESN)
@@ -9327,8 +9175,8 @@ class Resn(BaseStructure):
 
     key: str = 'RESN'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Reti(BaseStructure):
@@ -9368,8 +9216,7 @@ class Reti(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the RETI structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM RETI Structure](https://gedcom.io/terms/v7/RETI)
@@ -9377,8 +9224,8 @@ class Reti(BaseStructure):
 
     key: str = 'RETI'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Role(BaseStructure):
@@ -9477,8 +9324,7 @@ class Role(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the ROLE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM ROLE Structure](https://gedcom.io/terms/v7/ROLE)
@@ -9486,8 +9332,8 @@ class Role(BaseStructure):
 
     key: str = 'ROLE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Schma(BaseStructure):
@@ -9505,8 +9351,7 @@ class Schma(BaseStructure):
     | https://gedcom.io/terms/v7/TAG             | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SCHMA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SCHMA Structure](https://gedcom.io/terms/v7/SCHMA)
@@ -9514,8 +9359,8 @@ class Schma(BaseStructure):
 
     key: str = 'SCHMA'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Sdate(BaseStructure):
@@ -9550,8 +9395,7 @@ class Sdate(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SDATE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SDATE Structure](https://gedcom.io/terms/v7/SDATE)
@@ -9559,8 +9403,8 @@ class Sdate(BaseStructure):
 
     key: str = 'SDATE'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Sex(BaseStructure):
@@ -9598,7 +9442,7 @@ class Sex(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        ext: Optional extensions to the SEX structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SEX Structure](https://gedcom.io/terms/v7/SEX)
@@ -9606,8 +9450,8 @@ class Sex(BaseStructure):
 
     key: str = 'SEX'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Slgc(BaseStructure):
@@ -9635,8 +9479,7 @@ class Slgc(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SLGC structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SLGC Structure](https://gedcom.io/terms/v7/SLGC)
@@ -9644,8 +9487,8 @@ class Slgc(BaseStructure):
 
     key: str = 'SLGC'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Slgs(BaseStructure):
@@ -9675,8 +9518,7 @@ class Slgs(BaseStructure):
     | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SLGS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SLGS Structure](https://gedcom.io/terms/v7/SLGS)
@@ -9684,8 +9526,8 @@ class Slgs(BaseStructure):
 
     key: str = 'SLGS'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Snote(BaseStructure):
@@ -9699,7 +9541,7 @@ class Snote(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SNOTE>@
-        ext: Optional extensions to the SNOTE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/SNOTE)
@@ -9707,8 +9549,8 @@ class Snote(BaseStructure):
 
     key: str = 'SNOTE'
     
-    def __init__(self, value: SharedNoteXref, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: SharedNoteXref) -> None:
+        super().__init__(value, None, self.key)
 
 
 class SourData(BaseStructure):
@@ -9726,8 +9568,7 @@ class SourData(BaseStructure):
     | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the DATA structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/SOUR-DATA)
@@ -9735,8 +9576,8 @@ class SourData(BaseStructure):
 
     key: str = 'SOUR-DATA'
     
-    def __init__(self, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any = None) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class SourEven(BaseStructure):
@@ -9777,8 +9618,7 @@ class SourEven(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the EVEN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/SOUR-EVEN)
@@ -9786,8 +9626,8 @@ class SourEven(BaseStructure):
 
     key: str = 'SOUR-EVEN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Sour(BaseStructure):
@@ -9833,8 +9673,7 @@ class Sour(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SOUR>@
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SOUR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/SOUR)
@@ -9842,8 +9681,8 @@ class Sour(BaseStructure):
 
     key: str = 'SOUR'
     
-    def __init__(self, value: SourceXref, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: SourceXref, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Spfx(BaseStructure):
@@ -9856,7 +9695,7 @@ class Spfx(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the SPFX structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SPFX Structure](https://gedcom.io/terms/v7/SPFX)
@@ -9864,8 +9703,8 @@ class Spfx(BaseStructure):
 
     key: str = 'SPFX'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Ssn(BaseStructure):
@@ -9905,8 +9744,7 @@ class Ssn(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the SSN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SSN Structure](https://gedcom.io/terms/v7/SSN)
@@ -9914,8 +9752,8 @@ class Ssn(BaseStructure):
 
     key: str = 'SSN'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Stae(BaseStructure):
@@ -9930,7 +9768,7 @@ class Stae(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the STAE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM STAE Structure](https://gedcom.io/terms/v7/STAE)
@@ -9938,8 +9776,8 @@ class Stae(BaseStructure):
 
     key: str = 'STAE'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class SubmLang(BaseStructure):
@@ -9955,7 +9793,7 @@ class SubmLang(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
-        ext: Optional extensions to the LANG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/SUBM-LANG)
@@ -9963,8 +9801,8 @@ class SubmLang(BaseStructure):
 
     key: str = 'SUBM-LANG'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Subm(BaseStructure):
@@ -9978,7 +9816,7 @@ class Subm(BaseStructure):
     
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
-        ext: Optional extensions to the SUBM structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/SUBM)
@@ -9986,8 +9824,8 @@ class Subm(BaseStructure):
 
     key: str = 'SUBM'
     
-    def __init__(self, value: SubmitterXref, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: SubmitterXref) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Surn(BaseStructure):
@@ -10000,7 +9838,7 @@ class Surn(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the SURN structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM SURN Structure](https://gedcom.io/terms/v7/SURN)
@@ -10008,8 +9846,8 @@ class Surn(BaseStructure):
 
     key: str = 'SURN'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Tag(BaseStructure):
@@ -10023,7 +9861,7 @@ class Tag(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the TAG structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TAG Structure](https://gedcom.io/terms/v7/TAG)
@@ -10031,8 +9869,8 @@ class Tag(BaseStructure):
 
     key: str = 'TAG'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Temp(BaseStructure):
@@ -10048,7 +9886,7 @@ class Temp(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the TEMP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TEMP Structure](https://gedcom.io/terms/v7/TEMP)
@@ -10056,8 +9894,8 @@ class Temp(BaseStructure):
 
     key: str = 'TEMP'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Text(BaseStructure):
@@ -10080,8 +9918,7 @@ class Text(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the TEXT structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TEXT Structure](https://gedcom.io/terms/v7/TEXT)
@@ -10089,8 +9926,8 @@ class Text(BaseStructure):
 
     key: str = 'TEXT'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Time(BaseStructure):
@@ -10103,7 +9940,7 @@ class Time(BaseStructure):
     
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Time
-        ext: Optional extensions to the TIME structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TIME Structure](https://gedcom.io/terms/v7/TIME)
@@ -10111,8 +9948,8 @@ class Time(BaseStructure):
 
     key: str = 'TIME'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Titl(BaseStructure):
@@ -10151,7 +9988,7 @@ class Titl(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the TITL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/TITL)
@@ -10159,8 +9996,8 @@ class Titl(BaseStructure):
 
     key: str = 'TITL'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Top(BaseStructure):
@@ -10174,7 +10011,7 @@ class Top(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        ext: Optional extensions to the TOP structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TOP Structure](https://gedcom.io/terms/v7/TOP)
@@ -10182,8 +10019,8 @@ class Top(BaseStructure):
 
     key: str = 'TOP'
     
-    def __init__(self, value: int, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: int) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Trlr(BaseStructure):
@@ -10196,7 +10033,7 @@ class Trlr(BaseStructure):
     > Trailer] for more details.
     
     Args:
-        ext: Optional extensions to the TRLR structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TRLR Structure](https://gedcom.io/terms/v7/TRLR)
@@ -10204,8 +10041,8 @@ class Trlr(BaseStructure):
 
     key: str = 'TRLR'
     
-    def __init__(self, ext: ExtType = None):
-        super().__init__(Default.EMPTY, None, ext, self.key)
+    def __init__(self) -> None:
+        super().__init__(Default.EMPTY, None, self.key)
 
 
 class Type(BaseStructure):
@@ -10255,7 +10092,7 @@ class Type(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the TYPE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/TYPE)
@@ -10263,8 +10100,8 @@ class Type(BaseStructure):
 
     key: str = 'TYPE'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Uid(BaseStructure):
@@ -10308,7 +10145,7 @@ class Uid(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the UID structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM UID Structure](https://gedcom.io/terms/v7/UID)
@@ -10316,8 +10153,8 @@ class Uid(BaseStructure):
 
     key: str = 'UID'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Vers(BaseStructure):
@@ -10331,7 +10168,7 @@ class Vers(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the VERS structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/VERS)
@@ -10339,8 +10176,8 @@ class Vers(BaseStructure):
 
     key: str = 'VERS'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Width(BaseStructure):
@@ -10354,7 +10191,7 @@ class Width(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
-        ext: Optional extensions to the WIDTH structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM WIDTH Structure](https://gedcom.io/terms/v7/WIDTH)
@@ -10362,8 +10199,8 @@ class Width(BaseStructure):
 
     key: str = 'WIDTH'
     
-    def __init__(self, value: int, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: int) -> None:
+        super().__init__(value, None, self.key)
 
 
 class Wife(BaseStructure):
@@ -10382,8 +10219,7 @@ class Wife(BaseStructure):
     | https://gedcom.io/terms/v7/AGE             | Only One | Yes      |
     
     Args:
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the WIFE structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/WIFE)
@@ -10391,8 +10227,8 @@ class Wife(BaseStructure):
 
     key: str = 'WIFE'
     
-    def __init__(self, subs: SubsType, ext: ExtType = None):
-        super().__init__(Default.EMPTY, subs, ext, self.key)
+    def __init__(self, subs: Any) -> None:
+        super().__init__(Default.EMPTY, subs, self.key)
 
 
 class Will(BaseStructure):
@@ -10433,8 +10269,7 @@ class Will(BaseStructure):
     
     Args:
         value: A value of data type Y|<NULL>
-        subs: A permitted substructure or list of permitted substructures.
-        ext: Optional extensions to the WILL structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM WILL Structure](https://gedcom.io/terms/v7/WILL)
@@ -10442,8 +10277,8 @@ class Will(BaseStructure):
 
     key: str = 'WILL'
     
-    def __init__(self, value: str, subs: SubsType = None, ext: ExtType = None):
-        super().__init__(value, subs, ext, self.key)
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
 
 
 class Www(BaseStructure):
@@ -10471,7 +10306,7 @@ class Www(BaseStructure):
     
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
-        ext: Optional extensions to the WWW structure entered through `Extension`.
+        subs: A permitted substructure, an extension or list of permitted substructures or extensions.
     
     References:
     - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
@@ -10479,5 +10314,5 @@ class Www(BaseStructure):
 
     key: str = 'WWW'
     
-    def __init__(self, value: str, ext: ExtType = None):
-        super().__init__(value, None, ext, self.key)
+    def __init__(self, value: str) -> None:
+        super().__init__(value, None, self.key)
