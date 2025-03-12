@@ -103,6 +103,7 @@ class Msg:
     NOT_INDIVIDUAL_XREF: str = (
         'The value "{0}" is not an individual cross reference for structure "{1}".'
     )
+    NOT_INTEGER: str = 'The value "{0}" is not an integer for structure "{1}".'
     NOT_LANGUAGE: str = 'The value "{0}" is not a language code for structure "{1}".'
     NOT_LIST: str = 'The value "{0}" is not a list for structure "{1}".'
     NOT_MEDIA_TYPE: str = 'The value "{0}" is not a media type for structure "{1}".'
@@ -199,4 +200,4 @@ class Msg:
         'The structure type has no superstructures nor substructures.'
     )
     YAML_UNRECOGNIZED_TYPE: str = 'The type "{0}" is not a valid type'
-    ZERO_YEAR: str = 'The calendar has no zero year.'
+    ZERO_YEAR: str = 'The "{0}" calendar has no zero year.'
