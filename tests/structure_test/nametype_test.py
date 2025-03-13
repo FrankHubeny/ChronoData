@@ -77,13 +77,13 @@ def test_phrase_only_one() -> None:
 #     e. Catch bad input.
 
 
-def test_medi_bad_enum() -> None:
+def test_bad_enum() -> None:
     """Check that the wrong enumeration is caught."""
     m = NameType('abc')
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_VALID_ENUM.format('abc', m.enums, m.class_name)
+            Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)
         ),
     ):
         m.validate()

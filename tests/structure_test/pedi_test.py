@@ -82,7 +82,7 @@ def test_bad_enum() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_VALID_ENUM.format('abc', m.enums, m.class_name)
+            Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)
         ),
     ):
         m.validate()
