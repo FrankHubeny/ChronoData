@@ -182,6 +182,7 @@ __all__ = [
 import collections
 import contextlib
 import io
+import logging
 import math
 import re
 import urllib.request
@@ -3505,6 +3506,7 @@ class Adr1(BaseStructure):
     
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
+        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
 
 
 class Adr2(BaseStructure):
@@ -3537,6 +3539,7 @@ class Adr2(BaseStructure):
     
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
+        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
 
 
 class Adr3(BaseStructure):
@@ -3569,6 +3572,7 @@ class Adr3(BaseStructure):
     
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
+        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
 
 
 class Age(BaseStructure):

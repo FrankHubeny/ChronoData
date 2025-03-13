@@ -42,6 +42,7 @@ class Msg:
     BAD_MONTH: str = 'The month "{1}" for calend "{0}" is not recognized.'
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
+    DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
     )
