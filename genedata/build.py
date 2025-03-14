@@ -646,14 +646,15 @@ class Genealogy:
         return RepositoryXref(repository_xref)
 
     def shared_note_xref(
-        self, xref_name: str = '', initial: bool = False
+        self, xref_name: str = '', text: str = Default.EMPTY, initial: bool = False
     ) -> SharedNoteXref:
         """
         Create a SharedNoteXref identifier from a unique string according to the
         GEDCOM standard.
 
         Args:
-            xref_name (str, optional): A name for the identifier. Defaults to ''.
+            xref_name: A name for the identifier. Defaults to ''.
+            text: The text that is being shared.
             initial (bool, optional): Whether to use the name as an initial
                 value with an integer following. Defaults to False.
 
@@ -664,12 +665,12 @@ class Genealogy:
             The first example generates identifier for a shared note record.
             >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
-            >>> id = a.shared_note_xref()
+            >>> id = a.shared_note_xref(text='This is a shared note.')
             >>> print(id)
-            @1@
+            @1@ 
 
             The second example shows the output when the identifier has a name.
-            >>> id2 = a.shared_note_xref('sn')
+            >>> id2 = a.shared_note_xref('sn', text='This is a shared note.')
             >>> print(id2)
             @SN@
 
@@ -702,7 +703,7 @@ class Genealogy:
             xref_name,
             initial,
         )
-        return SharedNoteXref(shared_note_xref)
+        return SharedNoteXref(shared_note_xref, text=text)
 
     def source_xref(
         self, xref_name: str = '', initial: bool = False

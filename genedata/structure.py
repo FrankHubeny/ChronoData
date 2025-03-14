@@ -672,6 +672,7 @@ class Xref:
     Args:
         name: The name of the identifier.
         tag: The tag associated with this identifier.
+        value: Any payload associted with this identifier.  Usually empty except for SharedNoteXref.
 
     See Also:
         `ExtensionXref`
@@ -687,33 +688,35 @@ class Xref:
         [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
 
-    def __init__(self, name: str, tag: str = Default.EMPTY):
+    def __init__(self, name: str, tag: str = Default.EMPTY, text: str = Default.EMPTY):
         self.fullname: str = name.upper()
         self.name: str = name.replace('@', '').replace(Default.UNDERLINE, ' ')
         self.tag: str = tag
         self.code_xref = f'{self.tag.lower()}_{self.name.lower()}_xref'
+        self.text: str = text
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
         return self.fullname
-
+    
     def __repr__(self) -> str:
         return f"Xref('{self.fullname}')"
 
-    def ged(self, info: str = Default.EMPTY) -> str:
+    #def ged(self, info: str = Default.EMPTY) -> str:
+    def ged(self) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
         lines: str = Default.EMPTY
         xref_name: str = self.fullname
         if self.fullname == Default.VOID_POINTER:
             xref_name = Default.EMPTY
-        if info == Default.EMPTY:
+        if self.text == Default.EMPTY:
             lines = Tagger.empty(lines, level=0, tag=self.tag, xref=xref_name)
         return Tagger.string(
-            lines, level=0, tag=self.tag, payload=info, xref=xref_name
+            lines, level=0, tag=self.tag, payload=self.text, xref=xref_name
         )
 
     def code(self, tabs: int = 0) -> str:  # noqa: ARG002
-        return self.fullname
+        return repr(self.fullname)
 
 
 class ExtensionXref(Xref):
@@ -842,6 +845,7 @@ class SharedNoteXref(Xref):
     Args:
         name: The name of the identifier.
         tag: The tag associated with this identifier.
+        value: The text of the shared note.
 
     See Also:
         `genedata.build.shared_note_xref()`
@@ -850,11 +854,11 @@ class SharedNoteXref(Xref):
         - [GEDCOM SHARED_NOTE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.SNOTE):
-        super().__init__(name, tag)
+    def __init__(self, name: str, tag: str = XrefTag.SNOTE, text: str = Default.EMPTY):
+        super().__init__(name, tag, text=text)
 
     def __repr__(self) -> str:
-        return f"SharedNoteXref('{self.fullname}')"
+        return f"SharedNoteXref('{self.fullname}', text='{self.text}')"
 
 
 class SourceXref(Xref):
@@ -2643,26 +2647,26 @@ class Formatter:
     #         .replace(')', ',\n)')
     #     )
 
-    @staticmethod
-    def display(named_tuple: Any, full: bool = False) -> None:
-        """Display the results of the ged and code methods for a named tuple.
+    # @staticmethod
+    # def display(named_tuple: Any, full: bool = False) -> None:
+    #     """Display the results of the ged and code methods for a named tuple.
 
-        Args:
-            named_tuple: This is the NamedTuple to display.
+    #     Args:
+    #         named_tuple: This is the NamedTuple to display.
 
-        There are two methods to run:
-        1. `ged` runs validate() capturing any error message.
-        2. `code` which runs even if the ged method fails.
-        """
-        # print('DISPLAY:')
-        # print(f'{Formatter.display_tuple(named_tuple)}\n')
-        try:
-            print(f'GED:\n{named_tuple.ged()}')  # noqa: T201
-        except Exception as e:
-            print('ERROR MESSAGE:\n')  # noqa: T201
-            print(str(e))  # noqa: T201
-            print()  # noqa: T201
-        print(f'CODE:{named_tuple.code(full=full)}')  # noqa: T201
+    #     There are two methods to run:
+    #     1. `ged` runs validate() capturing any error message.
+    #     2. `code` which runs even if the ged method fails.
+    #     """
+    #     # print('DISPLAY:')
+    #     # print(f'{Formatter.display_tuple(named_tuple)}\n')
+    #     try:
+    #         print(f'GED:\n{named_tuple.ged()}')  
+    #     except Exception as e:
+    #         print('ERROR MESSAGE:\n')  
+    #         print(str(e))  
+    #         print()  
+    #     print(f'CODE:{named_tuple.code(full=full)}')  
 
 
 # class Extension(NamedTuple):
@@ -2758,23 +2762,12 @@ class BaseStructure:
     ):
         # Process value argument
         self.value: str | int | Xref = value
-        self.value_out: str | int = str(self.value)
         if isinstance(self.value, str):
-            self.value_out = f"'{self.value}'"
-        elif isinstance(self.value, FamilyXref):
-            self.value_out = f"FamilyXref('{self.value}')"
-        elif isinstance(self.value, IndividualXref):
-            self.value_out = f"IndividualXref('{self.value}')"
-        elif isinstance(self.value, MultimediaXref):
-            self.value_out = f"MultimediaXref('{self.value}')"
-        elif isinstance(self.value, RepositoryXref):
-            self.value_out = f"RepositoryXref('{self.value}')"
-        elif isinstance(self.value, SharedNoteXref):
-            self.value_out = f"SharedNoteXref('{self.value}')"
-        elif isinstance(self.value, SourceXref):
-            self.value_out = f"SourceXref('{self.value}')"
-        elif isinstance(self.value, SubmitterXref):
-            self.value_out = f"SubmitterXref('{self.value}')"
+            self.code_value: str = f"'{self.value}'"
+        elif isinstance(self.value, int):
+            self.code_value = str(self.value)
+        else:
+            self.code_value = repr(self.value)
 
         # Process subs argument
         self.subs: Any = subs
@@ -2795,7 +2788,7 @@ class BaseStructure:
         self.enums: list[str] = Structure[self.key][Default.YAML_ENUMS]
         if len(self.enums) > 0 and isinstance(self.value, str):
             self.value = self.value.upper()
-            self.value_out = f"'{self.value}'"
+            self.code_value = f"'{self.value}'"
         self.payload: str | None = Structure[self.key][Default.YAML_PAYLOAD]
         self.class_name: str = (
             self.key.title().replace('_', '').replace('-', '')
@@ -2861,12 +2854,12 @@ class BaseStructure:
                 case 'Y|<NULL>':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
                     if str(self.value) not in ['Y', '']:
                         raise ValueError(
                             Msg.VALUE_NOT_Y_OR_NULL.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                     return True
@@ -2899,9 +2892,9 @@ class BaseStructure:
                 case 'https://gedcom.io/terms/v7/type-List#Text':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match(',', str(self.value)):
+                    if not re.match('', str(self.value)):
                         raise ValueError(
                             Msg.NOT_LIST.format(
                                 str(self.value), self.class_name
@@ -2917,49 +2910,49 @@ class BaseStructure:
                 case 'http://www.w3.org/2001/XMLSchema#Language':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
                     if not re.match('', str(self.value)):
                         raise ValueError(
                             Msg.NOT_LANGUAGE.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                 case 'https://gedcom.io/terms/v7/type-Date#period':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match('', str(self.value)):
+                    if not re.match('^TO|^FROM', self.value) or re.match('[a-z]', self.value):
                         raise ValueError(
                             Msg.NOT_DATE_PERIOD.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                 case 'https://gedcom.io/terms/v7/type-Date#exact':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match('', str(self.value)):
+                    if not re.match('\\d$', self.value) or re.match('[a-z]', self.value) or not re.search('[0-9]', self.value):
                         raise ValueError(
                             Msg.NOT_DATE_EXACT.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                 case 'https://gedcom.io/terms/v7/type-Date':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match('', str(self.value)):
+                    if re.match('[a-z]', self.value) or not re.search('[0-9]', self.value):
                         raise ValueError(Msg.NOT_DATE.format(str(self.value)))
                 case 'https://gedcom.io/terms/v7/type-FilePath':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match('', str(self.value)):
+                    if not re.match('', self.value):
                         raise ValueError(
                             Msg.NOT_FILE_PATH.format(
                                 str(self.value), self.class_name
@@ -2968,21 +2961,21 @@ class BaseStructure:
                 case 'https://gedcom.io/terms/v7/type-Name':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
-                    if not re.match('', (str(self.value))):
+                    if not re.match('[/][/]', (self.value)):
                         raise ValueError(
                             Msg.NOT_NAME.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                 case 'https://gedcom.io/terms/v7/type-Age':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
                     if (
-                        re.search('[abcefghijklnopqrstuxz]', self.value)
+                        re.search('[abcefghijklnopqrstuxz]|[A-Z]', self.value)
                         or not re.search('[ymwd]', self.value)
                         or not re.search('[0-9]', self.value)
                         or not re.search('^[<|>|\\d]', self.value)
@@ -2994,51 +2987,51 @@ class BaseStructure:
                 case 'http://www.w3.org/ns/dcat#mediaType':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
                     if not re.match('', str(self.value)):
                         raise ValueError(
                             Msg.NOT_MEDIA_TYPE.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
                 case '@<https://gedcom.io/terms/v7/record-OBJE>@':
                     if not isinstance(self.value, MultimediaXref):
                         raise ValueError(
                             Msg.NOT_MULTIMEDIA_XREF.format(
-                                str(self.value), self.class_name
+                                repr(self.value), self.class_name
                             )
                         )
                 case '@<https://gedcom.io/terms/v7/record-REPO>@':
                     if not isinstance(self.value, RepositoryXref):
                         raise ValueError(
                             Msg.NOT_REPOSITORY_XREF.format(
-                                str(self.value), self.class_name
+                                repr(self.value), self.class_name
                             )
                         )
                 case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
                     if not isinstance(self.value, SharedNoteXref):
                         raise ValueError(
                             Msg.NOT_SHARED_NOTE_XREF.format(
-                                str(self.value), self.class_name
+                                repr(self.value), self.class_name
                             )
                         )
                 case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                     if not isinstance(self.value, SourceXref):
                         raise ValueError(
                             Msg.NOT_SOURCE_XREF.format(
-                                str(self.value), self.class_name
+                                repr(self.value), self.class_name
                             )
                         )
                 case 'https://gedcom.io/terms/v7/type-Time':
                     if not isinstance(self.value, str):
                         raise ValueError(
-                            Msg.NOT_STRING.format(self.value, self.class_name)
+                            Msg.NOT_STRING.format(repr(self.value), self.class_name)
                         )
                     if not re.match('', str(self.value)):
                         raise ValueError(
                             Msg.NOT_TIME.format(
-                                str(self.value), self.class_name
+                                self.value, self.class_name
                             )
                         )
 
@@ -3130,7 +3123,9 @@ class BaseStructure:
             ]:
                 format = False
             lines: str = Default.EMPTY
-            if self.value == Default.EMPTY:
+            if self.key[0:6] == 'record' and isinstance(self.value, Xref):
+                lines = self.value.ged()
+            elif self.value == Default.EMPTY:
                 lines = Tagger.empty(lines, level, self.tag)
             else:
                 lines = Tagger.string(
@@ -3142,7 +3137,7 @@ class BaseStructure:
                 )
             else:
                 lines = Tagger.structure(lines, level + 1, self.subs)
-        return lines  # Tagger.structure(lines, level + 1, self.ext)
+        return lines  
 
     def code(self, tabs: int = 0, full: bool = True) -> str:
         if self.payload is None and (
@@ -3153,31 +3148,31 @@ class BaseStructure:
                 Formatter.display_code(f'{self.class_name}()'),
                 Default.INDENT * tabs,
             )
-        if self.payload is not None and (
+        if (self.payload is not None or isinstance(self.value, Xref)) and (
             self.subs is None
             or (isinstance(self.subs, list) and len(self.subs) == 0)
         ):
             return indent(
-                Formatter.display_code(f'{self.class_name}({self.value_out})'),
+                Formatter.display_code(f'{self.class_name}({self.code_value})'),
                 Default.INDENT * tabs,
             )
-        if self.payload is not None and isinstance(self.subs, BaseStructure):
+        if (self.payload is not None or isinstance(self.value, Xref)) and isinstance(self.subs, BaseStructure):
             return indent(
                 Formatter.display_code(
-                    f'{self.class_name}({self.value_out}, {self.subs.code().replace("\n", "")})'
+                    f'{self.class_name}({self.code_value}, {self.subs.code().replace("\n", "")})'
                 ),
                 Default.INDENT * tabs,
             )
-        if self.payload is not None and (
+        if (self.payload is not None or isinstance(self.value, Xref)) and (
             isinstance(self.subs, list) and len(self.subs) == 1
         ):
             return indent(
                 Formatter.display_code(
-                    f'{self.class_name}({self.value_out}, {self.subs[0].code().replace("\n", "")})'
+                    f'{self.class_name}({self.code_value}, {self.subs[0].code().replace("\n", "")})'
                 ),
                 Default.INDENT * tabs,
             )
-        if self.payload is not None and (
+        if (self.payload is not None or isinstance(self.value, Xref)) and (
             isinstance(self.subs, list) and len(self.subs) > 0
         ):
             return indent(
@@ -3185,7 +3180,7 @@ class BaseStructure:
                     f'{self.class_name}',
                     (
                         f'    {Default.CODE_VALUE} = ',
-                        self.value_out,
+                        self.code_value,
                         tabs + 1,
                         full,
                         False,
@@ -3304,36 +3299,36 @@ class Ext(BaseStructure):
             # )
 
 
-# Classes below this marker were genered by the class_generation.ipynb notebook.
+# Classes below this marker were genered by the genedata.gedcom7 Display class
+# by calling Display.generate_all_classes or Display.generate_class.
+
 
 
 class Abbr(BaseStructure):
-    '''Store, validate and format the ABBR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ABBR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Abbreviation
     > A short name of a title, description, or name used for sorting, filing, and
     > retrieving records.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ABBR Structure](https://gedcom.io/terms/v7/ABBR)
     '''
-
-    key: str = 'ABBR'
     
+    key: str = 'ABBR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Addr(BaseStructure):
-    '''Store, validate and format the ADDR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADDR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Address
     > The location of, or most relevant to, the subject of the superstructure.
@@ -3366,36 +3361,35 @@ class Addr(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADR1            | Only One | No       |
-    | https://gedcom.io/terms/v7/ADR2            | Only One | No       |
-    | https://gedcom.io/terms/v7/ADR3            | Only One | No       |
-    | https://gedcom.io/terms/v7/CITY            | Only One | No       |
-    | https://gedcom.io/terms/v7/CTRY            | Only One | No       |
-    | https://gedcom.io/terms/v7/POST            | Only One | No       |
-    | https://gedcom.io/terms/v7/STAE            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/ADR1            | Many     | No       |
+    | https://gedcom.io/terms/v7/ADR2            | Many     | No       |
+    | https://gedcom.io/terms/v7/ADR3            | Many     | No       |
+    | https://gedcom.io/terms/v7/CITY            | Many     | No       |
+    | https://gedcom.io/terms/v7/CTRY            | Many     | No       |
+    | https://gedcom.io/terms/v7/POST            | Many     | No       |
+    | https://gedcom.io/terms/v7/STAE            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADDR Structure](https://gedcom.io/terms/v7/ADDR)
     '''
-
-    key: str = 'ADDR'
     
+    key: str = 'ADDR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class AdopFamc(BaseStructure):
-    '''Store, validate and format the FAMC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAMC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Family child
     > The individual or couple that adopted this individual.
@@ -3406,80 +3400,78 @@ class AdopFamc(BaseStructure):
     > performed the adoption; or by using a `FAM` where the adopting individual is
     > the only `HUSB`/`WIFE`.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/FAMC-ADOP       | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/FAMC-ADOP       | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/ADOP-FAMC)
     '''
-
-    key: str = 'ADOP-FAMC'
     
+    key: str = 'ADOP-FAMC'
+        
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Adop(BaseStructure):
-    '''Store, validate and format the ADOP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADOP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Adoption
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > adoption
     > Creation of a legally approved child-parent relationship that does not
     > exist biologically.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/ADOP-FAMC       | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/ADOP)
     '''
-
-    key: str = 'ADOP'
     
+    key: str = 'ADOP'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Adr1(BaseStructure):
-    '''Store, validate and format the ADR1 structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADR1 structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Address Line 1
     > The first line of the address, used for indexing. This structure's payload
@@ -3493,26 +3485,25 @@ class Adr1(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADR1 Structure](https://gedcom.io/terms/v7/ADR1)
     '''
-
-    key: str = 'ADR1'
     
+    key: str = 'ADR1'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
         logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
-
+    
 
 class Adr2(BaseStructure):
-    '''Store, validate and format the ADR2 structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADR2 structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Address Line 2
     > The second line of the address, used for indexing. This structure's payload
@@ -3526,26 +3517,25 @@ class Adr2(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADR2 Structure](https://gedcom.io/terms/v7/ADR2)
     '''
-
-    key: str = 'ADR2'
     
+    key: str = 'ADR2'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
         logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
-
+    
 
 class Adr3(BaseStructure):
-    '''Store, validate and format the ADR3 structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADR3 structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Address Line 3
     > The third line of the address, used for indexing. This structure's payload
@@ -3559,54 +3549,52 @@ class Adr3(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADR3 Structure](https://gedcom.io/terms/v7/ADR3)
     '''
-
-    key: str = 'ADR3'
     
+    key: str = 'ADR3'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
         logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))
-
+    
 
 class Age(BaseStructure):
-    '''Store, validate and format the AGE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the AGE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Age at event
     > The age of the individual at the time an event occurred, or the age listed
     > in the document.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Age
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM AGE Structure](https://gedcom.io/terms/v7/AGE)
     '''
-
-    key: str = 'AGE'
     
+    key: str = 'AGE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Agnc(BaseStructure):
-    '''Store, validate and format the AGNC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the AGNC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Responsible agency
     > The organization, institution, corporation, person, or other entity that
@@ -3614,25 +3602,24 @@ class Agnc(BaseStructure):
     > a person of an associated occupation, or a church that administered rites
     > or events, or an organization responsible for creating or archiving
     > records.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM AGNC Structure](https://gedcom.io/terms/v7/AGNC)
     '''
-
-    key: str = 'AGNC'
     
+    key: str = 'AGNC'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Alia(BaseStructure):
-    '''Store, validate and format the ALIA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ALIA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Alias
     > A single individual may have facts distributed across multiple individual
@@ -3650,102 +3637,99 @@ class Alia(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ALIA Structure](https://gedcom.io/terms/v7/ALIA)
     '''
-
-    key: str = 'ALIA'
     
+    key: str = 'ALIA'
+        
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Anci(BaseStructure):
-    '''Store, validate and format the ANCI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ANCI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Ancestor interest
     > Indicates an interest in additional research for ancestors of this
     > individual. (See also `DESI`).
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ANCI Structure](https://gedcom.io/terms/v7/ANCI)
     '''
-
-    key: str = 'ANCI'
     
+    key: str = 'ANCI'
+        
     def __init__(self, value: SubmitterXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Anul(BaseStructure):
-    '''Store, validate and format the ANUL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ANUL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Annulment
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > annulment
     > Declaring a marriage void from the beginning (never existed).
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ANUL Structure](https://gedcom.io/terms/v7/ANUL)
     '''
-
-    key: str = 'ANUL'
     
+    key: str = 'ANUL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Asso(BaseStructure):
-    '''Store, validate and format the ASSO structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ASSO structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Associates
     > A pointer to an associated individual. See `ASSOCIATION_STRUCTURE` for more
@@ -3775,337 +3759,329 @@ class Asso(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    | https://gedcom.io/terms/v7/ROLE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+    | https://gedcom.io/terms/v7/ROLE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ASSO Structure](https://gedcom.io/terms/v7/ASSO)
     '''
-
-    key: str = 'ASSO'
     
+    key: str = 'ASSO'
+        
     def __init__(self, value: IndividualXref, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Auth(BaseStructure):
-    '''Store, validate and format the AUTH structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the AUTH structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Author
     > The person, agency, or entity who created the record. For a published work,
     > this could be the author, compiler, transcriber, abstractor, or editor. For
     > an unpublished source, this may be an individual, a government agency,
     > church organization, or private organization.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM AUTH Structure](https://gedcom.io/terms/v7/AUTH)
     '''
-
-    key: str = 'AUTH'
     
+    key: str = 'AUTH'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Bapl(BaseStructure):
-    '''Store, validate and format the BAPL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BAPL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Baptism, Latter-Day Saint
     > A [Latter-Day Saint Ordinance]. See also `LDS_INDIVIDUAL_ORDINANCE`.
     > baptism
     > The event of baptism performed at age 8 or later by priesthood authority of
     > The Church of Jesus Christ of Latter-day Saints. (See also [`BAPM`])
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BAPL Structure](https://gedcom.io/terms/v7/BAPL)
     '''
-
-    key: str = 'BAPL'
     
+    key: str = 'BAPL'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Bapm(BaseStructure):
-    '''Store, validate and format the BAPM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BAPM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Baptism
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > baptism
     > Baptism, performed in infancy or later. (See also [`BAPL`] and `CHR`.)
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BAPM Structure](https://gedcom.io/terms/v7/BAPM)
     '''
-
-    key: str = 'BAPM'
     
+    key: str = 'BAPM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Barm(BaseStructure):
-    '''Store, validate and format the BARM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BARM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Bar Mitzvah
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > Bar Mitzvah
     > The ceremonial event held when a Jewish boy reaches age 13.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BARM Structure](https://gedcom.io/terms/v7/BARM)
     '''
-
-    key: str = 'BARM'
     
+    key: str = 'BARM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Basm(BaseStructure):
-    '''Store, validate and format the BASM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BASM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Bas Mitzvah
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > Bas Mitzvah
     > The ceremonial event held when a Jewish girl reaches age 13, also known as
     > "Bat Mitzvah."
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BASM Structure](https://gedcom.io/terms/v7/BASM)
     '''
-
-    key: str = 'BASM'
     
+    key: str = 'BASM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Birt(BaseStructure):
-    '''Store, validate and format the BIRT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BIRT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Birth
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > birth
     > Entering into life.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | No       |
+    | https://gedcom.io/terms/v7/FAMC            | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BIRT Structure](https://gedcom.io/terms/v7/BIRT)
     '''
-
-    key: str = 'BIRT'
     
+    key: str = 'BIRT'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Bles(BaseStructure):
-    '''Store, validate and format the BLES structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BLES structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Blessing
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > blessing
     > Bestowing divine care or intercession. Sometimes given in connection with a
     > naming ceremony.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BLES Structure](https://gedcom.io/terms/v7/BLES)
     '''
-
-    key: str = 'BLES'
     
+    key: str = 'BLES'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Buri(BaseStructure):
-    '''Store, validate and format the BURI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the BURI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Depositing remains
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
@@ -4119,78 +4095,76 @@ class Buri(BaseStructure):
     > 
     > depositing remains
     > Depositing the mortal remains of a deceased person.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM BURI Structure](https://gedcom.io/terms/v7/BURI)
     '''
-
-    key: str = 'BURI'
     
+    key: str = 'BURI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Caln(BaseStructure):
-    '''Store, validate and format the CALN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CALN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Call number
     > An identification or reference description used to file and retrieve items
     > from the holdings of a repository. Despite the word "number" in the name,
     > may contain any character, not just digits.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/MEDI            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/MEDI            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CALN Structure](https://gedcom.io/terms/v7/CALN)
     '''
-
-    key: str = 'CALN'
     
+    key: str = 'CALN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Cast(BaseStructure):
-    '''Store, validate and format the CAST structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CAST structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Caste
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
@@ -4198,73 +4172,71 @@ class Cast(BaseStructure):
     > The name of an individual's rank or status in society which is sometimes
     > based on racial or religious differences, or differences in wealth,
     > inherited rank, profession, or occupation.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CAST Structure](https://gedcom.io/terms/v7/CAST)
     '''
-
-    key: str = 'CAST'
     
+    key: str = 'CAST'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Caus(BaseStructure):
-    '''Store, validate and format the CAUS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CAUS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Cause
     > The reasons which precipitated an event. It is often used subordinate to a
     > death event to show cause of death, such as might be listed on a death
     > certificate.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CAUS Structure](https://gedcom.io/terms/v7/CAUS)
     '''
-
-    key: str = 'CAUS'
     
+    key: str = 'CAUS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Chan(BaseStructure):
-    '''Store, validate and format the CHAN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CHAN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Change
     > The most recent change to the superstructure. This is metadata about the
@@ -4277,317 +4249,308 @@ class Chan(BaseStructure):
     > recent, although only the most recent change is described by the `DATE`
     > substructure.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      |
+    | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CHAN Structure](https://gedcom.io/terms/v7/CHAN)
     '''
-
-    key: str = 'CHAN'
     
+    key: str = 'CHAN'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Chil(BaseStructure):
-    '''Store, validate and format the CHIL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CHIL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Child
     > The child in a family, whether biological, adopted, foster, sealed, or
     > other relationship.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CHIL Structure](https://gedcom.io/terms/v7/CHIL)
     '''
-
-    key: str = 'CHIL'
     
+    key: str = 'CHIL'
+        
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Chr(BaseStructure):
-    '''Store, validate and format the CHR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CHR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Christening
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > christening
     > Baptism or naming events for a child.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | No       |
+    | https://gedcom.io/terms/v7/FAMC            | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CHR Structure](https://gedcom.io/terms/v7/CHR)
     '''
-
-    key: str = 'CHR'
     
+    key: str = 'CHR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Chra(BaseStructure):
-    '''Store, validate and format the CHRA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CHRA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Christening, adult
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > adult christening
     > Baptism or naming events for an adult person.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CHRA Structure](https://gedcom.io/terms/v7/CHRA)
     '''
-
-    key: str = 'CHRA'
     
+    key: str = 'CHRA'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class City(BaseStructure):
-    '''Store, validate and format the CITY structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CITY structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > City
     > The name of the city used in the address. See `ADDRESS_STRUCTURE` for more
     > details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CITY Structure](https://gedcom.io/terms/v7/CITY)
     '''
-
-    key: str = 'CITY'
     
+    key: str = 'CITY'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Conf(BaseStructure):
-    '''Store, validate and format the CONF structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CONF structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Confirmation
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > confirmation
     > Conferring full church membership.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CONF Structure](https://gedcom.io/terms/v7/CONF)
     '''
-
-    key: str = 'CONF'
     
+    key: str = 'CONF'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Conl(BaseStructure):
-    '''Store, validate and format the CONL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CONL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Confirmation, Latter-Day Saint
     > A [Latter-Day Saint Ordinance]. See also `LDS_INDIVIDUAL_ORDINANCE`.
     > confirmation
     > The religious event by which a person receives membership in The Church of
     > Jesus Christ of Latter-day Saints. (See also [`CONF`])
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CONL Structure](https://gedcom.io/terms/v7/CONL)
     '''
-
-    key: str = 'CONL'
     
+    key: str = 'CONL'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Copr(BaseStructure):
-    '''Store, validate and format the COPR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the COPR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Copyright
     > A copyright statement, as appropriate for the copyright laws applicable to
     > this data.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM COPR Structure](https://gedcom.io/terms/v7/COPR)
     '''
-
-    key: str = 'COPR'
     
+    key: str = 'COPR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Corp(BaseStructure):
-    '''Store, validate and format the CORP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CORP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Corporate name
     > The name of the business, corporation, or person that produced or
     > commissioned the product.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CORP Structure](https://gedcom.io/terms/v7/CORP)
     '''
-
-    key: str = 'CORP'
     
+    key: str = 'CORP'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Crea(BaseStructure):
-    '''Store, validate and format the CREA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CREA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Creation
     > The initial creation of the superstructure. This is metadata about the
@@ -4596,77 +4559,75 @@ class Crea(BaseStructure):
     > The date of the initial creation of the superstructure. Because this refers
     > to the initial creation, it should not be modified after the structure is
     > created.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CREA Structure](https://gedcom.io/terms/v7/CREA)
     '''
-
-    key: str = 'CREA'
     
+    key: str = 'CREA'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Crem(BaseStructure):
-    '''Store, validate and format the CREM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CREM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Cremation
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > cremation
     > The act of reducing a dead body to ashes by fire.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CREM Structure](https://gedcom.io/terms/v7/CREM)
     '''
-
-    key: str = 'CREM'
     
+    key: str = 'CREM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Crop(BaseStructure):
-    '''Store, validate and format the CROP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CROP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Crop
     > A subregion of an image to display. It is only valid when the superstructure
@@ -4691,83 +4652,80 @@ class Crop(BaseStructure):
     > - `TOP` or `TOP` + `HEIGHT` exceed the image height.
     > - `CROP` applied to a non-image or image without a defined pixel unit.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/HEIGHT          | Only One | No       |
-    | https://gedcom.io/terms/v7/LEFT            | Only One | No       |
-    | https://gedcom.io/terms/v7/TOP             | Only One | No       |
-    | https://gedcom.io/terms/v7/WIDTH           | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/HEIGHT          | Many     | No       |
+    | https://gedcom.io/terms/v7/LEFT            | Many     | No       |
+    | https://gedcom.io/terms/v7/TOP             | Many     | No       |
+    | https://gedcom.io/terms/v7/WIDTH           | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CROP Structure](https://gedcom.io/terms/v7/CROP)
     '''
-
-    key: str = 'CROP'
     
+    key: str = 'CROP'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Ctry(BaseStructure):
-    '''Store, validate and format the CTRY structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CTRY structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Country
     > The name of the country that pertains to the associated address. See
     > `ADDRESS_STRUCTURE` for more details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CTRY Structure](https://gedcom.io/terms/v7/CTRY)
     '''
-
-    key: str = 'CTRY'
     
+    key: str = 'CTRY'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class DataEvenDate(BaseStructure):
-    '''Store, validate and format the DATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Date
     > The `DatePeriod` covered by the entire source; the period during which this
     > source recorded events.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATA-EVEN-DATE)
     '''
-
-    key: str = 'DATA-EVEN-DATE'
     
+    key: str = 'DATA-EVEN-DATE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class DataEven(BaseStructure):
-    '''Store, validate and format the EVEN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EVEN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Event
     > A list of enumerated values from set `https://gedcom.io/terms/v7/enumset-
@@ -4775,7 +4733,7 @@ class DataEven(BaseStructure):
     > source. Each event type is separated by a comma and space. For example, a
     > parish register of births, deaths, and marriages would be `BIRT, DEAT,
     > MARR`.
-    
+        
     Enumerations:
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
         > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
@@ -4792,91 +4750,88 @@ class DataEven(BaseStructure):
     - 'RESI': https://gedcom.io/terms/v7/enum-RESI
         > A residence attribute; either `https://gedcom.io/terms/v7/INDI-RESI` or
         > `https://gedcom.io/terms/v7/FAM-RESI`
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Only One | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Many     | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/DATA-EVEN)
     '''
-
-    key: str = 'DATA-EVEN'
     
+    key: str = 'DATA-EVEN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Data(BaseStructure):
-    '''Store, validate and format the DATA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Data
     > A structure with no payload used to distinguish a description of something
     > from metadata about it. For example, `SOUR` and its other substructures
     > describe a source itself, while `SOUR`.`DATA` describes the content of the
     > source.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/DATA)
     '''
-
-    key: str = 'DATA'
     
+    key: str = 'DATA'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class DateExact(BaseStructure):
-    '''Store, validate and format the DATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Date
     > The principal date of the subject of the superstructure. The payload is a
     > `DateExact`.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE-exact)
     '''
-
-    key: str = 'DATE-exact'
     
+    key: str = 'DATE-exact'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Date(BaseStructure):
-    '''Store, validate and format the DATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Date
     > The principal date of the subject of the superstructure. The payload is a
@@ -4908,319 +4863,311 @@ class Date(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+    | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE)
     '''
-
-    key: str = 'DATE'
     
+    key: str = 'DATE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Deat(BaseStructure):
-    '''Store, validate and format the DEAT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DEAT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Death
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > death
     > Mortal life terminates.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DEAT Structure](https://gedcom.io/terms/v7/DEAT)
     '''
-
-    key: str = 'DEAT'
     
+    key: str = 'DEAT'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Desi(BaseStructure):
-    '''Store, validate and format the DESI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DESI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Descendant Interest
     > Indicates an interest in research to identify additional descendants of
     > this individual. See also `ANCI`.
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DESI Structure](https://gedcom.io/terms/v7/DESI)
     '''
-
-    key: str = 'DESI'
     
+    key: str = 'DESI'
+        
     def __init__(self, value: SubmitterXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Dest(BaseStructure):
-    '''Store, validate and format the DEST structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DEST structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Destination
     > An identifier for the system expected to receive this document. See
     > `HEAD`.`SOUR` for guidance on choosing identifiers.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DEST Structure](https://gedcom.io/terms/v7/DEST)
     '''
-
-    key: str = 'DEST'
     
+    key: str = 'DEST'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Div(BaseStructure):
-    '''Store, validate and format the DIV structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DIV structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Divorce
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > divorce
     > Dissolving a marriage through civil action.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DIV Structure](https://gedcom.io/terms/v7/DIV)
     '''
-
-    key: str = 'DIV'
     
+    key: str = 'DIV'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Divf(BaseStructure):
-    '''Store, validate and format the DIVF structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DIVF structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Divorce filing
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > divorce filed
     > Filing for a divorce by a spouse.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DIVF Structure](https://gedcom.io/terms/v7/DIVF)
     '''
-
-    key: str = 'DIVF'
     
+    key: str = 'DIVF'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Dscr(BaseStructure):
-    '''Store, validate and format the DSCR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DSCR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Description
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > physical description
     > The physical characteristics of a person.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DSCR Structure](https://gedcom.io/terms/v7/DSCR)
     '''
-
-    key: str = 'DSCR'
     
+    key: str = 'DSCR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Educ(BaseStructure):
-    '''Store, validate and format the EDUC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EDUC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Education
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > education
     > Indicator of a level of education attained.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EDUC Structure](https://gedcom.io/terms/v7/EDUC)
     '''
-
-    key: str = 'EDUC'
     
+    key: str = 'EDUC'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Email(BaseStructure):
-    '''Store, validate and format the EMAIL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EMAIL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Email
     > An electronic mail address, as defined by any relevant standard such as [RFC
@@ -5237,73 +5184,71 @@ class Email(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EMAIL Structure](https://gedcom.io/terms/v7/EMAIL)
     '''
-
-    key: str = 'EMAIL'
     
+    key: str = 'EMAIL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Emig(BaseStructure):
-    '''Store, validate and format the EMIG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EMIG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Emigration
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > emigration
     > Leaving one's homeland with the intent of residing elsewhere.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EMIG Structure](https://gedcom.io/terms/v7/EMIG)
     '''
-
-    key: str = 'EMIG'
     
+    key: str = 'EMIG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Endl(BaseStructure):
-    '''Store, validate and format the ENDL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ENDL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Endowment, Latter-Day Saint
     > A [Latter-Day Saint Ordinance]. See also `LDS_INDIVIDUAL_ORDINANCE`.
@@ -5311,84 +5256,82 @@ class Endl(BaseStructure):
     > A religious event where an endowment ordinance for an individual was
     > performed by priesthood authority in a temple of The Church of Jesus Christ
     > of Latter-day Saints.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ENDL Structure](https://gedcom.io/terms/v7/ENDL)
     '''
-
-    key: str = 'ENDL'
     
+    key: str = 'ENDL'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Enga(BaseStructure):
-    '''Store, validate and format the ENGA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ENGA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Engagement
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > engagement
     > Recording or announcing an agreement between 2 people to become married.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ENGA Structure](https://gedcom.io/terms/v7/ENGA)
     '''
-
-    key: str = 'ENGA'
     
+    key: str = 'ENGA'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class ExidType(BaseStructure):
-    '''Store, validate and format the TYPE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TYPE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Type
     > The authority issuing the `EXID`, represented as a URI. It is recommended that
@@ -5404,25 +5347,24 @@ class ExidType(BaseStructure):
     > 
     > Additional type URIs can be registered by filing a [GitHub pull request].
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/EXID-TYPE)
     '''
-
-    key: str = 'EXID-TYPE'
     
+    key: str = 'EXID-TYPE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Exid(BaseStructure):
-    '''Store, validate and format the EXID structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EXID structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > External Identifier
     > An identifier for the subject of the superstructure. The identifier is
@@ -5439,250 +5381,244 @@ class Exid(BaseStructure):
     > `EXID` identifiers are expected to be unique. Once assigned, an `EXID`
     > identifier should never be re-used for any other purpose.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/EXID-TYPE       | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/EXID-TYPE       | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EXID Structure](https://gedcom.io/terms/v7/EXID)
     '''
-
-    key: str = 'EXID'
     
+    key: str = 'EXID'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamCens(BaseStructure):
-    '''Store, validate and format the CENS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CENS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Census
     > An [Family Event].
     > census
     > Periodic count of the population for a designated locality, such as a
     > national or state census.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/FAM-CENS)
     '''
-
-    key: str = 'FAM-CENS'
     
+    key: str = 'FAM-CENS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamEven(BaseStructure):
-    '''Store, validate and format the EVEN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EVEN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Event
     > See `https://gedcom.io/terms/v7/INDI-EVEN`.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/FAM-EVEN)
     '''
-
-    key: str = 'FAM-EVEN'
     
+    key: str = 'FAM-EVEN'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamFact(BaseStructure):
-    '''Store, validate and format the FACT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FACT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Fact
     > See `https://gedcom.io/terms/v7/INDI-FACT`.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/FAM-FACT)
     '''
-
-    key: str = 'FAM-FACT'
     
+    key: str = 'FAM-FACT'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamHusb(BaseStructure):
-    '''Store, validate and format the HUSB structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the HUSB structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Husband
     > This is a partner in a `FAM` record. See `FAMILY_RECORD` for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/FAM-HUSB)
     '''
-
-    key: str = 'FAM-HUSB'
     
+    key: str = 'FAM-HUSB'
+        
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamNchi(BaseStructure):
-    '''Store, validate and format the NCHI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NCHI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Number of children
     > A [Family Attribute]. See also `FAMILY_ATTRIBUTE_STRUCTURE`.
     > number of children
     > The number of children that belong to this family.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/FAM-NCHI)
     '''
-
-    key: str = 'FAM-NCHI'
     
+    key: str = 'FAM-NCHI'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamResi(BaseStructure):
-    '''Store, validate and format the RESI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the RESI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Residence
     > A [Family Attribute]. See also `FAMILY_ATTRIBUTE_STRUCTURE`.
@@ -5692,82 +5628,80 @@ class FamResi(BaseStructure):
     > 
     > residence
     > An address or place of residence where a family resided.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM RESI Structure](https://gedcom.io/terms/v7/FAM-RESI)
     '''
-
-    key: str = 'FAM-RESI'
     
+    key: str = 'FAM-RESI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamWife(BaseStructure):
-    '''Store, validate and format the WIFE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the WIFE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Wife
     > A partner in a `FAM` record. See `FAMILY_RECORD` for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/FAM-WIFE)
     '''
-
-    key: str = 'FAM-WIFE'
     
+    key: str = 'FAM-WIFE'
+        
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamcAdop(BaseStructure):
-    '''Store, validate and format the ADOP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ADOP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Adoption
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ADOP`
     > indicating which parent(s) in the family adopted this individual.
-    
+        
     Enumerations:
     - 'HUSB': https://gedcom.io/terms/v7/enum-ADOP-HUSB
         > Adopted by the `HUSB` of the `FAM` pointed to by `FAMC`.
@@ -5775,36 +5709,35 @@ class FamcAdop(BaseStructure):
         > Adopted by the `WIFE` of the `FAM` pointed to by `FAMC`.
     - 'BOTH': https://gedcom.io/terms/v7/enum-BOTH
         > Adopted by both `HUSB` and `WIFE` of the `FAM` pointed to by `FAMC`
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/FAMC-ADOP)
     '''
-
-    key: str = 'FAMC-ADOP'
     
+    key: str = 'FAMC-ADOP'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FamcStat(BaseStructure):
-    '''Store, validate and format the STAT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the STAT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Status
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-FAMC-STAT`
     > assessing of the state or condition of a researcher's belief in a family
     > connection.
-    
+        
     Enumerations:
     - 'CHALLENGED': https://gedcom.io/terms/v7/enum-CHALLENGED
         > Linking this child to this family is suspect, but the linkage has been
@@ -5814,152 +5747,147 @@ class FamcStat(BaseStructure):
         > the linkage has been disproven.
     - 'PROVEN': https://gedcom.io/terms/v7/enum-PROVEN
         > Linking this child to this family has been proven.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/FAMC-STAT)
     '''
-
-    key: str = 'FAMC-STAT'
     
+    key: str = 'FAMC-STAT'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Famc(BaseStructure):
-    '''Store, validate and format the FAMC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAMC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Family child
     > The family with which this individual event is associated.
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/FAMC)
     '''
-
-    key: str = 'FAMC'
     
+    key: str = 'FAMC'
+        
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Fams(BaseStructure):
-    '''Store, validate and format the FAMS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAMS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Family spouse
     > The family in which an individual appears as a partner. See `FAMILY_RECORD`
     > for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAMS Structure](https://gedcom.io/terms/v7/FAMS)
     '''
-
-    key: str = 'FAMS'
     
+    key: str = 'FAMS'
+        
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Fax(BaseStructure):
-    '''Store, validate and format the FAX structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAX structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Facsimile
     > A fax telephone number appropriate for sending data facsimiles. See `PHON`
     > for additional comments on telephone numbers.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAX Structure](https://gedcom.io/terms/v7/FAX)
     '''
-
-    key: str = 'FAX'
     
+    key: str = 'FAX'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Fcom(BaseStructure):
-    '''Store, validate and format the FCOM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FCOM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > First communion
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > first communion
     > The first act of sharing in the Lord's supper as part of church worship.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FCOM Structure](https://gedcom.io/terms/v7/FCOM)
     '''
-
-    key: str = 'FCOM'
     
+    key: str = 'FCOM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class FileTran(BaseStructure):
-    '''Store, validate and format the TRAN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TRAN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Translation
     > A type of `TRAN` for external media files. Each
@@ -6007,86 +5935,83 @@ class FileTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/FORM            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/FILE-TRAN)
     '''
-
-    key: str = 'FILE-TRAN'
     
+    key: str = 'FILE-TRAN'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class File(BaseStructure):
-    '''Store, validate and format the FILE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FILE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > File reference
     > A reference to an external file. See the [File Path datatype] for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/FILE-TRAN       | Many     | No       |
-    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/FORM            | Many     | No       |
+    | https://gedcom.io/terms/v7/TITL            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FILE Structure](https://gedcom.io/terms/v7/FILE)
     '''
-
-    key: str = 'FILE'
     
+    key: str = 'FILE'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Form(BaseStructure):
-    '''Store, validate and format the FORM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FORM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Format
     > The [media type] of the file referenced by the superstructure.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/MEDI            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/MEDI            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/ns/dcat#mediaType
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/FORM)
     '''
-
-    key: str = 'FORM'
     
+    key: str = 'FORM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class GedcVers(BaseStructure):
-    '''Store, validate and format the VERS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the VERS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Version
     > The version number of the official specification that this document's data
@@ -6094,25 +6019,24 @@ class GedcVers(BaseStructure):
     > "`7.0`"); it may include the patch as well (for example, "`7.0.1`"), but
     > doing so is not required. See [A Guide to Version Numbers] for more details
     > about version numbers.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/GEDC-VERS)
     '''
-
-    key: str = 'GEDC-VERS'
     
+    key: str = 'GEDC-VERS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Gedc(BaseStructure):
-    '''Store, validate and format the GEDC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the GEDC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > GEDCOM
     > A container for information about the entire document.
@@ -6120,126 +6044,122 @@ class Gedc(BaseStructure):
     > It is recommended that applications write `GEDC` with its required substructure
     > `https://gedcom.io/terms/v7/GEDC-VERS` as the first substructure of `HEAD`.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/GEDC-VERS       | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/GEDC-VERS       | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM GEDC Structure](https://gedcom.io/terms/v7/GEDC)
     '''
-
-    key: str = 'GEDC'
     
+    key: str = 'GEDC'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Givn(BaseStructure):
-    '''Store, validate and format the GIVN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the GIVN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Given name
     > A given or earned name used for official identification of a person.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM GIVN Structure](https://gedcom.io/terms/v7/GIVN)
     '''
-
-    key: str = 'GIVN'
     
+    key: str = 'GIVN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Grad(BaseStructure):
-    '''Store, validate and format the GRAD structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the GRAD structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Graduation
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > graduation
     > Awarding educational diplomas or degrees to individuals.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM GRAD Structure](https://gedcom.io/terms/v7/GRAD)
     '''
-
-    key: str = 'GRAD'
     
+    key: str = 'GRAD'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class HeadDate(BaseStructure):
-    '''Store, validate and format the DATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Date
     > The `DateExact` that this document was created.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/HEAD-DATE)
     '''
-
-    key: str = 'HEAD-DATE'
     
+    key: str = 'HEAD-DATE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class HeadLang(BaseStructure):
-    '''Store, validate and format the LANG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LANG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Language
     > A default language which may be used to interpret any `Text`-typed payloads
@@ -6266,105 +6186,101 @@ class HeadLang(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/HEAD-LANG)
     '''
-
-    key: str = 'HEAD-LANG'
     
+    key: str = 'HEAD-LANG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class HeadPlacForm(BaseStructure):
-    '''Store, validate and format the FORM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FORM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Format
     > Any `PLAC` with no [`FORM`] shall be treated as if it has this [`FORM`].
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
     '''
-
-    key: str = 'HEAD-PLAC-FORM'
     
+    key: str = 'HEAD-PLAC-FORM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class HeadPlac(BaseStructure):
-    '''Store, validate and format the PLAC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PLAC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Place
     > This is a placeholder for providing a default `PLAC`.`FORM`, and must not
     > have a payload.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/HEAD-PLAC)
     '''
-
-    key: str = 'HEAD-PLAC'
     
+    key: str = 'HEAD-PLAC'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class HeadSourData(BaseStructure):
-    '''Store, validate and format the DATA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Data
     > The database, electronic data source, or digital repository from which this
     > dataset was exported. The payload is the name of the database, electronic
     > data source, or digital repository, with substructures providing additional
     > details about it (not about the export).
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/COPR            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/COPR            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
     '''
-
-    key: str = 'HEAD-SOUR-DATA'
     
+    key: str = 'HEAD-SOUR-DATA'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Head(BaseStructure):
-    '''Store, validate and format the HEAD structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the HEAD structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Header
     > A pseudo-structure for storing metadata about the document. See [The Header
@@ -6389,39 +6305,38 @@ class Head(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/COPR            | Only One | No       |
-    | https://gedcom.io/terms/v7/DEST            | Only One | No       |
-    | https://gedcom.io/terms/v7/GEDC            | Only One | Yes      |
-    | https://gedcom.io/terms/v7/HEAD-DATE       | Only One | No       |
-    | https://gedcom.io/terms/v7/HEAD-LANG       | Only One | No       |
-    | https://gedcom.io/terms/v7/HEAD-PLAC       | Only One | No       |
-    | https://gedcom.io/terms/v7/HEAD-SOUR       | Only One | No       |
-    | https://gedcom.io/terms/v7/NOTE            | Only One | No       |
-    | https://gedcom.io/terms/v7/SCHMA           | Only One | No       |
-    | https://gedcom.io/terms/v7/SNOTE           | Only One | No       |
-    | https://gedcom.io/terms/v7/SUBM            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/COPR            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEST            | Many     | No       |
+    | https://gedcom.io/terms/v7/GEDC            | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-DATE       | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-LANG       | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-PLAC       | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Many     | No       |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
+    | https://gedcom.io/terms/v7/SCHMA           | Many     | No       |
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
+    | https://gedcom.io/terms/v7/SUBM            | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM HEAD Structure](https://gedcom.io/terms/v7/HEAD)
     '''
-
-    key: str = 'HEAD'
     
+    key: str = 'HEAD'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Height(BaseStructure):
-    '''Store, validate and format the HEIGHT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the HEIGHT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Height in pixels
     > How many pixels to display vertically for the image. See `CROP` for more
@@ -6443,53 +6358,51 @@ class Height(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM HEIGHT Structure](https://gedcom.io/terms/v7/HEIGHT)
     '''
-
-    key: str = 'HEIGHT'
     
+    key: str = 'HEIGHT'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Husb(BaseStructure):
-    '''Store, validate and format the HUSB structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the HUSB structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Husband
     > A container for information relevant to the subject of the superstructure
     > specific to the individual described by the associated `FAM`'s `HUSB`
     > substructure.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/HUSB)
     '''
-
-    key: str = 'HUSB'
     
+    key: str = 'HUSB'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Idno(BaseStructure):
-    '''Store, validate and format the IDNO structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the IDNO structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Identification number
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
@@ -6497,146 +6410,143 @@ class Idno(BaseStructure):
     > A number or other string assigned to identify a person within some
     > significant external system. It must have a `TYPE` substructure to define
     > what kind of identification number is being provided.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM IDNO Structure](https://gedcom.io/terms/v7/IDNO)
     '''
-
-    key: str = 'IDNO'
     
+    key: str = 'IDNO'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Immi(BaseStructure):
-    '''Store, validate and format the IMMI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the IMMI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Immigration
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > immigration
     > Entering into a new locality with the intent of residing there.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM IMMI Structure](https://gedcom.io/terms/v7/IMMI)
     '''
-
-    key: str = 'IMMI'
     
+    key: str = 'IMMI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiCens(BaseStructure):
-    '''Store, validate and format the CENS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the CENS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Census
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > census
     > Periodic count of the population for a designated locality, such as a
     > national or state census.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/INDI-CENS)
     '''
-
-    key: str = 'INDI-CENS'
     
+    key: str = 'INDI-CENS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiEven(BaseStructure):
-    '''Store, validate and format the EVEN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EVEN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Event
     > An event: a noteworthy happening related to an individual or family. If a
@@ -6661,49 +6571,48 @@ class IndiEven(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/INDI-EVEN)
     '''
-
-    key: str = 'INDI-EVEN'
     
+    key: str = 'INDI-EVEN'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiFact(BaseStructure):
-    '''Store, validate and format the FACT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FACT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Fact
     > A noteworthy attribute or fact concerning an individual or family. If a
@@ -6725,81 +6634,79 @@ class IndiFact(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/INDI-FACT)
     '''
-
-    key: str = 'INDI-FACT'
     
+    key: str = 'INDI-FACT'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiFamc(BaseStructure):
-    '''Store, validate and format the FAMC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAMC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Family child
     > The family in which an individual appears as a child. It is also used with
     > a `https://gedcom.io/terms/v7/FAMC-STAT` substructure to show individuals
     > who are not children of the family. See `FAMILY_RECORD` for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/FAMC-STAT       | Only One | No       |
+    | https://gedcom.io/terms/v7/FAMC-STAT       | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PEDI            | Only One | No       |
+    | https://gedcom.io/terms/v7/PEDI            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/INDI-FAMC)
     '''
-
-    key: str = 'INDI-FAMC'
     
+    key: str = 'INDI-FAMC'
+        
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiName(BaseStructure):
-    '''Store, validate and format the NAME structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NAME structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Name
     > A `PERSONAL_NAME_STRUCTURE` with parts, translations, sources, and so forth.
@@ -6833,13 +6740,13 @@ class IndiName(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/GIVN            | Many     | No       |
     | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
-    | https://gedcom.io/terms/v7/NAME-TYPE       | Only One | No       |
+    | https://gedcom.io/terms/v7/NAME-TYPE       | Many     | No       |
     | https://gedcom.io/terms/v7/NICK            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/NPFX            | Many     | No       |
@@ -6848,172 +6755,168 @@ class IndiName(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/SPFX            | Many     | No       |
     | https://gedcom.io/terms/v7/SURN            | Many     | No       |
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/INDI-NAME)
     '''
-
-    key: str = 'INDI-NAME'
     
+    key: str = 'INDI-NAME'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiNchi(BaseStructure):
-    '''Store, validate and format the NCHI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NCHI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Number of children
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > number of children
     > The number of children that this person is known to be the parent of (all
     > marriages).
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/INDI-NCHI)
     '''
-
-    key: str = 'INDI-NCHI'
     
+    key: str = 'INDI-NCHI'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiReli(BaseStructure):
-    '''Store, validate and format the RELI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the RELI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Religion
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > religion
     > A religious denomination to which a person is affiliated or for which a
     > record applies.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/INDI-RELI)
     '''
-
-    key: str = 'INDI-RELI'
     
+    key: str = 'INDI-RELI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class IndiTitl(BaseStructure):
-    '''Store, validate and format the TITL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TITL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Title
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > title
     > A formal designation used by an individual in connection with positions of
     > royalty or other social status, such as Grand Duke.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/INDI-TITL)
     '''
-
-    key: str = 'INDI-TITL'
     
+    key: str = 'INDI-TITL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Inil(BaseStructure):
-    '''Store, validate and format the INIL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the INIL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Initiatory, Latter-Day Saint
     > A [Latter-Day Saint Ordinance]. See also `LDS_INDIVIDUAL_ORDINANCE`.
@@ -7024,35 +6927,34 @@ class Inil(BaseStructure):
     > A religious event where an initiatory ordinance for an individual was
     > performed by priesthood authority in a temple of The Church of Jesus Christ
     > of Latter-day Saints.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM INIL Structure](https://gedcom.io/terms/v7/INIL)
     '''
-
-    key: str = 'INIL'
     
+    key: str = 'INIL'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Lang(BaseStructure):
-    '''Store, validate and format the LANG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LANG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Language
     > The primary human language of the superstructure. The primary language in which
@@ -7109,25 +7011,24 @@ class Lang(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/LANG)
     '''
-
-    key: str = 'LANG'
     
+    key: str = 'LANG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Lati(BaseStructure):
-    '''Store, validate and format the LATI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LATI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Latitude
     > A latitudinal coordinate. The payload is either `N` (for a coordinate north of
@@ -7170,48 +7071,46 @@ class Lati(BaseStructure):
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LATI Structure](https://gedcom.io/terms/v7/LATI)
     '''
-
-    key: str = 'LATI'
     
+    key: str = 'LATI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Left(BaseStructure):
-    '''Store, validate and format the LEFT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LEFT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Left crop width
     > Left is a number of pixels to not display from the left side of the image.
     > See `CROP` for more details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LEFT Structure](https://gedcom.io/terms/v7/LEFT)
     '''
-
-    key: str = 'LEFT'
     
+    key: str = 'LEFT'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Long(BaseStructure):
-    '''Store, validate and format the LONG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LONG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Longitude
     > A longitudinal coordinate. The payload is either `E` (for a coordinate east of
@@ -7254,25 +7153,24 @@ class Long(BaseStructure):
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LONG Structure](https://gedcom.io/terms/v7/LONG)
     '''
-
-    key: str = 'LONG'
     
+    key: str = 'LONG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Map(BaseStructure):
-    '''Store, validate and format the MAP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MAP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Map
     > A representative point for a location, as defined by `LATI` and `LONG`
@@ -7294,79 +7192,77 @@ class Map(BaseStructure):
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/LATI            | Only One | Yes      |
-    | https://gedcom.io/terms/v7/LONG            | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/LATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/LONG            | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MAP Structure](https://gedcom.io/terms/v7/MAP)
     '''
-
-    key: str = 'MAP'
     
+    key: str = 'MAP'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Marb(BaseStructure):
-    '''Store, validate and format the MARB structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MARB structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Marriage banns
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > marriage bann
     > Official public notice given that 2 people intend to marry.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MARB Structure](https://gedcom.io/terms/v7/MARB)
     '''
-
-    key: str = 'MARB'
     
+    key: str = 'MARB'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Marc(BaseStructure):
-    '''Store, validate and format the MARC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MARC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Marriage contract
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
@@ -7374,149 +7270,146 @@ class Marc(BaseStructure):
     > Recording a formal agreement of marriage, including the prenuptial
     > agreement in which marriage partners reach agreement about the property
     > rights of 1 or both, securing property to their children.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MARC Structure](https://gedcom.io/terms/v7/MARC)
     '''
-
-    key: str = 'MARC'
     
+    key: str = 'MARC'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Marl(BaseStructure):
-    '''Store, validate and format the MARL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MARL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Marriage license
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > marriage license
     > Obtaining a legal license to marry.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MARL Structure](https://gedcom.io/terms/v7/MARL)
     '''
-
-    key: str = 'MARL'
     
+    key: str = 'MARL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Marr(BaseStructure):
-    '''Store, validate and format the MARR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MARR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Marriage
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
     > marriage
     > A legal, common-law, or customary event such as a wedding or marriage
     > ceremony that joins 2 partners to create or extend a family unit.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MARR Structure](https://gedcom.io/terms/v7/MARR)
     '''
-
-    key: str = 'MARR'
     
+    key: str = 'MARR'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Mars(BaseStructure):
-    '''Store, validate and format the MARS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MARS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Marriage settlement
     > A [Family Event]. See also `FAMILY_EVENT_STRUCTURE`.
@@ -7524,50 +7417,49 @@ class Mars(BaseStructure):
     > Creating an agreement between 2 people contemplating marriage, at which
     > time they agree to release or modify property rights that would otherwise
     > arise from the marriage.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MARS Structure](https://gedcom.io/terms/v7/MARS)
     '''
-
-    key: str = 'MARS'
     
+    key: str = 'MARS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Medi(BaseStructure):
-    '''Store, validate and format the MEDI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MEDI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Medium
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-MEDI`
@@ -7610,7 +7502,7 @@ class Medi(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Medi('AUDIO')
-    
+        
     Enumerations:
     - 'AUDIO': https://gedcom.io/terms/v7/enum-AUDIO
         > An audio recording
@@ -7640,30 +7532,29 @@ class Medi(BaseStructure):
         > Burial marker or related memorial
     - 'VIDEO': https://gedcom.io/terms/v7/enum-VIDEO
         > Motion picture recording
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MEDI Structure](https://gedcom.io/terms/v7/MEDI)
     '''
-
-    key: str = 'MEDI'
     
+    key: str = 'MEDI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Mime(BaseStructure):
-    '''Store, validate and format the MIME structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the MIME structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Media type
     > Indicates the [media type] of the payload of the superstructure.
@@ -7723,25 +7614,24 @@ class Mime(BaseStructure):
     > 4. Replace each `&lt;` with `<` and `&gt;` with `>`
     > 5. Replace each `&amp;` with `&`
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/ns/dcat#mediaType
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM MIME Structure](https://gedcom.io/terms/v7/MIME)
     '''
-
-    key: str = 'MIME'
     
+    key: str = 'MIME'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class NameTran(BaseStructure):
-    '''Store, validate and format the TRAN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TRAN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Translation
     > A type of `TRAN` substructure specific to [Personal Names]. Each `NAME`.`TRAN`
@@ -7781,41 +7671,40 @@ class NameTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/GIVN            | Many     | No       |
-    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
     | https://gedcom.io/terms/v7/NICK            | Many     | No       |
     | https://gedcom.io/terms/v7/NPFX            | Many     | No       |
     | https://gedcom.io/terms/v7/NSFX            | Many     | No       |
     | https://gedcom.io/terms/v7/SPFX            | Many     | No       |
     | https://gedcom.io/terms/v7/SURN            | Many     | No       |
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NAME-TRAN)
     '''
-
-    key: str = 'NAME-TRAN'
     
+    key: str = 'NAME-TRAN'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class NameType(BaseStructure):
-    '''Store, validate and format the TYPE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TYPE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Type
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-NAME-TYPE`
     > indicating the type of the name.
-    
+        
     Enumerations:
     - 'AKA': https://gedcom.io/terms/v7/enum-AKA
         > Also known as, alias, etc.
@@ -7831,149 +7720,145 @@ class NameType(BaseStructure):
         > A value not listed here; should have a `PHRASE` substructure
     - 'PROFESSIONAL': https://gedcom.io/terms/v7/enum-PROFESSIONAL
         > Name used professionally (pen, screen, stage name).
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/NAME-TYPE)
     '''
-
-    key: str = 'NAME-TYPE'
     
+    key: str = 'NAME-TYPE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Name(BaseStructure):
-    '''Store, validate and format the NAME structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NAME structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Name
     > The name of the superstructure's subject, represented as a simple string.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/NAME)
     '''
-
-    key: str = 'NAME'
     
+    key: str = 'NAME'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Nati(BaseStructure):
-    '''Store, validate and format the NATI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NATI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Nationality
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > nationality
     > An individual's national heritage or origin, or other folk, house, kindred,
     > lineage, or tribal interest.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NATI Structure](https://gedcom.io/terms/v7/NATI)
     '''
-
-    key: str = 'NATI'
     
+    key: str = 'NATI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Natu(BaseStructure):
-    '''Store, validate and format the NATU structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NATU structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Naturalization
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > naturalization
     > Obtaining citizenship.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NATU Structure](https://gedcom.io/terms/v7/NATU)
     '''
-
-    key: str = 'NATU'
     
+    key: str = 'NATU'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Nick(BaseStructure):
-    '''Store, validate and format the NICK structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NICK structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Nickname
     > A descriptive or familiar name that is used instead of, or in addition to,
@@ -7992,102 +7877,99 @@ class Nick(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NICK Structure](https://gedcom.io/terms/v7/NICK)
     '''
-
-    key: str = 'NICK'
     
+    key: str = 'NICK'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Nmr(BaseStructure):
-    '''Store, validate and format the NMR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NMR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Number of marriages
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > number of marriages
     > The number of times this person has participated in a family as a spouse or
     > parent.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NMR Structure](https://gedcom.io/terms/v7/NMR)
     '''
-
-    key: str = 'NMR'
     
+    key: str = 'NMR'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class NoDate(BaseStructure):
-    '''Store, validate and format the DATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Date
     > The `DatePeriod` during which the event did not occur or the attribute did
     > not apply.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/NO-DATE)
     '''
-
-    key: str = 'NO-DATE'
     
+    key: str = 'NO-DATE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class NoteTran(BaseStructure):
-    '''Store, validate and format the TRAN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TRAN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Translation
     > A type of `TRAN` for unstructured human-readable text, such as is found in
@@ -8137,31 +8019,30 @@ class NoteTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+    | https://gedcom.io/terms/v7/MIME            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NOTE-TRAN)
     '''
-
-    key: str = 'NOTE-TRAN'
     
+    key: str = 'NOTE-TRAN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Note(BaseStructure):
-    '''Store, validate and format the NOTE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NOTE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Note
     > A `NOTE_STRUCTURE`, containing additional information provided by the submitter
@@ -8171,78 +8052,75 @@ class Note(BaseStructure):
     > in terms of "ancestors or descendants of" so that the person receiving the data
     > knows what genealogical information the document contains.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       |
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+    | https://gedcom.io/terms/v7/MIME            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NOTE Structure](https://gedcom.io/terms/v7/NOTE)
     '''
-
-    key: str = 'NOTE'
     
+    key: str = 'NOTE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Npfx(BaseStructure):
-    '''Store, validate and format the NPFX structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NPFX structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Name prefix
     > Text that appears on a name line before the given and surname parts of a name.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NPFX Structure](https://gedcom.io/terms/v7/NPFX)
     '''
-
-    key: str = 'NPFX'
     
+    key: str = 'NPFX'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Nsfx(BaseStructure):
-    '''Store, validate and format the NSFX structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the NSFX structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Name suffix
     > Text which appears on a name line after or behind the given and surname
     > parts of a name.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM NSFX Structure](https://gedcom.io/terms/v7/NSFX)
     '''
-
-    key: str = 'NSFX'
     
+    key: str = 'NSFX'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Obje(BaseStructure):
-    '''Store, validate and format the OBJE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the OBJE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Object
     > See `MULTIMEDIA_LINK`.
@@ -8254,79 +8132,77 @@ class Obje(BaseStructure):
     > The optional `TITL` substructure supersedes any `OBJE.FILE.TITL` substructures
     > included in the `MULTIMEDIA_RECORD`.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/CROP            | Only One | No       |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/CROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/TITL            | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-OBJE>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/OBJE)
     '''
-
-    key: str = 'OBJE'
     
+    key: str = 'OBJE'
+        
     def __init__(self, value: MultimediaXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Occu(BaseStructure):
-    '''Store, validate and format the OCCU structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the OCCU structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Occupation
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > occupation
     > The type of work or profession of an individual.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM OCCU Structure](https://gedcom.io/terms/v7/OCCU)
     '''
-
-    key: str = 'OCCU'
     
+    key: str = 'OCCU'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class OrdStat(BaseStructure):
-    '''Store, validate and format the STAT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the STAT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Status
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ord-STAT`
@@ -8345,7 +8221,7 @@ class OrdStat(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         OrdStat('BIC')
-    
+        
     Enumerations:
     - 'BIC': https://gedcom.io/terms/v7/enum-BIC
         > Applies to: `SLGC`
@@ -8371,78 +8247,76 @@ class OrdStat(BaseStructure):
         > Applies to: All
     - 'UNCLEARED': https://gedcom.io/terms/v7/enum-UNCLEARED
         > Applies to: All
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/ord-STAT)
     '''
-
-    key: str = 'ord-STAT'
     
+    key: str = 'ord-STAT'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Ordn(BaseStructure):
-    '''Store, validate and format the ORDN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ORDN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Ordination
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > ordination
     > Receiving authority to act in religious matters.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ORDN Structure](https://gedcom.io/terms/v7/ORDN)
     '''
-
-    key: str = 'ORDN'
     
+    key: str = 'ORDN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Page(BaseStructure):
-    '''Store, validate and format the PAGE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PAGE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Page
     > A specific location within the information referenced. For a published work,
@@ -8478,25 +8352,24 @@ class Page(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PAGE Structure](https://gedcom.io/terms/v7/PAGE)
     '''
-
-    key: str = 'PAGE'
     
+    key: str = 'PAGE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Pedi(BaseStructure):
-    '''Store, validate and format the PEDI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PEDI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Pedigree
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-PEDI`
@@ -8516,7 +8389,7 @@ class Pedi(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Pedi('ADOPTED')
-    
+        
     Enumerations:
     - 'ADOPTED': https://gedcom.io/terms/v7/enum-ADOPTED
         > Adoptive parents
@@ -8528,30 +8401,29 @@ class Pedi(BaseStructure):
         > A value not listed here; should have a `PHRASE` substructure
     - 'SEALING': https://gedcom.io/terms/v7/enum-SEALING
         > The child was sealed to parents other than birth parents
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PEDI Structure](https://gedcom.io/terms/v7/PEDI)
     '''
-
-    key: str = 'PEDI'
     
+    key: str = 'PEDI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Phon(BaseStructure):
-    '''Store, validate and format the PHON structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PHON structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Phone
     > A telephone number. Telephone numbers have many regional variations and can
@@ -8564,25 +8436,24 @@ class Phon(BaseStructure):
     > 
     > See ITU standards [E.123] and [E.164] for more information.
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PHON Structure](https://gedcom.io/terms/v7/PHON)
     '''
-
-    key: str = 'PHON'
     
+    key: str = 'PHON'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Phrase(BaseStructure):
-    '''Store, validate and format the PHRASE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PHRASE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Phrase
     > Textual information that cannot be expressed in the superstructure due to the
@@ -8661,25 +8532,24 @@ class Phrase(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PHRASE Structure](https://gedcom.io/terms/v7/PHRASE)
     '''
-
-    key: str = 'PHRASE'
     
+    key: str = 'PHRASE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class PlacForm(BaseStructure):
-    '''Store, validate and format the FORM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FORM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Format
     > A comma-separated list of jurisdictional titles, which has the same number of
@@ -8697,25 +8567,24 @@ class PlacForm(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/PLAC-FORM)
     '''
-
-    key: str = 'PLAC-FORM'
     
+    key: str = 'PLAC-FORM'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class PlacTran(BaseStructure):
-    '''Store, validate and format the TRAN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TRAN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Translation
     > A type of `TRAN` substructure specific to places. Each `PLAC`.`TRAN` must have
@@ -8756,30 +8625,29 @@ class PlacTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/PLAC-TRAN)
     '''
-
-    key: str = 'PLAC-TRAN'
     
+    key: str = 'PLAC-TRAN'
+        
     def __init__(self, value: str, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Plac(BaseStructure):
-    '''Store, validate and format the PLAC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PLAC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Place
     > The principal place in which the superstructure's subject occurred, represented
@@ -8848,108 +8716,105 @@ class Plac(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       |
-    | https://gedcom.io/terms/v7/MAP             | Only One | No       |
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+    | https://gedcom.io/terms/v7/MAP             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC-FORM       | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC-FORM       | Many     | No       |
     | https://gedcom.io/terms/v7/PLAC-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/PLAC)
     '''
-
-    key: str = 'PLAC'
     
+    key: str = 'PLAC'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Post(BaseStructure):
-    '''Store, validate and format the POST structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the POST structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Postal code
     > A code used by a postal service to identify an area to facilitate mail
     > handling. See `ADDRESS_STRUCTURE` for more details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM POST Structure](https://gedcom.io/terms/v7/POST)
     '''
-
-    key: str = 'POST'
     
+    key: str = 'POST'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Prob(BaseStructure):
-    '''Store, validate and format the PROB structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PROB structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Probate
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > probate
     > Judicial determination of the validity of a will. It may indicate several
     > related court activities over several dates.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PROB Structure](https://gedcom.io/terms/v7/PROB)
     '''
-
-    key: str = 'PROB'
     
+    key: str = 'PROB'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Publ(BaseStructure):
-    '''Store, validate and format the PUBL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the PUBL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Publication
     > When and where the record was created. For published works, this includes
@@ -8961,25 +8826,24 @@ class Publ(BaseStructure):
     > person making a declaration for a pension or the city and state of residence of
     > the writer of a letter.
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM PUBL Structure](https://gedcom.io/terms/v7/PUBL)
     '''
-
-    key: str = 'PUBL'
     
+    key: str = 'PUBL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Quay(BaseStructure):
-    '''Store, validate and format the QUAY structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the QUAY structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Quality of data
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-QUAY`
@@ -9002,7 +8866,7 @@ class Quay(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Quay('0')
-    
+        
     Enumerations:
     - '0': https://gedcom.io/terms/v7/enum-0
         > Unreliable evidence or estimated data
@@ -9013,25 +8877,24 @@ class Quay(BaseStructure):
         > Secondary evidence, data officially recorded sometime after the event
     - '3': https://gedcom.io/terms/v7/enum-3
         > Direct and primary evidence used, or by dominance of the evidence
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM QUAY Structure](https://gedcom.io/terms/v7/QUAY)
     '''
-
-    key: str = 'QUAY'
     
+    key: str = 'QUAY'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordFam(BaseStructure):
-    '''Store, validate and format the FAM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the FAM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Family record
     > See `FAMILY_RECORD`
@@ -9099,15 +8962,15 @@ class RecordFam(BaseStructure):
     > have multiple `FAMC` substructures pointing to the same `FAM`, but doing so is
     > not recommended.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
     | https://gedcom.io/terms/v7/CHIL            | Many     | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/DIV             | Many     | No       |
     | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
     | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
@@ -9115,10 +8978,10 @@ class RecordFam(BaseStructure):
     | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
     | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
     | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
-    | https://gedcom.io/terms/v7/FAM-HUSB        | Only One | No       |
+    | https://gedcom.io/terms/v7/FAM-HUSB        | Many     | No       |
     | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
     | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
-    | https://gedcom.io/terms/v7/FAM-WIFE        | Only One | No       |
+    | https://gedcom.io/terms/v7/FAM-WIFE        | Many     | No       |
     | https://gedcom.io/terms/v7/MARB            | Many     | No       |
     | https://gedcom.io/terms/v7/MARC            | Many     | No       |
     | https://gedcom.io/terms/v7/MARL            | Many     | No       |
@@ -9128,30 +8991,30 @@ class RecordFam(BaseStructure):
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
     | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/SUBM            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    
+        
     Args:
+        value: A value of data type FamilyXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM FAM Structure](https://gedcom.io/terms/v7/record-FAM)
     '''
-
-    key: str = 'record-FAM'
     
+    key: str = 'record-FAM'
+        
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordIndi(BaseStructure):
-    '''Store, validate and format the INDI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the INDI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Individual
     > See `INDIVIDUAL_RECORD`.
@@ -9196,7 +9059,7 @@ class RecordIndi(BaseStructure):
     > `FAMC` pointer is allowed to refer to a family where the individual does not
     > appear as a child.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
@@ -9212,12 +9075,12 @@ class RecordIndi(BaseStructure):
     | https://gedcom.io/terms/v7/BLES            | Many     | No       |
     | https://gedcom.io/terms/v7/BURI            | Many     | No       |
     | https://gedcom.io/terms/v7/CAST            | Many     | No       |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
     | https://gedcom.io/terms/v7/CHR             | Many     | No       |
     | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
     | https://gedcom.io/terms/v7/CONF            | Many     | No       |
     | https://gedcom.io/terms/v7/CONL            | Many     | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/CREM            | Many     | No       |
     | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
     | https://gedcom.io/terms/v7/DESI            | Many     | No       |
@@ -9252,9 +9115,9 @@ class RecordIndi(BaseStructure):
     | https://gedcom.io/terms/v7/PROB            | Many     | No       |
     | https://gedcom.io/terms/v7/PROP            | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
     | https://gedcom.io/terms/v7/RETI            | Many     | No       |
-    | https://gedcom.io/terms/v7/SEX             | Only One | No       |
+    | https://gedcom.io/terms/v7/SEX             | Many     | No       |
     | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
@@ -9262,24 +9125,24 @@ class RecordIndi(BaseStructure):
     | https://gedcom.io/terms/v7/SUBM            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WILL            | Many     | No       |
-    
+        
     Args:
+        value: A value of data type IndividualXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM INDI Structure](https://gedcom.io/terms/v7/record-INDI)
     '''
-
-    key: str = 'record-INDI'
     
+    key: str = 'record-INDI'
+        
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordObje(BaseStructure):
-    '''Store, validate and format the OBJE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the OBJE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Object
     > See `MULTIMEDIA_RECORD`.
@@ -9293,38 +9156,38 @@ class RecordObje(BaseStructure):
     > The change and creation dates should be for the `OBJE` record itself, not the
     > underlying files.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
-    | https://gedcom.io/terms/v7/FILE            | Many     | Yes      |
+    | https://gedcom.io/terms/v7/FILE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    
+        
     Args:
+        value: A value of data type MultimediaXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/record-OBJE)
     '''
-
-    key: str = 'record-OBJE'
     
+    key: str = 'record-OBJE'
+        
     def __init__(self, value: MultimediaXref, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordRepo(BaseStructure):
-    '''Store, validate and format the REPO structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the REPO structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Repository
     > See `REPOSITORY_RECORD`.
@@ -9341,41 +9204,41 @@ class RecordRepo(BaseStructure):
     > recommended that the repository record store current contact information, if
     > known.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/NAME            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
+        value: A value of data type RepositoryXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/record-REPO)
     '''
-
-    key: str = 'record-REPO'
     
+    key: str = 'record-REPO'
+        
     def __init__(self, value: RepositoryXref, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordSnote(BaseStructure):
-    '''Store, validate and format the SNOTE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SNOTE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Shared note
     > A note that is shared by multiple structures. See `SHARED_NOTE_RECORD` for
@@ -9423,38 +9286,37 @@ class RecordSnote(BaseStructure):
     > cycle. Applications should also ensure they can handle invalid files with such
     > cycles in a safe manner.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       |
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+    | https://gedcom.io/terms/v7/MIME            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    
+        
     Args:
-        value: A value of data type http://www.w3.org/2001/XMLSchema#string
+        value: A value of data type SharedNoteXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/record-SNOTE)
     '''
-
-    key: str = 'record-SNOTE'
     
-    def __init__(self, value: str, subs: Any = None) -> None:
+    key: str = 'record-SNOTE'
+        
+    def __init__(self, value: SharedNoteXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordSour(BaseStructure):
-    '''Store, validate and format the SOUR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SOUR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Source
     > A description of an entire source. See `SOURCE_RECORD` for more details.
@@ -9475,43 +9337,43 @@ class RecordSour(BaseStructure):
     > cycle. Applications should also ensure they can handle invalid files with such
     > cycles in a safe manner.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ABBR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AUTH            | Only One | No       |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATA            | Only One | No       |
+    | https://gedcom.io/terms/v7/ABBR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AUTH            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PUBL            | Only One | No       |
+    | https://gedcom.io/terms/v7/PUBL            | Many     | No       |
     | https://gedcom.io/terms/v7/REFN            | Many     | No       |
     | https://gedcom.io/terms/v7/REPO            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    | https://gedcom.io/terms/v7/TEXT            | Only One | No       |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       |
+    | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
+    | https://gedcom.io/terms/v7/TITL            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
-    
+        
     Args:
+        value: A value of data type SourceXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/record-SOUR)
     '''
-
-    key: str = 'record-SOUR'
     
+    key: str = 'record-SOUR'
+        
     def __init__(self, value: SourceXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class RecordSubm(BaseStructure):
-    '''Store, validate and format the SUBM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SUBM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Submitter
     > A description of a contributor of information to the document. See
@@ -9521,17 +9383,17 @@ class RecordSubm(BaseStructure):
     > document are assumed to be contributed by the submitter referenced in the
     > `HEAD`, unless a `SUBM` structure inside a specific record points at a
     > different submitter record.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/EXID            | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
-    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/NAME            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
@@ -9540,24 +9402,24 @@ class RecordSubm(BaseStructure):
     | https://gedcom.io/terms/v7/SUBM-LANG       | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
+        value: A value of data type SubmitterXref
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/record-SUBM)
     '''
-
-    key: str = 'record-SUBM'
     
+    key: str = 'record-SUBM'
+        
     def __init__(self, value: SubmitterXref, subs: Any) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Refn(BaseStructure):
-    '''Store, validate and format the REFN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the REFN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Reference
     > A user-defined number or text that the submitter uses to identify the
@@ -9569,53 +9431,51 @@ class Refn(BaseStructure):
     > Multiple structures describing different aspects of the same subject must not
     > have the same `REFN` value.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM REFN Structure](https://gedcom.io/terms/v7/REFN)
     '''
-
-    key: str = 'REFN'
     
+    key: str = 'REFN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Reli(BaseStructure):
-    '''Store, validate and format the RELI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the RELI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Religion
     > A religious denomination associated with the event or attribute described
     > by the superstructure.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/RELI)
     '''
-
-    key: str = 'RELI'
     
+    key: str = 'RELI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Repo(BaseStructure):
-    '''Store, validate and format the REPO structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the REPO structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Repository
     > See `SOURCE_REPOSITORY_CITATION`.
@@ -9625,32 +9485,31 @@ class Repo(BaseStructure):
     > formal repositories, such as the Family History Library, should show a call
     > number of the source at that repository. The call number of that source
     > should be recorded using a `CALN` substructure.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/CALN            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-REPO>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/REPO)
     '''
-
-    key: str = 'REPO'
     
+    key: str = 'REPO'
+        
     def __init__(self, value: RepositoryXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Resn(BaseStructure):
-    '''Store, validate and format the RESN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the RESN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Restriction
     > A [List] of enumerated values from set
@@ -9680,7 +9539,7 @@ class Resn(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Resn('CONFIDENTIAL')
-    
+        
     Enumerations:
     - 'CONFIDENTIAL': https://gedcom.io/terms/v7/enum-CONFIDENTIAL
         > This data was marked as confidential by the user.
@@ -9691,74 +9550,72 @@ class Resn(BaseStructure):
         > because it contains information about living individuals. This definition
         > is known to admit multiple interpretations, so use of the `PRIVACY`
         > restriction notice is not recommended.
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM RESN Structure](https://gedcom.io/terms/v7/RESN)
     '''
-
-    key: str = 'RESN'
     
+    key: str = 'RESN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Reti(BaseStructure):
-    '''Store, validate and format the RETI structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the RETI structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Retirement
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > retirement
     > Exiting an occupational relationship with an employer after a qualifying
     > time period.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM RETI Structure](https://gedcom.io/terms/v7/RETI)
     '''
-
-    key: str = 'RETI'
     
+    key: str = 'RETI'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Role(BaseStructure):
-    '''Store, validate and format the ROLE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the ROLE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Role
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ROLE`
@@ -9810,7 +9667,7 @@ class Role(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Role('CHIL')
-    
+        
     Enumerations:
     - 'CHIL': https://gedcom.io/terms/v7/enum-CHIL
         > Child
@@ -9843,57 +9700,55 @@ class Role(BaseStructure):
         > Wife; implies `SPOU`
     - 'WITN': https://gedcom.io/terms/v7/enum-WITN
         > Witness
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM ROLE Structure](https://gedcom.io/terms/v7/ROLE)
     '''
-
-    key: str = 'ROLE'
     
+    key: str = 'ROLE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Schma(BaseStructure):
-    '''Store, validate and format the SCHMA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SCHMA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Extension schema
     > A container for storing meta-information about the extension tags used in
     > this document. See [Extensions] for more details.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/TAG             | Many     | No       |
-    
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SCHMA Structure](https://gedcom.io/terms/v7/SCHMA)
     '''
-
-    key: str = 'SCHMA'
     
+    key: str = 'SCHMA'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Sdate(BaseStructure):
-    '''Store, validate and format the SDATE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SDATE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Sort date
     > A date to be used as a sorting hint. It is intended for use when the actual
@@ -9913,31 +9768,30 @@ class Sdate(BaseStructure):
     > applications sort dates the same way, as the relative ordering of dates with
     > different levels of precision is not well defined.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+    | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SDATE Structure](https://gedcom.io/terms/v7/SDATE)
     '''
-
-    key: str = 'SDATE'
     
+    key: str = 'SDATE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Sex(BaseStructure):
-    '''Store, validate and format the SEX structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SEX structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Sex
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-SEX` that
@@ -9956,7 +9810,7 @@ class Sex(BaseStructure):
         >>> print(m.code())
         <BLANKLINE>
         Sex('F')
-    
+        
     Enumerations:
     - 'F': https://gedcom.io/terms/v7/enum-F
         > Female
@@ -9966,25 +9820,24 @@ class Sex(BaseStructure):
         > Cannot be determined from available sources
     - 'X': https://gedcom.io/terms/v7/enum-X
         > Does not fit the typical definition of only Male or only Female
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SEX Structure](https://gedcom.io/terms/v7/SEX)
     '''
-
-    key: str = 'SEX'
     
+    key: str = 'SEX'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Slgc(BaseStructure):
-    '''Store, validate and format the SLGC structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SLGC structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Sealing, child
     > A [Latter-Day Saint Ordinance]. See also `LDS_INDIVIDUAL_ORDINANCE`.
@@ -9992,36 +9845,35 @@ class Slgc(BaseStructure):
     > A religious event pertaining to the sealing of a child to his or her
     > parents in a temple ceremony of The Church of Jesus Christ of Latter-day
     > Saints.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | Yes      |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAMC            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SLGC Structure](https://gedcom.io/terms/v7/SLGC)
     '''
-
-    key: str = 'SLGC'
     
+    key: str = 'SLGC'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Slgs(BaseStructure):
-    '''Store, validate and format the SLGS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SLGS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Sealing, spouse
     > A [Latter-Day Saint Ordinance]. See also `LDS_SPOUSE_SEALING`.
@@ -10032,85 +9884,82 @@ class Slgs(BaseStructure):
     > A religious event pertaining to the sealing of a husband and wife in a
     > temple ceremony of The Church of Jesus Christ of Latter-day Saints. (See
     > also [`MARR`])
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SLGS Structure](https://gedcom.io/terms/v7/SLGS)
     '''
-
-    key: str = 'SLGS'
     
+    key: str = 'SLGS'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Snote(BaseStructure):
-    '''Store, validate and format the SNOTE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SNOTE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Shared note
     > A pointer to a note that is shared by multiple structures. See
     > `NOTE_STRUCTURE` for more details.
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SNOTE>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/SNOTE)
     '''
-
-    key: str = 'SNOTE'
     
+    key: str = 'SNOTE'
+        
     def __init__(self, value: SharedNoteXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class SourData(BaseStructure):
-    '''Store, validate and format the DATA structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the DATA structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Data
     > See `https://gedcom.io/terms/v7/DATA`.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
-    
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/SOUR-DATA)
     '''
-
-    key: str = 'SOUR-DATA'
     
+    key: str = 'SOUR-DATA'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class SourEven(BaseStructure):
-    '''Store, validate and format the EVEN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the EVEN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Event
     > An enumerated value from set `https://gedcom.io/terms/v7/enumset-EVENATTR`
@@ -10119,7 +9968,7 @@ class SourEven(BaseStructure):
     > record a birth of a child, then the type would be `BIRT` regardless of the
     > assertions made from that record, such as the mother's name or mother's
     > birth date.
-    
+        
     Enumerations:
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
         > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
@@ -10136,31 +9985,30 @@ class SourEven(BaseStructure):
     - 'RESI': https://gedcom.io/terms/v7/enum-RESI
         > A residence attribute; either `https://gedcom.io/terms/v7/INDI-RESI` or
         > `https://gedcom.io/terms/v7/FAM-RESI`
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       |
-    | https://gedcom.io/terms/v7/ROLE            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+    | https://gedcom.io/terms/v7/ROLE            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/SOUR-EVEN)
     '''
-
-    key: str = 'SOUR-EVEN'
     
+    key: str = 'SOUR-EVEN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Sour(BaseStructure):
-    '''Store, validate and format the SOUR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SOUR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Source
     > A description of the relevant part of a source to support the
@@ -10186,249 +10034,240 @@ class Sour(BaseStructure):
     > `SOURCE_CITATION`, allowing potentially unbounded nesting of structures.
     > Because each dataset is finite, this nesting is also guaranteed to be finite.
     > 
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
-    | https://gedcom.io/terms/v7/PAGE            | Only One | No       |
-    | https://gedcom.io/terms/v7/QUAY            | Only One | No       |
+    | https://gedcom.io/terms/v7/PAGE            | Many     | No       |
+    | https://gedcom.io/terms/v7/QUAY            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
-    | https://gedcom.io/terms/v7/SOUR-DATA       | Only One | No       |
-    | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/SOUR-DATA       | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR-EVEN       | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SOUR>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/SOUR)
     '''
-
-    key: str = 'SOUR'
     
+    key: str = 'SOUR'
+        
     def __init__(self, value: SourceXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Spfx(BaseStructure):
-    '''Store, validate and format the SPFX structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SPFX structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Surname prefix
     > A name piece used as a non-indexing pre-part of a surname.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SPFX Structure](https://gedcom.io/terms/v7/SPFX)
     '''
-
-    key: str = 'SPFX'
     
+    key: str = 'SPFX'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Ssn(BaseStructure):
-    '''Store, validate and format the SSN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SSN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Social security number
     > An [Individual Attribute]. See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > social security number
     > A number assigned by the United States Social Security Administration, used
     > for tax identification purposes. It is a type of `IDNO`.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SSN Structure](https://gedcom.io/terms/v7/SSN)
     '''
-
-    key: str = 'SSN'
     
+    key: str = 'SSN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Stae(BaseStructure):
-    '''Store, validate and format the STAE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the STAE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > State
     > A geographical division of a larger jurisdictional area, such as a state
     > within the United States of America. See `ADDRESS_STRUCTURE` for more
     > details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM STAE Structure](https://gedcom.io/terms/v7/STAE)
     '''
-
-    key: str = 'STAE'
     
+    key: str = 'STAE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class SubmLang(BaseStructure):
-    '''Store, validate and format the LANG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the LANG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Language
     > A language the subject of that record understands.
     > 
     > The payload of the `LANG` structure is a language tag, as defined by [BCP 47].
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/SUBM-LANG)
     '''
-
-    key: str = 'SUBM-LANG'
     
+    key: str = 'SUBM-LANG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Subm(BaseStructure):
-    '''Store, validate and format the SUBM structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SUBM structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Submitter
     > A contributor of information in the substructure. This is metadata about
     > the structure itself, not data about its subject.
-    
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/SUBM)
     '''
-
-    key: str = 'SUBM'
     
+    key: str = 'SUBM'
+        
     def __init__(self, value: SubmitterXref, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Surn(BaseStructure):
-    '''Store, validate and format the SURN structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the SURN structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Surname
     > A family name passed on or used by members of a family.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM SURN Structure](https://gedcom.io/terms/v7/SURN)
     '''
-
-    key: str = 'SURN'
     
+    key: str = 'SURN'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Tag(BaseStructure):
-    '''Store, validate and format the TAG structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TAG structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Extension tag
     > Information relating to a single extension tag as used in this document.
     > See [Extensions] for more details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TAG Structure](https://gedcom.io/terms/v7/TAG)
     '''
-
-    key: str = 'TAG'
     
+    key: str = 'TAG'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Temp(BaseStructure):
-    '''Store, validate and format the TEMP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TEMP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Temple
     > The name of a temple of The Church of Jesus Christ of Latter-day Saints.
     > Previous versions recommended using a set of abbreviations for temple
     > names, but the list of abbreviations is no longer published by the Church
     > and using abbreviations is no longer recommended.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TEMP Structure](https://gedcom.io/terms/v7/TEMP)
     '''
-
-    key: str = 'TEMP'
     
+    key: str = 'TEMP'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Text(BaseStructure):
-    '''Store, validate and format the TEXT structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TEXT structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Text from Source
     > A verbatim copy of any description contained within the source. This
@@ -10436,53 +10275,51 @@ class Text(BaseStructure):
     > not the submitter's opinion about the source. This should be, from the
     > evidence point of view, "what the original record keeper said" as opposed
     > to the researcher's interpretation.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       |
-    
+    | https://gedcom.io/terms/v7/LANG            | Many     | No       |
+    | https://gedcom.io/terms/v7/MIME            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TEXT Structure](https://gedcom.io/terms/v7/TEXT)
     '''
-
-    key: str = 'TEXT'
     
+    key: str = 'TEXT'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Time(BaseStructure):
-    '''Store, validate and format the TIME structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TIME structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Time
     > A `Time` value in a 24-hour clock format.
-    
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Time
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TIME Structure](https://gedcom.io/terms/v7/TIME)
     '''
-
-    key: str = 'TIME'
     
+    key: str = 'TIME'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Titl(BaseStructure):
-    '''Store, validate and format the TITL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TITL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Title
     > The title, formal or informal, of the superstructure.
@@ -10512,70 +10349,67 @@ class Titl(BaseStructure):
     > cases, the entire citation text may be presented as the payload of the
     > `SOUR`.`TITL`.
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/TITL)
     '''
-
-    key: str = 'TITL'
     
+    key: str = 'TITL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Top(BaseStructure):
-    '''Store, validate and format the TOP structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TOP structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Top crop width
     > A number of pixels to not display from the top side of the image. See
     > `CROP` for more details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TOP Structure](https://gedcom.io/terms/v7/TOP)
     '''
-
-    key: str = 'TOP'
     
+    key: str = 'TOP'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Trlr(BaseStructure):
-    '''Store, validate and format the TRLR structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TRLR structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Trailer
     > A pseudo-structure marking the end of a dataset. See [The Header and
     > Trailer] for more details.
-    
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TRLR Structure](https://gedcom.io/terms/v7/TRLR)
     '''
-
-    key: str = 'TRLR'
     
+    key: str = 'TRLR'
+        
     def __init__(self, subs: Any = None) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Type(BaseStructure):
-    '''Store, validate and format the TYPE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the TYPE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Type
     > A descriptive word or phrase used to further classify the superstructure.
@@ -10616,25 +10450,24 @@ class Type(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/TYPE)
     '''
-
-    key: str = 'TYPE'
     
+    key: str = 'TYPE'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Uid(BaseStructure):
-    '''Store, validate and format the UID structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the UID structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Unique Identifier
     > A globally-unique identifier of the superstructure, to be preserved across
@@ -10669,99 +10502,95 @@ class Uid(BaseStructure):
     > 
     > </div>
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM UID Structure](https://gedcom.io/terms/v7/UID)
     '''
-
-    key: str = 'UID'
     
+    key: str = 'UID'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Vers(BaseStructure):
-    '''Store, validate and format the VERS structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the VERS structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Version
     > An identifier that represents the version level assigned to the associated
     > product. It is defined and changed by the creators of the product.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/VERS)
     '''
-
-    key: str = 'VERS'
     
+    key: str = 'VERS'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Width(BaseStructure):
-    '''Store, validate and format the WIDTH structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the WIDTH structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Width in pixels
     > How many pixels to display horizontally for the image. See `CROP` for more
     > details.
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM WIDTH Structure](https://gedcom.io/terms/v7/WIDTH)
     '''
-
-    key: str = 'WIDTH'
     
+    key: str = 'WIDTH'
+        
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Wife(BaseStructure):
-    '''Store, validate and format the WIFE structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the WIFE structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Wife
     > A container for information relevant to the subject of the superstructure
     > specific to the individual described by the associated `FAM`'s `WIFE`
     > substructure.
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      |
-    
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/WIFE)
     '''
-
-    key: str = 'WIFE'
     
+    key: str = 'WIFE'
+        
     def __init__(self, subs: Any) -> None:
         super().__init__(Default.EMPTY, subs, self.key)
-
+    
 
 class Will(BaseStructure):
-    '''Store, validate and format the WILL structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the WILL structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Will
     > An [Individual Event]. See also `INDIVIDUAL_EVENT_STRUCTURE`.
@@ -10769,49 +10598,48 @@ class Will(BaseStructure):
     > A legal document treated as an event, by which a person disposes of his or
     > her estate. It takes effect after death. The event date is the date the
     > will was signed while the person was alive. (See also `PROB`)
-    
+        
     Substructures:
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/AGNC            | Many     | No       |
     | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       |
+    | https://gedcom.io/terms/v7/CAUS            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/EMAIL           | Many     | No       |
     | https://gedcom.io/terms/v7/FAX             | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/RELI            | Many     | No       |
+    | https://gedcom.io/terms/v7/RESN            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       |
+    | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
-    
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM WILL Structure](https://gedcom.io/terms/v7/WILL)
     '''
-
-    key: str = 'WILL'
     
+    key: str = 'WILL'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-
+    
 
 class Www(BaseStructure):
-    '''Store, validate and format the WWW structure. 
-    Generated by the class_generation.ipynb notebook.
-
+    '''Store, validate and format the WWW structure. Generated by `Display.generate_class`.
+    
     GEDCOM Specification:
     > Web address
     > A URL or other locator for a World Wide Web page of the subject of the
@@ -10830,16 +10658,17 @@ class Www(BaseStructure):
     > If an invalid or no longer existing web address is present upon import, it
     > should be preserved as-is on export.
     > 
-    
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
-    
+        
     References:
     - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
     '''
-
-    key: str = 'WWW'
     
+    key: str = 'WWW'
+        
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
+    
