@@ -121,6 +121,14 @@ class Default:
     TOP: int = 0
     TRAILER: str = '0 TRLR'
     UNDERLINE: str = '_'
+    URL_CALENDAR: str = 'calendar/standard/cal-'
+    URL_DATATYPE: str = 'data-type/standard/type-'
+    URL_ENUMERATION: str = 'enumeration/standard/enum-'
+    URL_ENUMERATION_SET: str = 'enumeration-set/standard/enumset-'
+    URL_MONTH: str = 'month/standard/month-'
+    URL_STRUCTURE: str = 'structure/standard/'
+    URL_STRUCTURE_EXTENSION: str = 'structure/extension/'
+    URL_URI: str = 'uri/exid-types/'
     UTF8: str = 'utf-8'
     VOID_POINTER: str = '@VOID@'
     WEEKS: int = 0
