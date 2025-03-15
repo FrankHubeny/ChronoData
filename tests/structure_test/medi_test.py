@@ -18,8 +18,8 @@ import re
 
 import pytest
 
+from genedata.classes7 import Lati, Medi, Phrase
 from genedata.messages import Msg
-from genedata.structure import Lati, Medi, Phrase
 
 
 # 1. Validate: Exercise all validation checks.
@@ -80,35 +80,38 @@ def test_bad_enum() -> None:
     m = Medi('abc')
     with pytest.raises(
         ValueError,
-        match=re.escape(Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)),
+        match=re.escape(
+            Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)
+        ),
     ):
         m.validate()
 
 
 # 2. Ged: Exercise the generation of ged data.
 
+
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
     m = Medi('BOOK', Phrase('a book'))
     assert m.ged(1) == '1 MEDI BOOK\n2 PHRASE a book\n'
+
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
     m = Medi('BOOK', [Phrase('a book')])
     assert m.ged(1) == '1 MEDI BOOK\n2 PHRASE a book\n'
 
+
 # 3. Code: Exercise the code method.
+
 
 def test_code() -> None:
     """Illustrate code running."""
     m = Medi('BOOK', Phrase('a book'))
-    assert (
-        m.code() == "\nMedi('BOOK', Phrase('a book'))"
-    )
+    assert m.code() == "\nMedi('BOOK', Phrase('a book'))"
+
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
     m = Medi('BOOK', [Phrase('a book')])
-    assert (
-        m.code() == "\nMedi('BOOK', Phrase('a book'))"
-    )
+    assert m.code() == "\nMedi('BOOK', Phrase('a book'))"

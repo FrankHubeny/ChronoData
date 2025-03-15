@@ -18,30 +18,30 @@ import re
 
 import pytest
 
+from genedata.classes7 import FamHusb, FamilyXref, IndividualXref, Lati, Phrase
 from genedata.messages import Msg
-from genedata.structure import FamHusb, FamilyXref, IndividualXref, Lati, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
 
-indi = IndividualXref('@1@')
-fam = FamilyXref('@2@')
-
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, [Phrase('indi')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, Phrase('indi'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi)
     assert m.validate()
 
@@ -51,6 +51,7 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, [Phrase('indi'), Lati('N30.0')])
     with pytest.raises(
         ValueError,
@@ -69,6 +70,7 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, [Phrase('indi'), Phrase('friend2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
@@ -81,7 +83,7 @@ def test_phrase_only_one() -> None:
 
 def test_bad_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = FamHusb('indi')
+    m = FamHusb('indi')  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -90,9 +92,11 @@ def test_bad_xref() -> None:
     ):
         m.validate()
 
+
 def test_bad_other_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = FamHusb(fam)
+    fam = FamilyXref('@2@')
+    m = FamHusb(fam)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -107,21 +111,23 @@ def test_bad_other_xref() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, Phrase('proven'))
     assert m.ged(1) == '1 HUSB @1@\n2 PHRASE proven\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, [Phrase('proven')])
     assert m.ged(1) == '1 HUSB @1@\n2 PHRASE proven\n'
 
 
 def test_ged_no_sub() -> None:
     """Illustrate the standard use of the class."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi)
     assert m.ged(1) == '1 HUSB @1@\n'
-
 
 
 # 3. Code: Exercise the code method.
@@ -129,17 +135,20 @@ def test_ged_no_sub() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, Phrase('proven'))
     assert m.code() == "\nFamHusb(IndividualXref('@1@'), Phrase('proven'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi, [Phrase('proven')])
     assert m.code() == "\nFamHusb(IndividualXref('@1@'), Phrase('proven'))"
 
 
 def test_code_no_sub() -> None:
     """Illustrate code running."""
+    indi = IndividualXref('@1@')
     m = FamHusb(indi)
     assert m.code() == "\nFamHusb(IndividualXref('@1@'))"

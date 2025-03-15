@@ -18,11 +18,12 @@ import re
 
 import pytest
 
+from genedata.classes7 import Lati, NameType, Phrase
 from genedata.messages import Msg
-from genedata.structure import Lati, NameType, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
+
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure."""

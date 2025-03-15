@@ -18,8 +18,8 @@ import re
 
 import pytest
 
+from genedata.classes7 import FamcAdop, Lati, Phrase
 from genedata.messages import Msg
-from genedata.structure import FamcAdop, Lati, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.

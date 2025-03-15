@@ -20,6 +20,16 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from genedata.classes7 import (
+    Head,
+    RecordFam,
+    RecordIndi,
+    RecordObje,
+    RecordRepo,
+    RecordSnote,
+    RecordSour,
+    RecordSubm,
+)
 from genedata.constants import (
     Default,
     Number,
@@ -29,16 +39,8 @@ from genedata.messages import Issue, Msg
 from genedata.structure import (
     ExtensionXref,
     FamilyXref,
-    Head,
     IndividualXref,
     MultimediaXref,
-    RecordFam,
-    RecordIndi,
-    RecordObje,
-    RecordRepo,
-    RecordSnote,
-    RecordSour,
-    RecordSubm,
     RepositoryXref,
     SharedNoteXref,
     SourceXref,

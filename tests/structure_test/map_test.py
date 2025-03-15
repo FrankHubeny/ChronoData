@@ -17,9 +17,10 @@ import re
 
 import pytest
 
+from genedata.classes7 import Lati, Long, Map, Phrase
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.structure import Input, Lati, Long, Map, Phrase
+from genedata.structure import Input
 
 
 # 1. Validate Section
@@ -197,5 +198,3 @@ def test_code() -> None:
         m.code()
         == "\nMap(\n    subs = [\n        Lati('N18.150944'),\n        Long('E168.150944'),\n    ],\n)"
     )
-
-

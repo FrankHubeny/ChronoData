@@ -16,7 +16,7 @@
 import pytest
 
 from genedata.messages import Msg
-from genedata.structure import NoDate, Phrase
+from genedata.classes7 import NoDate, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.

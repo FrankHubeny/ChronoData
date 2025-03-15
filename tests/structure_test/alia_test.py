@@ -18,8 +18,8 @@ import re
 
 import pytest
 
+from genedata.classes7 import Alia, FamilyXref, IndividualXref, Lati, Phrase
 from genedata.messages import Msg
-from genedata.structure import Alia, FamilyXref, IndividualXref, Lati, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
@@ -89,6 +89,7 @@ def test_bad_xref() -> None:
         ),
     ):
         m.validate()
+
 
 def test_bad_other_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""

@@ -18,8 +18,8 @@ import re
 
 import pytest
 
+from genedata.classes7 import Lati, Pedi, Phrase
 from genedata.messages import Msg
-from genedata.structure import Lati, Pedi, Phrase
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
