@@ -1,6 +1,7 @@
 # util.py
 
 __all__ = [
+    'Checker',
     'Formatter',
     'Input',
     'Tagger',
@@ -78,6 +79,52 @@ class Util:
                 ]
             )
         return lines
+
+
+class Checker:
+    """Global methods supporting validation of data."""
+
+    @staticmethod
+    def verify_type(value: Any, value_type: Any, no_list: bool = False) -> bool:
+        """Check if the value has the specified type."""
+        check: bool = True
+        if value is None:
+            return check
+        if isinstance(value, list):
+            if no_list and isinstance(value, list):
+                raise TypeError(Msg.NO_LIST)
+            for item in value:
+                if not isinstance(item, value_type):
+                    raise TypeError(
+                        Msg.WRONG_TYPE.format(item, type(item), value_type)
+                    )
+            return check
+        if not isinstance(value, value_type):
+            raise TypeError(
+                Msg.WRONG_TYPE.format(value, type(value), value_type)
+            )
+        return check
+
+    @staticmethod
+    def verify_tuple_type(name: Any, value_type: Any) -> bool:
+        """Check if each member of the tuple has the specified type."""
+        if name != [] and name is not None:
+            for value in name:
+                Checker.verify_type(value, value_type)
+        return True
+
+    @staticmethod
+    def verify_not_empty(value: Any) -> bool:
+        if value is None:
+            raise ValueError(Msg.NO_NONE)
+        if isinstance(value, str) and value == Default.EMPTY:
+            raise ValueError(Msg.NO_EMPTY_STRING)
+        if isinstance(value, list) and len(value) == 0:
+            raise ValueError(Msg.NO_EMPTY_LIST)
+        # if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
+        #     raise ValueError(Msg.NO_EMPTY_POINTER)
+        return True
+
 
 
 class Input:
@@ -994,32 +1041,6 @@ class Formatter:
             return f'{item!r}'
         # if isinstance(item, Xref):
         #     return f'{item!r}'
-        # if isinstance(item, Tag):
-        #     return f'Tag.{item.name}'
-        # if isinstance(item, AdopEnum):
-        #     return f'Adop.{item.name}'
-        # if isinstance(item, EvenEnum):
-        #     return f'Even.{item.name}'
-        # # elif isinstance(self.tag, EvenAttr):
-        # #     enum_name = Tag.EVEN
-        # if isinstance(item, MediumEnum):
-        #     return f'Medi.{item.name}'
-        # if isinstance(item, PediEnum):
-        #     return f'Pedi.{item.name}'
-        # if isinstance(item, QuayEnum):
-        #     return f'Quay.{item.name}'
-        # if isinstance(item, ResnEnum):
-        #     return f'Resn.{item.name}'
-        # if isinstance(item, RoleEnum):
-        #     return f'Role.{item.name}'
-        # if isinstance(item, SexEnum):
-        #     return f'Sex.{item.name}'
-        # if isinstance(item, FamcStatEnum):
-        #     return f'FamcStat.{item.name}'
-        # if isinstance(item, StatEnum):
-        #     return f'Stat.{item.name}'
-        # if isinstance(item, NameTypeEnum):
-        #     return f'NameType.{item.name}'
         code_lines: str = (
             item.code(tabs - 1, full=full)
             .replace(Default.EOL, Default.EMPTY, 1)
