@@ -271,6 +271,7 @@ class Keys:
             'HEAD-LANG',
             'HEAD-PLAC',
             'HEAD-PLAC-FORM',
+            'HEAD-SOUR',
             'HEAD-SOUR-DATA',
             'HEIGHT',
             'HUSB',
@@ -664,6 +665,7 @@ from typing import Any
                 Convert.calendar(url),
                 Convert.datatype(url),
                 Convert.enumeration(url),
+                Convert.enumerationset(url),
                 Convert.month(url),
                 Convert.structure(url),
                 Convert.structure_extension(url),
@@ -690,7 +692,7 @@ Examples: dict[str, str] = {
         Since it may be difficult to convert from degrees, minutes
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
-        >>> from genedata.structure import Input
+        >>> from genedata.util import Input
         >>> m = Map(
         ...     [
         ...         Lati(Input.lati(18, 9, 3.4)), 
@@ -719,7 +721,7 @@ Examples: dict[str, str] = {
         Since it may be difficult to convert from degrees, minutes
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
-        >>> from genedata.structure import Input
+        >>> from genedata.util import Input
         >>> m = Map(
         ...     [
         ...         Lati('N18.150944'), 

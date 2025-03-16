@@ -14,7 +14,7 @@ import pytest
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.structure import Input
+from genedata.util import Input
 
 # 2. Check Input.lati().
 #     a. Good run.

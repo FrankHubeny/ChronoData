@@ -24,7 +24,7 @@ import pytest
 
 from genedata.classes7 import Age, Lati, Phrase
 from genedata.messages import Msg
-from genedata.structure import Input
+from genedata.util import Input
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.

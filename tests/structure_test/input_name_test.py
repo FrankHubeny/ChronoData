@@ -6,7 +6,7 @@
     b. Catch range errors.
 """
 
-from genedata.structure import Input
+from genedata.util import Input
 
 # 1. Check Input.name().
 #     a. Good run.
