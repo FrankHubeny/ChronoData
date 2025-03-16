@@ -1,10 +1,17 @@
 # util.py
 
+__all__ = [
+    'Input',
+    'Tagger',
+    'Util',
+]
+
 import re
 import urllib.request
 from typing import Any
 
 import yaml  # type: ignore[import-untyped]
+from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Default
 from genedata.messages import Msg
@@ -13,6 +20,7 @@ from genedata.specs7 import Calendar, Month
 
 class Util:
     """Utilities to read and write yaml or ged files."""
+
     @staticmethod
     def read(url: str) -> dict[str, Any]:
         """Read a yaml file and convert it into a dictionary.
@@ -43,7 +51,7 @@ class Util:
         yaml_data = raw
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
         return yaml_dict
-    
+
     @staticmethod
     def compare(first: str, second: str) -> str:
         if first == second:
@@ -63,12 +71,13 @@ class Util:
                     "'",
                     split_first[i],
                     "' does not equal '",
-                        split_second[i],
-                        "'"
+                    split_second[i],
+                    "'",
                 ]
             )
         return lines
-    
+
+
 class Input:
     @staticmethod
     def age(
@@ -532,3 +541,376 @@ class Input:
                 intermediate_lines.append(lines[i])
         return output
 
+
+class Tagger:
+    """Global methods to tag GEDCOM information.
+
+    There are five methods.
+    - `clean_input` makes sure that user input does not contain banned utf-8 strings.
+    - `taginfo` performs the base tagging process calling clean_input on user input.
+    - `empty` constructs a tag where there is no user input.
+    - `string` constructs a tag on user input or a list of a similar type of user input.
+    - `structure` runs the ged method on an already tagged structure or a list of
+        similar structures adding them to the final GEDCOM string.
+    """
+
+    @staticmethod
+    def clean_input(input: str) -> str:
+        """Remove banned GEDCOM unicode characters from input strings.
+
+        The control characters U+0000 - U+001F and the delete character U+007F
+        are listed in the
+        [C0 Controls and Basic Latin](https://www.unicode.org/charts/PDF/U0000.pdf)
+        chart.
+
+        The code points U+D800 - U+DFFF are not interpreted.
+        They are described in the
+        [High Surrogate Area](https://www.unicode.org/charts/PDF/UD800.pdf) and
+        [Low Surrogate Area](https://www.unicode.org/charts/PDF/UDC00.pdf)
+        standards.
+
+        The code points U+FFFE and U+FFFF are noncharacters as described in the
+        [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
+
+        Examples:
+
+
+        Reference:
+            - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
+            - [Unicode Specification](https://www.unicode.org/versions/Unicode16.0.0/#Summary)
+            - [Python re Module](https://docs.python.org/3/library/re.html)
+        """
+
+        return re.sub(Default.BANNED, Default.EMPTY, input)
+
+    @staticmethod
+    def taginfo(
+        level: int,
+        tag: str,
+        payload: str = Default.EMPTY,
+        extra: str = Default.EMPTY,
+        format: bool = True,
+        xref: str = Default.EMPTY,
+    ) -> str:
+        """Return a GEDCOM formatted line for the information and level.
+
+        This is suitable for most tagged lines to guarantee it is uniformly
+        formatted.  Although the user need not worry about calling this line,
+        it is provided so the user can see the GEDCOM formatted output
+        that would result.
+
+        Example:
+            The main use of this method generates a GEDCOM line.
+            Note how the initial and ending spaces have been stripped from
+            the input value.
+            >>> from genedata.structure import Tagger
+            >>> print(Tagger.taginfo(1, 'NAME', '  Some Name'))
+            1 NAME   Some Name
+            <BLANKLINE>
+
+            There can also be an extra parameter.
+            >>> print(Tagger.taginfo(1, 'NAME', 'SomeName', 'Other info'))
+            1 NAME SomeName Other info
+            <BLANKLINE>
+
+            This example comes from the [GEDCOM lines standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines):
+            Note how the `@me` was reformatted as `@@me`.
+            > 1 NOTE me@example.com is my email
+            > 2 CONT @@me and @I are my social media handles
+            >>> from genedata.structure import Note
+            >>> mynote = Note(
+            ...     '''me@example.com is my email
+            ... @me and @I are my social media handles'''
+            ... )
+            >>> print(mynote.ged(1))
+            1 NOTE me@example.com is my email
+            2 CONT @@me and @I are my social media handles
+            <BLANKLINE>
+
+            However, escaping the '@' should not occur when this is part of a cross-reference identifier.
+
+
+        Reference:
+            [GEDCOM Lines](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines)
+
+        """
+        lineval: str = payload
+        if format and lineval != Default.EMPTY and lineval[0] == Default.ATSIGN:
+            lineval = ''.join([Default.ATSIGN, lineval])
+        if xref == Default.EMPTY:
+            if extra == Default.EMPTY:
+                if lineval == Default.EMPTY:
+                    return f'{level} {tag}{Default.EOL}'
+                return (
+                    f'{level} {tag} {Tagger.clean_input(lineval)}{Default.EOL}'
+                )
+            return f'{level} {tag} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
+        if extra == Default.EMPTY:
+            if lineval == Default.EMPTY:
+                return f'{level} {xref} {tag}{Default.EOL}'
+            return f'{level} {xref} {tag} {Tagger.clean_input(lineval)}{Default.EOL}'
+        return f'{level} {xref} {tag} {Tagger.clean_input(lineval)} {Tagger.clean_input(extra)}{Default.EOL}'
+
+    @staticmethod
+    def empty(
+        lines: str, level: int, tag: str, xref: str = Default.EMPTY
+    ) -> str:
+        """Join a GEDCOM line that has only a level and a tag to a string.
+
+        This method implements the
+        [GEDCOM empty LineVal standard](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#lines) which reads:
+        > Note that production LineVal does not match the empty string.
+        > Because empty payloads and missing payloads are considered equivalent,
+        > both a structure with no payload and a structure with the empty string
+        > as its payload are encoded with no LineVal and no space after the Tag.
+
+        Example:
+            >>> from genedata.structure import Tagger
+            >>> lines = ''
+            >>> lines = Tagger.empty(lines, 1, 'MAP')
+            >>> print(lines)
+            1 MAP
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix of the returned string.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            xref: The cross reference identifier.
+
+        """
+        if xref == Default.EMPTY:
+            return ''.join([lines, Tagger.taginfo(level, tag)])
+        return ''.join([lines, Tagger.taginfo(level, tag, xref=xref)])
+
+    @staticmethod
+    def string(
+        lines: str,
+        level: int,
+        tag: str,
+        payload: list[str] | str | None,
+        extra: str = Default.EMPTY,
+        format: bool = True,
+        xref: str = Default.EMPTY,
+    ) -> str:
+        """Join a string or a list of string to GEDCOM lines.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line and the check that this should only
+        be done if the payload is not empty.  It also hides checking
+        whether the string is part of a list or not.
+
+        Examples:
+            Suppose there is only one string that should be tagged.
+            >>> from genedata.structure import Tagger
+            >>> lines = ''
+            >>> lines = Tagger.empty(lines, 1, 'MAP')
+            >>> lines = Tagger.string(lines, 2, 'LATI', 'N30.0')
+            >>> lines = Tagger.string(lines, 2, 'LONG', 'W30.0')
+            >>> print(lines)
+            1 MAP
+            2 LATI N30.0
+            2 LONG W30.0
+            <BLANKLINE>
+
+            Suppose there are a list of strings that should be tagged.
+            >>> lines = ''
+            >>> wwws = [
+            ...     'https://here.com',
+            ...     'https://there.com',
+            ...     'https://everywhere.com',
+            ... ]
+            >>> lines = Tagger.string(lines, 3, 'WWW', wwws)
+            >>> print(lines)
+            3 WWW https://here.com
+            3 WWW https://there.com
+            3 WWW https://everywhere.com
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            tag: The tag to apply to this line.
+            records: The list of strings to tag.
+            format: If true and '@' begins the line then escape it with another '@' otherwise not.
+            xref: The cross reference identifier.
+        """
+
+        if payload is None:
+            return lines
+        if isinstance(payload, list):
+            for item in payload:
+                if Default.EOL in item:
+                    items: list[str] = item.split(Default.EOL)
+                    lines = Tagger.string(
+                        lines, level, tag, items[0], format=format, xref=xref
+                    )
+                    lines = Tagger.string(
+                        lines,
+                        level + 1,
+                        Default.CONT,
+                        items[1:],
+                        format=format,
+                    )
+                else:
+                    lines = ''.join(
+                        [
+                            lines,
+                            Tagger.taginfo(
+                                level, tag, item, format=format, xref=xref
+                            ),
+                        ]
+                    )
+            return lines
+        if payload != Default.EMPTY and payload is not None:
+            if Default.EOL in payload:
+                payloads: list[str] = payload.split(Default.EOL)
+                lines = Tagger.string(
+                    lines, level, tag, payloads[0], format=format, xref=xref
+                )
+                lines = Tagger.string(
+                    lines,
+                    level + 1,
+                    Default.CONT,
+                    payloads[1:],
+                    format=format,
+                )
+            else:
+                return ''.join(
+                    [
+                        lines,
+                        Tagger.taginfo(
+                            level, tag, payload, extra, format=format, xref=xref
+                        ),
+                    ]
+                )
+        return lines
+
+    @staticmethod
+    def structure(
+        lines: str,
+        level: int,
+        payload: list[Any] | Any,
+        flag: str = Default.EMPTY,
+    ) -> str:
+        """Join a structure or a list of structure to GEDCOM lines.
+
+        This method hides the concatenation of the already constructed
+        GEDCOM file with the new line.  It also hides checking
+        whether the string is part of a list or not.
+
+        Examples:
+            Suppose there is one structure to write to GEDCOM lines.
+            >>> from genedata.structure import Lati, Long, Map, Tagger
+            >>> map1 = Map([Lati('N30.000000'), Long('W30.000000')])
+            >>> map2 = Map([Lati('S40.000000'), Long('E20.000000')])
+            >>> lines = ''
+            >>> lines = Tagger.structure(lines, 2, map1)
+            >>> print(lines)
+            2 MAP
+            3 LATI N30.000000
+            3 LONG W30.000000
+            <BLANKLINE>
+
+            Now include both defined maps into a list.
+            >>> lines = ''
+            >>> lines = Tagger.structure(lines, 4, [map1, map2])
+            >>> print(lines)
+            4 MAP
+            5 LATI N30.000000
+            5 LONG W30.000000
+            4 MAP
+            5 LATI S40.000000
+            5 LONG E20.000000
+            <BLANKLINE>
+
+        Args:
+            lines: The prefix string that will be appended to.
+            level: The GEDCOM level of the structure.
+            payload: The structure or list of structures from which the lines will be formed.
+            flag: An optional item passed to the structure's ged method to modify its behavior.
+        """
+
+        if payload is None or payload == Default.EMPTY:
+            return lines
+        if isinstance(payload, list):
+            # unique_payload = OrderedSet(payload)
+            for item in payload:  # unique_payload:
+                # for item in payload:
+                if flag != Default.EMPTY:
+                    lines = ''.join([lines, item.ged(level, flag)])
+                else:
+                    lines = ''.join([lines, item.ged(level)])
+            return lines
+        # if payload != default:
+        if flag != Default.EMPTY:
+            lines = ''.join([lines, payload.ged(level, flag)])
+        else:
+            lines = ''.join([lines, payload.ged(level)])
+        return lines
+
+    @staticmethod
+    def order(substructure: list[Any] | None) -> list[Any]:
+        """Order structures by collecting similar ones together, but in the same order as presented."""
+        if substructure is None:
+            return []
+        ordered: list[Any] = []
+        subs_types: list[str] = [type(sub).__name__ for sub in substructure]
+        unique_types: list[str] = OrderedSet(subs_types)
+        for index in range(len(unique_types)):
+            for sub in substructure:
+                if unique_types[index] == type(sub).__name__:
+                    ordered.append(sub)
+        return ordered
+
+    # @staticmethod
+    # def base_ged(
+    #     level: int,
+    #     tag: str,
+    #     value: str,
+    #     subs: Any | None = None,
+    #     extension: Any = None,
+    # ) -> str:
+    #     lines: str = ''
+    #     lines = Tagger.string(lines, level, tag, value)
+    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
+    #     return Tagger.structure(lines, level + 1, extension)
+
+    # @staticmethod
+    # def ged(
+    #     level: int,
+    #     tag: TagTuple,
+    #     value: str,
+    #     subs: Any | None,
+    #     ext: Any | None,
+    #     format: bool = True,
+    # ) -> str:
+    #     lines: str = Default.EMPTY
+    #     if value == Default.EMPTY:
+    #         lines = Tagger.empty(lines, level, tag.standard_tag)
+    #     else:
+    #         lines = Tagger.string(
+    #             lines, level, tag.standard_tag, value, format=format
+    #         )
+    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
+    #     return Tagger.structure(lines, level + 1, ext)
+
+    # @staticmethod
+    # def extension(
+    #     lines: str,
+    #     level: int,
+    #     tag: str,
+    #     payload: str,
+    #     extra: str = Default.EMPTY,
+    # ) -> str:
+    #     ext_line: str = Default.EMPTY
+    #     if extra == Default.EMPTY:
+    #         if payload == Default.EMPTY:
+    #             ext_line = f'{level} {tag}{Default.EOL}'
+    #         else:
+    #             ext_line = (
+    #                 f'{level} {tag} {Tagger.clean_input(payload)}{Default.EOL}'
+    #             )
+    #     else:
+    #         ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{Default.EOL}'
+    #     return ''.join([lines, ext_line])
