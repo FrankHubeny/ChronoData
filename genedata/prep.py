@@ -971,6 +971,7 @@ from genedata.structure import (
     @staticmethod
     def generate_substructures(key: str, structure: dict[str, Any]) -> str:
         """Construct the Substructures section of the documentation."""
+        class_name: str = Default.EMPTY
         subs: list[str] = []
         if Default.YAML_SUBSTRUCTURES in structure[key]:
             subs = structure[key][Default.YAML_SUBSTRUCTURES]
@@ -979,8 +980,8 @@ from genedata.structure import (
             substructures = """
         
     Substructures:
-    |               Specification                | Quantity | Required |
-    | ------------------------------------------ | -------- | -------- |"""
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |"""
             for value in subs:
                 yes: str = 'No'
                 one: str = 'Many'
@@ -988,6 +989,7 @@ from genedata.structure import (
                     yes = 'Yes'
                 if Default.YAML_CARDINALITY_SINGULAR in value:
                     one = 'Only One'
+                class_name = value[value.rfind('/') + 1 :].title().replace('_','').replace('-','')
                 substructures = ''.join(
                     [
                         substructures,
@@ -1000,10 +1002,55 @@ from genedata.structure import (
                         ' | ',
                         yes,
                         ' ' * (8 - len(yes)),
+                        ' | ',
+                        class_name,
+                        ' ' * (12 - len(class_name)),
                         ' |',
                     ]
                 )
         return substructures
+    
+    @staticmethod
+    def generate_superstructures(key: str, structure: dict[str, Any]) -> str:
+        """Construct the Substructures section of the documentation."""
+        class_name: str = Default.EMPTY
+        subs: list[str] = []
+        if Default.YAML_SUPERSTRUCTURES in structure[key]:
+            subs = structure[key][Default.YAML_SUPERSTRUCTURES]
+        superstructures: str = Default.EMPTY
+        if len(subs) > 0:
+            superstructures = """
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |"""
+            for value in subs:
+                yes: str = 'No'
+                one: str = 'Many'
+                if Default.YAML_CARDINALITY_REQUIRED in value:
+                    yes = 'Yes'
+                if Default.YAML_CARDINALITY_SINGULAR in value:
+                    one = 'Only One'
+                class_name = value[value.rfind('/') + 1 :].title().replace('_','').replace('-','')
+                superstructures = ''.join(
+                    [
+                        superstructures,
+                        '\n    | ',
+                        value,
+                        ' ' * (42 - len(value)),
+                        ' | ',
+                        one,
+                        ' ' * (8 - len(one)),
+                        ' | ',
+                        yes,
+                        ' ' * (8 - len(yes)),
+                        ' | ',
+                        class_name,
+                        ' ' * (12 - len(class_name)),
+                        ' |',
+                    ]
+                )
+        return superstructures
 
     @staticmethod
     def generate_args(key: str, structure: dict[str, Any]) -> str:
@@ -1183,6 +1230,7 @@ from genedata.structure import (
                 Construct.generate_examples(key),
                 Construct.generate_enumerations(key, structure, enumeration),
                 Construct.generate_substructures(key, structure),
+                Construct.generate_superstructures(key, structure),
                 Construct.generate_args(key, structure),
                 Construct.generate_references(key, structure),
             ]

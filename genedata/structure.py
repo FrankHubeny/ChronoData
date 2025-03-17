@@ -17,7 +17,6 @@ __all__ = [
 import collections
 import contextlib
 import io
-import math
 import re
 import urllib.request
 from enum import Enum
@@ -528,6 +527,7 @@ class Xref:
         self.tag: str = tag
         self.code_xref = f'{self.tag.lower()}_{self.name.lower()}_xref'
         self.text: str = text
+        self.xrefs: list[Xref] = []
 
     def __str__(self) -> str:
         """Return the name used by the GEDCOM standard."""
@@ -756,313 +756,6 @@ class Void:
     XREF: Xref = Xref(NAME)
 
 
-
-
-
-
-# class Dater:
-#     """Global methods supporting date processing."""
-
-#     @staticmethod
-#     def format(
-#         year: int,
-#         month: int = 0,
-#         day: int = 0,
-#         calendar: CalendarDefinition = CalendarsGregorian.GREGORIAN,
-#     ) -> str:
-#         formatted: str = str(year)
-#         if year < 0:
-#             formatted = ''.join(
-#                 [str(-year), Default.SPACE, calendar.epoch_name]
-#             )
-#         if month > 0:
-#             formatted = ''.join(
-#                 [calendar.months[month].abbreviation, Default.SPACE, formatted]
-#             )
-#         if day > 0:
-#             formatted = ''.join([str(day), Default.SPACE, formatted])
-#         return formatted
-
-#     @staticmethod
-#     def ged_date(
-#         iso_date: str = String.NOW,
-#         calendar: CalendarName = CalendarName.GREGORIAN,
-#         epoch: bool = True,
-#     ) -> tuple[str, str]:
-#         """Obtain the GEDCOM date and time from an ISO 8601 date and time for the
-#         current UTC timestamp in GEDCOM format.
-
-#         Examples:
-#             The ISO date for January 1, 2000 at 1:15:30 AM would be `20000101 01:15:30`.
-#             >>> from genedata.store import Dater
-#             >>> print(Dater.ged_date(iso_date='2000-01-01T01:15:30'))
-#             ('01 JAN 2000', '01:15:30Z')
-
-#             Viewing this same date in BC context we would have:
-#             >>> print(Dater.ged_date(iso_date='-2000-01-01T01:15:30'))
-#             ('01 JAN 2000 BCE', '01:15:30Z')
-
-#             There is no zero year in the Gregorian Calendar and neither
-#             does the ISO 8601 standard have a zero year.
-#             >>> print(Dater.ged_date(iso_date='0-01-01T01:15:30'))
-#             Traceback (most recent call last):
-#             ValueError: The calendar has no zero year.
-
-#         Args:
-#             iso_date: The ISO date or `now` for the current date and time.
-#             calendar: The GEDCOM calendar to use when returning the date.
-#             epoch: Return the epoch, `BCE`, for the GEDCOM date if it is before
-#                 the current epoch.  Set this to `False` to not return the epoch.
-#                 This only applies to dates prior to 1 AD starting at 1 BC.
-
-#         References:
-#             [Wikipedia ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-
-#         Exceptions:
-
-#         """
-#         datetime: str = str(np.datetime64(iso_date))
-#         date, time = datetime.split(Default.T)
-#         date_pieces = date.split(Default.HYPHEN)
-#         if len(date_pieces) == 3:
-#             year: str = date_pieces[0]
-#             month: str = date_pieces[1]
-#             day: str = date_pieces[2]
-#         else:
-#             year = date_pieces[1]
-#             month = date_pieces[2]
-#             day = date_pieces[3]
-#         if int(year) == 0:
-#             raise ValueError(Msg.ZERO_YEAR)
-#         ged_time: str = ''.join([time, Default.Z])
-#         good_calendar: str | bool = Cal.CALENDARS.get(calendar, False)
-#         if not good_calendar:
-#             raise ValueError(Msg.BAD_CALENDAR.format(calendar))
-#         month_code: str = Cal.CALENDARS[calendar][String.MONTH_NAMES].get(
-#             month, False
-#         )
-#         if not month_code:
-#             raise ValueError(Msg.BAD_MONTH.format(calendar, month))
-#         ged_date: str = ''
-#         if epoch and len(date_pieces) == 4:
-#             ged_date = ''.join(
-#                 [
-#                     day,
-#                     Default.SPACE,
-#                     month_code,
-#                     Default.SPACE,
-#                     year,
-#                     Default.SPACE,
-#                     String.BC,
-#                 ]
-#             )
-#         else:
-#             ged_date = ''.join(
-#                 [day, Default.SPACE, month_code, Default.SPACE, year]
-#             )
-#         return ged_date, ged_time
-
-#     @staticmethod
-#     def iso_date(
-#         ged_date: str,
-#         ged_time: str = Default.EMPTY,
-#         calendar: str = String.GREGORIAN,
-#     ) -> str:
-#         """Return an ISO date and time given a GEDCOM date and time."""
-#         day: str
-#         month: str
-#         year: str
-#         day, month, year = ged_date.split(Default.SPACE)
-#         time: str = ged_time.split(Default.Z)[0]
-#         good_calendar: str | bool = Cal.CALENDARS[calendar].get(
-#             String.GREGORIAN, False
-#         )
-#         if not good_calendar:
-#             logging.critical(Msg.BAD_CALENDAR.format(calendar))
-#             raise ValueError(Msg.BAD_CALENDAR.format(calendar))
-#         month_code: str = Cal.CALENDARS[calendar].get(month, False)
-#         if not month_code:
-#             logging.critical(Msg.BAD_MONTH.format(calendar, month))
-#             raise ValueError(Msg.BAD_MONTH.format(calendar, month))
-#         iso_datetime: str = ''.join(
-#             [
-#                 year,
-#                 Default.HYPHEN,
-#                 month_code,
-#                 Default.HYPHEN,
-#                 day,
-#                 Default.T,
-#                 time,
-#             ]
-#         )
-#         return iso_datetime
-
-#     # @staticmethod
-#     # def now(level: int = 2) -> str:
-#     #     """Return the current UTC date and time rather than an entered value.
-
-#     #     This will be returned as a list of two lines for a GEDCOM file.
-#     #     This method will not likely be needed by the builder of a genealogy
-#     #     unless the builder wants to enter the current date and time into
-#     #     the genealogy. The current date and time is automatically
-#     #     entered for each record as its creation date and time
-#     #     as well as its change date and time.
-
-#     #     Return
-#     #     ------
-#     #     A list containing two strings is returned. The first member of
-#     #     the list is the date formatted to be used in a GEDCOM file.
-#     #     The second member of the list is the time formatted to
-#     #     be used in a GEDCOM file.
-
-#     #     Example
-#     #     -------
-#     #     >>> from genedata.store import Dater  # doctest: +ELLIPSIS
-#     #     >>> print(Dater.now())
-#     #     2 DATE ...
-#     #     3 TIME ...
-#     #     <BLANKLINE>
-
-#     #     Changing the level adjusts the level numbers for the two returned strings.
-
-#     #     >>> print(Dater.now(level=5))
-#     #     5 DATE ...
-#     #     6 TIME ...
-#     #     <BLANKLINE>
-
-#     #     See Also
-#     #     --------
-#     #     - `creation_date`
-#     #     - `change_date`
-#     #     - `header`
-#     #     """
-#     #     date: str
-#     #     time: str
-#     #     date, time = Dater.ged_date()
-#     #     return ''.join(
-#     #         [
-#     #             Tagger.taginfo(level, Tag.DATE.value, date),
-#     #             Tagger.taginfo(level + 1, Tag.TIME.value, time),
-#     #         ]
-#     #     )
-
-#     # @staticmethod
-#     # def creation_date() -> str:
-#     #     """Return three GEDCOM lines showing a line with a creation tag (CREA)
-#     #     and then two automatically generated
-#     #     UTC date and time lines.  These are used to
-#     #     show when a record has been created.
-
-#     #     See Also
-#     #     --------
-#     #     - `now`: the method that generates the current UTC date and time
-#     #     - `family`: the method creating the family record (FAM)
-#     #     - `individual`: the method creating the individual record (INDI)
-#     #     - `multimedia`: the method creating the multimedia record (OBJE)
-#     #     - `repository`: the method creating the repository record (REPO)
-#     #     - `shared_note`: the method creating the shared note record (SNOTE)
-#     #     - `source`: the method creating the source record (SOUR)
-#     #     - `submitter`: the method creating the submitter record (SUBM)
-#     #     """
-#     #     return ''.join([Tagger.taginfo(1, Tag.CREA.value), Dater.now()])
-
-
-class Placer:
-    """Global methods to support place data."""
-
-    @staticmethod
-    def to_decimal(
-        degrees: int, minutes: int, seconds: float, precision: int = 6
-    ) -> float:
-        """Convert degrees, minutes and seconds to a decimal.
-
-        Example:
-            The specification for the LATI and LONG structures (tags) offer the
-            following example.
-            >>> from genedata.structure import Placer
-            >>> Placer.to_decimal(168, 9, 3.4, 6)
-            168.150944
-
-        Args:
-            degrees: The degrees in the angle whether latitude or longitude.
-            minutes: The minutes in the angle.
-            seconds: The seconds in the angle.
-            precision: The number of digits to the right of the decimal point.
-
-        See Also:
-            - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
-
-        Reference:
-            [GEDCOM LONG structure](https://gedcom.io/terms/v7/LONG)
-            [GEDCOM LATI structure](https://gedcom.io/terms/v7/LATI)
-
-        """
-        sign: int = -1 if degrees < 0 else 1
-        degrees = abs(degrees)
-        minutes_per_degree = 60
-        seconds_per_degree = 3600
-        return round(
-            sign * degrees
-            + (minutes / minutes_per_degree)
-            + (seconds / seconds_per_degree),
-            precision,
-        )
-
-    @staticmethod
-    def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
-        """Convert a measurment in decimals to one showing degrees, minutes
-        and sconds.
-
-        >>> from genedata.structure import Placer
-        >>> Placer.to_dms(49.29722222222, 10)
-        (49, 17, 49.999999992)
-
-        See Also:
-            - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
-
-        """
-        minutes_per_degree = 60
-        seconds_per_degree = 3600
-        degrees: int = math.floor(position)
-        minutes: int = math.floor((position - degrees) * minutes_per_degree)
-        seconds: float = round(
-            (position - degrees - (minutes / minutes_per_degree))
-            * seconds_per_degree,
-            precision,
-        )
-        return (degrees, minutes, seconds)
-
-    @staticmethod
-    def form(form1: str, form2: str, form3: str, form4: str) -> str:
-        return ''.join(
-            [
-                form1,
-                Default.LIST_ITEM_SEPARATOR,
-                form2,
-                Default.LIST_ITEM_SEPARATOR,
-                form3,
-                Default.LIST_ITEM_SEPARATOR,
-                form4,
-            ]
-        )
-
-    @staticmethod
-    def place(place1: str, place2: str, place3: str, place4: str) -> str:
-        return ''.join(
-            [
-                place1,
-                Default.LIST_ITEM_SEPARATOR,
-                place2,
-                Default.LIST_ITEM_SEPARATOR,
-                place3,
-                Default.LIST_ITEM_SEPARATOR,
-                place4,
-            ]
-        )
-
-
-
-
 # class Extension(NamedTuple):
 #     """Store, validate and display extension tags.
 
@@ -1187,6 +880,9 @@ class BaseStructure:
         self.class_name: str = (
             self.key.title().replace('_', '').replace('-', '')
         )
+
+        # Identify which cross reference identifier started opened the record.
+        self.originator: Xref = Void.XREF
 
     def validate(self) -> bool:
         """Validate the stored value."""
@@ -1570,9 +1266,16 @@ class BaseStructure:
                 self.subs.validate()
         return True
 
-    def ged(self, level: int = 1, format: bool = True) -> str:
+    def ged(
+        self,
+        level: int = 1,
+        format: bool = True,
+        recordkey: Xref = Void.XREF,
+        order: bool = False,
+    ) -> str:
         """Generate the GEDCOM lines."""
         if self.validate():
+            lines: str = Default.EMPTY
             if self.class_name in [
                 'Head',
                 'RecordFam',
@@ -1585,35 +1288,72 @@ class BaseStructure:
                 'Trlr',
             ]:
                 level = 0
-            # Modify self.value if data type is IndividualXref
-            if self.class_name in [
-                'Alia',
-                'Fam',
-                'FamHusb',
-                'FamWife',
-                'Indi',
-                'Obje',
-                'Repo',
-                'Snote',
-                'Sour',
-                'Subm',
-            ]:
+    
+            # Don't escape @ in self.value if its data type is Xref
+            # if self.class_name in [
+            #     'Alia',
+            #     'Fam',
+            #     'FamHusb',
+            #     'FamWife',
+            #     'Indi',
+            #     'Obje',
+            #     'Repo',
+            #     'Snote',
+            #     'Sour',
+            #     'Subm',
+            # ]:
+            
+            # Adjust format and recordkey if necessary.
+            if isinstance(self.value, Xref):
                 format = False
-            lines: str = Default.EMPTY
-            if self.key[0:6] == 'record' and isinstance(self.value, Xref):
+                if self.key[0:6] == 'record':
+                    recordkey = self.value
+                elif recordkey in self.value.xrefs:
+                    raise ValueError(
+                        Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
+                    )
+                if level > 0:
+                    recordkey.xrefs.append(self.value)
+
+            # Construct the ged lines for self.value.
+            if self.value == Default.EMPTY:
+                lines = Tagger.empty(
+                    lines, level, self.tag
+                )
+            elif isinstance(self.value, Xref) and level == 0:
                 lines = self.value.ged()
-            elif self.value == Default.EMPTY:
-                lines = Tagger.empty(lines, level, self.tag)
             else:
                 lines = Tagger.string(
-                    lines, level, self.tag, str(self.value), format=format
+                    lines,
+                    level,
+                    self.tag,
+                    str(self.value),
+                    format=format,
                 )
+
+            # Check for circularity of cross reference use.
+            # if isinstance(self.value, Xref) and level > 0:
+            #     if recordkey in self.value.xrefs:
+            #         raise ValueError(Msg.CIRCULAR.format(repr(self.value), repr(recordkey)))
+            #     recordkey.xrefs.append(self.value)
+
+            # Construct the ged lines for any substructures.
             if isinstance(self.subs, list):
-                lines = Tagger.structure(
-                    lines, level + 1, Tagger.order(self.subs)
-                )
+                if order:
+                    lines = Tagger.structure(
+                        lines,
+                        level + 1,
+                        Tagger.order(self.subs),
+                        recordkey=recordkey,
+                    )
+                else:
+                    lines = Tagger.structure(
+                        lines, level + 1, self.subs, recordkey=recordkey
+                    )
             else:
-                lines = Tagger.structure(lines, level + 1, self.subs)
+                lines = Tagger.structure(
+                    lines, level + 1, self.subs, recordkey=recordkey
+                )
         return lines.replace('0 TRLR\n', '0 TRLR')
 
     def code(self, tabs: int = 0, full: bool = True) -> str:

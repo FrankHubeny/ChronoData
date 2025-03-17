@@ -8,6 +8,7 @@ __all__ = [
     'Util',
 ]
 
+import math
 import re
 import urllib.request
 from textwrap import indent
@@ -60,24 +61,66 @@ class Util:
         if first == second:
             return f'{first}\nSuccessful Match'
         lines: str = Default.EMPTY
-        split_first = first.split('\n')
-        split_second = second.split('\n')
-        for i in range(len(split_first)):
+        split_first: list[str] = first.split('\n')
+        split_second: list[str] = second.split('\n')
+        len_split_first: int = len(split_first)
+        len_split_second: int = len(split_second)
+        for i in range(min(len_split_first, len_split_second)):
             problem: str = Default.EMPTY
             if split_first[i] != split_second[i]:
                 problem = 'PROBLEM:   '
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.EOL,
+                        problem,
+                        "'",
+                        split_first[i],
+                        "' does not equal '",
+                        split_second[i],
+                        "'",
+                    ]
+                )
+            else:
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.EOL,
+                        split_first[i],
+                    ]
+                )
+        if len_split_first > len_split_second:
             lines = ''.join(
                 [
                     lines,
                     Default.EOL,
-                    problem,
-                    "'",
-                    split_first[i],
-                    "' does not equal '",
-                    split_second[i],
-                    "'",
+                    'The first string is longer than the second.  Here are the remaining lines:'
                 ]
             )
+            for line in split_first[len_split_second:]:
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.EOL,
+                        line,
+                    ]
+                )
+        elif len_split_first < len_split_second:
+            lines = ''.join(
+                [
+                    lines,
+                    Default.EOL,
+                    'The second string is longer than the first.  Here are the remaining lines:'
+                ]
+            )
+            for line in split_second[len_split_first:]:
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.EOL,
+                        line,
+                    ]
+                )
         return lines
 
 
@@ -489,6 +532,30 @@ class Input:
         return edited_name
 
     @staticmethod
+    def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
+        """Convert a measurment in decimals to one showing degrees, minutes
+        and sconds.
+
+        >>> from genedata.util import Input
+        >>> Input.to_dms(49.29722222222, 10)
+        (49, 17, 49.999999992)
+
+        See Also:
+            - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
+
+        """
+        minutes_per_degree = 60
+        seconds_per_degree = 3600
+        degrees: int = math.floor(position)
+        minutes: int = math.floor((position - degrees) * minutes_per_degree)
+        seconds: float = round(
+            (position - degrees - (minutes / minutes_per_degree))
+            * seconds_per_degree,
+            precision,
+        )
+        return (degrees, minutes, seconds)
+
+    @staticmethod
     def to_decimal(
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> float:
@@ -497,8 +564,8 @@ class Input:
         Example:
             The specification for the LATI and LONG structures (tags) offer the
             following example.
-            >>> from genedata.structure import Placer
-            >>> Placer.to_decimal(168, 9, 3.4, 6)
+            >>> from genedata.util import Input
+            >>> Input.to_decimal(168, 9, 3.4, 6)
             168.150944
 
         Args:
@@ -589,6 +656,128 @@ class Input:
             else:
                 intermediate_lines.append(lines[i])
         return output
+    
+    @staticmethod
+    def form(form1: str, form2: str, form3: str, form4: str) -> str:
+        return ''.join(
+            [
+                form1,
+                Default.LIST_ITEM_SEPARATOR,
+                form2,
+                Default.LIST_ITEM_SEPARATOR,
+                form3,
+                Default.LIST_ITEM_SEPARATOR,
+                form4,
+            ]
+        )
+    
+    @staticmethod
+    def place(place1: str, place2: str, place3: str, place4: str) -> str:
+        return ''.join(
+            [
+                place1,
+                Default.LIST_ITEM_SEPARATOR,
+                place2,
+                Default.LIST_ITEM_SEPARATOR,
+                place3,
+                Default.LIST_ITEM_SEPARATOR,
+                place4,
+            ]
+        )
+
+
+# class Placer:
+#     """Global methods to support place data."""
+
+#     @staticmethod
+#     def to_decimal(
+#         degrees: int, minutes: int, seconds: float, precision: int = 6
+#     ) -> float:
+#         """Convert degrees, minutes and seconds to a decimal.
+
+#         Example:
+#             The specification for the LATI and LONG structures (tags) offer the
+#             following example.
+#             >>> from genedata.structure import Placer
+#             >>> Placer.to_decimal(168, 9, 3.4, 6)
+#             168.150944
+
+#         Args:
+#             degrees: The degrees in the angle whether latitude or longitude.
+#             minutes: The minutes in the angle.
+#             seconds: The seconds in the angle.
+#             precision: The number of digits to the right of the decimal point.
+
+#         See Also:
+#             - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
+
+#         Reference:
+#             [GEDCOM LONG structure](https://gedcom.io/terms/v7/LONG)
+#             [GEDCOM LATI structure](https://gedcom.io/terms/v7/LATI)
+
+#         """
+#         sign: int = -1 if degrees < 0 else 1
+#         degrees = abs(degrees)
+#         minutes_per_degree = 60
+#         seconds_per_degree = 3600
+#         return round(
+#             sign * degrees
+#             + (minutes / minutes_per_degree)
+#             + (seconds / seconds_per_degree),
+#             precision,
+#         )
+
+#     @staticmethod
+#     def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
+#         """Convert a measurment in decimals to one showing degrees, minutes
+#         and sconds.
+
+#         >>> from genedata.util import Placer
+#         >>> Placer.to_dms(49.29722222222, 10)
+#         (49, 17, 49.999999992)
+
+#         See Also:
+#             - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
+
+#         """
+#         minutes_per_degree = 60
+#         seconds_per_degree = 3600
+#         degrees: int = math.floor(position)
+#         minutes: int = math.floor((position - degrees) * minutes_per_degree)
+#         seconds: float = round(
+#             (position - degrees - (minutes / minutes_per_degree))
+#             * seconds_per_degree,
+#             precision,
+#         )
+#         return (degrees, minutes, seconds)
+
+#     @staticmethod
+#     def form(form1: str, form2: str, form3: str, form4: str) -> str:
+#         return ''.join(
+#             [
+#                 form1,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 form2,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 form3,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 form4,
+#             ]
+#         )
+
+#     @staticmethod
+#     def place(place1: str, place2: str, place3: str, place4: str) -> str:
+#         return ''.join(
+#             [
+#                 place1,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 place2,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 place3,
+#                 Default.LIST_ITEM_SEPARATOR,
+#                 place4,
+#             ]
+#         )
 
 
 class Tagger:
@@ -751,7 +940,7 @@ class Tagger:
 
         Examples:
             Suppose there is only one string that should be tagged.
-            >>> from genedata.structure import Tagger
+            >>> from genedata.util import Tagger
             >>> lines = ''
             >>> lines = Tagger.empty(lines, 1, 'MAP')
             >>> lines = Tagger.string(lines, 2, 'LATI', 'N30.0')
@@ -841,6 +1030,7 @@ class Tagger:
         level: int,
         payload: list[Any] | Any,
         flag: str = Default.EMPTY,
+        recordkey: Any = Default.EMPTY,
     ) -> str:
         """Join a structure or a list of structure to GEDCOM lines.
 
@@ -850,7 +1040,7 @@ class Tagger:
 
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
-            >>> from genedata.structure import Lati, Long, Map, Tagger
+            >>> from genedata.util import Lati, Long, Map, Tagger
             >>> map1 = Map([Lati('N30.000000'), Long('W30.000000')])
             >>> map2 = Map([Lati('S40.000000'), Long('E20.000000')])
             >>> lines = ''
@@ -887,15 +1077,15 @@ class Tagger:
             for item in payload:  # unique_payload:
                 # for item in payload:
                 if flag != Default.EMPTY:
-                    lines = ''.join([lines, item.ged(level, flag)])
+                    lines = ''.join([lines, item.ged(level, flag, recordkey=recordkey)])
                 else:
-                    lines = ''.join([lines, item.ged(level)])
+                    lines = ''.join([lines, item.ged(level, recordkey=recordkey)])
             return lines
         # if payload != default:
         if flag != Default.EMPTY:
-            lines = ''.join([lines, payload.ged(level, flag)])
+            lines = ''.join([lines, payload.ged(level, flag, recordkey=recordkey)])
         else:
-            lines = ''.join([lines, payload.ged(level)])
+            lines = ''.join([lines, payload.ged(level, recordkey=recordkey)])
         return lines
 
     @staticmethod
@@ -911,58 +1101,6 @@ class Tagger:
                 if unique_types[index] == type(sub).__name__:
                     ordered.append(sub)
         return ordered
-
-    # @staticmethod
-    # def base_ged(
-    #     level: int,
-    #     tag: str,
-    #     value: str,
-    #     subs: Any | None = None,
-    #     extension: Any = None,
-    # ) -> str:
-    #     lines: str = ''
-    #     lines = Tagger.string(lines, level, tag, value)
-    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
-    #     return Tagger.structure(lines, level + 1, extension)
-
-    # @staticmethod
-    # def ged(
-    #     level: int,
-    #     tag: TagTuple,
-    #     value: str,
-    #     subs: Any | None,
-    #     ext: Any | None,
-    #     format: bool = True,
-    # ) -> str:
-    #     lines: str = Default.EMPTY
-    #     if value == Default.EMPTY:
-    #         lines = Tagger.empty(lines, level, tag.standard_tag)
-    #     else:
-    #         lines = Tagger.string(
-    #             lines, level, tag.standard_tag, value, format=format
-    #         )
-    #     lines = Tagger.structure(lines, level + 1, Tagger.order(subs))
-    #     return Tagger.structure(lines, level + 1, ext)
-
-    # @staticmethod
-    # def extension(
-    #     lines: str,
-    #     level: int,
-    #     tag: str,
-    #     payload: str,
-    #     extra: str = Default.EMPTY,
-    # ) -> str:
-    #     ext_line: str = Default.EMPTY
-    #     if extra == Default.EMPTY:
-    #         if payload == Default.EMPTY:
-    #             ext_line = f'{level} {tag}{Default.EOL}'
-    #         else:
-    #             ext_line = (
-    #                 f'{level} {tag} {Tagger.clean_input(payload)}{Default.EOL}'
-    #             )
-    #     else:
-    #         ext_line = f'{level} {tag} {Tagger.clean_input(payload)} {Tagger.clean_input(extra)}{Default.EOL}'
-    #     return ''.join([lines, ext_line])
 
 
 class Formatter:

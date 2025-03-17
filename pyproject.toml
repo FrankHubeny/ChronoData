@@ -70,7 +70,6 @@ addopts = [
   #"--cov-report=term-missing",
   "--doctest-modules",
   "--ignore=chronodata/separate",
-  "--ignore=tests/store_test",
 ]
 xfail_strict = true
 faulthandler_timeout = 5
@@ -79,12 +78,9 @@ log_cli_level = "INFO"
 testpaths = [
   "tests",
   "genedata",
-  "chronodata",
-  "calendars",
+  #"chronodata",
+  #"calendars",
 ]
-# markers = [
-#  "description",
-# ]
 
 [tool.mypy]
 mypy_path = [

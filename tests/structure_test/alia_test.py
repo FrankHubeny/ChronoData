@@ -24,24 +24,24 @@ from genedata.messages import Msg
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
 
-indi = IndividualXref('@1@')
-fam = FamilyXref('@2@')
-
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, [Phrase('indi')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, Phrase('indi'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
+    indi = IndividualXref('@1@')
     m = Alia(indi)
     assert m.validate()
 
@@ -69,6 +69,7 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, [Phrase('indi'), Phrase('friend2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
@@ -93,6 +94,7 @@ def test_bad_xref() -> None:
 
 def test_bad_other_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
+    fam = FamilyXref('@2@')
     m = Alia(fam)
     with pytest.raises(
         ValueError,
@@ -108,12 +110,14 @@ def test_bad_other_xref() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, Phrase('proven'))
     assert m.ged(1) == '1 ALIA @1@\n2 PHRASE proven\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, [Phrase('proven')])
     assert m.ged(1) == '1 ALIA @1@\n2 PHRASE proven\n'
 
@@ -123,11 +127,13 @@ def test_ged_with_list() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, Phrase('proven'))
     assert m.code() == "\nAlia(IndividualXref('@1@'), Phrase('proven'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
+    indi = IndividualXref('@1@')
     m = Alia(indi, [Phrase('proven')])
     assert m.code() == "\nAlia(IndividualXref('@1@'), Phrase('proven'))"

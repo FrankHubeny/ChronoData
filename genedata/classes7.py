@@ -209,6 +209,11 @@ class Abbr(BaseStructure):
     > A short name of a title, description, or name used for sorting, filing, and
     > retrieving records.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -270,6 +275,64 @@ class Addr(BaseStructure):
     | https://gedcom.io/terms/v7/POST            | Many     | No       |
     | https://gedcom.io/terms/v7/STAE            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CORP            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -319,6 +382,11 @@ class Adop(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -352,6 +420,11 @@ class AdopFamc(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/FAMC-ADOP       | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -382,6 +455,11 @@ class Adr1(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -415,6 +493,11 @@ class Adr2(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -447,6 +530,11 @@ class Adr3(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -475,6 +563,49 @@ class Age(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/HUSB            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Age
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -499,6 +630,62 @@ class Agnc(BaseStructure):
     > a person of an associated occupation, or a church that administered rites
     > or events, or an organization responsible for creating or archiving
     > records.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -540,6 +727,11 @@ class Alia(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -561,6 +753,11 @@ class Anci(BaseStructure):
     > Ancestor interest
     > Indicates an interest in additional research for ancestors of this
     > individual. (See also `DESI`).
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
@@ -609,6 +806,11 @@ class Anul(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -666,6 +868,63 @@ class Asso(BaseStructure):
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -689,6 +948,11 @@ class Auth(BaseStructure):
     > this could be the author, compiler, transcriber, abstractor, or editor. For
     > an unpublished source, this may be an individual, a government agency,
     > church organization, or private organization.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -724,6 +988,11 @@ class Bapl(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -771,6 +1040,11 @@ class Bapm(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -817,6 +1091,11 @@ class Barm(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -866,6 +1145,11 @@ class Basm(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -914,6 +1198,11 @@ class Birt(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -961,6 +1250,11 @@ class Bles(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1017,6 +1311,11 @@ class Buri(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1044,6 +1343,11 @@ class Caln(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/MEDI            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/REPO            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1094,6 +1398,11 @@ class Cast(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1116,6 +1425,61 @@ class Caus(BaseStructure):
     > The reasons which precipitated an event. It is often used subordinate to a
     > death event to show cause of death, such as might be listed on a death
     > certificate.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1154,6 +1518,17 @@ class Chan(BaseStructure):
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -1179,6 +1554,11 @@ class Chil(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
@@ -1228,6 +1608,11 @@ class Chr(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1275,6 +1660,11 @@ class Chra(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1296,6 +1686,11 @@ class City(BaseStructure):
     > City
     > The name of the city used in the address. See `ADDRESS_STRUCTURE` for more
     > details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1344,6 +1739,11 @@ class Conf(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1379,6 +1779,11 @@ class Conl(BaseStructure):
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -1399,6 +1804,12 @@ class Copr(BaseStructure):
     > Copyright
     > A copyright statement, as appropriate for the copyright laws applicable to
     > this data.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-SOUR-DATA  | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1431,6 +1842,11 @@ class Corp(BaseStructure):
     | https://gedcom.io/terms/v7/PHON            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1461,6 +1877,17 @@ class Crea(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1507,6 +1934,11 @@ class Crem(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1558,6 +1990,11 @@ class Crop(BaseStructure):
     | https://gedcom.io/terms/v7/TOP             | Many     | No       |
     | https://gedcom.io/terms/v7/WIDTH           | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -1578,6 +2015,11 @@ class Ctry(BaseStructure):
     > Country
     > The name of the country that pertains to the associated address. See
     > `ADDRESS_STRUCTURE` for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1610,6 +2052,11 @@ class Data(BaseStructure):
     | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1658,6 +2105,11 @@ class DataEven(BaseStructure):
     | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Many     | No       |
     | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1684,6 +2136,11 @@ class DataEvenDate(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
@@ -1740,6 +2197,68 @@ class Date(BaseStructure):
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
     | https://gedcom.io/terms/v7/TIME            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR-DATA       | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1766,6 +2285,14 @@ class DateExact(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREA            | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-SOUR-DATA  | Many     | No       |
+    | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
@@ -1814,6 +2341,11 @@ class Deat(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1836,6 +2368,11 @@ class Desi(BaseStructure):
     > Indicates an interest in research to identify additional descendants of
     > this individual. See also `ANCI`.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1857,6 +2394,11 @@ class Dest(BaseStructure):
     > Destination
     > An identifier for the system expected to receive this document. See
     > `HEAD`.`SOUR` for guidance on choosing identifiers.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1906,6 +2448,11 @@ class Div(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -1954,6 +2501,11 @@ class Divf(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2000,6 +2552,11 @@ class Dscr(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -2048,6 +2605,11 @@ class Educ(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2081,6 +2643,64 @@ class Email(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CORP            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -2129,6 +2749,11 @@ class Emig(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2164,6 +2789,11 @@ class Endl(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2212,6 +2842,11 @@ class Enga(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2251,6 +2886,18 @@ class Exid(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/EXID-TYPE       | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2283,6 +2930,11 @@ class ExidType(BaseStructure):
     > 
     > Additional type URIs can be registered by filing a [GitHub pull request].
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -2333,6 +2985,11 @@ class FamCens(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2378,6 +3035,11 @@ class FamEven(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -2425,6 +3087,11 @@ class FamFact(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2450,6 +3117,11 @@ class FamHusb(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
@@ -2498,6 +3170,11 @@ class FamNchi(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -2551,6 +3228,11 @@ class FamResi(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2577,6 +3259,11 @@ class FamWife(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-INDI>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2597,6 +3284,13 @@ class Famc(BaseStructure):
     GEDCOM Specification:
     > Family child
     > The family with which this individual event is associated.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
@@ -2632,6 +3326,11 @@ class FamcAdop(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP-FAMC       | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -2671,6 +3370,11 @@ class FamcStat(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2699,6 +3403,11 @@ class Fams(BaseStructure):
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2720,6 +3429,64 @@ class Fax(BaseStructure):
     > Facsimile
     > A fax telephone number appropriate for sending data facsimiles. See `PHON`
     > for additional comments on telephone numbers.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CORP            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -2768,6 +3535,11 @@ class Fcom(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2795,6 +3567,11 @@ class File(BaseStructure):
     | https://gedcom.io/terms/v7/FILE-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/FORM            | Many     | No       |
     | https://gedcom.io/terms/v7/TITL            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
@@ -2866,6 +3643,11 @@ class FileTran(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/FORM            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/FILE            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-FilePath
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2891,6 +3673,12 @@ class Form(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/MEDI            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/FILE            | Many     | No       |
+    | https://gedcom.io/terms/v7/FILE-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/ns/dcat#mediaType
@@ -2922,6 +3710,11 @@ class Gedc(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/GEDC-VERS       | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -2946,6 +3739,11 @@ class GedcVers(BaseStructure):
     > doing so is not required. See [A Guide to Version Numbers] for more details
     > about version numbers.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/GEDC            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -2966,6 +3764,12 @@ class Givn(BaseStructure):
     GEDCOM Specification:
     > Given name
     > A given or earned name used for official identification of a person.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -3013,6 +3817,11 @@ class Grad(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3096,6 +3905,11 @@ class HeadDate(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/TIME            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#exact
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3140,6 +3954,11 @@ class HeadLang(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3167,6 +3986,11 @@ class HeadPlac(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -3186,6 +4010,11 @@ class HeadPlacForm(BaseStructure):
     GEDCOM Specification:
     > Format
     > Any `PLAC` with no [`FORM`] shall be treated as if it has this [`FORM`].
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD-PLAC       | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
@@ -3219,6 +4048,11 @@ class HeadSour(BaseStructure):
     | https://gedcom.io/terms/v7/NAME            | Many     | No       |
     | https://gedcom.io/terms/v7/VERS            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3248,6 +4082,11 @@ class HeadSourData(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/COPR            | Many     | No       |
     | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -3288,6 +4127,11 @@ class Height(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CROP            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3315,6 +4159,24 @@ class Husb(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3364,6 +4226,11 @@ class Idno(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3410,6 +4277,11 @@ class Immi(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3458,6 +4330,11 @@ class IndiCens(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3525,6 +4402,11 @@ class IndiEven(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3588,6 +4470,11 @@ class IndiFact(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3618,6 +4505,11 @@ class IndiFamc(BaseStructure):
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/PEDI            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-FAM>@
@@ -3685,6 +4577,11 @@ class IndiName(BaseStructure):
     | https://gedcom.io/terms/v7/SPFX            | Many     | No       |
     | https://gedcom.io/terms/v7/SURN            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3732,6 +4629,11 @@ class IndiNchi(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -3781,6 +4683,11 @@ class IndiReli(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3829,6 +4736,11 @@ class IndiTitl(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3867,6 +4779,11 @@ class Inil(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -3941,6 +4858,17 @@ class Lang(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
+    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/PLAC-TRAN       | Many     | No       |
+    | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4001,6 +4929,11 @@ class Lati(BaseStructure):
         2 LONG E168.150944
         <BLANKLINE>
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/MAP             | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4022,6 +4955,11 @@ class Left(BaseStructure):
     > Left crop width
     > Left is a number of pixels to not display from the left side of the image.
     > See `CROP` for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CROP            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -4083,6 +5021,11 @@ class Long(BaseStructure):
         2 LONG E168.150944
         <BLANKLINE>
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/MAP             | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4127,6 +5070,11 @@ class Map(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/LATI            | Many     | No       |
     | https://gedcom.io/terms/v7/LONG            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4174,6 +5122,11 @@ class Marb(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -4225,6 +5178,11 @@ class Marc(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4272,6 +5230,11 @@ class Marl(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -4322,6 +5285,11 @@ class Marr(BaseStructure):
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4371,6 +5339,11 @@ class Mars(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WIFE            | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -4467,6 +5440,12 @@ class Medi(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CALN            | Many     | No       |
+    | https://gedcom.io/terms/v7/FORM            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4544,6 +5523,14 @@ class Mime(BaseStructure):
     > 5. Replace each `&amp;` with `&`
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
+    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       |
+    | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/ns/dcat#mediaType
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4564,6 +5551,13 @@ class Name(BaseStructure):
     GEDCOM Specification:
     > Name
     > The name of the superstructure's subject, represented as a simple string.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -4633,6 +5627,11 @@ class NameTran(BaseStructure):
     | https://gedcom.io/terms/v7/SPFX            | Many     | No       |
     | https://gedcom.io/terms/v7/SURN            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Name
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4675,6 +5674,11 @@ class NameType(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -4724,6 +5728,11 @@ class Nati(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4771,6 +5780,11 @@ class Natu(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4806,6 +5820,12 @@ class Nick(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -4855,6 +5875,11 @@ class Nmr(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -4881,6 +5906,11 @@ class NoDate(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/NO              | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date#period
@@ -4916,6 +5946,84 @@ class Note(BaseStructure):
     | https://gedcom.io/terms/v7/MIME            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAMS            | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/NO              | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/REPO            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -4990,6 +6098,12 @@ class NoteTran(BaseStructure):
     | https://gedcom.io/terms/v7/LANG            | Many     | No       |
     | https://gedcom.io/terms/v7/MIME            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5010,6 +6124,12 @@ class Npfx(BaseStructure):
     GEDCOM Specification:
     > Name prefix
     > Text that appears on a name line before the given and surname parts of a name.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5032,6 +6152,12 @@ class Nsfx(BaseStructure):
     > Name suffix
     > Text which appears on a name line after or behind the given and surname
     > parts of a name.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5067,6 +6193,66 @@ class Obje(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/CROP            | Many     | No       |
     | https://gedcom.io/terms/v7/TITL            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-OBJE>@
@@ -5114,6 +6300,11 @@ class Occu(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5182,6 +6373,16 @@ class OrdStat(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5228,6 +6429,11 @@ class Ordn(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -5281,6 +6487,11 @@ class Page(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5336,6 +6547,11 @@ class Pedi(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5365,6 +6581,64 @@ class Phon(BaseStructure):
     > 
     > See ITU standards [E.123] and [E.164] for more information.
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CORP            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5461,6 +6735,27 @@ class Phrase(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+    | https://gedcom.io/terms/v7/ALIA            | Many     | No       |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-HUSB        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-WIFE        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAMC-ADOP       | Many     | No       |
+    | https://gedcom.io/terms/v7/FAMC-STAT       | Many     | No       |
+    | https://gedcom.io/terms/v7/MEDI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TYPE       | Many     | No       |
+    | https://gedcom.io/terms/v7/NO-DATE         | Many     | No       |
+    | https://gedcom.io/terms/v7/PEDI            | Many     | No       |
+    | https://gedcom.io/terms/v7/ROLE            | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR-EVEN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5559,6 +6854,68 @@ class Plac(BaseStructure):
     | https://gedcom.io/terms/v7/PLAC-TRAN       | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5593,6 +6950,11 @@ class PlacForm(BaseStructure):
     > 
     > </div>
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
@@ -5657,6 +7019,11 @@ class PlacTran(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/LANG            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Text
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5678,6 +7045,11 @@ class Post(BaseStructure):
     > Postal code
     > A code used by a postal service to identify an area to facilitate mail
     > handling. See `ADDRESS_STRUCTURE` for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5727,6 +7099,11 @@ class Prob(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -5755,6 +7132,11 @@ class Publ(BaseStructure):
     > person making a declaration for a pension or the city and state of residence of
     > the writer of a letter.
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5806,6 +7188,11 @@ class Quay(BaseStructure):
         > Secondary evidence, data officially recorded sometime after the event
     - '3': https://gedcom.io/terms/v7/enum-3
         > Direct and primary evidence used, or by dominance of the evidence
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -6366,6 +7753,17 @@ class Refn(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6387,6 +7785,61 @@ class Reli(BaseStructure):
     > Religion
     > A religious denomination associated with the event or attribute described
     > by the superstructure.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -6421,6 +7874,11 @@ class Repo(BaseStructure):
     | https://gedcom.io/terms/v7/CALN            | Many     | No       |
     | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
     | https://gedcom.io/terms/v7/SNOTE           | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-REPO>@
@@ -6480,6 +7938,64 @@ class Resn(BaseStructure):
         > is known to admit multiple interpretations, so use of the `PRIVACY`
         > restriction notice is not recommended.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6527,6 +8043,11 @@ class Reti(BaseStructure):
     | https://gedcom.io/terms/v7/TYPE            | Many     | No       |
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6635,6 +8156,12 @@ class Role(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR-EVEN       | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6661,6 +8188,11 @@ class Schma(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/TAG             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6703,6 +8235,61 @@ class Sdate(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
     | https://gedcom.io/terms/v7/TIME            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Date
@@ -6750,6 +8337,11 @@ class Sex(BaseStructure):
     - 'X': https://gedcom.io/terms/v7/enum-X
         > Does not fit the typical definition of only Male or only Female
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6786,6 +8378,11 @@ class Slgc(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6825,6 +8422,11 @@ class Slgs(BaseStructure):
     | https://gedcom.io/terms/v7/TEMP            | Many     | No       |
     | https://gedcom.io/terms/v7/ord-STAT        | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+        
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
         
@@ -6845,6 +8447,84 @@ class Snote(BaseStructure):
     > Shared note
     > A pointer to a note that is shared by multiple structures. See
     > `NOTE_STRUCTURE` for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHAN            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAMS            | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/NO              | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PLAC            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/REPO            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SNOTE>@
@@ -6900,6 +8580,75 @@ class Sour(BaseStructure):
     | https://gedcom.io/terms/v7/SOUR-DATA       | Many     | No       |
     | https://gedcom.io/terms/v7/SOUR-EVEN       | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/NO              | Many     | No       |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+        
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SOUR>@
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6926,6 +8675,11 @@ class SourData(BaseStructure):
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/DATE            | Many     | No       |
     | https://gedcom.io/terms/v7/TEXT            | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6975,6 +8729,11 @@ class SourEven(BaseStructure):
     | https://gedcom.io/terms/v7/PHRASE          | Many     | No       |
     | https://gedcom.io/terms/v7/ROLE            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       |
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -6995,6 +8754,12 @@ class Spfx(BaseStructure):
     GEDCOM Specification:
     > Surname prefix
     > A name piece used as a non-indexing pre-part of a surname.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7044,6 +8809,11 @@ class Ssn(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7067,6 +8837,11 @@ class Stae(BaseStructure):
     > within the United States of America. See `ADDRESS_STRUCTURE` for more
     > details.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADDR            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7088,6 +8863,13 @@ class Subm(BaseStructure):
     > Submitter
     > A contributor of information in the substructure. This is metadata about
     > the structure itself, not data about its subject.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
         
     Args:
         value: A value of data type @<https://gedcom.io/terms/v7/record-SUBM>@
@@ -7113,6 +8895,11 @@ class SubmLang(BaseStructure):
     > The payload of the `LANG` structure is a language tag, as defined by [BCP 47].
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#Language
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7133,6 +8920,12 @@ class Surn(BaseStructure):
     GEDCOM Specification:
     > Surname
     > A family name passed on or used by members of a family.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       |
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7155,6 +8948,11 @@ class Tag(BaseStructure):
     > Extension tag
     > Information relating to a single extension tag as used in this document.
     > See [Extensions] for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SCHMA           | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7179,6 +8977,16 @@ class Temp(BaseStructure):
     > Previous versions recommended using a set of abbreviations for temple
     > names, but the list of abbreviations is no longer published by the Church
     > and using abbreviations is no longer recommended.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       |
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       |
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7211,6 +9019,12 @@ class Text(BaseStructure):
     | https://gedcom.io/terms/v7/LANG            | Many     | No       |
     | https://gedcom.io/terms/v7/MIME            | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/SOUR-DATA       | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7231,6 +9045,14 @@ class Time(BaseStructure):
     GEDCOM Specification:
     > Time
     > A `Time` value in a 24-hour clock format.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/DATE            | Many     | No       |
+    | https://gedcom.io/terms/v7/DATE-exact      | Many     | No       |
+    | https://gedcom.io/terms/v7/HEAD-DATE       | Many     | No       |
+    | https://gedcom.io/terms/v7/SDATE           | Many     | No       |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Time
@@ -7279,6 +9101,13 @@ class Titl(BaseStructure):
     > `SOUR`.`TITL`.
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/FILE            | Many     | No       |
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7300,6 +9129,11 @@ class Top(BaseStructure):
     > Top crop width
     > A number of pixels to not display from the top side of the image. See
     > `CROP` for more details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CROP            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -7380,6 +9214,62 @@ class Type(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7432,6 +9322,68 @@ class Uid(BaseStructure):
     > </div>
     > 
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-OBJE     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SNOTE    | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SOUR     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7454,6 +9406,11 @@ class Vers(BaseStructure):
     > An identifier that represents the version level assigned to the associated
     > product. It is defined and changed by the creators of the product.
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Many     | No       |
+        
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7475,6 +9432,11 @@ class Width(BaseStructure):
     > Width in pixels
     > How many pixels to display horizontally for the image. See `CROP` for more
     > details.
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/CROP            | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -7503,6 +9465,24 @@ class Wife(BaseStructure):
     |               Specification                | Quantity | Required |
     | ------------------------------------------ | -------- | -------- |
     | https://gedcom.io/terms/v7/AGE             | Many     | No       |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
         
     Args:
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7552,6 +9532,11 @@ class Will(BaseStructure):
     | https://gedcom.io/terms/v7/UID             | Many     | No       |
     | https://gedcom.io/terms/v7/WWW             | Many     | No       |
         
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       |
+        
     Args:
         value: A value of data type Y|<NULL>
         subs: A permitted substructure, an extension or list of permitted substructures or extensions.
@@ -7587,6 +9572,64 @@ class Www(BaseStructure):
     > If an invalid or no longer existing web address is present upon import, it
     > should be preserved as-is on export.
     > 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |
+    | ------------------------------------------ | -------- | -------- |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       |
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       |
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       |
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       |
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       |
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       |
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       |
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       |
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       |
+    | https://gedcom.io/terms/v7/CORP            | Many     | No       |
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       |
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       |
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       |
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       |
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       |
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       |
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       |
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       |
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       |
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       |
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       |
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       |
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       |
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       |
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       |
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       |
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       |
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       |
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       |
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       |
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       |
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       |
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       |
+    | https://gedcom.io/terms/v7/record-REPO     | Many     | No       |
+    | https://gedcom.io/terms/v7/record-SUBM     | Many     | No       |
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string

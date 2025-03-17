@@ -5,22 +5,6 @@ from internationalization.
 
 from dataclasses import dataclass
 
-# @dataclass(frozen=True)
-# class Example:
-#     EMPTY_CODE: str = 'Empty Example'
-#     EMPTY_GEDCOM: str = 'There should be no GEDCOM lines produced.'
-#     ERROR_EXPECTED: str = 'An error is expected since the default must be changed to use the structure.'
-#     FULL: str = 'First Example'
-#     FIRST: str = 'First Example'
-#     GEDCOM: str = 'The following GEDCOM lines are produced.'
-#     GEDCOM_SPECIFICATION: str = '\n\nGEDCOM Specification\n'
-#     SECOND: str = 'Second Example'
-#     SUBSTRUCTURES: str = '\n\nSubstructures\n'
-#     SUPERSTRUCTURES: str = '\nSuperstructures\n'
-#     THIRD: str = 'Third Example'
-#     USER_PROVIDED: str = 'User Provided Example'
-#     USER_PROVIDED_EXAMPLE: str = 'The example data was provided by the user.'
-
 
 @dataclass(frozen=True)
 class Issue:
@@ -42,6 +26,7 @@ class Msg:
     BAD_MONTH: str = 'The month "{1}" for calend "{0}" is not recognized.'
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
+    CIRCULAR: str = '"{0}" has "{1}" as one of its subordinate cross references. It cannot by a subordinate cross reference for it.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
