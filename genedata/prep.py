@@ -28,9 +28,8 @@ from typing import Any
 
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
-from genedata.constants import Default
-
 # from genedata.gedcom7 import Enumeration, Structure
+from genedata.constants import Config, Default
 from genedata.util import Util
 
 
@@ -675,13 +674,13 @@ from typing import Any
 
 
 Examples: dict[str, str] = {
-    'LATI': """
+    'LATI': f"""
 
     Examples:
         The following example shows how to enter the latitude (Lati))
         coordinates into a Map structure to produce the GEDCOM example
         mentioned in the GEDCOM Specification section.
-        >>> from genedata.structure import Lati, Long, Map
+        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
         >>> print(m.ged())
         1 MAP
@@ -704,13 +703,13 @@ Examples: dict[str, str] = {
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>""",
-    'LONG': """
+    'LONG': f"""
 
     Examples:
         The following example howss how to enter the longitude (Long)
         coordinates into a map structure to produce the GEDCOM output
         mentioned in the GEDCOM Specification.
-        >>> from genedata.structure import Lati, Long, Map
+        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
         >>> print(m.ged())
         1 MAP
@@ -733,24 +732,25 @@ Examples: dict[str, str] = {
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>""",
-    'MAP': """
+    'MAP': f"""
 
     Examples:
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
         coordinates into a map structure to produce the GEDCOM output.
-        >>> from genedata.structure import Input, Lati, Long, Map
+        >>> from genedata.util import Input
+        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
         >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
         2 LONG E168.150944
         <BLANKLINE>""",
-    'MEDI': """
+    'MEDI': f"""
 
     Examples:
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
-        >>> from genedata.structure import Medi
+        >>> from genedata.classes{Config.VERSION} import Medi
         >>> m = Medi('AUDIO')
         >>> print(m.ged(2))
         2 MEDI AUDIO
@@ -760,27 +760,28 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Medi('AUDIO')""",
-    'ord-STAT': """
+    'ord-STAT': f"""
 
     Examples:
         This example shows a successful run of the OrdStat structure using
-        the enumeration value 'BIC'.
-        >>> from genedata.structure import OrdStat
-        >>> m = OrdStat('BIC')
+        the enumeration value 'BIC' occurring on January 15, 2020.
+        >>> from genedata.classes{Config.VERSION} import DateExact, OrdStat
+        >>> m = OrdStat('BIC', DateExact('15 JAN 2020'))
         >>> print(m.ged(1))
         1 STAT BIC
+        2 DATE 15 JAN 2020
         <BLANKLINE>
 
         This example shows the code that is generated to produce the same result as above.
         >>> print(m.code())
         <BLANKLINE>
-        OrdStat('BIC')""",
-    'PEDI': """
+        OrdStat('BIC', DateExact('15 JAN 2020'))""",
+    'PEDI': f"""
 
     Examples:
         This example shows a successful run of the Pedi structure using
         the enumeration value 'ADOPTED'.
-        >>> from genedata.structure import Pedi
+        >>> from genedata.classes{Config.VERSION} import Pedi
         >>> m = Pedi('ADOPTED')
         >>> print(m.ged(1))
         1 PEDI ADOPTED
@@ -790,12 +791,12 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Pedi('ADOPTED')""",
-    'QUAY': """
+    'QUAY': f"""
 
     Examples:
         This example shows a successful run of the Quay structure using
         the enumeration value '0'.
-        >>> from genedata.structure import Quay
+        >>> from genedata.classes{Config.VERSION} import Quay
         >>> m = Quay('0')
         >>> print(m.ged(1))
         1 QUAY 0
@@ -805,12 +806,12 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Quay('0')""",
-    'RESN': """
+    'RESN': f"""
 
     Examples:
         This example shows a successful run of the Resn structure using
         the enumeration value 'CONFIDENTIAL'.
-        >>> from genedata.structure import Resn
+        >>> from genedata.classes{Config.VERSION} import Resn
         >>> m = Resn('CONFIDENTIAL')
         >>> print(m.ged(1))
         1 RESN CONFIDENTIAL
@@ -820,12 +821,12 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Resn('CONFIDENTIAL')""",
-    'ROLE': """
+    'ROLE': f"""
 
     Examples:
         This example shows a successful run of the Role structure using
         the enumeration value 'CHIL'.
-        >>> from genedata.structure import Role
+        >>> from genedata.classes{Config.VERSION} import Role
         >>> m = Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL
@@ -835,12 +836,12 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Role('CHIL')""",
-    'SEX': """
+    'SEX': f"""
 
     Examples:
         This example shows a successful run of the Sex structure using
         the enumeration value 'F'.
-        >>> from genedata.structure import Sex
+        >>> from genedata.classes{Config.VERSION} import Sex
         >>> m = Sex('F')
         >>> print(m.ged(1))
         1 SEX F
@@ -860,10 +861,14 @@ class Construct:
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
-        return f"""'''The classes were generated by methods in the `Construct` class.  
-They should not be manually altered.
+        return f"""'''This module of classes was generated by methods in the `Construct` class
+of the `util` module from GEDCOM yaml specification files.  
 
-The specifications are from the [GEDCOM files]{source} for version {version}.
+They should not be manually altered, but the `Construct` class should be changed
+if needed and the classes modules from each GEDCOM version regenerated.
+
+The specifications for this module are from the 
+[GEDCOM files]{source} for version {version}.
 '''
 
 """
@@ -972,7 +977,7 @@ from genedata.structure import (
     def generate_substructures(key: str, structure: dict[str, Any]) -> str:
         """Construct the Substructures section of the documentation."""
         class_name: str = Default.EMPTY
-        subs: list[str] = []
+        subs: dict[str, str] = {}
         if Default.YAML_SUBSTRUCTURES in structure[key]:
             subs = structure[key][Default.YAML_SUBSTRUCTURES]
         substructures: str = Default.EMPTY
@@ -982,20 +987,20 @@ from genedata.structure import (
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |"""
-            for value in subs:
+            for subskey, value in subs.items():
                 yes: str = 'No'
                 one: str = 'Many'
                 if Default.YAML_CARDINALITY_REQUIRED in value:
                     yes = 'Yes'
                 if Default.YAML_CARDINALITY_SINGULAR in value:
                     one = 'Only One'
-                class_name = value[value.rfind('/') + 1 :].title().replace('_','').replace('-','')
+                class_name = subskey[subskey.rfind('/') + 1 :].title().replace('_','').replace('-','')
                 substructures = ''.join(
                     [
                         substructures,
                         '\n    | ',
-                        value,
-                        ' ' * (42 - len(value)),
+                        subskey,
+                        ' ' * (42 - len(subskey)),
                         ' | ',
                         one,
                         ' ' * (8 - len(one)),
@@ -1014,30 +1019,30 @@ from genedata.structure import (
     def generate_superstructures(key: str, structure: dict[str, Any]) -> str:
         """Construct the Substructures section of the documentation."""
         class_name: str = Default.EMPTY
-        subs: list[str] = []
+        supers: dict[str, str] = {}
         if Default.YAML_SUPERSTRUCTURES in structure[key]:
-            subs = structure[key][Default.YAML_SUPERSTRUCTURES]
+            supers = structure[key][Default.YAML_SUPERSTRUCTURES]
         superstructures: str = Default.EMPTY
-        if len(subs) > 0:
+        if len(supers) > 0:
             superstructures = """
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |"""
-            for value in subs:
+            for superskey, value in supers.items():
                 yes: str = 'No'
                 one: str = 'Many'
                 if Default.YAML_CARDINALITY_REQUIRED in value:
                     yes = 'Yes'
                 if Default.YAML_CARDINALITY_SINGULAR in value:
                     one = 'Only One'
-                class_name = value[value.rfind('/') + 1 :].title().replace('_','').replace('-','')
+                class_name = superskey[superskey.rfind('/') + 1 :].title().replace('_','').replace('-','')
                 superstructures = ''.join(
                     [
                         superstructures,
                         '\n    | ',
-                        value,
-                        ' ' * (42 - len(value)),
+                        superskey,
+                        ' ' * (42 - len(superskey)),
                         ' | ',
                         one,
                         ' ' * (8 - len(one)),
@@ -1196,12 +1201,6 @@ from genedata.structure import (
     ) -> str:
         """Generate a single class and its documentation defined by its Structure definition.
 
-        Place the output from this in genedata.structure below the commented line
-        stating that generaed classes follow.  There are only generated classes
-        below this line.
-
-        It may be best to run this in a notebook and then copy the output to the module.
-
         See Also:
         - `generate_all_classes`
 
@@ -1248,14 +1247,6 @@ class {class_name}(BaseStructure):
     @staticmethod
     def generate_all_classes(url: str) -> str:
         """Generate all classes and their documentation defined by the Structure dictionary.
-
-        Place the entire collection in genedata.structure below the commented
-        line which reads:
-
-        # Classes below this marker were genered by the genedata.gedcom7 Display class
-        # by calling Display.generate_all_classes or Display.generate_class.
-
-        Only generated classes go below this line.
 
         See Also:
         - `generate_class`

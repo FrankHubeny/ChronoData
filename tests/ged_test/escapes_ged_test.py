@@ -33,8 +33,8 @@ def test_escape_ged() -> None:
     sn8_xref = g.shared_note_xref('N08', 'single@internal no space')
     sn19_xref = g.shared_note_xref(
         'N19',
-        """@ at at front and @ inside line and 
-    @ at after CONT and @ inside CONT's line too.""",
+        """@ at at front and @ inside line and
+@ at after CONT and @ inside CONT's line too.""",
     )
 
     head = Head(
@@ -51,8 +51,8 @@ def test_escape_ged() -> None:
         [
             IndiName('John /Doe/'),
             Note("""me@example.com is an example email address.
-    @me and @I are example social media handles.
-    @@@@ has four @ characters where only the first is escaped."""),
+@me and @I are example social media handles.
+@@@@ has four @ characters where only the first is escaped."""),
         ],
     )
 

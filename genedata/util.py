@@ -94,7 +94,7 @@ class Util:
                 [
                     lines,
                     Default.EOL,
-                    'The first string is longer than the second.  Here are the remaining lines:'
+                    'The first string is longer than the second.  Here are the remaining lines:',
                 ]
             )
             for line in split_first[len_split_second:]:
@@ -110,7 +110,7 @@ class Util:
                 [
                     lines,
                     Default.EOL,
-                    'The second string is longer than the first.  Here are the remaining lines:'
+                    'The second string is longer than the first.  Here are the remaining lines:',
                 ]
             )
             for line in split_second[len_split_first:]:
@@ -167,7 +167,6 @@ class Checker:
         # if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
         #     raise ValueError(Msg.NO_EMPTY_POINTER)
         return True
-
 
 
 class Input:
@@ -656,7 +655,7 @@ class Input:
             else:
                 intermediate_lines.append(lines[i])
         return output
-    
+
     @staticmethod
     def form(form1: str, form2: str, form3: str, form4: str) -> str:
         return ''.join(
@@ -670,7 +669,7 @@ class Input:
                 form4,
             ]
         )
-    
+
     @staticmethod
     def place(place1: str, place2: str, place3: str, place4: str) -> str:
         return ''.join(
@@ -1077,13 +1076,19 @@ class Tagger:
             for item in payload:  # unique_payload:
                 # for item in payload:
                 if flag != Default.EMPTY:
-                    lines = ''.join([lines, item.ged(level, flag, recordkey=recordkey)])
+                    lines = ''.join(
+                        [lines, item.ged(level, flag, recordkey=recordkey)]
+                    )
                 else:
-                    lines = ''.join([lines, item.ged(level, recordkey=recordkey)])
+                    lines = ''.join(
+                        [lines, item.ged(level, recordkey=recordkey)]
+                    )
             return lines
         # if payload != default:
         if flag != Default.EMPTY:
-            lines = ''.join([lines, payload.ged(level, flag, recordkey=recordkey)])
+            lines = ''.join(
+                [lines, payload.ged(level, flag, recordkey=recordkey)]
+            )
         else:
             lines = ''.join([lines, payload.ged(level, recordkey=recordkey)])
         return lines

@@ -13,10 +13,10 @@ __all__ = [
     'Void',
 ]
 
-
 import collections
 import contextlib
 import io
+import logging
 import re
 import urllib.request
 from enum import Enum
@@ -1288,20 +1288,6 @@ class BaseStructure:
                 'Trlr',
             ]:
                 level = 0
-    
-            # Don't escape @ in self.value if its data type is Xref
-            # if self.class_name in [
-            #     'Alia',
-            #     'Fam',
-            #     'FamHusb',
-            #     'FamWife',
-            #     'Indi',
-            #     'Obje',
-            #     'Repo',
-            #     'Snote',
-            #     'Sour',
-            #     'Subm',
-            # ]:
             
             # Adjust format and recordkey if necessary.
             if isinstance(self.value, Xref):
@@ -1309,9 +1295,10 @@ class BaseStructure:
                 if self.key[0:6] == 'record':
                     recordkey = self.value
                 elif recordkey in self.value.xrefs:
-                    raise ValueError(
-                        Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
-                    )
+                    logging.info(Msg.CIRCULAR.format(repr(self.value), repr(recordkey)))
+                    # raise ValueError(
+                    #     Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
+                    # )
                 if level > 0:
                     recordkey.xrefs.append(self.value)
 
