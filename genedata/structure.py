@@ -1310,11 +1310,15 @@ class BaseStructure:
                 format = False
                 if self.key[0:6] == 'record':
                     recordkey = self.value
-                elif recordkey in self.value.xrefs:
-                    logging.info(Msg.CIRCULAR.format(repr(self.value), repr(recordkey)))
-                    # raise ValueError(
-                    #     Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
-                    # )
+                elif (
+                    ((isinstance(recordkey, SourceXref) and isinstance(self.value, SharedNoteXref))
+                    or (isinstance(recordkey, SharedNoteXref) and isinstance(self.value, SourceXref)))
+                    and recordkey in self.value.xrefs
+                ):
+                    #logging.info(Msg.CIRCULAR.format(repr(self.value), repr(recordkey)))
+                    raise ValueError(
+                        Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
+                    )
                 if level > 0:
                     recordkey.xrefs.append(self.value)
 

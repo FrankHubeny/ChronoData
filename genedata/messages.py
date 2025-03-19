@@ -26,7 +26,7 @@ class Msg:
     BAD_MONTH: str = 'The month "{1}" for calend "{0}" is not recognized.'
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
-    CIRCULAR: str = '"{0}" has "{1}" as one of its subordinate cross references. It cannot by a subordinate cross reference for it.'
+    CIRCULAR: str = '"{0}" has "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'

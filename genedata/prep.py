@@ -748,6 +748,22 @@ Examples: dict[str, str] = {
     'MEDI': f"""
 
     Examples:
+        These are the steps to build the example in the specification.
+        First import the classes and build a multimedia cross reference identifier.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes{Config.VERSION} import File, Form, Medi, RecordObje
+        >>> g = Genealogy('example')
+        >>> obje_xref = g.multimedia_xref('M1')
+
+        Next construct the ged lines.  Let `photo.jpg` be the file name of the photo.
+        >>> m = RecordObje(obje_xref, File('photo.jpg', Form('image/jpeg', Medi('PHOTO'))))
+        >>> print(m.ged())
+        0 @M1@ OBJE
+        1 FILE photo.jpg
+        2 FORM image/jpeg
+        3 MEDI PHOTO
+        <BLANKLINE>
+
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
         >>> from genedata.classes{Config.VERSION} import Medi
@@ -760,6 +776,60 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Medi('AUDIO')""",
+    'NAME-TRAN': f"""
+
+    Example:
+        These are the steps to build the example in the specification.
+        First the classes are imported which construct the ged lines.
+        >>> from genedata.classes{Config.VERSION} import Givn, IndiName, Lang, NameTran, Surn
+        >>> m = IndiName('/孔/德庸',
+        ...         [
+        ...             Givn('德庸'),
+        ...             Surn('孔'),
+        ...             NameTran('/Kǒng/ Déyōng',
+        ...                 [
+        ...                     Givn('Déyōng'),
+        ...                     Surn('Kǒng'),
+        ...                     Lang('zh-pinyin'),
+        ...                 ]
+        ...             )
+        ...         ]
+        ... )
+        >>> print(m.ged(1))
+        1 NAME /孔/德庸
+        2 GIVN 德庸
+        2 SURN 孔
+        2 TRAN /Kǒng/ Déyōng
+        3 GIVN Déyōng
+        3 SURN Kǒng
+        3 LANG zh-pinyin
+        <BLANKLINE>""",
+    'NOTE-TRAN': f"""
+
+    Example:
+        These are the steps to build the example in the specification.
+        First the classes are imported which construct the ged lines.
+        >>> from genedata.classes{Config.VERSION} import Lang, Mime, Name, Note, NoteTran
+        >>> m = IndiName('Arete /Hernandez/', 
+        ...     Note('Named after Arete from <i>The Odyssey</i>',
+        ...         [
+        ...             Lang('en'),
+        ...             Mime('text/html'),
+        ...             NoteTran('Named after Arete from "The Odyssey"', Mime('text/plain')),
+        ...             NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', Lang('es')),
+        ...         ]
+        ...     )
+        ... ) 
+        >>> print(m.ged(1))
+        1 NAME Arete /Hernandez/
+        2 NOTE Named after Arete from <i>The Odyssey</i>
+        3 LANG en
+        3 MIME text/html
+        3 TRAN Named after Arete from "The Odyssey"
+        4 MIME text/plain
+        3 TRAN Nombrada en honor a Arete de <i>La Odisea</i>
+        4 LANG es
+        <BLANKLINE>""",
     'ord-STAT': f"""
 
     Examples:
@@ -776,6 +846,32 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         OrdStat('BIC', DateExact('15 JAN 2020'))""",
+    'PAGE': f"""
+
+    Examples:
+        These are the steps to build the examples in the specification.
+        First we will import the classes and then create a source cross reference `S1`.
+        The void cross reference identifier comes from the Void class.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes{Config.VERSION} import Dscr, Page, Sour 
+        >>> from genedata.structure import Void
+        >>> g = Genealogy('example')
+        >>> sour_xref = g.source_xref('S1')
+
+        These are the steps to build the first example:
+        >>> m = Sour(sour_xref, Page('Film: 1234567, Frame: 344, Line: 28'))
+        >>> print(m.ged(2))
+        2 SOUR @S1@
+        3 PAGE Film: 1234567, Frame: 344, Line: 28
+        <BLANKLINE>
+
+        These are the steps to build the second example:
+        >>> m = Dscr('Tall enough his head touched the ceiling', Sour(Void.SOUR, Page('His grand-daughter Lydia told me this in 1980')))
+        >>> print(m.ged(2))
+        1 DSCR Tall enough his head touched the ceiling
+        2 SOUR @VOID@
+        3 PAGE His grand-daughter Lydia told me this in 1980
+        <BLANKLINE>""",
     'PEDI': f"""
 
     Examples:
@@ -791,6 +887,103 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Pedi('ADOPTED')""",
+    'PHRASE': f"""
+
+    Examples:
+        The following steps would generate the examples in the specification.
+        We will need the following imports for these examples along with one
+        individual cross reference identifier `I2` for the fifth example:
+        >>> from genedata.classes{Config.VERSION} import Asso, Date, Givn, Marr, Name, Phrase, Role, Type
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi = g.individual_xref('I2')
+        
+        These are the steps for the first example.
+        >>> m = Date('24 JUN 1852', Phrase('During the feast of St John'))
+        >>> print(m.ged(2))
+        2 DATE 24 JUN 1852
+        3 PHRASE During the feast of St John
+        <BLANKLINE>
+
+        These are the steps for the second example.
+        >>> m = Date('30 JAN 1649', Phrase('30th of January, 1648/9'))
+        >>> print(m.ged(2))
+        2 DATE 30 JAN 1649
+        3 PHRASE 30th of January, 1648/9
+        <BLANKLINE>
+
+        These are the steps for the third example.
+        >>> m = Date('BET 1648 AND 1649', Phrase('1648/9'))
+        >>> print(m.ged(2))
+        2 DATE BET 1648 AND 1649
+        3 PHRASE 1648/9
+        <BLANKLINE>
+
+        These are the steps for the fourth example.
+        >>> m = Date('BET 1 JAN 1867 AND 31 MAR 1867', Phrase('Q1 1867'))
+        >>> print(m.ged(2))
+        2 DATE BET 1 JAN 1867 AND 31 MAR 1867
+        3 PHRASE Q1 1867
+        <BLANKLINE>
+
+        These are the steps for the fifth example.
+        >>> m = Marr('', Asso(indi, Role('OTHER', Phrase('Maid of Honor'))))
+        >>> print(m.ged(1))
+        1 MARR
+        2 ASSO @I2@
+        3 ROLE OTHER
+        4 PHRASE Maid of Honor
+        <BLANKLINE>""",
+    'PLAC': f"""
+
+    Example:
+        The following steps would generate the example in the specification.  
+        First create source cross reference identifier `S1` and then build the ged lines
+        in a RecordSour.
+        >>> from genedata.classes{Config.VERSION} import Plac, PlacForm, RecordSour, Data, DataEven
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> sour = g.source_xref('S1')
+        >>> m = RecordSour(sour, Data(DataEven('BIRT', Plac(', Oneida, Idaho, USA', PlacForm('City, County, State, Country')))))
+        >>> print(m.ged())
+        0 @S1@ SOUR
+        1 DATA
+        2 EVEN BIRT
+        3 PLAC , Oneida, Idaho, USA
+        4 FORM City, County, State, Country
+        <BLANKLINE>""",
+    'PLAC-FORM': f"""
+
+    Example:
+        The following steps would generate the example in the specifications:
+        >>> from genedata.classes{Config.VERSION} import Plac, PlacForm
+        >>> m = Plac('Baltimore, , Maryland, USA', PlacForm('City, County, State, Country'))
+        >>> print(m.ged(2))
+        2 PLAC Baltimore, , Maryland, USA
+        3 FORM City, County, State, Country
+        <BLANKLINE>""",
+    'PLAC-TRAN': f"""
+
+    Example:
+        The following steps would generate the example in the specifications.
+        >>> from genedata.classes{Config.VERSION} import PlacForm, Lang, PlacTran, Plac, PlacTran
+        >>> m = Plac('千代田, 東京, 日本',
+        ...     [
+        ...         PlacForm('区, 都, 国'),
+        ...         Lang('ja'),
+        ...         PlacTran('Chiyoda, Tokyo, Nihon', Lang('ja-Latn')),
+        ...         PlacTran('Chiyoda, Tokyo, Japan', Lang('en')),
+        ...     ]
+        ... )
+        >>> print(m.ged(2))
+        2 PLAC 千代田, 東京, 日本
+        3 FORM 区, 都, 国
+        3 LANG ja
+        3 TRAN Chiyoda, Tokyo, Nihon
+        4 LANG ja-Latn
+        3 TRAN Chiyoda, Tokyo, Japan
+        4 LANG en
+        <BLANKLINE>""",
     'QUAY': f"""
 
     Examples:
@@ -806,6 +999,57 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Quay('0')""",
+    'record-INDI': f"""
+
+    Example:
+        Here is the way to construct the ged lines in the example from the specification.
+        First create the two individual cross reference identifiers.  Then let a
+        RecordIndi class format them into the desired ged lines.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes{Config.VERSION} import Asso, RecordIndi, Role
+        >>> g = Genealogy('example')
+        >>> indi_i1_xref = g.individual_xref('I1')
+        >>> indi_i2_xref = g.individual_xref('I2')
+        >>> m = RecordIndi(indi_i1_xref, Asso(indi_i2_xref, Role('GODP')))
+        >>> print(m.ged())
+        0 @I1@ INDI
+        1 ASSO @I2@
+        2 ROLE GODP
+        <BLANKLINE>""",
+    # 'record-SNOTE': f"""
+
+    # Example:
+    #     The example in the specification has two records: the source record
+    #     `GORDON` and an individual `I1`.  We will create those cross
+    #     reference identifiers first.
+    #     >>> from genedata.build import Genealogy
+    #     >>> g = Genealogy('example')
+    #     >>> sour_xref = g.source_xref('GORDON')
+    #     >>> indi_xref = g.individual_xref('I1')
+
+    #     Next create the record for the shared note:
+    #     >>> from genedata.classes{Config.VERSION} import RecordIndi, RecordSnote, IndiName, Note, Snote
+    #     >>> snote = RecordSnote(sour_xref, f'''"Gordon" is a traditional scottish surname.\\nIt became a given name in honor of Charles George Gordon.''')
+
+    #     Next create the individual record.
+    #     >>> indi = RecordIndi(
+    #     ...     indi_xref, 
+    #     ...     IndiName('Gordon /Jones/',
+    #     ...         [
+    #     ...             Note('Named after the astronaut Gordon Cooper'),
+    #     ...             Snote(snote_xref),
+    #     ...         ]
+    #     ...     )
+    #     ... )
+    #     Now generate the ged lines by calling the ged method on each of the records:
+    #     >>> print(''.join([snote.ged(), indi.ged()]))
+    #     0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
+    #     1 CONT It became a given name in honor of Charles George Gordon.
+    #     0 @I1@ INDI
+    #     1 NAME Gordon /Jones/
+    #     2 NOTE Named after the astronaut Gordon Cooper
+    #     2 SNOTE @GORDON@
+    #     <BLANKLINE>""",
     'RESN': f"""
 
     Examples:
@@ -831,9 +1075,54 @@ Examples: dict[str, str] = {
     'ROLE': f"""
 
     Examples:
-        This example shows a successful run of the Role structure using
-        the enumeration value 'CHIL'.
-        >>> from genedata.classes{Config.VERSION} import Role
+        The first example of the specification could be coded by first creating
+        the cross reference identifiers for the individual `I1` and the source `S1`.  
+        This would be done as follows:
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi = g.individual_xref('I1')
+        >>> sour = g.source_xref('S1')
+
+        With these cross reference identifiers we can create the ged lines:
+        >>> from genedata.classes{Config.VERSION} import RecordIndi, IndiName, Sour, SourEven, Role
+        >>> m = RecordIndi(indi, IndiName('Mary //', Sour(sour, SourEven('BIRT', Role('MOTH')))))
+        >>> print(m.ged(1))
+        0 @I1@ INDI
+        1 NAME Mary //
+        2 SOUR @S1@
+        3 EVEN BIRT
+        4 ROLE MOTH
+        <BLANKLINE>
+
+        The second example from the specification would be created as follows.
+        There are two individuals in this example, `I2` and `I3`.  First
+        create cross reference identifiers for them.
+        >>> indi2 = g.individual_xref('I2')
+        >>> indi3 = g.individual_xref('I3')
+        With those cross reference identifiers we can complete the ged lines
+        after importing the additional classes.
+        >>> from genedata.class{Config.VERSION} import Asso, Bapm, Phrase
+        Now create the lines:
+        >>> m = RecordIndi(
+        ...     [
+        ...         Asso(indi3, Role('FRIEND', Phrase('best friend'))),
+        ...         Bapm('', Asso(indi3, Role('WITN'))),
+        ...     ]
+        ... )
+        >>> print(m.ged())
+        0 @I2@ INDI
+        1 ASSO @I3@
+        2 ROLE FRIEND
+        3 PHRASE best friend
+        1 BAPM
+        2 ASSO @I3@
+        3 ROLE WITN
+        <BLANKLINE>
+
+        As a simpler example shows a successful run of the Role structure using
+        the enumeration value 'CHIL'.  However, ultimately these lines would
+        have to be part of a larger record.
+        >>> from genedata.classes7 import Role
         >>> m = Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL
@@ -858,6 +1147,18 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Sex('F')""",
+    'TITL': f"""
+
+    Examples:
+        Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
+        on April 6, 1920.  Based on the specification one could enter this as follows.
+        >>> from genedata.classes{Config.VERSION} import File, Form, Titl
+        >>> m = File('letter.pdf', [Form('application/pdf'), Titl('Letter from Ann to Henry April 6, 1920')])
+        >>> print(m.ged(1))
+        1 FILE letter.pdf
+        2 FORM application/pdf
+        2 TITL Letter from Ann to Henry April 6, 1920
+        <BLANKLINE>""",
     'TYPE': f"""
 
     Examples:
@@ -871,7 +1172,7 @@ Examples: dict[str, str] = {
         >>> m = RecordIndi(
         ...     indi_xref,
         ...     [
-        ...         Ordn(Type('Bishop'))
+        ...         Ordn('', Type('Bishop'))
         ...     ]
         ... )
         >>> print(m.ged())
@@ -885,9 +1186,9 @@ Examples: dict[str, str] = {
         The following example would send a logging message warning
         that the site "abc" cannot be reached.
         >>> from genedata.util import Input
-        >>> from genedata.classes{Config.VERSION} import Www.
-        >>> response = Www(Input('abc'))
-        >>> response.ged(1)
+        >>> from genedata.classes{Config.VERSION} import Www
+        >>> response = Www(Input.www('abc'))
+        >>> print(response.ged(1))
         1 WWW abc
         <BLANKLINE>
         
@@ -895,7 +1196,7 @@ Examples: dict[str, str] = {
         According to the specification the url should be retained even
         it is not available.
         >>> m = Www('abc')
-        >>> m.ged(1)
+        >>> print(m.ged(1))
         1 WWW abc
         <BLANKLINE>""",
 }
