@@ -34,7 +34,9 @@ class Msg:
     # EMPTY_EVENT_TYPE: str = 'The event type for tag {0} must have some value.'
     EVEN_REQUIRES_TYPE: str = 'The EVEN tag requires a non-empty TYPE.'
     EXID_TYPE: str = 'The EXID identifier requires a type description of it.'
-    EXTENSION_DUPLICATES_TAG: str = 'The extension tag "{0}" duplicates the standard tag "{1}".'
+    EXTENSION_DUPLICATES_TAG: str = (
+        'The extension tag "{0}" duplicates the standard tag "{1}".'
+    )
     EXTENSION_ENUM_TAG: str = (
         'The tag "{0}" is not a value of the enumeration "{1}".'
     )
@@ -43,19 +45,31 @@ class Msg:
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
     IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
-    LATI_NORTH_SOUTH: str = 'The character "{0}" of the latitude "{1}" is not "N" or "S".'
-    LATI_RANGE: str = 'The value "{0}" is not between {1} and {2} in structure "{3}".'
-    LATI_RANGE_METHOD: str = 'The value "{0}" is not between {1} and {2} in method Input.lati.'
+    LATI_NORTH_SOUTH: str = (
+        'The character "{0}" of the latitude "{1}" is not "N" or "S".'
+    )
+    LATI_RANGE: str = (
+        'The value "{0}" is not between {1} and {2} in structure "{3}".'
+    )
+    LATI_RANGE_METHOD: str = (
+        'The value "{0}" is not between {1} and {2} in method Input.lati.'
+    )
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
     LONG_EAST_WEST: str = 'The character "{0}" of the longitude "{1}" is not "{2}" or "{3}" in structure "{4}".'
-    LONG_RANGE: str = 'The value "{0}" is not between {1} and {2} in structure "{3}".'
-    LONG_RANGE_METHOD: str = 'The value "{0}" is not between {1} and {2} in method Input.long.'
+    LONG_RANGE: str = (
+        'The value "{0}" is not between {1} and {2} in structure "{3}".'
+    )
+    LONG_RANGE_METHOD: str = (
+        'The value "{0}" is not between {1} and {2} in method Input.long.'
+    )
     MISSING: str = 'These xref values {0} are missing record definitions.'
     MISSING_REQUIRED: str = (
         'The substructure "{0}" is required for the "{1}" structure.'
     )
-    NEGATIVE_ERROR: str = 'The value "{0}" is less than zero in structure "{1}".'
+    NEGATIVE_ERROR: str = (
+        'The value "{0}" is less than zero in structure "{1}".'
+    )
     NEG_YEAR: str = 'Negative year but a negative label "{0}".'
     NEITHER_TAG_NOR_EXTTAG: str = (
         'The item "{0}" is neither a Tag nor an ExtTag.'
@@ -75,49 +89,57 @@ class Msg:
     NO_EMPTY_TAG: str = 'The tag is required to be not the empty tag.'
     NOT_AGE: str = 'The value "{0}" is not an age for structure "{1}".'
     NOT_DATE: str = 'The value "{0}" is not a date for structure "{1}".'
-    NOT_DATE_EXACT: str = 'The value "{0}" is not an exact date for structure "{1}".'
-    NOT_DATE_PERIOD: str = 'The value "{0}" is not a date period for structure "{1}".'
+    NOT_DATE_EXACT: str = (
+        'The value "{0}" is not an exact date for structure "{1}".'
+    )
+    NOT_DATE_PERIOD: str = (
+        'The value "{0}" is not a date period for structure "{1}".'
+    )
     NOT_DEFAULT: str = (
         'GEDCOM requires a specific value different from the default "{0}".'
     )
     NOT_DEFINED_FOR_STRUCTURE: str = (
         'The extension "{0}" is not defined for the current structure.'
     )
-    NOT_FAMILY_XREF: str = 'The value "{0}" is not a family cross reference for structure "{1}".'
-    NOT_FILE_PATH: str = 'The value "{0}" is not a file path for structure "{1}".'
+    NOT_FAMILY_XREF: str = (
+        'The value "{0}" is not a family cross reference for structure "{1}".'
+    )
+    NOT_FILE_PATH: str = (
+        'The value "{0}" is not a file path for structure "{1}".'
+    )
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
-    NOT_INDIVIDUAL_XREF: str = (
-        'The value "{0}" is not an individual cross reference for structure "{1}".'
-    )
+    NOT_INDIVIDUAL_XREF: str = 'The value "{0}" is not an individual cross reference for structure "{1}".'
     NOT_INTEGER: str = 'The value "{0}" is not an integer for structure "{1}".'
-    NOT_LANGUAGE: str = 'The value "{0}" is not a language code for structure "{1}".'
+    NOT_LANGUAGE: str = (
+        'The value "{0}" is not a language code for structure "{1}".'
+    )
     NOT_LIST: str = 'The value "{0}" is not a list for structure "{1}".'
-    NOT_MEDIA_TYPE: str = 'The value "{0}" is not a media type for structure "{1}".'
-    NOT_MULTIMEDIA_XREF: str = (
-        'The value "{0}" is not a multimedia cross reference for structure "{1}".'
+    NOT_MEDIA_TYPE: str = (
+        'The value "{0}" is not a media type for structure "{1}".'
     )
+    NOT_MULTIMEDIA_XREF: str = 'The value "{0}" is not a multimedia cross reference for structure "{1}".'
     NOT_NAME: str = 'The value "{0}" is not a name for structure "{1}".'
-    NOT_PERMITTED: str = (
-        'The substructure "{0}" is not in the permitted list {1} for structure "{2}".'
+    NOT_PERMITTED: str = 'The substructure "{0}" is not in the permitted list {1} for structure "{2}".'
+    NOT_RECORD: str = (
+        'The value "{0}" is not an appropriate xref value for structure "{1}".'
     )
-    NOT_RECORD: str = 'The value "{0}" is not an appropriate xref value for structure "{1}".'
-    NOT_REPOSITORY_XREF: str = (
-        'The value "{0}" is not a repository cross reference for structure "{1}".'
+    NOT_REPOSITORY_XREF: str = 'The value "{0}" is not a repository cross reference for structure "{1}".'
+    NOT_SHARED_NOTE_XREF: str = 'The value "{0}" is not a shared note cross reference for structure "{1}".'
+    NOT_SOURCE_XREF: str = (
+        'The value "{0}" is not a source cross reference for structure "{1}".'
     )
-    NOT_SHARED_NOTE_XREF: str = (
-        'The value "{0}" is not a shared note cross reference for structure "{1}".'
-    )
-    NOT_SOURCE_XREF: str = 'The value "{0}" is not a source cross reference for structure "{1}".'
     NOT_STRING: str = 'The value "{0}" is not a string for structure "{1}".'
-    NOT_SUBMITTER_XREF: str = (
-        'The value "{0}" is not a submitter cross reference for structure "{1}".'
-    )
+    NOT_SUBMITTER_XREF: str = 'The value "{0}" is not a submitter cross reference for structure "{1}".'
     NOT_TIME: str = 'The value "{0}" is not a time for structure "{1}".'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The value "{0}" is not in the enumeration list {1} for structure "{2}".'
 
-    ONLY_ONCE: str = 'The substructure "{0}" can appear only once in structure "{1}".'
-    ONLY_ONE_PERMITTED: str = 'The substructure "{0}" can appear only once in structure "{1}".'
+    ONLY_ONCE: str = (
+        'The substructure "{0}" can appear only once in structure "{1}".'
+    )
+    ONLY_ONE_PERMITTED: str = (
+        'The substructure "{0}" can appear only once in structure "{1}".'
+    )
     PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'
     PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
@@ -162,9 +184,10 @@ class Msg:
         'The cross reference identifier "{0}" is not recognized.'
     )
     WRONG_TYPE: str = '"{0}" has type {1} but should have type {2}.'
-    VALUE_NOT_Y_OR_NULL: str = (
-        'The value "{0}" is neither "Y" nor the empty string for structure "{1}".'
+    WWW_RESPONSE: str = (
+        'The site "{0}" returned "{1}". The value 200 was expected.'
     )
+    VALUE_NOT_Y_OR_NULL: str = 'The value "{0}" is neither "Y" nor the empty string for structure "{1}".'
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'
     YAML_NOT_YAML_FILE: str = (
         'The file "{0}" does not contain the YAML directive "{1}".'

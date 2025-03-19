@@ -445,7 +445,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'Calendar: dict[str, dict[str, Any]] = {'
         for item in Keys.CALENDARS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -459,7 +459,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'DataType: dict[str, dict[str, Any]] = {'
         for item in Keys.DATATYPES:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -474,7 +474,7 @@ from typing import Any
         # lines: str = 'Enumeration: dict[str, dict[str, Any]] = {'
         lines: str = '{'
         for item in Keys.ENUMERATIONS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}'{item}': {yamldict}, "
         return ''.join([lines, Default.EOL, '}\n'])
 
@@ -488,7 +488,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'Enumeration: dict[str, dict[str, Any]] = {'
         for item in Keys.ENUMERATIONS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -502,7 +502,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'EnumerationSet: dict[str, dict[str, Any]] = {'
         for item in Keys.ENUMERATION_SETS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -516,7 +516,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'Month: dict[str, dict[str, Any]] = {'
         for item in Keys.MONTHS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -532,7 +532,7 @@ from typing import Any
         enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
         lines: str = '{'
         for item in Keys.STRUCTURES:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             required = []
             single = []
             permitted = []
@@ -571,7 +571,7 @@ from typing import Any
         enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
         lines: str = 'Structure: dict[str, dict[str, Any]] = {'
         for item in Keys.STRUCTURES:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             required = []
             single = []
             permitted = []
@@ -613,7 +613,7 @@ from typing import Any
         enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
         lines: str = 'ExtensionStructure: dict[str, dict[str, Any]] = {'
         for item in Keys.STRUCTURE_EXTENSIONS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             required = []
             single = []
             permitted = []
@@ -652,7 +652,7 @@ from typing import Any
         path_end = '.yaml'
         lines: str = 'Uri: dict[str, dict[str, Any]] = {'
         for item in Keys.URIS:
-            yamldict = Util.read(f'{path_start}{item}{path_end}')
+            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -820,7 +820,14 @@ Examples: dict[str, str] = {
         This example shows the code that is generated to produce the same result as above.
         >>> print(m.code())
         <BLANKLINE>
-        Resn('CONFIDENTIAL')""",
+        Resn('CONFIDENTIAL')
+        
+        More than one enumeration value may be entered for this particular
+        enumeration set by separating the values with a comma.  For example,
+        >>> n = Resn('CONFIDENTIAL, LOCKED')
+        >>> print(n.ged(1))
+        1 RESN CONFIDENTIAL, LOCKED
+        <BLANKLINE>""",
     'ROLE': f"""
 
     Examples:
@@ -851,6 +858,46 @@ Examples: dict[str, str] = {
         >>> print(m.code())
         <BLANKLINE>
         Sex('F')""",
+    'TYPE': f"""
+
+    Examples:
+        To see how the example could be produced from the specification
+        first create an individual cross reference identifier then add the
+        ordination event as a substructure of the RecordIndi record.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes{Config.VERSION} import Ordn, RecordIndi, Type
+        >>> g = Genealogy('test')
+        >>> indi_xref = g.individual_xref('I1')
+        >>> m = RecordIndi(
+        ...     indi_xref,
+        ...     [
+        ...         Ordn(Type('Bishop'))
+        ...     ]
+        ... )
+        >>> print(m.ged())
+        0 @I1@ INDI
+        1 ORDN
+        2 TYPE Bishop
+        <BLANKLINE>""",
+    'WWW': f"""
+
+    Examples:
+        The following example would send a logging message warning
+        that the site "abc" cannot be reached.
+        >>> from genedata.util import Input
+        >>> from genedata.classes{Config.VERSION} import Www.
+        >>> response = Www(Input('abc'))
+        >>> response.ged(1)
+        1 WWW abc
+        <BLANKLINE>
+        
+        If one doesn't want the check, one can just enter the url.
+        According to the specification the url should be retained even
+        it is not available.
+        >>> m = Www('abc')
+        >>> m.ged(1)
+        1 WWW abc
+        <BLANKLINE>""",
 }
 
 

@@ -914,14 +914,6 @@ class BaseStructure:
                     )
                 )
 
-        # Is the value of an enumeration substructure in its list of enumerated values?
-        if len(self.enums) > 0 and self.value not in self.enums:
-            raise ValueError(
-                Msg.NOT_VALID_ENUM.format(
-                    self.value, self.enums, self.class_name
-                )
-            )
-
         # Check that extenions meet requirements.
         # if self.ext is not None:
         #     # Is an extension tag the same as a standard tag?
@@ -936,219 +928,243 @@ class BaseStructure:
         #                 raise ValueError(Msg.EXTENSION_DUPLICATES_TAG.format(self.ext.tag, value[Default.YAML_STANDARD_TAG]))
 
         # Does value have the required data type?
-        if self.payload not in [
-            'https://gedcom.io/terms/v7/type-Enum',
-            'https://gedcom.io/terms/v7/type-List#Enum',
-        ]:
-            match self.payload:
-                case 'Y|<NULL>':
-                    if not isinstance(self.value, str):
+        match self.payload:
+            case 'Y|<NULL>':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
+                        )
+                    )
+                if str(self.value) not in ['Y', '']:
+                    raise ValueError(
+                        Msg.VALUE_NOT_Y_OR_NULL.format(
+                            self.value, self.class_name
+                        )
+                    )
+                return True
+            case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+                if not isinstance(self.value, int):
+                    raise ValueError(
+                        Msg.NOT_INTEGER.format(self.value, self.class_name)
+                    )
+                if int(self.value) < 0:
+                    raise ValueError(
+                        Msg.NEGATIVE_ERROR.format(
+                            str(self.value), self.class_name
+                        )
+                    )
+                return True
+            case 'https://gedcom.io/terms/v7/type-List#Enum':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
+                        )
+                    )
+                for value in self.value.split(','):
+                    if value.strip() not in self.enums:
                         raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
+                            Msg.NOT_VALID_ENUM.format(
+                                self.value, self.enums, self.class_name
                             )
                         )
-                    if str(self.value) not in ['Y', '']:
-                        raise ValueError(
-                            Msg.VALUE_NOT_Y_OR_NULL.format(
-                                self.value, self.class_name
-                            )
+            case 'https://gedcom.io/terms/v7/type-Enum':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    return True
-                case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                    if not isinstance(self.value, int):
-                        raise ValueError(
-                            Msg.NOT_INTEGER.format(self.value, self.class_name)
+                    )
+                if self.value not in self.enums:
+                    raise ValueError(
+                        Msg.NOT_VALID_ENUM.format(
+                            self.value, self.enums, self.class_name
                         )
-                    if int(self.value) < 0:
-                        raise ValueError(
-                            Msg.NEGATIVE_ERROR.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-INDI>@':
+                if not isinstance(self.value, IndividualXref):
+                    raise ValueError(
+                        Msg.NOT_INDIVIDUAL_XREF.format(
+                            str(self.value), self.class_name
                         )
-                    return True
-                case '@<https://gedcom.io/terms/v7/record-INDI>@':
-                    if not isinstance(self.value, IndividualXref):
-                        raise ValueError(
-                            Msg.NOT_INDIVIDUAL_XREF.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-FAM>@':
+                if not isinstance(self.value, FamilyXref):
+                    raise ValueError(
+                        Msg.NOT_FAMILY_XREF.format(
+                            str(self.value), self.class_name
                         )
-                case '@<https://gedcom.io/terms/v7/record-FAM>@':
-                    if not isinstance(self.value, FamilyXref):
-                        raise ValueError(
-                            Msg.NOT_FAMILY_XREF.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+            case 'https://gedcom.io/terms/v7/type-List#Text':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-List#Text':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+                if not re.match('', str(self.value)):
+                    raise ValueError(
+                        Msg.NOT_LIST.format(
+                            str(self.value), self.class_name
                         )
-                    if not re.match('', str(self.value)):
-                        raise ValueError(
-                            Msg.NOT_LIST.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+                if not isinstance(self.value, SubmitterXref):
+                    raise ValueError(
+                        Msg.NOT_SUBMITTER_XREF.format(
+                            str(self.value), self.class_name
                         )
-                case '@<https://gedcom.io/terms/v7/record-SUBM>@':
-                    if not isinstance(self.value, SubmitterXref):
-                        raise ValueError(
-                            Msg.NOT_SUBMITTER_XREF.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+            case 'http://www.w3.org/2001/XMLSchema#Language':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                case 'http://www.w3.org/2001/XMLSchema#Language':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+                if not re.match('', str(self.value)):
+                    raise ValueError(
+                        Msg.NOT_LANGUAGE.format(self.value, self.class_name)
+                    )
+            case 'https://gedcom.io/terms/v7/type-Date#period':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    if not re.match('', str(self.value)):
-                        raise ValueError(
-                            Msg.NOT_LANGUAGE.format(self.value, self.class_name)
+                    )
+                if not re.match('^TO|^FROM', self.value) or re.match(
+                    '[a-z]', self.value
+                ):
+                    raise ValueError(
+                        Msg.NOT_DATE_PERIOD.format(
+                            self.value, self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-Date#period':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case 'https://gedcom.io/terms/v7/type-Date#exact':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    if not re.match('^TO|^FROM', self.value) or re.match(
-                        '[a-z]', self.value
-                    ):
-                        raise ValueError(
-                            Msg.NOT_DATE_PERIOD.format(
-                                self.value, self.class_name
-                            )
+                    )
+                if (
+                    re.search('[a-z]', self.value) is not None
+                    or re.search('[0-9]', self.value) is None
+                    or len(re.findall(' ', self.value)) != 2
+                ):
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT.format(
+                            self.value, self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-Date#exact':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case 'https://gedcom.io/terms/v7/type-Date':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    if (
-                        re.search('[a-z]', self.value) is not None
-                        or re.search('[0-9]', self.value) is None
-                        or len(re.findall(' ', self.value)) != 2
-                    ):
-                        raise ValueError(
-                            Msg.NOT_DATE_EXACT.format(
-                                self.value, self.class_name
-                            )
+                    )
+                if (
+                    re.search('[a-z]', self.value) is not None
+                    or re.search('[0-9]', self.value) is None
+                ):
+                    raise ValueError(Msg.NOT_DATE.format(self.value))
+            case 'https://gedcom.io/terms/v7/type-FilePath':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-Date':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+                if not re.match('', self.value):
+                    raise ValueError(
+                        Msg.NOT_FILE_PATH.format(
+                            str(self.value), self.class_name
                         )
-                    if (
-                        re.search('[a-z]', self.value) is not None
-                        or re.search('[0-9]', self.value) is None
-                    ):
-                        raise ValueError(Msg.NOT_DATE.format(self.value))
-                case 'https://gedcom.io/terms/v7/type-FilePath':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case 'https://gedcom.io/terms/v7/type-Name':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    if not re.match('', self.value):
-                        raise ValueError(
-                            Msg.NOT_FILE_PATH.format(
-                                str(self.value), self.class_name
-                            )
+                    )
+                if not len(re.findall('/', self.value)) == 2:
+                    raise ValueError(
+                        Msg.NOT_NAME.format(self.value, self.class_name)
+                    )
+            case 'https://gedcom.io/terms/v7/type-Age':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-Name':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+                if (
+                    re.search('[abcefghijklnopqrstuxz]|[A-Z]', self.value)
+                    or not re.search('[ymwd]', self.value)
+                    or not re.search('[0-9]', self.value)
+                    or not re.search('^[<|>|\\d]', self.value)
+                    or re.search('[ymwd][ymwd]', self.value)
+                ) and self.value != Default.EMPTY:
+                    raise ValueError(
+                        Msg.NOT_AGE.format(str(self.value), self.class_name)
+                    )
+            case 'http://www.w3.org/ns/dcat#mediaType':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                    if not len(re.findall('/', self.value)) == 2:
-                        raise ValueError(
-                            Msg.NOT_NAME.format(self.value, self.class_name)
+                    )
+                if not re.match('', str(self.value)):
+                    raise ValueError(
+                        Msg.NOT_MEDIA_TYPE.format(
+                            self.value, self.class_name
                         )
-                case 'https://gedcom.io/terms/v7/type-Age':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                if not isinstance(self.value, MultimediaXref):
+                    raise ValueError(
+                        Msg.NOT_MULTIMEDIA_XREF.format(
+                            repr(self.value), self.class_name
                         )
-                    if (
-                        re.search('[abcefghijklnopqrstuxz]|[A-Z]', self.value)
-                        or not re.search('[ymwd]', self.value)
-                        or not re.search('[0-9]', self.value)
-                        or not re.search('^[<|>|\\d]', self.value)
-                        or re.search('[ymwd][ymwd]', self.value)
-                    ) and self.value != Default.EMPTY:
-                        raise ValueError(
-                            Msg.NOT_AGE.format(str(self.value), self.class_name)
+                    )
+            case '@<https://gedcom.io/terms/v7/record-REPO>@':
+                if not isinstance(self.value, RepositoryXref):
+                    raise ValueError(
+                        Msg.NOT_REPOSITORY_XREF.format(
+                            repr(self.value), self.class_name
                         )
-                case 'http://www.w3.org/ns/dcat#mediaType':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                if not isinstance(self.value, SharedNoteXref):
+                    raise ValueError(
+                        Msg.NOT_SHARED_NOTE_XREF.format(
+                            repr(self.value), self.class_name
                         )
-                    if not re.match('', str(self.value)):
-                        raise ValueError(
-                            Msg.NOT_MEDIA_TYPE.format(
-                                self.value, self.class_name
-                            )
+                    )
+            case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+                if not isinstance(self.value, SourceXref):
+                    raise ValueError(
+                        Msg.NOT_SOURCE_XREF.format(
+                            repr(self.value), self.class_name
                         )
-                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                    if not isinstance(self.value, MultimediaXref):
-                        raise ValueError(
-                            Msg.NOT_MULTIMEDIA_XREF.format(
-                                repr(self.value), self.class_name
-                            )
+                    )
+            case 'https://gedcom.io/terms/v7/type-Time':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(
+                            repr(self.value), self.class_name
                         )
-                case '@<https://gedcom.io/terms/v7/record-REPO>@':
-                    if not isinstance(self.value, RepositoryXref):
-                        raise ValueError(
-                            Msg.NOT_REPOSITORY_XREF.format(
-                                repr(self.value), self.class_name
-                            )
-                        )
-                case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                    if not isinstance(self.value, SharedNoteXref):
-                        raise ValueError(
-                            Msg.NOT_SHARED_NOTE_XREF.format(
-                                repr(self.value), self.class_name
-                            )
-                        )
-                case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-                    if not isinstance(self.value, SourceXref):
-                        raise ValueError(
-                            Msg.NOT_SOURCE_XREF.format(
-                                repr(self.value), self.class_name
-                            )
-                        )
-                case 'https://gedcom.io/terms/v7/type-Time':
-                    if not isinstance(self.value, str):
-                        raise ValueError(
-                            Msg.NOT_STRING.format(
-                                repr(self.value), self.class_name
-                            )
-                        )
-                    if not re.match('', str(self.value)):
-                        raise ValueError(
-                            Msg.NOT_TIME.format(self.value, self.class_name)
-                        )
+                    )
+                if not re.match('', str(self.value)):
+                    raise ValueError(
+                        Msg.NOT_TIME.format(self.value, self.class_name)
+                    )
+                
         # Do records have the correct class?
         match self.key:
             case 'record-FAM':

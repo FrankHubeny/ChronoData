@@ -8,12 +8,15 @@ __all__ = [
     'Util',
 ]
 
+import logging
 import math
 import re
 import urllib.request
+import zipfile
 from textwrap import indent
 from typing import Any
 
+import requests  # type: ignore[import-untyped]
 import yaml  # type: ignore[import-untyped]
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
@@ -26,7 +29,33 @@ class Util:
     """Utilities to read and write yaml or ged files."""
 
     @staticmethod
-    def read(url: str) -> dict[str, Any]:
+    def www_status(url: str) -> int:
+        request: int = 0
+        try:
+            request = requests.head(url)
+        except requests.exceptions.RequestException:
+            return 0
+        return request
+        
+    @staticmethod
+    def extract(
+        file: str,
+        zipped_files: str,
+        to_directory: str,
+        password: bytes = b'',
+    ) -> None:
+        # Create a ZipFile object without a password.
+        if password == b'':
+            with zipfile.ZipFile(zipped_files, 'r') as zip_ref:
+                zip_ref.extract(file, to_directory)
+        # else:
+        #     with zipfile.ZipFile(
+        #         zipped_files, 'r', zipfile.ZipFile.setpassword(pwd=password)
+        #     ) as zip_ref:
+        #         zip_ref.extract(file, to_directory)
+
+    @staticmethod
+    def read(url: str) -> str:
         """Read a yaml file and convert it into a dictionary.
 
         Args:
@@ -44,6 +73,18 @@ class Util:
             with open(url, 'rb') as file:  # noqa: PTH123
                 binary_raw = file.read()
             raw = binary_raw.decode('utf-8')
+        return raw
+
+    @staticmethod
+    def read_yaml(url: str) -> dict[str, Any]:
+        """Read a yaml file and convert it into a dictionary.
+
+        Args:
+            url: The name of the file or the internet url.
+        """
+
+        # Retrieve the file.
+        raw: str = Util.read(url)
 
         # Check that file has proper yaml directive.
         if Default.YAML_DIRECTIVE not in raw:
@@ -55,6 +96,34 @@ class Util:
         yaml_data = raw
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
         return yaml_dict
+
+    @staticmethod
+    def ged_summary(ged: str) -> str:
+        """Summarize the contents of a ged file.
+
+        Args:
+            ged: The string obtained from reading or producing a ged file.
+        """
+
+        # Count the number of record types.
+        fam_count: int = len(re.findall('\n0.+FAM', ged))
+        indi_count: int = len(re.findall('\n0.+INDI', ged))
+        obje_count: int = len(re.findall('\n0.+OBJE', ged))
+        repo_count: int = len(re.findall('\n0.+REPO', ged))
+        snote_count: int = len(re.findall('\n0.+SNOTE', ged))
+        sour_count: int = len(re.findall('\n0.+SOUR', ged))
+        subm_count: int = len(re.findall('\n0.+SUBM', ged))
+
+        # Return the number of record types.
+        return f"""
+Families      {fam_count!s}
+Individuals   {indi_count!s}
+Multimedia    {obje_count!s}
+Repositories  {repo_count!s}
+Shared Notes  {snote_count!s}
+Sources       {sour_count!s}
+submitters    {subm_count!s}
+"""
 
     @staticmethod
     def compare(first: str, second: str) -> str:
@@ -683,6 +752,38 @@ class Input:
                 place4,
             ]
         )
+    
+    @staticmethod
+    def www(url: str) -> str:
+        """Test a url to see if it can be reached.
+
+        If the site cannot be reached a warning message through the
+        logging system is sent.  In all cases the url is returned.
+
+        This may be helpful when using the WWW structure (class Www) to
+        test the url that one enters into that structure.
+
+        Args:
+            url: The address of the site.
+
+        Example:
+            The following example would send a logging message warning
+            that the site "abc" cannot be reached.
+            >>> from genedata.util import Input
+            >>> from genedata.classes7 import Www.
+            >>> response = Www(Input('abc'))
+            >>> response.ged(1)
+            1 WWW abc
+            <BLANKLINE>
+
+        Reference:
+        - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
+        
+        """
+        response: int = Util.www_status(url)
+        if response != 200:
+            logging.warning(Msg.WWW_RESPONSE.format(url, response))
+        return url
 
 
 # class Placer:
