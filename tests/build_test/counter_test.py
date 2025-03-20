@@ -10,7 +10,7 @@ import pytest
 
 from genedata.build import Genealogy
 from genedata.messages import Msg
-from genedata.store import Void
+from genedata.structure import Void
 
 testdata = [
     # TEST Initial counter value.
@@ -35,7 +35,6 @@ testdata = [
 ]
 
 
-@pytest.mark.description('Testing the _counter method of the build module.')
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_counter(test_input: str, expected: str | int | bool) -> None:
     # SETUP Instantiate a Genealogy.

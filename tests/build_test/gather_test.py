@@ -16,17 +16,17 @@ import re
 import pytest
 
 from genedata.build import Genealogy
+from genedata.classes7 import (
+    RecordFam,
+    RecordIndi,
+    RecordObje,
+    RecordRepo,
+    RecordSnote,
+    RecordSour,
+    RecordSubm,
+)
 from genedata.constants import String  # noqa: F401
 from genedata.messages import Msg
-from genedata.store import (
-    Family,
-    Individual,
-    Multimedia,
-    Repository,
-    SharedNote,
-    Source,
-    Submitter,
-)
 
 testdata_empty = [
     ('len(a.ged_family)', 0),
@@ -139,7 +139,7 @@ def test_missing_individual() -> None:
     """Test that an individual identifier was not listed in the individual records."""
     a = Genealogy('test')
     sam_xref = a.individual_xref('sam')
-    sam = Individual(sam_xref)
+    sam = RecordIndi(sam_xref)
 
     joe = a.individual_xref('joe')
     missing = [joe.fullname]
@@ -153,7 +153,7 @@ def test_missing_family() -> None:
     """Test that a family identifier was not listed in the family records."""
     a = Genealogy('test')
     one_xref = a.family_xref('one')
-    one = Family(one_xref)
+    one = RecordFam(one_xref)
 
     two = a.family_xref('two')
     missing = [two.fullname]
@@ -209,7 +209,7 @@ def test_missing_source() -> None:
     """Test that a source identifier was not listed in the source records."""
     a = Genealogy('test')
     one_xref = a.source_xref('one')
-    one = Source(one_xref)
+    one = RecordSour(one_xref)
 
     two = a.source_xref('two')
     missing = [two.fullname]
@@ -250,7 +250,7 @@ def test_duplicate_family() -> None:
     """Test that an error is raised if a family cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     fam_one_xref = a.family_xref('one')
-    fam = Family(xref=fam_one_xref)
+    fam = RecordFam(fam_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(fam_one_xref.fullname)),
@@ -262,7 +262,7 @@ def test_duplicate_individual() -> None:
     """Test that an error is raised if an individual cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     indi_one_xref = a.individual_xref('one')
-    indi = Individual(xref=indi_one_xref)
+    indi = RecordIndi(indi_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(indi_one_xref.fullname)),
@@ -310,7 +310,7 @@ def test_duplicate_source() -> None:
     """Test that an error is raised if a source cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     sour_one_xref = a.source_xref('one')
-    sour = Source(xref=sour_one_xref)
+    sour = RecordSour(sour_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(sour_one_xref.fullname)),

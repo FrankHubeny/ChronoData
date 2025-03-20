@@ -254,14 +254,12 @@ class Input:
             are rounded down it is best to include non-negative integers for the years, months,
             weeks and days.
             >>> from genedata.util import Input
-            >>> Input.age(1.1, 0, 2.2, 1)
-            > 1y 2w 1d
-            <BLANKLINE>
+            >>> Input.age(1.1, -1, 2.2, 1)
+            '> 1y 2w 1d'
 
             Negative values will not display that unit.
             >>> Input.age(-2, -14.2, -1, 1)
-            > 1d
-            <BLANKLINE>
+            '> 1d'
 
         args:
             years: The number of years rounded down to an integer value.
@@ -350,13 +348,13 @@ class Input:
             >>> Input.date_period(
             ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1)
             ... )
-            FROM 1 JAN 2024 TO 1 JAN 2025
+            'FROM 1 JAN 2024 TO 1 JAN 2025'
 
             This example displays the calendar name on the from date:
             >>> Input.date_period(
-            ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1, use_tag=True)
+            ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1, show=True)
             ... )
-            FROM GREGORIAN 1 JAN 2024 TO 1 JAN 2025
+            'FROM 1 JAN 2024 TO GREGORIAN 1 JAN 2025'
 
         Args:
             from_date: The earliest date of the period.
@@ -389,13 +387,13 @@ class Input:
             >>> Input.date_between_and(
             ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1)
             ... )
-            BET 1 JAN 2024 AND 1 JAN 2025
+            'BET 1 JAN 2024 AND 1 JAN 2025'
 
             This example displays the calendar name on the from date:
-            >>> Input.date_period(
+            >>> Input.date_between_and(
             ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1, show=True)
             ... )
-            BET GREGORIAN 1 JAN 2024 AND 1 JAN 2025
+            'BET 1 JAN 2024 AND GREGORIAN 1 JAN 2025'
 
         Args:
             between_date: The date following the BET tag.
@@ -420,11 +418,11 @@ class Input:
             This example constructs a date after using the Input.date method to construct date.
             >>> from genedata.util import Input
             >>> Input.date_after(Input.date(2024, 1, 1))
-            AFT 1 JAN 2024
+            'AFT 1 JAN 2024'
 
             This example displays the calendar name on the date:
             >>> Input.date_after(Input.date(2025, 1, 1, show=True))
-            AFT GREGORIAN 1 JAN 2024
+            'AFT GREGORIAN 1 JAN 2025'
 
         Args:
             date: The date following the AFT tag.
@@ -446,11 +444,11 @@ class Input:
             This method attached the BEF tag in front of that date.
             >>> from genedata.util import Input
             >>> Input.date_before(Input.date(2024, 1, 1))
-            BEF 1 JAN 2024
+            'BEF 1 JAN 2024'
 
             This example displays the calendar name on the date:
             >>> Input.date_before(Input.date(2025, 1, 1, show=True))
-            BEF GREGORIAN 1 JAN 2025
+            'BEF GREGORIAN 1 JAN 2025'
 
         Args:
             date: The date following the BEF tag.
@@ -472,11 +470,11 @@ class Input:
             This method attaches the ABT tag in front of that date.
             >>> from genedata.util import Input
             >>> Input.date_about(Input.date(2024, 1, 1))
-            ABT 1 JAN 2024
+            'ABT 1 JAN 2024'
 
             This example displays the calendar name on the date:
-            >>> Input.date_before(Input.date(2025, 1, 1, show=True))
-            AFT GREGORIAN 1 JAN 2025
+            >>> Input.date_about(Input.date(2025, 1, 1, show=True))
+            'ABT GREGORIAN 1 JAN 2025'
 
         Args:
             date: The date following the AFT tag.
@@ -498,11 +496,11 @@ class Input:
             This method attaches the CAL tag in front of that date.
             >>> from genedata.util import Input
             >>> Input.date_calculated(Input.date(2024, 1, 1))
-            CAL 1 JAN 2024
+            'CAL 1 JAN 2024'
 
             This example displays the calendar name on the date:
             >>> Input.date_calculated(Input.date(2025, 1, 1, show=True))
-            CAL GREGORIAN 1 JAN 2025
+            'CAL GREGORIAN 1 JAN 2025'
 
         Args:
             date: The date following the AFT tag.
@@ -524,11 +522,11 @@ class Input:
             This method attaches the EST tag in front of that date.
             >>> from genedata.util import Input
             >>> Input.date_estimated(Input.date(2024, 1, 1))
-            EST 1 JAN 2024
+            'EST 1 JAN 2024'
 
             This example displays the calendar name on the date:
-            >>> Input.date_estimatedd(Input.date(2025, 1, 1, show=True))
-            EST GREGORIAN 1 JAN 2025
+            >>> Input.date_estimated(Input.date(2025, 1, 1, show=True))
+            'EST GREGORIAN 1 JAN 2025'
 
         Args:
             date: The date following the AFT tag.
@@ -546,21 +544,21 @@ class Input:
         """Format a personal name to meet GEDCOM name type specifications.
 
         Example:
-            >>> from genedata.structure import Input
+            >>> from genedata.util import Input
             >>> Input.name('Jim Smith', 'Smith')
-            Jim /Smith/
+            'Jim /Smith/'
 
             If more than one space separates parts of the name they are removed along with
             spaces at the beginning or end of the name.
             >>> Input.name(' Jim      Smith ', '   Smith ')
-            Jim /Smith/
+            'Jim /Smith/'
 
             Line breaks are also removed from both name and surname.
-            >>> Input.name(' Jim\n\n\nSmith\n', '\n\nSmith\n')
-            Jim /Smith/
+            >>> Input.name(' Jim\\n\\n\\nSmith\\n', '\\n\\nSmith\\n')
+            'Jim /Smith/'
 
             This methods assists formatting a personal name using IndiName.
-            >>> from genedata.util import IndiName
+            >>> from genedata.classes7 import IndiName
             >>> m = IndiName(Input.name('Jim Smith', 'Smith'))
             >>> print(m.ged())
             1 NAME Jim /Smith/
@@ -727,6 +725,14 @@ class Input:
 
     @staticmethod
     def form(form1: str, form2: str, form3: str, form4: str) -> str:
+        """Format the place form separating each component with a comma.
+        
+        Example:
+            This example illustrates the formatting provided.
+            >>> from genedata.util import Input
+            >>> Input.form('City', 'State', 'County', 'Country')
+            'City, State, County, Country'
+        """
         return ''.join(
             [
                 form1,
@@ -741,6 +747,14 @@ class Input:
 
     @staticmethod
     def place(place1: str, place2: str, place3: str, place4: str) -> str:
+        """Format the place components separating them with a comma.
+        
+        Example:
+            This example illustrates the formatting provided.
+            >>> from genedata.util import Input
+            >>> Input.form('Chicago', 'Illinois', 'Cook', 'USA')
+            'Chicago, Illinois, Cook, USA'
+        """
         return ''.join(
             [
                 place1,
@@ -770,9 +784,9 @@ class Input:
             The following example would send a logging message warning
             that the site "abc" cannot be reached.
             >>> from genedata.util import Input
-            >>> from genedata.classes7 import Www.
-            >>> response = Www(Input('abc'))
-            >>> response.ged(1)
+            >>> from genedata.classes7 import Www
+            >>> response = Www(Input.www('abc'))
+            >>> print(response.ged(1))
             1 WWW abc
             <BLANKLINE>
 
@@ -784,100 +798,6 @@ class Input:
         if response != 200:
             logging.warning(Msg.WWW_RESPONSE.format(url, response))
         return url
-
-
-# class Placer:
-#     """Global methods to support place data."""
-
-#     @staticmethod
-#     def to_decimal(
-#         degrees: int, minutes: int, seconds: float, precision: int = 6
-#     ) -> float:
-#         """Convert degrees, minutes and seconds to a decimal.
-
-#         Example:
-#             The specification for the LATI and LONG structures (tags) offer the
-#             following example.
-#             >>> from genedata.structure import Placer
-#             >>> Placer.to_decimal(168, 9, 3.4, 6)
-#             168.150944
-
-#         Args:
-#             degrees: The degrees in the angle whether latitude or longitude.
-#             minutes: The minutes in the angle.
-#             seconds: The seconds in the angle.
-#             precision: The number of digits to the right of the decimal point.
-
-#         See Also:
-#             - `to_dms`: Convert a decimal to degrees, minutes, seconds to a precision.
-
-#         Reference:
-#             [GEDCOM LONG structure](https://gedcom.io/terms/v7/LONG)
-#             [GEDCOM LATI structure](https://gedcom.io/terms/v7/LATI)
-
-#         """
-#         sign: int = -1 if degrees < 0 else 1
-#         degrees = abs(degrees)
-#         minutes_per_degree = 60
-#         seconds_per_degree = 3600
-#         return round(
-#             sign * degrees
-#             + (minutes / minutes_per_degree)
-#             + (seconds / seconds_per_degree),
-#             precision,
-#         )
-
-#     @staticmethod
-#     def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
-#         """Convert a measurment in decimals to one showing degrees, minutes
-#         and sconds.
-
-#         >>> from genedata.util import Placer
-#         >>> Placer.to_dms(49.29722222222, 10)
-#         (49, 17, 49.999999992)
-
-#         See Also:
-#             - `to_decimal`: Convert degrees, minutes, seconds with precision to a decimal.
-
-#         """
-#         minutes_per_degree = 60
-#         seconds_per_degree = 3600
-#         degrees: int = math.floor(position)
-#         minutes: int = math.floor((position - degrees) * minutes_per_degree)
-#         seconds: float = round(
-#             (position - degrees - (minutes / minutes_per_degree))
-#             * seconds_per_degree,
-#             precision,
-#         )
-#         return (degrees, minutes, seconds)
-
-#     @staticmethod
-#     def form(form1: str, form2: str, form3: str, form4: str) -> str:
-#         return ''.join(
-#             [
-#                 form1,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 form2,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 form3,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 form4,
-#             ]
-#         )
-
-#     @staticmethod
-#     def place(place1: str, place2: str, place3: str, place4: str) -> str:
-#         return ''.join(
-#             [
-#                 place1,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 place2,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 place3,
-#                 Default.LIST_ITEM_SEPARATOR,
-#                 place4,
-#             ]
-#         )
 
 
 class Tagger:
@@ -941,7 +861,7 @@ class Tagger:
             The main use of this method generates a GEDCOM line.
             Note how the initial and ending spaces have been stripped from
             the input value.
-            >>> from genedata.structure import Tagger
+            >>> from genedata.util import Tagger
             >>> print(Tagger.taginfo(1, 'NAME', '  Some Name'))
             1 NAME   Some Name
             <BLANKLINE>
@@ -955,7 +875,7 @@ class Tagger:
             Note how the `@me` was reformatted as `@@me`.
             > 1 NOTE me@example.com is my email
             > 2 CONT @@me and @I are my social media handles
-            >>> from genedata.structure import Note
+            >>> from genedata.classes7 import Note
             >>> mynote = Note(
             ...     '''me@example.com is my email
             ... @me and @I are my social media handles'''
@@ -1003,7 +923,7 @@ class Tagger:
         > as its payload are encoded with no LineVal and no space after the Tag.
 
         Example:
-            >>> from genedata.structure import Tagger
+            >>> from genedata.util import Tagger
             >>> lines = ''
             >>> lines = Tagger.empty(lines, 1, 'MAP')
             >>> print(lines)
@@ -1140,7 +1060,8 @@ class Tagger:
 
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
-            >>> from genedata.util import Lati, Long, Map, Tagger
+            >>> from genedata.classes7 import Lati, Long, Map
+            >>> from genedata.util import Tagger
             >>> map1 = Map([Lati('N30.000000'), Long('W30.000000')])
             >>> map2 = Map([Lati('S40.000000'), Long('E20.000000')])
             >>> lines = ''
@@ -1231,7 +1152,7 @@ class Formatter:
 
         Examples:
             The first example shows the use of the default, US, international number.
-            >>> from genedata.structure import Formatter
+            >>> from genedata.util import Formatter
             >>> Formatter.phone(1, 123, 456, 7890)
             '+1 123 456 7890'
 
@@ -1403,71 +1324,71 @@ class Formatter:
     #         Default.INDENT * tabs,
     #     )
 
-    @staticmethod
-    def display_no_subs(
-        name: str,
-        value: str,
-        ext: Any,
-        tabs: int = 1,
-        full: bool = True,
-    ) -> str:
-        if ext is None and not full:
-            return indent(
-                Formatter.display_code(f"{name}('{value}')"),
-                Default.INDENT * tabs,
-            )
-        return indent(
-            Formatter.display_code(
-                f'{name}',
-                ('    value = ', value, tabs, full, True),
-                ('    ext = ', ext, tabs + 1, full, True),
-            ),
-            Default.INDENT * tabs,
-        )
+    # @staticmethod
+    # def display_no_subs(
+    #     name: str,
+    #     value: str,
+    #     ext: Any,
+    #     tabs: int = 1,
+    #     full: bool = True,
+    # ) -> str:
+    #     if ext is None and not full:
+    #         return indent(
+    #             Formatter.display_code(f"{name}('{value}')"),
+    #             Default.INDENT * tabs,
+    #         )
+    #     return indent(
+    #         Formatter.display_code(
+    #             f'{name}',
+    #             ('    value = ', value, tabs, full, True),
+    #             ('    ext = ', ext, tabs + 1, full, True),
+    #         ),
+    #         Default.INDENT * tabs,
+    #     )
 
-    @staticmethod
-    def base_string(
-        value: str,
-        sub_name: str,
-        ext: Any = None,
-        tabs: int = 1,
-        full: bool = False,
-    ) -> str:
-        if ext is None:
-            return indent(
-                Formatter.display_code(f"{sub_name}('{value}')"),
-                Default.INDENT * tabs,
-            )
-        return indent(
-            Formatter.display_code(
-                f'{sub_name}',
-                ('    value = ', value, tabs, full, True),
-                ('    ext = ', ext, tabs, full, False),
-            ),
-            Default.INDENT * tabs,
-        )
+    # @staticmethod
+    # def base_string(
+    #     value: str,
+    #     sub_name: str,
+    #     ext: Any = None,
+    #     tabs: int = 1,
+    #     full: bool = False,
+    # ) -> str:
+    #     if ext is None:
+    #         return indent(
+    #             Formatter.display_code(f"{sub_name}('{value}')"),
+    #             Default.INDENT * tabs,
+    #         )
+    #     return indent(
+    #         Formatter.display_code(
+    #             f'{sub_name}',
+    #             ('    value = ', value, tabs, full, True),
+    #             ('    ext = ', ext, tabs, full, False),
+    #         ),
+    #         Default.INDENT * tabs,
+    #     )
 
-    @staticmethod
-    def base_enum(
-        value: str,
-        sub_name: str,
-        extension: Any,
-        tabs: int = 1,
-        full: bool = False,
-    ) -> str:
-        if extension is None:
-            return indent(
-                Formatter.display_code(f'{sub_name}(Tag.{value})'),
-                Default.INDENT * tabs,
-            )
-        return indent(
-            Formatter.display_code(
-                f'{sub_name}',
-                ('    tag = Tag.', value, tabs, full, True),
-                ('    extension = ', extension, tabs, full, False),
-            ),
-            Default.INDENT * tabs,
-        )
+    # @staticmethod
+    # def base_enum(
+    #     value: str,
+    #     sub_name: str,
+    #     extension: Any,
+    #     tabs: int = 1,
+    #     full: bool = False,
+    # ) -> str:
+    #     if extension is None:
+    #         return indent(
+    #             Formatter.display_code(f'{sub_name}(Tag.{value})'),
+    #             Default.INDENT * tabs,
+    #         )
+    #     return indent(
+    #         Formatter.display_code(
+    #             f'{sub_name}',
+    #             ('    tag = Tag.', value, tabs, full, True),
+    #             ('    extension = ', extension, tabs, full, False),
+    #         ),
+    #         Default.INDENT * tabs,
+    #     )
 
     # @staticmethod
     # def schema_example(

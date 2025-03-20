@@ -18,8 +18,7 @@ import pytest
 
 from genedata.build import Genealogy
 from genedata.messages import Msg
-from genedata.store import (
-    Checker,
+from genedata.structure import (
     FamilyXref,
     IndividualXref,
     MultimediaXref,
@@ -52,7 +51,7 @@ def test_individual(test_input: str, expected: str | int | bool) -> None:
 
     # Test creation of the IndividualXref type without names.
     individual = a.individual_xref()
-    indi_type = Checker.verify_type(individual, IndividualXref)  # noqa: F841
+    indi_type = isinstance(individual, IndividualXref)  # noqa: F841
     indi_name = individual.name  # noqa: F841
     indi_fullname = individual.fullname  # noqa: F841
     indi_string = str(individual)  # noqa: F841
@@ -96,7 +95,7 @@ testdata_family = [
 def test_family(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     family = a.family_xref('a family')
-    family_type = Checker.verify_type(family, FamilyXref)  # noqa: F841
+    family_type = isinstance(family, FamilyXref)  # noqa: F841
     family_name = family.name  # noqa: F841
     family_fullname = family.fullname  # noqa: F841
     family_string = str(family)  # noqa: F841
@@ -125,7 +124,7 @@ testdata_multimedia = [
 def test_multimedia(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     multimedia = a.multimedia_xref()
-    multimedia_type = Checker.verify_type(multimedia, MultimediaXref)  # noqa: F841
+    multimedia_type = isinstance(multimedia, MultimediaXref)  # noqa: F841
     multimedia_name = multimedia.name  # noqa: F841
     multimedia_fullname = multimedia.fullname  # noqa: F841
     multimedia_string = str(multimedia)  # noqa: F841
@@ -154,7 +153,7 @@ testdata_repository = [
 def test_repository(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     repository = a.repository_xref()
-    repository_type = Checker.verify_type(repository, RepositoryXref)  # noqa: F841
+    repository_type = isinstance(repository, RepositoryXref)  # noqa: F841
     repository_name = repository.name  # noqa: F841
     repository_fullname = repository.fullname  # noqa: F841
     repository_string = str(repository)  # noqa: F841
@@ -183,7 +182,7 @@ testdata_shared_note = [
 def test_shared_note(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     shared_note = a.shared_note_xref()
-    shared_note_type = Checker.verify_type(shared_note, SharedNoteXref)  # noqa: F841
+    shared_note_type = isinstance(shared_note, SharedNoteXref)  # noqa: F841
     shared_note_name = shared_note.name  # noqa: F841
     shared_note_fullname = shared_note.fullname  # noqa: F841
     shared_note_string = str(shared_note)  # noqa: F841
@@ -212,7 +211,7 @@ testdata_source = [
 def test_source(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     source = a.source_xref()
-    source_type = Checker.verify_type(source, SourceXref)  # noqa: F841
+    source_type = isinstance(source, SourceXref)  # noqa: F841
     source_name = source.name  # noqa: F841
     source_fullname = source.fullname  # noqa: F841
     source_string = str(source)  # noqa: F841
@@ -241,7 +240,7 @@ testdata_submitter = [
 def test_submitter(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
     submitter = a.submitter_xref()
-    submitter_type = Checker.verify_type(submitter, SubmitterXref)  # noqa: F841
+    submitter_type = isinstance(submitter, SubmitterXref)  # noqa: F841
     submitter_name = submitter.name  # noqa: F841
     submitter_fullname = submitter.fullname  # noqa: F841
     submitter_string = str(submitter)  # noqa: F841

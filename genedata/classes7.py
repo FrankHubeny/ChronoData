@@ -5397,6 +5397,22 @@ class Medi(BaseStructure):
     > 
 
     Examples:
+        These are the steps to build the example in the specification.
+        First import the classes and build a multimedia cross reference identifier.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes7 import File, Form, Medi, RecordObje
+        >>> g = Genealogy('example')
+        >>> obje_xref = g.multimedia_xref('M1')
+
+        Next construct the ged lines.  Let `photo.jpg` be the file name of the photo.
+        >>> m = RecordObje(obje_xref, File('photo.jpg', Form('image/jpeg', Medi('PHOTO'))))
+        >>> print(m.ged())
+        0 @M1@ OBJE
+        1 FILE photo.jpg
+        2 FORM image/jpeg
+        3 MEDI PHOTO
+        <BLANKLINE>
+
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
         >>> from genedata.classes7 import Medi
@@ -5620,6 +5636,33 @@ class NameTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
+
+    Example:
+        These are the steps to build the example in the specification.
+        First the classes are imported which construct the ged lines.
+        >>> from genedata.classes7 import Givn, IndiName, Lang, NameTran, Surn
+        >>> m = IndiName('/孔/德庸',
+        ...         [
+        ...             Givn('德庸'),
+        ...             Surn('孔'),
+        ...             NameTran('/Kǒng/ Déyōng',
+        ...                 [
+        ...                     Givn('Déyōng'),
+        ...                     Surn('Kǒng'),
+        ...                     Lang('zh-pinyin'),
+        ...                 ]
+        ...             )
+        ...         ]
+        ... )
+        >>> print(m.ged(1))
+        1 NAME /孔/德庸
+        2 GIVN 德庸
+        2 SURN 孔
+        2 TRAN /Kǒng/ Déyōng
+        3 GIVN Déyōng
+        3 SURN Kǒng
+        3 LANG zh-pinyin
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6096,6 +6139,31 @@ class NoteTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
+
+    Example:
+        These are the steps to build the example in the specification.
+        First the classes are imported which construct the ged lines.
+        >>> from genedata.classes7 import Lang, Mime, Name, Note, NoteTran
+        >>> m = IndiName('Arete /Hernandez/', 
+        ...     Note('Named after Arete from <i>The Odyssey</i>',
+        ...         [
+        ...             Lang('en'),
+        ...             Mime('text/html'),
+        ...             NoteTran('Named after Arete from "The Odyssey"', Mime('text/plain')),
+        ...             NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', Lang('es')),
+        ...         ]
+        ...     )
+        ... ) 
+        >>> print(m.ged(1))
+        1 NAME Arete /Hernandez/
+        2 NOTE Named after Arete from <i>The Odyssey</i>
+        3 LANG en
+        3 MIME text/html
+        3 TRAN Named after Arete from "The Odyssey"
+        4 MIME text/plain
+        3 TRAN Nombrada en honor a Arete de <i>La Odisea</i>
+        4 LANG es
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6493,6 +6561,31 @@ class Page(BaseStructure):
     > 
     > </div>
     > 
+
+    Examples:
+        These are the steps to build the examples in the specification.
+        First we will import the classes and then create a source cross reference `S1`.
+        The void cross reference identifier comes from the Void class.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes7 import Dscr, Page, Sour 
+        >>> from genedata.structure import Void
+        >>> g = Genealogy('example')
+        >>> sour_xref = g.source_xref('S1')
+
+        These are the steps to build the first example:
+        >>> m = Sour(sour_xref, Page('Film: 1234567, Frame: 344, Line: 28'))
+        >>> print(m.ged(2))
+        2 SOUR @S1@
+        3 PAGE Film: 1234567, Frame: 344, Line: 28
+        <BLANKLINE>
+
+        These are the steps to build the second example:
+        >>> m = Dscr('Tall enough his head touched the ceiling', Sour(Void.SOUR, Page('His grand-daughter Lydia told me this in 1980')))
+        >>> print(m.ged(1))
+        1 DSCR Tall enough his head touched the ceiling
+        2 SOUR @VOID@
+        3 PAGE His grand-daughter Lydia told me this in 1980
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6741,6 +6834,52 @@ class Phrase(BaseStructure):
     > 
     > </div>
     > 
+
+    Examples:
+        The following steps would generate the examples in the specification.
+        We will need the following imports for these examples along with one
+        individual cross reference identifier `I2` for the fifth example:
+        >>> from genedata.classes7 import Asso, Date, Givn, Marr, Name, Phrase, Role, Type
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi = g.individual_xref('I2')
+        
+        These are the steps for the first example.
+        >>> m = Date('24 JUN 1852', Phrase('During the feast of St John'))
+        >>> print(m.ged(2))
+        2 DATE 24 JUN 1852
+        3 PHRASE During the feast of St John
+        <BLANKLINE>
+
+        These are the steps for the second example.
+        >>> m = Date('30 JAN 1649', Phrase('30th of January, 1648/9'))
+        >>> print(m.ged(2))
+        2 DATE 30 JAN 1649
+        3 PHRASE 30th of January, 1648/9
+        <BLANKLINE>
+
+        These are the steps for the third example.
+        >>> m = Date('BET 1648 AND 1649', Phrase('1648/9'))
+        >>> print(m.ged(2))
+        2 DATE BET 1648 AND 1649
+        3 PHRASE 1648/9
+        <BLANKLINE>
+
+        These are the steps for the fourth example.
+        >>> m = Date('BET 1 JAN 1867 AND 31 MAR 1867', Phrase('Q1 1867'))
+        >>> print(m.ged(2))
+        2 DATE BET 1 JAN 1867 AND 31 MAR 1867
+        3 PHRASE Q1 1867
+        <BLANKLINE>
+
+        These are the steps for the fifth example.
+        >>> m = Marr('', Asso(indi, Role('OTHER', Phrase('Maid of Honor'))))
+        >>> print(m.ged(1))
+        1 MARR
+        2 ASSO @I2@
+        3 ROLE OTHER
+        4 PHRASE Maid of Honor
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6848,6 +6987,23 @@ class Plac(BaseStructure):
     > 
     > </div>
     > 
+
+    Example:
+        The following steps would generate the example in the specification.  
+        First create source cross reference identifier `S1` and then build the ged lines
+        in a RecordSour.
+        >>> from genedata.classes7 import Plac, PlacForm, RecordSour, Data, DataEven
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> sour = g.source_xref('S1')
+        >>> m = RecordSour(sour, Data(DataEven('BIRT', Plac(', Oneida, Idaho, USA', PlacForm('City, County, State, Country')))))
+        >>> print(m.ged())
+        0 @S1@ SOUR
+        1 DATA
+        2 EVEN BIRT
+        3 PLAC , Oneida, Idaho, USA
+        4 FORM City, County, State, Country
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6956,6 +7112,15 @@ class PlacForm(BaseStructure):
     > 
     > </div>
     > 
+
+    Example:
+        The following steps would generate the example in the specifications:
+        >>> from genedata.classes7 import Plac, PlacForm
+        >>> m = Plac('Baltimore, , Maryland, USA', PlacForm('City, County, State, Country'))
+        >>> print(m.ged(2))
+        2 PLAC Baltimore, , Maryland, USA
+        3 FORM City, County, State, Country
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7019,6 +7184,27 @@ class PlacTran(BaseStructure):
     > other `TRAN` substructure of its superstructure in either its language tag or
     > its media type or both.
     > 
+
+    Example:
+        The following steps would generate the example in the specifications.
+        >>> from genedata.classes7 import PlacForm, Lang, PlacTran, Plac, PlacTran
+        >>> m = Plac('千代田, 東京, 日本',
+        ...     [
+        ...         PlacForm('区, 都, 国'),
+        ...         Lang('ja'),
+        ...         PlacTran('Chiyoda, Tokyo, Nihon', Lang('ja-Latn')),
+        ...         PlacTran('Chiyoda, Tokyo, Japan', Lang('en')),
+        ...     ]
+        ... )
+        >>> print(m.ged(2))
+        2 PLAC 千代田, 東京, 日本
+        3 FORM 区, 都, 国
+        3 LANG ja
+        3 TRAN Chiyoda, Tokyo, Nihon
+        4 LANG ja-Latn
+        3 TRAN Chiyoda, Tokyo, Japan
+        4 LANG en
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7381,6 +7567,22 @@ class RecordIndi(BaseStructure):
     > `FAMC` pointer is allowed to refer to a family where the individual does not
     > appear as a child.
     > 
+
+    Example:
+        Here is the way to construct the ged lines in the example from the specification.
+        First create the two individual cross reference identifiers.  Then let a
+        RecordIndi class format them into the desired ged lines.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes7 import Asso, RecordIndi, Role
+        >>> g = Genealogy('example')
+        >>> indi_i1_xref = g.individual_xref('I1')
+        >>> indi_i2_xref = g.individual_xref('I2')
+        >>> m = RecordIndi(indi_i1_xref, Asso(indi_i2_xref, Role('GODP')))
+        >>> print(m.ged())
+        0 @I1@ INDI
+        1 ASSO @I2@
+        2 ROLE GODP
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7933,6 +8135,13 @@ class Resn(BaseStructure):
         <BLANKLINE>
         Resn('CONFIDENTIAL')
         
+        More than one enumeration value may be entered for this particular
+        enumeration set by separating the values with a comma.  For example,
+        >>> n = Resn('CONFIDENTIAL, LOCKED')
+        >>> print(n.ged(1))
+        1 RESN CONFIDENTIAL, LOCKED
+        <BLANKLINE>
+        
     Enumerations:
     - 'CONFIDENTIAL': https://gedcom.io/terms/v7/enum-CONFIDENTIAL
         > This data was marked as confidential by the user.
@@ -8111,8 +8320,53 @@ class Role(BaseStructure):
     > 
 
     Examples:
-        This example shows a successful run of the Role structure using
-        the enumeration value 'CHIL'.
+        The first example of the specification could be coded by first creating
+        the cross reference identifiers for the individual `I1` and the source `S1`.  
+        This would be done as follows:
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi = g.individual_xref('I1')
+        >>> sour = g.source_xref('S1')
+
+        With these cross reference identifiers we can create the ged lines:
+        >>> from genedata.classes7 import RecordIndi, IndiName, Sour, SourEven, Role
+        >>> m = RecordIndi(indi, IndiName('Mary //', Sour(sour, SourEven('BIRT', Role('MOTH')))))
+        >>> print(m.ged(1))
+        0 @I1@ INDI
+        1 NAME Mary //
+        2 SOUR @S1@
+        3 EVEN BIRT
+        4 ROLE MOTH
+        <BLANKLINE>
+
+        The second example from the specification would be created as follows.
+        There are two individuals in this example, `I2` and `I3`.  First
+        create cross reference identifiers for them.
+        >>> indi2 = g.individual_xref('I2')
+        >>> indi3 = g.individual_xref('I3')
+        With those cross reference identifiers we can complete the ged lines
+        after importing the additional classes.
+        >>> from genedata.class7 import Asso, Bapm, Phrase
+        Now create the lines:
+        >>> m = RecordIndi(
+        ...     [
+        ...         Asso(indi3, Role('FRIEND', Phrase('best friend'))),
+        ...         Bapm('', Asso(indi3, Role('WITN'))),
+        ...     ]
+        ... )
+        >>> print(m.ged())
+        0 @I2@ INDI
+        1 ASSO @I3@
+        2 ROLE FRIEND
+        3 PHRASE best friend
+        1 BAPM
+        2 ASSO @I3@
+        3 ROLE WITN
+        <BLANKLINE>
+
+        As a simpler example shows a successful run of the Role structure using
+        the enumeration value 'CHIL'.  However, ultimately these lines would
+        have to be part of a larger record.
         >>> from genedata.classes7 import Role
         >>> m = Role('CHIL')
         >>> print(m.ged(1))
@@ -9106,6 +9360,17 @@ class Titl(BaseStructure):
     > cases, the entire citation text may be presented as the payload of the
     > `SOUR`.`TITL`.
     > 
+
+    Examples:
+        Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
+        on April 6, 1920.  Based on the specification one could enter this as follows.
+        >>> from genedata.classes7 import File, Form, Titl
+        >>> m = File('letter.pdf', [Form('application/pdf'), Titl('Letter from Ann to Henry April 6, 1920')])
+        >>> print(m.ged(1))
+        1 FILE letter.pdf
+        2 FORM application/pdf
+        2 TITL Letter from Ann to Henry April 6, 1920
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9219,6 +9484,26 @@ class Type(BaseStructure):
     > 
     > </div>
     > 
+
+    Examples:
+        To see how the example could be produced from the specification
+        first create an individual cross reference identifier then add the
+        ordination event as a substructure of the RecordIndi record.
+        >>> from genedata.build import Genealogy
+        >>> from genedata.classes7 import Ordn, RecordIndi, Type
+        >>> g = Genealogy('test')
+        >>> indi_xref = g.individual_xref('I1')
+        >>> m = RecordIndi(
+        ...     indi_xref,
+        ...     [
+        ...         Ordn('', Type('Bishop'))
+        ...     ]
+        ... )
+        >>> print(m.ged())
+        0 @I1@ INDI
+        1 ORDN
+        2 TYPE Bishop
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9578,6 +9863,24 @@ class Www(BaseStructure):
     > If an invalid or no longer existing web address is present upon import, it
     > should be preserved as-is on export.
     > 
+
+    Examples:
+        The following example would send a logging message warning
+        that the site "abc" cannot be reached.
+        >>> from genedata.util import Input
+        >>> from genedata.classes7 import Www
+        >>> response = Www(Input.www('abc'))
+        >>> print(response.ged(1))
+        1 WWW abc
+        <BLANKLINE>
+        
+        If one doesn't want the check, one can just enter the url.
+        According to the specification the url should be retained even
+        it is not available.
+        >>> m = Www('abc')
+        >>> print(m.ged(1))
+        1 WWW abc
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |

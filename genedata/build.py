@@ -667,25 +667,25 @@ class Genealogy:
             The first example generates identifier for a shared note record.
             >>> from genedata.build import Genealogy
             >>> a = Genealogy('testing')
-            >>> id = a.shared_note_xref(text='This is a shared note.')
+            >>> id = a.shared_note_xref('1', 'This is a shared note.')
             >>> print(id)
             @1@ 
 
             The second example shows the output when the identifier has a name.
-            >>> id2 = a.shared_note_xref('sn', text='This is a shared note.')
+            >>> id2 = a.shared_note_xref('sn', 'This is a shared note.')
             >>> print(id2)
             @SN@
 
             The third example shows the output when the name is to be used as the initial
             part of the identifier.
-            >>> id3 = a.shared_note_xref('SN', True)
+            >>> id3 = a.shared_note_xref('SN', '  ')
             >>> print(id3)
             @SN2@
 
             The final example shows what happens if we try to assign two different
             records with the same name.  We already have @SN@ so we will try
             creating that name again.
-            >>> a.shared_note_xref('sn')
+            >>> a.shared_note_xref('sn', '  ')
             Traceback (most recent call last):
             ValueError: The identifier "@SN@" built from "sn" already exists.
 
@@ -830,12 +830,13 @@ class Genealogy:
         destination = ''
         unique_list: list[str] = []
         for record in records:
-            if record.xref.fullname not in unique_list:
-                unique_list.append(record.xref.fullname)
+            #if record.xref.fullname not in unique_list:
+            if record.value.fullname not in unique_list:
+                unique_list.append(record.value.fullname)
                 destination = ''.join([destination, record.ged()])
             else:
                 raise ValueError(
-                    Msg.DUPLICATE_RECORD.format(record.xref.fullname)
+                    Msg.DUPLICATE_RECORD.format(record.value.fullname)
                 )
         missing = [
             xref
@@ -849,26 +850,16 @@ class Genealogy:
     def families(self, records: list[RecordFam]) -> None:
         """Collect and store all family records for the genealogy.
 
-        After importing `genedata.build` and `genedata.store`
-        one can instantiate a `Genealogy` and create a family
-        identifier to be used in forming a GEDCOM family record.
-        The `tuples.Family` NamedTuple will hold all of this
-        particular family's information. When one has constructed
-        all of the families that one wants to define for this
-        genealogy, they are bundled together with this method.
-        This stores them as GEDCOM strings waiting to be saved
-        to a file.
-
         Args:
             records: a list of all Family records.
 
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Family
+            >>> from genedata.classes7 import RecordFam
             >>> a = Genealogy('test')
             >>> family_id = a.family_xref()
-            >>> family = Family(xref=family_id)
+            >>> family = RecordFam(family_id)
             >>> a.families(
             ...     [
             ...         family,
@@ -882,7 +873,7 @@ class Genealogy:
             family and them runs the method.  This second run overwrites
             what was entered earlier.
             >>> family_id2 = a.family_xref()
-            >>> family2 = Family(xref=family_id2)
+            >>> family2 = RecordFam(family_id2)
             >>> a.families(
             ...     [
             ...         family,
@@ -913,10 +904,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Individual
+            >>> from genedata.classes7 import RecordIndi
             >>> a = Genealogy('test')
             >>> individual_id = a.individual_xref()
-            >>> individual = Individual(xref=individual_id)
+            >>> individual = RecordIndi(individual_id)
             >>> a.individuals(
             ...     [
             ...         individual,
@@ -930,7 +921,7 @@ class Genealogy:
             family and them runs the method.  This second run overwrites
             what was entered earlier.
             >>> individual_id2 = a.individual_xref()
-            >>> individual2 = Individual(xref=individual_id2)
+            >>> individual2 = RecordIndi(individual_id2)
             >>> a.individuals(
             ...     [
             ...         individual,
@@ -961,10 +952,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import File, Multimedia
+            >>> from genedata.classes7 import File, Form, RecordObje
             >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
-            >>> mm = Multimedia(xref=mm_id, files=File(file='/path/to/file', form='pdf'))
+            >>> mm = RecordObje(mm_id, File('/path/to/file', Form('application/pdf')))
             >>> a.multimedia(
             ...     [
             ...         mm,
@@ -973,14 +964,14 @@ class Genealogy:
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
             1 FILE /path/to/file
-            2 FORM pdf
+            2 FORM application/pdf
             <BLANKLINE>
 
             There may be more than one multimedia record.  This example creates a second
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> mm_id2 = a.multimedia_xref()
-            >>> mm2 = Multimedia(xref=mm_id2,files=File(file='/path/to/otherfile', form='pdf'))
+            >>> mm2 = RecordObje(mm_id2, File('/path/to/otherfile', Form('application/pdf')))
             >>> a.multimedia(
             ...     [
             ...         mm,
@@ -990,10 +981,10 @@ class Genealogy:
             >>> print(a.ged_multimedia)
             0 @1@ OBJE
             1 FILE /path/to/file
-            2 FORM pdf
+            2 FORM application/pdf
             0 @2@ OBJE
             1 FILE /path/to/otherfile
-            2 FORM pdf
+            2 FORM application/pdf
             <BLANKLINE>
 
         See Also:
@@ -1015,10 +1006,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Repository
+            >>> from genedata.classes7 import RecordRepo, Name
             >>> a = Genealogy('test')
             >>> repo_id = a.repository_xref()
-            >>> repo = Repository(xref=repo_id, name='Repo Name')
+            >>> repo = RecordRepo(repo_id, Name('Repo Name'))
             >>> a.repositories(
             ...     [
             ...         repo,
@@ -1033,7 +1024,7 @@ class Genealogy:
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> repo_id2 = a.repository_xref()
-            >>> repo2 = Repository(xref=repo_id2, name='Second Repo Name')
+            >>> repo2 = RecordRepo(repo_id2, Name('Second Repo Name'))
             >>> a.repositories(
             ...     [
             ...         repo,
@@ -1066,10 +1057,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import SharedNote
+            >>> from genedata.classes7 import RecordSnote, Name
             >>> a = Genealogy('test')
-            >>> sn_id = a.shared_note_xref()
-            >>> sn = SharedNote(xref=sn_id, text='The text of a shared note')
+            >>> sn_id = a.shared_note_xref('1', 'The text of a shared note')
+            >>> sn = RecordSnote(sn_id)
             >>> a.shared_notes(
             ...     [
             ...         sn,
@@ -1082,8 +1073,8 @@ class Genealogy:
             There may be more than one shared note record.  This example creates a second
             one and then runs the method.  This second run overwrites
             what was entered earlier.
-            >>> sn_id2 = a.shared_note_xref()
-            >>> sn2 = SharedNote(xref=sn_id2, text='Other text')
+            >>> sn_id2 = a.shared_note_xref('2', 'Other text')
+            >>> sn2 = RecordSnote(sn_id2)
             >>> a.shared_notes(
             ...     [
             ...         sn,
@@ -1114,10 +1105,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Source
+            >>> from genedata.classes7 import RecordSour
             >>> a = Genealogy('test')
             >>> source_id = a.source_xref()
-            >>> source = Source(xref=source_id)
+            >>> source = RecordSour(source_id)
             >>> a.sources(
             ...     [
             ...         source,
@@ -1131,7 +1122,7 @@ class Genealogy:
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> source_id2 = a.source_xref()
-            >>> source2 = Source(xref=source_id2)
+            >>> source2 = RecordSour(source_id2)
             >>> a.sources(
             ...     [
             ...         source,
@@ -1162,10 +1153,10 @@ class Genealogy:
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.store import Submitter
+            >>> from genedata.classes7 import RecordSubm, Name
             >>> a = Genealogy('test')
             >>> sub_id = a.submitter_xref()
-            >>> sub = Submitter(xref=sub_id, name='Tom')
+            >>> sub = RecordSubm(sub_id, Name('Tom'))
             >>> a.submitters(
             ...     [
             ...         sub,
@@ -1180,7 +1171,7 @@ class Genealogy:
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> sub_id2 = a.submitter_xref()
-            >>> sub2 = Submitter(xref=sub_id2, name='Joe')
+            >>> sub2 = RecordSubm(sub_id2, Name('Joe'))
             >>> a.submitters(
             ...     [
             ...         sub,
@@ -1206,21 +1197,6 @@ class Genealogy:
 
     def header(self, ged_header: Head) -> None:
         """Collect and store the header record.
-
-        
-
-        Example:
-            This example provides the minimum data for a GEDCOM version 7.0 file
-            as illustrated by the [minimal70.ged](https://gedcom.io/testfiles/gedcom70/minimal70.ged) file.
-            Nothing else has been added to it.
-            >>> from genedata.build import Genealogy
-            >>> a = Genealogy('test')
-            >>> a.header(Header())
-            >>> print(''.join([a.ged_header, a.ged_trailer]))
-            0 HEAD
-            1 GEDC
-            2 VERS 7.0
-            0 TRLR
 
         Args:
             ged_header: is the text of the header record.

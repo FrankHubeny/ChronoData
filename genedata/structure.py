@@ -14,15 +14,12 @@ __all__ = [
 ]
 
 import collections
-import contextlib
 import io
 import logging
 import re
 import urllib.request
-from enum import Enum
-from pathlib import Path
 from textwrap import indent
-from typing import Any, Literal, NamedTuple, Self
+from typing import Any, Literal, Self
 
 import yaml  # type: ignore[import-untyped]
 
@@ -36,7 +33,7 @@ from genedata.specs7 import (
     ExtensionStructure,
     Structure,
 )
-from genedata.util import Checker, Formatter, Tagger
+from genedata.util import Formatter, Tagger
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -46,354 +43,354 @@ SubsType = Any | list[Any] | None
 YNull = Literal['Y'] | None
 
 
-class YamlType(Enum):
-    STRUCTURE = 'structure'
-    ENUMERATION = 'enumeration'
-    ENUMERATION_SET = 'enumeration set'
-    CALENDAR = 'calendar'
-    MONTH = 'month'
-    DATA_TYPE = 'data type'
-    URI = 'uri'
+# class YamlType(Enum):
+#     STRUCTURE = 'structure'
+#     ENUMERATION = 'enumeration'
+#     ENUMERATION_SET = 'enumeration set'
+#     CALENDAR = 'calendar'
+#     MONTH = 'month'
+#     DATA_TYPE = 'data type'
+#     URI = 'uri'
 
 
-class TagTuple(NamedTuple):
-    """Store standard and extension tag information."""
+# class TagTuple(NamedTuple):
+#     """Store standard and extension tag information."""
 
-    value: str = Default.EMPTY
-    kind: str = Default.KIND_STANDARD
-    supers: list[str] | None = None
-    subs: list[str] | None = None
-    required: list[str] | None = None
-    single: list[str] | None = None
-    enumsets: list[str] | None = None
-    enums: list[str] | None = None
-    lang: str = Default.EMPTY
-    type: str = Default.EMPTY
-    uri: str = Default.EMPTY
-    fragment: str = Default.EMPTY
-    standard_tag: str = Default.EMPTY
-    extension_tags: list[str] | None = None
-    specification: str = Default.EMPTY
-    label: str | None = None
-    help_text: str | None = None
-    documentation: list[str] | None = None
-    payload: str = Default.EMPTY
-    substructures: dict[str, str] | None = None
-    superstructures: dict[str, str] | None = None
-    enumeration_values: list[str] | None = None
-    value_of: dict[str, str] = {}  # noqa: RUF012
-    calendars: list[str] | None = None
-    months: list[str] | None = None
-    epochs: list[str] | None = None
-    contact: str = Default.EMPTY
-    change_controller: str = Default.EMPTY
-    yamldict: dict[str, Any] | None = None
+#     value: str = Default.EMPTY
+#     kind: str = Default.KIND_STANDARD
+#     supers: list[str] | None = None
+#     subs: list[str] | None = None
+#     required: list[str] | None = None
+#     single: list[str] | None = None
+#     enumsets: list[str] | None = None
+#     enums: list[str] | None = None
+#     lang: str = Default.EMPTY
+#     type: str = Default.EMPTY
+#     uri: str = Default.EMPTY
+#     fragment: str = Default.EMPTY
+#     standard_tag: str = Default.EMPTY
+#     extension_tags: list[str] | None = None
+#     specification: str = Default.EMPTY
+#     label: str | None = None
+#     help_text: str | None = None
+#     documentation: list[str] | None = None
+#     payload: str = Default.EMPTY
+#     substructures: dict[str, str] | None = None
+#     superstructures: dict[str, str] | None = None
+#     enumeration_values: list[str] | None = None
+#     value_of: dict[str, str] = {}  
+#     calendars: list[str] | None = None
+#     months: list[str] | None = None
+#     epochs: list[str] | None = None
+#     contact: str = Default.EMPTY
+#     change_controller: str = Default.EMPTY
+#     yamldict: dict[str, Any] | None = None
 
-    def show(self) -> str:
-        return f"    {self.value} = TagTuple(value='{self.value.upper()}', standard_tag='{self.standard_tag}', supers={self.supers}, subs={self.subs}, required={self.required}, single={self.single}, enumsets={self.enumsets}, enums={self.enums})"
+#     def show(self) -> str:
+#         return f"    {self.value} = TagTuple(value='{self.value.upper()}', standard_tag='{self.standard_tag}', supers={self.supers}, subs={self.subs}, required={self.required}, single={self.single}, enumsets={self.enumsets}, enums={self.enums})"
 
-    def code(self) -> str:
-        return f"""
-TagTuple(
-  value = {self.value},
-  kind = {self.kind},
-  supers = {self.supers},
-  subs = {self.subs},
-  required = {self.required},
-  single = {self.single},
-  enumsets = {self.enumsets},
-  enums = {self.enums},
-  lang = '{self.lang}',
-  type = '{self.type}',
-  uri = '{self.uri}',
-  fragment = '{self.fragment}',
-  standard_tag = '{self.standard_tag}',
-  extension_tags = {self.extension_tags},
-  specification = '{self.specification}',
-  label = {self.label},
-  help_text = {self.help_text},
-  documentation = {self.documentation},
-  payload = '{self.payload}',
-  substructures = {self.substructures},
-  superstructures = {self.superstructures},
-  enumeration_values = {self.enumeration_values},
-  value_of = {self.value_of},
-  calendars = {self.calendars},
-  months = {self.months},
-  epochs = {self.epochs},
-  contact = '{self.contact}',
-  change_controller = '{self.change_controller}',
-  yamldict = {self.yamldict},
-)
-"""
-
-
-class TagYaml:
-    """File read and store standard and extension tag specifications.
-
-    The [YAML description format](https://gedcom.io/terms/format) documents a tag.
-    An extension tag cannot be used without a yaml file read by the `get`
-    static method of this class.
-
-    The standard tags are also obtained by `get` using `generate`.
-
-    Exceptions:
-        ValueError NOT_YAML_FILE is raised if the file does not contain '%YAML 1.2'.
+#     def code(self) -> str:
+#         return f"""
+# TagTuple(
+#   value = {self.value},
+#   kind = {self.kind},
+#   supers = {self.supers},
+#   subs = {self.subs},
+#   required = {self.required},
+#   single = {self.single},
+#   enumsets = {self.enumsets},
+#   enums = {self.enums},
+#   lang = '{self.lang}',
+#   type = '{self.type}',
+#   uri = '{self.uri}',
+#   fragment = '{self.fragment}',
+#   standard_tag = '{self.standard_tag}',
+#   extension_tags = {self.extension_tags},
+#   specification = '{self.specification}',
+#   label = {self.label},
+#   help_text = {self.help_text},
+#   documentation = {self.documentation},
+#   payload = '{self.payload}',
+#   substructures = {self.substructures},
+#   superstructures = {self.superstructures},
+#   enumeration_values = {self.enumeration_values},
+#   value_of = {self.value_of},
+#   calendars = {self.calendars},
+#   months = {self.months},
+#   epochs = {self.epochs},
+#   contact = '{self.contact}',
+#   change_controller = '{self.change_controller}',
+#   yamldict = {self.yamldict},
+# )
+# """
 
 
-    See Also:
-        `ExtTag`
-        `Extension`
-        `StdTag`
-        `TagTuple`
+# class TagYaml:
+#     """File read and store standard and extension tag specifications.
 
-    Reference:
-        [GEDCOM YAML description format](https://gedcom.io/terms/format)
-    """
+#     The [YAML description format](https://gedcom.io/terms/format) documents a tag.
+#     An extension tag cannot be used without a yaml file read by the `get`
+#     static method of this class.
 
-    @staticmethod
-    def read(url: str = Default.EMPTY) -> dict[str, Any]:
-        # Read the internet file or a local file.
-        if url[0:4] == 'http':
-            webUrl = urllib.request.urlopen(url)
-            result_code = str(webUrl.getcode())
-            if result_code == '404':
-                raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-            raw: str = webUrl.read().decode(Default.UTF8)
-        else:
-            with Path.open(Path(url)) as file:
-                raw = file.read()
-        # raw = raw.replace('"','')  # To avoid yaml.scanner.ScannerError
+#     The standard tags are also obtained by `get` using `generate`.
 
-        # Check that file has proper yaml directive.
-        if Default.YAML_DIRECTIVE not in raw:
-            raise ValueError(
-                Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
-            )
+#     Exceptions:
+#         ValueError NOT_YAML_FILE is raised if the file does not contain '%YAML 1.2'.
 
-        # Put the yaml data into a dictionary.
-        raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
-        yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
-        yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
-        return yaml_dict
 
-    @staticmethod
-    def get(
-        tag: str = Default.EMPTY,
-        url: str = Default.EMPTY,
-        alt_name: str = Default.EMPTY,
-    ) -> TagTuple:
-        """Read a yaml specification file and store the data in a dictionary."""
+#     See Also:
+#         `ExtTag`
+#         `Extension`
+#         `StdTag`
+#         `TagTuple`
 
-        yamldict = TagYaml.read(url)
+#     Reference:
+#         [GEDCOM YAML description format](https://gedcom.io/terms/format)
+#     """
 
-        # Read the internet file or a local file.
-        # if url[0:4] == 'http':
-        #     webUrl = urllib.request.urlopen(url)
-        #     result_code = str(webUrl.getcode())
-        #     if result_code == '404':
-        #         raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-        #     raw: str = webUrl.read().decode(Default.UTF8)
-        # else:
-        #     with Path.open(Path(url)) as file:
-        #         raw = file.read()
-        # # raw = raw.replace('"','')  # To avoid yaml.scanner.ScannerError
+#     @staticmethod
+#     def read(url: str = Default.EMPTY) -> dict[str, Any]:
+#         # Read the internet file or a local file.
+#         if url[0:4] == 'http':
+#             webUrl = urllib.request.urlopen(url)
+#             result_code = str(webUrl.getcode())
+#             if result_code == '404':
+#                 raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+#             raw: str = webUrl.read().decode(Default.UTF8)
+#         else:
+#             with Path.open(Path(url)) as file:
+#                 raw = file.read()
+#         # raw = raw.replace('"','')  # To avoid yaml.scanner.ScannerError
 
-        # # Check that file has proper yaml directive.
-        # if Default.YAML_DIRECTIVE not in raw:
-        #     raise ValueError(
-        #         Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
-        #     )
+#         # Check that file has proper yaml directive.
+#         if Default.YAML_DIRECTIVE not in raw:
+#             raise ValueError(
+#                 Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
+#             )
 
-        # # Put the yaml data into a dictionary.
-        # raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
-        # yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
-        # yamldict: dict[str, Any] = yaml.safe_load(yaml_data)
+#         # Put the yaml data into a dictionary.
+#         raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
+#         yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
+#         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
+#         return yaml_dict
 
-        # Store and check the required `lang` value.
-        lang: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            lang = yamldict[Default.YAML_LANG]
-        if lang == Default.EMPTY or lang is None:
-            raise ValueError(Msg.YAML_MISSING_REQUIRED_LANG.format(url))
+#     @staticmethod
+#     def get(
+#         tag: str = Default.EMPTY,
+#         url: str = Default.EMPTY,
+#         alt_name: str = Default.EMPTY,
+#     ) -> TagTuple:
+#         """Read a yaml specification file and store the data in a dictionary."""
 
-        # Store and check the required `type` value.
-        spectype: YamlType | None = None
-        with contextlib.suppress(Exception):
-            spectype = yamldict[Default.YAML_TYPE]
-        if spectype is None:
-            raise ValueError(Msg.YAML_MISSING_REQUIRED_TYPE.format(url))
-        if spectype not in YamlType:
-            raise ValueError(Msg.YAML_UNRECOGNIZED_TYPE.format(spectype))
+#         yamldict = TagYaml.read(url)
 
-        # Store and check the required uri and fragment values.
-        uri: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            uri = yamldict[Default.YAML_URI]
-        if uri == Default.EMPTY or uri is None:
-            raise ValueError(Msg.YAML_MISSING_REQUIRED_URI.format(url))
-        fragment: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            fragment = yamldict[Default.YAML_FRAGMENT]
+#         # Read the internet file or a local file.
+#         # if url[0:4] == 'http':
+#         #     webUrl = urllib.request.urlopen(url)
+#         #     result_code = str(webUrl.getcode())
+#         #     if result_code == '404':
+#         #         raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+#         #     raw: str = webUrl.read().decode(Default.UTF8)
+#         # else:
+#         #     with Path.open(Path(url)) as file:
+#         #         raw = file.read()
+#         # # raw = raw.replace('"','')  # To avoid yaml.scanner.ScannerError
 
-        # Store and check the standard or extension tags.
-        standard_tag: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            standard_tag = yamldict[Default.YAML_STANDARD_TAG]
-        extension_tags: list[str] | None = None
-        with contextlib.suppress(Exception):
-            extension_tags = yamldict[Default.YAML_EXTENSION_TAGS]
-        if (
-            standard_tag == Default.EMPTY
-            and spectype == YamlType.STRUCTURE
-            and (extension_tags is None or len(extension_tags) == 0)
-        ):
-            raise ValueError(Msg.YAML_NO_TAG_NAME)
+#         # # Check that file has proper yaml directive.
+#         # if Default.YAML_DIRECTIVE not in raw:
+#         #     raise ValueError(
+#         #         Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
+#         #     )
 
-        # Store the documentation sections.
-        documentation: list[str] | None = None
-        with contextlib.suppress(Exception):
-            documentation = yamldict[Default.YAML_DOCUMENTATION]
-        help_text: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            help_text = yamldict[Default.YAML_HELP_TEXT]
-        label: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            label = yamldict[Default.YAML_LABEL]
-        specification: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            specification = yamldict[Default.YAML_SPECIFICATION]
+#         # # Put the yaml data into a dictionary.
+#         # raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
+#         # yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
+#         # yamldict: dict[str, Any] = yaml.safe_load(yaml_data)
 
-        # Store the payload definition.
-        payload: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            payload = yamldict[Default.YAML_PAYLOAD]
+#         # Store and check the required `lang` value.
+#         lang: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             lang = yamldict[Default.YAML_LANG]
+#         if lang == Default.EMPTY or lang is None:
+#             raise ValueError(Msg.YAML_MISSING_REQUIRED_LANG.format(url))
 
-        # Store the substructures identifying the required structures
-        # those which may appear only once.
-        substructures: dict[str, str] = {}
-        subs: list[str] = []
-        required: list[str] = []
-        single: list[str] = []
-        with contextlib.suppress(Exception):
-            substructures = yamldict[Default.YAML_SUBSTRUCTURES]
-        if substructures != {} and substructures is not None:
-            for key, dictvalue in substructures.items():
-                name = (
-                    key[key.rfind(Default.SLASH) + 1 :].title().replace('-', '')
-                )
-                subs.append(name)
-                if dictvalue[0:3] == Default.CARDINALITY_REQUIRED:
-                    required.append(name)
-                if dictvalue[2:5] == Default.CARDINALITY_SINGULAR:
-                    single.append(name)
+#         # Store and check the required `type` value.
+#         spectype: YamlType | None = None
+#         with contextlib.suppress(Exception):
+#             spectype = yamldict[Default.YAML_TYPE]
+#         if spectype is None:
+#             raise ValueError(Msg.YAML_MISSING_REQUIRED_TYPE.format(url))
+#         if spectype not in YamlType:
+#             raise ValueError(Msg.YAML_UNRECOGNIZED_TYPE.format(spectype))
 
-        # Store the superstructures.
-        superstructures: dict[str, str] = {}
-        supers: list[str] = []
-        with contextlib.suppress(Exception):
-            superstructures = yamldict[Default.YAML_SUPERSTRUCTURES]
-        if superstructures != {} and superstructures is not None:
-            supers = [
-                super_name[super_name.rfind(Default.SLASH) + 1 :]
-                .title()
-                .replace('-', '')
-                for super_name in superstructures
-            ]
+#         # Store and check the required uri and fragment values.
+#         uri: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             uri = yamldict[Default.YAML_URI]
+#         if uri == Default.EMPTY or uri is None:
+#             raise ValueError(Msg.YAML_MISSING_REQUIRED_URI.format(url))
+#         fragment: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             fragment = yamldict[Default.YAML_FRAGMENT]
 
-        # Check that a structure type contains both superstructures and substructures.
-        if (
-            spectype is YamlType.STRUCTURE
-            and superstructures == {}
-            and substructures == {}
-        ):
-            raise ValueError(Msg.YAML_STRUCTURE_MISSING_VALUES)
+#         # Store and check the standard or extension tags.
+#         standard_tag: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             standard_tag = yamldict[Default.YAML_STANDARD_TAG]
+#         extension_tags: list[str] | None = None
+#         with contextlib.suppress(Exception):
+#             extension_tags = yamldict[Default.YAML_EXTENSION_TAGS]
+#         if (
+#             standard_tag == Default.EMPTY
+#             and spectype == YamlType.STRUCTURE
+#             and (extension_tags is None or len(extension_tags) == 0)
+#         ):
+#             raise ValueError(Msg.YAML_NO_TAG_NAME)
 
-        # Store the enumeration definitions.
-        value_of: dict[str, str] = {}
-        with contextlib.suppress(Exception):
-            value_of = yamldict[Default.YAML_VALUE_OF]
-        enumsets: list[str] = [
-            enum_name[enum_name.rfind('-') + 1 :] for enum_name in value_of
-        ]
-        enumeration_values: list[str] = []
-        with contextlib.suppress(Exception):
-            enumeration_values = yamldict[Default.YAML_ENUMERATION_VALUES]
-        enums: list[str] = [
-            enum_name[enum_name.rfind('/') + 1 :]
-            for enum_name in enumeration_values
-        ]
+#         # Store the documentation sections.
+#         documentation: list[str] | None = None
+#         with contextlib.suppress(Exception):
+#             documentation = yamldict[Default.YAML_DOCUMENTATION]
+#         help_text: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             help_text = yamldict[Default.YAML_HELP_TEXT]
+#         label: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             label = yamldict[Default.YAML_LABEL]
+#         specification: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             specification = yamldict[Default.YAML_SPECIFICATION]
 
-        # Store the calendar definitions.
-        calendars: list[str] | None = None
-        with contextlib.suppress(Exception):
-            calendars = yamldict[Default.YAML_CALENDARS]
-        months: list[str] | None = None
-        with contextlib.suppress(Exception):
-            months = yamldict[Default.YAML_MONTHS]
-        epochs: list[str] | None = None
-        with contextlib.suppress(Exception):
-            epochs = yamldict[Default.YAML_EPOCHS]
-        # if spectype != YamlType.CALENDAR and (months is not None or epochs is not None):
-        #     raise ValueError(Msg.YAML_NO_CALENDAR)
+#         # Store the payload definition.
+#         payload: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             payload = yamldict[Default.YAML_PAYLOAD]
 
-        # Store contact information.
-        contact: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            contact = yamldict[Default.YAML_CONTACT]
-        change_controller: str = Default.EMPTY
-        with contextlib.suppress(Exception):
-            change_controller = yamldict[Default.YAML_CHANGE_CONTROLLER]
+#         # Store the substructures identifying the required structures
+#         # those which may appear only once.
+#         substructures: dict[str, str] = {}
+#         subs: list[str] = []
+#         required: list[str] = []
+#         single: list[str] = []
+#         with contextlib.suppress(Exception):
+#             substructures = yamldict[Default.YAML_SUBSTRUCTURES]
+#         if substructures != {} and substructures is not None:
+#             for key, dictvalue in substructures.items():
+#                 name = (
+#                     key[key.rfind(Default.SLASH) + 1 :].title().replace('-', '')
+#                 )
+#                 subs.append(name)
+#                 if dictvalue[0:3] == Default.CARDINALITY_REQUIRED:
+#                     required.append(name)
+#                 if dictvalue[2:5] == Default.CARDINALITY_SINGULAR:
+#                     single.append(name)
 
-        # Construct the tag name.
-        value: str = alt_name.title().replace('-', '')
-        if tag != Default.EMPTY:
-            if tag[0] != Default.UNDERLINE:
-                value = ''.join([Default.UNDERLINE, tag.upper()])
-            else:
-                value = tag.upper()
-        # elif standard_tag != Default.EMPTY:
-        #     value = standard_tag
-        # elif spectype == YamlType.STRUCTURE:
-        #     raise ValueError(Msg.UNKNOWN_TAG.format(url))
+#         # Store the superstructures.
+#         superstructures: dict[str, str] = {}
+#         supers: list[str] = []
+#         with contextlib.suppress(Exception):
+#             superstructures = yamldict[Default.YAML_SUPERSTRUCTURES]
+#         if superstructures != {} and superstructures is not None:
+#             supers = [
+#                 super_name[super_name.rfind(Default.SLASH) + 1 :]
+#                 .title()
+#                 .replace('-', '')
+#                 for super_name in superstructures
+#             ]
 
-        # Identify whether it is a standard or extension definition.
-        kind: str = Default.KIND_STANDARD
-        if extension_tags is not None:
-            kind = Default.KIND_EXTENDED
+#         # Check that a structure type contains both superstructures and substructures.
+#         if (
+#             spectype is YamlType.STRUCTURE
+#             and superstructures == {}
+#             and substructures == {}
+#         ):
+#             raise ValueError(Msg.YAML_STRUCTURE_MISSING_VALUES)
 
-        # Finished: return the TagTuple.
-        return TagTuple(
-            value=value,
-            kind=kind,
-            supers=supers,
-            subs=subs,
-            required=required,
-            single=single,
-            enumsets=enumsets,
-            enumeration_values=enumeration_values,
-            enums=enums,
-            lang=lang,
-            type=str(spectype),
-            uri=uri,
-            fragment=fragment,
-            standard_tag=standard_tag,
-            extension_tags=extension_tags,
-            specification=specification,
-            label=label,
-            help_text=help_text,
-            documentation=documentation,
-            payload=payload,
-            substructures=substructures,
-            superstructures=superstructures,
-            value_of=value_of,
-            calendars=calendars,
-            months=months,
-            epochs=epochs,
-            contact=contact,
-            change_controller=change_controller,
-            yamldict=yamldict,
-        )
+#         # Store the enumeration definitions.
+#         value_of: dict[str, str] = {}
+#         with contextlib.suppress(Exception):
+#             value_of = yamldict[Default.YAML_VALUE_OF]
+#         enumsets: list[str] = [
+#             enum_name[enum_name.rfind('-') + 1 :] for enum_name in value_of
+#         ]
+#         enumeration_values: list[str] = []
+#         with contextlib.suppress(Exception):
+#             enumeration_values = yamldict[Default.YAML_ENUMERATION_VALUES]
+#         enums: list[str] = [
+#             enum_name[enum_name.rfind('/') + 1 :]
+#             for enum_name in enumeration_values
+#         ]
+
+#         # Store the calendar definitions.
+#         calendars: list[str] | None = None
+#         with contextlib.suppress(Exception):
+#             calendars = yamldict[Default.YAML_CALENDARS]
+#         months: list[str] | None = None
+#         with contextlib.suppress(Exception):
+#             months = yamldict[Default.YAML_MONTHS]
+#         epochs: list[str] | None = None
+#         with contextlib.suppress(Exception):
+#             epochs = yamldict[Default.YAML_EPOCHS]
+#         # if spectype != YamlType.CALENDAR and (months is not None or epochs is not None):
+#         #     raise ValueError(Msg.YAML_NO_CALENDAR)
+
+#         # Store contact information.
+#         contact: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             contact = yamldict[Default.YAML_CONTACT]
+#         change_controller: str = Default.EMPTY
+#         with contextlib.suppress(Exception):
+#             change_controller = yamldict[Default.YAML_CHANGE_CONTROLLER]
+
+#         # Construct the tag name.
+#         value: str = alt_name.title().replace('-', '')
+#         if tag != Default.EMPTY:
+#             if tag[0] != Default.UNDERLINE:
+#                 value = ''.join([Default.UNDERLINE, tag.upper()])
+#             else:
+#                 value = tag.upper()
+#         # elif standard_tag != Default.EMPTY:
+#         #     value = standard_tag
+#         # elif spectype == YamlType.STRUCTURE:
+#         #     raise ValueError(Msg.UNKNOWN_TAG.format(url))
+
+#         # Identify whether it is a standard or extension definition.
+#         kind: str = Default.KIND_STANDARD
+#         if extension_tags is not None:
+#             kind = Default.KIND_EXTENDED
+
+#         # Finished: return the TagTuple.
+#         return TagTuple(
+#             value=value,
+#             kind=kind,
+#             supers=supers,
+#             subs=subs,
+#             required=required,
+#             single=single,
+#             enumsets=enumsets,
+#             enumeration_values=enumeration_values,
+#             enums=enums,
+#             lang=lang,
+#             type=str(spectype),
+#             uri=uri,
+#             fragment=fragment,
+#             standard_tag=standard_tag,
+#             extension_tags=extension_tags,
+#             specification=specification,
+#             label=label,
+#             help_text=help_text,
+#             documentation=documentation,
+#             payload=payload,
+#             substructures=substructures,
+#             superstructures=superstructures,
+#             value_of=value_of,
+#             calendars=calendars,
+#             months=months,
+#             epochs=epochs,
+#             contact=contact,
+#             change_controller=change_controller,
+#             yamldict=yamldict,
+#         )
 
     # @staticmethod
     # def generate() -> None:
@@ -406,93 +403,93 @@ class TagYaml:
     #         )
 
 
-class ExtTag:
-    """Store, validate and display extension tag information.
+# class ExtTag:
+#     """Store, validate and display extension tag information.
 
-    An underline is added to the front of the new tag if one is not there already.
-    Also the tag is made upper case.
+#     An underline is added to the front of the new tag if one is not there already.
+#     Also the tag is made upper case.
 
-    This class holds multiple extension tags identified in the header record.  It is not a separate
-    GEDCOM structure.
+#     This class holds multiple extension tags identified in the header record.  It is not a separate
+#     GEDCOM structure.
 
-    Examples:
-
-
-    Args:
-        tag: The tag used for the schema information.
-        url: A yaml file following the [GEDCOM YAML description format](https://gedcom.io/terms/format)
-
-    See Also:
-        `Header`
-        `Extension`
-
-    Returns:
-        A string representing a GEDCOM line for this tag.
-
-    Reference:
-        [GEDCOM YAML description format](https://gedcom.io/terms/format)
-        [GENCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
-
-    >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
-    >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
-    """
-
-    def __init__(self, tag: str, url: str = Default.EMPTY) -> None:
-        self.url: str = url
-        self.relocated: bool = False
-        try:
-            # self.stdtag: StdTag = eval(''.join(['StdTag.', tag]))
-            self.stdtag: str = Structure[tag][Default.YAML_STANDARD_TAG]
-            self.tag: TagTuple
-            self.relocated = True
-        except AttributeError:
-            if url == Default.EMPTY and tag != Default.EMPTY:
-                raise ValueError(Msg.UNDOCUMENTED) from None
-            self.tag = TagYaml.get(tag, url)
-        self.value: str = self.tag.value
-        self.supers: list[str] | None = self.tag.supers
-        self.subs: list[str] | None = self.tag.subs
-        self.enumsets: list[str] | None = self.tag.enumsets
-        self.required: list[str] | None = self.tag.required
-        self.single: list[str] | None = self.tag.single
-
-    def validate(self) -> bool:
-        for char in self.value:
-            if not (char.isalnum() or char == Default.UNDERLINE):
-                raise ValueError(Msg.SCHEMA_NAME.format(self.value, char))
-        check: bool = (
-            Checker.verify_type(self.tag, TagTuple, no_list=True)
-            and Checker.verify_not_empty(self.tag)
-            and Checker.verify_type(self.url, str, no_list=True)
-            and Checker.verify_not_empty(self.url)
-        )
-        return check
-
-    def ged(self, level: int = 0) -> str:
-        """Format to meet GEDCOM standards."""
-        lines: str = Default.EMPTY
-        if self.validate():
-            lines = Tagger.string(
-                lines, level + 1, 'TAG', self.value, str(self.url)
-            )
-        return lines
-
-    def show(self) -> dict[str, Any] | None:
-        return self.tag.yamldict
-
-    def code(self, tabs: int = 1, full: bool = False) -> str:
-        return indent(
-            Formatter.display_code(
-                'ExtTag',
-                ('    tag = ', self.tag, tabs, full, True),
-                ('    url = ', self.url, tabs, full, True),
-            ),
-            Default.INDENT * tabs,
-        )
+#     Examples:
 
 
-ExtTagType = ExtTag | list[ExtTag] | None
-TagType = XrefTag | ExtTag | None
+#     Args:
+#         tag: The tag used for the schema information.
+#         url: A yaml file following the [GEDCOM YAML description format](https://gedcom.io/terms/format)
+
+#     See Also:
+#         `Header`
+#         `Extension`
+
+#     Returns:
+#         A string representing a GEDCOM line for this tag.
+
+#     Reference:
+#         [GEDCOM YAML description format](https://gedcom.io/terms/format)
+#         [GENCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+
+#     >  +1 SCHMA                                 {0:1}  [g7:SCHMA](https://gedcom.io/terms/v7/SCHMA)
+#     >     +2 TAG <Special>                      {0:M}  [g7:TAG](https://gedcom.io/terms/v7/TAG)
+#     """
+
+#     def __init__(self, tag: str, url: str = Default.EMPTY) -> None:
+#         self.url: str = url
+#         self.relocated: bool = False
+#         try:
+#             # self.stdtag: StdTag = eval(''.join(['StdTag.', tag]))
+#             self.stdtag: str = Structure[tag][Default.YAML_STANDARD_TAG]
+#             self.tag: TagTuple
+#             self.relocated = True
+#         except AttributeError:
+#             if url == Default.EMPTY and tag != Default.EMPTY:
+#                 raise ValueError(Msg.UNDOCUMENTED) from None
+#             self.tag = TagYaml.get(tag, url)
+#         self.value: str = self.tag.value
+#         self.supers: list[str] | None = self.tag.supers
+#         self.subs: list[str] | None = self.tag.subs
+#         self.enumsets: list[str] | None = self.tag.enumsets
+#         self.required: list[str] | None = self.tag.required
+#         self.single: list[str] | None = self.tag.single
+
+#     def validate(self) -> bool:
+#         for char in self.value:
+#             if not (char.isalnum() or char == Default.UNDERLINE):
+#                 raise ValueError(Msg.SCHEMA_NAME.format(self.value, char))
+#         check: bool = (
+#             Checker.verify_type(self.tag, TagTuple, no_list=True)
+#             and Checker.verify_not_empty(self.tag)
+#             and Checker.verify_type(self.url, str, no_list=True)
+#             and Checker.verify_not_empty(self.url)
+#         )
+#         return check
+
+#     def ged(self, level: int = 0) -> str:
+#         """Format to meet GEDCOM standards."""
+#         lines: str = Default.EMPTY
+#         if self.validate():
+#             lines = Tagger.string(
+#                 lines, level + 1, 'TAG', self.value, str(self.url)
+#             )
+#         return lines
+
+#     def show(self) -> dict[str, Any] | None:
+#         return self.tag.yamldict
+
+#     def code(self, tabs: int = 1, full: bool = False) -> str:
+#         return indent(
+#             Formatter.display_code(
+#                 'ExtTag',
+#                 ('    tag = ', self.tag, tabs, full, True),
+#                 ('    url = ', self.url, tabs, full, True),
+#             ),
+#             Default.INDENT * tabs,
+#         )
+
+
+# ExtTagType = ExtTag | list[ExtTag] | None
+#TagType = XrefTag | ExtTag | None
 
 
 class Xref:

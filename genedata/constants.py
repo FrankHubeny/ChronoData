@@ -139,6 +139,7 @@ class Default:
     YAML_CARDINALITY_REQUIRED: str = '{1:'
     YAML_CARDINALITY_SINGULAR: str = ':1}'
     YAML_CHANGE_CONTROLLER: str = 'change controller'
+    YAML_CLASS_NAME: str = 'class name'
     YAML_CONTACT: str = 'contact'
     YAML_DIRECTIVE: str = '%YAML 1.2'
     YAML_DIRECTIVE_END_MARKER: str = '---'

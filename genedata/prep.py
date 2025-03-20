@@ -558,6 +558,7 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
+            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
             lines = f"{lines}'{item}': {yamldict}, "
         return ''.join([lines, Default.EOL, '}\n'])
 
@@ -597,6 +598,7 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
+            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -639,6 +641,7 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
+            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -867,7 +870,7 @@ Examples: dict[str, str] = {
 
         These are the steps to build the second example:
         >>> m = Dscr('Tall enough his head touched the ceiling', Sour(Void.SOUR, Page('His grand-daughter Lydia told me this in 1980')))
-        >>> print(m.ged(2))
+        >>> print(m.ged(1))
         1 DSCR Tall enough his head touched the ceiling
         2 SOUR @VOID@
         3 PAGE His grand-daughter Lydia told me this in 1980
@@ -1203,9 +1206,9 @@ Examples: dict[str, str] = {
 
 
 class Construct:
-    @staticmethod
-    def get_class_name(key: str) -> str:
-        return key.title().replace('_', '').replace('-', '')
+    # @staticmethod
+    # def get_class_name(key: str) -> str:
+    #     return key.title().replace('_', '').replace('-', '')
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
@@ -1549,11 +1552,11 @@ from genedata.structure import (
     ) -> str:
         """Generate a single class and its documentation defined by its Structure definition.
 
-        See Also:
-        - `generate_all_classes`
-
         Args:
             key: The key of the Structure dictionary.
+            url: The source of the yaml files where one can read the structure and enumeration dictionaries.
+            structure_dictionary: The structure dictionary as an alternative to using the url to get this.
+            enumeration_dictionary: The enumeration dictionary as an alternative to using the url to get this.
         """
         if url[-1] == Default.SLASH:
             base_url: str = url
@@ -1570,7 +1573,7 @@ from genedata.structure import (
         if len(enumeration) == 0:
             enumeration = eval(Convert.enumeration_dictionary(base_url))
         tag: str = structure[key][Default.YAML_STANDARD_TAG]
-        class_name: str = Construct.get_class_name(key)
+        class_name: str = structure[key][Default.YAML_CLASS_NAME]
         parts: str = ''.join(
             [
                 Construct.generate_specification(key, structure),
