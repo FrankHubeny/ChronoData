@@ -1598,9 +1598,6 @@ class {class_name}(BaseStructure):
     @staticmethod
     def generate_all_classes(url: str) -> str:
         """Generate all classes and their documentation defined by the Structure dictionary.
-
-        See Also:
-        - `generate_class`
         """
 
         if url[-1] == Default.SLASH:
@@ -1626,6 +1623,7 @@ class {class_name}(BaseStructure):
 
     @staticmethod
     def build_all(source: str, version: str, url: str) -> str:
+        """Construct the entire module containing GEDCOM structures converted to classes."""
         return ''.join(
             [
                 Construct.preamble(source, version),

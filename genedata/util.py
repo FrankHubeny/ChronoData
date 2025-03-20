@@ -55,7 +55,7 @@ class Util:
         #         zip_ref.extract(file, to_directory)
 
     @staticmethod
-    def read(url: str) -> str:
+    def read_binary(url: str) -> str:
         """Read a yaml file and convert it into a dictionary.
 
         Args:
@@ -76,6 +76,26 @@ class Util:
         return raw
 
     @staticmethod
+    def read(url: str) -> str:
+        """Read a yaml file and convert it into a dictionary.
+
+        Args:
+            url: The name of the file or the internet url.
+        """
+
+        # Read the internet file or a local file.
+        if url[0:4] == 'http':
+            webUrl = urllib.request.urlopen(url)
+            result_code = str(webUrl.getcode())
+            if result_code == '404':
+                raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+            raw: str = webUrl.read().decode(Default.UTF8)
+        else:
+            with open(url) as file:  # noqa: PTH123
+                raw = file.read()
+        return raw
+
+    @staticmethod
     def read_yaml(url: str) -> dict[str, Any]:
         """Read a yaml file and convert it into a dictionary.
 
@@ -84,7 +104,7 @@ class Util:
         """
 
         # Retrieve the file.
-        raw: str = Util.read(url)
+        raw: str = Util.read_binary(url)
 
         # Check that file has proper yaml directive.
         if Default.YAML_DIRECTIVE not in raw:
