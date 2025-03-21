@@ -1,4 +1,4 @@
-# util.py
+# prep.py
 """Utilities to turn GEDCOM specifications into a module of dictionaries and a module of classes
 specific to a GEDCOM version.
 
@@ -14,6 +14,9 @@ specific types of specifications and one dictionary, `Examples`.
 - Examples: Code examples that will go into a specific class when `Construct` generates the class.
 - Keys: OrderedSets of string which when combined with a beginning url and ".yaml"
     retrieve the specification.
+
+The classes and specs modules are generated from methods in this module.
+This is the module to change if one wants to modify the classes or specs modules.
 """
 
 __all__ = [
@@ -28,7 +31,6 @@ from typing import Any
 
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
-# from genedata.gedcom7 import Enumeration, Structure
 from genedata.constants import Config, Default
 from genedata.util import Util
 
@@ -393,13 +395,16 @@ class Convert:
     @staticmethod
     def preamble(source: str, version: str) -> str:
         lines: str = f'''"""Store the GEDCOM verson {version} specifications in a dictionary format from yaml files.
+This is a generated module. DO NOT MODIFY IT MANUALLY.  Changes should be made to the `Convert` class 
+in the `prep` module.
 
 The specification was obtained from the [GEDCOM-registeries]({source})
 made available under an Apache 2.0 license.
 
 The names of the dictionaries are based on the directories in this registry.  Each yaml file
 in the directory is read into a dictionary which is then added to a dictionary named after
-the directory.
+the directory.  Other keys besides those in the yaml file have been added
+to assist this application to read and write ged files.
 
 The following dictionaries are available.  Each item in the dictionary corresponds to a
 single yaml file.
@@ -558,7 +563,9 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
-            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
+            yamldict[Default.YAML_CLASS_NAME] = (
+                item.title().replace('_', '').replace('-', '')
+            )
             lines = f"{lines}'{item}': {yamldict}, "
         return ''.join([lines, Default.EOL, '}\n'])
 
@@ -598,7 +605,9 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
-            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
+            yamldict[Default.YAML_CLASS_NAME] = (
+                item.title().replace('_', '').replace('-', '')
+            )
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -641,7 +650,9 @@ from typing import Any
                     if enumset in value[Default.YAML_VALUE_OF]:
                         enums.append(value[Default.YAML_STANDARD_TAG])
             yamldict[Default.YAML_ENUMS] = enums
-            yamldict[Default.YAML_CLASS_NAME] = item.title().replace('_', '').replace('-', '')
+            yamldict[Default.YAML_CLASS_NAME] = (
+                item.title().replace('_', '').replace('-', '')
+            )
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -1020,7 +1031,6 @@ Examples: dict[str, str] = {
         2 ROLE GODP
         <BLANKLINE>""",
     # 'record-SNOTE': f"""
-
     # Example:
     #     The example in the specification has two records: the source record
     #     `GORDON` and an individual `I1`.  We will create those cross
@@ -1029,14 +1039,12 @@ Examples: dict[str, str] = {
     #     >>> g = Genealogy('example')
     #     >>> sour_xref = g.source_xref('GORDON')
     #     >>> indi_xref = g.individual_xref('I1')
-
     #     Next create the record for the shared note:
     #     >>> from genedata.classes{Config.VERSION} import RecordIndi, RecordSnote, IndiName, Note, Snote
     #     >>> snote = RecordSnote(sour_xref, f'''"Gordon" is a traditional scottish surname.\\nIt became a given name in honor of Charles George Gordon.''')
-
     #     Next create the individual record.
     #     >>> indi = RecordIndi(
-    #     ...     indi_xref, 
+    #     ...     indi_xref,
     #     ...     IndiName('Gordon /Jones/',
     #     ...         [
     #     ...             Note('Named after the astronaut Gordon Cooper'),
@@ -1219,7 +1227,7 @@ They should not be manually altered, but the `Construct` class should be changed
 if needed and the classes modules from each GEDCOM version regenerated.
 
 The specifications for this module are from the 
-[GEDCOM files]{source} for version {version}.
+[GEDCOM files]({source}) for version {version}.
 '''
 
 """
@@ -1256,20 +1264,96 @@ from genedata.structure import (
 """
 
     @staticmethod
+    def add_links(text: str) -> str:
+        """Add links missing in the specifications to text with brackets around it."""
+        site: str = f'https://gedcom.io/specifications/FamilySearchGEDCOMv{Config.VERSION}.html'
+        datatracker: str = 'https://datatracker.ietf.org/doc/html/rfc'
+        return (
+            text.replace(
+                '[BCP 47]',
+                '\n[BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag)',
+            )
+            .replace(
+                '[documented extension tag]',
+                f'[documented extension tag]({site}#extension-tags)',
+            )
+            .replace('[E.123]', '[E.123](https://en.wikipedia.org/wiki/E.123)')
+            .replace(
+                '[E.164]', '\n[E.164](https://en.wikipedia.org/wiki/E.164)'
+            )
+            .replace(
+                '[exid-types registry]', f'\n[exid-types registry]({site}#EXID)'
+            )
+            .replace('[Extensions]', f'\n[Extensions]({site}#extensions)')
+            .replace(
+                '[Family Attribute]',
+                f'[Family Attribute]({site}#family-attributes)',
+            )
+            .replace('[Family Event]', f'[Family Event]({site}#family-events)')
+            .replace(
+                '[File Path datatype]',
+                f'[File Path datatype]({site}#file-path)',
+            )
+            .replace(
+                '[Individual Attribute]',
+                f'[Individual Attribute]({site}#individual-attributes)',
+            )
+            .replace(
+                '[Individual Event]',
+                f'[Individual Event]({site}#INDIVIDUAL_EVENT_STRUCTURE)',
+            )
+            .replace(
+                '[Latter-Day Saint Ordinance]',
+                f'[Latter-Day Saint Ordinance]({site}#latter-day-saint-ordinances)',
+            )
+            .replace('[List]', f'[List]({site}#list)\n')
+            .replace(
+                '[media type]',
+                f'[media type]({site}#media-type)\n',
+            )
+            .replace(
+                '[Removing data]', f'\n[Removing data]({site}#removing-data)'
+            )
+            .replace('[RFC 3696]', f'[RFC 3696]({datatracker}3696)')
+            .replace('[RFC\n3696]', f'\n[RFC 3696]({datatracker}3696)')
+            .replace('[RFC\n3986]', f'\n[RFC 3986]({datatracker}3986)')
+            .replace('[RFC 3987]', f'\n[RFC 3987]({datatracker}3987)')
+            .replace('[RFC 4122]', f'[RFC 4122]({datatracker}4122)')
+            .replace('[RFC 5321]', f'\n[RFC 5321]({datatracker}5321)')
+            .replace('[RFC 5322]', f'\n[RFC 5322]({datatracker}5322)')
+            .replace('. See also ', '.\nSee also ')
+            .replace(
+                '[The Header and Trailer]',
+                f'\n[The Header and Trailer]({site}#the-header)',
+            )
+            .replace(
+                '[whatwg/url]', '\n[whatwg/url](https://url.spec.whatwg.org/)'
+            )
+            .replace('[YAML file format]', f'[YAML file format]({site})')
+        )
+
+    @staticmethod
     def generate_specification(key: str, structure: dict[str, Any]) -> str:
         """Construct the Specification section of the documentation."""
         specification: list[str] = structure[key][Default.YAML_SPECIFICATION]
+        string_linked: str = Default.EMPTY
         spec: str = """
     GEDCOM Specification:"""
         for string in specification:
-            if '\n' not in string and len(string) > 80:
-                wrapped = wrap(string, 75)
+            string_linked = Construct.add_links(string)
+            if '\n' not in string_linked and len(string_linked) > 80:
+                wrapped = wrap(
+                    string_linked,
+                    75,
+                    break_long_words=False,
+                    break_on_hyphens=False,
+                )
                 if len(wrapped) > 1:
                     for line in wrapped:
                         spec = ''.join([spec, '\n    > ', line])
             else:
                 spec = ''.join(
-                    [spec, '\n    > ', string.replace('\n', '\n    > ')]
+                    [spec, '\n    > ', string_linked.replace('\n', '\n    > ')]
                 )
         return spec
 
@@ -1345,7 +1429,12 @@ from genedata.structure import (
                     yes = 'Yes'
                 if Default.YAML_CARDINALITY_SINGULAR in value:
                     one = 'Only One'
-                class_name = subskey[subskey.rfind('/') + 1 :].title().replace('_','').replace('-','')
+                class_name = (
+                    subskey[subskey.rfind('/') + 1 :]
+                    .title()
+                    .replace('_', '')
+                    .replace('-', '')
+                )
                 substructures = ''.join(
                     [
                         substructures,
@@ -1365,7 +1454,7 @@ from genedata.structure import (
                     ]
                 )
         return substructures
-    
+
     @staticmethod
     def generate_superstructures(key: str, structure: dict[str, Any]) -> str:
         """Construct the Substructures section of the documentation."""
@@ -1387,7 +1476,12 @@ from genedata.structure import (
                     yes = 'Yes'
                 if Default.YAML_CARDINALITY_SINGULAR in value:
                     one = 'Only One'
-                class_name = superskey[superskey.rfind('/') + 1 :].title().replace('_','').replace('-','')
+                class_name = (
+                    superskey[superskey.rfind('/') + 1 :]
+                    .title()
+                    .replace('_', '')
+                    .replace('-', '')
+                )
                 superstructures = ''.join(
                     [
                         superstructures,
@@ -1443,7 +1537,7 @@ from genedata.structure import (
                 args,
                 '\n        ',
                 Default.CODE_SUBS,
-                ': A permitted substructure, an extension or list of permitted substructures or extensions.',
+                ': A permitted substructure or list of permitted substructures.',
             ]
         )
 
@@ -1455,7 +1549,8 @@ from genedata.structure import (
         return f"""
         
     References:
-    - [GEDCOM {tag} Structure]({uri})"""
+    - [GEDCOM {tag} Structure]({uri})
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv{Config.VERSION}.html)"""
 
     @staticmethod
     def get_datatype(key: str, structure: dict[str, Any]) -> str:
@@ -1529,7 +1624,8 @@ from genedata.structure import (
         init: str = f"\n    key: str = '{key}'"
         if payload == Default.EMPTY or key == 'record-SNOTE':
             value_arg = Default.EMPTY
-            value_init = 'Default.EMPTY'
+            #value_init = 'Default.EMPTY'
+            value_init = 'None'
             if 'record-' in key:
                 init = f"\n    key: str = '{key}'"
                 value_arg = f', {Default.CODE_VALUE}: {Construct.get_record_datatype(key)}'
@@ -1588,7 +1684,13 @@ from genedata.structure import (
         lines: str = f"""
 
 class {class_name}(BaseStructure):
-    '''Store, validate and format the {tag} structure. Generated by `Construct.generate_class`.
+    '''Store, validate and format the {tag} structure. 
+    
+    This class was generated by `Construct.generate_class` in the prep module
+    using GEDCOM yaml specification files.  Links were added to the specification 
+    and tables constructed from the yaml files to aid the user of these classes.  
+    DO NOT CHANGE THIS CLASS MANUALLY.  
+
     {parts}
     '''
     {Construct.generate_init(key, structure)}
@@ -1597,8 +1699,7 @@ class {class_name}(BaseStructure):
 
     @staticmethod
     def generate_all_classes(url: str) -> str:
-        """Generate all classes and their documentation defined by the Structure dictionary.
-        """
+        """Generate all classes and their documentation defined by the Structure dictionary."""
 
         if url[-1] == Default.SLASH:
             base_url: str = url

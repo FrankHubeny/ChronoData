@@ -94,6 +94,8 @@ class Default:
     MONTHS: int = 0
     NONE: str = 'None'
     OCCURRED: str = 'Y'
+    PARENS_LEFT: str = '('
+    PARENS_RIGHT: str = ')'
     PAYLOAD_EMPTY: str = EMPTY
     PHONE_AREA_MIN: int = 0
     PHONE_AREA_MAX: int = 1000

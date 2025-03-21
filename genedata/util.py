@@ -1,7 +1,7 @@
 # util.py
 
 __all__ = [
-    'Checker',
+    #'Checker',
     'Formatter',
     'Input',
     'Tagger',
@@ -36,7 +36,40 @@ class Util:
         except requests.exceptions.RequestException:
             return 0
         return request
-        
+
+    @staticmethod
+    def list_gdz(gdz: str) -> str:
+        """List the files in a GEDCOM gdz archive file.
+
+        Args:
+            gdz: The path to the archive gdz file.
+        """
+        lines: str = Default.EMPTY
+        with zipfile.ZipFile(gdz, 'r') as zip_ref:
+            # List all the file names in the zip
+            for file_name in zip_ref.namelist():
+                lines = ''.join([lines, file_name, Default.EOL])
+        return lines
+
+    @staticmethod
+    def read_gdz_ged_file(file: str, gdz: str) -> str:
+        """Read a file from a GEDCOM gdz archive file.
+
+        Args:
+            gdz: The path to the archive gdz file.
+        """
+        with zipfile.ZipFile(gdz, 'r') as zip_ref:
+            for file_name in zip_ref.namelist():
+                if file_name == file:
+                    with zip_ref.open(file_name) as f:
+                        return (
+                            f.read()
+                            .decode('utf-8')
+                            .replace('\r\n', '\n')
+                            .replace('\ufeff', '')
+                        )
+        return Default.EMPTY
+
     @staticmethod
     def extract(
         file: str,
@@ -94,6 +127,17 @@ class Util:
             with open(url) as file:  # noqa: PTH123
                 raw = file.read()
         return raw
+
+    @staticmethod
+    def write_ged(ged: str, file: str) -> None:
+        """Write a ged string to a file in a directory.
+
+        Args:
+            ged: The string to write to the file.
+            file: The full path of the file.
+        """
+        with open(file, 'w') as f:  # noqa: PTH123
+            f.write(ged)
 
     @staticmethod
     def read_yaml(url: str) -> dict[str, Any]:
@@ -211,51 +255,52 @@ submitters    {subm_count!s}
                     ]
                 )
         return lines
+    
 
 
-class Checker:
-    """Global methods supporting validation of data."""
+# class Checker:
+#     """Global methods supporting validation of data."""
 
-    @staticmethod
-    def verify_type(value: Any, value_type: Any, no_list: bool = False) -> bool:
-        """Check if the value has the specified type."""
-        check: bool = True
-        if value is None:
-            return check
-        if isinstance(value, list):
-            if no_list and isinstance(value, list):
-                raise TypeError(Msg.NO_LIST)
-            for item in value:
-                if not isinstance(item, value_type):
-                    raise TypeError(
-                        Msg.WRONG_TYPE.format(item, type(item), value_type)
-                    )
-            return check
-        if not isinstance(value, value_type):
-            raise TypeError(
-                Msg.WRONG_TYPE.format(value, type(value), value_type)
-            )
-        return check
+#     @staticmethod
+#     def verify_type(value: Any, value_type: Any, no_list: bool = False) -> bool:
+#         """Check if the value has the specified type."""
+#         check: bool = True
+#         if value is None:
+#             return check
+#         if isinstance(value, list):
+#             if no_list and isinstance(value, list):
+#                 raise TypeError(Msg.NO_LIST)
+#             for item in value:
+#                 if not isinstance(item, value_type):
+#                     raise TypeError(
+#                         Msg.WRONG_TYPE.format(item, type(item), value_type)
+#                     )
+#             return check
+#         if not isinstance(value, value_type):
+#             raise TypeError(
+#                 Msg.WRONG_TYPE.format(value, type(value), value_type)
+#             )
+#         return check
 
-    @staticmethod
-    def verify_tuple_type(name: Any, value_type: Any) -> bool:
-        """Check if each member of the tuple has the specified type."""
-        if name != [] and name is not None:
-            for value in name:
-                Checker.verify_type(value, value_type)
-        return True
+#     @staticmethod
+#     def verify_tuple_type(name: Any, value_type: Any) -> bool:
+#         """Check if each member of the tuple has the specified type."""
+#         if name != [] and name is not None:
+#             for value in name:
+#                 Checker.verify_type(value, value_type)
+#         return True
 
-    @staticmethod
-    def verify_not_empty(value: Any) -> bool:
-        if value is None:
-            raise ValueError(Msg.NO_NONE)
-        if isinstance(value, str) and value == Default.EMPTY:
-            raise ValueError(Msg.NO_EMPTY_STRING)
-        if isinstance(value, list) and len(value) == 0:
-            raise ValueError(Msg.NO_EMPTY_LIST)
-        # if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
-        #     raise ValueError(Msg.NO_EMPTY_POINTER)
-        return True
+#     @staticmethod
+#     def verify_not_empty(value: Any) -> bool:
+#         if value is None:
+#             raise ValueError(Msg.NO_NONE)
+#         if isinstance(value, str) and value == Default.EMPTY:
+#             raise ValueError(Msg.NO_EMPTY_STRING)
+#         if isinstance(value, list) and len(value) == 0:
+#             raise ValueError(Msg.NO_EMPTY_LIST)
+#         # if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
+#         #     raise ValueError(Msg.NO_EMPTY_POINTER)
+#         return True
 
 
 class Input:
@@ -560,6 +605,92 @@ class Input:
         return value
 
     @staticmethod
+    def form(form1: str, form2: str, form3: str, form4: str) -> str:
+        """Format the place form separating each component with a comma.
+
+        Example:
+            This example illustrates the formatting provided.
+            >>> from genedata.util import Input
+            >>> Input.form('City', 'State', 'County', 'Country')
+            'City, State, County, Country'
+        """
+        return ''.join(
+            [
+                form1,
+                Default.LIST_ITEM_SEPARATOR,
+                form2,
+                Default.LIST_ITEM_SEPARATOR,
+                form3,
+                Default.LIST_ITEM_SEPARATOR,
+                form4,
+            ]
+        )
+
+    @staticmethod
+    def from_ged(lines: str | list[list[str]]) -> str:
+        if isinstance(lines, str):
+            strlist: list[list[str]] = [
+                a.split(' ') for a in lines.split('\n') if a != ''
+            ]
+            return Input.from_ged(strlist)
+        level: int = int(lines[0][0])
+        tag: str = lines[0][1]
+        payload: str = Default.EMPTY
+        output: str = Default.EMPTY
+        number_of_lines: int = len(lines)
+        if len(lines[0]) == 3:
+            payload = lines[0][2]
+        output = f'{tag}({payload}'
+        intermediate_lines: list[list[str]] = []
+        number_of_lines = len(lines[1:])
+        for i in range(number_of_lines):
+            if int(lines[i][0]) == level and len(intermediate_lines) > 0:
+                output = ''.join(
+                    [output, '[', Input.from_ged(intermediate_lines), '])']
+                )
+                intermediate_lines = []
+            elif int(lines[i][0]) == level:
+                output = ''.join([output, ')'])
+                if i < number_of_lines:
+                    return ''.join(
+                        [',', output, Input.from_ged(lines[i:]), ')']
+                    )
+                return output
+            else:
+                intermediate_lines.append(lines[i])
+        return output
+
+    @staticmethod
+    def lati(
+        degrees: int, minutes: int, seconds: float, precision: int = 6
+    ) -> str:
+        latitude = Input.to_decimal(degrees, minutes, seconds, precision)
+        if latitude > Default.LATI_HIGH or latitude < Default.LATI_LOW:
+            raise ValueError(
+                Msg.LATI_RANGE_METHOD.format(
+                    latitude, Default.LATI_LOW, Default.LATI_HIGH
+                )
+            )
+        if degrees >= 0:
+            return f'{Default.LATI_NORTH}{latitude!s}'
+        return f'{Default.LATI_SOUTH}{abs(latitude)!s}'
+
+    @staticmethod
+    def long(
+        degrees: int, minutes: int, seconds: float, precision: int = 6
+    ) -> str:
+        longitude = Input.to_decimal(degrees, minutes, seconds, precision)
+        if longitude > Default.LONG_HIGH or longitude < Default.LONG_LOW:
+            raise ValueError(
+                Msg.LONG_RANGE_METHOD.format(
+                    longitude, Default.LONG_LOW, Default.LONG_HIGH
+                )
+            )
+        if degrees >= 0:
+            return f'{Default.LONG_EAST}{longitude!s}'
+        return f'{Default.LONG_WEST}{abs(longitude)!s}'
+
+    @staticmethod
     def name(full: str, surname: str) -> str:
         """Format a personal name to meet GEDCOM name type specifications.
 
@@ -616,6 +747,93 @@ class Input:
             surname_slash = f'{Default.SLASH}{edited_surname}{Default.SLASH}'
             edited_name = re.sub(edited_surname, surname_slash, edited_name)
         return edited_name
+
+    @staticmethod
+    def phone(country: int, area: int, prefix: int, line: int) -> str:
+        """Format a phone string to meet the GEDCOM standard.
+
+        The International Notation from the ITU-T E.123 standard
+        are followed.  Spaces are used between the country, area_code, prefix and line numbers.
+        A `+` precedes the country code.
+
+        The GEDCOM standard does not require this international notation, but recommends it.
+        This method formats for the optional international notation should the user
+        choose to have a method format the number in a uniform manner.
+
+        If the number cannot be formatted correctly with this method any string is accepted
+        as a phone number.
+
+        One may use this for fax numbers as well.
+
+        Examples:
+            The first example shows the use of the default, US, international number.
+            >>> from genedata.util import Input
+            >>> Input.phone(1, 123, 456, 7890)
+            '+1 123 456 7890'
+
+            The second example provides a non-US country number.
+            >>> Input.phone(44, 123, 456, 7890)
+            '+44 123 456 7890'
+
+        Args:
+            country: The country code greater than 0 and and less than 1000.
+            area: The area code for the phone number greater than 0 and less than 1000.
+            prefix: The prefix portion of the phone number greater than 0 and less than 1000.
+            line: The line portion of the phone number greater than 0 and less than 10000.
+
+        Reference:
+            [GEDCOM Standard](https://gedcom.io/terms/v7/PHON)
+            [ITU-T E.123 Standard](https://www.itu.int/rec/T-REC-E.123-200102-I/en)
+        """
+        if not Default.PHONE_COUNTRY_MIN < country < Default.PHONE_COUNTRY_MAX:
+            raise ValueError(
+                Msg.PHONE_COUNTRY_CODE.format(
+                    country,
+                    Default.PHONE_COUNTRY_MIN,
+                    Default.PHONE_COUNTRY_MAX,
+                )
+            )
+        if not Default.PHONE_AREA_MIN < area < Default.PHONE_AREA_MAX:
+            raise ValueError(
+                Msg.PHONE_AREA_CODE.format(
+                    area, Default.PHONE_AREA_MIN, Default.PHONE_AREA_MAX
+                )
+            )
+        if not Default.PHONE_PREFIX_MIN < prefix < Default.PHONE_PREFIX_MAX:
+            raise ValueError(
+                Msg.PHONE_PREFIX_CODE.format(
+                    prefix, Default.PHONE_PREFIX_MIN, Default.PHONE_PREFIX_MAX
+                )
+            )
+        if not Default.PHONE_LINE_MIN < line < Default.PHONE_LINE_MAX:
+            raise ValueError(
+                Msg.PHONE_LINE_CODE.format(
+                    line, Default.PHONE_LINE_MIN, Default.PHONE_LINE_MAX
+                )
+            )
+        return f'+{country!s} {area!s} {prefix!s} {line!s}'
+
+    @staticmethod
+    def place(place1: str, place2: str, place3: str, place4: str) -> str:
+        """Format the place components separating them with a comma.
+
+        Example:
+            This example illustrates the formatting provided.
+            >>> from genedata.util import Input
+            >>> Input.form('Chicago', 'Illinois', 'Cook', 'USA')
+            'Chicago, Illinois, Cook, USA'
+        """
+        return ''.join(
+            [
+                place1,
+                Default.LIST_ITEM_SEPARATOR,
+                place2,
+                Default.LIST_ITEM_SEPARATOR,
+                place3,
+                Default.LIST_ITEM_SEPARATOR,
+                place4,
+            ]
+        )
 
     @staticmethod
     def to_dms(position: float, precision: int = 6) -> tuple[int, int, float]:
@@ -680,114 +898,6 @@ class Input:
         )
 
     @staticmethod
-    def lati(
-        degrees: int, minutes: int, seconds: float, precision: int = 6
-    ) -> str:
-        latitude = Input.to_decimal(degrees, minutes, seconds, precision)
-        if latitude > Default.LATI_HIGH or latitude < Default.LATI_LOW:
-            raise ValueError(
-                Msg.LATI_RANGE_METHOD.format(
-                    latitude, Default.LATI_LOW, Default.LATI_HIGH
-                )
-            )
-        if degrees >= 0:
-            return f'{Default.LATI_NORTH}{latitude!s}'
-        return f'{Default.LATI_SOUTH}{abs(latitude)!s}'
-
-    @staticmethod
-    def long(
-        degrees: int, minutes: int, seconds: float, precision: int = 6
-    ) -> str:
-        longitude = Input.to_decimal(degrees, minutes, seconds, precision)
-        if longitude > Default.LONG_HIGH or longitude < Default.LONG_LOW:
-            raise ValueError(
-                Msg.LONG_RANGE_METHOD.format(
-                    longitude, Default.LONG_LOW, Default.LONG_HIGH
-                )
-            )
-        if degrees >= 0:
-            return f'{Default.LONG_EAST}{longitude!s}'
-        return f'{Default.LONG_WEST}{abs(longitude)!s}'
-
-    @staticmethod
-    def from_ged(lines: str | list[list[str]]) -> str:
-        if isinstance(lines, str):
-            strlist: list[list[str]] = [
-                a.split(' ') for a in lines.split('\n') if a != ''
-            ]
-            return Input.from_ged(strlist)
-        level: int = int(lines[0][0])
-        tag: str = lines[0][1]
-        payload: str = Default.EMPTY
-        output: str = Default.EMPTY
-        number_of_lines: int = len(lines)
-        if len(lines[0]) == 3:
-            payload = lines[0][2]
-        output = f'{tag}({payload}'
-        intermediate_lines: list[list[str]] = []
-        number_of_lines = len(lines[1:])
-        for i in range(number_of_lines):
-            if int(lines[i][0]) == level and len(intermediate_lines) > 0:
-                output = ''.join(
-                    [output, '[', Input.from_ged(intermediate_lines), '])']
-                )
-                intermediate_lines = []
-            elif int(lines[i][0]) == level:
-                output = ''.join([output, ')'])
-                if i < number_of_lines:
-                    return ''.join(
-                        [',', output, Input.from_ged(lines[i:]), ')']
-                    )
-                return output
-            else:
-                intermediate_lines.append(lines[i])
-        return output
-
-    @staticmethod
-    def form(form1: str, form2: str, form3: str, form4: str) -> str:
-        """Format the place form separating each component with a comma.
-        
-        Example:
-            This example illustrates the formatting provided.
-            >>> from genedata.util import Input
-            >>> Input.form('City', 'State', 'County', 'Country')
-            'City, State, County, Country'
-        """
-        return ''.join(
-            [
-                form1,
-                Default.LIST_ITEM_SEPARATOR,
-                form2,
-                Default.LIST_ITEM_SEPARATOR,
-                form3,
-                Default.LIST_ITEM_SEPARATOR,
-                form4,
-            ]
-        )
-
-    @staticmethod
-    def place(place1: str, place2: str, place3: str, place4: str) -> str:
-        """Format the place components separating them with a comma.
-        
-        Example:
-            This example illustrates the formatting provided.
-            >>> from genedata.util import Input
-            >>> Input.form('Chicago', 'Illinois', 'Cook', 'USA')
-            'Chicago, Illinois, Cook, USA'
-        """
-        return ''.join(
-            [
-                place1,
-                Default.LIST_ITEM_SEPARATOR,
-                place2,
-                Default.LIST_ITEM_SEPARATOR,
-                place3,
-                Default.LIST_ITEM_SEPARATOR,
-                place4,
-            ]
-        )
-    
-    @staticmethod
     def www(url: str) -> str:
         """Test a url to see if it can be reached.
 
@@ -812,7 +922,7 @@ class Input:
 
         Reference:
         - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
-        
+
         """
         response: int = Util.www_status(url)
         if response != 200:
@@ -1154,71 +1264,6 @@ class Formatter:
     """Methods to support formatting strings to meet the GEDCOM standard."""
 
     @staticmethod
-    def phone(country: int, area: int, prefix: int, line: int) -> str:
-        """Format a phone string to meet the GEDCOM standard.
-
-        The International Notation from the ITU-T E.123 standard
-        are followed.  Spaces are used between the country, area_code, prefix and line numbers.
-        A `+` precedes the country code.
-
-        The GEDCOM standard does not require this international notation, but recommends it.
-        This method formats for the optional international notation should the user
-        choose to have a method format the number in a uniform manner.
-
-        If the number cannot be formatted correctly with this method any string is accepted
-        as a phone number.
-
-        One may use this for fax numbers as well.
-
-        Examples:
-            The first example shows the use of the default, US, international number.
-            >>> from genedata.util import Formatter
-            >>> Formatter.phone(1, 123, 456, 7890)
-            '+1 123 456 7890'
-
-            The second example provides a non-US country number.
-            >>> Formatter.phone(44, 123, 456, 7890)
-            '+44 123 456 7890'
-
-        Args:
-            country: The country code greater than 0 and and less than 1000.
-            area: The area code for the phone number greater than 0 and less than 1000.
-            prefix: The prefix portion of the phone number greater than 0 and less than 1000.
-            line: The line portion of the phone number greater than 0 and less than 10000.
-
-        Reference:
-            [GEDCOM Standard](https://gedcom.io/terms/v7/PHON)
-            [ITU-T E.123 Standard](https://www.itu.int/rec/T-REC-E.123-200102-I/en)
-        """
-        if not Default.PHONE_COUNTRY_MIN < country < Default.PHONE_COUNTRY_MAX:
-            raise ValueError(
-                Msg.PHONE_COUNTRY_CODE.format(
-                    country,
-                    Default.PHONE_COUNTRY_MIN,
-                    Default.PHONE_COUNTRY_MAX,
-                )
-            )
-        if not Default.PHONE_AREA_MIN < area < Default.PHONE_AREA_MAX:
-            raise ValueError(
-                Msg.PHONE_AREA_CODE.format(
-                    area, Default.PHONE_AREA_MIN, Default.PHONE_AREA_MAX
-                )
-            )
-        if not Default.PHONE_PREFIX_MIN < prefix < Default.PHONE_PREFIX_MAX:
-            raise ValueError(
-                Msg.PHONE_PREFIX_CODE.format(
-                    prefix, Default.PHONE_PREFIX_MIN, Default.PHONE_PREFIX_MAX
-                )
-            )
-        if not Default.PHONE_LINE_MIN < line < Default.PHONE_LINE_MAX:
-            raise ValueError(
-                Msg.PHONE_LINE_CODE.format(
-                    line, Default.PHONE_LINE_MIN, Default.PHONE_LINE_MAX
-                )
-            )
-        return f'+{country!s} {area!s} {prefix!s} {line!s}'
-
-    @staticmethod
     def codes_single(item: Any, tabs: int, full: bool) -> str:
         if isinstance(item, str):
             return f'{item!r}'
@@ -1311,185 +1356,3 @@ class Formatter:
                     lines = ''.join([lines, Default.EOL, returned_line])
             return ''.join([lines, Default.EOL, ')'])
         return ''.join([Default.EOL, name])
-
-    # @staticmethod
-    # def display_two(
-    #     name: str, subs: SubsType, ext: Any, tabs: int = 1, full: bool = True
-    # ) -> str:
-    #     return indent(
-    #         Formatter.display_code(
-    #             f'{name}',
-    #             ('    subs = ', subs, tabs + 1, full, False),
-    #             ('    ext = ', ext, tabs + 1, full, True),
-    #         ),
-    #         Default.INDENT * tabs,
-    #     )
-
-    # @staticmethod
-    # def display_three(
-    #     name: str,
-    #     value: str,
-    #     subs: SubsType,
-    #     ext: Any,
-    #     tabs: int = 1,
-    #     full: bool = True,
-    # ) -> str:
-    #     return indent(
-    #         Formatter.display_code(
-    #             f'{name}',
-    #             ('    value = ', value, tabs, full, True),
-    #             ('    subs = ', subs, tabs + 1, full, False),
-    #             ('    ext = ', ext, tabs + 1, full, True),
-    #         ),
-    #         Default.INDENT * tabs,
-    #     )
-
-    # @staticmethod
-    # def display_no_subs(
-    #     name: str,
-    #     value: str,
-    #     ext: Any,
-    #     tabs: int = 1,
-    #     full: bool = True,
-    # ) -> str:
-    #     if ext is None and not full:
-    #         return indent(
-    #             Formatter.display_code(f"{name}('{value}')"),
-    #             Default.INDENT * tabs,
-    #         )
-    #     return indent(
-    #         Formatter.display_code(
-    #             f'{name}',
-    #             ('    value = ', value, tabs, full, True),
-    #             ('    ext = ', ext, tabs + 1, full, True),
-    #         ),
-    #         Default.INDENT * tabs,
-    #     )
-
-    # @staticmethod
-    # def base_string(
-    #     value: str,
-    #     sub_name: str,
-    #     ext: Any = None,
-    #     tabs: int = 1,
-    #     full: bool = False,
-    # ) -> str:
-    #     if ext is None:
-    #         return indent(
-    #             Formatter.display_code(f"{sub_name}('{value}')"),
-    #             Default.INDENT * tabs,
-    #         )
-    #     return indent(
-    #         Formatter.display_code(
-    #             f'{sub_name}',
-    #             ('    value = ', value, tabs, full, True),
-    #             ('    ext = ', ext, tabs, full, False),
-    #         ),
-    #         Default.INDENT * tabs,
-    #     )
-
-    # @staticmethod
-    # def base_enum(
-    #     value: str,
-    #     sub_name: str,
-    #     extension: Any,
-    #     tabs: int = 1,
-    #     full: bool = False,
-    # ) -> str:
-    #     if extension is None:
-    #         return indent(
-    #             Formatter.display_code(f'{sub_name}(Tag.{value})'),
-    #             Default.INDENT * tabs,
-    #         )
-    #     return indent(
-    #         Formatter.display_code(
-    #             f'{sub_name}',
-    #             ('    tag = Tag.', value, tabs, full, True),
-    #             ('    extension = ', extension, tabs, full, False),
-    #         ),
-    #         Default.INDENT * tabs,
-    #     )
-
-    # @staticmethod
-    # def schema_example(
-    #     code_preface: str,
-    #     show_code: str,
-    #     gedcom_preface: str,
-    #     show_ged: str,
-    #     superstructures: dict[str, str],
-    #     substructures: dict[str, str],
-    #     gedcom_docs: str,
-    #     genealogy_docs: str,
-    # ) -> None:
-    #     superstructs: str = Default.EMPTY
-    #     substructs: str = Default.EMPTY
-    #     key: str
-    #     value: str
-    #     for key, value in superstructures.items():
-    #         superstructs = ''.join(
-    #             [
-    #                 superstructs,
-    #                 Default.EOL,
-    #                 f'{Default.INDENT}{key:<40} {value:<6}',
-    #             ]
-    #         )
-    #     for key, value in substructures.items():
-    #         substructs = ''.join(
-    #             [
-    #                 substructs,
-    #                 Default.EOL,
-    #                 f'{Default.INDENT}{key:<40} {value:<6}',
-    #             ]
-    #         )
-    #     print(
-    #         ''.join(
-    #             [
-    #                 code_preface,
-    #                 Default.EOL,
-    #                 show_code,
-    #                 Default.EOL_DOUBLE,
-    #                 gedcom_preface,
-    #                 Default.EOL_DOUBLE,
-    #                 show_ged,
-    #                 Default.EOL,
-    #                 Example.SUPERSTRUCTURES,
-    #                 superstructs,
-    #                 Example.SUBSTRUCTURES,
-    #                 substructs,
-    #                 Example.GEDCOM_SPECIFICATION,
-    #                 gedcom_docs,
-    #                 Default.EOL,
-    #                 genealogy_docs,
-    #             ]
-    #         )
-    #     )
-
-    # @staticmethod
-    # def display_tuple(named_tuple: Any) -> None:
-    #     print(
-    #         str(named_tuple)
-    #         .replace('(', '(\n     ', 1)
-    #         .replace(',', ',\n    ')
-    #         .replace(')', ',\n)')
-    #     )
-
-    # @staticmethod
-    # def display(named_tuple: Any, full: bool = False) -> None:
-    #     """Display the results of the ged and code methods for a named tuple.
-
-    #     Args:
-    #         named_tuple: This is the NamedTuple to display.
-
-    #     There are two methods to run:
-    #     1. `ged` runs validate() capturing any error message.
-    #     2. `code` which runs even if the ged method fails.
-    #     """
-    #     # print('DISPLAY:')
-    #     # print(f'{Formatter.display_tuple(named_tuple)}\n')
-    #     try:
-    #         print(f'GED:\n{named_tuple.ged()}')
-    #     except Exception as e:
-    #         print('ERROR MESSAGE:\n')
-    #         print(str(e))
-    #         print()
-    #     print(f'CODE:{named_tuple.code(full=full)}')
