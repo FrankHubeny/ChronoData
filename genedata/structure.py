@@ -15,25 +15,20 @@ __all__ = [
 
 import collections
 import io
-import logging
 import re
 import urllib.request
-from textwrap import indent
 from typing import Any, Literal, Self
 
 import yaml  # type: ignore[import-untyped]
 
-from genedata.constants import (
-    Default,
-    XrefTag,
-)
+from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.specs7 import (
     Enumeration,
     ExtensionStructure,
     Structure,
 )
-from genedata.util import Formatter, Tagger
+from genedata.util import Tagger
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -118,7 +113,7 @@ class ExtensionXref(Xref):
         [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
     """
 
-    def __init__(self, name: str, exttag: str = XrefTag.EXT):
+    def __init__(self, name: str, exttag: str = Default.TAG_EXT):
         super().__init__(name, exttag)
 
     def __repr__(self) -> str:
@@ -139,7 +134,7 @@ class FamilyXref(Xref):
         genedata.build.family_xref()
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.FAM):
+    def __init__(self, name: str, tag: str = Default.TAG_FAM):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -163,7 +158,7 @@ class IndividualXref(Xref):
         [GEDCOM INDIVIDUAL Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_RECORD)
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.INDI):
+    def __init__(self, name: str, tag: str = Default.TAG_INDI):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -187,7 +182,7 @@ class MultimediaXref(Xref):
         [GEDCOM MULTIMEDIA Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#MULTIMEDIA_RECORD)
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.OBJE):
+    def __init__(self, name: str, tag: str = Default.TAG_OBJE):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -211,7 +206,7 @@ class RepositoryXref(Xref):
         https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#REPOSITORY_RECORD
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.REPO):
+    def __init__(self, name: str, tag: str = Default.TAG_REPO):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -237,7 +232,7 @@ class SharedNoteXref(Xref):
     """
 
     def __init__(
-        self, name: str, tag: str = XrefTag.SNOTE, text: str = Default.EMPTY
+        self, name: str, tag: str = Default.TAG_SNOTE, text: str = Default.EMPTY
     ):
         super().__init__(name, tag, text=text)
 
@@ -268,7 +263,7 @@ class SourceXref(Xref):
         [GEDCOM SOURCE Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SHARED_NOTE_RECORD)
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.SOUR):
+    def __init__(self, name: str, tag: str = Default.TAG_SOUR):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -291,7 +286,7 @@ class SubmitterXref(Xref):
         [GEDCOM SUBMITTER Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
     """
 
-    def __init__(self, name: str, tag: str = XrefTag.SUBM):
+    def __init__(self, name: str, tag: str = Default.TAG_SUBM):
         super().__init__(name, tag)
 
     def __repr__(self) -> str:
@@ -411,6 +406,8 @@ class BaseStructure:
                     self.code_value = f'"""{self.value}"""'
                 else:
                     self.code_value = f"'''{self.value}'''"
+            elif Default.QUOTE_SINGLE in self.value:
+                self.code_value = f'"{self.value}"'
             else:
                 self.code_value = f"'{self.value}'"
         elif isinstance(self.value, int):
@@ -848,7 +845,6 @@ class BaseStructure:
                         and isinstance(self.value, SourceXref)
                     )
                 ) and recordkey in self.value.xrefs:
-                    # logging.info(Msg.CIRCULAR.format(repr(self.value), repr(recordkey)))
                     raise ValueError(
                         Msg.CIRCULAR.format(repr(self.value), repr(recordkey))
                     )
@@ -894,7 +890,7 @@ class BaseStructure:
                 )
         return lines.replace('0 TRLR\n', '0 TRLR')
 
-    def code2(self, tabs: int = 0, no_indent: bool = False) -> str:
+    def code(self, tabs: int = 0, no_indent: bool = False) -> str:
         """Generate a formatted code that can be evaluated of the class."""
         indent: str = Default.INDENT * tabs
         indent_plus_one: str = Default.INDENT * (tabs + 1)
@@ -921,19 +917,14 @@ class BaseStructure:
                     self.code_value,
                 ]
             )
-        if self.subs is None and tabs == 0:
-            return ''.join([code_lines, Default.PARENS_RIGHT])
         if self.subs is None:
-            return ''.join([code_lines, Default.PARENS_RIGHT, Default.COMMA])
-        if (
-            not isinstance(self.subs, list) and self.value is None
-        ):  # and not isinstance(self.subs.subs, list):
+            return ''.join([code_lines, Default.PARENS_RIGHT])
+        if not isinstance(self.subs, list) and self.value is None:
             return ''.join(
                 [
                     code_lines,
-                    self.subs.code2(no_indent=True),
+                    self.subs.code(no_indent=True),
                     Default.PARENS_RIGHT,
-                    Default.COMMA,
                 ]
             )
         if not isinstance(self.subs, list):
@@ -942,9 +933,9 @@ class BaseStructure:
                     code_lines,
                     Default.COMMA,
                     Default.SPACE,
-                    self.subs.code2(no_indent=True),
+                    self.subs.code(no_indent=True),
                     Default.PARENS_RIGHT,
-                    Default.COMMA,
+                    # Default.COMMA,
                 ]
             )
         if self.value is not None:
@@ -958,14 +949,32 @@ class BaseStructure:
                 Default.EOL,
             ]
         )
-        for sub in self.subs:
-            code_lines = ''.join(
-                [
-                    code_lines,
-                    sub.code2(tabs + 2),
-                    Default.EOL,
-                ]
-            )
+        for index, sub in enumerate(self.subs):
+            if index > 0:
+                code_lines = ''.join(
+                    [
+                        code_lines,
+                        Default.COMMA,
+                        Default.EOL,
+                        sub.code(tabs + 2),
+                        # Default.EOL,
+                    ]
+                )
+            else:
+                code_lines = ''.join(
+                    [
+                        code_lines,
+                        sub.code(tabs + 2),
+                        # Default.EOL,
+                    ]
+                )
+        code_lines = ''.join(
+            [
+                code_lines,
+                Default.COMMA,
+                Default.EOL,
+            ]
+        )
         return ''.join(
             [
                 code_lines,
@@ -976,90 +985,90 @@ class BaseStructure:
             ]
         )
 
-    def code(self, tabs: int = 0, full: bool = True) -> str:
-        if (
-            self.payload is None
-            and not isinstance(self.value, Xref)
-            and (
-                self.subs is None
-                or (isinstance(self.subs, list) and len(self.subs) == 0)
-            )
-        ):
-            return indent(
-                Formatter.display_code(f'{self.class_name}()'),
-                Default.INDENT * tabs,
-            )
-        if (self.payload is not None or isinstance(self.value, Xref)) and (
-            self.subs is None
-            or (isinstance(self.subs, list) and len(self.subs) == 0)
-        ):
-            return indent(
-                Formatter.display_code(f'{self.class_name}({self.code_value})'),
-                Default.INDENT * tabs,
-            )
-        if (
-            self.payload is not None or isinstance(self.value, Xref)
-        ) and isinstance(self.subs, BaseStructure):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}({self.code_value}, {self.subs.code().replace("\n", "")})'
-                ),
-                Default.INDENT * tabs,
-            )
-        if (self.payload is not None or isinstance(self.value, Xref)) and (
-            isinstance(self.subs, list) and len(self.subs) == 1
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}({self.code_value}, {self.subs[0].code().replace("\n", "")})'
-                ),
-                Default.INDENT * tabs,
-            )
-        if (self.payload is not None or isinstance(self.value, Xref)) and (
-            isinstance(self.subs, list) and len(self.subs) > 0
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        # f'    {Default.CODE_VALUE} = ',
-                        '',
-                        self.code_value,
-                        tabs + 1,
-                        full,
-                        False,
-                    ),
-                    (
-                        # f'    {Default.CODE_SUBS} = ',
-                        '',
-                        self.subs,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        if (
-            self.payload is None
-            and isinstance(self.subs, list)
-            and len(self.subs) > 0
-        ):
-            return indent(
-                Formatter.display_code(
-                    f'{self.class_name}',
-                    (
-                        # f'    {Default.CODE_SUBS} = ',
-                        '',
-                        self.subs,
-                        tabs + 2,
-                        full,
-                        True,
-                    ),
-                ),
-                Default.INDENT * tabs,
-            )
-        return Default.EMPTY
+    # def code(self, tabs: int = 0, full: bool = True) -> str:
+    #     if (
+    #         self.payload is None
+    #         and not isinstance(self.value, Xref)
+    #         and (
+    #             self.subs is None
+    #             or (isinstance(self.subs, list) and len(self.subs) == 0)
+    #         )
+    #     ):
+    #         return indent(
+    #             Formatter.display_code(f'{self.class_name}()'),
+    #             Default.INDENT * tabs,
+    #         )
+    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
+    #         self.subs is None
+    #         or (isinstance(self.subs, list) and len(self.subs) == 0)
+    #     ):
+    #         return indent(
+    #             Formatter.display_code(f'{self.class_name}({self.code_value})'),
+    #             Default.INDENT * tabs,
+    #         )
+    #     if (
+    #         self.payload is not None or isinstance(self.value, Xref)
+    #     ) and isinstance(self.subs, BaseStructure):
+    #         return indent(
+    #             Formatter.display_code(
+    #                 f'{self.class_name}({self.code_value}, {self.subs.code().replace("\n", "")})'
+    #             ),
+    #             Default.INDENT * tabs,
+    #         )
+    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
+    #         isinstance(self.subs, list) and len(self.subs) == 1
+    #     ):
+    #         return indent(
+    #             Formatter.display_code(
+    #                 f'{self.class_name}({self.code_value}, {self.subs[0].code().replace("\n", "")})'
+    #             ),
+    #             Default.INDENT * tabs,
+    #         )
+    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
+    #         isinstance(self.subs, list) and len(self.subs) > 0
+    #     ):
+    #         return indent(
+    #             Formatter.display_code(
+    #                 f'{self.class_name}',
+    #                 (
+    #                     # f'    {Default.CODE_VALUE} = ',
+    #                     '',
+    #                     self.code_value,
+    #                     tabs + 1,
+    #                     full,
+    #                     False,
+    #                 ),
+    #                 (
+    #                     # f'    {Default.CODE_SUBS} = ',
+    #                     '',
+    #                     self.subs,
+    #                     tabs + 2,
+    #                     full,
+    #                     True,
+    #                 ),
+    #             ),
+    #             Default.INDENT * tabs,
+    #         )
+    #     if (
+    #         self.payload is None
+    #         and isinstance(self.subs, list)
+    #         and len(self.subs) > 0
+    #     ):
+    #         return indent(
+    #             Formatter.display_code(
+    #                 f'{self.class_name}',
+    #                 (
+    #                     # f'    {Default.CODE_SUBS} = ',
+    #                     '',
+    #                     self.subs,
+    #                     tabs + 2,
+    #                     full,
+    #                     True,
+    #                 ),
+    #             ),
+    #             Default.INDENT * tabs,
+    #         )
+    #     return Default.EMPTY
 
 
 class Ext(BaseStructure):

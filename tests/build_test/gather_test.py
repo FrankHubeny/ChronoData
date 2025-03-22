@@ -17,6 +17,9 @@ import pytest
 
 from genedata.build import Genealogy
 from genedata.classes7 import (
+    File,
+    Form,
+    Name,
     RecordFam,
     RecordIndi,
     RecordObje,
@@ -25,7 +28,7 @@ from genedata.classes7 import (
     RecordSour,
     RecordSubm,
 )
-from genedata.constants import String  # noqa: F401
+from genedata.constants import Default  # noqa: F401
 from genedata.messages import Msg
 
 testdata_empty = [
@@ -61,7 +64,7 @@ def test_empty_record_lists(
 # )
 
 
-# @pytest.mark.parametrize('test_input,expected', testdata_one)  
+# @pytest.mark.parametrize('test_input,expected', testdata_one)
 # def test_one_record(test_input: str, expected: str) -> None:
 #     a = Genealogy('test')
 #     familyxref = a.family_xref()
@@ -89,50 +92,55 @@ def test_empty_record_lists(
 #     assert eval(test_input) == expected
 
 
-# testdata_three: list[tuple[str, int]] = [
-#     ('a.ged_family.count(String.EOL)', 3),
-#     ('a.ged_individual.count(String.EOL)', 3),
-#     ('a.ged_multimedia.count(String.EOL)', 3),
-#     ('a.ged_repository.count(String.EOL)', 3),
-#     ('a.ged_shared_note.count(String.EOL)', 3),
-#     ('a.ged_source.count(String.EOL)', 3),
-#     ('a.ged_submitter.count(String.EOL)', 3),
-# ]
+testdata_three: list[tuple[str, int]] = [
+    ('a.ged_family.count(Default.EOL)', 3),
+    ('a.ged_individual.count(Default.EOL)', 3),
+    ('a.ged_multimedia.count(Default.EOL)', 9),  # 3 ged lines per multimedia record: OBJE, FILE, FORM
+    ('a.ged_repository.count(Default.EOL)', 6),  # 2 ged lines per repository record: REPO, NAME
+    ('a.ged_shared_note.count(Default.EOL)', 3),
+    ('a.ged_source.count(Default.EOL)', 3),
+    ('a.ged_submitter.count(Default.EOL)', 6),   # 2 ged line per submitter record: SUBM, NAME
+]
 
 
-# @pytest.mark.parametrize('test_input,expected', testdata_three)  
-# def test_three_records(test_input: str, expected: str | int | bool) -> None:
-#     a = Genealogy('test')
-#     family1 = Family(a.family_xref())
-#     family2 = Family(a.family_xref())
-#     family3 = Family(a.family_xref())
-#     individual1 = Individual(a.individual_xref())
-#     individual2 = Individual(a.individual_xref())
-#     individual3 = Individual(a.individual_xref())
-#     multimedia1 = Multimedia(a.multimedia_xref())
-#     multimedia2 = Multimedia(a.multimedia_xref())
-#     multimedia3 = Multimedia(a.multimedia_xref())
-#     repository1 = Repository(a.repository_xref())
-#     repository2 = Repository(a.repository_xref())
-#     repository3 = Repository(a.repository_xref())
-#     shared_note1 = SharedNote(a.shared_note_xref())
-#     shared_note2 = SharedNote(a.shared_note_xref())
-#     shared_note3 = SharedNote(a.shared_note_xref())
-#     source1 = Source(a.source_xref())
-#     source2 = Source(a.source_xref())
-#     source3 = Source(a.source_xref())
-#     submitter1 = Submitter(a.submitter_xref())
-#     submitter2 = Submitter(a.submitter_xref())
-#     submitter3 = Submitter(a.submitter_xref())
-#     a.families([family1, family2, family3])
-#     a.individuals([individual1, individual2, individual3])
-#     a.multimedia([multimedia1, multimedia2, multimedia3])
-#     a.repositories([repository1, repository2, repository3])
-#     a.shared_notes([shared_note1, shared_note2, shared_note3])
-#     a.sources([source1, source2, source3])
-#     a.submitters([submitter1, submitter2, submitter3])
-
-#     assert eval(test_input) == expected
+@pytest.mark.parametrize(('test_input', 'expected'), testdata_three)
+def test_three_records(test_input: str, expected: str | int | bool) -> None:
+    a = Genealogy('test')
+    family1 = RecordFam(a.family_xref())
+    family2 = RecordFam(a.family_xref())
+    family3 = RecordFam(a.family_xref())
+    individual1 = RecordIndi(a.individual_xref())
+    individual2 = RecordIndi(a.individual_xref())
+    individual3 = RecordIndi(a.individual_xref())
+    multimedia1 = RecordObje(
+        a.multimedia_xref(), File('a.txt', Form('text/html'))
+    )
+    multimedia2 = RecordObje(
+        a.multimedia_xref(), File('b.txt', Form('text/html'))
+    )
+    multimedia3 = RecordObje(
+        a.multimedia_xref(), File('c.txt', Form('text/html'))
+    )
+    repository1 = RecordRepo(a.repository_xref(), Name('X'))
+    repository2 = RecordRepo(a.repository_xref(), Name('Y'))
+    repository3 = RecordRepo(a.repository_xref(), Name('Z'))
+    shared_note1 = RecordSnote(a.shared_note_xref(text='a'))
+    shared_note2 = RecordSnote(a.shared_note_xref(text='b'))
+    shared_note3 = RecordSnote(a.shared_note_xref(text='c'))
+    source1 = RecordSour(a.source_xref())
+    source2 = RecordSour(a.source_xref())
+    source3 = RecordSour(a.source_xref())
+    submitter1 = RecordSubm(a.submitter_xref(), Name('A'))
+    submitter2 = RecordSubm(a.submitter_xref(), Name('B'))
+    submitter3 = RecordSubm(a.submitter_xref(), Name('C;'))
+    a.families([family1, family2, family3])
+    a.individuals([individual1, individual2, individual3])
+    a.multimedia([multimedia1, multimedia2, multimedia3])
+    a.repositories([repository1, repository2, repository3])
+    a.shared_notes([shared_note1, shared_note2, shared_note3])
+    a.sources([source1, source2, source3])
+    a.submitters([submitter1, submitter2, submitter3])
+    assert eval(test_input) == expected
 
 
 def test_missing_individual() -> None:
@@ -315,7 +323,7 @@ def test_duplicate_source() -> None:
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(sour_one_xref.fullname)),
     ):
-        a.families([sour, sour]) # type: ignore[list-item]
+        a.families([sour, sour])  # type: ignore[list-item]
 
 
 # def test_duplicate_submitter() -> None:

@@ -190,7 +190,6 @@ __all__ = [
 import logging
 from typing import Any
 
-from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.structure import (
     BaseStructure,

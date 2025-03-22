@@ -1,8 +1,6 @@
 # util.py
 
 __all__ = [
-    #'Checker',
-    'Formatter',
     'Input',
     'Tagger',
     'Util',
@@ -13,7 +11,8 @@ import math
 import re
 import urllib.request
 import zipfile
-from textwrap import indent
+
+#from textwrap import indent
 from typing import Any
 
 import requests  # type: ignore[import-untyped]
@@ -1260,99 +1259,99 @@ class Tagger:
         return ordered
 
 
-class Formatter:
-    """Methods to support formatting strings to meet the GEDCOM standard."""
+# class Formatter:
+#     """Methods to support formatting strings to meet the GEDCOM standard."""
 
-    @staticmethod
-    def codes_single(item: Any, tabs: int, full: bool) -> str:
-        if isinstance(item, str):
-            return f'{item!r}'
-        if isinstance(item, int | float):
-            return f'{item!r}'
-        # if isinstance(item, Xref):
-        #     return f'{item!r}'
-        code_lines: str = (
-            item.code(tabs - 1, full=full)
-            .replace(Default.EOL, Default.EMPTY, 1)
-            .replace(Default.INDENT, Default.EMPTY, 1)
-        )
-        return code_lines
+#     @staticmethod
+#     def codes_single(item: Any, tabs: int, full: bool) -> str:
+#         if isinstance(item, str):
+#             return f'{item!r}'
+#         if isinstance(item, int | float):
+#             return f'{item!r}'
+#         # if isinstance(item, Xref):
+#         #     return f'{item!r}'
+#         code_lines: str = (
+#             item.code(tabs - 1, full=full)
+#             .replace(Default.EOL, Default.EMPTY, 1)
+#             .replace(Default.INDENT, Default.EMPTY, 1)
+#         )
+#         return code_lines
 
-    @staticmethod
-    def codes(
-        items: Any, tabs: int = 1, full: bool = False, required: bool = False
-    ) -> str:
-        if items is None:
-            return Default.NONE
-        if isinstance(items, list):
-            if len(items) == 0:
-                return Default.BRACKET_LEFT_RIGHT
-            if len(items) == 1:
-                return Formatter.codes_single(items[0], tabs, full)
-            lines: str = Default.BRACKET_LEFT
-            for item in items:
-                line_end = Default.COMMA
-                if required:
-                    line_end = Default.COMMA_REQUIRED
-                if isinstance(item, int | float):
-                    lines = ''.join(
-                        [
-                            lines,
-                            Default.EOL,
-                            Default.INDENT * (tabs),
-                            str(item),
-                            line_end,
-                        ]
-                    )
-                elif isinstance(item, str):
-                    quote_mark: str = Default.QUOTE_SINGLE
-                    if quote_mark in str(item):
-                        quote_mark = Default.QUOTE_DOUBLE
-                    lines = ''.join(
-                        [
-                            lines,
-                            Default.EOL,
-                            Default.INDENT * (tabs),
-                            quote_mark,
-                            str(item),
-                            quote_mark,
-                            line_end,
-                        ]
-                    )
-                else:
-                    lines = ''.join(
-                        [lines, item.code(tabs, full=full), Default.COMMA]
-                    )
-            return ''.join(
-                [
-                    lines,
-                    Default.EOL,
-                    Default.INDENT * (tabs - 1),
-                    Default.BRACKET_RIGHT,
-                ]
-            )
-        return Formatter.codes_single(items, tabs, full)
+#     @staticmethod
+#     def codes(
+#         items: Any, tabs: int = 1, full: bool = False, required: bool = False
+#     ) -> str:
+#         if items is None:
+#             return Default.NONE
+#         if isinstance(items, list):
+#             if len(items) == 0:
+#                 return Default.BRACKET_LEFT_RIGHT
+#             if len(items) == 1:
+#                 return Formatter.codes_single(items[0], tabs, full)
+#             lines: str = Default.BRACKET_LEFT
+#             for item in items:
+#                 line_end = Default.COMMA
+#                 if required:
+#                     line_end = Default.COMMA_REQUIRED
+#                 if isinstance(item, int | float):
+#                     lines = ''.join(
+#                         [
+#                             lines,
+#                             Default.EOL,
+#                             Default.INDENT * (tabs),
+#                             str(item),
+#                             line_end,
+#                         ]
+#                     )
+#                 elif isinstance(item, str):
+#                     quote_mark: str = Default.QUOTE_SINGLE
+#                     if quote_mark in str(item):
+#                         quote_mark = Default.QUOTE_DOUBLE
+#                     lines = ''.join(
+#                         [
+#                             lines,
+#                             Default.EOL,
+#                             Default.INDENT * (tabs),
+#                             quote_mark,
+#                             str(item),
+#                             quote_mark,
+#                             line_end,
+#                         ]
+#                     )
+#                 else:
+#                     lines = ''.join(
+#                         [lines, item.code(tabs, full=full), Default.COMMA]
+#                     )
+#             return ''.join(
+#                 [
+#                     lines,
+#                     Default.EOL,
+#                     Default.INDENT * (tabs - 1),
+#                     Default.BRACKET_RIGHT,
+#                 ]
+#             )
+#         return Formatter.codes_single(items, tabs, full)
 
-    @staticmethod
-    def codes_line(initial: str, items: Any, tabs: int, full: bool) -> str:
-        line_end: str = Default.COMMA
-        result: str = Formatter.codes(items, tabs, full)
-        keep: bool = full or result not in ['None']
-        if keep:
-            return ''.join([initial, result, line_end])
-        return Default.EMPTY
+#     @staticmethod
+#     def codes_line(initial: str, items: Any, tabs: int, full: bool) -> str:
+#         line_end: str = Default.COMMA
+#         result: str = Formatter.codes(items, tabs, full)
+#         keep: bool = full or result not in ['None']
+#         if keep:
+#             return ''.join([initial, result, line_end])
+#         return Default.EMPTY
 
-    @staticmethod
-    def display_code(
-        name: str, *code_lines: tuple[str, Any, int, bool, bool]
-    ) -> str:
-        if len(code_lines) > 0:
-            lines: str = ''.join([Default.EOL, name, '('])
-            for line in code_lines:
-                returned_line = Formatter.codes_line(
-                    line[0], line[1], line[2], line[3]
-                )
-                if returned_line != Default.EMPTY:
-                    lines = ''.join([lines, Default.EOL, returned_line])
-            return ''.join([lines, Default.EOL, ')'])
-        return ''.join([Default.EOL, name])
+#     @staticmethod
+#     def display_code(
+#         name: str, *code_lines: tuple[str, Any, int, bool, bool]
+#     ) -> str:
+#         if len(code_lines) > 0:
+#             lines: str = ''.join([Default.EOL, name, '('])
+#             for line in code_lines:
+#                 returned_line = Formatter.codes_line(
+#                     line[0], line[1], line[2], line[3]
+#                 )
+#                 if returned_line != Default.EMPTY:
+#                     lines = ''.join([lines, Default.EOL, returned_line])
+#             return ''.join([lines, Default.EOL, ')'])
+#         return ''.join([Default.EOL, name])

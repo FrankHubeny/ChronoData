@@ -1248,7 +1248,6 @@ The specifications for this module are from the
 import logging
 from typing import Any
 
-from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.structure import (
     BaseStructure,

@@ -190,7 +190,7 @@ def test_code() -> None:
 def test_code_with_list() -> None:
     """Illustrate code running."""
     m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y')])
-    assert m.code() == "\nAge('> 2y 1m 1w 1d', Phrase('Original: 2.2y'))"
+    assert m.code() == "\nAge('> 2y 1m 1w 1d',\n    [\n        Phrase('Original: 2.2y'),\n    ]\n)"
 
 
 # 4. Examples:  Demonstrate that all of the examples

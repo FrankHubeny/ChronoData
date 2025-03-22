@@ -40,6 +40,7 @@ class Config:
         f'https://gedcom.io/specifications/FamilySearchGEDCOMv{VERSION}.html'
     )
 
+
 @dataclass(frozen=True)
 class Default:
     AGE_DAY: str = 'd'
@@ -116,6 +117,14 @@ class Default:
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
     T: str = 'T'
+    TAG_EXT: str = 'EXT'
+    TAG_FAM: str = 'FAM'
+    TAG_INDI: str = 'INDI'
+    TAG_OBJE: str = 'OBJE'
+    TAG_REPO: str = 'REPO'
+    TAG_SNOTE: str = 'SNOTE'
+    TAG_SOUR: str = 'SOUR'
+    TAG_SUBM: str = 'SUBM'
     TIME_HOUR: int = 0
     TIME_MINUTE: int = 0
     TIME_SECOND: float = 0.0
@@ -172,32 +181,16 @@ class Default:
     Z: str = 'Z'
 
 
-@dataclass(frozen=True)
-class XrefTag:
-    EXT: str = 'EXT'
-    FAM: str = 'FAM'
-    INDI: str = 'INDI'
-    OBJE: str = 'OBJE'
-    REPO: str = 'REPO'
-    SNOTE: str = 'SNOTE'
-    SOUR: str = 'SOUR'
-    SUBM: str = 'SUBM'
-
-# class AgeConstants:
-#     """Age enumerations for the Age NamedTuple."""
-
-#     UNIT: ClassVar = {
-#         'y': 'y',
-#         'year': 'y',
-#         'm': 'month',
-#         'month': 'm',
-#         'd': 'd',
-#         'day': 'd',
-#         'w': 'w',
-#         'week': 'w',
-#     }
-#     BOUND: ClassVar = {'<', '>'}
-#     NAME: ClassVar = {'U'}
+# @dataclass(frozen=True)
+# class XrefTag:
+#     EXT: str = 'EXT'
+#     FAM: str = 'FAM'
+#     INDI: str = 'INDI'
+#     OBJE: str = 'OBJE'
+#     REPO: str = 'REPO'
+#     SNOTE: str = 'SNOTE'
+#     SOUR: str = 'SOUR'
+#     SUBM: str = 'SUBM'
 
 
 @dataclass(frozen=True)
@@ -440,8 +433,6 @@ class Number:
     JSONLEN: int = 5
 
 
-
-
 @dataclass(frozen=True)
 class String:
     """The following values are part of the configuration of the GEDCOM standard
@@ -449,16 +440,16 @@ class String:
     and so do not require internationalization.
     """
 
-    #ATSIGN: str = '@'
-    #BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    # ATSIGN: str = '@'
+    # BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BC: str = 'BCE'
-    #COLON: str = ':'
-    #COMMA: str = ','
+    # COLON: str = ':'
+    # COMMA: str = ','
     CSV: str = '.csv'
-    #DAY: str = 'd'
-    #DOUBLE_NEWLINE: str = '\n\n'
+    # DAY: str = 'd'
+    # DOUBLE_NEWLINE: str = '\n\n'
     EMPTY: str = ''
-    #EOL: str = '\n'
+    # EOL: str = '\n'
     # EVENT: str = 'EVENT'
     # FORM_DEFAULT1: str = 'City'
     # FORM_DEFAULT2: str = 'County'
@@ -467,37 +458,37 @@ class String:
     FRENCH_R: str = 'FRENCH_R'
     GED: str = '.ged'
     GRAMPS: str = '.gramps'
-    #GREATER_THAN: str = '>'
+    # GREATER_THAN: str = '>'
     GREGORIAN: str = 'GREGORIAN'
     HEBREW: str = 'HEBREW'
-    #HYPHEN: str = '-'
-    #INDENT: str = '    '
-    #INDEX: str = 'index'
+    # HYPHEN: str = '-'
+    # INDENT: str = '    '
+    # INDEX: str = 'index'
     INT: str = 'int'
     JSON: str = '.json'
     JULIAN: str = 'JULIAN'
-    #LEFT_BRACKET: str = '['
-    #LEFT_RIGHT_BRACKET: str = '[]'
-    #LEFT_RIGHT_BRACKET_REQUIRED: str = '[]  <- REQUIRED'
-    #LIST_ITEM_SEPARATOR: str = ', '
+    # LEFT_BRACKET: str = '['
+    # LEFT_RIGHT_BRACKET: str = '[]'
+    # LEFT_RIGHT_BRACKET_REQUIRED: str = '[]  <- REQUIRED'
+    # LIST_ITEM_SEPARATOR: str = ', '
     MONTH: str = 'm'
     MONTH_NAMES: str = 'Month Names'
     NEGATIVE: str = '-'
     NOW: str = 'now'
-    #OCCURRED: Literal['Y'] = 'Y'
-    #MAX = 'MAX'
-    #MIN = 'MIN'
+    # OCCURRED: Literal['Y'] = 'Y'
+    # MAX = 'MAX'
+    # MIN = 'MIN'
     READ: str = 'r'
-    #REQUIRED: str = '  <- REQUIRED'
-    #RIGHT_BRACKET: str = ']'
-    #SLASH: str = '/'
-    #SPACE: str = ' '
-    #T: str = 'T'
-    #UNDERLINE: str = '_'
-    #UNDETERMINED: str = 'und'
-    #VERSION: str = '7.0'
+    # REQUIRED: str = '  <- REQUIRED'
+    # RIGHT_BRACKET: str = ']'
+    # SLASH: str = '/'
+    # SPACE: str = ' '
+    # T: str = 'T'
+    # UNDERLINE: str = '_'
+    # UNDETERMINED: str = 'und'
+    # VERSION: str = '7.0'
     WRITE: str = 'w'
-    #Z: str = 'Z'
+    # Z: str = 'Z'
 
 
 class GedFlag:
