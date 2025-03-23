@@ -5522,7 +5522,8 @@ class Lang(BaseStructure):
     > 
     > The payload of the `LANG` structure is a language tag, as defined by 
     > [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
-    > A [registry of component subtags] is maintained publicly by the IANA.
+    > A [registry of component subtags](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)
+    > is maintained publicly by the IANA.
     > 
     > In the absence of a `LANG` structure, the language is assumed to be
     > unspecified; that may also be recorded explicitly with language tag `und`
@@ -5627,8 +5628,13 @@ class Lati(BaseStructure):
         The following example shows how to enter the latitude (Lati))
         coordinates into a Map structure to produce the GEDCOM example
         mentioned in the GEDCOM Specification section.
-        >>> from genedata.classes7 import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Map(
+        ...     [
+        ...         gc.Lati('N18.150944'), 
+        ...         gc.Long('E168.150944')
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -5639,10 +5645,10 @@ class Lati(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
         >>> from genedata.util import Input
-        >>> m = Map(
+        >>> m = gc.Map(
         ...     [
-        ...         Lati(Input.lati(18, 9, 3.4)), 
-        ...         Long('E168.150944'),
+        ...         gc.Lati(Input.lati(18, 9, 3.4)), 
+        ...         gc.Long('E168.150944'),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -5733,8 +5739,13 @@ class Long(BaseStructure):
         The following example howss how to enter the longitude (Long)
         coordinates into a map structure to produce the GEDCOM output
         mentioned in the GEDCOM Specification.
-        >>> from genedata.classes7 import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Map(
+        ...     [
+        ...         gc.Lati('N18.150944'), 
+        ...         gc.Long('E168.150944')
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -5745,10 +5756,10 @@ class Long(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
         >>> from genedata.util import Input
-        >>> m = Map(
+        >>> m = gc.Map(
         ...     [
-        ...         Lati('N18.150944'), 
-        ...         Long(Input.long(168, 9, 3.4)),
+        ...         gc.Lati('N18.150944'), 
+        ...         gc.Long(Input.long(168, 9, 3.4)),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -5801,8 +5812,13 @@ class Map(BaseStructure):
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
         coordinates into a map structure to produce the GEDCOM output.
         >>> from genedata.util import Input
-        >>> from genedata.classes7 import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Map(
+        ...     [
+        ...         gc.Lati('N18.150944'), 
+        ...         gc.Long('E168.150944'),
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -6186,12 +6202,18 @@ class Medi(BaseStructure):
         These are the steps to build the example in the specification.
         First import the classes and build a multimedia cross reference identifier.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes7 import File, Form, Medi, RecordObje
+        >>> import genedata.classes7 as gc
         >>> g = Genealogy('example')
         >>> obje_xref = g.multimedia_xref('M1')
 
         Next construct the ged lines.  Let `photo.jpg` be the file name of the photo.
-        >>> m = RecordObje(obje_xref, File('photo.jpg', Form('image/jpeg', Medi('PHOTO'))))
+        >>> m = gc.RecordObje(obje_xref, 
+        ...     gc.File('photo.jpg', 
+        ...         gc.Form('image/jpeg', 
+        ...             gc.Medi('PHOTO')
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged())
         0 @M1@ OBJE
         1 FILE photo.jpg
@@ -6201,16 +6223,11 @@ class Medi(BaseStructure):
 
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
-        >>> from genedata.classes7 import Medi
-        >>> m = Medi('AUDIO')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Medi('AUDIO')
         >>> print(m.ged(2))
         2 MEDI AUDIO
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Medi('AUDIO')
         
     Enumerations:
     - 'AUDIO': https://gedcom.io/terms/v7/enum-AUDIO
@@ -6449,16 +6466,16 @@ class NameTran(BaseStructure):
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> from genedata.classes7 import Givn, IndiName, Lang, NameTran, Surn
-        >>> m = IndiName('/孔/德庸',
+        >>> import genedata.classes7 as gc
+        >>> m = gc.IndiName('/孔/德庸',
         ...         [
-        ...             Givn('德庸'),
-        ...             Surn('孔'),
-        ...             NameTran('/Kǒng/ Déyōng',
+        ...             gc.Givn('德庸'),
+        ...             gc.Surn('孔'),
+        ...             gc.NameTran('/Kǒng/ Déyōng',
         ...                 [
-        ...                     Givn('Déyōng'),
-        ...                     Surn('Kǒng'),
-        ...                     Lang('zh-pinyin'),
+        ...                     gc.Givn('Déyōng'),
+        ...                     gc.Surn('Kǒng'),
+        ...                     gc.Lang('zh-pinyin'),
         ...                 ]
         ...             )
         ...         ]
@@ -7011,14 +7028,18 @@ class NoteTran(BaseStructure):
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> from genedata.classes7 import Lang, Mime, Name, Note, NoteTran
-        >>> m = IndiName('Arete /Hernandez/', 
-        ...     Note('Named after Arete from <i>The Odyssey</i>',
+        >>> import genedata.classes7 as gc
+        >>> m = gc.IndiName('Arete /Hernandez/', 
+        ...     gc.Note('Named after Arete from <i>The Odyssey</i>',
         ...         [
-        ...             Lang('en'),
-        ...             Mime('text/html'),
-        ...             NoteTran('Named after Arete from "The Odyssey"', Mime('text/plain')),
-        ...             NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', Lang('es')),
+        ...             gc.Lang('en'),
+        ...             gc.Mime('text/html'),
+        ...             gc.NoteTran('Named after Arete from "The Odyssey"', 
+        ...                 gc.Mime('text/plain')
+        ...             ),
+        ...             gc.NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', 
+        ...                 gc.Lang('es')
+        ...             ),
         ...         ]
         ...     )
         ... ) 
@@ -7308,17 +7329,14 @@ class OrdStat(BaseStructure):
     Examples:
         This example shows a successful run of the OrdStat structure using
         the enumeration value 'BIC' occurring on January 15, 2020.
-        >>> from genedata.classes7 import DateExact, OrdStat
-        >>> m = OrdStat('BIC', DateExact('15 JAN 2020'))
+        >>> import genedata.classes7 as gc
+        >>> m = gc.OrdStat('BIC', 
+        ...     gc.DateExact('15 JAN 2020')
+        ... )
         >>> print(m.ged(1))
         1 STAT BIC
         2 DATE 15 JAN 2020
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        OrdStat('BIC', DateExact('15 JAN 2020'))
         
     Enumerations:
     - 'BIC': https://gedcom.io/terms/v7/enum-BIC
@@ -7486,20 +7504,26 @@ class Page(BaseStructure):
         First we will import the classes and then create a source cross reference `S1`.
         The void cross reference identifier comes from the Void class.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes7 import Dscr, Page, Sour 
+        >>> import genedata.classes7 as gc 
         >>> from genedata.structure import Void
         >>> g = Genealogy('example')
         >>> sour_xref = g.source_xref('S1')
 
         These are the steps to build the first example:
-        >>> m = Sour(sour_xref, Page('Film: 1234567, Frame: 344, Line: 28'))
+        >>> m = gc.Sour(sour_xref, 
+        ...     gc.Page('Film: 1234567, Frame: 344, Line: 28')
+        ... )
         >>> print(m.ged(2))
         2 SOUR @S1@
         3 PAGE Film: 1234567, Frame: 344, Line: 28
         <BLANKLINE>
 
         These are the steps to build the second example:
-        >>> m = Dscr('Tall enough his head touched the ceiling', Sour(Void.SOUR, Page('His grand-daughter Lydia told me this in 1980')))
+        >>> m = gc.Dscr('Tall enough his head touched the ceiling', 
+        ...     gc.Sour(Void.SOUR, 
+        ...         gc.Page('His grand-daughter Lydia told me this in 1980')
+        ...     )
+        ... )
         >>> print(m.ged(1))
         1 DSCR Tall enough his head touched the ceiling
         2 SOUR @VOID@
@@ -7544,16 +7568,11 @@ class Pedi(BaseStructure):
     Examples:
         This example shows a successful run of the Pedi structure using
         the enumeration value 'ADOPTED'.
-        >>> from genedata.classes7 import Pedi
-        >>> m = Pedi('ADOPTED')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Pedi('ADOPTED')
         >>> print(m.ged(1))
         1 PEDI ADOPTED
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Pedi('ADOPTED')
         
     Enumerations:
     - 'ADOPTED': https://gedcom.io/terms/v7/enum-ADOPTED
@@ -7780,41 +7799,55 @@ class Phrase(BaseStructure):
         The following steps would generate the examples in the specification.
         We will need the following imports for these examples along with one
         individual cross reference identifier `I2` for the fifth example:
-        >>> from genedata.classes7 import Asso, Date, Givn, Marr, Name, Phrase, Role, Type
+        >>> import genedata.classes7 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> indi = g.individual_xref('I2')
         
         These are the steps for the first example.
-        >>> m = Date('24 JUN 1852', Phrase('During the feast of St John'))
+        >>> m = gc.Date('24 JUN 1852', 
+        ...     gc.Phrase('During the feast of St John')
+        ... )
         >>> print(m.ged(2))
         2 DATE 24 JUN 1852
         3 PHRASE During the feast of St John
         <BLANKLINE>
 
         These are the steps for the second example.
-        >>> m = Date('30 JAN 1649', Phrase('30th of January, 1648/9'))
+        >>> m = gc.Date('30 JAN 1649', 
+        ...     gc.Phrase('30th of January, 1648/9')
+        ... )
         >>> print(m.ged(2))
         2 DATE 30 JAN 1649
         3 PHRASE 30th of January, 1648/9
         <BLANKLINE>
 
         These are the steps for the third example.
-        >>> m = Date('BET 1648 AND 1649', Phrase('1648/9'))
+        >>> m = gc.Date('BET 1648 AND 1649', 
+        ...     gc.Phrase('1648/9')
+        ... )
         >>> print(m.ged(2))
         2 DATE BET 1648 AND 1649
         3 PHRASE 1648/9
         <BLANKLINE>
 
         These are the steps for the fourth example.
-        >>> m = Date('BET 1 JAN 1867 AND 31 MAR 1867', Phrase('Q1 1867'))
+        >>> m = gc.Date('BET 1 JAN 1867 AND 31 MAR 1867', 
+        ...     gc.Phrase('Q1 1867')
+        ... )
         >>> print(m.ged(2))
         2 DATE BET 1 JAN 1867 AND 31 MAR 1867
         3 PHRASE Q1 1867
         <BLANKLINE>
 
         These are the steps for the fifth example.
-        >>> m = Marr('', Asso(indi, Role('OTHER', Phrase('Maid of Honor'))))
+        >>> m = gc.Marr('', 
+        ...     gc.Asso(indi, 
+        ...         gc.Role('OTHER', 
+        ...             gc.Phrase('Maid of Honor')
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged(1))
         1 MARR
         2 ASSO @I2@
@@ -7941,11 +7974,19 @@ class Plac(BaseStructure):
         The following steps would generate the example in the specification.  
         First create source cross reference identifier `S1` and then build the ged lines
         in a RecordSour.
-        >>> from genedata.classes7 import Plac, PlacForm, RecordSour, Data, DataEven
+        >>> import genedata.classes7 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> sour = g.source_xref('S1')
-        >>> m = RecordSour(sour, Data(DataEven('BIRT', Plac(', Oneida, Idaho, USA', PlacForm('City, County, State, Country')))))
+        >>> m = gc.RecordSour(sour, 
+        ...     gc.Data(
+        ...         gc.DataEven('BIRT', 
+        ...             gc.Plac(', Oneida, Idaho, USA', 
+        ...                 gc.PlacForm('City, County, State, Country')
+        ...             )
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged())
         0 @S1@ SOUR
         1 DATA
@@ -8071,8 +8112,10 @@ class PlacForm(BaseStructure):
 
     Example:
         The following steps would generate the example in the specifications:
-        >>> from genedata.classes7 import Plac, PlacForm
-        >>> m = Plac('Baltimore, , Maryland, USA', PlacForm('City, County, State, Country'))
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Plac('Baltimore, , Maryland, USA', 
+        ...     gc.PlacForm('City, County, State, Country')
+        ... )
         >>> print(m.ged(2))
         2 PLAC Baltimore, , Maryland, USA
         3 FORM City, County, State, Country
@@ -8151,13 +8194,17 @@ class PlacTran(BaseStructure):
 
     Example:
         The following steps would generate the example in the specifications.
-        >>> from genedata.classes7 import PlacForm, Lang, PlacTran, Plac, PlacTran
-        >>> m = Plac('千代田, 東京, 日本',
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Plac('千代田, 東京, 日本',
         ...     [
-        ...         PlacForm('区, 都, 国'),
-        ...         Lang('ja'),
-        ...         PlacTran('Chiyoda, Tokyo, Nihon', Lang('ja-Latn')),
-        ...         PlacTran('Chiyoda, Tokyo, Japan', Lang('en')),
+        ...         gc.PlacForm('区, 都, 国'),
+        ...         gc.Lang('ja'),
+        ...         gc.PlacTran('Chiyoda, Tokyo, Nihon', 
+        ...             gc.Lang('ja-Latn')
+        ...         ),
+        ...         gc.PlacTran('Chiyoda, Tokyo, Japan', 
+        ...             gc.Lang('en')
+        ...         ),
         ...     ]
         ... )
         >>> print(m.ged(2))
@@ -8352,16 +8399,11 @@ class Quay(BaseStructure):
     Examples:
         This example shows a successful run of the Quay structure using
         the enumeration value '0'.
-        >>> from genedata.classes7 import Quay
-        >>> m = Quay('0')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Quay('0')
         >>> print(m.ged(1))
         1 QUAY 0
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Quay('0')
         
     Enumerations:
     - '0': https://gedcom.io/terms/v7/enum-0
@@ -8580,11 +8622,13 @@ class RecordIndi(BaseStructure):
         First create the two individual cross reference identifiers.  Then let a
         RecordIndi class format them into the desired ged lines.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes7 import Asso, RecordIndi, Role
+        >>> import genedata.classes7 as gc
         >>> g = Genealogy('example')
         >>> indi_i1_xref = g.individual_xref('I1')
         >>> indi_i2_xref = g.individual_xref('I2')
-        >>> m = RecordIndi(indi_i1_xref, Asso(indi_i2_xref, Role('GODP')))
+        >>> m = gc.RecordIndi(indi_i1_xref, 
+        ...     gc.Asso(indi_i2_xref, gc.Role('GODP'))
+        ... )
         >>> print(m.ged())
         0 @I1@ INDI
         1 ASSO @I2@
@@ -9196,20 +9240,15 @@ class Resn(BaseStructure):
     Examples:
         This example shows a successful run of the Resn structure using
         the enumeration value 'CONFIDENTIAL'.
-        >>> from genedata.classes7 import Resn
-        >>> m = Resn('CONFIDENTIAL')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Resn('CONFIDENTIAL')
         >>> print(m.ged(1))
         1 RESN CONFIDENTIAL
         <BLANKLINE>
 
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Resn('CONFIDENTIAL')
-        
         More than one enumeration value may be entered for this particular
         enumeration set by separating the values with a comma.  For example,
-        >>> n = Resn('CONFIDENTIAL, LOCKED')
+        >>> n = gc.Resn('CONFIDENTIAL, LOCKED')
         >>> print(n.ged(1))
         1 RESN CONFIDENTIAL, LOCKED
         <BLANKLINE>
@@ -9416,8 +9455,16 @@ class Role(BaseStructure):
         >>> sour = g.source_xref('S1')
 
         With these cross reference identifiers we can create the ged lines:
-        >>> from genedata.classes7 import RecordIndi, IndiName, Sour, SourEven, Role
-        >>> m = RecordIndi(indi, IndiName('Mary //', Sour(sour, SourEven('BIRT', Role('MOTH')))))
+        >>> import genedata.classes7 as gc
+        >>> m = gc.RecordIndi(indi, 
+        ...     gc.IndiName('Mary //', 
+        ...         gc.Sour(sour, 
+        ...             gc.SourEven('BIRT', 
+        ...                 gc.Role('MOTH')
+        ...             )
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged(1))
         0 @I1@ INDI
         1 NAME Mary //
@@ -9433,12 +9480,19 @@ class Role(BaseStructure):
         >>> indi3 = g.individual_xref('I3')
         With those cross reference identifiers we can complete the ged lines
         after importing the additional classes.
-        >>> from genedata.class7 import Asso, Bapm, Phrase
         Now create the lines:
-        >>> m = RecordIndi(
+        >>> m = gc.RecordIndi(
         ...     [
-        ...         Asso(indi3, Role('FRIEND', Phrase('best friend'))),
-        ...         Bapm('', Asso(indi3, Role('WITN'))),
+        ...         gc.Asso(indi3, 
+        ...             gc.Role('FRIEND', 
+        ...                 gc.Phrase('best friend')
+        ...             )
+        ...         ),
+        ...         gc.Bapm('', 
+        ...             gc.Asso(indi3, 
+        ...                 gc.Role('WITN')
+        ...             )
+        ...         ),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -9454,16 +9508,11 @@ class Role(BaseStructure):
         As a simpler example shows a successful run of the Role structure using
         the enumeration value 'CHIL'.  However, ultimately these lines would
         have to be part of a larger record.
-        >>> from genedata.classes7 import Role
-        >>> m = Role('CHIL')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Role('CHIL')
         
     Enumerations:
     - 'CHIL': https://gedcom.io/terms/v7/enum-CHIL
@@ -9684,16 +9733,11 @@ class Sex(BaseStructure):
     Examples:
         This example shows a successful run of the Sex structure using
         the enumeration value 'F'.
-        >>> from genedata.classes7 import Sex
-        >>> m = Sex('F')
+        >>> import genedata.classes7 as gc
+        >>> m = gc.Sex('F')
         >>> print(m.ged(1))
         1 SEX F
         <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Sex('F')
         
     Enumerations:
     - 'F': https://gedcom.io/terms/v7/enum-F
@@ -10595,8 +10639,13 @@ class Titl(BaseStructure):
     Examples:
         Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
         on April 6, 1920.  Based on the specification one could enter this as follows.
-        >>> from genedata.classes7 import File, Form, Titl
-        >>> m = File('letter.pdf', [Form('application/pdf'), Titl('Letter from Ann to Henry April 6, 1920')])
+        >>> import genedata.classes7 as gc
+        >>> m = gc.File('letter.pdf', 
+        ...     [
+        ...         gc.Form('application/pdf'), 
+        ...         gc.Titl('Letter from Ann to Henry April 6, 1920'),
+        ...     ]
+        ... )
         >>> print(m.ged(1))
         1 FILE letter.pdf
         2 FORM application/pdf
@@ -10742,14 +10791,13 @@ class Type(BaseStructure):
         first create an individual cross reference identifier then add the
         ordination event as a substructure of the RecordIndi record.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes7 import Ordn, RecordIndi, Type
+        >>> import genedata.classes7 as gc
         >>> g = Genealogy('test')
         >>> indi_xref = g.individual_xref('I1')
-        >>> m = RecordIndi(
-        ...     indi_xref,
-        ...     [
-        ...         Ordn('', Type('Bishop'))
-        ...     ]
+        >>> m = gc.RecordIndi(indi_xref, 
+        ...     gc.Ordn('', 
+        ...         gc.Type('Bishop')
+        ...     )
         ... )
         >>> print(m.ged())
         0 @I1@ INDI
@@ -11165,7 +11213,7 @@ class Www(BaseStructure):
         The following example would send a logging message warning
         that the site "abc" cannot be reached.
         >>> from genedata.util import Input
-        >>> from genedata.classes7 import Www
+        >>> import genedata.classes7 as gc
         >>> response = Www(Input.www('abc'))
         >>> print(response.ged(1))
         1 WWW abc

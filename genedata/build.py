@@ -29,8 +29,10 @@ from genedata.classes7 import (
     RecordSnote,
     RecordSour,
     RecordSubm,
+    Trlr,
 )
 from genedata.constants import (
+    Config,
     Default,
     Number,
     String,
@@ -45,9 +47,9 @@ from genedata.structure import (
     SharedNoteXref,
     SourceXref,
     SubmitterXref,
-    Tagger,
     Void,
 )
+from genedata.util import Tagger, Util
 
 
 class Genealogy:
@@ -76,6 +78,16 @@ class Genealogy:
         self.ged_shared_note: str = ''
         self.ged_source: str = ''
         self.ged_submitter: str = ''
+        self.records: list[
+            RecordFam
+            | RecordIndi
+            | RecordObje
+            | RecordRepo
+            | RecordSnote
+            | RecordSour
+            | RecordSubm
+        ] = []
+        self.record_header: Head | None = None
         self.csv_data: str = ''
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
@@ -113,6 +125,66 @@ class Genealogy:
 
     def __str__(self) -> str:
         return json.dumps(self.chron)
+
+    def store(self, record: Head | RecordFam | RecordIndi | RecordObje | RecordRepo | RecordSnote | RecordSour| RecordSubm) -> None:
+        if not isinstance(record, Head | RecordFam | RecordIndi | RecordObje | RecordRepo | RecordSnote | RecordSour| RecordSubm):
+            raise ValueError(Msg.ONLY_RECORDS.format(str(record)))
+        if isinstance(record, Head):
+            self.record_header = record
+        else:
+            self.records.append(record)
+
+    def show_ged(self) -> str:
+        if self.record_header is None:
+            raise ValueError(Msg.MISSING_HEADER)
+        lines = self.record_header.ged()
+        for record in self.records:
+            lines = ''.join([lines, record.ged()])
+        return ''.join([lines, Trlr().ged()])
+    
+    def save_ged(self, file_name: str = Default.EMPTY) -> None:
+        Util.write_ged(self.show_ged(), file_name)
+    
+
+    def code(self) -> str:
+        lines: str = f"""from genedata.build import Genealogy
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+
+{Default.CODE_GENEALOGY} = Genealogy('{self.chron_name}')
+"""
+        for ext in self.extension_xreflist:
+            item: str = ext.replace(Default.ATSIGN, Default.EMPTY)
+            if ext != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}ext_{item}_xref = {Default.CODE_GENEALOGY}.extension_xref('{item}')"
+        for fam in self.family_xreflist:
+            item = fam.replace(Default.ATSIGN, Default.EMPTY)
+            if fam != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}fam_{item}_xref = {Default.CODE_GENEALOGY}.family_xref('{item}')"
+        for indi in self.individual_xreflist:
+            item = indi.replace(Default.ATSIGN, Default.EMPTY)
+            if indi != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}indi_{item}_xref = {Default.CODE_GENEALOGY}.individual_xref('{item}')"
+        for obje in self.multimedia_xreflist:
+            item = obje.replace(Default.ATSIGN, Default.EMPTY)
+            if obje != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}obje_{item}_xref = {Default.CODE_GENEALOGY}.multimedia_xref('{item}')"
+        for repo in self.repository_xreflist:
+            item = repo.replace(Default.ATSIGN, Default.EMPTY)
+            if repo != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}repo_{item}_xref = {Default.CODE_GENEALOGY}.repository_xref('{item}')"
+        for snote in self.shared_note_xreflist:
+            item = snote.replace(Default.ATSIGN, Default.EMPTY)
+            if snote != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}snote_{item}_xref = {Default.CODE_GENEALOGY}.shared_note_xref('{item}')"
+        for sour in self.source_xreflist:
+            item = sour.replace(Default.ATSIGN, Default.EMPTY)
+            if sour != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}sour_{item}_xref = {Default.CODE_GENEALOGY}.source_xref('{item}')"
+        for subm in self.submitter_xreflist:
+            item = subm.replace(Default.ATSIGN, Default.EMPTY)
+            if subm != Default.VOID_POINTER:
+                lines = f"{lines}{Default.EOL}subm_{item}_xref = {Default.CODE_GENEALOGY}.submitter_xref('{item}')"
+        return lines
 
     def _get_filename_type(self, filename: str) -> str:
         filename_type: str = ''
@@ -245,9 +317,7 @@ class Genealogy:
                     ) as file:
                         json.dump(self.chron, file)
                         file.close()
-                    logging.info(
-                        Msg.SAVED.format(self.filename)
-                    )
+                    logging.info(Msg.SAVED.format(self.filename))
                 case String.GED:
                     output: str = ''.join(
                         [
@@ -271,20 +341,6 @@ class Genealogy:
                     )
                 case _:
                     logging.info(Msg.SAVE_FIRST)
-
-    # def rename(self, name: str) -> None:
-    #     """Rename the genealogy."""
-    #     self.chron.update({Key.NAME: name})
-    #     self.chron_name = self.chron[Key.NAME]
-    #     logging.info(Msg.RENAME.format(self.chron_name))
-    #     self.xref_counter: int = 1
-    #     self.family_xreflist: list[str] = [Void.NAME]
-    #     self.individual_xreflist: list[str] = [Void.NAME]
-    #     self.multimedia_xreflist: list[str] = [Void.NAME]
-    #     self.repository_xreflist: list[str] = [Void.NAME]
-    #     self.shared_note_xreflist: list[str] = [Void.NAME]
-    #     self.source_xreflist: list[str] = [Void.NAME]
-    #     self.submitter_xreflist: list[str] = [Void.NAME]
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -354,7 +410,7 @@ class Genealogy:
             xref = self._format_name(xref_name)
         self._set_xref(xref_list, xref, xref_name)
         return xref
-    
+
     def extension_xref(
         self, xref_name: str = '', initial: bool = False
     ) -> ExtensionXref:
@@ -648,7 +704,10 @@ class Genealogy:
         return RepositoryXref(repository_xref)
 
     def shared_note_xref(
-        self, xref_name: str = '', text: str = Default.EMPTY, initial: bool = False
+        self,
+        xref_name: str = '',
+        text: str = Default.EMPTY,
+        initial: bool = False,
     ) -> SharedNoteXref:
         """
         Create a SharedNoteXref identifier from a unique string according to the
@@ -669,7 +728,7 @@ class Genealogy:
             >>> a = Genealogy('testing')
             >>> id = a.shared_note_xref('1', 'This is a shared note.')
             >>> print(id)
-            @1@ 
+            @1@
 
             The second example shows the output when the identifier has a name.
             >>> id2 = a.shared_note_xref('sn', 'This is a shared note.')
@@ -830,7 +889,7 @@ class Genealogy:
         destination = ''
         unique_list: list[str] = []
         for record in records:
-            #if record.xref.fullname not in unique_list:
+            # if record.xref.fullname not in unique_list:
             if record.value.fullname not in unique_list:
                 unique_list.append(record.value.fullname)
                 destination = ''.join([destination, record.ged()])
@@ -955,7 +1014,9 @@ class Genealogy:
             >>> from genedata.classes7 import File, Form, RecordObje
             >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
-            >>> mm = RecordObje(mm_id, File('/path/to/file', Form('application/pdf')))
+            >>> mm = RecordObje(
+            ...     mm_id, File('/path/to/file', Form('application/pdf'))
+            ... )
             >>> a.multimedia(
             ...     [
             ...         mm,
@@ -971,7 +1032,9 @@ class Genealogy:
             one and then runs the method.  This second run overwrites
             what was entered earlier.
             >>> mm_id2 = a.multimedia_xref()
-            >>> mm2 = RecordObje(mm_id2, File('/path/to/otherfile', Form('application/pdf')))
+            >>> mm2 = RecordObje(
+            ...     mm_id2, File('/path/to/otherfile', Form('application/pdf'))
+            ... )
             >>> a.multimedia(
             ...     [
             ...         mm,

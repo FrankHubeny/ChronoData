@@ -147,7 +147,14 @@ class Util:
         """
 
         # Retrieve the file.
-        raw: str = Util.read_binary(url)
+        try:
+            raw: str = Util.read(url)
+        except Exception:
+            logging.info(Msg.LOG_READ_FAILED.format(url))
+            try:
+                raw = Util.read_binary(url)
+            except Exception:
+                logging.info(Msg.LOG_READ_BINARY_FAILED.format(url))
 
         # Check that file has proper yaml directive.
         if Default.YAML_DIRECTIVE not in raw:
@@ -156,9 +163,31 @@ class Util:
             )
 
         # Return the dictionary.
-        yaml_data = raw
+        yaml_data = raw #.replace('\n  - |\n', '\n  - bar\n')
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
         return yaml_dict
+    
+    # @staticmethod
+    # def read_yaml_full(url: str) -> dict[str, Any]:
+    #     """Read a yaml file and convert it into a dictionary.
+
+    #     Args:
+    #         url: The name of the file or the internet url.
+    #     """
+
+    #     # Retrieve the file.
+    #     raw: str = Util.read_binary(url)
+
+    #     # Check that file has proper yaml directive.
+    #     if Default.YAML_DIRECTIVE not in raw:
+    #         raise ValueError(
+    #             Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
+    #         )
+
+    #     # Return the dictionary.
+    #     yaml_data = raw
+    #     yaml_dict: dict[str, Any] = yaml.full_load(yaml_data)
+    #     return yaml_dict
 
     @staticmethod
     def ged_summary(ged: str) -> str:
@@ -208,7 +237,7 @@ submitters    {subm_count!s}
                         problem,
                         "'",
                         split_first[i],
-                        "' does not equal '",
+                        "'  * DOES NOT EQUAL * '",
                         split_second[i],
                         "'",
                     ]
@@ -708,8 +737,8 @@ class Input:
             'Jim /Smith/'
 
             This methods assists formatting a personal name using IndiName.
-            >>> from genedata.classes7 import IndiName
-            >>> m = IndiName(Input.name('Jim Smith', 'Smith'))
+            >>> import genedata.classes7 as gc
+            >>> m = gc.IndiName(Input.name('Jim Smith', 'Smith'))
             >>> print(m.ged())
             1 NAME Jim /Smith/
             <BLANKLINE>
@@ -913,8 +942,8 @@ class Input:
             The following example would send a logging message warning
             that the site "abc" cannot be reached.
             >>> from genedata.util import Input
-            >>> from genedata.classes7 import Www
-            >>> response = Www(Input.www('abc'))
+            >>> import genedata.classes7 as gc
+            >>> response = gc.Www(Input.www('abc'))
             >>> print(response.ged(1))
             1 WWW abc
             <BLANKLINE>
@@ -1004,8 +1033,8 @@ class Tagger:
             Note how the `@me` was reformatted as `@@me`.
             > 1 NOTE me@example.com is my email
             > 2 CONT @@me and @I are my social media handles
-            >>> from genedata.classes7 import Note
-            >>> mynote = Note(
+            >>> import genedata.classes7 as gc
+            >>> mynote = gc.Note(
             ...     '''me@example.com is my email
             ... @me and @I are my social media handles'''
             ... )
@@ -1171,6 +1200,28 @@ class Tagger:
                         ),
                     ]
                 )
+        # if extra != Default.EMPTY:
+        #     if Default.EOL in extra:
+        #         extras: list[str] = extra.split(Default.EOL)
+        #         lines = Tagger.string(
+        #             lines, level, tag, payload, extras[0], format=format, xref=xref
+        #         )
+        #         lines = Tagger.string(
+        #             lines,
+        #             level + 1,
+        #             Default.CONT,
+        #             extras[1:],
+        #             format=format,
+        #         )
+        #     else:
+        #         return ''.join(
+        #             [
+        #                 lines,
+        #                 Tagger.taginfo(
+        #                     level, tag, payload, extra, format=format, xref=xref
+        #                 ),
+        #             ]
+        #         )
         return lines
 
     @staticmethod
@@ -1189,10 +1240,10 @@ class Tagger:
 
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
-            >>> from genedata.classes7 import Lati, Long, Map
+            >>> import genedata.classes7 as gc
             >>> from genedata.util import Tagger
-            >>> map1 = Map([Lati('N30.000000'), Long('W30.000000')])
-            >>> map2 = Map([Lati('S40.000000'), Long('E20.000000')])
+            >>> map1 = gc.Map([gc.Lati('N30.000000'), gc.Long('W30.000000')])
+            >>> map2 = gc.Map([gc.Lati('S40.000000'), gc.Long('E20.000000')])
             >>> lines = ''
             >>> lines = Tagger.structure(lines, 2, map1)
             >>> print(lines)

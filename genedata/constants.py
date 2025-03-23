@@ -56,9 +56,10 @@ class Default:
     CARDINALITY_OPTIONAL: str = '{0:'
     CARDINALITY_REQUIRED: str = '{1:'
     CARDINALITY_SINGULAR: str = ':1}'
-    CODE_VALUE: str = 'value'
+    CODE_CLASS: str = 'gc'
+    CODE_GENEALOGY: str = 'g'
     CODE_SUBS: str = 'subs'
-    CODE_EXT: str = 'ext'
+    CODE_VALUE: str = 'value'
     COMMA: str = ','
     COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
@@ -163,6 +164,7 @@ class Default:
     YAML_EXTENSION_TAGS: str = 'extension tags'
     YAML_FRAGMENT: str = 'fragment'
     YAML_HELP_TEXT: str = 'help text'
+    
     YAML_LABEL: str = 'label'
     YAML_LANG: str = 'lang'
     YAML_MONTHS: str = 'months'
@@ -177,20 +179,10 @@ class Default:
     YAML_TYPE: str = 'type'
     YAML_URI: str = 'uri'
     YAML_VALUE_OF: str = 'value of'
+    YAML_WITH_HYPHEN: str = '\n    > - '
+    YAML_WITHOUT_HYPHEN: str = '\n    >   '
     YEARS: int = 0
     Z: str = 'Z'
-
-
-# @dataclass(frozen=True)
-# class XrefTag:
-#     EXT: str = 'EXT'
-#     FAM: str = 'FAM'
-#     INDI: str = 'INDI'
-#     OBJE: str = 'OBJE'
-#     REPO: str = 'REPO'
-#     SNOTE: str = 'SNOTE'
-#     SOUR: str = 'SOUR'
-#     SUBM: str = 'SUBM'
 
 
 @dataclass(frozen=True)

@@ -15,19 +15,8 @@ import re
 
 import pytest
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    File,
-    Form,
-    Name,
-    RecordFam,
-    RecordIndi,
-    RecordObje,
-    RecordRepo,
-    RecordSnote,
-    RecordSour,
-    RecordSubm,
-)
 from genedata.constants import Default  # noqa: F401
 from genedata.messages import Msg
 
@@ -106,33 +95,33 @@ testdata_three: list[tuple[str, int]] = [
 @pytest.mark.parametrize(('test_input', 'expected'), testdata_three)
 def test_three_records(test_input: str, expected: str | int | bool) -> None:
     a = Genealogy('test')
-    family1 = RecordFam(a.family_xref())
-    family2 = RecordFam(a.family_xref())
-    family3 = RecordFam(a.family_xref())
-    individual1 = RecordIndi(a.individual_xref())
-    individual2 = RecordIndi(a.individual_xref())
-    individual3 = RecordIndi(a.individual_xref())
-    multimedia1 = RecordObje(
-        a.multimedia_xref(), File('a.txt', Form('text/html'))
+    family1 = gc.RecordFam(a.family_xref())
+    family2 = gc.RecordFam(a.family_xref())
+    family3 = gc.RecordFam(a.family_xref())
+    individual1 = gc.RecordIndi(a.individual_xref())
+    individual2 = gc.RecordIndi(a.individual_xref())
+    individual3 = gc.RecordIndi(a.individual_xref())
+    multimedia1 = gc.RecordObje(
+        a.multimedia_xref(), gc.File('a.txt', gc.Form('text/html'))
     )
-    multimedia2 = RecordObje(
-        a.multimedia_xref(), File('b.txt', Form('text/html'))
+    multimedia2 = gc.RecordObje(
+        a.multimedia_xref(), gc.File('b.txt', gc.Form('text/html'))
     )
-    multimedia3 = RecordObje(
-        a.multimedia_xref(), File('c.txt', Form('text/html'))
+    multimedia3 = gc.RecordObje(
+        a.multimedia_xref(), gc.File('c.txt', gc.Form('text/html'))
     )
-    repository1 = RecordRepo(a.repository_xref(), Name('X'))
-    repository2 = RecordRepo(a.repository_xref(), Name('Y'))
-    repository3 = RecordRepo(a.repository_xref(), Name('Z'))
-    shared_note1 = RecordSnote(a.shared_note_xref(text='a'))
-    shared_note2 = RecordSnote(a.shared_note_xref(text='b'))
-    shared_note3 = RecordSnote(a.shared_note_xref(text='c'))
-    source1 = RecordSour(a.source_xref())
-    source2 = RecordSour(a.source_xref())
-    source3 = RecordSour(a.source_xref())
-    submitter1 = RecordSubm(a.submitter_xref(), Name('A'))
-    submitter2 = RecordSubm(a.submitter_xref(), Name('B'))
-    submitter3 = RecordSubm(a.submitter_xref(), Name('C;'))
+    repository1 = gc.RecordRepo(a.repository_xref(), gc.Name('X'))
+    repository2 = gc.RecordRepo(a.repository_xref(), gc.Name('Y'))
+    repository3 = gc.RecordRepo(a.repository_xref(), gc.Name('Z'))
+    shared_note1 = gc.RecordSnote(a.shared_note_xref(text='a'))
+    shared_note2 = gc.RecordSnote(a.shared_note_xref(text='b'))
+    shared_note3 = gc.RecordSnote(a.shared_note_xref(text='c'))
+    source1 = gc.RecordSour(a.source_xref())
+    source2 = gc.RecordSour(a.source_xref())
+    source3 = gc.RecordSour(a.source_xref())
+    submitter1 = gc.RecordSubm(a.submitter_xref(), gc.Name('A'))
+    submitter2 = gc.RecordSubm(a.submitter_xref(), gc.Name('B'))
+    submitter3 = gc.RecordSubm(a.submitter_xref(), gc.Name('C;'))
     a.families([family1, family2, family3])
     a.individuals([individual1, individual2, individual3])
     a.multimedia([multimedia1, multimedia2, multimedia3])
@@ -147,7 +136,7 @@ def test_missing_individual() -> None:
     """Test that an individual identifier was not listed in the individual records."""
     a = Genealogy('test')
     sam_xref = a.individual_xref('sam')
-    sam = RecordIndi(sam_xref)
+    sam = gc.RecordIndi(sam_xref)
 
     joe = a.individual_xref('joe')
     missing = [joe.fullname]
@@ -161,7 +150,7 @@ def test_missing_family() -> None:
     """Test that a family identifier was not listed in the family records."""
     a = Genealogy('test')
     one_xref = a.family_xref('one')
-    one = RecordFam(one_xref)
+    one = gc.RecordFam(one_xref)
 
     two = a.family_xref('two')
     missing = [two.fullname]
@@ -217,7 +206,7 @@ def test_missing_source() -> None:
     """Test that a source identifier was not listed in the source records."""
     a = Genealogy('test')
     one_xref = a.source_xref('one')
-    one = RecordSour(one_xref)
+    one = gc.RecordSour(one_xref)
 
     two = a.source_xref('two')
     missing = [two.fullname]
@@ -258,7 +247,7 @@ def test_duplicate_family() -> None:
     """Test that an error is raised if a family cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     fam_one_xref = a.family_xref('one')
-    fam = RecordFam(fam_one_xref)
+    fam = gc.RecordFam(fam_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(fam_one_xref.fullname)),
@@ -270,7 +259,7 @@ def test_duplicate_individual() -> None:
     """Test that an error is raised if an individual cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     indi_one_xref = a.individual_xref('one')
-    indi = RecordIndi(indi_one_xref)
+    indi = gc.RecordIndi(indi_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(indi_one_xref.fullname)),
@@ -318,7 +307,7 @@ def test_duplicate_source() -> None:
     """Test that an error is raised if a source cross-reference identifier is used twice."""
     a = Genealogy('duplicate')
     sour_one_xref = a.source_xref('one')
-    sour = RecordSour(sour_one_xref)
+    sour = gc.RecordSour(sour_one_xref)
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.DUPLICATE_RECORD.format(sour_one_xref.fullname)),

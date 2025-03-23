@@ -694,8 +694,13 @@ Examples: dict[str, str] = {
         The following example shows how to enter the latitude (Lati))
         coordinates into a Map structure to produce the GEDCOM example
         mentioned in the GEDCOM Specification section.
-        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Map(
+        ...     [
+        ...         {Default.CODE_CLASS}.Lati('N18.150944'), 
+        ...         {Default.CODE_CLASS}.Long('E168.150944')
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -706,10 +711,10 @@ Examples: dict[str, str] = {
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
         >>> from genedata.util import Input
-        >>> m = Map(
+        >>> m = {Default.CODE_CLASS}.Map(
         ...     [
-        ...         Lati(Input.lati(18, 9, 3.4)), 
-        ...         Long('E168.150944'),
+        ...         {Default.CODE_CLASS}.Lati(Input.lati(18, 9, 3.4)), 
+        ...         {Default.CODE_CLASS}.Long('E168.150944'),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -723,8 +728,13 @@ Examples: dict[str, str] = {
         The following example howss how to enter the longitude (Long)
         coordinates into a map structure to produce the GEDCOM output
         mentioned in the GEDCOM Specification.
-        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Map(
+        ...     [
+        ...         {Default.CODE_CLASS}.Lati('N18.150944'), 
+        ...         {Default.CODE_CLASS}.Long('E168.150944')
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -735,10 +745,10 @@ Examples: dict[str, str] = {
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
         >>> from genedata.util import Input
-        >>> m = Map(
+        >>> m = {Default.CODE_CLASS}.Map(
         ...     [
-        ...         Lati('N18.150944'), 
-        ...         Long(Input.long(168, 9, 3.4)),
+        ...         {Default.CODE_CLASS}.Lati('N18.150944'), 
+        ...         {Default.CODE_CLASS}.Long(Input.long(168, 9, 3.4)),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -752,8 +762,13 @@ Examples: dict[str, str] = {
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
         coordinates into a map structure to produce the GEDCOM output.
         >>> from genedata.util import Input
-        >>> from genedata.classes{Config.VERSION} import Lati, Long, Map
-        >>> m = Map([Lati('N18.150944'), Long('E168.150944')])
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Map(
+        ...     [
+        ...         {Default.CODE_CLASS}.Lati('N18.150944'), 
+        ...         {Default.CODE_CLASS}.Long('E168.150944'),
+        ...     ]
+        ... )
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -765,12 +780,18 @@ Examples: dict[str, str] = {
         These are the steps to build the example in the specification.
         First import the classes and build a multimedia cross reference identifier.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes{Config.VERSION} import File, Form, Medi, RecordObje
-        >>> g = Genealogy('example')
-        >>> obje_xref = g.multimedia_xref('M1')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> obje_xref = {Default.CODE_GENEALOGY}.multimedia_xref('M1')
 
         Next construct the ged lines.  Let `photo.jpg` be the file name of the photo.
-        >>> m = RecordObje(obje_xref, File('photo.jpg', Form('image/jpeg', Medi('PHOTO'))))
+        >>> m = {Default.CODE_CLASS}.RecordObje(obje_xref, 
+        ...     {Default.CODE_CLASS}.File('photo.jpg', 
+        ...         {Default.CODE_CLASS}.Form('image/jpeg', 
+        ...             {Default.CODE_CLASS}.Medi('PHOTO')
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged())
         0 @M1@ OBJE
         1 FILE photo.jpg
@@ -780,31 +801,26 @@ Examples: dict[str, str] = {
 
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
-        >>> from genedata.classes{Config.VERSION} import Medi
-        >>> m = Medi('AUDIO')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Medi('AUDIO')
         >>> print(m.ged(2))
         2 MEDI AUDIO
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Medi('AUDIO')""",
+        <BLANKLINE>""",
     'NAME-TRAN': f"""
 
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> from genedata.classes{Config.VERSION} import Givn, IndiName, Lang, NameTran, Surn
-        >>> m = IndiName('/孔/德庸',
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.IndiName('/孔/德庸',
         ...         [
-        ...             Givn('德庸'),
-        ...             Surn('孔'),
-        ...             NameTran('/Kǒng/ Déyōng',
+        ...             {Default.CODE_CLASS}.Givn('德庸'),
+        ...             {Default.CODE_CLASS}.Surn('孔'),
+        ...             {Default.CODE_CLASS}.NameTran('/Kǒng/ Déyōng',
         ...                 [
-        ...                     Givn('Déyōng'),
-        ...                     Surn('Kǒng'),
-        ...                     Lang('zh-pinyin'),
+        ...                     {Default.CODE_CLASS}.Givn('Déyōng'),
+        ...                     {Default.CODE_CLASS}.Surn('Kǒng'),
+        ...                     {Default.CODE_CLASS}.Lang('zh-pinyin'),
         ...                 ]
         ...             )
         ...         ]
@@ -823,14 +839,18 @@ Examples: dict[str, str] = {
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> from genedata.classes{Config.VERSION} import Lang, Mime, Name, Note, NoteTran
-        >>> m = IndiName('Arete /Hernandez/', 
-        ...     Note('Named after Arete from <i>The Odyssey</i>',
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.IndiName('Arete /Hernandez/', 
+        ...     {Default.CODE_CLASS}.Note('Named after Arete from <i>The Odyssey</i>',
         ...         [
-        ...             Lang('en'),
-        ...             Mime('text/html'),
-        ...             NoteTran('Named after Arete from "The Odyssey"', Mime('text/plain')),
-        ...             NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', Lang('es')),
+        ...             {Default.CODE_CLASS}.Lang('en'),
+        ...             {Default.CODE_CLASS}.Mime('text/html'),
+        ...             {Default.CODE_CLASS}.NoteTran('Named after Arete from "The Odyssey"', 
+        ...                 {Default.CODE_CLASS}.Mime('text/plain')
+        ...             ),
+        ...             {Default.CODE_CLASS}.NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', 
+        ...                 {Default.CODE_CLASS}.Lang('es')
+        ...             ),
         ...         ]
         ...     )
         ... ) 
@@ -849,17 +869,14 @@ Examples: dict[str, str] = {
     Examples:
         This example shows a successful run of the OrdStat structure using
         the enumeration value 'BIC' occurring on January 15, 2020.
-        >>> from genedata.classes{Config.VERSION} import DateExact, OrdStat
-        >>> m = OrdStat('BIC', DateExact('15 JAN 2020'))
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.OrdStat('BIC', 
+        ...     {Default.CODE_CLASS}.DateExact('15 JAN 2020')
+        ... )
         >>> print(m.ged(1))
         1 STAT BIC
         2 DATE 15 JAN 2020
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        OrdStat('BIC', DateExact('15 JAN 2020'))""",
+        <BLANKLINE>""",
     'PAGE': f"""
 
     Examples:
@@ -867,20 +884,26 @@ Examples: dict[str, str] = {
         First we will import the classes and then create a source cross reference `S1`.
         The void cross reference identifier comes from the Void class.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes{Config.VERSION} import Dscr, Page, Sour 
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS} 
         >>> from genedata.structure import Void
-        >>> g = Genealogy('example')
-        >>> sour_xref = g.source_xref('S1')
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> sour_xref = {Default.CODE_GENEALOGY}.source_xref('S1')
 
         These are the steps to build the first example:
-        >>> m = Sour(sour_xref, Page('Film: 1234567, Frame: 344, Line: 28'))
+        >>> m = {Default.CODE_CLASS}.Sour(sour_xref, 
+        ...     {Default.CODE_CLASS}.Page('Film: 1234567, Frame: 344, Line: 28')
+        ... )
         >>> print(m.ged(2))
         2 SOUR @S1@
         3 PAGE Film: 1234567, Frame: 344, Line: 28
         <BLANKLINE>
 
         These are the steps to build the second example:
-        >>> m = Dscr('Tall enough his head touched the ceiling', Sour(Void.SOUR, Page('His grand-daughter Lydia told me this in 1980')))
+        >>> m = {Default.CODE_CLASS}.Dscr('Tall enough his head touched the ceiling', 
+        ...     {Default.CODE_CLASS}.Sour(Void.SOUR, 
+        ...         {Default.CODE_CLASS}.Page('His grand-daughter Lydia told me this in 1980')
+        ...     )
+        ... )
         >>> print(m.ged(1))
         1 DSCR Tall enough his head touched the ceiling
         2 SOUR @VOID@
@@ -891,57 +914,66 @@ Examples: dict[str, str] = {
     Examples:
         This example shows a successful run of the Pedi structure using
         the enumeration value 'ADOPTED'.
-        >>> from genedata.classes{Config.VERSION} import Pedi
-        >>> m = Pedi('ADOPTED')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Pedi('ADOPTED')
         >>> print(m.ged(1))
         1 PEDI ADOPTED
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Pedi('ADOPTED')""",
+        <BLANKLINE>""",
     'PHRASE': f"""
 
     Examples:
         The following steps would generate the examples in the specification.
         We will need the following imports for these examples along with one
         individual cross reference identifier `I2` for the fifth example:
-        >>> from genedata.classes{Config.VERSION} import Asso, Date, Givn, Marr, Name, Phrase, Role, Type
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
-        >>> indi = g.individual_xref('I2')
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi = {Default.CODE_GENEALOGY}.individual_xref('I2')
         
         These are the steps for the first example.
-        >>> m = Date('24 JUN 1852', Phrase('During the feast of St John'))
+        >>> m = {Default.CODE_CLASS}.Date('24 JUN 1852', 
+        ...     {Default.CODE_CLASS}.Phrase('During the feast of St John')
+        ... )
         >>> print(m.ged(2))
         2 DATE 24 JUN 1852
         3 PHRASE During the feast of St John
         <BLANKLINE>
 
         These are the steps for the second example.
-        >>> m = Date('30 JAN 1649', Phrase('30th of January, 1648/9'))
+        >>> m = {Default.CODE_CLASS}.Date('30 JAN 1649', 
+        ...     {Default.CODE_CLASS}.Phrase('30th of January, 1648/9')
+        ... )
         >>> print(m.ged(2))
         2 DATE 30 JAN 1649
         3 PHRASE 30th of January, 1648/9
         <BLANKLINE>
 
         These are the steps for the third example.
-        >>> m = Date('BET 1648 AND 1649', Phrase('1648/9'))
+        >>> m = {Default.CODE_CLASS}.Date('BET 1648 AND 1649', 
+        ...     {Default.CODE_CLASS}.Phrase('1648/9')
+        ... )
         >>> print(m.ged(2))
         2 DATE BET 1648 AND 1649
         3 PHRASE 1648/9
         <BLANKLINE>
 
         These are the steps for the fourth example.
-        >>> m = Date('BET 1 JAN 1867 AND 31 MAR 1867', Phrase('Q1 1867'))
+        >>> m = {Default.CODE_CLASS}.Date('BET 1 JAN 1867 AND 31 MAR 1867', 
+        ...     {Default.CODE_CLASS}.Phrase('Q1 1867')
+        ... )
         >>> print(m.ged(2))
         2 DATE BET 1 JAN 1867 AND 31 MAR 1867
         3 PHRASE Q1 1867
         <BLANKLINE>
 
         These are the steps for the fifth example.
-        >>> m = Marr('', Asso(indi, Role('OTHER', Phrase('Maid of Honor'))))
+        >>> m = {Default.CODE_CLASS}.Marr('', 
+        ...     {Default.CODE_CLASS}.Asso(indi, 
+        ...         {Default.CODE_CLASS}.Role('OTHER', 
+        ...             {Default.CODE_CLASS}.Phrase('Maid of Honor')
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged(1))
         1 MARR
         2 ASSO @I2@
@@ -954,11 +986,19 @@ Examples: dict[str, str] = {
         The following steps would generate the example in the specification.  
         First create source cross reference identifier `S1` and then build the ged lines
         in a RecordSour.
-        >>> from genedata.classes{Config.VERSION} import Plac, PlacForm, RecordSour, Data, DataEven
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
-        >>> sour = g.source_xref('S1')
-        >>> m = RecordSour(sour, Data(DataEven('BIRT', Plac(', Oneida, Idaho, USA', PlacForm('City, County, State, Country')))))
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> sour = {Default.CODE_GENEALOGY}.source_xref('S1')
+        >>> m = {Default.CODE_CLASS}.RecordSour(sour, 
+        ...     {Default.CODE_CLASS}.Data(
+        ...         {Default.CODE_CLASS}.DataEven('BIRT', 
+        ...             {Default.CODE_CLASS}.Plac(', Oneida, Idaho, USA', 
+        ...                 {Default.CODE_CLASS}.PlacForm('City, County, State, Country')
+        ...             )
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged())
         0 @S1@ SOUR
         1 DATA
@@ -970,8 +1010,10 @@ Examples: dict[str, str] = {
 
     Example:
         The following steps would generate the example in the specifications:
-        >>> from genedata.classes{Config.VERSION} import Plac, PlacForm
-        >>> m = Plac('Baltimore, , Maryland, USA', PlacForm('City, County, State, Country'))
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Plac('Baltimore, , Maryland, USA', 
+        ...     {Default.CODE_CLASS}.PlacForm('City, County, State, Country')
+        ... )
         >>> print(m.ged(2))
         2 PLAC Baltimore, , Maryland, USA
         3 FORM City, County, State, Country
@@ -980,13 +1022,17 @@ Examples: dict[str, str] = {
 
     Example:
         The following steps would generate the example in the specifications.
-        >>> from genedata.classes{Config.VERSION} import PlacForm, Lang, PlacTran, Plac, PlacTran
-        >>> m = Plac('千代田, 東京, 日本',
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Plac('千代田, 東京, 日本',
         ...     [
-        ...         PlacForm('区, 都, 国'),
-        ...         Lang('ja'),
-        ...         PlacTran('Chiyoda, Tokyo, Nihon', Lang('ja-Latn')),
-        ...         PlacTran('Chiyoda, Tokyo, Japan', Lang('en')),
+        ...         {Default.CODE_CLASS}.PlacForm('区, 都, 国'),
+        ...         {Default.CODE_CLASS}.Lang('ja'),
+        ...         {Default.CODE_CLASS}.PlacTran('Chiyoda, Tokyo, Nihon', 
+        ...             {Default.CODE_CLASS}.Lang('ja-Latn')
+        ...         ),
+        ...         {Default.CODE_CLASS}.PlacTran('Chiyoda, Tokyo, Japan', 
+        ...             {Default.CODE_CLASS}.Lang('en')
+        ...         ),
         ...     ]
         ... )
         >>> print(m.ged(2))
@@ -1003,16 +1049,11 @@ Examples: dict[str, str] = {
     Examples:
         This example shows a successful run of the Quay structure using
         the enumeration value '0'.
-        >>> from genedata.classes{Config.VERSION} import Quay
-        >>> m = Quay('0')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Quay('0')
         >>> print(m.ged(1))
         1 QUAY 0
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Quay('0')""",
+        <BLANKLINE>""",
     'record-INDI': f"""
 
     Example:
@@ -1020,11 +1061,13 @@ Examples: dict[str, str] = {
         First create the two individual cross reference identifiers.  Then let a
         RecordIndi class format them into the desired ged lines.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes{Config.VERSION} import Asso, RecordIndi, Role
-        >>> g = Genealogy('example')
-        >>> indi_i1_xref = g.individual_xref('I1')
-        >>> indi_i2_xref = g.individual_xref('I2')
-        >>> m = RecordIndi(indi_i1_xref, Asso(indi_i2_xref, Role('GODP')))
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi_i1_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> indi_i2_xref = {Default.CODE_GENEALOGY}.individual_xref('I2')
+        >>> m = {Default.CODE_CLASS}.RecordIndi(indi_i1_xref, 
+        ...     {Default.CODE_CLASS}.Asso(indi_i2_xref, {Default.CODE_CLASS}.Role('GODP'))
+        ... )
         >>> print(m.ged())
         0 @I1@ INDI
         1 ASSO @I2@
@@ -1066,20 +1109,15 @@ Examples: dict[str, str] = {
     Examples:
         This example shows a successful run of the Resn structure using
         the enumeration value 'CONFIDENTIAL'.
-        >>> from genedata.classes{Config.VERSION} import Resn
-        >>> m = Resn('CONFIDENTIAL')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Resn('CONFIDENTIAL')
         >>> print(m.ged(1))
         1 RESN CONFIDENTIAL
         <BLANKLINE>
 
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Resn('CONFIDENTIAL')
-        
         More than one enumeration value may be entered for this particular
         enumeration set by separating the values with a comma.  For example,
-        >>> n = Resn('CONFIDENTIAL, LOCKED')
+        >>> n = {Default.CODE_CLASS}.Resn('CONFIDENTIAL, LOCKED')
         >>> print(n.ged(1))
         1 RESN CONFIDENTIAL, LOCKED
         <BLANKLINE>""",
@@ -1090,13 +1128,21 @@ Examples: dict[str, str] = {
         the cross reference identifiers for the individual `I1` and the source `S1`.  
         This would be done as follows:
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
-        >>> indi = g.individual_xref('I1')
-        >>> sour = g.source_xref('S1')
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> sour = {Default.CODE_GENEALOGY}.source_xref('S1')
 
         With these cross reference identifiers we can create the ged lines:
-        >>> from genedata.classes{Config.VERSION} import RecordIndi, IndiName, Sour, SourEven, Role
-        >>> m = RecordIndi(indi, IndiName('Mary //', Sour(sour, SourEven('BIRT', Role('MOTH')))))
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.RecordIndi(indi, 
+        ...     {Default.CODE_CLASS}.IndiName('Mary //', 
+        ...         {Default.CODE_CLASS}.Sour(sour, 
+        ...             {Default.CODE_CLASS}.SourEven('BIRT', 
+        ...                 {Default.CODE_CLASS}.Role('MOTH')
+        ...             )
+        ...         )
+        ...     )
+        ... )
         >>> print(m.ged(1))
         0 @I1@ INDI
         1 NAME Mary //
@@ -1108,16 +1154,23 @@ Examples: dict[str, str] = {
         The second example from the specification would be created as follows.
         There are two individuals in this example, `I2` and `I3`.  First
         create cross reference identifiers for them.
-        >>> indi2 = g.individual_xref('I2')
-        >>> indi3 = g.individual_xref('I3')
+        >>> indi2 = {Default.CODE_GENEALOGY}.individual_xref('I2')
+        >>> indi3 = {Default.CODE_GENEALOGY}.individual_xref('I3')
         With those cross reference identifiers we can complete the ged lines
         after importing the additional classes.
-        >>> from genedata.class{Config.VERSION} import Asso, Bapm, Phrase
         Now create the lines:
-        >>> m = RecordIndi(
+        >>> m = {Default.CODE_CLASS}.RecordIndi(
         ...     [
-        ...         Asso(indi3, Role('FRIEND', Phrase('best friend'))),
-        ...         Bapm('', Asso(indi3, Role('WITN'))),
+        ...         {Default.CODE_CLASS}.Asso(indi3, 
+        ...             {Default.CODE_CLASS}.Role('FRIEND', 
+        ...                 {Default.CODE_CLASS}.Phrase('best friend')
+        ...             )
+        ...         ),
+        ...         {Default.CODE_CLASS}.Bapm('', 
+        ...             {Default.CODE_CLASS}.Asso(indi3, 
+        ...                 {Default.CODE_CLASS}.Role('WITN')
+        ...             )
+        ...         ),
         ...     ]
         ... )
         >>> print(m.ged())
@@ -1133,38 +1186,33 @@ Examples: dict[str, str] = {
         As a simpler example shows a successful run of the Role structure using
         the enumeration value 'CHIL'.  However, ultimately these lines would
         have to be part of a larger record.
-        >>> from genedata.classes7 import Role
-        >>> m = Role('CHIL')
+        >>> import genedata.classes7 as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Role('CHIL')""",
+        <BLANKLINE>""",
     'SEX': f"""
 
     Examples:
         This example shows a successful run of the Sex structure using
         the enumeration value 'F'.
-        >>> from genedata.classes{Config.VERSION} import Sex
-        >>> m = Sex('F')
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.Sex('F')
         >>> print(m.ged(1))
         1 SEX F
-        <BLANKLINE>
-
-        This example shows the code that is generated to produce the same result as above.
-        >>> print(m.code())
-        <BLANKLINE>
-        Sex('F')""",
+        <BLANKLINE>""",
     'TITL': f"""
 
     Examples:
         Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
         on April 6, 1920.  Based on the specification one could enter this as follows.
-        >>> from genedata.classes{Config.VERSION} import File, Form, Titl
-        >>> m = File('letter.pdf', [Form('application/pdf'), Titl('Letter from Ann to Henry April 6, 1920')])
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> m = {Default.CODE_CLASS}.File('letter.pdf', 
+        ...     [
+        ...         {Default.CODE_CLASS}.Form('application/pdf'), 
+        ...         {Default.CODE_CLASS}.Titl('Letter from Ann to Henry April 6, 1920'),
+        ...     ]
+        ... )
         >>> print(m.ged(1))
         1 FILE letter.pdf
         2 FORM application/pdf
@@ -1177,14 +1225,13 @@ Examples: dict[str, str] = {
         first create an individual cross reference identifier then add the
         ordination event as a substructure of the RecordIndi record.
         >>> from genedata.build import Genealogy
-        >>> from genedata.classes{Config.VERSION} import Ordn, RecordIndi, Type
-        >>> g = Genealogy('test')
-        >>> indi_xref = g.individual_xref('I1')
-        >>> m = RecordIndi(
-        ...     indi_xref,
-        ...     [
-        ...         Ordn('', Type('Bishop'))
-        ...     ]
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> {Default.CODE_GENEALOGY} = Genealogy('test')
+        >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> m = {Default.CODE_CLASS}.RecordIndi(indi_xref, 
+        ...     {Default.CODE_CLASS}.Ordn('', 
+        ...         {Default.CODE_CLASS}.Type('Bishop')
+        ...     )
         ... )
         >>> print(m.ged())
         0 @I1@ INDI
@@ -1197,7 +1244,7 @@ Examples: dict[str, str] = {
         The following example would send a logging message warning
         that the site "abc" cannot be reached.
         >>> from genedata.util import Input
-        >>> from genedata.classes{Config.VERSION} import Www
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         >>> response = Www(Input.www('abc'))
         >>> print(response.ged(1))
         1 WWW abc
@@ -1313,6 +1360,7 @@ from genedata.structure import (
             .replace(
                 '[Removing data]', f'\n[Removing data]({site}#removing-data)'
             )
+            .replace('[registry of component subtags] ', '[registry of component subtags](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)\n')
             .replace('[RFC 3696]', f'[RFC 3696]({datatracker}3696)')
             .replace('[RFC\n3696]', f'\n[RFC 3696]({datatracker}3696)')
             .replace('[RFC\n3986]', f'\n[RFC 3986]({datatracker}3986)')
@@ -1348,12 +1396,36 @@ from genedata.structure import (
                     break_on_hyphens=False,
                 )
                 if len(wrapped) > 1:
-                    for line in wrapped:
-                        spec = ''.join([spec, '\n    > ', line])
+                    for index, line in enumerate(wrapped):
+                        #spec = ''.join([spec, '\n    > ', line])
+                        if index == 0:
+                            spec = ''.join([spec, Default.YAML_WITH_HYPHEN, line])
+                        else:
+                            spec = ''.join([spec, Default.YAML_WITHOUT_HYPHEN, line])
+            elif '\n' in string_linked:
+                string_linked_split: list[str] = string_linked.split('\n')
+                for line in string_linked_split:
+                    if len(line) > 80:
+                        line_wrapped: list[str] = wrap(
+                            line,
+                            75,
+                            break_long_words=False,
+                            break_on_hyphens=False,
+                        )
+                        if len(line_wrapped) > 1:
+                            for index, item in enumerate(line_wrapped):
+                                #spec = ''.join([spec, '\n    > ', item])
+                                if index == 0:
+                                    spec = ''.join([spec, Default.YAML_WITH_HYPHEN, item])
+                                else:
+                                    spec = ''.join([spec, Default.YAML_WITHOUT_HYPHEN, item])
+                    else:
+                        spec = ''.join([spec, Default.YAML_WITHOUT_HYPHEN, line])
             else:
-                spec = ''.join(
-                    [spec, '\n    > ', string_linked.replace('\n', '\n    > ')]
-                )
+                # spec = ''.join(
+                #     [spec, '\n    > - ', string_linked.replace('\n', '\n    >   ')]
+                # )
+                spec = ''.join([spec, Default.YAML_WITH_HYPHEN, string_linked])
         return spec
 
     @staticmethod

@@ -184,6 +184,7 @@ class MultimediaXref(Xref):
 
     def __init__(self, name: str, tag: str = Default.TAG_OBJE):
         super().__init__(name, tag)
+        self.records: list[Any] = []
 
     def __repr__(self) -> str:
         return f"MultimediaXref('{self.fullname}')"
@@ -232,19 +233,23 @@ class SharedNoteXref(Xref):
     """
 
     def __init__(
-        self, name: str, tag: str = Default.TAG_SNOTE, text: str = Default.EMPTY
+        self, name: str, text: str = Default.EMPTY, tag: str = Default.TAG_SNOTE
     ):
         super().__init__(name, tag, text=text)
 
-    def __repr__(self) -> str:
+    def code(self, tabs: int = 0) -> str:  # noqa: ARG002
         text: str = f"'{self.text}'"
-        if Default.EOL in self.text and Default.QUOTE_SINGLE in self.text:
-            text = f'"""{self.text}"""'
-        elif Default.EOL in self.text and Default.QUOTE_DOUBLE in self.text:
-            text = f"'''{self.text}'''"
-        elif Default.QUOTE_SINGLE in self.text:
+        if Default.QUOTE_SINGLE in self.text:
             text = f'"{self.text}"'
+        if Default.EOL in self.text:
+            if Default.QUOTE_SINGLE in self.text:
+                text = f'"""{self.text}"""'
+            else:
+                text = f"'''{self.text}'''"
         return f"SharedNoteXref('{self.fullname}', {text})"
+
+    def __repr__(self) -> str:
+        return self.code()
 
 
 class SourceXref(Xref):
@@ -439,6 +444,7 @@ class BaseStructure:
         self.class_name: str = (
             self.key.title().replace('_', '').replace('-', '')
         )
+        self.class_name = f'{Default.CODE_CLASS}.{self.class_name}'
 
         # Identify which cross reference identifier started opened the record.
         self.originator: Xref = Void.XREF
@@ -744,7 +750,7 @@ class BaseStructure:
 
         # Is value formatted correctly for its structure specification?
         match self.class_name:
-            case 'Lati':
+            case 'gc.Lati':
                 if not isinstance(self.value, str):
                     raise ValueError(Msg.NOT_STRING.format(str(self.value)))
                 if self.value[0] not in [
@@ -772,7 +778,7 @@ class BaseStructure:
                             self.class_name,
                         )
                     )
-            case 'Long':
+            case 'gc.Long':
                 if not isinstance(self.value, str):
                     raise ValueError(Msg.NOT_STRING.format(str(self.value)))
                 if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
@@ -818,15 +824,15 @@ class BaseStructure:
         if self.validate():
             lines: str = Default.EMPTY
             if self.class_name in [
-                'Head',
-                'RecordFam',
-                'RecordIndi',
-                'RecordObje',
-                'RecordRepo',
-                'RecordSnote',
-                'RecordSour',
-                'RecordSubm',
-                'Trlr',
+                f'{Default.CODE_CLASS}.Head',
+                f'{Default.CODE_CLASS}.RecordFam',
+                f'{Default.CODE_CLASS}.RecordIndi',
+                f'{Default.CODE_CLASS}.RecordObje',
+                f'{Default.CODE_CLASS}.RecordRepo',
+                f'{Default.CODE_CLASS}.RecordSnote',
+                f'{Default.CODE_CLASS}.RecordSour',
+                f'{Default.CODE_CLASS}.RecordSubm',
+                f'{Default.CODE_CLASS}.Trlr',
             ]:
                 level = 0
 
@@ -856,6 +862,8 @@ class BaseStructure:
                 lines = Tagger.empty(lines, level, self.tag)
             elif isinstance(self.value, Xref) and level == 0:
                 lines = self.value.ged()
+            # elif isinstance(self.value, Xref):
+            #     lines = self.value.fullname
             else:
                 lines = Tagger.string(
                     lines,
@@ -984,91 +992,6 @@ class BaseStructure:
                 Default.PARENS_RIGHT,
             ]
         )
-
-    # def code(self, tabs: int = 0, full: bool = True) -> str:
-    #     if (
-    #         self.payload is None
-    #         and not isinstance(self.value, Xref)
-    #         and (
-    #             self.subs is None
-    #             or (isinstance(self.subs, list) and len(self.subs) == 0)
-    #         )
-    #     ):
-    #         return indent(
-    #             Formatter.display_code(f'{self.class_name}()'),
-    #             Default.INDENT * tabs,
-    #         )
-    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
-    #         self.subs is None
-    #         or (isinstance(self.subs, list) and len(self.subs) == 0)
-    #     ):
-    #         return indent(
-    #             Formatter.display_code(f'{self.class_name}({self.code_value})'),
-    #             Default.INDENT * tabs,
-    #         )
-    #     if (
-    #         self.payload is not None or isinstance(self.value, Xref)
-    #     ) and isinstance(self.subs, BaseStructure):
-    #         return indent(
-    #             Formatter.display_code(
-    #                 f'{self.class_name}({self.code_value}, {self.subs.code().replace("\n", "")})'
-    #             ),
-    #             Default.INDENT * tabs,
-    #         )
-    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
-    #         isinstance(self.subs, list) and len(self.subs) == 1
-    #     ):
-    #         return indent(
-    #             Formatter.display_code(
-    #                 f'{self.class_name}({self.code_value}, {self.subs[0].code().replace("\n", "")})'
-    #             ),
-    #             Default.INDENT * tabs,
-    #         )
-    #     if (self.payload is not None or isinstance(self.value, Xref)) and (
-    #         isinstance(self.subs, list) and len(self.subs) > 0
-    #     ):
-    #         return indent(
-    #             Formatter.display_code(
-    #                 f'{self.class_name}',
-    #                 (
-    #                     # f'    {Default.CODE_VALUE} = ',
-    #                     '',
-    #                     self.code_value,
-    #                     tabs + 1,
-    #                     full,
-    #                     False,
-    #                 ),
-    #                 (
-    #                     # f'    {Default.CODE_SUBS} = ',
-    #                     '',
-    #                     self.subs,
-    #                     tabs + 2,
-    #                     full,
-    #                     True,
-    #                 ),
-    #             ),
-    #             Default.INDENT * tabs,
-    #         )
-    #     if (
-    #         self.payload is None
-    #         and isinstance(self.subs, list)
-    #         and len(self.subs) > 0
-    #     ):
-    #         return indent(
-    #             Formatter.display_code(
-    #                 f'{self.class_name}',
-    #                 (
-    #                     # f'    {Default.CODE_SUBS} = ',
-    #                     '',
-    #                     self.subs,
-    #                     tabs + 2,
-    #                     full,
-    #                     True,
-    #                 ),
-    #             ),
-    #             Default.INDENT * tabs,
-    #         )
-    #     return Default.EMPTY
 
 
 class Ext(BaseStructure):

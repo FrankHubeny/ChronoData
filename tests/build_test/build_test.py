@@ -3,16 +3,8 @@
 
 import pytest
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    Famc,
-    FamHusb,
-    FamWife,
-    Phrase,
-    RecordFam,
-    RecordIndi,
-    Sex,
-)
 from genedata.structure import FamilyXref, IndividualXref
 
 testdata_indi_xref = [
@@ -51,14 +43,14 @@ def test_create_individual_xrefs(
     joe_mary_xref_type = isinstance(joe_mary_xref, FamilyXref)  # noqa: F841
 
     # Create the individual records.
-    joe = RecordIndi(joe_xref, Sex('M'))
-    mary = RecordIndi(mary_xref, Sex('F'))
-    jesus = RecordIndi(
-        jesus_xref, [Sex('M'), Famc(joe_mary_xref)]
+    joe = gc.RecordIndi(joe_xref, gc.Sex('M'))
+    mary = gc.RecordIndi(mary_xref, gc.Sex('F'))
+    jesus = gc.RecordIndi(
+        jesus_xref, [gc.Sex('M'), gc.Famc(joe_mary_xref)]
     )
-    joe_type = isinstance(joe, RecordIndi)  # noqa: F841
-    mary_type = isinstance(mary, RecordIndi)  # noqa: F841
-    jesus_type = isinstance(jesus, RecordIndi)  # noqa: F841
+    joe_type = isinstance(joe, gc.RecordIndi)  # noqa: F841
+    mary_type = isinstance(mary, gc.RecordIndi)  # noqa: F841
+    jesus_type = isinstance(jesus, gc.RecordIndi)  # noqa: F841
 
     # Create the family record.
     # joe_husband = Husband(joe_xref, 'Joe is the husband.')
@@ -71,12 +63,12 @@ def test_create_individual_xrefs(
     #jesus_child_type = isinstance(jesus_child, Chil) 
 
     # Create the family.
-    joe_mary = RecordFam(joe_mary_xref, [
-            FamHusb(joe_xref, Phrase('Joe is the husband.')),
-            FamWife(mary_xref,Phrase('Mary is the wife.')),
+    joe_mary = gc.RecordFam(joe_mary_xref, [
+            gc.FamHusb(joe_xref, gc.Phrase('Joe is the husband.')),
+            gc.FamWife(mary_xref,gc.Phrase('Mary is the wife.')),
         ]
     )
-    joe_mary_type = isinstance(joe_mary, RecordFam)  # noqa: F841
+    joe_mary_type = isinstance(joe_mary, gc.RecordFam)  # noqa: F841
 
     # Create the display at this point.
     family = joe_mary.ged().splitlines()  # noqa: F841

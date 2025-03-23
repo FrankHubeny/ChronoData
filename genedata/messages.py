@@ -56,6 +56,10 @@ class Msg:
     )
     LOADED: str = 'The "{0}" genealogy has been loaded from the "{1}" file.'
     LOAD_FAILED: str = 'The file "{0}" failed to load.'
+    LOG_READ_FAILED: str = (
+        'Could not read {0} with Util.read. Trying Util.read_binary.'
+    )
+    LOG_READ_BINARY_FAILED: str = 'Could not read {0} with Util.read_binary.'
     LONG_EAST_WEST: str = 'The character "{0}" of the longitude "{1}" is not "{2}" or "{3}" in structure "{4}".'
     LONG_RANGE: str = (
         'The value "{0}" is not between {1} and {2} in structure "{3}".'
@@ -64,6 +68,7 @@ class Msg:
         'The value "{0}" is not between {1} and {2} in method Input.long.'
     )
     MISSING: str = 'These xref values {0} are missing record definitions.'
+    MISSING_HEADER: str = 'The header record has not been added to the genealogy by the `add_header` method.'
     MISSING_REQUIRED: str = (
         'The substructure "{0}" is required for the "{1}" structure.'
     )
@@ -140,6 +145,8 @@ class Msg:
     ONLY_ONE_PERMITTED: str = (
         'The substructure "{0}" can appear only once in structure "{1}".'
     )
+    ONLY_RECORDS: str = 'The object "{0}" is not a record structure such as RecordExt, RecordFam, RecordIndi, RecordObje, RecordRepo, RecordSnote, RecordSour or RecordSubm.'
+    ONLY_HEADER: str = 'The object "{0}" is not a Head record structure.'
     PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'
     PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
