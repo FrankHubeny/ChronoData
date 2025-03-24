@@ -17,6 +17,7 @@ data type."""
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +39,7 @@ from genedata.constants import (
     String,
 )
 from genedata.messages import Issue, Msg
+from genedata.specs7 import Structure
 from genedata.structure import (
     ExtensionXref,
     FamilyXref,
@@ -78,6 +80,8 @@ class Genealogy:
         self.ged_shared_note: str = ''
         self.ged_source: str = ''
         self.ged_submitter: str = ''
+        self.ged_file_loaded: str = ''
+        self.ged_file_loaded_split: list[str] = []
         self.records: list[
             RecordFam
             | RecordIndi
@@ -126,8 +130,28 @@ class Genealogy:
     def __str__(self) -> str:
         return json.dumps(self.chron)
 
-    def store(self, record: Head | RecordFam | RecordIndi | RecordObje | RecordRepo | RecordSnote | RecordSour| RecordSubm) -> None:
-        if not isinstance(record, Head | RecordFam | RecordIndi | RecordObje | RecordRepo | RecordSnote | RecordSour| RecordSubm):
+    def stage(
+        self,
+        record: Head
+        | RecordFam
+        | RecordIndi
+        | RecordObje
+        | RecordRepo
+        | RecordSnote
+        | RecordSour
+        | RecordSubm,
+    ) -> None:
+        if not isinstance(
+            record,
+            Head
+            | RecordFam
+            | RecordIndi
+            | RecordObje
+            | RecordRepo
+            | RecordSnote
+            | RecordSour
+            | RecordSubm,
+        ):
             raise ValueError(Msg.ONLY_RECORDS.format(str(record)))
         if isinstance(record, Head):
             self.record_header = record
@@ -135,16 +159,259 @@ class Genealogy:
             self.records.append(record)
 
     def show_ged(self) -> str:
+        """Display the ged file constructed by this instance of the Genealogy class.
+
+        Examples:
+            This example has a minimal header, two records and a trailer.  It is constructed
+            using the following steps.
+            >>> from genedata.build import Genealogy
+            >>> import genedata.classes7 as gc
+            >>> g = Genealogy('minimal example')
+            >>> indi_xref = g.individual_xref('1')
+            >>> fam_xref = g.family_xref('2')
+            >>> indi = gc.RecordIndi(indi_xref)
+            >>> fam = gc.RecordFam(fam_xref)
+            >>> head = gc.Head(gc.Gedc(gc.GedcVers(7.0)))
+            >>> g.stage(head)
+            >>> g.stage(fam)
+            >>> g.stage(indi)
+            >>> print(g.show_ged())
+            0 HEAD
+            1 GEDC
+            2 VERS 7.0
+            0 @2@ FAM
+            0 @1@ INDI
+            0 TRLR
+
+        """
         if self.record_header is None:
             raise ValueError(Msg.MISSING_HEADER)
         lines = self.record_header.ged()
         for record in self.records:
             lines = ''.join([lines, record.ged()])
         return ''.join([lines, Trlr().ged()])
-    
+
     def save_ged(self, file_name: str = Default.EMPTY) -> None:
+        """Save the ged file constructed by this instance of the Genealogy class."""
         Util.write_ged(self.show_ged(), file_name)
-    
+
+    def load_ged(self, file_name: str) -> None:
+        """Load a ged file and split it into records."""
+        self.filename = file_name
+        self.ged_file_loaded = Util.read(self.filename)
+        self.ged_file_loaded_split = self.ged_file_loaded.split('\n0 ')
+
+    def format_payload(self, key: str, payload: str) -> str:
+        """Format the payload as either a string, an integer or a cross reference identifier."""
+        datatype: str = Default.EMPTY
+        yaml_payload: Any = Structure[key][Default.YAML_PAYLOAD]
+        if payload is not None:
+            datatype = yaml_payload
+        return datatype
+
+    def get_substructures(self, key: str) -> list[list[str]]:
+        """Associate the permitted substructure classes with the tags in the ged file."""
+        subs: list[list[str]] = []
+        subslist: list[str] = Structure[key][Default.YAML_PERMITTED]
+        for sub in subslist:
+            subs.append([Structure[sub][Default.YAML_STANDARD_TAG], sub])
+        return subs
+
+    def get_record_type(self, tag: str) -> str:
+        """Get the kind of record based on the tag in the ged file on the line with level 0."""
+        match tag:
+            case Default.TAG_FAM:
+                return Default.FAM_RECORD_TYPE
+            case Default.TAG_INDI:
+                return Default.INDI_RECORD_TYPE
+            case Default.TAG_OBJE:
+                return Default.OBJE_RECORD_TYPE
+            case Default.TAG_REPO:
+                return Default.REPO_RECORD_TYPE
+            case Default.TAG_SNOTE:
+                return Default.SNOTE_RECORD_TYPE
+            case Default.TAG_SOUR:
+                return Default.SOUR_RECORD_TYPE
+            case Default.TAG_SUBM:
+                return Default.SUBM_RECORD_TYPE
+        return Default.EMPTY
+
+    def genealogy_imports(self) -> str:
+        """Construct the section of the code where the imports are made."""
+        return f"""# Import the required packages and classes.
+from genedata.build import Genealogy
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+
+"""
+
+    def genealogy_initialize(self) -> str:
+        """Construct the section of the code where the Genealogy class is instantiated."""
+        return f"""# Instantiate a Genealogy class with the name of the ged file.
+{Default.CODE_GENEALOGY} = Genealogy('{self.filename}')
+"""
+
+    def format_text(self, text: str) -> str:
+        """Format text with proper quotes based on single quotes or newlines being in the text."""
+        if Default.EOL in text:
+            if Default.QUOTE_SINGLE in text:
+                return f'"""{text}"""'
+            return f"'''{text}'''"
+        if Default.QUOTE_SINGLE in text:
+            return f'"{text}"'
+        return f"'{text}'"
+
+    def genealogy_xrefs(self) -> str:
+        """Construct the section of the code where the cross reference identifiers are instantiated."""
+        lines: str = """
+# Instantiate the cross reference identifiers.
+"""
+        for record in self.ged_file_loaded_split:
+            # Remove the first lines prior to the first substructure starting with 1.
+            record_split: list[str] = (
+                record.replace('1 CONT @', Default.EMPTY)
+                .replace('1 CONT ', Default.EMPTY)
+                .split('\n1 ')
+            )
+            
+
+            # Split the first two strings from the first split.
+            record_split_split: list[str] = record_split[0].split(
+                Default.SPACE, 2
+            )
+
+            # Avoid the header record which still has 0 and the trailer record which has one string.
+            if len(record_split_split) > 1 and record_split_split[0] != '0':
+                record_name: str = (
+                    record_split_split[0]
+                    .replace(Default.ATSIGN, Default.EMPTY)
+                    .lower()
+                )
+                record_type: str = self.get_record_type(record_split_split[1])
+                text: str = Default.EMPTY
+                if record_type == Default.SNOTE_RECORD_TYPE:
+                    if record_split_split[2][0] == Default.ATSIGN:
+                        record_split_split[2] = record_split_split[2][1:]
+                    formatted_text: str = self.format_text(record_split_split[2])
+                    text = f', {formatted_text}'
+                lines = ''.join(
+                    [
+                        lines,
+                        record_type,
+                        Default.UNDERLINE,
+                        record_name,
+                        Default.UNDERLINE,
+                        'xref = ',
+                        Default.CODE_GENEALOGY,
+                        '.',
+                        record_type,
+                        Default.UNDERLINE,
+                        "xref('",
+                        record_name,
+                        "'",
+                        text,
+                        ')',
+                        Default.EOL,
+                    ]
+                )
+        return lines
+
+    def genealogy_structure(self, ged: str, level: int) -> str:
+        lines: str = Default.EMPTY
+        ged_split: list[str] = ged.split(f'\n{level} ')
+        ged_split_split: list[str] = ged_split[0].split(Default.SPACE)
+        if len(ged_split_split) > 1 and len(ged_split) > 1:
+            lines = ''.join(
+                [
+                    lines,
+                ]
+            )
+
+        return lines
+
+    def genealogy_records(self) -> str:
+        lines: str = """
+# Instantiate the records holding the GED data.
+"""
+        for record in self.ged_file_loaded_split:
+            record_split: list[str] = record.split(Default.EOL)
+            record_split_split: list[str] = record_split[0].split(Default.SPACE)
+            if len(record_split_split) > 1 and record_split_split[0] != '0':
+                record_name: str = (
+                    record_split_split[0]
+                    .replace(Default.ATSIGN, Default.EMPTY)
+                    .lower()
+                )
+                record_type: str = self.get_record_type(record_split_split[1])
+                lines = ''.join(
+                    [
+                        lines,
+                        record_type,
+                        Default.UNDERLINE,
+                        record_name,
+                        ' = ',
+                        Default.CODE_CLASS,
+                        '.Record',
+                        record_split_split[1].title(),
+                        '(',
+                    ]
+                )
+
+                lines = ''.join(
+                    [
+                        lines,
+                        ')',
+                        Default.EOL,
+                    ]
+                )
+        return lines
+
+    def genealogy_header(self) -> str:
+        lines: str = """
+# Instantiate the header record.
+header = 
+"""
+        return lines
+
+    def genealogy_stage(self) -> str:
+        lines: str = f"""
+# Stage the GEDCOM records to generate the ged lines.
+{Default.CODE_GENEALOGY}.stage(header)
+"""
+        for record in self.ged_file_loaded_split:
+            record_split: list[str] = record.split(Default.EOL)
+            record_split_split: list[str] = record_split[0].split(Default.SPACE)
+            if len(record_split_split) > 1 and record_split_split[0] != '0':
+                record_name: str = (
+                    record_split_split[0]
+                    .replace(Default.ATSIGN, Default.EMPTY)
+                    .lower()
+                )
+                record_type: str = self.get_record_type(record_split_split[1])
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.CODE_GENEALOGY,
+                        '.stage(',
+                        record_type,
+                        Default.UNDERLINE,
+                        record_name,
+                        ')',
+                        Default.EOL,
+                    ]
+                )
+        return lines
+
+    def code_from_ged(self) -> str:
+        return ''.join(
+            [
+                self.genealogy_imports(),
+                self.genealogy_initialize(),
+                self.genealogy_xrefs(),
+                self.genealogy_header(),
+                self.genealogy_records(),
+                self.genealogy_stage(),
+            ]
+        )
 
     def code(self) -> str:
         lines: str = f"""from genedata.build import Genealogy

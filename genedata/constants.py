@@ -114,6 +114,13 @@ class Default:
     PLACE_FORM4: str = 'Country'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
+    FAM_RECORD_TYPE: str = 'family'
+    INDI_RECORD_TYPE: str = 'individual'
+    OBJE_RECORD_TYPE: str = 'multimedia'
+    REPO_RECORD_TYPE: str = 'repository'
+    SNOTE_RECORD_TYPE: str = 'shared_note'
+    SOUR_RECORD_TYPE: str =  'source'
+    SUBM_RECORD_TYPE: str = 'submitter'
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
@@ -164,7 +171,6 @@ class Default:
     YAML_EXTENSION_TAGS: str = 'extension tags'
     YAML_FRAGMENT: str = 'fragment'
     YAML_HELP_TEXT: str = 'help text'
-    
     YAML_LABEL: str = 'label'
     YAML_LANG: str = 'lang'
     YAML_MONTHS: str = 'months'
