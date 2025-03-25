@@ -70,6 +70,7 @@ class Default:
     DATE_WEEK: int = 0
     DAYS: int = 0
     EMPTY: str = ''
+    EQUAL: str = ' = '
     EOL: str = '\n'
     EOL_DOUBLE: str = '\n\n'
     GREATER_LESS_THAN: str = '>'
@@ -171,11 +172,13 @@ class Default:
     YAML_EXTENSION_TAGS: str = 'extension tags'
     YAML_FRAGMENT: str = 'fragment'
     YAML_HELP_TEXT: str = 'help text'
+    YAML_KEY: str = 'key'
     YAML_LABEL: str = 'label'
     YAML_LANG: str = 'lang'
     YAML_MONTHS: str = 'months'
     YAML_PAYLOAD: str = 'payload'
     YAML_PERMITTED: str = 'permitted'
+    YAML_PERMITTED_KEY: str = 'permitted key'
     YAML_REQUIRED: str = 'required'
     YAML_SINGULAR: str = 'single'
     YAML_SPECIFICATION: str = 'specification'

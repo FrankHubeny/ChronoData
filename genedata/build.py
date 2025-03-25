@@ -104,6 +104,48 @@ class Genealogy:
         self.shared_note_xreflist: list[str] = [Void.NAME]
         self.source_xreflist: list[str] = [Void.NAME]
         self.submitter_xreflist: list[str] = [Void.NAME]
+        self.record_names: dict[str, dict[str, str]] = {
+            'EXT': {
+                'key': 'record-EXT',
+                'type': 'extension',
+                'class': 'RecordExt',
+            },
+            'FAM': {
+                'key': 'record-FAM',
+                'type': 'family',
+                'class': 'RecordFam',
+            },
+            'INDI': {
+                'key': 'record-INDI',
+                'type': 'individual',
+                'class': 'RecordIndi',
+            },
+            'OBJE': {
+                'key': 'record-OBJE',
+                'type': 'multimedia',
+                'class': 'RecordObje',
+            },
+            'REPO': {
+                'key': 'record-REPO',
+                'type': 'repository',
+                'class': 'RecordRepo',
+            },
+            'SNOTE': {
+                'key': 'record-SNOTE',
+                'type': 'shared_note',
+                'class': 'RecordSnote',
+            },
+            'SOUR': {
+                'key': 'record-SOUR',
+                'type': 'source',
+                'class': 'RecordSour',
+            },
+            'SUBM': {
+                'key': 'record-SUBM',
+                'type': 'submitter',
+                'class': 'RecordSubm',
+            },
+        }
         match self.filename_type:
             case '':
                 self.chron: dict[str, str] = {
@@ -213,8 +255,15 @@ class Genealogy:
         """Associate the permitted substructure classes with the tags in the ged file."""
         subs: list[list[str]] = []
         subslist: list[str] = Structure[key][Default.YAML_PERMITTED]
-        for sub in subslist:
-            subs.append([Structure[sub][Default.YAML_STANDARD_TAG], sub])
+        subs_key_list: list[str] = Structure[key][Default.YAML_PERMITTED_KEY]
+        for sub in subs_key_list:
+            subs.append(
+                [
+                    Structure[sub][Default.YAML_STANDARD_TAG],
+                    sub,
+                    Structure[sub][Default.YAML_KEY],
+                ]
+            )
         return subs
 
     def get_record_type(self, tag: str) -> str:
@@ -272,7 +321,6 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                 .replace('1 CONT ', Default.EMPTY)
                 .split('\n1 ')
             )
-            
 
             # Split the first two strings from the first split.
             record_split_split: list[str] = record_split[0].split(
@@ -291,7 +339,9 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                 if record_type == Default.SNOTE_RECORD_TYPE:
                     if record_split_split[2][0] == Default.ATSIGN:
                         record_split_split[2] = record_split_split[2][1:]
-                    formatted_text: str = self.format_text(record_split_split[2])
+                    formatted_text: str = self.format_text(
+                        record_split_split[2]
+                    )
                     text = f', {formatted_text}'
                 lines = ''.join(
                     [
@@ -315,7 +365,9 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                 )
         return lines
 
-    def genealogy_structure(self, ged: str, level: int) -> str:
+    def genealogy_structure(
+        self, ged: str, level: int, class_name: str, key_name: str
+    ) -> str:
         lines: str = Default.EMPTY
         ged_split: list[str] = ged.split(f'\n{level} ')
         ged_split_split: list[str] = ged_split[0].split(Default.SPACE)
@@ -323,6 +375,18 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             lines = ''.join(
                 [
                     lines,
+                    Default.INDENT * level,
+                    Default.CODE_CLASS,
+                    '.',
+                    class_name,
+                    Default.PARENS_LEFT,
+                ]
+            )
+            lines = ''.join(
+                [
+                    lines,
+                    Default.PARENS_RIGHT,
+                    Default.COMMA,
                 ]
             )
 
@@ -334,35 +398,79 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 """
         for record in self.ged_file_loaded_split:
             record_split: list[str] = record.split(Default.EOL)
+            record_subs: list[str] = record.split('\n1 ')
             record_split_split: list[str] = record_split[0].split(Default.SPACE)
             if len(record_split_split) > 1 and record_split_split[0] != '0':
+                # Remove the `@` from the beginning of the line used to escape @.
                 record_name: str = (
                     record_split_split[0]
                     .replace(Default.ATSIGN, Default.EMPTY)
                     .lower()
                 )
-                record_type: str = self.get_record_type(record_split_split[1])
+                # record_type: str = self.get_record_type(record_split_split[1])
+                record_tag: str = record_split_split[1]
+                record_key: str = f'record-{record_tag}'
+                record_class: str = self.record_names[record_tag]['class']
+                record_type: str = self.record_names[record_tag]['type']
+
+                permitted_subs: list[list[str]] = self.get_substructures(record_key)
                 lines = ''.join(
                     [
                         lines,
                         record_type,
                         Default.UNDERLINE,
                         record_name,
-                        ' = ',
+                        Default.EQUAL,
                         Default.CODE_CLASS,
-                        '.Record',
-                        record_split_split[1].title(),
-                        '(',
+                        record_class,
+                        Default.PARENS_LEFT,
+                        record_type,
+                        Default.UNDERLINE,
+                        record_name,
+                        Default.UNDERLINE,
+                        'xref',
                     ]
                 )
-
-                lines = ''.join(
-                    [
-                        lines,
-                        ')',
-                        Default.EOL,
-                    ]
-                )
+                if len(record_subs) > 1:
+                    lines = ''.join(
+                        [
+                            lines,
+                            Default.COMMA,
+                            Default.EOL,
+                            Default.INDENT,
+                            Default.BRACKET_LEFT,
+                            Default.EOL,
+                            Default.INDENT * 2,
+                        ]
+                    )
+                    for subs in record_subs:
+                        subs_split: list[str] = subs.split(Default.SPACE, 2)
+                        subs_tag: str = subs_split[1]
+                        class_name: str = Default.EMPTY
+                        for spec in permitted_subs:
+                            if spec[1] == subs_tag:
+                                class_name = spec[0]
+                                break
+                        self.genealogy_structure(subs, 2, class_name, spec[2])
+                    lines = ''.join(
+                        [
+                            lines,
+                            Default.EOL,
+                            Default.INDENT,
+                            Default.BRACKET_RIGHT,
+                            Default.EOL,
+                            Default.PARENS_RIGHT,
+                            Default.EOL,
+                        ]
+                    )
+                else:
+                    lines = ''.join(
+                        [
+                            lines,
+                            Default.PARENS_RIGHT,
+                            Default.EOL,
+                        ]
+                    )
         return lines
 
     def genealogy_header(self) -> str:

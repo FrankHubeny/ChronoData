@@ -285,6 +285,7 @@ class Keys:
             'INDI-NAME',
             'INDI-NCHI',
             'INDI-RELI',
+            'INDI-RESI',
             'INDI-TITL',
             'INIL',
             'LANG',
@@ -306,6 +307,7 @@ class Keys:
             'NATU',
             'NICK',
             'NMR',
+            'NO',
             'NO-DATE',
             'NOTE',
             'NOTE-TRAN',
@@ -324,6 +326,7 @@ class Keys:
             'PLAC-TRAN',
             'POST',
             'PROB',
+            'PROP',
             'PUBL',
             'QUAY',
             'record-FAM',
@@ -583,6 +586,7 @@ from typing import Any
             required = []
             single = []
             permitted = []
+            permitted_key = []
             enums = []
             if Default.YAML_SUBSTRUCTURES in yamldict:
                 for key, value in yamldict[Default.YAML_SUBSTRUCTURES].items():
@@ -592,11 +596,13 @@ from typing import Any
                         .replace('-', '')
                     )
                     permitted.append(tag)
+                    permitted_key.append(key[key.rfind(Default.SLASH) + 1 :])
                     if Default.YAML_CARDINALITY_REQUIRED in value:
                         required.append(tag)
                     if Default.YAML_CARDINALITY_SINGULAR in value:
                         single.append(tag)
             yamldict[Default.YAML_PERMITTED] = permitted
+            yamldict[Default.YAML_PERMITTED_KEY] = permitted_key
             yamldict[Default.YAML_REQUIRED] = required
             yamldict[Default.YAML_SINGULAR] = single
             if Default.YAML_ENUMERATION_SET in yamldict:
@@ -608,6 +614,8 @@ from typing import Any
             yamldict[Default.YAML_CLASS_NAME] = (
                 item.title().replace('_', '').replace('-', '')
             )
+            yamldict[Default.YAML_KEY] = item
+
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
@@ -628,6 +636,7 @@ from typing import Any
             required = []
             single = []
             permitted = []
+            permitted_key = []
             enums = []
             if Default.YAML_SUBSTRUCTURES in yamldict:
                 for key, value in yamldict[Default.YAML_SUBSTRUCTURES].items():
@@ -637,11 +646,13 @@ from typing import Any
                         .replace('-', '')
                     )
                     permitted.append(tag)
+                    permitted_key.append(key[key.rfind(Default.SLASH) + 1 :])
                     if Default.YAML_CARDINALITY_REQUIRED in value:
                         required.append(tag)
                     if Default.YAML_CARDINALITY_SINGULAR in value:
                         single.append(tag)
             yamldict[Default.YAML_PERMITTED] = permitted
+            yamldict[Default.YAML_PERMITTED_KEY] = permitted_key
             yamldict[Default.YAML_REQUIRED] = required
             yamldict[Default.YAML_SINGULAR] = single
             if Default.YAML_ENUMERATION_SET in yamldict:
@@ -653,6 +664,7 @@ from typing import Any
             yamldict[Default.YAML_CLASS_NAME] = (
                 item.title().replace('_', '').replace('-', '')
             )
+            yamldict[Default.YAML_KEY] = item
             lines = f"{lines}\n    '{item}': {yamldict},"
         return ''.join([lines, Default.EOL, '}\n\n'])
 
