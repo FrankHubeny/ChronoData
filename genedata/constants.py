@@ -48,6 +48,7 @@ class Default:
     AGE_WEEK: str = 'w'
     AGE_YEAR: str = 'y'
     ATSIGN: str = '@'
+    ATSIGN_DOUBLE: str = '@@'
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
     BRACKET_RIGHT: str = ']'
     BRACKET_LEFT: str = '['
@@ -74,6 +75,7 @@ class Default:
     EOL: str = '\n'
     EOL_DOUBLE: str = '\n\n'
     GREATER_LESS_THAN: str = '>'
+    HEADER: str = f'0 HEAD{EOL}'
     HEIGHT: int = 0
     HYPHEN: str = '-'
     INDENT: str = '    '
@@ -100,6 +102,7 @@ class Default:
     PARENS_LEFT: str = '('
     PARENS_RIGHT: str = ')'
     PAYLOAD_EMPTY: str = EMPTY
+    PERIOD: str = '.'
     PHONE_AREA_MIN: int = 0
     PHONE_AREA_MAX: int = 1000
     PHONE_COUNTRY_MIN: int = 0
@@ -115,16 +118,17 @@ class Default:
     PLACE_FORM4: str = 'Country'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
-    FAM_RECORD_TYPE: str = 'family'
-    INDI_RECORD_TYPE: str = 'individual'
-    OBJE_RECORD_TYPE: str = 'multimedia'
-    REPO_RECORD_TYPE: str = 'repository'
-    SNOTE_RECORD_TYPE: str = 'shared_note'
-    SOUR_RECORD_TYPE: str =  'source'
-    SUBM_RECORD_TYPE: str = 'submitter'
+    FAM_RECORD_TYPE: str = 'fam'
+    INDI_RECORD_TYPE: str = 'indi'
+    OBJE_RECORD_TYPE: str = 'obje'
+    REPO_RECORD_TYPE: str = 'repo'
+    SNOTE_RECORD_TYPE: str = 'snote'
+    SOUR_RECORD_TYPE: str =  'sour'
+    SUBM_RECORD_TYPE: str = 'subm'
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
+    STAGE: str = 'stage'
     T: str = 'T'
     TAG_EXT: str = 'EXT'
     TAG_FAM: str = 'FAM'
@@ -153,6 +157,7 @@ class Default:
     VOID_POINTER: str = '@VOID@'
     WEEKS: int = 0
     WIDTH: int = 0
+    XREF: str = 'xref'
     YAML_CALENDARS: str = 'calendars'
     YAML_CARDINALITY_ANY_NUMBER: str = ':M}'
     YAML_CARDINALITY_OPTIONAL: str = '{0:'

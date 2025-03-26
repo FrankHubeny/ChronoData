@@ -102,6 +102,7 @@ __all__ = [
     'IndiName',
     'IndiNchi',
     'IndiReli',
+    'IndiResi',
     'IndiTitl',
     'Inil',
     'Lang',
@@ -123,6 +124,7 @@ __all__ = [
     'Natu',
     'Nick',
     'Nmr',
+    'No',
     'NoDate',
     'Note',
     'NoteTran',
@@ -141,6 +143,7 @@ __all__ = [
     'PlacTran',
     'Post',
     'Prob',
+    'Prop',
     'Publ',
     'Quay',
     'RecordFam',
@@ -214,9 +217,9 @@ class Abbr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Abbreviation
-    > A short name of a title, description, or name used for sorting, filing, and
-    > retrieving records.
+    > - Abbreviation
+    > - A short name of a title, description, or name used for sorting, filing, and
+    >   retrieving records.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -248,37 +251,37 @@ class Addr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Address
-    > The location of, or most relevant to, the subject of the superstructure.
-    > See `ADDRESS_STRUCTURE` for more details.
-    > A specific building, plot, or location. The payload is the full formatted
-    > address as it would appear on a mailing label, including appropriate line
-    > breaks (encoded using `CONT` tags). The expected order of address components
-    > varies by region; the address should be organized as expected by the addressed
-    > region.
-    > 
-    > Optionally, additional substructures such as `STAE` and `CTRY` are provided to
-    > be used by systems that have structured their addresses for indexing and
-    > sorting. If the substructures and `ADDR` payload disagree, the `ADDR` payload
-    > shall be taken as correct. Because the regionally-correct order and formatting
-    > of address components cannot be determined from the substructures alone, the
-    > `ADDR` payload is required, even if its content appears to be redundant with
-    > the substructures.
-    > 
-    > <div class="deprecation">
-    > 
-    > `ADR1` and `ADR2` were introduced in version 5.5 (1996) and `ADR3` in version
-    > 5.5.1 (1999), defined as "The first/second/third line of an address." Some
-    > applications interpreted ADR1 as "the first line of the *street* address", but
-    > most took the spec as-written and treated it as a straight copy of a line of
-    > text already available in the `ADDR` payload.
-    > 
-    > Duplicating information bloats files and introduces the potential for
-    > self-contradiction. `ADR1`, `ADR2`, and `ADR3` should not be added to new
-    > files.
-    > 
-    > </div>
-    > 
+    > - Address
+    > - The location of, or most relevant to, the subject of the superstructure.
+    >   See `ADDRESS_STRUCTURE` for more details.
+    >   A specific building, plot, or location. The payload is the full formatted
+    >   address as it would appear on a mailing label, including appropriate line
+    >   breaks (encoded using `CONT` tags). The expected order of address components
+    >   varies by region; the address should be organized as expected by the addressed
+    >   region.
+    >   
+    >   Optionally, additional substructures such as `STAE` and `CTRY` are provided to
+    >   be used by systems that have structured their addresses for indexing and
+    >   sorting. If the substructures and `ADDR` payload disagree, the `ADDR` payload
+    >   shall be taken as correct. Because the regionally-correct order and formatting
+    >   of address components cannot be determined from the substructures alone, the
+    >   `ADDR` payload is required, even if its content appears to be redundant with
+    >   the substructures.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   `ADR1` and `ADR2` were introduced in version 5.5 (1996) and `ADR3` in version
+    >   5.5.1 (1999), defined as "The first/second/third line of an address." Some
+    >   applications interpreted ADR1 as "the first line of the *street* address", but
+    >   most took the spec as-written and treated it as a straight copy of a line of
+    >   text already available in the `ADDR` payload.
+    >   
+    >   Duplicating information bloats files and introduces the potential for
+    >   self-contradiction. `ADR1`, `ADR2`, and `ADR3` should not be added to new
+    >   files.
+    >   
+    >   </div>
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -374,12 +377,13 @@ class Adop(BaseStructure):
 
     
     GEDCOM Specification:
-    > Adoption
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > adoption
-    > Creation of a legally approved child-parent relationship that does not
-    > exist biologically.
+    > - Adoption
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - adoption
+    > - Creation of a legally approved child-parent relationship that does not
+    >   exist biologically.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -436,15 +440,15 @@ class AdopFamc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Family child
-    > The individual or couple that adopted this individual.
-    > 
-    > Adoption by an individual, rather than a couple, may be represented either by
-    > pointing to a `FAM` where that individual is a `HUSB` or `WIFE` and using a
-    > `https://gedcom.io/terms/v7/FAMC-ADOP` substructure to indicate which 1
-    > performed the adoption; or by using a `FAM` where the adopting individual is
-    > the only `HUSB`/`WIFE`.
-    > 
+    > - Family child
+    >   The individual or couple that adopted this individual.
+    >   
+    >   Adoption by an individual, rather than a couple, may be represented either by
+    >   pointing to a `FAM` where that individual is a `HUSB` or `WIFE` and using a
+    >   `https://gedcom.io/terms/v7/FAMC-ADOP` substructure to indicate which 1
+    >   performed the adoption; or by using a `FAM` where the adopting individual is
+    >   the only `HUSB`/`WIFE`.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -481,18 +485,18 @@ class Adr1(BaseStructure):
 
     
     GEDCOM Specification:
-    > Address Line 1
-    > The first line of the address, used for indexing. This structure's payload
-    > should be a single line of text equal to the first line of the corresponding
-    > `ADDR`. See `ADDRESS_STRUCTURE` for more details.
-    > 
-    > <div class="deprecation">
-    > 
-    > `ADR1` should not be added to new files; see `ADDRESS_STRUCTURE` for more
-    > details.
-    > 
-    > </div>
-    > 
+    > - Address Line 1
+    >   The first line of the address, used for indexing. This structure's payload
+    >   should be a single line of text equal to the first line of the corresponding
+    >   `ADDR`. See `ADDRESS_STRUCTURE` for more details.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   `ADR1` should not be added to new files; see `ADDRESS_STRUCTURE` for more
+    >   details.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -525,18 +529,18 @@ class Adr2(BaseStructure):
 
     
     GEDCOM Specification:
-    > Address Line 2
-    > The second line of the address, used for indexing. This structure's payload
-    > should be a single line of text equal to the second line of the corresponding
-    > `ADDR`. See `ADDRESS_STRUCTURE` for more details.
-    > 
-    > <div class="deprecation">
-    > 
-    > `ADR2` should not be added to new files; see `ADDRESS_STRUCTURE` for more
-    > details.
-    > 
-    > </div>
-    > 
+    > - Address Line 2
+    >   The second line of the address, used for indexing. This structure's payload
+    >   should be a single line of text equal to the second line of the corresponding
+    >   `ADDR`. See `ADDRESS_STRUCTURE` for more details.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   `ADR2` should not be added to new files; see `ADDRESS_STRUCTURE` for more
+    >   details.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -569,18 +573,18 @@ class Adr3(BaseStructure):
 
     
     GEDCOM Specification:
-    > Address Line 3
-    > The third line of the address, used for indexing. This structure's payload
-    > should be a single line of text equal to the third line of the corresponding
-    > `ADDR`. See `ADDRESS_STRUCTURE` for more details.
-    > 
-    > <div class="deprecation">
-    > 
-    > `ADR3` should not be added to new files; see `ADDRESS_STRUCTURE` for more
-    > details.
-    > 
-    > </div>
-    > 
+    > - Address Line 3
+    >   The third line of the address, used for indexing. This structure's payload
+    >   should be a single line of text equal to the third line of the corresponding
+    >   `ADDR`. See `ADDRESS_STRUCTURE` for more details.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   `ADR3` should not be added to new files; see `ADDRESS_STRUCTURE` for more
+    >   details.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -613,9 +617,9 @@ class Age(BaseStructure):
 
     
     GEDCOM Specification:
-    > Age at event
-    > The age of the individual at the time an event occurred, or the age listed
-    > in the document.
+    > - Age at event
+    > - The age of the individual at the time an event occurred, or the age listed
+    >   in the document.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -690,12 +694,12 @@ class Agnc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Responsible agency
-    > The organization, institution, corporation, person, or other entity that
-    > has responsibility for the associated context. Examples are an employer of
-    > a person of an associated occupation, or a church that administered rites
-    > or events, or an organization responsible for creating or archiving
-    > records.
+    > - Responsible agency
+    > - The organization, institution, corporation, person, or other entity that
+    >   has responsibility for the associated context. Examples are an employer of
+    >   a person of an associated occupation, or a church that administered rites
+    >   or events, or an organization responsible for creating or archiving
+    >   records.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -778,22 +782,22 @@ class Alia(BaseStructure):
 
     
     GEDCOM Specification:
-    > Alias
-    > A single individual may have facts distributed across multiple individual
-    > records, connected by `ALIA` pointers (named after "alias" in the computing
-    > sense, not the pseudonym sense).
-    > 
-    > <div class="note">
-    > 
-    > This specification does not define how to connect `INDI` records with `ALIA`.
-    > Some systems organize `ALIA` pointers to create a tree structure, with the root
-    > `INDI` record containing the composite view of all facts in the leaf `INDI`
-    > records. Others distribute events and attributes between `INDI` records
-    > mutually linked by symmetric pairs of `ALIA` pointers. A future version of this
-    > specification may adjust the definition of `ALIA`.
-    > 
-    > </div>
-    > 
+    > - Alias
+    >   A single individual may have facts distributed across multiple individual
+    >   records, connected by `ALIA` pointers (named after "alias" in the computing
+    >   sense, not the pseudonym sense).
+    >   
+    >   <div class="note">
+    >   
+    >   This specification does not define how to connect `INDI` records with `ALIA`.
+    >   Some systems organize `ALIA` pointers to create a tree structure, with the root
+    >   `INDI` record containing the composite view of all facts in the leaf `INDI`
+    >   records. Others distribute events and attributes between `INDI` records
+    >   mutually linked by symmetric pairs of `ALIA` pointers. A future version of this
+    >   specification may adjust the definition of `ALIA`.
+    >   
+    >   </div>
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -830,9 +834,9 @@ class Anci(BaseStructure):
 
     
     GEDCOM Specification:
-    > Ancestor interest
-    > Indicates an interest in additional research for ancestors of this
-    > individual. (See also `DESI`).
+    > - Ancestor interest
+    > - Indicates an interest in additional research for ancestors of this
+    >   individual. (See also `DESI`).
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -864,11 +868,12 @@ class Anul(BaseStructure):
 
     
     GEDCOM Specification:
-    > Annulment
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > annulment
-    > Declaring a marriage void from the beginning (never existed).
+    > - Annulment
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - annulment
+    > - Declaring a marriage void from the beginning (never existed).
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -925,34 +930,72 @@ class Asso(BaseStructure):
 
     
     GEDCOM Specification:
-    > Associates
-    > A pointer to an associated individual. See `ASSOCIATION_STRUCTURE` for more
-    > details.
-    > An individual associated with the subject of the superstructure. The nature of
-    > the association is indicated in the `ROLE` substructure.
-    > 
-    > A `voidPtr` and `PHRASE` can be used to describe associations to people not
-    > referenced by any `INDI` record.
-    > 
-    > <div class="example">
-    > 
-    > The following indicates that "Mr Stockdale" was the individual's teacher and
-    > that individual `@I2@` was the clergy officiating at their baptism.
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 ASSO @VOID@
-    > 2 PHRASE Mr Stockdale
-    > 2 ROLE OTHER
-    > 3 PHRASE Teacher
-    > 1 BAPM
-    > 2 DATE 1930
-    > 2 ASSO @I2@
-    > 3 ROLE CLERGY
-    > ```
-    > 
-    > </div>
-    > 
+    > - Associates
+    > - A pointer to an associated individual. See `ASSOCIATION_STRUCTURE` for more
+    >   details.
+    >   An individual associated with the subject of the superstructure. The nature of
+    >   the association is indicated in the `ROLE` substructure.
+    >   
+    >   A `voidPtr` and `PHRASE` can be used to describe associations to people not
+    >   referenced by any `INDI` record.
+    >   
+    >   <div class="example">
+    >   
+    >   The following indicates that "Mr Stockdale" was the individual's teacher and
+    >   that individual `@I2@` was the clergy officiating at their baptism.
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 ASSO @VOID@
+    >   2 PHRASE Mr Stockdale
+    >   2 ROLE OTHER
+    >   3 PHRASE Teacher
+    >   1 BAPM
+    >   2 DATE 1930
+    >   2 ASSO @I2@
+    >   3 ROLE CLERGY
+    >   ```
+    >   
+    >   </div>
+    >   
+
+    Examples:
+        This example illustrates how one may construct the example in the
+        specification. First create two individual cross reference identifiers.
+        The add the data to a RecordIndi class for the first individual.
+        >>> import genedata.classes7 as gc
+        >>> from genedata.build import Genealogy
+        >>> from genedata.structure import Void
+        >>> g = Genealogy('example')
+        >>> indi1 = g.individual_xref('I1')
+        >>> indi2 = g.individual_xref('I2')
+        >>> indi = gc.RecordIndi(indi1,
+        ...     [
+        ...         gc.Asso(Void.INDI, 
+        ...             [
+        ...                 gc.Phrase('Mr Stockdale'),
+        ...                 gc.Role('OTHER', gc.Phrase('Teacher')),
+        ...             ]
+        ...         ),
+        ...         gc.Bapm('',
+        ...             [
+        ...                 gc.Date('1930'),
+        ...                 gc.Asso(indi2, gc.Role('CLERGY')),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 ASSO @VOID@
+        2 PHRASE Mr Stockdale
+        2 ROLE OTHER
+        3 PHRASE Teacher
+        1 BAPM
+        2 DATE 1930
+        2 ASSO @I2@
+        3 ROLE CLERGY
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1045,11 +1088,11 @@ class Auth(BaseStructure):
 
     
     GEDCOM Specification:
-    > Author
-    > The person, agency, or entity who created the record. For a published work,
-    > this could be the author, compiler, transcriber, abstractor, or editor. For
-    > an unpublished source, this may be an individual, a government agency,
-    > church organization, or private organization.
+    > - Author
+    > - The person, agency, or entity who created the record. For a published work,
+    >   this could be the author, compiler, transcriber, abstractor, or editor. For
+    >   an unpublished source, this may be an individual, a government agency,
+    >   church organization, or private organization.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1081,12 +1124,13 @@ class Bapl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Baptism, Latter-Day Saint
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_INDIVIDUAL_ORDINANCE`.
-    > baptism
-    > The event of baptism performed at age 8 or later by priesthood authority of
-    > The Church of Jesus Christ of Latter-day Saints. (See also [`BAPM`])
+    > - Baptism, Latter-Day Saint
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   See also `LDS_INDIVIDUAL_ORDINANCE`.
+    > - baptism
+    > - The event of baptism performed at age 8 or later by priesthood authority of
+    >   The Church of Jesus Christ of Latter-day Saints. (See also [`BAPM`])
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1128,11 +1172,12 @@ class Bapm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Baptism
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > baptism
-    > Baptism, performed in infancy or later. (See also [`BAPL`] and `CHR`.)
+    > - Baptism
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - baptism
+    > - Baptism, performed in infancy or later. (See also [`BAPL`] and `CHR`.)
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1188,11 +1233,12 @@ class Barm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Bar Mitzvah
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > Bar Mitzvah
-    > The ceremonial event held when a Jewish boy reaches age 13.
+    > - Bar Mitzvah
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - Bar Mitzvah
+    > - The ceremonial event held when a Jewish boy reaches age 13.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1248,12 +1294,13 @@ class Basm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Bas Mitzvah
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > Bas Mitzvah
-    > The ceremonial event held when a Jewish girl reaches age 13, also known as
-    > "Bat Mitzvah."
+    > - Bas Mitzvah
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - Bas Mitzvah
+    > - The ceremonial event held when a Jewish girl reaches age 13, also known as
+    >   "Bat Mitzvah."
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1309,11 +1356,12 @@ class Birt(BaseStructure):
 
     
     GEDCOM Specification:
-    > Birth
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > birth
-    > Entering into life.
+    > - Birth
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - birth
+    > - Entering into life.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1370,12 +1418,13 @@ class Bles(BaseStructure):
 
     
     GEDCOM Specification:
-    > Blessing
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > blessing
-    > Bestowing divine care or intercession. Sometimes given in connection with a
-    > naming ceremony.
+    > - Blessing
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - blessing
+    > - Bestowing divine care or intercession. Sometimes given in connection with a
+    >   naming ceremony.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1431,19 +1480,20 @@ class Buri(BaseStructure):
 
     
     GEDCOM Specification:
-    > Depositing remains
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > 
-    > Although defined as any depositing of remains since it was introduced in the
-    > first version of GEDCOM, this tag is a shortened form of the English word
-    > "burial" and has been interpreted to mean "depositing of remains by burial" by
-    > some applications and users. In the absence of a clarifying `TYPE` substructure
-    > it is likely, but not guaranteed, that a `BURI` structure refers to a burial
-    > rather than another form of depositing remains.
-    > 
-    > depositing remains
-    > Depositing the mortal remains of a deceased person.
+    > - Depositing remains
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    >   
+    >   Although defined as any depositing of remains since it was introduced in the
+    >   first version of GEDCOM, this tag is a shortened form of the English word
+    >   "burial" and has been interpreted to mean "depositing of remains by burial" by
+    >   some applications and users. In the absence of a clarifying `TYPE` substructure
+    >   it is likely, but not guaranteed, that a `BURI` structure refers to a burial
+    >   rather than another form of depositing remains.
+    >   
+    > - depositing remains
+    > - Depositing the mortal remains of a deceased person.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1499,10 +1549,10 @@ class Caln(BaseStructure):
 
     
     GEDCOM Specification:
-    > Call number
-    > An identification or reference description used to file and retrieve items
-    > from the holdings of a repository. Despite the word "number" in the name,
-    > may contain any character, not just digits.
+    > - Call number
+    > - An identification or reference description used to file and retrieve items
+    >   from the holdings of a repository. Despite the word "number" in the name,
+    >   may contain any character, not just digits.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1539,13 +1589,14 @@ class Cast(BaseStructure):
 
     
     GEDCOM Specification:
-    > Caste
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > caste
-    > The name of an individual's rank or status in society which is sometimes
-    > based on racial or religious differences, or differences in wealth,
-    > inherited rank, profession, or occupation.
+    > - Caste
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - caste
+    > - The name of an individual's rank or status in society which is sometimes
+    >   based on racial or religious differences, or differences in wealth,
+    >   inherited rank, profession, or occupation.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1601,10 +1652,10 @@ class Caus(BaseStructure):
 
     
     GEDCOM Specification:
-    > Cause
-    > The reasons which precipitated an event. It is often used subordinate to a
-    > death event to show cause of death, such as might be listed on a death
-    > certificate.
+    > - Cause
+    > - The reasons which precipitated an event. It is often used subordinate to a
+    >   death event to show cause of death, such as might be listed on a death
+    >   certificate.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1686,17 +1737,17 @@ class Chan(BaseStructure):
 
     
     GEDCOM Specification:
-    > Change
-    > The most recent change to the superstructure. This is metadata about the
-    > structure itself, not data about its subject. See `CHANGE_DATE` for more
-    > details.
-    > The date of the most recent modification of the superstructure, optionally with
-    > notes about that modification.
-    > 
-    > The `NOTE` substructure may describe previous changes as well as the most
-    > recent, although only the most recent change is described by the `DATE`
-    > substructure.
-    > 
+    > - Change
+    > - The most recent change to the superstructure. This is metadata about the
+    >   structure itself, not data about its subject. See `CHANGE_DATE` for more
+    >   details.
+    >   The date of the most recent modification of the superstructure, optionally with
+    >   notes about that modification.
+    >   
+    >   The `NOTE` substructure may describe previous changes as well as the most
+    >   recent, although only the most recent change is described by the `DATE`
+    >   substructure.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1740,9 +1791,9 @@ class Chil(BaseStructure):
 
     
     GEDCOM Specification:
-    > Child
-    > The child in a family, whether biological, adopted, foster, sealed, or
-    > other relationship.
+    > - Child
+    > - The child in a family, whether biological, adopted, foster, sealed, or
+    >   other relationship.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1779,11 +1830,12 @@ class Chr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Christening
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > christening
-    > Baptism or naming events for a child.
+    > - Christening
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - christening
+    > - Baptism or naming events for a child.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1840,11 +1892,12 @@ class Chra(BaseStructure):
 
     
     GEDCOM Specification:
-    > Christening, adult
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > adult christening
-    > Baptism or naming events for an adult person.
+    > - Christening, adult
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - adult christening
+    > - Baptism or naming events for an adult person.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1900,9 +1953,9 @@ class City(BaseStructure):
 
     
     GEDCOM Specification:
-    > City
-    > The name of the city used in the address. See `ADDRESS_STRUCTURE` for more
-    > details.
+    > - City
+    > - The name of the city used in the address. See `ADDRESS_STRUCTURE` for more
+    >   details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1934,11 +1987,12 @@ class Conf(BaseStructure):
 
     
     GEDCOM Specification:
-    > Confirmation
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > confirmation
-    > Conferring full church membership.
+    > - Confirmation
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - confirmation
+    > - Conferring full church membership.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1994,12 +2048,13 @@ class Conl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Confirmation, Latter-Day Saint
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_INDIVIDUAL_ORDINANCE`.
-    > confirmation
-    > The religious event by which a person receives membership in The Church of
-    > Jesus Christ of Latter-day Saints. (See also [`CONF`])
+    > - Confirmation, Latter-Day Saint
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   See also `LDS_INDIVIDUAL_ORDINANCE`.
+    > - confirmation
+    > - The religious event by which a person receives membership in The Church of
+    >   Jesus Christ of Latter-day Saints. (See also [`CONF`])
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2041,9 +2096,9 @@ class Copr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Copyright
-    > A copyright statement, as appropriate for the copyright laws applicable to
-    > this data.
+    > - Copyright
+    > - A copyright statement, as appropriate for the copyright laws applicable to
+    >   this data.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2076,9 +2131,9 @@ class Corp(BaseStructure):
 
     
     GEDCOM Specification:
-    > Corporate name
-    > The name of the business, corporation, or person that produced or
-    > commissioned the product.
+    > - Corporate name
+    > - The name of the business, corporation, or person that produced or
+    >   commissioned the product.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2119,13 +2174,13 @@ class Crea(BaseStructure):
 
     
     GEDCOM Specification:
-    > Creation
-    > The initial creation of the superstructure. This is metadata about the
-    > structure itself, not data about its subject. See `CREATION_DATE` for more
-    > details.
-    > The date of the initial creation of the superstructure. Because this refers
-    > to the initial creation, it should not be modified after the structure is
-    > created.
+    > - Creation
+    > - The initial creation of the superstructure. This is metadata about the
+    >   structure itself, not data about its subject. See `CREATION_DATE` for more
+    >   details.
+    > - The date of the initial creation of the superstructure. Because this refers
+    >   to the initial creation, it should not be modified after the structure is
+    >   created.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2167,11 +2222,12 @@ class Crem(BaseStructure):
 
     
     GEDCOM Specification:
-    > Cremation
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > cremation
-    > The act of reducing a dead body to ashes by fire.
+    > - Cremation
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - cremation
+    > - The act of reducing a dead body to ashes by fire.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2227,29 +2283,29 @@ class Crop(BaseStructure):
 
     
     GEDCOM Specification:
-    > Crop
-    > A subregion of an image to display. It is only valid when the superstructure
-    > links to a `MULTIMEDIA_RECORD` with at least 1 `FILE` substructure that refers
-    > to an external file with a defined pixel unit.
-    > 
-    > `LEFT` and `TOP` indicate the top-left corner of the region to display. `WIDTH`
-    > and `HEIGHT` indicate how many pixels wide and tall the region to display is.
-    > If omitted, `LEFT` and `TOP` each default to 0; `WIDTH` defaults to the image
-    > width minus `LEFT`; and `HEIGHT` defaults to the image height minus `TOP`.
-    > 
-    > If the superstructure links to a `MULTIMEDIA_RECORD` that includes multiple
-    > `FILE` substructures, the `CROP` applies to the first `FILE` to which it can
-    > apply, namely the first external file with a defined pixel unit.
-    > 
-    > It is recommended that `CROP` be used only with a single-FILE
-    > `MULTIMEDIA_RECORD`.
-    > 
-    > The following are errors:
-    > 
-    > - `LEFT` or `LEFT` + `WIDTH` exceed the image width.
-    > - `TOP` or `TOP` + `HEIGHT` exceed the image height.
-    > - `CROP` applied to a non-image or image without a defined pixel unit.
-    > 
+    > - Crop
+    >   A subregion of an image to display. It is only valid when the superstructure
+    >   links to a `MULTIMEDIA_RECORD` with at least 1 `FILE` substructure that refers
+    >   to an external file with a defined pixel unit.
+    >   
+    >   `LEFT` and `TOP` indicate the top-left corner of the region to display. `WIDTH`
+    >   and `HEIGHT` indicate how many pixels wide and tall the region to display is.
+    >   If omitted, `LEFT` and `TOP` each default to 0; `WIDTH` defaults to the image
+    >   width minus `LEFT`; and `HEIGHT` defaults to the image height minus `TOP`.
+    >   
+    >   If the superstructure links to a `MULTIMEDIA_RECORD` that includes multiple
+    >   `FILE` substructures, the `CROP` applies to the first `FILE` to which it can
+    >   apply, namely the first external file with a defined pixel unit.
+    >   
+    >   It is recommended that `CROP` be used only with a single-FILE
+    >   `MULTIMEDIA_RECORD`.
+    >   
+    >   The following are errors:
+    >   
+    >   - `LEFT` or `LEFT` + `WIDTH` exceed the image width.
+    >   - `TOP` or `TOP` + `HEIGHT` exceed the image height.
+    >   - `CROP` applied to a non-image or image without a defined pixel unit.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2288,9 +2344,9 @@ class Ctry(BaseStructure):
 
     
     GEDCOM Specification:
-    > Country
-    > The name of the country that pertains to the associated address. See
-    > `ADDRESS_STRUCTURE` for more details.
+    > - Country
+    > - The name of the country that pertains to the associated address. See
+    >   `ADDRESS_STRUCTURE` for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2322,11 +2378,11 @@ class Data(BaseStructure):
 
     
     GEDCOM Specification:
-    > Data
-    > A structure with no payload used to distinguish a description of something
-    > from metadata about it. For example, `SOUR` and its other substructures
-    > describe a source itself, while `SOUR`.`DATA` describes the content of the
-    > source.
+    > - Data
+    > - A structure with no payload used to distinguish a description of something
+    >   from metadata about it. For example, `SOUR` and its other substructures
+    >   describe a source itself, while `SOUR`.`DATA` describes the content of the
+    >   source.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2365,12 +2421,12 @@ class DataEven(BaseStructure):
 
     
     GEDCOM Specification:
-    > Event
-    > A list of enumerated values from set
-    > `https://gedcom.io/terms/v7/enumset-EVENATTR` indicating the types of
-    > events that were recorded in a particular source. Each event type is
-    > separated by a comma and space. For example, a parish register of births,
-    > deaths, and marriages would be `BIRT, DEAT, MARR`.
+    > - Event
+    > - A list of enumerated values from set
+    >   `https://gedcom.io/terms/v7/enumset-EVENATTR` indicating the types of
+    >   events that were recorded in a particular source. Each event type is
+    >   separated by a comma and space. For example, a parish register of births,
+    >   deaths, and marriages would be `BIRT, DEAT, MARR`.
         
     Enumerations:
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
@@ -2425,9 +2481,9 @@ class DataEvenDate(BaseStructure):
 
     
     GEDCOM Specification:
-    > Date
-    > The `DatePeriod` covered by the entire source; the period during which this
-    > source recorded events.
+    > - Date
+    > - The `DatePeriod` covered by the entire source; the period during which this
+    >   source recorded events.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2464,36 +2520,36 @@ class Date(BaseStructure):
 
     
     GEDCOM Specification:
-    > Date
-    > The principal date of the subject of the superstructure. The payload is a
-    > `DateValue`.
-    > 
-    > When the superstructure is an event, the principal date indicates when the
-    > event took place.
-    > 
-    > When the superstructure is an attribute, the principal date indicates when the
-    > attribute was observed, asserted, or applied. A date period might put bounds on
-    > the attributes applicability, but other date forms assume that the attribute
-    > may have also applied on other dates too.
-    > 
-    > When the superstructure is a `https://gedcom.io/terms/v7/SOUR-DATA`, the
-    > principal date indicates when the data was entered into the source; or, for a
-    > source like a website that changes over time, a date on which the source
-    > contained the data.
-    > 
-    > See `DATE_VALUE` for more details.
-    > 
-    > A date, optionally with a time and/or a phrase. If there is a `TIME`, it
-    > asserts that the event happened at a specific time on a single day. `TIME`
-    > should not be used with `DatePeriod` but may be used with other date types.
-    > 
-    > <div class="note">
-    > 
-    > There is currently no provision for approximate times or time phrases. Time
-    > phrases are expected to be added in version 7.1.
-    > 
-    > </div>
-    > 
+    > - Date
+    >   The principal date of the subject of the superstructure. The payload is a
+    >   `DateValue`.
+    >   
+    >   When the superstructure is an event, the principal date indicates when the
+    >   event took place.
+    >   
+    >   When the superstructure is an attribute, the principal date indicates when the
+    >   attribute was observed, asserted, or applied. A date period might put bounds on
+    >   the attributes applicability, but other date forms assume that the attribute
+    >   may have also applied on other dates too.
+    >   
+    >   When the superstructure is a `https://gedcom.io/terms/v7/SOUR-DATA`, the
+    >   principal date indicates when the data was entered into the source; or, for a
+    >   source like a website that changes over time, a date on which the source
+    >   contained the data.
+    >   
+    >   See `DATE_VALUE` for more details.
+    >   
+    >   A date, optionally with a time and/or a phrase. If there is a `TIME`, it
+    >   asserts that the event happened at a specific time on a single day. `TIME`
+    >   should not be used with `DatePeriod` but may be used with other date types.
+    >   
+    >   <div class="note">
+    >   
+    >   There is currently no provision for approximate times or time phrases. Time
+    >   phrases are expected to be added in version 7.1.
+    >   
+    >   </div>
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2588,9 +2644,9 @@ class DateExact(BaseStructure):
 
     
     GEDCOM Specification:
-    > Date
-    > The principal date of the subject of the superstructure. The payload is a
-    > `DateExact`.
+    > - Date
+    > - The principal date of the subject of the superstructure. The payload is a
+    >   `DateExact`.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2630,11 +2686,12 @@ class Deat(BaseStructure):
 
     
     GEDCOM Specification:
-    > Death
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > death
-    > Mortal life terminates.
+    > - Death
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - death
+    > - Mortal life terminates.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2690,9 +2747,10 @@ class Desi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Descendant Interest
-    > Indicates an interest in research to identify additional descendants of this individual.
-    > See also `ANCI`.
+    > - Descendant Interest
+    > - Indicates an interest in research to identify additional descendants of
+    >   this individual.
+    >   See also `ANCI`.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2724,9 +2782,9 @@ class Dest(BaseStructure):
 
     
     GEDCOM Specification:
-    > Destination
-    > An identifier for the system expected to receive this document. See
-    > `HEAD`.`SOUR` for guidance on choosing identifiers.
+    > - Destination
+    > - An identifier for the system expected to receive this document. See
+    >   `HEAD`.`SOUR` for guidance on choosing identifiers.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2758,11 +2816,12 @@ class Div(BaseStructure):
 
     
     GEDCOM Specification:
-    > Divorce
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > divorce
-    > Dissolving a marriage through civil action.
+    > - Divorce
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - divorce
+    > - Dissolving a marriage through civil action.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2819,11 +2878,12 @@ class Divf(BaseStructure):
 
     
     GEDCOM Specification:
-    > Divorce filing
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > divorce filed
-    > Filing for a divorce by a spouse.
+    > - Divorce filing
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - divorce filed
+    > - Filing for a divorce by a spouse.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2880,11 +2940,12 @@ class Dscr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Description
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > physical description
-    > The physical characteristics of a person.
+    > - Description
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - physical description
+    > - The physical characteristics of a person.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2940,11 +3001,12 @@ class Educ(BaseStructure):
 
     
     GEDCOM Specification:
-    > Education
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > education
-    > Indicator of a level of education attained.
+    > - Education
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - education
+    > - Indicator of a level of education attained.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3000,23 +3062,23 @@ class Email(BaseStructure):
 
     
     GEDCOM Specification:
-    > Email
-    > An electronic mail address, as defined by any relevant standard such as 
-    > [RFC 3696](https://datatracker.ietf.org/doc/html/rfc3696), 
-    > [RFC 5321](https://datatracker.ietf.org/doc/html/rfc5321), or 
-    > [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322).
-    > 
-    > If an invalid email address is present upon import, it should be preserved
-    > as-is on export.
-    > 
-    > <div class="note">
-    > 
-    > The version 5.5.1 specification contained a typo where this tag was sometimes
-    > written `EMAI` and sometimes written `EMAIL`. `EMAIL` should be used in version
-    > 7.0 and later.
-    > 
-    > </div>
-    > 
+    > - Email
+    >   An electronic mail address, as defined by any relevant standard such as 
+    >   [RFC 3696](https://datatracker.ietf.org/doc/html/rfc3696), 
+    >   [RFC 5321](https://datatracker.ietf.org/doc/html/rfc5321), or 
+    >   [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322).
+    >   
+    >   If an invalid email address is present upon import, it should be preserved
+    >   as-is on export.
+    >   
+    >   <div class="note">
+    >   
+    >   The version 5.5.1 specification contained a typo where this tag was sometimes
+    >   written `EMAI` and sometimes written `EMAIL`. `EMAIL` should be used in version
+    >   7.0 and later.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3101,11 +3163,12 @@ class Emig(BaseStructure):
 
     
     GEDCOM Specification:
-    > Emigration
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > emigration
-    > Leaving one's homeland with the intent of residing elsewhere.
+    > - Emigration
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - emigration
+    > - Leaving one's homeland with the intent of residing elsewhere.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3161,13 +3224,14 @@ class Endl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Endowment, Latter-Day Saint
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_INDIVIDUAL_ORDINANCE`.
-    > endowment
-    > A religious event where an endowment ordinance for an individual was
-    > performed by priesthood authority in a temple of The Church of Jesus Christ
-    > of Latter-day Saints.
+    > - Endowment, Latter-Day Saint
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   See also `LDS_INDIVIDUAL_ORDINANCE`.
+    > - endowment
+    > - A religious event where an endowment ordinance for an individual was
+    >   performed by priesthood authority in a temple of The Church of Jesus Christ
+    >   of Latter-day Saints.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3209,11 +3273,12 @@ class Enga(BaseStructure):
 
     
     GEDCOM Specification:
-    > Engagement
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > engagement
-    > Recording or announcing an agreement between 2 people to become married.
+    > - Engagement
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - engagement
+    > - Recording or announcing an agreement between 2 people to become married.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3270,21 +3335,21 @@ class Exid(BaseStructure):
 
     
     GEDCOM Specification:
-    > External Identifier
-    > An identifier for the subject of the superstructure. The identifier is
-    > maintained by some external authority; the authority owning the identifier is
-    > provided in the TYPE substructure; see `EXID`.`TYPE` for more details.
-    > 
-    > Depending on the maintaining authority, an `EXID` may be a unique identifier
-    > for the subject, an identifier for 1 of several views of the subject, or an
-    > identifier for the externally-maintained copy of the same information as is
-    > contained in this structure. However, unlike `UID` and `REFN`, `EXID` does not
-    > identify a structure; structures with the same `EXID` may have originated
-    > independently rather than by edits from the same starting point.
-    > 
-    > `EXID` identifiers are expected to be unique. Once assigned, an `EXID`
-    > identifier should never be re-used for any other purpose.
-    > 
+    > - External Identifier
+    >   An identifier for the subject of the superstructure. The identifier is
+    >   maintained by some external authority; the authority owning the identifier is
+    >   provided in the TYPE substructure; see `EXID`.`TYPE` for more details.
+    >   
+    >   Depending on the maintaining authority, an `EXID` may be a unique identifier
+    >   for the subject, an identifier for 1 of several views of the subject, or an
+    >   identifier for the externally-maintained copy of the same information as is
+    >   contained in this structure. However, unlike `UID` and `REFN`, `EXID` does not
+    >   identify a structure; structures with the same `EXID` may have originated
+    >   independently rather than by edits from the same starting point.
+    >   
+    >   `EXID` identifiers are expected to be unique. Once assigned, an `EXID`
+    >   identifier should never be re-used for any other purpose.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3328,21 +3393,24 @@ class ExidType(BaseStructure):
 
     
     GEDCOM Specification:
-    > Type
-    > The authority issuing the `EXID`, represented as a URI. It is recommended that
-    > this be a URL.
-    > 
-    > If the authority maintains stable URLs for each identifier it issues, it is
-    > recommended that the `TYPE` payload be selected such that appending the `EXID`
-    > payload to it yields that URL. However, this is not required and a different
-    > URI for the set of issued identifiers may be used instead.
-    > 
-    > Registered URIs are listed in the 
-    > [exid-types registry](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EXID), where fields are
-    > defined using the [YAML file format](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html).
-    > 
-    > Additional type URIs can be registered by filing a [GitHub pull request].
-    > 
+    > - Type
+    >   The authority issuing the `EXID`, represented as a URI. It is recommended that
+    >   this be a URL.
+    >   
+    >   If the authority maintains stable URLs for each identifier it issues, it is
+    >   recommended that the `TYPE` payload be selected such that appending the `EXID`
+    >   payload to it yields that URL. However, this is not required and a different
+    >   URI for the set of issued identifiers may be used instead.
+    >   
+    >   Registered URIs are listed in the 
+    > - [exid-types
+    >   registry](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EXID),
+    >   where fields are
+    > - defined using the [YAML file
+    >   format](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html).
+    >   
+    >   Additional type URIs can be registered by filing a [GitHub pull request].
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3374,12 +3442,12 @@ class FamCens(BaseStructure):
 
     
     GEDCOM Specification:
-    > Census
-    > An [Family
-    > Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > census
-    > Periodic count of the population for a designated locality, such as a
-    > national or state census.
+    > - Census
+    > - An [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    > - census
+    > - Periodic count of the population for a designated locality, such as a
+    >   national or state census.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3436,8 +3504,8 @@ class FamEven(BaseStructure):
 
     
     GEDCOM Specification:
-    > Event
-    > See `https://gedcom.io/terms/v7/INDI-EVEN`.
+    > - Event
+    > - See `https://gedcom.io/terms/v7/INDI-EVEN`.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3494,8 +3562,8 @@ class FamFact(BaseStructure):
 
     
     GEDCOM Specification:
-    > Fact
-    > See `https://gedcom.io/terms/v7/INDI-FACT`.
+    > - Fact
+    > - See `https://gedcom.io/terms/v7/INDI-FACT`.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3552,8 +3620,8 @@ class FamHusb(BaseStructure):
 
     
     GEDCOM Specification:
-    > Husband
-    > This is a partner in a `FAM` record. See `FAMILY_RECORD` for more details.
+    > - Husband
+    > - This is a partner in a `FAM` record. See `FAMILY_RECORD` for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3590,11 +3658,12 @@ class FamNchi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Number of children
-    > A [Family Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
-    > See also `FAMILY_ATTRIBUTE_STRUCTURE`.
-    > number of children
-    > The number of children that belong to this family.
+    > - Number of children
+    > - A [Family
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
+    >   See also `FAMILY_ATTRIBUTE_STRUCTURE`.
+    > - number of children
+    > - The number of children that belong to this family.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3651,15 +3720,16 @@ class FamResi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Residence
-    > A [Family Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
-    > See also `FAMILY_ATTRIBUTE_STRUCTURE`.
-    > 
-    > See `https://gedcom.io/terms/v7/INDI-RESI` for comments on the use of payload
-    > strings in `RESI` structures.
-    > 
-    > residence
-    > An address or place of residence where a family resided.
+    > - Residence
+    > - A [Family
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
+    >   See also `FAMILY_ATTRIBUTE_STRUCTURE`.
+    >   
+    >   See `https://gedcom.io/terms/v7/INDI-RESI` for comments on the use of payload
+    >   strings in `RESI` structures.
+    >   
+    > - residence
+    > - An address or place of residence where a family resided.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3716,8 +3786,8 @@ class FamWife(BaseStructure):
 
     
     GEDCOM Specification:
-    > Wife
-    > A partner in a `FAM` record. See `FAMILY_RECORD` for more details.
+    > - Wife
+    > - A partner in a `FAM` record. See `FAMILY_RECORD` for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3754,8 +3824,8 @@ class Famc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Family child
-    > The family with which this individual event is associated.
+    > - Family child
+    > - The family with which this individual event is associated.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3789,9 +3859,9 @@ class FamcAdop(BaseStructure):
 
     
     GEDCOM Specification:
-    > Adoption
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ADOP`
-    > indicating which parent(s) in the family adopted this individual.
+    > - Adoption
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-ADOP`
+    >   indicating which parent(s) in the family adopted this individual.
         
     Enumerations:
     - 'HUSB': https://gedcom.io/terms/v7/enum-ADOP-HUSB
@@ -3836,10 +3906,10 @@ class FamcStat(BaseStructure):
 
     
     GEDCOM Specification:
-    > Status
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-FAMC-STAT`
-    > assessing of the state or condition of a researcher's belief in a family
-    > connection.
+    > - Status
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-FAMC-STAT`
+    >   assessing of the state or condition of a researcher's belief in a family
+    >   connection.
         
     Enumerations:
     - 'CHALLENGED': https://gedcom.io/terms/v7/enum-CHALLENGED
@@ -3886,9 +3956,9 @@ class Fams(BaseStructure):
 
     
     GEDCOM Specification:
-    > Family spouse
-    > The family in which an individual appears as a partner. See `FAMILY_RECORD`
-    > for more details.
+    > - Family spouse
+    > - The family in which an individual appears as a partner. See `FAMILY_RECORD`
+    >   for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3926,9 +3996,9 @@ class Fax(BaseStructure):
 
     
     GEDCOM Specification:
-    > Facsimile
-    > A fax telephone number appropriate for sending data facsimiles. See `PHON`
-    > for additional comments on telephone numbers.
+    > - Facsimile
+    > - A fax telephone number appropriate for sending data facsimiles. See `PHON`
+    >   for additional comments on telephone numbers.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4013,11 +4083,12 @@ class Fcom(BaseStructure):
 
     
     GEDCOM Specification:
-    > First communion
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > first communion
-    > The first act of sharing in the Lord's supper as part of church worship.
+    > - First communion
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - first communion
+    > - The first act of sharing in the Lord's supper as part of church worship.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4073,10 +4144,10 @@ class File(BaseStructure):
 
     
     GEDCOM Specification:
-    > File reference
-    > A reference to an external file. See the [File Path
-    > datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path)
-    > for more details.
+    > - File reference
+    > - A reference to an external file. See the [File Path
+    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path)
+    >   for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4115,52 +4186,80 @@ class FileTran(BaseStructure):
 
     
     GEDCOM Specification:
-    > Translation
-    > A type of `TRAN` for external media files. Each
-    > `https://gedcom.io/terms/v7/NOTE-TRAN` must have a `FORM` substructure. See
-    > also `FILE` and the [File Path datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path).
-    > 
-    > <div class="example">
-    > 
-    > If an mp3 audio file has been transcoded as an ogg file and a timestamped
-    > transcript has been extracted as a WebVTT file, the resulting set of files
-    > might be presented as follows:
-    > 
-    > ```gedcom
-    > 0 @EX@ OBJE
-    > 1 FILE media/original.mp3
-    > 2 FORM audio/mp3
-    > 2 TRAN media/derived.oga
-    > 3 FORM audio/ogg
-    > 2 TRAN media/transcript.vtt
-    > 3 FORM text/vtt
-    > ```
-    > 
-    > </div>
-    > 
-    > Note that `FILE`.`TRAN` refers to translation to a different digital format,
-    > not to translation to a different human language. Files that differ in the
-    > human language of their content should each be given their own `FILE`
-    > structure.
-    > 
-    > A representation of the superstructure's data in a different format.
-    > 
-    > In some situations it is desirable to provide the same semantic content in
-    > multiple formats. Where this is desirable, a `TRAN` substructure is used, where
-    > the specific format is given in its language tag substructure, media type
-    > substructure, or both.
-    > 
-    > Different `TRAN` structures are used in different contexts to fully capture the
-    > structure of the information being presented in multiple formats. In all cases,
-    > a `TRAN` structure's payload and substructures should provide only information
-    > also contained in the `TRAN` structures' superstructure, but provide it in a
-    > new language, script, or media type.
-    > 
-    > Each `TRAN` substructure must have either a language tag or a media type or
-    > both. Each `TRAN` structure must differ from its superstructure and from every
-    > other `TRAN` substructure of its superstructure in either its language tag or
-    > its media type or both.
-    > 
+    > - Translation
+    >   A type of `TRAN` for external media files. Each
+    >   `https://gedcom.io/terms/v7/NOTE-TRAN` must have a `FORM` substructure. See
+    > - also `FILE` and the [File Path
+    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path).
+    >   
+    >   <div class="example">
+    >   
+    >   If an mp3 audio file has been transcoded as an ogg file and a timestamped
+    >   transcript has been extracted as a WebVTT file, the resulting set of files
+    >   might be presented as follows:
+    >   
+    >   ```gedcom
+    >   0 @EX@ OBJE
+    >   1 FILE media/original.mp3
+    >   2 FORM audio/mp3
+    >   2 TRAN media/derived.oga
+    >   3 FORM audio/ogg
+    >   2 TRAN media/transcript.vtt
+    >   3 FORM text/vtt
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   Note that `FILE`.`TRAN` refers to translation to a different digital format,
+    >   not to translation to a different human language. Files that differ in the
+    >   human language of their content should each be given their own `FILE`
+    >   structure.
+    >   
+    >   A representation of the superstructure's data in a different format.
+    >   
+    >   In some situations it is desirable to provide the same semantic content in
+    >   multiple formats. Where this is desirable, a `TRAN` substructure is used, where
+    >   the specific format is given in its language tag substructure, media type
+    >   substructure, or both.
+    >   
+    >   Different `TRAN` structures are used in different contexts to fully capture the
+    >   structure of the information being presented in multiple formats. In all cases,
+    >   a `TRAN` structure's payload and substructures should provide only information
+    >   also contained in the `TRAN` structures' superstructure, but provide it in a
+    >   new language, script, or media type.
+    >   
+    >   Each `TRAN` substructure must have either a language tag or a media type or
+    >   both. Each `TRAN` structure must differ from its superstructure and from every
+    >   other `TRAN` substructure of its superstructure in either its language tag or
+    >   its media type or both.
+    >   
+
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes7 as gc
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> obje_xref = g.multimedia_xref('EX')
+        >>> obje = gc.RecordObje(obje_xref,
+        ...     [
+        ...         gc.File('media/original.mp3',
+        ...             [
+        ...                 gc.Form('audio/mp3'),
+        ...                 gc.FileTran('media/derived.oga', gc.Form('audio/ogg')),
+        ...                 gc.FileTran('media/transcript.vtt', gc.Form('text/vtt')),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(obje.ged())
+        0 @EX@ OBJE
+        1 FILE media/original.mp3
+        2 FORM audio/mp3
+        2 TRAN media/derived.oga
+        3 FORM audio/ogg
+        2 TRAN media/transcript.vtt
+        3 FORM text/vtt
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4197,9 +4296,10 @@ class Form(BaseStructure):
 
     
     GEDCOM Specification:
-    > Format
-    > The [media type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
-    >  of the file referenced by the superstructure.
+    > - Format
+    > - The [media
+    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
+    >    of the file referenced by the superstructure.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4237,12 +4337,12 @@ class Gedc(BaseStructure):
 
     
     GEDCOM Specification:
-    > GEDCOM
-    > A container for information about the entire document.
-    > 
-    > It is recommended that applications write `GEDC` with its required substructure
-    > `https://gedcom.io/terms/v7/GEDC-VERS` as the first substructure of `HEAD`.
-    > 
+    > - GEDCOM
+    >   A container for information about the entire document.
+    >   
+    >   It is recommended that applications write `GEDC` with its required substructure
+    >   `https://gedcom.io/terms/v7/GEDC-VERS` as the first substructure of `HEAD`.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4278,12 +4378,12 @@ class GedcVers(BaseStructure):
 
     
     GEDCOM Specification:
-    > Version
-    > The version number of the official specification that this document's data
-    > conforms to. This must include the major and minor version (for example,
-    > "`7.0`"); it may include the patch as well (for example, "`7.0.1`"), but
-    > doing so is not required. See [A Guide to Version Numbers] for more details
-    > about version numbers.
+    > - Version
+    > - The version number of the official specification that this document's data
+    >   conforms to. This must include the major and minor version (for example,
+    >   "`7.0`"); it may include the patch as well (for example, "`7.0.1`"), but
+    >   doing so is not required. See [A Guide to Version Numbers] for more details
+    >   about version numbers.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4315,8 +4415,8 @@ class Givn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Given name
-    > A given or earned name used for official identification of a person.
+    > - Given name
+    > - A given or earned name used for official identification of a person.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4349,11 +4449,12 @@ class Grad(BaseStructure):
 
     
     GEDCOM Specification:
-    > Graduation
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > graduation
-    > Awarding educational diplomas or degrees to individuals.
+    > - Graduation
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - graduation
+    > - Awarding educational diplomas or degrees to individuals.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4409,30 +4510,33 @@ class Head(BaseStructure):
 
     
     GEDCOM Specification:
-    > Header
-    > A pseudo-structure for storing metadata about the document. See 
-    > [The Header and Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header) for more details.
-    > The header pseudo-structure provides metadata about the entire dataset. A few
-    > substructures of note:
-    > 
-    > - `GEDC` identifies the specification that this document conforms to. It is
-    >   recommended that `GEDC` be the first substructure of the header.
-    > - `SCHMA` gives the meaning of extension tags; see 
-    > [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions) for more
-    >   details.
-    > - `SOUR` describes the originating software.
-    >   - `CORP` describes the corporation creating the software.
-    >   - `HEAD`.`SOUR`.`DATA` describes a larger database, electronic data source,
-    >     or digital repository this data is extracted from.
-    > - `LANG` and `PLAC` give a default value for the rest of the document.
-    > 
-    > <div class="deprecation">
-    > 
-    > `HEAD`.`SOUR`.`DATA` is now deprecated and applications should use
-    > `HEAD`.`SOUR`.`NAME` instead.
-    > 
-    > </div>
-    > 
+    > - Header
+    >   A pseudo-structure for storing metadata about the document. See 
+    > - [The Header and
+    >   Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header)
+    >   for more details.
+    >   The header pseudo-structure provides metadata about the entire dataset. A few
+    >   substructures of note:
+    >   
+    >   - `GEDC` identifies the specification that this document conforms to. It is
+    >     recommended that `GEDC` be the first substructure of the header.
+    >   - `SCHMA` gives the meaning of extension tags; see 
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    >   for more
+    >     details.
+    >   - `SOUR` describes the originating software.
+    >     - `CORP` describes the corporation creating the software.
+    >     - `HEAD`.`SOUR`.`DATA` describes a larger database, electronic data source,
+    >       or digital repository this data is extracted from.
+    >   - `LANG` and `PLAC` give a default value for the rest of the document.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   `HEAD`.`SOUR`.`DATA` is now deprecated and applications should use
+    >   `HEAD`.`SOUR`.`NAME` instead.
+    >   
+    >   </div>
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4473,8 +4577,8 @@ class HeadDate(BaseStructure):
 
     
     GEDCOM Specification:
-    > Date
-    > The `DateExact` that this document was created.
+    > - Date
+    > - The `DateExact` that this document was created.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4511,32 +4615,32 @@ class HeadLang(BaseStructure):
 
     
     GEDCOM Specification:
-    > Language
-    > A default language which may be used to interpret any `Text`-typed payloads
-    > that lack a specific language tag from a `https://gedcom.io/terms/v7/LANG`
-    > structure. An application may choose to use a different default based on its
-    > knowledge of the language preferences of the user.
-    > 
-    > The payload of the `LANG` structure is a language tag, as defined by 
-    > [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
-    > 
-    > <div class="note">
-    > 
-    > Some algorithms on text are language-specific. Examples include sorting
-    > sequences, name comparison and phonetic name matching algorithms,
-    > spell-checking, computer-synthesized speech, Braille transcription, and
-    > language translation. When the language of the text is given through a
-    > `https://gedcom.io/terms/v7/LANG`, that should be used. When
-    > `https://gedcom.io/terms/v7/LANG` is not available,
-    > `https://gedcom.io/terms/v7/HEAD-LANG` provides the file creator's suggested
-    > default language. For some language-specific algorithms, the user's preferred
-    > language may be a more appropriate default than the file's default language.
-    > User language preferences can be found in a variety of platform-specific
-    > places, such as the default language from operating system settings, user
-    > locales, Input Method Editors (IMEs), etc.
-    > 
-    > </div>
-    > 
+    > - Language
+    >   A default language which may be used to interpret any `Text`-typed payloads
+    >   that lack a specific language tag from a `https://gedcom.io/terms/v7/LANG`
+    >   structure. An application may choose to use a different default based on its
+    >   knowledge of the language preferences of the user.
+    >   
+    >   The payload of the `LANG` structure is a language tag, as defined by 
+    >   [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
+    >   
+    >   <div class="note">
+    >   
+    >   Some algorithms on text are language-specific. Examples include sorting
+    >   sequences, name comparison and phonetic name matching algorithms,
+    >   spell-checking, computer-synthesized speech, Braille transcription, and
+    >   language translation. When the language of the text is given through a
+    >   `https://gedcom.io/terms/v7/LANG`, that should be used. When
+    >   `https://gedcom.io/terms/v7/LANG` is not available,
+    >   `https://gedcom.io/terms/v7/HEAD-LANG` provides the file creator's suggested
+    >   default language. For some language-specific algorithms, the user's preferred
+    >   language may be a more appropriate default than the file's default language.
+    >   User language preferences can be found in a variety of platform-specific
+    >   places, such as the default language from operating system settings, user
+    >   locales, Input Method Editors (IMEs), etc.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4568,9 +4672,9 @@ class HeadPlac(BaseStructure):
 
     
     GEDCOM Specification:
-    > Place
-    > This is a placeholder for providing a default `PLAC`.`FORM`, and must not
-    > have a payload.
+    > - Place
+    > - This is a placeholder for providing a default `PLAC`.`FORM`, and must not
+    >   have a payload.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4606,8 +4710,8 @@ class HeadPlacForm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Format
-    > Any `PLAC` with no [`FORM`] shall be treated as if it has this [`FORM`].
+    > - Format
+    > - Any `PLAC` with no [`FORM`] shall be treated as if it has this [`FORM`].
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4639,11 +4743,11 @@ class HeadSour(BaseStructure):
 
     
     GEDCOM Specification:
-    > Source
-    > An identifier for the product producing this dataset. A registration
-    > process for these identifiers existed for a time, but no longer does. If an
-    > existing identifier is known, it should be used. Otherwise, a URI owned by
-    > the product should be used instead.
+    > - Source
+    > - An identifier for the product producing this dataset. A registration
+    >   process for these identifiers existed for a time, but no longer does. If an
+    >   existing identifier is known, it should be used. Otherwise, a URI owned by
+    >   the product should be used instead.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4683,11 +4787,11 @@ class HeadSourData(BaseStructure):
 
     
     GEDCOM Specification:
-    > Data
-    > The database, electronic data source, or digital repository from which this
-    > dataset was exported. The payload is the name of the database, electronic
-    > data source, or digital repository, with substructures providing additional
-    > details about it (not about the export).
+    > - Data
+    > - The database, electronic data source, or digital repository from which this
+    >   dataset was exported. The payload is the name of the database, electronic
+    >   data source, or digital repository, with substructures providing additional
+    >   details about it (not about the export).
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4725,26 +4829,42 @@ class Height(BaseStructure):
 
     
     GEDCOM Specification:
-    > Height in pixels
-    > How many pixels to display vertically for the image. See `CROP` for more
-    > details.
-    > 
-    > <div class="note">
-    > 
-    > `HEIGHT` is a number of pixels. The correct tag for the height of an individual
-    > is the `DSCR` attribute.
-    > 
-    > <div class="example">
-    > 
-    > ```gedcom
-    > 0 @I45@ INDI
-    > 1 DSCR brown eyes, 5ft 10in, 198 pounds
-    > ```
-    > 
-    > </div>
-    > 
-    > </div>
-    > 
+    > - Height in pixels
+    >   How many pixels to display vertically for the image. See `CROP` for more
+    >   details.
+    >   
+    >   <div class="note">
+    >   
+    >   `HEIGHT` is a number of pixels. The correct tag for the height of an individual
+    >   is the `DSCR` attribute.
+    >   
+    >   <div class="example">
+    >   
+    >   ```gedcom
+    >   0 @I45@ INDI
+    >   1 DSCR brown eyes, 5ft 10in, 198 pounds
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   </div>
+    >   
+
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes7 as gc
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi_xref = g.individual_xref('I45')
+        >>> indi = gc.RecordIndi(indi_xref, 
+        ...     [
+        ...         gc.Dscr('brown eyes, 5ft 10in, 198 pounds'),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I45@ INDI
+        1 DSCR brown eyes, 5ft 10in, 198 pounds
+        <BLANKLINE>
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4776,10 +4896,10 @@ class Husb(BaseStructure):
 
     
     GEDCOM Specification:
-    > Husband
-    > A container for information relevant to the subject of the superstructure
-    > specific to the individual described by the associated `FAM`'s `HUSB`
-    > substructure.
+    > - Husband
+    > - A container for information relevant to the subject of the superstructure
+    >   specific to the individual described by the associated `FAM`'s `HUSB`
+    >   substructure.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4828,13 +4948,14 @@ class Idno(BaseStructure):
 
     
     GEDCOM Specification:
-    > Identification number
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > identifying number
-    > A number or other string assigned to identify a person within some
-    > significant external system. It must have a `TYPE` substructure to define
-    > what kind of identification number is being provided.
+    > - Identification number
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - identifying number
+    > - A number or other string assigned to identify a person within some
+    >   significant external system. It must have a `TYPE` substructure to define
+    >   what kind of identification number is being provided.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4890,11 +5011,12 @@ class Immi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Immigration
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > immigration
-    > Entering into a new locality with the intent of residing there.
+    > - Immigration
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - immigration
+    > - Entering into a new locality with the intent of residing there.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4950,12 +5072,13 @@ class IndiCens(BaseStructure):
 
     
     GEDCOM Specification:
-    > Census
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > census
-    > Periodic count of the population for a designated locality, such as a
-    > national or state census.
+    > - Census
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - census
+    > - Periodic count of the population for a designated locality, such as a
+    >   national or state census.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5011,29 +5134,61 @@ class IndiEven(BaseStructure):
 
     
     GEDCOM Specification:
-    > Event
-    > An event: a noteworthy happening related to an individual or family. If a
-    > specific event type exists, it should be used instead of a generic `EVEN`
-    > structure. Each `EVEN` must be classified by a subordinate use of the `TYPE`
-    > tag and may be further described in the structure's payload.
-    > 
-    > <div class="example">
-    > 
-    > A person that signed a lease for land dated October 2, 1837 and a lease for
-    > mining equipment dated November 4, 1837 would be written as:
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 EVEN
-    > 2 TYPE Land Lease
-    > 2 DATE 2 OCT 1837
-    > 1 EVEN Mining equipment
-    > 2 TYPE Equipment Lease
-    > 2 DATE 4 NOV 1837
-    > ```
-    > 
-    > </div>
-    > 
+    > - Event
+    >   An event: a noteworthy happening related to an individual or family. If a
+    >   specific event type exists, it should be used instead of a generic `EVEN`
+    >   structure. Each `EVEN` must be classified by a subordinate use of the `TYPE`
+    >   tag and may be further described in the structure's payload.
+    >   
+    >   <div class="example">
+    >   
+    >   A person that signed a lease for land dated October 2, 1837 and a lease for
+    >   mining equipment dated November 4, 1837 would be written as:
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 EVEN
+    >   2 TYPE Land Lease
+    >   2 DATE 2 OCT 1837
+    >   1 EVEN Mining equipment
+    >   2 TYPE Equipment Lease
+    >   2 DATE 4 NOV 1837
+    >   ```
+    >   
+    >   </div>
+    >   
+
+    Example:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes7 as gc
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi_xref = g.individual_xref('I1')
+        >>> indi = gc.RecordIndi(indi_xref, 
+        ...     [
+        ...         gc.IndiEven('',
+        ...             [
+        ...                 gc.Type('Land Lease'),
+        ...                 gc.Date('2 OCT 1837'),
+        ...             ]
+        ...         ),
+        ...         gc.IndiEven('Mining equipment',
+        ...             [
+        ...                 gc.Type('Equipment Lease'),
+        ...                 gc.Date('4 NOV 1837'),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 EVEN
+        2 TYPE Land Lease
+        2 DATE 2 OCT 1837
+        1 EVEN Mining equipment
+        2 TYPE Equipment Lease
+        2 DATE 4 NOV 1837
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5089,26 +5244,41 @@ class IndiFact(BaseStructure):
 
     
     GEDCOM Specification:
-    > Fact
-    > A noteworthy attribute or fact concerning an individual or family. If a
-    > specific attribute type exists, it should be used instead of a generic `FACT`
-    > structure. Each `FACT` must be classified by a subordinate use of the `TYPE`
-    > tag and may be further described in the structure's payload.
-    > 
-    > <div class="example">
-    > 
-    > If the attribute being defined was 1 of the person's skills, such as
-    > woodworking, the `FACT` tag would have the value of "Woodworking", followed by
-    > a subordinate `TYPE` tag with the value "Skills".
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 FACT Woodworking
-    > 2 TYPE Skills
-    > ```
-    > 
-    > </div>
-    > 
+    > - Fact
+    >   A noteworthy attribute or fact concerning an individual or family. If a
+    >   specific attribute type exists, it should be used instead of a generic `FACT`
+    >   structure. Each `FACT` must be classified by a subordinate use of the `TYPE`
+    >   tag and may be further described in the structure's payload.
+    >   
+    >   <div class="example">
+    >   
+    >   If the attribute being defined was 1 of the person's skills, such as
+    >   woodworking, the `FACT` tag would have the value of "Woodworking", followed by
+    >   a subordinate `TYPE` tag with the value "Skills".
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 FACT Woodworking
+    >   2 TYPE Skills
+    >   ```
+    >   
+    >   </div>
+    >   
+    
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes7 as gc
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> indi_xref = g.individual_xref('I1')
+        >>> indi = gc.RecordIndi(indi_xref, 
+        ...     gc.IndiFact('Woodworking', gc.Type('Skills'))
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 FACT Woodworking
+        2 TYPE Skills
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5164,10 +5334,10 @@ class IndiFamc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Family child
-    > The family in which an individual appears as a child. It is also used with
-    > a `https://gedcom.io/terms/v7/FAMC-STAT` substructure to show individuals
-    > who are not children of the family. See `FAMILY_RECORD` for more details.
+    > - Family child
+    > - The family in which an individual appears as a child. It is also used with
+    >   a `https://gedcom.io/terms/v7/FAMC-STAT` substructure to show individuals
+    >   who are not children of the family. See `FAMILY_RECORD` for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5207,38 +5377,38 @@ class IndiName(BaseStructure):
 
     
     GEDCOM Specification:
-    > Name
-    > A `PERSONAL_NAME_STRUCTURE` with parts, translations, sources, and so forth.
-    > Names of individuals are represented in the manner the name is normally spoken,
-    > with the family name, surname, or nearest cultural parallel thereunto separated
-    > by slashes (U+002F `/`). Based on the dynamic nature or unknown compositions of
-    > naming conventions, it is difficult to provide a more detailed name piece
-    > structure to handle every case. The `PERSONAL_NAME_PIECES` are provided
-    > optionally for systems that cannot operate effectively with less structured
-    > information. The Personal Name payload shall be seen as the primary name
-    > representation, with name pieces as optional auxiliary information; in
-    > particular it is recommended that all name parts in `PERSONAL_NAME_PIECES`
-    > appear within the `PersonalName` payload in some form, possibly adjusted for
-    > gender-specific suffixes or the like. It is permitted for the payload to
-    > contain information not present in any name piece substructure.
-    > 
-    > The name may be translated or transliterated into different languages or
-    > scripts using the `TRAN` substructure. It is recommended, but not required,
-    > that if the name pieces are used, the same pieces are used in each translation
-    > and transliteration.
-    > 
-    > A `TYPE` is used to specify the particular variation that this name is. For
-    > example; it could indicate that this name is a name taken at immigration or
-    > that it could be an ‘also known as’ name. See
-    > `https://gedcom.io/terms/v7/enumset-NAME-TYPE` for more details.
-    > 
-    > <div class="note">
-    > 
-    > Alternative approaches to representing names are being considered for future
-    > versions of this specification.
-    > 
-    > </div>
-    > 
+    > - Name
+    > - A `PERSONAL_NAME_STRUCTURE` with parts, translations, sources, and so forth.
+    >   Names of individuals are represented in the manner the name is normally spoken,
+    >   with the family name, surname, or nearest cultural parallel thereunto separated
+    >   by slashes (U+002F `/`). Based on the dynamic nature or unknown compositions of
+    >   naming conventions, it is difficult to provide a more detailed name piece
+    >   structure to handle every case. The `PERSONAL_NAME_PIECES` are provided
+    >   optionally for systems that cannot operate effectively with less structured
+    >   information. The Personal Name payload shall be seen as the primary name
+    >   representation, with name pieces as optional auxiliary information; in
+    >   particular it is recommended that all name parts in `PERSONAL_NAME_PIECES`
+    >   appear within the `PersonalName` payload in some form, possibly adjusted for
+    >   gender-specific suffixes or the like. It is permitted for the payload to
+    >   contain information not present in any name piece substructure.
+    >   
+    >   The name may be translated or transliterated into different languages or
+    >   scripts using the `TRAN` substructure. It is recommended, but not required,
+    >   that if the name pieces are used, the same pieces are used in each translation
+    >   and transliteration.
+    >   
+    >   A `TYPE` is used to specify the particular variation that this name is. For
+    >   example; it could indicate that this name is a name taken at immigration or
+    >   that it could be an â€˜also known asâ€™ name. See
+    >   `https://gedcom.io/terms/v7/enumset-NAME-TYPE` for more details.
+    >   
+    >   <div class="note">
+    >   
+    >   Alternative approaches to representing names are being considered for future
+    >   versions of this specification.
+    >   
+    >   </div>
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5285,12 +5455,13 @@ class IndiNchi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Number of children
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > number of children
-    > The number of children that this person is known to be the parent of (all
-    > marriages).
+    > - Number of children
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - number of children
+    > - The number of children that this person is known to be the parent of (all
+    >   marriages).
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5346,12 +5517,13 @@ class IndiReli(BaseStructure):
 
     
     GEDCOM Specification:
-    > Religion
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > religion
-    > A religious denomination to which a person is affiliated or for which a
-    > record applies.
+    > - Religion
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - religion
+    > - A religious denomination to which a person is affiliated or for which a
+    >   record applies.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5397,6 +5569,110 @@ class IndiReli(BaseStructure):
         super().__init__(value, subs, self.key)
     
 
+class IndiResi(BaseStructure):
+    '''Store, validate and format the RESI structure. 
+    
+    This class was generated by `Construct.generate_class` in the prep module
+    using GEDCOM yaml specification files.  Links were added to the specification 
+    and tables constructed from the yaml files to aid the user of these classes.  
+    DO NOT CHANGE THIS CLASS MANUALLY.  
+
+    
+    GEDCOM Specification:
+    > - Residence
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    >   
+    >   Where possible, the residence should be identified in `PLAC` and/or `ADDR`
+    >   substructures of the `RESI` structure. The payload text should not duplicate
+    >   `PLAC` or `ADDR` information, but may be used for residence information that
+    >   cannot be expressed by those structures.
+    >   
+    >   <div class="example">
+    >   
+    >   The following two examples show situations where a `RESI` payload may be
+    >   appropriate:
+    >   
+    >   ```gedcom
+    >   1 RESI living with an aunt
+    >   2 DATE ABT MAR 1894
+    >   ```
+    >   
+    >   ```gedcom
+    >   1 RESI in a mobile caravan
+    >   2 PLAC , , Austro-Hungarian Empire
+    >   3 FORM City, County, Country
+    >   ```
+    >   
+    >   </div>
+    >   
+    > - residence
+    > - An address or place of residence where an individual resided.
+
+    Examples:
+        The following examples show how to construct the examples in the specification.
+        >>> import genedata.classes7 as gc
+        >>> resi = gc.IndiResi('living with an aunt', gc.Date('ABT MAR 1894'))
+        >>> print(resi.ged())
+        1 RESI living with an aunt
+        2 DATE ABT MAR 1894
+        <BLANKLINE>
+
+        >>> resi2 = gc.IndiResi('in a mobile caravan', 
+        ...     gc.Plac(', , Austro-Hungarian Empire',
+        ...         gc.PlacForm('City, County, Country'))
+        ... )
+        >>> print(resi2.ged())
+        1 RESI in a mobile caravan
+        2 PLAC , , Austro-Hungarian Empire
+        3 FORM City, County, Country
+        <BLANKLINE>
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Args:
+        value: A value of data type http://www.w3.org/2001/XMLSchema#string
+        subs: A permitted substructure or list of permitted substructures.
+        
+    References:
+    - [GEDCOM RESI Structure](https://gedcom.io/terms/v7/INDI-RESI)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    '''
+    
+    key: str = 'INDI-RESI'
+        
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
+    
+
 class IndiTitl(BaseStructure):
     '''Store, validate and format the TITL structure. 
     
@@ -5407,12 +5683,13 @@ class IndiTitl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Title
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > title
-    > A formal designation used by an individual in connection with positions of
-    > royalty or other social status, such as Grand Duke.
+    > - Title
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - title
+    > - A formal designation used by an individual in connection with positions of
+    >   royalty or other social status, such as Grand Duke.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5468,13 +5745,17 @@ class Inil(BaseStructure):
 
     
     GEDCOM Specification:
-    > Initiatory, Latter-Day Saint
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_INDIVIDUAL_ORDINANCE`. Previously, GEDCOM versions 3.0 through 5.3 called this `WAC`; it was not part of 5.4 through 5.5.1. FamilySearch GEDCOM 7.0 reintroduced it with the name `INIL` for consistency with `BAPL`, `CONL`, and `ENDL`.
-    > initiatory
-    > A religious event where an initiatory ordinance for an individual was
-    > performed by priesthood authority in a temple of The Church of Jesus Christ
-    > of Latter-day Saints.
+    > - Initiatory, Latter-Day Saint
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    > - See also `LDS_INDIVIDUAL_ORDINANCE`. Previously, GEDCOM versions 3.0
+    >   through 5.3 called this `WAC`; it was not part of 5.4 through 5.5.1.
+    >   FamilySearch GEDCOM 7.0 reintroduced it with the name `INIL` for
+    >   consistency with `BAPL`, `CONL`, and `ENDL`.
+    > - initiatory
+    > - A religious event where an initiatory ordinance for an individual was
+    >   performed by priesthood authority in a temple of The Church of Jesus Christ
+    >   of Latter-day Saints.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5516,63 +5797,64 @@ class Lang(BaseStructure):
 
     
     GEDCOM Specification:
-    > Language
-    > The primary human language of the superstructure. The primary language in which
-    > the `Text`-typed payloads of the superstructure and its substructures appear.
-    > 
-    > The payload of the `LANG` structure is a language tag, as defined by 
-    > [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
-    > A [registry of component subtags](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)
-    > is maintained publicly by the IANA.
-    > 
-    > In the absence of a `LANG` structure, the language is assumed to be
-    > unspecified; that may also be recorded explicitly with language tag `und`
-    > (meaning "undetermined"). See `https://gedcom.io/terms/v7/HEAD-LANG` for
-    > information about applying language-specific algorithms to text in an
-    > unspecified language.
-    > 
-    > If the text is primarily in one language with a few parts in a different
-    > language, it is recommended that a language tag identifying the primary
-    > language be used. If no one language is primary, the language tag `mul`
-    > (meaning "multiple") may be used, but most language-specific algorithms will
-    > treat `mul` the same way they do `und`.
-    > 
-    > <div class="note">
-    > 
-    > Conversations are ongoing about adding part-of-payload language tagging in a
-    > future version of the specification to provide more fidelity for multilingual
-    > text.
-    > 
-    > </div>
-    > 
-    > If the text is not in any human language and should not be treated as lingual
-    > content, the language tag `zxx` (meaning "no linguistic content" or "not
-    > applicable") may be used. An example of `zxx` text might be a diagram
-    > approximated using characters for their shape, not their meaning.
-    > 
-    > <div class="note">
-    > 
-    > This specification does not permit `LANG` in every place where human language
-    > text might appear. Conversations are ongoing about adding it in more places in
-    > a future version of the specification. Using the current specification,
-    > additional language tagging can be accomplished using a [documented extension
-    > tag] by including the following in the header:
-    > 
-    > ```gedcom
-    > 1 SCHEMA
-    > 2 TAG _LANG https://gedcom.io/terms/v7/LANG
-    > ```
-    > 
-    > and using the extension tag like so:
-    > 
-    > ```gedcom
-    > 2 DATE 31 AUG 2018
-    > 3 PHRASE 2018年8月31日
-    > 4 _LANG cmn
-    > ```
-    > 
-    > </div>
-    > 
+    > - Language
+    >   The primary human language of the superstructure. The primary language in which
+    >   the `Text`-typed payloads of the superstructure and its substructures appear.
+    >   
+    >   The payload of the `LANG` structure is a language tag, as defined by 
+    >   [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
+    > - A [registry of component
+    >   subtags](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)
+    >   is maintained publicly by the IANA.
+    >   
+    >   In the absence of a `LANG` structure, the language is assumed to be
+    >   unspecified; that may also be recorded explicitly with language tag `und`
+    >   (meaning "undetermined"). See `https://gedcom.io/terms/v7/HEAD-LANG` for
+    >   information about applying language-specific algorithms to text in an
+    >   unspecified language.
+    >   
+    >   If the text is primarily in one language with a few parts in a different
+    >   language, it is recommended that a language tag identifying the primary
+    >   language be used. If no one language is primary, the language tag `mul`
+    >   (meaning "multiple") may be used, but most language-specific algorithms will
+    >   treat `mul` the same way they do `und`.
+    >   
+    >   <div class="note">
+    >   
+    >   Conversations are ongoing about adding part-of-payload language tagging in a
+    >   future version of the specification to provide more fidelity for multilingual
+    >   text.
+    >   
+    >   </div>
+    >   
+    >   If the text is not in any human language and should not be treated as lingual
+    >   content, the language tag `zxx` (meaning "no linguistic content" or "not
+    >   applicable") may be used. An example of `zxx` text might be a diagram
+    >   approximated using characters for their shape, not their meaning.
+    >   
+    >   <div class="note">
+    >   
+    >   This specification does not permit `LANG` in every place where human language
+    >   text might appear. Conversations are ongoing about adding it in more places in
+    >   a future version of the specification. Using the current specification,
+    >   additional language tagging can be accomplished using a [documented extension
+    >   tag] by including the following in the header:
+    >   
+    >   ```gedcom
+    >   1 SCHEMA
+    >   2 TAG _LANG https://gedcom.io/terms/v7/LANG
+    >   ```
+    >   
+    >   and using the extension tag like so:
+    >   
+    >   ```gedcom
+    >   2 DATE 31 AUG 2018
+    >   3 PHRASE 2018å¹´8æœˆ31æ—¥
+    >   4 _LANG cmn
+    >   ```
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5610,19 +5892,19 @@ class Lati(BaseStructure):
 
     
     GEDCOM Specification:
-    > Latitude
-    > A latitudinal coordinate. The payload is either `N` (for a coordinate north of
-    > the equator) or `S` (for a coordinate south of the equator) followed by a
-    > decimal number of degrees. Minutes and seconds are not used and should be
-    > converted to fractional degrees prior to encoding.
-    > 
-    > <div class="example">
-    > 
-    > 18 degrees, 9 minutes, and 3.4 seconds North would be formatted as
-    > `N18.150944`.
-    > 
-    > </div>
-    > 
+    > - Latitude
+    >   A latitudinal coordinate. The payload is either `N` (for a coordinate north of
+    >   the equator) or `S` (for a coordinate south of the equator) followed by a
+    >   decimal number of degrees. Minutes and seconds are not used and should be
+    >   converted to fractional degrees prior to encoding.
+    >   
+    >   <div class="example">
+    >   
+    >   18 degrees, 9 minutes, and 3.4 seconds North would be formatted as
+    >   `N18.150944`.
+    >   
+    >   </div>
+    >   
 
     Examples:
         The following example shows how to enter the latitude (Lati))
@@ -5687,9 +5969,9 @@ class Left(BaseStructure):
 
     
     GEDCOM Specification:
-    > Left crop width
-    > Left is a number of pixels to not display from the left side of the image.
-    > See `CROP` for more details.
+    > - Left crop width
+    > - Left is a number of pixels to not display from the left side of the image.
+    >   See `CROP` for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5721,19 +6003,19 @@ class Long(BaseStructure):
 
     
     GEDCOM Specification:
-    > Longitude
-    > A longitudinal coordinate. The payload is either `E` (for a coordinate east of
-    > the prime meridian) or `W` (for a coordinate west of the prime meridian)
-    > followed by a decimal number of degrees. Minutes and seconds are not used and
-    > should be converted to fractional degrees prior to encoding.
-    > 
-    > <div class="example">
-    > 
-    > 168 degrees, 9 minutes, and 3.4 seconds East would be formatted as
-    > `E168.150944`.
-    > 
-    > </div>
-    > 
+    > - Longitude
+    >   A longitudinal coordinate. The payload is either `E` (for a coordinate east of
+    >   the prime meridian) or `W` (for a coordinate west of the prime meridian)
+    >   followed by a decimal number of degrees. Minutes and seconds are not used and
+    >   should be converted to fractional degrees prior to encoding.
+    >   
+    >   <div class="example">
+    >   
+    >   168 degrees, 9 minutes, and 3.4 seconds East would be formatted as
+    >   `E168.150944`.
+    >   
+    >   </div>
+    >   
 
     Examples:
         The following example howss how to enter the longitude (Long)
@@ -5798,15 +6080,15 @@ class Map(BaseStructure):
 
     
     GEDCOM Specification:
-    > Map
-    > A representative point for a location, as defined by `LATI` and `LONG`
-    > substructures.
-    > 
-    > Note that `MAP` provides neither a notion of accuracy (for example, the `MAP`
-    > for a birth event may be some distance from the point where the birth occurred)
-    > nor a notion of region size (for example, the `MAP` for a place "Belarus" may
-    > be anywhere within that nation's 200,000 square kilometer area).
-    > 
+    > - Map
+    >   A representative point for a location, as defined by `LATI` and `LONG`
+    >   substructures.
+    >   
+    >   Note that `MAP` provides neither a notion of accuracy (for example, the `MAP`
+    >   for a birth event may be some distance from the point where the birth occurred)
+    >   nor a notion of region size (for example, the `MAP` for a place "Belarus" may
+    >   be anywhere within that nation's 200,000 square kilometer area).
+    >   
 
     Examples:
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
@@ -5860,11 +6142,12 @@ class Marb(BaseStructure):
 
     
     GEDCOM Specification:
-    > Marriage banns
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > marriage bann
-    > Official public notice given that 2 people intend to marry.
+    > - Marriage banns
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - marriage bann
+    > - Official public notice given that 2 people intend to marry.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5921,13 +6204,14 @@ class Marc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Marriage contract
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > marriage contract
-    > Recording a formal agreement of marriage, including the prenuptial
-    > agreement in which marriage partners reach agreement about the property
-    > rights of 1 or both, securing property to their children.
+    > - Marriage contract
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - marriage contract
+    > - Recording a formal agreement of marriage, including the prenuptial
+    >   agreement in which marriage partners reach agreement about the property
+    >   rights of 1 or both, securing property to their children.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5984,11 +6268,12 @@ class Marl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Marriage license
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > marriage license
-    > Obtaining a legal license to marry.
+    > - Marriage license
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - marriage license
+    > - Obtaining a legal license to marry.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6045,12 +6330,13 @@ class Marr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Marriage
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > marriage
-    > A legal, common-law, or customary event such as a wedding or marriage
-    > ceremony that joins 2 partners to create or extend a family unit.
+    > - Marriage
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - marriage
+    > - A legal, common-law, or customary event such as a wedding or marriage
+    >   ceremony that joins 2 partners to create or extend a family unit.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6107,13 +6393,14 @@ class Mars(BaseStructure):
 
     
     GEDCOM Specification:
-    > Marriage settlement
-    > A [Family Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
-    > See also `FAMILY_EVENT_STRUCTURE`.
-    > marriage settlement
-    > Creating an agreement between 2 people contemplating marriage, at which
-    > time they agree to release or modify property rights that would otherwise
-    > arise from the marriage.
+    > - Marriage settlement
+    > - A [Family
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   See also `FAMILY_EVENT_STRUCTURE`.
+    > - marriage settlement
+    > - Creating an agreement between 2 people contemplating marriage, at which
+    >   time they agree to release or modify property rights that would otherwise
+    >   arise from the marriage.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6170,33 +6457,33 @@ class Medi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Medium
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-MEDI`
-    > providing information about the media or the medium in which information is
-    > stored.
-    > 
-    > When `MEDI` is a substructure of a `https://gedcom.io/terms/v7/CALN`, it is
-    > recommended that its payload describes the medium directly found at that call
-    > number rather than a medium from which it was derived.
-    > 
-    > <div class="example">
-    > 
-    > Consider an asset in a repository that is a digital scan of a book of compiled
-    > newspapers; for this asset, the `CALN`.`MEDI` is recommended to be `ELECTRONIC`
-    > rather than `BOOK` or `NEWSPAPER`.
-    > 
-    > </div>
-    > 
-    > When `MEDI` is a substructure of a `https://gedcom.io/terms/v7/FORM`, it is
-    > recommended that its payload describes the medium from which it was derived.
-    > 
-    > <div class="example">
-    > 
-    > Consider a digital photo in a multimedia record; for this asset, the
-    > `FORM`.`MEDI` is recommended to be `PHOTO` rather than `ELECTRONIC`.
-    > 
-    > </div>
-    > 
+    > - Medium
+    >   An enumerated value from set `https://gedcom.io/terms/v7/enumset-MEDI`
+    >   providing information about the media or the medium in which information is
+    >   stored.
+    >   
+    >   When `MEDI` is a substructure of a `https://gedcom.io/terms/v7/CALN`, it is
+    >   recommended that its payload describes the medium directly found at that call
+    >   number rather than a medium from which it was derived.
+    >   
+    >   <div class="example">
+    >   
+    >   Consider an asset in a repository that is a digital scan of a book of compiled
+    >   newspapers; for this asset, the `CALN`.`MEDI` is recommended to be `ELECTRONIC`
+    >   rather than `BOOK` or `NEWSPAPER`.
+    >   
+    >   </div>
+    >   
+    >   When `MEDI` is a substructure of a `https://gedcom.io/terms/v7/FORM`, it is
+    >   recommended that its payload describes the medium from which it was derived.
+    >   
+    >   <div class="example">
+    >   
+    >   Consider a digital photo in a multimedia record; for this asset, the
+    >   `FORM`.`MEDI` is recommended to be `PHOTO` rather than `ELECTRONIC`.
+    >   
+    >   </div>
+    >   
 
     Examples:
         These are the steps to build the example in the specification.
@@ -6295,65 +6582,66 @@ class Mime(BaseStructure):
 
     
     GEDCOM Specification:
-    > Media type
-    > Indicates the [media type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
-    >  of the payload of the superstructure.
-    > 
-    > As of version 7.0, only 2 media types are supported by this structure:
-    > 
-    > - `text/plain` shall be presented to the user as-is, preserving all spacing,
-    >   line breaks, and so forth.
-    > 
-    > - `text/html` uses HTML tags to provide presentation information. Applications
-    >   should support at least the following:
-    > 
-    >   - `p` and `br` elements for paragraphing and line breaks.
-    >   - `b`, `i`, `u`, and `s` elements for bold, italic, underlined, and
-    >     strike-through text (or corresponding display in other locales; see [HTML
-    >     §4.5] for more).
-    >   - `sup` and `sub` elements for super- and sub-script.
-    >   - The 3 XML entities that appear in text: `&amp;`, `&lt;` `&gt;`. Note that
-    >     `&quote;` and `&apos;` are only needed in attributes. Other entities should
-    >     be represented as their respective Unicode characters instead.
-    > 
-    >   Supporting more of HTML is encouraged. Unsupported tags should be ignored
-    >   during display.
-    > 
-    > <div class="note">
-    > 
-    > Applications are welcome to support more XML entities or HTML character
-    > references in their user interface. However, exporting must only use the core
-    > XML entities, translating any other entities into their corresponding Unicode
-    > characters.
-    > 
-    > </div>
-    > 
-    > <div class="note">
-    > 
-    > Applications are welcome to support additional HTML elements, but they should
-    > ensure that content is meaningful if those extra elements are ignored and only
-    > their content text is displayed.
-    > 
-    > </div>
-    > 
-    > <div class="note">
-    > 
-    > Media types are also used by external files, as described under `FORM`.
-    > External file media types are not limited to `text/plain` and `text/html`.
-    > 
-    > </div>
-    > 
-    > If needed, `text/html` can be converted to `text/plain` using the following
-    > steps:
-    > 
-    > 1. Replace any sequence of 1 or more spaces, tabs, and line breaks with a
-    >    single space
-    > 2. Case-insensitively replace each `<p`...`>`, `</p`...`>`, and `<br`...`>`
-    >    with a line break
-    > 3. Remove all other `<`...`>` tags
-    > 4. Replace each `&lt;` with `<` and `&gt;` with `>`
-    > 5. Replace each `&amp;` with `&`
-    > 
+    > - Media type
+    > - Indicates the [media
+    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
+    >    of the payload of the superstructure.
+    >   
+    >   As of version 7.0, only 2 media types are supported by this structure:
+    >   
+    >   - `text/plain` shall be presented to the user as-is, preserving all spacing,
+    >     line breaks, and so forth.
+    >   
+    >   - `text/html` uses HTML tags to provide presentation information. Applications
+    >     should support at least the following:
+    >   
+    >     - `p` and `br` elements for paragraphing and line breaks.
+    >     - `b`, `i`, `u`, and `s` elements for bold, italic, underlined, and
+    >       strike-through text (or corresponding display in other locales; see [HTML
+    >       Â§4.5] for more).
+    >     - `sup` and `sub` elements for super- and sub-script.
+    >     - The 3 XML entities that appear in text: `&amp;`, `&lt;` `&gt;`. Note that
+    >       `&quote;` and `&apos;` are only needed in attributes. Other entities should
+    >       be represented as their respective Unicode characters instead.
+    >   
+    >     Supporting more of HTML is encouraged. Unsupported tags should be ignored
+    >     during display.
+    >   
+    >   <div class="note">
+    >   
+    >   Applications are welcome to support more XML entities or HTML character
+    >   references in their user interface. However, exporting must only use the core
+    >   XML entities, translating any other entities into their corresponding Unicode
+    >   characters.
+    >   
+    >   </div>
+    >   
+    >   <div class="note">
+    >   
+    >   Applications are welcome to support additional HTML elements, but they should
+    >   ensure that content is meaningful if those extra elements are ignored and only
+    >   their content text is displayed.
+    >   
+    >   </div>
+    >   
+    >   <div class="note">
+    >   
+    >   Media types are also used by external files, as described under `FORM`.
+    >   External file media types are not limited to `text/plain` and `text/html`.
+    >   
+    >   </div>
+    >   
+    >   If needed, `text/html` can be converted to `text/plain` using the following
+    >   steps:
+    >   
+    >   1. Replace any sequence of 1 or more spaces, tabs, and line breaks with a
+    >      single space
+    >   2. Case-insensitively replace each `<p`...`>`, `</p`...`>`, and `<br`...`>`
+    >      with a line break
+    >   3. Remove all other `<`...`>` tags
+    >   4. Replace each `&lt;` with `<` and `&gt;` with `>`
+    >   5. Replace each `&amp;` with `&`
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6388,8 +6676,8 @@ class Name(BaseStructure):
 
     
     GEDCOM Specification:
-    > Name
-    > The name of the superstructure's subject, represented as a simple string.
+    > - Name
+    > - The name of the superstructure's subject, represented as a simple string.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6423,45 +6711,45 @@ class NameTran(BaseStructure):
 
     
     GEDCOM Specification:
-    > Translation
-    > A type of `TRAN` substructure specific to [Personal Names]. Each `NAME`.`TRAN`
-    > must have a `LANG` substructure.
-    > See also `INDI`.`NAME`.
-    > 
-    > <div class="example">
-    > 
-    > The following presents a name in Mandarin, transliterated using Pinyin
-    > 
-    > ```gedcom
-    > 1 NAME /孔/德庸
-    > 2 GIVN 德庸
-    > 2 SURN 孔
-    > 2 TRAN /Kǒng/ Déyōng
-    > 3 GIVN Déyōng
-    > 3 SURN Kǒng
-    > 3 LANG zh-pinyin
-    > ```
-    > 
-    > </div>
-    > 
-    > A representation of the superstructure's data in a different format.
-    > 
-    > In some situations it is desirable to provide the same semantic content in
-    > multiple formats. Where this is desirable, a `TRAN` substructure is used, where
-    > the specific format is given in its language tag substructure, media type
-    > substructure, or both.
-    > 
-    > Different `TRAN` structures are used in different contexts to fully capture the
-    > structure of the information being presented in multiple formats. In all cases,
-    > a `TRAN` structure's payload and substructures should provide only information
-    > also contained in the `TRAN` structures' superstructure, but provide it in a
-    > new language, script, or media type.
-    > 
-    > Each `TRAN` substructure must have either a language tag or a media type or
-    > both. Each `TRAN` structure must differ from its superstructure and from every
-    > other `TRAN` substructure of its superstructure in either its language tag or
-    > its media type or both.
-    > 
+    > - Translation
+    >   A type of `TRAN` substructure specific to [Personal Names]. Each `NAME`.`TRAN`
+    >   must have a `LANG` substructure.
+    >   See also `INDI`.`NAME`.
+    >   
+    >   <div class="example">
+    >   
+    >   The following presents a name in Mandarin, transliterated using Pinyin
+    >   
+    >   ```gedcom
+    >   1 NAME /孔/德庸
+    >   2 GIVN 德庸
+    >   2 SURN 孔
+    >   2 TRAN /Kǒng/ Déyōng
+    >   3 GIVN Déyōng
+    >   3 SURN Kǒng
+    >   3 LANG zh-pinyin
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   A representation of the superstructure's data in a different format.
+    >   
+    >   In some situations it is desirable to provide the same semantic content in
+    >   multiple formats. Where this is desirable, a `TRAN` substructure is used, where
+    >   the specific format is given in its language tag substructure, media type
+    >   substructure, or both.
+    >   
+    >   Different `TRAN` structures are used in different contexts to fully capture the
+    >   structure of the information being presented in multiple formats. In all cases,
+    >   a `TRAN` structure's payload and substructures should provide only information
+    >   also contained in the `TRAN` structures' superstructure, but provide it in a
+    >   new language, script, or media type.
+    >   
+    >   Each `TRAN` substructure must have either a language tag or a media type or
+    >   both. Each `TRAN` structure must differ from its superstructure and from every
+    >   other `TRAN` substructure of its superstructure in either its language tag or
+    >   its media type or both.
+    >   
 
     Example:
         These are the steps to build the example in the specification.
@@ -6531,9 +6819,9 @@ class NameType(BaseStructure):
 
     
     GEDCOM Specification:
-    > Type
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-NAME-TYPE`
-    > indicating the type of the name.
+    > - Type
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-NAME-TYPE`
+    >   indicating the type of the name.
         
     Enumerations:
     - 'AKA': https://gedcom.io/terms/v7/enum-AKA
@@ -6586,12 +6874,13 @@ class Nati(BaseStructure):
 
     
     GEDCOM Specification:
-    > Nationality
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > nationality
-    > An individual's national heritage or origin, or other folk, house, kindred,
-    > lineage, or tribal interest.
+    > - Nationality
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - nationality
+    > - An individual's national heritage or origin, or other folk, house, kindred,
+    >   lineage, or tribal interest.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6647,11 +6936,12 @@ class Natu(BaseStructure):
 
     
     GEDCOM Specification:
-    > Naturalization
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > naturalization
-    > Obtaining citizenship.
+    > - Naturalization
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - naturalization
+    > - Obtaining citizenship.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6707,23 +6997,23 @@ class Nick(BaseStructure):
 
     
     GEDCOM Specification:
-    > Nickname
-    > A descriptive or familiar name that is used instead of, or in addition to,
-    > one’s official or legal name.
-    > 
-    > <div class="note">
-    > 
-    > The label "nickname" and description text of this structure were introduced
-    > with version 5.5 in 1996, but are understood differently by different users.
-    > Some use `NICK` only for names that would be inappropriate in formal settings.
-    > Some use it for pseudonyms regardless of where they are used. Some use it for
-    > any variant of a name that is not the one used on legal documents. Because all
-    > of these uses, and likely others as well, are common in existing data, no
-    > further clarification of the meaning of the `NICK` structure is possible
-    > without contradicting some existing data.
-    > 
-    > </div>
-    > 
+    > - Nickname
+    >   A descriptive or familiar name that is used instead of, or in addition to,
+    >   oneâ€™s official or legal name.
+    >   
+    >   <div class="note">
+    >   
+    >   The label "nickname" and description text of this structure were introduced
+    >   with version 5.5 in 1996, but are understood differently by different users.
+    >   Some use `NICK` only for names that would be inappropriate in formal settings.
+    >   Some use it for pseudonyms regardless of where they are used. Some use it for
+    >   any variant of a name that is not the one used on legal documents. Because all
+    >   of these uses, and likely others as well, are common in existing data, no
+    >   further clarification of the meaning of the `NICK` structure is possible
+    >   without contradicting some existing data.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6756,12 +7046,13 @@ class Nmr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Number of marriages
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > number of marriages
-    > The number of times this person has participated in a family as a spouse or
-    > parent.
+    > - Number of marriages
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - number of marriages
+    > - The number of times this person has participated in a family as a spouse or
+    >   parent.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6807,6 +7098,83 @@ class Nmr(BaseStructure):
         super().__init__(value, subs, self.key)
     
 
+class No(BaseStructure):
+    '''Store, validate and format the NO structure. 
+    
+    This class was generated by `Construct.generate_class` in the prep module
+    using GEDCOM yaml specification files.  Links were added to the specification 
+    and tables constructed from the yaml files to aid the user of these classes.  
+    DO NOT CHANGE THIS CLASS MANUALLY.  
+
+    
+    GEDCOM Specification:
+    > - Did not happen
+    >   An enumerated value from set `https://gedcom.io/terms/v7/enumset-EVEN`
+    >   identifying an event type which did not occur to the superstructure's subject.
+    >   A specific payload `NO XYZ` should only appear where `XYZ` would be legal.
+    >   
+    >   See `NON_EVENT_STRUCTURE` for more details.
+    >   
+    >   Indicates that a specific type of event, given in the payload, did not happen
+    >   within a given date period (or never happened if there is no `DATE`
+    >   substructure).
+    >   
+    >   Substructures may provide discussion about the non-occurrence of the event but
+    >   must not limit the meaning of what did not occur. No substructure other than
+    >   `DATE` may restrict the breadth of that negative assertion.
+    >   
+    >   <div class="example">
+    >   
+    >   `1 NO MARR` means "no marriage occurred"
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   ```gedcom
+    >   1 NO MARR
+    >   2 DATE TO 24 MAR 1880
+    >   ```
+    >   
+    >   means "no marriage had occurred as of March 24^th^, 1880"
+    >   
+    >   </div>
+    >   
+        
+    Enumerations:
+    - 'CENS': https://gedcom.io/terms/v7/enum-CENS
+        > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
+        > `https://gedcom.io/terms/v7/FAM-CENS`
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/NO-DATE         | Only One | No       | NoDate       |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Args:
+        value: A value of data type https://gedcom.io/terms/v7/type-Enum
+        subs: A permitted substructure or list of permitted substructures.
+        
+    References:
+    - [GEDCOM NO Structure](https://gedcom.io/terms/v7/NO)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    '''
+    
+    key: str = 'NO'
+        
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
+    
+
 class NoDate(BaseStructure):
     '''Store, validate and format the DATE structure. 
     
@@ -6817,9 +7185,9 @@ class NoDate(BaseStructure):
 
     
     GEDCOM Specification:
-    > Date
-    > The `DatePeriod` during which the event did not occur or the attribute did
-    > not apply.
+    > - Date
+    > - The `DatePeriod` during which the event did not occur or the attribute did
+    >   not apply.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6856,14 +7224,14 @@ class Note(BaseStructure):
 
     
     GEDCOM Specification:
-    > Note
-    > A `NOTE_STRUCTURE`, containing additional information provided by the submitter
-    > for understanding the enclosing data.
-    > 
-    > When a substructure of `HEAD`, it should describe the contents of the document
-    > in terms of "ancestors or descendants of" so that the person receiving the data
-    > knows what genealogical information the document contains.
-    > 
+    > - Note
+    >   A `NOTE_STRUCTURE`, containing additional information provided by the submitter
+    >   for understanding the enclosing data.
+    >   
+    >   When a substructure of `HEAD`, it should describe the contents of the document
+    >   in terms of "ancestors or descendants of" so that the person receiving the data
+    >   knows what genealogical information the document contains.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6976,54 +7344,54 @@ class NoteTran(BaseStructure):
 
     
     GEDCOM Specification:
-    > Translation
-    > A type of `TRAN` for unstructured human-readable text, such as is found in
-    > `NOTE` and `SNOTE` payloads. Each `https://gedcom.io/terms/v7/NOTE-TRAN` must
-    > have either a `LANG` substructure or a `MIME` substructure or both. If either
-    > is missing, it is assumed to have the same value as the superstructure. See
-    > also `NOTE` and `SNOTE`.
-    > 
-    > <div class="example">
-    > 
-    > The following presents the same note in HTML-format English; in plain-text with
-    > the same language as the superstructure (English); and in Spanish with the same
-    > media type as the superstructure (HTML).
-    > 
-    > ```gedcom
-    > 1 NAME Arete /Hernandez/
-    > 2 NOTE Named after Arete from <i>The Odyssey</i>
-    > 3 LANG en
-    > 3 MIME text/html
-    > 3 TRAN Named after Arete from "The Odyssey"
-    > 4 MIME text/plain
-    > 3 TRAN Nombrada en honor a Arete de <i>La Odisea</i>
-    > 4 LANG es
-    > ```
-    > 
-    > </div>
-    > 
-    > It is recommended that text given in `text/html` should only be translated into
-    > `text/plain` if the resulting text is different from the text created by the
-    > HTML-to-text conversion process defined in `https://gedcom.io/terms/v7/MIME`.
-    > 
-    > A representation of the superstructure's data in a different format.
-    > 
-    > In some situations it is desirable to provide the same semantic content in
-    > multiple formats. Where this is desirable, a `TRAN` substructure is used, where
-    > the specific format is given in its language tag substructure, media type
-    > substructure, or both.
-    > 
-    > Different `TRAN` structures are used in different contexts to fully capture the
-    > structure of the information being presented in multiple formats. In all cases,
-    > a `TRAN` structure's payload and substructures should provide only information
-    > also contained in the `TRAN` structures' superstructure, but provide it in a
-    > new language, script, or media type.
-    > 
-    > Each `TRAN` substructure must have either a language tag or a media type or
-    > both. Each `TRAN` structure must differ from its superstructure and from every
-    > other `TRAN` substructure of its superstructure in either its language tag or
-    > its media type or both.
-    > 
+    > - Translation
+    >   A type of `TRAN` for unstructured human-readable text, such as is found in
+    >   `NOTE` and `SNOTE` payloads. Each `https://gedcom.io/terms/v7/NOTE-TRAN` must
+    >   have either a `LANG` substructure or a `MIME` substructure or both. If either
+    >   is missing, it is assumed to have the same value as the superstructure. See
+    >   also `NOTE` and `SNOTE`.
+    >   
+    >   <div class="example">
+    >   
+    >   The following presents the same note in HTML-format English; in plain-text with
+    >   the same language as the superstructure (English); and in Spanish with the same
+    >   media type as the superstructure (HTML).
+    >   
+    >   ```gedcom
+    >   1 NAME Arete /Hernandez/
+    >   2 NOTE Named after Arete from <i>The Odyssey</i>
+    >   3 LANG en
+    >   3 MIME text/html
+    >   3 TRAN Named after Arete from "The Odyssey"
+    >   4 MIME text/plain
+    >   3 TRAN Nombrada en honor a Arete de <i>La Odisea</i>
+    >   4 LANG es
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   It is recommended that text given in `text/html` should only be translated into
+    >   `text/plain` if the resulting text is different from the text created by the
+    >   HTML-to-text conversion process defined in `https://gedcom.io/terms/v7/MIME`.
+    >   
+    >   A representation of the superstructure's data in a different format.
+    >   
+    >   In some situations it is desirable to provide the same semantic content in
+    >   multiple formats. Where this is desirable, a `TRAN` substructure is used, where
+    >   the specific format is given in its language tag substructure, media type
+    >   substructure, or both.
+    >   
+    >   Different `TRAN` structures are used in different contexts to fully capture the
+    >   structure of the information being presented in multiple formats. In all cases,
+    >   a `TRAN` structure's payload and substructures should provide only information
+    >   also contained in the `TRAN` structures' superstructure, but provide it in a
+    >   new language, script, or media type.
+    >   
+    >   Each `TRAN` substructure must have either a language tag or a media type or
+    >   both. Each `TRAN` structure must differ from its superstructure and from every
+    >   other `TRAN` substructure of its superstructure in either its language tag or
+    >   its media type or both.
+    >   
 
     Example:
         These are the steps to build the example in the specification.
@@ -7091,8 +7459,8 @@ class Npfx(BaseStructure):
 
     
     GEDCOM Specification:
-    > Name prefix
-    > Text that appears on a name line before the given and surname parts of a name.
+    > - Name prefix
+    > - Text that appears on a name line before the given and surname parts of a name.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7125,9 +7493,9 @@ class Nsfx(BaseStructure):
 
     
     GEDCOM Specification:
-    > Name suffix
-    > Text which appears on a name line after or behind the given and surname
-    > parts of a name.
+    > - Name suffix
+    > - Text which appears on a name line after or behind the given and surname
+    >   parts of a name.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7160,16 +7528,16 @@ class Obje(BaseStructure):
 
     
     GEDCOM Specification:
-    > Object
-    > See `MULTIMEDIA_LINK`.
-    > Links the superstructure to the `MULTIMEDIA_RECORD` with the given pointer.
-    > 
-    > The optional `CROP` substructure indicates that a subregion of an image
-    > represents or applies to the superstructure.
-    > 
-    > The optional `TITL` substructure supersedes any `OBJE.FILE.TITL` substructures
-    > included in the `MULTIMEDIA_RECORD`.
-    > 
+    > - Object
+    > - See `MULTIMEDIA_LINK`.
+    >   Links the superstructure to the `MULTIMEDIA_RECORD` with the given pointer.
+    >   
+    >   The optional `CROP` substructure indicates that a subregion of an image
+    >   represents or applies to the superstructure.
+    >   
+    >   The optional `TITL` substructure supersedes any `OBJE.FILE.TITL` substructures
+    >   included in the `MULTIMEDIA_RECORD`.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7262,11 +7630,12 @@ class Occu(BaseStructure):
 
     
     GEDCOM Specification:
-    > Occupation
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > occupation
-    > The type of work or profession of an individual.
+    > - Occupation
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - occupation
+    > - The type of work or profession of an individual.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7322,9 +7691,9 @@ class OrdStat(BaseStructure):
 
     
     GEDCOM Specification:
-    > Status
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ord-STAT`
-    > assessing of the state or condition of an ordinance.
+    > - Status
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-ord-STAT`
+    >   assessing of the state or condition of an ordinance.
 
     Examples:
         This example shows a successful run of the OrdStat structure using
@@ -7404,11 +7773,12 @@ class Ordn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Ordination
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > ordination
-    > Receiving authority to act in religious matters.
+    > - Ordination
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - ordination
+    > - Receiving authority to act in religious matters.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7464,40 +7834,40 @@ class Page(BaseStructure):
 
     
     GEDCOM Specification:
-    > Page
-    > A specific location within the information referenced. For a published work,
-    > this could include the volume of a multi-volume work and the page number or
-    > numbers. For a periodical, it could include volume, issue, and page numbers.
-    > For a newspaper, it could include a date, page number, and column number. For
-    > an unpublished source or microfilmed works, this could be a film or sheet
-    > number, page number, or frame number. A census record might have an enumerating
-    > district, page number, line number, dwelling number, and family number.
-    > 
-    > It is recommended that the data in this field be formatted comma-separated with
-    > label: value pairs
-    > 
-    > <div class="example">
-    > 
-    > ```gedcom
-    > 2 SOUR @S1@
-    > 3 PAGE Film: 1234567, Frame: 344, Line: 28
-    > ```
-    > 
-    > </div>
-    > 
-    > If the superstructure's pointer is `@VOID@` then there is no information
-    > referenced and the `PAGE` may describe the entire source.
-    > 
-    > <div class="example">
-    > 
-    > ```gedcom
-    > 1 DSCR Tall enough his head touched the ceiling
-    > 2 SOUR @VOID@
-    > 3 PAGE His grand-daughter Lydia told me this in 1980
-    > ```
-    > 
-    > </div>
-    > 
+    > - Page
+    >   A specific location within the information referenced. For a published work,
+    >   this could include the volume of a multi-volume work and the page number or
+    >   numbers. For a periodical, it could include volume, issue, and page numbers.
+    >   For a newspaper, it could include a date, page number, and column number. For
+    >   an unpublished source or microfilmed works, this could be a film or sheet
+    >   number, page number, or frame number. A census record might have an enumerating
+    >   district, page number, line number, dwelling number, and family number.
+    >   
+    >   It is recommended that the data in this field be formatted comma-separated with
+    >   label: value pairs
+    >   
+    >   <div class="example">
+    >   
+    >   ```gedcom
+    >   2 SOUR @S1@
+    >   3 PAGE Film: 1234567, Frame: 344, Line: 28
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   If the superstructure's pointer is `@VOID@` then there is no information
+    >   referenced and the `PAGE` may describe the entire source.
+    >   
+    >   <div class="example">
+    >   
+    >   ```gedcom
+    >   1 DSCR Tall enough his head touched the ceiling
+    >   2 SOUR @VOID@
+    >   3 PAGE His grand-daughter Lydia told me this in 1980
+    >   ```
+    >   
+    >   </div>
+    >   
 
     Examples:
         These are the steps to build the examples in the specification.
@@ -7560,10 +7930,10 @@ class Pedi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Pedigree
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-PEDI`
-    > indicating the type of child-to-family relationship represented by the
-    > superstructure.
+    > - Pedigree
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-PEDI`
+    >   indicating the type of child-to-family relationship represented by the
+    >   superstructure.
 
     Examples:
         This example shows a successful run of the Pedi structure using
@@ -7621,18 +7991,18 @@ class Phon(BaseStructure):
 
     
     GEDCOM Specification:
-    > Phone
-    > A telephone number. Telephone numbers have many regional variations and can
-    > contain non-digit characters. Users should be encouraged to use
-    > internationalized telephone numbers rather than local versions. As a starting
-    > point for this recommendation, there are international standards that use a
-    > "'+'" shorthand for the international prefix (for example, in place of "011" in
-    > the US or "00" in the UK). Examples are `+1 (555) 555-1234` (US) or
-    > `+44 20 1234 1234` (UK).
-    > 
-    > See ITU standards [E.123](https://en.wikipedia.org/wiki/E.123) and 
-    > [E.164](https://en.wikipedia.org/wiki/E.164) for more information.
-    > 
+    > - Phone
+    >   A telephone number. Telephone numbers have many regional variations and can
+    >   contain non-digit characters. Users should be encouraged to use
+    >   internationalized telephone numbers rather than local versions. As a starting
+    >   point for this recommendation, there are international standards that use a
+    >   "'+'" shorthand for the international prefix (for example, in place of "011" in
+    >   the US or "00" in the UK). Examples are `+1 (555) 555-1234` (US) or
+    >   `+44 20 1234 1234` (UK).
+    >   
+    >   See ITU standards [E.123](https://en.wikipedia.org/wiki/E.123) and 
+    >   [E.164](https://en.wikipedia.org/wiki/E.164) for more information.
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7717,83 +8087,83 @@ class Phrase(BaseStructure):
 
     
     GEDCOM Specification:
-    > Phrase
-    > Textual information that cannot be expressed in the superstructure due to the
-    > limitations of its data type. A `PHRASE` may restate information contained in
-    > the superstructure, but doing so is not recommended unless it is needed for
-    > clarity.
-    > 
-    > <div class="example">
-    > 
-    > A date interpreted from the phrase "The Feast of St John" might be
-    > 
-    > ```gedcom
-    > 2 DATE 24 JUN 1852
-    > 3 PHRASE During the feast of St John
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > A record using `1648/9` to indicate a change in new year might become
-    > 
-    > ```gedcom
-    > 2 DATE 30 JAN 1649
-    > 3 PHRASE 30th of January, 1648/9
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > A record using `1648/9` to indicate uncertainty in the year might become
-    > 
-    > ```gedcom
-    > 2 DATE BET 1648 AND 1649
-    > 3 PHRASE 1648/9
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > A record using `Q1 1867` to indicate an event occurred sometime within the
-    > first quarter of 1867 might become
-    > 
-    > ```gedcom
-    > 2 DATE BET 1 JAN 1867 AND 31 MAR 1867
-    > 3 PHRASE Q1 1867
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > A record defining the Maid of Honor in a marriage might become
-    > 
-    > ```gedcom
-    > 1 MARR
-    > 2 ASSO @I2@
-    > 3 ROLE OTHER
-    > 4 PHRASE Maid of Honor
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > A name given to a foundling orphan might be
-    > 
-    > ```gedcom
-    > 1 NAME Mary //
-    > 2 GIVN Mary
-    > 2 TYPE OTHER
-    > 3 PHRASE given by orphanage
-    > ```
-    > 
-    > </div>
-    > 
+    > - Phrase
+    >   Textual information that cannot be expressed in the superstructure due to the
+    >   limitations of its data type. A `PHRASE` may restate information contained in
+    >   the superstructure, but doing so is not recommended unless it is needed for
+    >   clarity.
+    >   
+    >   <div class="example">
+    >   
+    >   A date interpreted from the phrase "The Feast of St John" might be
+    >   
+    >   ```gedcom
+    >   2 DATE 24 JUN 1852
+    >   3 PHRASE During the feast of St John
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   A record using `1648/9` to indicate a change in new year might become
+    >   
+    >   ```gedcom
+    >   2 DATE 30 JAN 1649
+    >   3 PHRASE 30th of January, 1648/9
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   A record using `1648/9` to indicate uncertainty in the year might become
+    >   
+    >   ```gedcom
+    >   2 DATE BET 1648 AND 1649
+    >   3 PHRASE 1648/9
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   A record using `Q1 1867` to indicate an event occurred sometime within the
+    >   first quarter of 1867 might become
+    >   
+    >   ```gedcom
+    >   2 DATE BET 1 JAN 1867 AND 31 MAR 1867
+    >   3 PHRASE Q1 1867
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   A record defining the Maid of Honor in a marriage might become
+    >   
+    >   ```gedcom
+    >   1 MARR
+    >   2 ASSO @I2@
+    >   3 ROLE OTHER
+    >   4 PHRASE Maid of Honor
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   A name given to a foundling orphan might be
+    >   
+    >   ```gedcom
+    >   1 NAME Mary //
+    >   2 GIVN Mary
+    >   2 TYPE OTHER
+    >   3 PHRASE given by orphanage
+    >   ```
+    >   
+    >   </div>
+    >   
 
     Examples:
         The following steps would generate the examples in the specification.
@@ -7901,74 +8271,76 @@ class Plac(BaseStructure):
 
     
     GEDCOM Specification:
-    > Place
-    > The principal place in which the superstructure's subject occurred, represented
-    > as a [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
-    >  of jurisdictional entities in a sequence from the lowest to the
-    > highest jurisdiction, where "jurisdiction" includes units in a political,
-    > ecclesiastical, and geographical hierarchies and may include units of any size,
-    > such as a continent, "at sea", or a specific building, farm, or cemetery. As
-    > with other lists, the jurisdictions are separated by commas. Any jurisdiction's
-    > name that is missing is still accounted for by an empty string in the list.
-    > 
-    > The type of each jurisdiction is given in the `PLAC`.`FORM` substructure, if
-    > present, or in the `HEAD`.`PLAC`.`FORM` structure. If neither is present, the
-    > jurisdictional types are unspecified beyond the lowest-to-highest order noted
-    > above.
-    > 
-    > <div class="deprecation">
-    > 
-    > Having an `EXID` without an `EXID`.`TYPE` substructure is deprecated. The
-    > meaning of an `EXID` depends on its `EXID`.`TYPE`. The cardinality of
-    > `EXID`.`TYPE` will be changed to `{1:1}` in version 8.0.
-    > 
-    > </div>
-    > 
-    > A place, which can be represented in several ways:
-    > 
-    > - The payload contains a comma-separated list of region names, ordered from
-    >   smallest to largest. The specific meaning of each element is given by the
-    >   `FORM` substructure, or in the `HEAD`.`PLAC`.`FORM` if there is no `FORM`
-    >   substructure. If neither `FORM` exists, the meaning of the elements are not
-    >   defined in this specification beyond being names of jurisdictions of some
-    >   kind, ordered from smallest to largest.
-    > 
-    >   <div class="note">
-    >     Some applications and users have defaulted to assuming a `FORM` of "City, County, State, Country",
-    >     and some applications even ignore any `FORM` substructures and treat payloads with a smaller number of
-    >     elements as if they had additional blank elements at the end.
-    >     </div>
-    > 
-    >   Elements should be left blank if they are unknown, do not apply to the
-    >   location, or are too specific for the region in question.
-    > 
-    >   <div class="example">
-    >     A record describing births throughout Oneida county could be recorded as
-    > 
-    >   ```gedcom
-    >   0 @S1@ SOUR
-    >   1 DATA
-    >   2 EVEN BIRT
-    >   3 PLAC , Oneida, Idaho, USA
-    >   4 FORM City, County, State, Country
-    >   ```
-    > 
+    > - Place
+    >   The principal place in which the superstructure's subject occurred, represented
+    >   as a [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
+    >    of jurisdictional entities in a sequence from the lowest to the
+    >   highest jurisdiction, where "jurisdiction" includes units in a political,
+    >   ecclesiastical, and geographical hierarchies and may include units of any size,
+    >   such as a continent, "at sea", or a specific building, farm, or cemetery. As
+    >   with other lists, the jurisdictions are separated by commas. Any jurisdiction's
+    >   name that is missing is still accounted for by an empty string in the list.
+    >   
+    >   The type of each jurisdiction is given in the `PLAC`.`FORM` substructure, if
+    >   present, or in the `HEAD`.`PLAC`.`FORM` structure. If neither is present, the
+    >   jurisdictional types are unspecified beyond the lowest-to-highest order noted
+    >   above.
+    >   
+    >   <div class="deprecation">
+    >   
+    >   Having an `EXID` without an `EXID`.`TYPE` substructure is deprecated. The
+    >   meaning of an `EXID` depends on its `EXID`.`TYPE`. The cardinality of
+    >   `EXID`.`TYPE` will be changed to `{1:1}` in version 8.0.
+    >   
     >   </div>
-    > 
-    > - The payload may be translated or transliterated into different languages or
-    >   scripts using the `TRAN` substructure. It should use the same `FORM` as the
-    >   payload.
-    > 
-    > - Global coordinates may be presented in the `MAP` substructure
-    > 
-    > <div class="note">
-    > 
-    > This specification does not support places where a region name contains a
-    > comma. An alternative system for representing locations is likely to be added
-    > in a later version.
-    > 
-    > </div>
-    > 
+    >   
+    >   A place, which can be represented in several ways:
+    >   
+    >   - The payload contains a comma-separated list of region names, ordered from
+    >     smallest to largest. The specific meaning of each element is given by the
+    >     `FORM` substructure, or in the `HEAD`.`PLAC`.`FORM` if there is no `FORM`
+    >     substructure. If neither `FORM` exists, the meaning of the elements are not
+    >     defined in this specification beyond being names of jurisdictions of some
+    >     kind, ordered from smallest to largest.
+    >   
+    >     <div class="note">
+    > -     Some applications and users have defaulted to assuming a `FORM` of
+    >   "City, County, State, Country",
+    > -     and some applications even ignore any `FORM` substructures and treat
+    >   payloads with a smaller number of
+    >       elements as if they had additional blank elements at the end.
+    >       </div>
+    >   
+    >     Elements should be left blank if they are unknown, do not apply to the
+    >     location, or are too specific for the region in question.
+    >   
+    >     <div class="example">
+    >       A record describing births throughout Oneida county could be recorded as
+    >   
+    >     ```gedcom
+    >     0 @S1@ SOUR
+    >     1 DATA
+    >     2 EVEN BIRT
+    >     3 PLAC , Oneida, Idaho, USA
+    >     4 FORM City, County, State, Country
+    >     ```
+    >   
+    >     </div>
+    >   
+    >   - The payload may be translated or transliterated into different languages or
+    >     scripts using the `TRAN` substructure. It should use the same `FORM` as the
+    >     payload.
+    >   
+    >   - Global coordinates may be presented in the `MAP` substructure
+    >   
+    >   <div class="note">
+    >   
+    >   This specification does not support places where a region name contains a
+    >   comma. An alternative system for representing locations is likely to be added
+    >   in a later version.
+    >   
+    >   </div>
+    >   
 
     Example:
         The following steps would generate the example in the specification.  
@@ -8093,22 +8465,22 @@ class PlacForm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Format
-    > A comma-separated list of jurisdictional titles, which has the same number of
-    > elements and in the same order as the `PLAC` structure. As with `PLAC`, this
-    > shall be ordered from lowest to highest jurisdiction.
-    > 
-    > <div class="example">
-    > 
-    > The following represents Baltimore, a city that is not within a county.
-    > 
-    > ```gedcom
-    > 2 PLAC Baltimore, , Maryland, USA
-    > 3 FORM City, County, State, Country
-    > ```
-    > 
-    > </div>
-    > 
+    > - Format
+    >   A comma-separated list of jurisdictional titles, which has the same number of
+    >   elements and in the same order as the `PLAC` structure. As with `PLAC`, this
+    >   shall be ordered from lowest to highest jurisdiction.
+    >   
+    >   <div class="example">
+    >   
+    >   The following represents Baltimore, a city that is not within a county.
+    >   
+    >   ```gedcom
+    >   2 PLAC Baltimore, , Maryland, USA
+    >   3 FORM City, County, State, Country
+    >   ```
+    >   
+    >   </div>
+    >   
 
     Example:
         The following steps would generate the example in the specifications:
@@ -8151,46 +8523,46 @@ class PlacTran(BaseStructure):
 
     
     GEDCOM Specification:
-    > Translation
-    > A type of `TRAN` substructure specific to places. Each `PLAC`.`TRAN` must have
-    > a `LANG` substructure.
-    > See also `PLAC`.
-    > 
-    > <div class="example">
-    > 
-    > The following presents a place in Japanese with a romaji transliteration and
-    > English translation
-    > 
-    > ```gedcom
-    > 2 PLAC 千代田, 東京, 日本
-    > 3 FORM 区, 都, 国
-    > 3 LANG ja
-    > 3 TRAN Chiyoda, Tokyo, Nihon
-    > 4 LANG ja-Latn
-    > 3 TRAN Chiyoda, Tokyo, Japan
-    > 4 LANG en
-    > ```
-    > 
-    > </div>
-    > 
-    > A representation of the superstructure's data in a different format.
-    > 
-    > In some situations it is desirable to provide the same semantic content in
-    > multiple formats. Where this is desirable, a `TRAN` substructure is used, where
-    > the specific format is given in its language tag substructure, media type
-    > substructure, or both.
-    > 
-    > Different `TRAN` structures are used in different contexts to fully capture the
-    > structure of the information being presented in multiple formats. In all cases,
-    > a `TRAN` structure's payload and substructures should provide only information
-    > also contained in the `TRAN` structures' superstructure, but provide it in a
-    > new language, script, or media type.
-    > 
-    > Each `TRAN` substructure must have either a language tag or a media type or
-    > both. Each `TRAN` structure must differ from its superstructure and from every
-    > other `TRAN` substructure of its superstructure in either its language tag or
-    > its media type or both.
-    > 
+    > - Translation
+    >   A type of `TRAN` substructure specific to places. Each `PLAC`.`TRAN` must have
+    >   a `LANG` substructure.
+    >   See also `PLAC`.
+    >   
+    >   <div class="example">
+    >   
+    >   The following presents a place in Japanese with a romaji transliteration and
+    >   English translation
+    >   
+    >   ```gedcom
+    >   2 PLAC 千代田, 東京, 日本
+    >   3 FORM 区, 都, 国
+    >   3 LANG ja
+    >   3 TRAN Chiyoda, Tokyo, Nihon
+    >   4 LANG ja-Latn
+    >   3 TRAN Chiyoda, Tokyo, Japan
+    >   4 LANG en
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   A representation of the superstructure's data in a different format.
+    >   
+    >   In some situations it is desirable to provide the same semantic content in
+    >   multiple formats. Where this is desirable, a `TRAN` substructure is used, where
+    >   the specific format is given in its language tag substructure, media type
+    >   substructure, or both.
+    >   
+    >   Different `TRAN` structures are used in different contexts to fully capture the
+    >   structure of the information being presented in multiple formats. In all cases,
+    >   a `TRAN` structure's payload and substructures should provide only information
+    >   also contained in the `TRAN` structures' superstructure, but provide it in a
+    >   new language, script, or media type.
+    >   
+    >   Each `TRAN` substructure must have either a language tag or a media type or
+    >   both. Each `TRAN` structure must differ from its superstructure and from every
+    >   other `TRAN` substructure of its superstructure in either its language tag or
+    >   its media type or both.
+    >   
 
     Example:
         The following steps would generate the example in the specifications.
@@ -8252,9 +8624,9 @@ class Post(BaseStructure):
 
     
     GEDCOM Specification:
-    > Postal code
-    > A code used by a postal service to identify an area to facilitate mail
-    > handling. See `ADDRESS_STRUCTURE` for more details.
+    > - Postal code
+    > - A code used by a postal service to identify an area to facilitate mail
+    >   handling. See `ADDRESS_STRUCTURE` for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8286,12 +8658,13 @@ class Prob(BaseStructure):
 
     
     GEDCOM Specification:
-    > Probate
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > probate
-    > Judicial determination of the validity of a will. It may indicate several
-    > related court activities over several dates.
+    > - Probate
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - probate
+    > - Judicial determination of the validity of a will. It may indicate several
+    >   related court activities over several dates.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8337,6 +8710,67 @@ class Prob(BaseStructure):
         super().__init__(value, subs, self.key)
     
 
+class Prop(BaseStructure):
+    '''Store, validate and format the PROP structure. 
+    
+    This class was generated by `Construct.generate_class` in the prep module
+    using GEDCOM yaml specification files.  Links were added to the specification 
+    and tables constructed from the yaml files to aid the user of these classes.  
+    DO NOT CHANGE THIS CLASS MANUALLY.  
+
+    
+    GEDCOM Specification:
+    > - Property
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - property
+    > - Pertaining to possessions such as real estate or other property of interest.
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Args:
+        value: A value of data type http://www.w3.org/2001/XMLSchema#string
+        subs: A permitted substructure or list of permitted substructures.
+        
+    References:
+    - [GEDCOM PROP Structure](https://gedcom.io/terms/v7/PROP)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    '''
+    
+    key: str = 'PROP'
+        
+    def __init__(self, value: str, subs: Any = None) -> None:
+        super().__init__(value, subs, self.key)
+    
+
 class Publ(BaseStructure):
     '''Store, validate and format the PUBL structure. 
     
@@ -8347,16 +8781,16 @@ class Publ(BaseStructure):
 
     
     GEDCOM Specification:
-    > Publication
-    > When and where the record was created. For published works, this includes
-    > information such as the city of publication, name of the publisher, and year of
-    > publication.
-    > 
-    > For an unpublished work, it includes the date the record was created and the
-    > place where it was created, such as the county and state of residence of a
-    > person making a declaration for a pension or the city and state of residence of
-    > the writer of a letter.
-    > 
+    > - Publication
+    >   When and where the record was created. For published works, this includes
+    >   information such as the city of publication, name of the publisher, and year of
+    >   publication.
+    >   
+    >   For an unpublished work, it includes the date the record was created and the
+    >   place where it was created, such as the county and state of residence of a
+    >   person making a declaration for a pension or the city and state of residence of
+    >   the writer of a letter.
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8388,13 +8822,13 @@ class Quay(BaseStructure):
 
     
     GEDCOM Specification:
-    > Quality of data
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-QUAY`
-    > indicating the credibility of a piece of information, based on its
-    > supporting evidence. Some systems use this feature to rank multiple
-    > conflicting opinions for display of most likely information first. It is
-    > not intended to eliminate the receivers' need to evaluate the evidence for
-    > themselves.
+    > - Quality of data
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-QUAY`
+    >   indicating the credibility of a piece of information, based on its
+    >   supporting evidence. Some systems use this feature to rank multiple
+    >   conflicting opinions for display of most likely information first. It is
+    >   not intended to eliminate the receivers' need to evaluate the evidence for
+    >   themselves.
 
     Examples:
         This example shows a successful run of the Quay structure using
@@ -8446,72 +8880,72 @@ class RecordFam(BaseStructure):
 
     
     GEDCOM Specification:
-    > Family record
-    > See `FAMILY_RECORD`
-    > 
-    > <div class="note">
-    > 
-    > The common case is that each couple has one `FAM` record, but that is not
-    > always the case.
-    > 
-    > A couple that separates and then gets together again can be represented either
-    > as a single `FAM` with multiple events (`MARR`, `DIV`, etc.) or as a separate
-    > `FAM` for each time together. Some user interfaces may display these two in
-    > different ways and the two admit different semantics in sourcing. A single
-    > `FAM` with two `MARR` with distinct dates might also represent uncertainty
-    > about dates and a pair of `FAM` with same spouses might also be the result of
-    > merging multiple files.
-    > 
-    > Implementers should support both representations, and should choose between
-    > them based on user input or other context beyond that provided in the datasets
-    > themselves.
-    > 
-    > </div>
-    > 
-    > The `FAM` record was originally structured to represent families where a male
-    > `HUSB` (husband or father) and female `WIFE` (wife or mother) produce `CHIL`
-    > (children). The `FAM` record may also be used for cultural parallels to this,
-    > including nuclear families, marriage, cohabitation, fostering, adoption, and so
-    > on, regardless of the gender of the partners. Sex, gender, titles, and roles of
-    > partners should not be inferred based on the partner that the `HUSB` or `WIFE`
-    > structure points to.
-    > 
-    > The individuals pointed to by the `HUSB` and `WIFE` are collectively referred
-    > to as "partners", "parents" or "spouses".
-    > 
-    > Some displays may be unable to display more than 2 partners. Displays may use
-    > `HUSB` and `WIFE` as layout hints, for example, by consistently displaying the
-    > `HUSB` on the same side of the `WIFE` in a tree view. Family structures with
-    > more than 2 partners may either use several `FAM` records or use
-    > `ASSOCIATION_STRUCTURE`s to indicate additional partners. `ASSO` should not be
-    > used for relationships that can be expressed using `HUSB`, `WIFE`, or `CHIL`
-    > instead.
-    > 
-    > <div class="note">
-    > 
-    > The `FAM` record will be revised in a future version to more fully express the
-    > diversity of human family relationships.
-    > 
-    > </div>
-    > 
-    > The order of the `CHIL` (children) pointers within a `FAM` (family) structure
-    > should be chronological by birth; this is an exception to the usual "most
-    > preferred value first" rule. A `CHIL` with a `voidPtr` indicates a placeholder
-    > for an unknown child in this birth order.
-    > 
-    > If a `FAM` record uses `HUSB` or `WIFE` to point to an `INDI` record, the
-    > `INDI` record must use `FAMS` to point to the `FAM` record. If a `FAM` record
-    > uses `CHIL` to point to an `INDI` record, the `INDI` record must use a `FAMC`
-    > to point to the `FAM` record.
-    > 
-    > An `INDI` record should not have multiple `FAMS` substructures pointing to the
-    > same `FAM`.
-    > 
-    > A `FAM` record should not have multiple `CHIL` substructures pointing to the
-    > same `INDI`; doing so implies a nonsensical birth order. An `INDI` record may
-    > have multiple `FAMC` substructures pointing to the same `FAM`, but doing so is
-    > not recommended.
-    > 
+    > - Family record
+    >   See `FAMILY_RECORD`
+    >   
+    >   <div class="note">
+    >   
+    >   The common case is that each couple has one `FAM` record, but that is not
+    >   always the case.
+    >   
+    >   A couple that separates and then gets together again can be represented either
+    >   as a single `FAM` with multiple events (`MARR`, `DIV`, etc.) or as a separate
+    >   `FAM` for each time together. Some user interfaces may display these two in
+    >   different ways and the two admit different semantics in sourcing. A single
+    >   `FAM` with two `MARR` with distinct dates might also represent uncertainty
+    >   about dates and a pair of `FAM` with same spouses might also be the result of
+    >   merging multiple files.
+    >   
+    >   Implementers should support both representations, and should choose between
+    >   them based on user input or other context beyond that provided in the datasets
+    >   themselves.
+    >   
+    >   </div>
+    >   
+    >   The `FAM` record was originally structured to represent families where a male
+    >   `HUSB` (husband or father) and female `WIFE` (wife or mother) produce `CHIL`
+    >   (children). The `FAM` record may also be used for cultural parallels to this,
+    >   including nuclear families, marriage, cohabitation, fostering, adoption, and so
+    >   on, regardless of the gender of the partners. Sex, gender, titles, and roles of
+    >   partners should not be inferred based on the partner that the `HUSB` or `WIFE`
+    >   structure points to.
+    >   
+    >   The individuals pointed to by the `HUSB` and `WIFE` are collectively referred
+    >   to as "partners", "parents" or "spouses".
+    >   
+    >   Some displays may be unable to display more than 2 partners. Displays may use
+    >   `HUSB` and `WIFE` as layout hints, for example, by consistently displaying the
+    >   `HUSB` on the same side of the `WIFE` in a tree view. Family structures with
+    >   more than 2 partners may either use several `FAM` records or use
+    >   `ASSOCIATION_STRUCTURE`s to indicate additional partners. `ASSO` should not be
+    >   used for relationships that can be expressed using `HUSB`, `WIFE`, or `CHIL`
+    >   instead.
+    >   
+    >   <div class="note">
+    >   
+    >   The `FAM` record will be revised in a future version to more fully express the
+    >   diversity of human family relationships.
+    >   
+    >   </div>
+    >   
+    >   The order of the `CHIL` (children) pointers within a `FAM` (family) structure
+    >   should be chronological by birth; this is an exception to the usual "most
+    >   preferred value first" rule. A `CHIL` with a `voidPtr` indicates a placeholder
+    >   for an unknown child in this birth order.
+    >   
+    >   If a `FAM` record uses `HUSB` or `WIFE` to point to an `INDI` record, the
+    >   `INDI` record must use `FAMS` to point to the `FAM` record. If a `FAM` record
+    >   uses `CHIL` to point to an `INDI` record, the `INDI` record must use a `FAMC`
+    >   to point to the `FAM` record.
+    >   
+    >   An `INDI` record should not have multiple `FAMS` substructures pointing to the
+    >   same `FAM`.
+    >   
+    >   A `FAM` record should not have multiple `CHIL` substructures pointing to the
+    >   same `INDI`; doing so implies a nonsensical birth order. An `INDI` record may
+    >   have multiple `FAMC` substructures pointing to the same `FAM`, but doing so is
+    >   not recommended.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8573,49 +9007,49 @@ class RecordIndi(BaseStructure):
 
     
     GEDCOM Specification:
-    > Individual
-    > See `INDIVIDUAL_RECORD`.
-    > The individual record is a compilation of facts or hypothesized facts about an
-    > individual. These facts may come from multiple sources. Source citations and
-    > notes allow documentation of the source where each of the facts were
-    > discovered.
-    > 
-    > A single individual may have facts distributed across multiple individual
-    > records, connected by `ALIA` (alias, in the computing sense not the pseudonym
-    > sense) pointers. See `ALIA` for more details.
-    > 
-    > Individual records are linked to Family records by use of bi-directional
-    > pointers. Details about those links are stored as substructures of the pointers
-    > in the individual record.
-    > 
-    > Other associations or relationships are represented by the `ASSO` (association)
-    > tag. The person's relation or associate is the person being pointed to. The
-    > association or relationship is stated by the value on the subordinate `ROLE`
-    > line. `ASSO` should not be used for relationships that can be expressed using
-    > `FAMS` or `FAMC` instead.
-    > 
-    > <div class="example">
-    > 
-    > The following example refers to 2 individuals, `@I1@` and `@I2@`, where `@I2@`
-    > is a godparent of `@I1@`:
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 ASSO @I2@
-    > 2 ROLE GODP
-    > ```
-    > 
-    > </div>
-    > 
-    > Events stored as facts within an `INDI` record may also have `FAMC` or `ASSO`
-    > tags to indicate families and individuals that participated in those events.
-    > For example, a `FAMC` pointer subordinate to an adoption event indicates a
-    > relationship to family by adoption; biological parents can be shown by a `FAMC`
-    > pointer subordinate to the birth event; the eulogist at a funeral can be shown
-    > by an `ASSO` pointer subordinate to the burial event; and so on. A subordinate
-    > `FAMC` pointer is allowed to refer to a family where the individual does not
-    > appear as a child.
-    > 
+    > - Individual
+    > - See `INDIVIDUAL_RECORD`.
+    >   The individual record is a compilation of facts or hypothesized facts about an
+    >   individual. These facts may come from multiple sources. Source citations and
+    >   notes allow documentation of the source where each of the facts were
+    >   discovered.
+    >   
+    >   A single individual may have facts distributed across multiple individual
+    >   records, connected by `ALIA` (alias, in the computing sense not the pseudonym
+    >   sense) pointers. See `ALIA` for more details.
+    >   
+    >   Individual records are linked to Family records by use of bi-directional
+    >   pointers. Details about those links are stored as substructures of the pointers
+    >   in the individual record.
+    >   
+    >   Other associations or relationships are represented by the `ASSO` (association)
+    >   tag. The person's relation or associate is the person being pointed to. The
+    >   association or relationship is stated by the value on the subordinate `ROLE`
+    >   line. `ASSO` should not be used for relationships that can be expressed using
+    >   `FAMS` or `FAMC` instead.
+    >   
+    >   <div class="example">
+    >   
+    >   The following example refers to 2 individuals, `@I1@` and `@I2@`, where `@I2@`
+    >   is a godparent of `@I1@`:
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 ASSO @I2@
+    >   2 ROLE GODP
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   Events stored as facts within an `INDI` record may also have `FAMC` or `ASSO`
+    >   tags to indicate families and individuals that participated in those events.
+    >   For example, a `FAMC` pointer subordinate to an adoption event indicates a
+    >   relationship to family by adoption; biological parents can be shown by a `FAMC`
+    >   pointer subordinate to the birth event; the eulogist at a funeral can be shown
+    >   by an `ASSO` pointer subordinate to the burial event; and so on. A subordinate
+    >   `FAMC` pointer is allowed to refer to a family where the individual does not
+    >   appear as a child.
+    >   
 
     Example:
         Here is the way to construct the ged lines in the example from the specification.
@@ -8726,18 +9160,18 @@ class RecordObje(BaseStructure):
 
     
     GEDCOM Specification:
-    > Object
-    > See `MULTIMEDIA_RECORD`.
-    > The multimedia record refers to 1 or more external digital files, and may
-    > provide some additional information about the files and the media they encode.
-    > 
-    > The file reference can occur more than once to group multiple files together.
-    > Grouped files should each pertain to the same context. For example, a sound
-    > clip and a photo both of the same event might be grouped in a single `OBJE`.
-    > 
-    > The change and creation dates should be for the `OBJE` record itself, not the
-    > underlying files.
-    > 
+    > - Object
+    > - See `MULTIMEDIA_RECORD`.
+    >   The multimedia record refers to 1 or more external digital files, and may
+    >   provide some additional information about the files and the media they encode.
+    >   
+    >   The file reference can occur more than once to group multiple files together.
+    >   Grouped files should each pertain to the same context. For example, a sound
+    >   clip and a photo both of the same event might be grouped in a single `OBJE`.
+    >   
+    >   The change and creation dates should be for the `OBJE` record itself, not the
+    >   underlying files.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8778,21 +9212,21 @@ class RecordRepo(BaseStructure):
 
     
     GEDCOM Specification:
-    > Repository
-    > See `REPOSITORY_RECORD`.
-    > The repository record provides information about an institution or person that
-    > has a collection of sources. Informal repositories include the owner of an
-    > unpublished work or of a rare published source, or a keeper of personal
-    > collections. An example would be the owner of a family Bible containing
-    > unpublished family genealogical entries.
-    > 
-    > Layered repositories, such as an archive containing copies of a subset of
-    > records from another archive or archives that have moved or been bought by
-    > other archives, are not modeled in this version of the specification. It is
-    > expected they will be added in a later version. Until such time, it is
-    > recommended that the repository record store current contact information, if
-    > known.
-    > 
+    > - Repository
+    > - See `REPOSITORY_RECORD`.
+    >   The repository record provides information about an institution or person that
+    >   has a collection of sources. Informal repositories include the owner of an
+    >   unpublished work or of a rare published source, or a keeper of personal
+    >   collections. An example would be the owner of a family Bible containing
+    >   unpublished family genealogical entries.
+    >   
+    >   Layered repositories, such as an archive containing copies of a subset of
+    >   records from another archive or archives that have moved or been bought by
+    >   other archives, are not modeled in this version of the specification. It is
+    >   expected they will be added in a later version. Until such time, it is
+    >   recommended that the repository record store current contact information, if
+    >   known.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8836,52 +9270,86 @@ class RecordSnote(BaseStructure):
 
     
     GEDCOM Specification:
-    > Shared note
-    > A note that is shared by multiple structures. See `SHARED_NOTE_RECORD` for
-    > more details.
-    > A catch-all location for information that does not fully fit within other
-    > structures. It may include research notes, additional context, alternative
-    > interpretations, reasoning, and so forth.
-    > 
-    > A shared note record may be pointed to by multiple other structures. Shared
-    > notes should only be used if editing the note in one place should edit it in
-    > all other places or if the note itself requires an `IDENTIFIER_STRUCTURE`. If
-    > each instance of the note may be edited separately and no identifier is needed,
-    > a `NOTE` should be used instead.
-    > 
-    > Each [`SNOTE`.`TRAN`] must have either a `MIME` or `LANG` substructure or
-    > both.
-    > 
-    > <div class="example">
-    > 
-    > The origin of a name might be a reasonable shared note, while the reason a
-    > particular person was given that name may make more sense as a non-shared note.
-    > 
-    > ```gedcom
-    > 0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
-    > 1 CONT It became a given name in honor of Charles George Gordon.
-    > 0 @I1@ INDI
-    > 1 NAME Gordon /Jones/
-    > 2 NOTE Named after the astronaut Gordon Cooper
-    > 2 SNOTE @GORDON@
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="note">
-    > 
-    > The ability to have multiple structures share a single note using pointers was
-    > introduced in version 5.0 in 1991. However, as of 2021 relatively few
-    > applications have a user interface that presents shared notes as such to users.
-    > It is recommended that `SNOTE` be avoided when `NOTE` will suffice.
-    > 
-    > </div>
-    > 
-    > A `SHARED_NOTE_RECORD` may contain a pointer to a `SOURCE_RECORD` and vice
-    > versa. Applications must not create datasets where these mutual pointers form a
-    > cycle. Applications should also ensure they can handle invalid files with such
-    > cycles in a safe manner.
-    > 
+    > - Shared note
+    > - A note that is shared by multiple structures. See `SHARED_NOTE_RECORD` for
+    >   more details.
+    >   A catch-all location for information that does not fully fit within other
+    >   structures. It may include research notes, additional context, alternative
+    >   interpretations, reasoning, and so forth.
+    >   
+    >   A shared note record may be pointed to by multiple other structures. Shared
+    >   notes should only be used if editing the note in one place should edit it in
+    >   all other places or if the note itself requires an `IDENTIFIER_STRUCTURE`. If
+    >   each instance of the note may be edited separately and no identifier is needed,
+    >   a `NOTE` should be used instead.
+    >   
+    >   Each [`SNOTE`.`TRAN`] must have either a `MIME` or `LANG` substructure or
+    >   both.
+    >   
+    >   <div class="example">
+    >   
+    >   The origin of a name might be a reasonable shared note, while the reason a
+    >   particular person was given that name may make more sense as a non-shared note.
+    >   
+    >   ```gedcom
+    >   0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
+    >   1 CONT It became a given name in honor of Charles George Gordon.
+    >   0 @I1@ INDI
+    >   1 NAME Gordon /Jones/
+    >   2 NOTE Named after the astronaut Gordon Cooper
+    >   2 SNOTE @GORDON@
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="note">
+    >   
+    >   The ability to have multiple structures share a single note using pointers was
+    >   introduced in version 5.0 in 1991. However, as of 2021 relatively few
+    >   applications have a user interface that presents shared notes as such to users.
+    >   It is recommended that `SNOTE` be avoided when `NOTE` will suffice.
+    >   
+    >   </div>
+    >   
+    >   A `SHARED_NOTE_RECORD` may contain a pointer to a `SOURCE_RECORD` and vice
+    >   versa. Applications must not create datasets where these mutual pointers form a
+    >   cycle. Applications should also ensure they can handle invalid files with such
+    >   cycles in a safe manner.
+    >   
+
+    Example:
+        The example in the specification has two records: the source record
+        `GORDON` and an individual `I1`.  We will create those cross
+        reference identifiers first.
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('example')
+        >>> snote_xref = g.shared_note_xref('GORDON', '"Gordon" is a traditional Scottish surname.\\nIt became a given name in honor of Charles George Gordon.')
+        >>> indi_xref = g.individual_xref('I1')
+
+        Next create the record for the shared note:
+        >>> import genedata.classes7 as gc
+        >>> snote = gc.RecordSnote(snote_xref)
+
+        Next create the individual record.
+        >>> indi = gc.RecordIndi(
+        ...     indi_xref,
+        ...     gc.IndiName('Gordon /Jones/',
+        ...         [
+        ...             gc.Note('Named after the astronaut Gordon Cooper'),
+        ...             gc.Snote(snote_xref),
+        ...         ]
+        ...     )
+        ... )
+        
+        Now generate the ged lines for each record separately:
+        >>> print(''.join([snote.ged(), indi.ged()]))
+        0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
+        1 CONT It became a given name in honor of Charles George Gordon.
+        0 @I1@ INDI
+        1 NAME Gordon /Jones/
+        2 NOTE Named after the astronaut Gordon Cooper
+        2 SNOTE @GORDON@
+        <BLANKLINE>
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8921,25 +9389,25 @@ class RecordSour(BaseStructure):
 
     
     GEDCOM Specification:
-    > Source
-    > A description of an entire source. See `SOURCE_RECORD` for more details.
-    > A source record describes an entire source. A source may also point to `REPO`s
-    > to describe repositories or archives where the source document may be found.
-    > The part of a source relevant to a specific fact, such as a specific page or
-    > entry, is indicated in a `SOURCE_CITATION` that points to the source record.
-    > 
-    > <div class="note">
-    > 
-    > This sourcing model is known to be insufficient for some use cases and may be
-    > refined in a future version of this specification.
-    > 
-    > </div>
-    > 
-    > A `SOURCE_RECORD` may contain a pointer to a `SHARED_NOTE_RECORD` and vice
-    > versa. Applications must not create datasets where these mutual pointers form a
-    > cycle. Applications should also ensure they can handle invalid files with such
-    > cycles in a safe manner.
-    > 
+    > - Source
+    > - A description of an entire source. See `SOURCE_RECORD` for more details.
+    >   A source record describes an entire source. A source may also point to `REPO`s
+    >   to describe repositories or archives where the source document may be found.
+    >   The part of a source relevant to a specific fact, such as a specific page or
+    >   entry, is indicated in a `SOURCE_CITATION` that points to the source record.
+    >   
+    >   <div class="note">
+    >   
+    >   This sourcing model is known to be insufficient for some use cases and may be
+    >   refined in a future version of this specification.
+    >   
+    >   </div>
+    >   
+    >   A `SOURCE_RECORD` may contain a pointer to a `SHARED_NOTE_RECORD` and vice
+    >   versa. Applications must not create datasets where these mutual pointers form a
+    >   cycle. Applications should also ensure they can handle invalid files with such
+    >   cycles in a safe manner.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8985,14 +9453,14 @@ class RecordSubm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Submitter
-    > A description of a contributor of information to the document. See
-    > `SUBMITTER_RECORD` for more details.
-    > The submitter record identifies an individual or organization that
-    > contributed information contained in the dataset. All records in the
-    > document are assumed to be contributed by the submitter referenced in the
-    > `HEAD`, unless a `SUBM` structure inside a specific record points at a
-    > different submitter record.
+    > - Submitter
+    > - A description of a contributor of information to the document. See
+    >   `SUBMITTER_RECORD` for more details.
+    > - The submitter record identifies an individual or organization that
+    >   contributed information contained in the dataset. All records in the
+    >   document are assumed to be contributed by the submitter referenced in the
+    >   `HEAD`, unless a `SUBM` structure inside a specific record points at a
+    >   different submitter record.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9038,16 +9506,16 @@ class Refn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Reference
-    > A user-defined number or text that the submitter uses to identify the
-    > superstructure. For instance, it may be a record number within the submitter's
-    > automated or manual system, or it may be a page and position number on a
-    > pedigree chart.
-    > 
-    > This is metadata about the structure itself, not data about its subject.
-    > Multiple structures describing different aspects of the same subject must not
-    > have the same `REFN` value.
-    > 
+    > - Reference
+    >   A user-defined number or text that the submitter uses to identify the
+    >   superstructure. For instance, it may be a record number within the submitter's
+    >   automated or manual system, or it may be a page and position number on a
+    >   pedigree chart.
+    >   
+    >   This is metadata about the structure itself, not data about its subject.
+    >   Multiple structures describing different aspects of the same subject must not
+    >   have the same `REFN` value.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9090,9 +9558,9 @@ class Reli(BaseStructure):
 
     
     GEDCOM Specification:
-    > Religion
-    > A religious denomination associated with the event or attribute described
-    > by the superstructure.
+    > - Religion
+    > - A religious denomination associated with the event or attribute described
+    >   by the superstructure.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9174,14 +9642,14 @@ class Repo(BaseStructure):
 
     
     GEDCOM Specification:
-    > Repository
-    > See `SOURCE_REPOSITORY_CITATION`.
-    > This structure is used within a source record to point to a name and
-    > address record of the holder of the source document. Formal and informal
-    > repository name and addresses are stored in the `REPOSITORY_RECORD`. More
-    > formal repositories, such as the Family History Library, should show a call
-    > number of the source at that repository. The call number of that source
-    > should be recorded using a `CALN` substructure.
+    > - Repository
+    > - See `SOURCE_REPOSITORY_CITATION`.
+    > - This structure is used within a source record to point to a name and
+    >   address record of the holder of the source document. Formal and informal
+    >   repository name and addresses are stored in the `REPOSITORY_RECORD`. More
+    >   formal repositories, such as the Family History Library, should show a call
+    >   number of the source at that repository. The call number of that source
+    >   should be recorded using a `CALN` substructure.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9220,22 +9688,24 @@ class Resn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Restriction
-    > A [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
-    >  of enumerated values from set
-    > `https://gedcom.io/terms/v7/enumset-RESN` signifying access to information may
-    > be denied or otherwise restricted.
-    > 
-    > The `RESN` structure is provided to assist software in filtering data that
-    > should not be exported or otherwise used in a particular context. It is
-    > recommended that tools provide an interface to allow users to filter data on
-    > export such that certain `RESN` structure payload entries result in the `RESN`
-    > structure and its superstructure being removed from the export. Such removal
-    > must abide by some constraints: see 
-    > [Removing data](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#removing-data) for more details.
-    > 
-    > This is metadata about the structure itself, not data about its subject.
-    > 
+    > - Restriction
+    >   A [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
+    >    of enumerated values from set
+    >   `https://gedcom.io/terms/v7/enumset-RESN` signifying access to information may
+    >   be denied or otherwise restricted.
+    >   
+    >   The `RESN` structure is provided to assist software in filtering data that
+    >   should not be exported or otherwise used in a particular context. It is
+    >   recommended that tools provide an interface to allow users to filter data on
+    >   export such that certain `RESN` structure payload entries result in the `RESN`
+    >   structure and its superstructure being removed from the export. Such removal
+    >   must abide by some constraints: see 
+    > - [Removing
+    >   data](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#removing-data)
+    >   for more details.
+    >   
+    >   This is metadata about the structure itself, not data about its subject.
+    >   
 
     Examples:
         This example shows a successful run of the Resn structure using
@@ -9347,12 +9817,13 @@ class Reti(BaseStructure):
 
     
     GEDCOM Specification:
-    > Retirement
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > retirement
-    > Exiting an occupational relationship with an employer after a qualifying
-    > time period.
+    > - Retirement
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - retirement
+    > - Exiting an occupational relationship with an employer after a qualifying
+    >   time period.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9408,42 +9879,42 @@ class Role(BaseStructure):
 
     
     GEDCOM Specification:
-    > Role
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-ROLE`
-    > indicating what role this person played in an event or person's life.
-    > 
-    > <div class="example">
-    > 
-    > The following indicates a child's birth record as the source of the mother's
-    > name:
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 NAME Mary //
-    > 2 SOUR @S1@
-    > 3 EVEN BIRT
-    > 4 ROLE MOTH
-    > ```
-    > 
-    > </div>
-    > 
-    > <div class="example">
-    > 
-    > The following indicates that a person's best friend was a witness at their
-    > baptism:
-    > 
-    > ```gedcom
-    > 0 @I2@ INDI
-    > 1 ASSO @I3@
-    > 2 ROLE FRIEND
-    > 3 PHRASE best friend
-    > 1 BAPM
-    > 2 ASSO @I3@
-    > 3 ROLE WITN
-    > ```
-    > 
-    > </div>
-    > 
+    > - Role
+    >   An enumerated value from set `https://gedcom.io/terms/v7/enumset-ROLE`
+    >   indicating what role this person played in an event or person's life.
+    >   
+    >   <div class="example">
+    >   
+    >   The following indicates a child's birth record as the source of the mother's
+    >   name:
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 NAME Mary //
+    >   2 SOUR @S1@
+    >   3 EVEN BIRT
+    >   4 ROLE MOTH
+    >   ```
+    >   
+    >   </div>
+    >   
+    >   <div class="example">
+    >   
+    >   The following indicates that a person's best friend was a witness at their
+    >   baptism:
+    >   
+    >   ```gedcom
+    >   0 @I2@ INDI
+    >   1 ASSO @I3@
+    >   2 ROLE FRIEND
+    >   3 PHRASE best friend
+    >   1 BAPM
+    >   2 ASSO @I3@
+    >   3 ROLE WITN
+    >   ```
+    >   
+    >   </div>
+    >   
 
     Examples:
         The first example of the specification could be coded by first creating
@@ -9583,9 +10054,11 @@ class Schma(BaseStructure):
 
     
     GEDCOM Specification:
-    > Extension schema
-    > A container for storing meta-information about the extension tags used in this document. See 
-    > [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions) for more details.
+    > - Extension schema
+    > - A container for storing meta-information about the extension tags used in
+    >   this document. See
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    >   for more details.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9621,24 +10094,24 @@ class Sdate(BaseStructure):
 
     
     GEDCOM Specification:
-    > Sort date
-    > A date to be used as a sorting hint. It is intended for use when the actual
-    > date is unknown, but the display order may be dependent on date.
-    > 
-    > If both a `DATE` and `SDATE` are present in the same structure, the `SDATE`
-    > should be used for sorting and positioning while the `DATE` should be displayed
-    > as the date of the structure.
-    > 
-    > `SDATE` and its substructures (including `PHRASE`, `TIME`, and any extension
-    > structures) should be used only as sorting hints, not to convey historical
-    > meaning.
-    > 
-    > It is recommended to use a payload that matches
-    > `[[day D] month D] year [D epoch]`. Other DateValue forms may have unreliable
-    > effects on sorting. Including a month and day is encouraged to help different
-    > applications sort dates the same way, as the relative ordering of dates with
-    > different levels of precision is not well defined.
-    > 
+    > - Sort date
+    >   A date to be used as a sorting hint. It is intended for use when the actual
+    >   date is unknown, but the display order may be dependent on date.
+    >   
+    >   If both a `DATE` and `SDATE` are present in the same structure, the `SDATE`
+    >   should be used for sorting and positioning while the `DATE` should be displayed
+    >   as the date of the structure.
+    >   
+    >   `SDATE` and its substructures (including `PHRASE`, `TIME`, and any extension
+    >   structures) should be used only as sorting hints, not to convey historical
+    >   meaning.
+    >   
+    >   It is recommended to use a payload that matches
+    >   `[[day D] month D] year [D epoch]`. Other DateValue forms may have unreliable
+    >   effects on sorting. Including a month and day is encouraged to help different
+    >   applications sort dates the same way, as the relative ordering of dates with
+    >   different levels of precision is not well defined.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9726,9 +10199,9 @@ class Sex(BaseStructure):
 
     
     GEDCOM Specification:
-    > Sex
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-SEX` that
-    > indicates the sex of the individual at birth.
+    > - Sex
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-SEX` that
+    >   indicates the sex of the individual at birth.
 
     Examples:
         This example shows a successful run of the Sex structure using
@@ -9779,13 +10252,14 @@ class Slgc(BaseStructure):
 
     
     GEDCOM Specification:
-    > Sealing, child
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_INDIVIDUAL_ORDINANCE`.
-    > sealing child
-    > A religious event pertaining to the sealing of a child to his or her
-    > parents in a temple ceremony of The Church of Jesus Christ of Latter-day
-    > Saints.
+    > - Sealing, child
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   See also `LDS_INDIVIDUAL_ORDINANCE`.
+    > - sealing child
+    > - A religious event pertaining to the sealing of a child to his or her
+    >   parents in a temple ceremony of The Church of Jesus Christ of Latter-day
+    >   Saints.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9828,16 +10302,17 @@ class Slgs(BaseStructure):
 
     
     GEDCOM Specification:
-    > Sealing, spouse
-    > A [Latter-Day Saint Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
-    > See also `LDS_SPOUSE_SEALING`.
-    > Ordinances performed by members of The Church of Jesus Christ of Latter-day
-    > Saints; see [Latter-day Saint Ordinances] for descriptions of each
-    > ordinance type.
-    > sealing spouse
-    > A religious event pertaining to the sealing of a husband and wife in a
-    > temple ceremony of The Church of Jesus Christ of Latter-day Saints. (See
-    > also [`MARR`])
+    > - Sealing, spouse
+    > - A [Latter-Day Saint
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   See also `LDS_SPOUSE_SEALING`.
+    > - Ordinances performed by members of The Church of Jesus Christ of Latter-day
+    >   Saints; see [Latter-day Saint Ordinances] for descriptions of each
+    >   ordinance type.
+    > - sealing spouse
+    > - A religious event pertaining to the sealing of a husband and wife in a
+    >   temple ceremony of The Church of Jesus Christ of Latter-day Saints. (See
+    >   also [`MARR`])
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9879,9 +10354,9 @@ class Snote(BaseStructure):
 
     
     GEDCOM Specification:
-    > Shared note
-    > A pointer to a note that is shared by multiple structures. See
-    > `NOTE_STRUCTURE` for more details.
+    > - Shared note
+    > - A pointer to a note that is shared by multiple structures. See
+    >   `NOTE_STRUCTURE` for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9986,30 +10461,30 @@ class Sour(BaseStructure):
 
     
     GEDCOM Specification:
-    > Source
-    > A description of the relevant part of a source to support the
-    > superstructure's data. See `SOURCE_CITATION` for more details.
-    > A citation indicating that the pointed-to source record supports the claims
-    > made in the superstructure. Substructures provide additional information about
-    > how that source applies to the subject of the citation's superstructure:
-    > 
-    > - `PAGE`: where in the source the relevant material can be found.
-    > - `DATA`: the relevant data from the source.
-    > - `EVEN`: what event the relevant material was recording.
-    > - `QUAY`: an estimation of the reliability of the source in regard to these
-    >   claims.
-    > - `MULTIMEDIA_LINK`: digital copies of the cited part of the source
-    > 
-    > It is recommended that every `SOURCE_CITATION` point to a `SOURCE_RECORD`.
-    > However, a `voidPtr` can be used with the citation text in a `PAGE`
-    > substructure. The `PAGE` is defined to express a "specific location within the
-    > information referenced;" with a `voidPtr` there is no information referenced,
-    > so the `PAGE` may describe the entire source.
-    > 
-    > A `SOURCE_CITATION` can contain a `NOTE_STRUCTURE`, which in turn can contain a
-    > `SOURCE_CITATION`, allowing potentially unbounded nesting of structures.
-    > Because each dataset is finite, this nesting is also guaranteed to be finite.
-    > 
+    > - Source
+    > - A description of the relevant part of a source to support the
+    >   superstructure's data. See `SOURCE_CITATION` for more details.
+    >   A citation indicating that the pointed-to source record supports the claims
+    >   made in the superstructure. Substructures provide additional information about
+    >   how that source applies to the subject of the citation's superstructure:
+    >   
+    >   - `PAGE`: where in the source the relevant material can be found.
+    >   - `DATA`: the relevant data from the source.
+    >   - `EVEN`: what event the relevant material was recording.
+    >   - `QUAY`: an estimation of the reliability of the source in regard to these
+    >     claims.
+    >   - `MULTIMEDIA_LINK`: digital copies of the cited part of the source
+    >   
+    >   It is recommended that every `SOURCE_CITATION` point to a `SOURCE_RECORD`.
+    >   However, a `voidPtr` can be used with the citation text in a `PAGE`
+    >   substructure. The `PAGE` is defined to express a "specific location within the
+    >   information referenced;" with a `voidPtr` there is no information referenced,
+    >   so the `PAGE` may describe the entire source.
+    >   
+    >   A `SOURCE_CITATION` can contain a `NOTE_STRUCTURE`, which in turn can contain a
+    >   `SOURCE_CITATION`, allowing potentially unbounded nesting of structures.
+    >   Because each dataset is finite, this nesting is also guaranteed to be finite.
+    >   
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10116,8 +10591,8 @@ class SourData(BaseStructure):
 
     
     GEDCOM Specification:
-    > Data
-    > See `https://gedcom.io/terms/v7/DATA`.
+    > - Data
+    > - See `https://gedcom.io/terms/v7/DATA`.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10154,13 +10629,13 @@ class SourEven(BaseStructure):
 
     
     GEDCOM Specification:
-    > Event
-    > An enumerated value from set `https://gedcom.io/terms/v7/enumset-EVENATTR`
-    > indicating the type of event or attribute which was responsible for the
-    > source entry being recorded. For example, if the entry was created to
-    > record a birth of a child, then the type would be `BIRT` regardless of the
-    > assertions made from that record, such as the mother's name or mother's
-    > birth date.
+    > - Event
+    > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-EVENATTR`
+    >   indicating the type of event or attribute which was responsible for the
+    >   source entry being recorded. For example, if the entry was created to
+    >   record a birth of a child, then the type would be `BIRT` regardless of the
+    >   assertions made from that record, such as the mother's name or mother's
+    >   birth date.
         
     Enumerations:
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
@@ -10215,8 +10690,8 @@ class Spfx(BaseStructure):
 
     
     GEDCOM Specification:
-    > Surname prefix
-    > A name piece used as a non-indexing pre-part of a surname.
+    > - Surname prefix
+    > - A name piece used as a non-indexing pre-part of a surname.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10249,12 +10724,13 @@ class Ssn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Social security number
-    > An [Individual Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
-    > See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
-    > social security number
-    > A number assigned by the United States Social Security Administration, used
-    > for tax identification purposes. It is a type of `IDNO`.
+    > - Social security number
+    > - An [Individual
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
+    > - social security number
+    > - A number assigned by the United States Social Security Administration, used
+    >   for tax identification purposes. It is a type of `IDNO`.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10310,10 +10786,10 @@ class Stae(BaseStructure):
 
     
     GEDCOM Specification:
-    > State
-    > A geographical division of a larger jurisdictional area, such as a state
-    > within the United States of America. See `ADDRESS_STRUCTURE` for more
-    > details.
+    > - State
+    > - A geographical division of a larger jurisdictional area, such as a state
+    >   within the United States of America. See `ADDRESS_STRUCTURE` for more
+    >   details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10345,9 +10821,9 @@ class Subm(BaseStructure):
 
     
     GEDCOM Specification:
-    > Submitter
-    > A contributor of information in the substructure. This is metadata about
-    > the structure itself, not data about its subject.
+    > - Submitter
+    > - A contributor of information in the substructure. This is metadata about
+    >   the structure itself, not data about its subject.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10381,12 +10857,12 @@ class SubmLang(BaseStructure):
 
     
     GEDCOM Specification:
-    > Language
-    > A language the subject of that record understands.
-    > 
-    > The payload of the `LANG` structure is a language tag, as defined by 
-    > [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
-    > 
+    > - Language
+    >   A language the subject of that record understands.
+    >   
+    >   The payload of the `LANG` structure is a language tag, as defined by 
+    >   [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag).
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10418,8 +10894,8 @@ class Surn(BaseStructure):
 
     
     GEDCOM Specification:
-    > Surname
-    > A family name passed on or used by members of a family.
+    > - Surname
+    > - A family name passed on or used by members of a family.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10452,9 +10928,10 @@ class Tag(BaseStructure):
 
     
     GEDCOM Specification:
-    > Extension tag
-    > Information relating to a single extension tag as used in this document. See 
-    > [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions) for more details.
+    > - Extension tag
+    >   Information relating to a single extension tag as used in this document. See 
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    >   for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10486,11 +10963,11 @@ class Temp(BaseStructure):
 
     
     GEDCOM Specification:
-    > Temple
-    > The name of a temple of The Church of Jesus Christ of Latter-day Saints.
-    > Previous versions recommended using a set of abbreviations for temple
-    > names, but the list of abbreviations is no longer published by the Church
-    > and using abbreviations is no longer recommended.
+    > - Temple
+    > - The name of a temple of The Church of Jesus Christ of Latter-day Saints.
+    >   Previous versions recommended using a set of abbreviations for temple
+    >   names, but the list of abbreviations is no longer published by the Church
+    >   and using abbreviations is no longer recommended.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10527,12 +11004,12 @@ class Text(BaseStructure):
 
     
     GEDCOM Specification:
-    > Text from Source
-    > A verbatim copy of any description contained within the source. This
-    > indicates notes or text that are actually contained in the source document,
-    > not the submitter's opinion about the source. This should be, from the
-    > evidence point of view, "what the original record keeper said" as opposed
-    > to the researcher's interpretation.
+    > - Text from Source
+    > - A verbatim copy of any description contained within the source. This
+    >   indicates notes or text that are actually contained in the source document,
+    >   not the submitter's opinion about the source. This should be, from the
+    >   evidence point of view, "what the original record keeper said" as opposed
+    >   to the researcher's interpretation.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10571,8 +11048,8 @@ class Time(BaseStructure):
 
     
     GEDCOM Specification:
-    > Time
-    > A `Time` value in a 24-hour clock format.
+    > - Time
+    > - A `Time` value in a 24-hour clock format.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10607,34 +11084,34 @@ class Titl(BaseStructure):
 
     
     GEDCOM Specification:
-    > Title
-    > The title, formal or informal, of the superstructure.
-    > 
-    > A published work, such as a book, might have a title plus the title of the
-    > series of which the book is a part. A magazine article would have a title plus
-    > the title of the magazine that published the article.
-    > 
-    > For an unpublished work, including most digital files, titles should be
-    > descriptive and appropriate to the work.
-    > 
-    > <div class="example">
-    > 
-    > <p></p>
-    > 
-    > - The `TITL` of a letter might include the date, the sender, and the receiver.
-    > - The `TITL` of a transaction between a buyer and seller might have their names
-    >   and the transaction date.
-    > - The `TITL` of a family Bible containing genealogical information might have
-    >   past and present owners and a physical description of the book.
-    > - The `TITL` of a personal interview would cite the informant and interviewer.
-    > 
-    > </div>
-    > 
-    > Some sources may have a citation text that cannot readily be represented using
-    > the `SOURCE_RECORD` substructures `AUTH`, `PUBL`, `REPO`, and so on. In such
-    > cases, the entire citation text may be presented as the payload of the
-    > `SOUR`.`TITL`.
-    > 
+    > - Title
+    >   The title, formal or informal, of the superstructure.
+    >   
+    >   A published work, such as a book, might have a title plus the title of the
+    >   series of which the book is a part. A magazine article would have a title plus
+    >   the title of the magazine that published the article.
+    >   
+    >   For an unpublished work, including most digital files, titles should be
+    >   descriptive and appropriate to the work.
+    >   
+    >   <div class="example">
+    >   
+    >   <p></p>
+    >   
+    >   - The `TITL` of a letter might include the date, the sender, and the receiver.
+    >   - The `TITL` of a transaction between a buyer and seller might have their names
+    >     and the transaction date.
+    >   - The `TITL` of a family Bible containing genealogical information might have
+    >     past and present owners and a physical description of the book.
+    >   - The `TITL` of a personal interview would cite the informant and interviewer.
+    >   
+    >   </div>
+    >   
+    >   Some sources may have a citation text that cannot readily be represented using
+    >   the `SOURCE_RECORD` substructures `AUTH`, `PUBL`, `REPO`, and so on. In such
+    >   cases, the entire citation text may be presented as the payload of the
+    >   `SOUR`.`TITL`.
+    >   
 
     Examples:
         Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
@@ -10684,9 +11161,9 @@ class Top(BaseStructure):
 
     
     GEDCOM Specification:
-    > Top crop width
-    > A number of pixels to not display from the top side of the image. See
-    > `CROP` for more details.
+    > - Top crop width
+    > - A number of pixels to not display from the top side of the image. See
+    >   `CROP` for more details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10718,9 +11195,11 @@ class Trlr(BaseStructure):
 
     
     GEDCOM Specification:
-    > Trailer
-    > A pseudo-structure marking the end of a dataset. See 
-    > [The Header and Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header) for more details.
+    > - Trailer
+    >   A pseudo-structure marking the end of a dataset. See 
+    > - [The Header and
+    >   Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header)
+    >   for more details.
         
     Args:
         subs: A permitted substructure or list of permitted substructures.
@@ -10746,45 +11225,45 @@ class Type(BaseStructure):
 
     
     GEDCOM Specification:
-    > Type
-    > A descriptive word or phrase used to further classify the superstructure.
-    > 
-    > When both a `NOTE` and free-text `TYPE` are permitted as substructures of the
-    > same structure, the displaying systems should always display the `TYPE` value
-    > when they display the data from the associated structure; `NOTE` will typically
-    > be visible only in a detailed view.
-    > 
-    > `TYPE` must be used whenever the generic `EVEN`, `FACT` and `IDNO` tags are
-    > used. It may also be used for any other event or attribute.
-    > 
-    > Using the subordinate `TYPE` classification method provides a further
-    > classification of the superstructure but does not change its basic meaning.
-    > 
-    > <div class="example">
-    > 
-    > A `ORDN` with a `TYPE` could clarify what kind of ordination was performed:
-    > 
-    > ```gedcom
-    > 0 @I1@ INDI
-    > 1 ORDN
-    > 2 TYPE Bishop
-    > ```
-    > 
-    > This classifies the entry as an ordination as a bishop, which is still a
-    > ordination event. The event could be further clarified with `RELI`, `DATE`, and
-    > other substructures.
-    > 
-    > Other descriptor values might include, for example,
-    > 
-    > - "Stillborn" as a qualifier to `BIRT` (birth)
-    > - "Civil" as a qualifier to `MARR` (marriage)
-    > - "College" as a qualifier to `GRAD` (graduation)
-    > - "Oral" as a qualifier to `WILL`
-    > 
-    > See also `FACT` and `EVEN` for additional examples.
-    > 
-    > </div>
-    > 
+    > - Type
+    >   A descriptive word or phrase used to further classify the superstructure.
+    >   
+    >   When both a `NOTE` and free-text `TYPE` are permitted as substructures of the
+    >   same structure, the displaying systems should always display the `TYPE` value
+    >   when they display the data from the associated structure; `NOTE` will typically
+    >   be visible only in a detailed view.
+    >   
+    >   `TYPE` must be used whenever the generic `EVEN`, `FACT` and `IDNO` tags are
+    >   used. It may also be used for any other event or attribute.
+    >   
+    >   Using the subordinate `TYPE` classification method provides a further
+    >   classification of the superstructure but does not change its basic meaning.
+    >   
+    >   <div class="example">
+    >   
+    >   A `ORDN` with a `TYPE` could clarify what kind of ordination was performed:
+    >   
+    >   ```gedcom
+    >   0 @I1@ INDI
+    >   1 ORDN
+    >   2 TYPE Bishop
+    >   ```
+    >   
+    >   This classifies the entry as an ordination as a bishop, which is still a
+    >   ordination event. The event could be further clarified with `RELI`, `DATE`, and
+    >   other substructures.
+    >   
+    >   Other descriptor values might include, for example,
+    >   
+    >   - "Stillborn" as a qualifier to `BIRT` (birth)
+    >   - "Civil" as a qualifier to `MARR` (marriage)
+    >   - "College" as a qualifier to `GRAD` (graduation)
+    >   - "Oral" as a qualifier to `WILL`
+    >   
+    >   See also `FACT` and `EVEN` for additional examples.
+    >   
+    >   </div>
+    >   
 
     Examples:
         To see how the example could be produced from the specification
@@ -10886,39 +11365,39 @@ class Uid(BaseStructure):
 
     
     GEDCOM Specification:
-    > Unique Identifier
-    > A globally-unique identifier of the superstructure, to be preserved across
-    > edits. If a globally-unique identifier for the record already exists, it should
-    > be used without modification, not even whitespace or letter case normalization.
-    > New globally unique identifiers should be created and formatted as described in
-    > [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122).
-    > 
-    > This is metadata about the structure itself, not data about its subject.
-    > Multiple structures describing different aspects of the same subject would have
-    > different `UID` values.
-    > 
-    > Because the `UID` identifies a structure, it can facilitate inter-tool
-    > collaboration by distinguishing between a structure being edited and a new
-    > structure being created. If an application allows structures to be edited in a
-    > way that completely changes their meaning (e.g., changing all the contents of
-    > an `INDI` record to have it describe a completely different person) then any
-    > `UID`s should also be changed.
-    > 
-    > <div class="note">
-    > 
-    > Some systems used a 16-byte UUID with a custom 2-byte checksum for a total of
-    > 18 bytes:
-    > 
-    > - checksum byte 1 = (sum of (byte~*i*~) for *i* 1 through 16) mod 256
-    > - checksum byte 2 = (sum of ((16 − *i*) × (byte~*i*~)) for *i* 1 through 16)
-    >   mod 256
-    > 
-    > Use of checksums for UIDs is discouraged except in cases where error-prone
-    > input is expected and an appropriate action to take in case of an error is
-    > known.
-    > 
-    > </div>
-    > 
+    > - Unique Identifier
+    >   A globally-unique identifier of the superstructure, to be preserved across
+    >   edits. If a globally-unique identifier for the record already exists, it should
+    >   be used without modification, not even whitespace or letter case normalization.
+    >   New globally unique identifiers should be created and formatted as described in
+    >   [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122).
+    >   
+    >   This is metadata about the structure itself, not data about its subject.
+    >   Multiple structures describing different aspects of the same subject would have
+    >   different `UID` values.
+    >   
+    >   Because the `UID` identifies a structure, it can facilitate inter-tool
+    >   collaboration by distinguishing between a structure being edited and a new
+    >   structure being created. If an application allows structures to be edited in a
+    >   way that completely changes their meaning (e.g., changing all the contents of
+    >   an `INDI` record to have it describe a completely different person) then any
+    >   `UID`s should also be changed.
+    >   
+    >   <div class="note">
+    >   
+    >   Some systems used a 16-byte UUID with a custom 2-byte checksum for a total of
+    >   18 bytes:
+    >   
+    >   - checksum byte 1 = (sum of (byte~*i*~) for *i* 1 through 16) mod 256
+    >   - checksum byte 2 = (sum of ((16 âˆ’ *i*) Ã— (byte~*i*~)) for *i* 1 through 16)
+    >     mod 256
+    >   
+    >   Use of checksums for UIDs is discouraged except in cases where error-prone
+    >   input is expected and an appropriate action to take in case of an error is
+    >   known.
+    >   
+    >   </div>
+    >   
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11007,9 +11486,9 @@ class Vers(BaseStructure):
 
     
     GEDCOM Specification:
-    > Version
-    > An identifier that represents the version level assigned to the associated
-    > product. It is defined and changed by the creators of the product.
+    > - Version
+    > - An identifier that represents the version level assigned to the associated
+    >   product. It is defined and changed by the creators of the product.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11041,9 +11520,9 @@ class Width(BaseStructure):
 
     
     GEDCOM Specification:
-    > Width in pixels
-    > How many pixels to display horizontally for the image. See `CROP` for more
-    > details.
+    > - Width in pixels
+    > - How many pixels to display horizontally for the image. See `CROP` for more
+    >   details.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11075,10 +11554,10 @@ class Wife(BaseStructure):
 
     
     GEDCOM Specification:
-    > Wife
-    > A container for information relevant to the subject of the superstructure
-    > specific to the individual described by the associated `FAM`'s `WIFE`
-    > substructure.
+    > - Wife
+    > - A container for information relevant to the subject of the superstructure
+    >   specific to the individual described by the associated `FAM`'s `WIFE`
+    >   substructure.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11127,13 +11606,14 @@ class Will(BaseStructure):
 
     
     GEDCOM Specification:
-    > Will
-    > An [Individual Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
-    > See also `INDIVIDUAL_EVENT_STRUCTURE`.
-    > will
-    > A legal document treated as an event, by which a person disposes of his or
-    > her estate. It takes effect after death. The event date is the date the
-    > will was signed while the person was alive. (See also `PROB`)
+    > - Will
+    > - An [Individual
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
+    > - will
+    > - A legal document treated as an event, by which a person disposes of his or
+    >   her estate. It takes effect after death. The event date is the date the
+    >   will was signed while the person was alive. (See also `PROB`)
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11189,25 +11669,25 @@ class Www(BaseStructure):
 
     
     GEDCOM Specification:
-    > Web address
-    > A URL or other locator for a World Wide Web page of the subject of the
-    > superstructure, as defined by any relevant standard such as 
-    > [whatwg/url](https://url.spec.whatwg.org/), 
-    > [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986), 
-    > [RFC 3987](https://datatracker.ietf.org/doc/html/rfc3987), and so forth.
-    > 
-    > Like other substructures, the `WWW` structure provides details about the
-    > subject of its superstructure. For example, a `MARR`.`WWW` is a world wide web
-    > page of the marriage event, not the personal website of the couple or an entry
-    > in an online database serving as a source documenting the marriage. However,
-    > the meaning of `WWW` was only implicit when it was introduced in version 5.5.1
-    > and many files were created that use `WWW` to store a more tangentially-related
-    > web address, so applications are recommended to interpret the `WWW` structure's
-    > meaning cautiously.
-    > 
-    > If an invalid or no longer existing web address is present upon import, it
-    > should be preserved as-is on export.
-    > 
+    > - Web address
+    >   A URL or other locator for a World Wide Web page of the subject of the
+    >   superstructure, as defined by any relevant standard such as 
+    >   [whatwg/url](https://url.spec.whatwg.org/), 
+    >   [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986), 
+    >   [RFC 3987](https://datatracker.ietf.org/doc/html/rfc3987), and so forth.
+    >   
+    >   Like other substructures, the `WWW` structure provides details about the
+    >   subject of its superstructure. For example, a `MARR`.`WWW` is a world wide web
+    >   page of the marriage event, not the personal website of the couple or an entry
+    >   in an online database serving as a source documenting the marriage. However,
+    >   the meaning of `WWW` was only implicit when it was introduced in version 5.5.1
+    >   and many files were created that use `WWW` to store a more tangentially-related
+    >   web address, so applications are recommended to interpret the `WWW` structure's
+    >   meaning cautiously.
+    >   
+    >   If an invalid or no longer existing web address is present upon import, it
+    >   should be preserved as-is on export.
+    >   
 
     Examples:
         The following example would send a logging message warning

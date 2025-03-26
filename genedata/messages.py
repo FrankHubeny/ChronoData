@@ -92,6 +92,8 @@ class Msg:
         'The value is required to be other than the empty string.'
     )
     NO_EMPTY_TAG: str = 'The tag is required to be not the empty tag.'
+    NO_TRAILER: str = 'The file does not have a ged trailer: {0}'
+    NO_HEADER: str = 'The file does not have a ged header: {0}'
     NOT_AGE: str = 'The value "{0}" is not an age for structure "{1}".'
     NOT_DATE: str = 'The value "{0}" is not a date for structure "{1}".'
     NOT_DATE_EXACT: str = (
@@ -113,6 +115,7 @@ class Msg:
         'The value "{0}" is not a file path for structure "{1}".'
     )
     NOT_FLOAT: str = 'The {1} value "{0}" is not a float.'
+    NOT_GED_STRINGS: str = 'The string contains end of lines followed by alpha characters rather than numerics.'
     NOT_INDIVIDUAL_XREF: str = 'The value "{0}" is not an individual cross reference for structure "{1}".'
     NOT_INTEGER: str = 'The value "{0}" is not an integer for structure "{1}".'
     NOT_LANGUAGE: str = (

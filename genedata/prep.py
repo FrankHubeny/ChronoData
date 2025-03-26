@@ -700,6 +700,159 @@ from typing import Any
 
 
 Examples: dict[str, str] = {
+    'ASSO': f"""
+
+    Examples:
+        This example illustrates how one may construct the example in the
+        specification. First create two individual cross reference identifiers.
+        The add the data to a RecordIndi class for the first individual.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+        >>> from genedata.structure import Void
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi1 = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> indi2 = {Default.CODE_GENEALOGY}.individual_xref('I2')
+        >>> indi = {Default.CODE_CLASS}.RecordIndi(indi1,
+        ...     [
+        ...         {Default.CODE_CLASS}.Asso(Void.INDI, 
+        ...             [
+        ...                 {Default.CODE_CLASS}.Phrase('Mr Stockdale'),
+        ...                 {Default.CODE_CLASS}.Role('OTHER', {Default.CODE_CLASS}.Phrase('Teacher')),
+        ...             ]
+        ...         ),
+        ...         {Default.CODE_CLASS}.Bapm('',
+        ...             [
+        ...                 {Default.CODE_CLASS}.Date('1930'),
+        ...                 {Default.CODE_CLASS}.Asso(indi2, {Default.CODE_CLASS}.Role('CLERGY')),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 ASSO @VOID@
+        2 PHRASE Mr Stockdale
+        2 ROLE OTHER
+        3 PHRASE Teacher
+        1 BAPM
+        2 DATE 1930
+        2 ASSO @I2@
+        3 ROLE CLERGY
+        <BLANKLINE>""",
+    'FILE-TRAN': f"""
+
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> obje_xref = {Default.CODE_GENEALOGY}.multimedia_xref('EX')
+        >>> obje = {Default.CODE_CLASS}.RecordObje(obje_xref,
+        ...     [
+        ...         {Default.CODE_CLASS}.File('media/original.mp3',
+        ...             [
+        ...                 {Default.CODE_CLASS}.Form('audio/mp3'),
+        ...                 {Default.CODE_CLASS}.FileTran('media/derived.oga', {Default.CODE_CLASS}.Form('audio/ogg')),
+        ...                 {Default.CODE_CLASS}.FileTran('media/transcript.vtt', {Default.CODE_CLASS}.Form('text/vtt')),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(obje.ged())
+        0 @EX@ OBJE
+        1 FILE media/original.mp3
+        2 FORM audio/mp3
+        2 TRAN media/derived.oga
+        3 FORM audio/ogg
+        2 TRAN media/transcript.vtt
+        3 FORM text/vtt
+        <BLANKLINE>""",
+    'HEIGHT': f"""
+
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I45')
+        >>> indi = {Default.CODE_CLASS}.RecordIndi(indi_xref, 
+        ...     [
+        ...         {Default.CODE_CLASS}.Dscr('brown eyes, 5ft 10in, 198 pounds'),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I45@ INDI
+        1 DSCR brown eyes, 5ft 10in, 198 pounds
+        <BLANKLINE>""",
+    'INDI-EVEN': f"""
+
+    Example:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> indi = {Default.CODE_CLASS}.RecordIndi(indi_xref, 
+        ...     [
+        ...         {Default.CODE_CLASS}.IndiEven('',
+        ...             [
+        ...                 {Default.CODE_CLASS}.Type('Land Lease'),
+        ...                 {Default.CODE_CLASS}.Date('2 OCT 1837'),
+        ...             ]
+        ...         ),
+        ...         {Default.CODE_CLASS}.IndiEven('Mining equipment',
+        ...             [
+        ...                 {Default.CODE_CLASS}.Type('Equipment Lease'),
+        ...                 {Default.CODE_CLASS}.Date('4 NOV 1837'),
+        ...             ]
+        ...         ),
+        ...     ]
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 EVEN
+        2 TYPE Land Lease
+        2 DATE 2 OCT 1837
+        1 EVEN Mining equipment
+        2 TYPE Equipment Lease
+        2 DATE 4 NOV 1837
+        <BLANKLINE>""",
+    'INDI-FACT': f"""
+    
+    Examples:
+        The following example shows how to construct the example in the specification.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
+        >>> indi = {Default.CODE_CLASS}.RecordIndi(indi_xref, 
+        ...     {Default.CODE_CLASS}.IndiFact('Woodworking', {Default.CODE_CLASS}.Type('Skills'))
+        ... )
+        >>> print(indi.ged())
+        0 @I1@ INDI
+        1 FACT Woodworking
+        2 TYPE Skills
+        <BLANKLINE>""",
+    'INDI-RESI': f"""
+
+    Examples:
+        The following examples show how to construct the examples in the specification.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> resi = {Default.CODE_CLASS}.IndiResi('living with an aunt', {Default.CODE_CLASS}.Date('ABT MAR 1894'))
+        >>> print(resi.ged())
+        1 RESI living with an aunt
+        2 DATE ABT MAR 1894
+        <BLANKLINE>
+
+        >>> resi2 = {Default.CODE_CLASS}.IndiResi('in a mobile caravan', 
+        ...     {Default.CODE_CLASS}.Plac(', , Austro-Hungarian Empire',
+        ...         {Default.CODE_CLASS}.PlacForm('City, County, Country'))
+        ... )
+        >>> print(resi2.ged())
+        1 RESI in a mobile caravan
+        2 PLAC , , Austro-Hungarian Empire
+        3 FORM City, County, Country
+        <BLANKLINE>""",
     'LATI': f"""
 
     Examples:
@@ -1085,37 +1238,41 @@ Examples: dict[str, str] = {
         1 ASSO @I2@
         2 ROLE GODP
         <BLANKLINE>""",
-    # 'record-SNOTE': f"""
-    # Example:
-    #     The example in the specification has two records: the source record
-    #     `GORDON` and an individual `I1`.  We will create those cross
-    #     reference identifiers first.
-    #     >>> from genedata.build import Genealogy
-    #     >>> g = Genealogy('example')
-    #     >>> sour_xref = g.source_xref('GORDON')
-    #     >>> indi_xref = g.individual_xref('I1')
-    #     Next create the record for the shared note:
-    #     >>> from genedata.classes{Config.VERSION} import RecordIndi, RecordSnote, IndiName, Note, Snote
-    #     >>> snote = RecordSnote(sour_xref, f'''"Gordon" is a traditional scottish surname.\\nIt became a given name in honor of Charles George Gordon.''')
-    #     Next create the individual record.
-    #     >>> indi = RecordIndi(
-    #     ...     indi_xref,
-    #     ...     IndiName('Gordon /Jones/',
-    #     ...         [
-    #     ...             Note('Named after the astronaut Gordon Cooper'),
-    #     ...             Snote(snote_xref),
-    #     ...         ]
-    #     ...     )
-    #     ... )
-    #     Now generate the ged lines by calling the ged method on each of the records:
-    #     >>> print(''.join([snote.ged(), indi.ged()]))
-    #     0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
-    #     1 CONT It became a given name in honor of Charles George Gordon.
-    #     0 @I1@ INDI
-    #     1 NAME Gordon /Jones/
-    #     2 NOTE Named after the astronaut Gordon Cooper
-    #     2 SNOTE @GORDON@
-    #     <BLANKLINE>""",
+    'record-SNOTE': f"""
+
+    Example:
+        The example in the specification has two records: the source record
+        `GORDON` and an individual `I1`.  We will create those cross
+        reference identifiers first.
+        >>> from genedata.build import Genealogy
+        >>> {Default.CODE_GENEALOGY} = Genealogy('example')
+        >>> snote_xref = {Default.CODE_GENEALOGY}.shared_note_xref('GORDON', '"Gordon" is a traditional Scottish surname.\\\\nIt became a given name in honor of Charles George Gordon.')
+        >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
+
+        Next create the record for the shared note:
+        >>> import genedata.classes7 as {Default.CODE_CLASS}
+        >>> snote = {Default.CODE_CLASS}.RecordSnote(snote_xref)
+
+        Next create the individual record.
+        >>> indi = {Default.CODE_CLASS}.RecordIndi(
+        ...     indi_xref,
+        ...     {Default.CODE_CLASS}.IndiName('Gordon /Jones/',
+        ...         [
+        ...             {Default.CODE_CLASS}.Note('Named after the astronaut Gordon Cooper'),
+        ...             {Default.CODE_CLASS}.Snote(snote_xref),
+        ...         ]
+        ...     )
+        ... )
+        
+        Now generate the ged lines for each record separately:
+        >>> print(''.join([snote.ged(), indi.ged()]))
+        0 @GORDON@ SNOTE "Gordon" is a traditional Scottish surname.
+        1 CONT It became a given name in honor of Charles George Gordon.
+        0 @I1@ INDI
+        1 NAME Gordon /Jones/
+        2 NOTE Named after the astronaut Gordon Cooper
+        2 SNOTE @GORDON@
+        <BLANKLINE>""",
     'RESN': f"""
 
     Examples:
