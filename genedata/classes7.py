@@ -2429,21 +2429,103 @@ class DataEven(BaseStructure):
     >   deaths, and marriages would be `BIRT, DEAT, MARR`.
         
     Enumerations:
+    - 'ADOP': https://gedcom.io/terms/v7/ADOP
+        > Adoption
+    - 'ANUL': https://gedcom.io/terms/v7/ANUL
+        > Annulment
+    - 'BAPM': https://gedcom.io/terms/v7/BAPM
+        > Baptism
+    - 'BARM': https://gedcom.io/terms/v7/BARM
+        > Bar Mitzvah
+    - 'BASM': https://gedcom.io/terms/v7/BASM
+        > Bas Mitzvah
+    - 'BIRT': https://gedcom.io/terms/v7/BIRT
+        > Birth
+    - 'BLES': https://gedcom.io/terms/v7/BLES
+        > Blessing
+    - 'BURI': https://gedcom.io/terms/v7/BURI
+        > Depositing remains
+    - 'CAST': https://gedcom.io/terms/v7/CAST
+        > Caste
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
         > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
         > `https://gedcom.io/terms/v7/FAM-CENS`
+    - 'CHR': https://gedcom.io/terms/v7/CHR
+        > Christening
+    - 'CHRA': https://gedcom.io/terms/v7/CHRA
+        > Christening, adult
+    - 'CONF': https://gedcom.io/terms/v7/CONF
+        > Confirmation
+    - 'CREM': https://gedcom.io/terms/v7/CREM
+        > Cremation
+    - 'DEAT': https://gedcom.io/terms/v7/DEAT
+        > Death
+    - 'DIV': https://gedcom.io/terms/v7/DIV
+        > Divorce
+    - 'DIVF': https://gedcom.io/terms/v7/DIVF
+        > Divorce filing
+    - 'DSCR': https://gedcom.io/terms/v7/DSCR
+        > Description
+    - 'EDUC': https://gedcom.io/terms/v7/EDUC
+        > Education
+    - 'EMIG': https://gedcom.io/terms/v7/EMIG
+        > Emigration
+    - 'ENGA': https://gedcom.io/terms/v7/ENGA
+        > Engagement
     - 'EVEN': https://gedcom.io/terms/v7/enum-EVEN
         > A generic event; either `https://gedcom.io/terms/v7/INDI-EVEN` or
         > `https://gedcom.io/terms/v7/FAM-EVEN`
     - 'FACT': https://gedcom.io/terms/v7/enum-FACT
         > A generic attribute; either `https://gedcom.io/terms/v7/INDI-FACT` or
         > `https://gedcom.io/terms/v7/FAM-FACT`
+    - 'FCOM': https://gedcom.io/terms/v7/FCOM
+        > First communion
+    - 'GRAD': https://gedcom.io/terms/v7/GRAD
+        > Graduation
+    - 'IDNO': https://gedcom.io/terms/v7/IDNO
+        > Identification number
+    - 'IMMI': https://gedcom.io/terms/v7/IMMI
+        > Immigration
+    - 'RELI': https://gedcom.io/terms/v7/INDI-RELI
+        > Religion
+    - 'TITL': https://gedcom.io/terms/v7/INDI-TITL
+        > Title
+    - 'MARB': https://gedcom.io/terms/v7/MARB
+        > Marriage banns
+    - 'MARC': https://gedcom.io/terms/v7/MARC
+        > Marriage contract
+    - 'MARL': https://gedcom.io/terms/v7/MARL
+        > Marriage license
+    - 'MARR': https://gedcom.io/terms/v7/MARR
+        > Marriage
+    - 'MARS': https://gedcom.io/terms/v7/MARS
+        > Marriage settlement
+    - 'NATI': https://gedcom.io/terms/v7/NATI
+        > Nationality
+    - 'NATU': https://gedcom.io/terms/v7/NATU
+        > Naturalization
     - 'NCHI': https://gedcom.io/terms/v7/enum-NCHI
         > A count of children; either `https://gedcom.io/terms/v7/INDI-NCHI` or
         > `https://gedcom.io/terms/v7/FAM-NCHI`
+    - 'NMR': https://gedcom.io/terms/v7/NMR
+        > Number of marriages
+    - 'OCCU': https://gedcom.io/terms/v7/OCCU
+        > Occupation
+    - 'ORDN': https://gedcom.io/terms/v7/ORDN
+        > Ordination
+    - 'PROB': https://gedcom.io/terms/v7/PROB
+        > Probate
+    - 'PROP': https://gedcom.io/terms/v7/PROP
+        > Property
     - 'RESI': https://gedcom.io/terms/v7/enum-RESI
         > A residence attribute; either `https://gedcom.io/terms/v7/INDI-RESI` or
         > `https://gedcom.io/terms/v7/FAM-RESI`
+    - 'RETI': https://gedcom.io/terms/v7/RETI
+        > Retirement
+    - 'SSN': https://gedcom.io/terms/v7/SSN
+        > Social security number
+    - 'WILL': https://gedcom.io/terms/v7/WILL
+        > Will
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7142,9 +7224,69 @@ class No(BaseStructure):
     >   
         
     Enumerations:
+    - 'ADOP': https://gedcom.io/terms/v7/ADOP
+        > Adoption
+    - 'ANUL': https://gedcom.io/terms/v7/ANUL
+        > Annulment
+    - 'BAPM': https://gedcom.io/terms/v7/BAPM
+        > Baptism
+    - 'BARM': https://gedcom.io/terms/v7/BARM
+        > Bar Mitzvah
+    - 'BASM': https://gedcom.io/terms/v7/BASM
+        > Bas Mitzvah
+    - 'BIRT': https://gedcom.io/terms/v7/BIRT
+        > Birth
+    - 'BLES': https://gedcom.io/terms/v7/BLES
+        > Blessing
+    - 'BURI': https://gedcom.io/terms/v7/BURI
+        > Depositing remains
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
         > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
         > `https://gedcom.io/terms/v7/FAM-CENS`
+    - 'CHR': https://gedcom.io/terms/v7/CHR
+        > Christening
+    - 'CHRA': https://gedcom.io/terms/v7/CHRA
+        > Christening, adult
+    - 'CONF': https://gedcom.io/terms/v7/CONF
+        > Confirmation
+    - 'CREM': https://gedcom.io/terms/v7/CREM
+        > Cremation
+    - 'DEAT': https://gedcom.io/terms/v7/DEAT
+        > Death
+    - 'DIV': https://gedcom.io/terms/v7/DIV
+        > Divorce
+    - 'DIVF': https://gedcom.io/terms/v7/DIVF
+        > Divorce filing
+    - 'EMIG': https://gedcom.io/terms/v7/EMIG
+        > Emigration
+    - 'ENGA': https://gedcom.io/terms/v7/ENGA
+        > Engagement
+    - 'FCOM': https://gedcom.io/terms/v7/FCOM
+        > First communion
+    - 'GRAD': https://gedcom.io/terms/v7/GRAD
+        > Graduation
+    - 'IMMI': https://gedcom.io/terms/v7/IMMI
+        > Immigration
+    - 'MARB': https://gedcom.io/terms/v7/MARB
+        > Marriage banns
+    - 'MARC': https://gedcom.io/terms/v7/MARC
+        > Marriage contract
+    - 'MARL': https://gedcom.io/terms/v7/MARL
+        > Marriage license
+    - 'MARR': https://gedcom.io/terms/v7/MARR
+        > Marriage
+    - 'MARS': https://gedcom.io/terms/v7/MARS
+        > Marriage settlement
+    - 'NATU': https://gedcom.io/terms/v7/NATU
+        > Naturalization
+    - 'ORDN': https://gedcom.io/terms/v7/ORDN
+        > Ordination
+    - 'PROB': https://gedcom.io/terms/v7/PROB
+        > Probate
+    - 'RETI': https://gedcom.io/terms/v7/RETI
+        > Retirement
+    - 'WILL': https://gedcom.io/terms/v7/WILL
+        > Will
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9949,10 +10091,11 @@ class Role(BaseStructure):
         create cross reference identifiers for them.
         >>> indi2 = g.individual_xref('I2')
         >>> indi3 = g.individual_xref('I3')
+
         With those cross reference identifiers we can complete the ged lines
         after importing the additional classes.
         Now create the lines:
-        >>> m = gc.RecordIndi(
+        >>> m = gc.RecordIndi(indi2,
         ...     [
         ...         gc.Asso(indi3, 
         ...             gc.Role('FRIEND', 
@@ -10638,21 +10781,103 @@ class SourEven(BaseStructure):
     >   birth date.
         
     Enumerations:
+    - 'ADOP': https://gedcom.io/terms/v7/ADOP
+        > Adoption
+    - 'ANUL': https://gedcom.io/terms/v7/ANUL
+        > Annulment
+    - 'BAPM': https://gedcom.io/terms/v7/BAPM
+        > Baptism
+    - 'BARM': https://gedcom.io/terms/v7/BARM
+        > Bar Mitzvah
+    - 'BASM': https://gedcom.io/terms/v7/BASM
+        > Bas Mitzvah
+    - 'BIRT': https://gedcom.io/terms/v7/BIRT
+        > Birth
+    - 'BLES': https://gedcom.io/terms/v7/BLES
+        > Blessing
+    - 'BURI': https://gedcom.io/terms/v7/BURI
+        > Depositing remains
+    - 'CAST': https://gedcom.io/terms/v7/CAST
+        > Caste
     - 'CENS': https://gedcom.io/terms/v7/enum-CENS
         > A census event; either `https://gedcom.io/terms/v7/INDI-CENS` or
         > `https://gedcom.io/terms/v7/FAM-CENS`
+    - 'CHR': https://gedcom.io/terms/v7/CHR
+        > Christening
+    - 'CHRA': https://gedcom.io/terms/v7/CHRA
+        > Christening, adult
+    - 'CONF': https://gedcom.io/terms/v7/CONF
+        > Confirmation
+    - 'CREM': https://gedcom.io/terms/v7/CREM
+        > Cremation
+    - 'DEAT': https://gedcom.io/terms/v7/DEAT
+        > Death
+    - 'DIV': https://gedcom.io/terms/v7/DIV
+        > Divorce
+    - 'DIVF': https://gedcom.io/terms/v7/DIVF
+        > Divorce filing
+    - 'DSCR': https://gedcom.io/terms/v7/DSCR
+        > Description
+    - 'EDUC': https://gedcom.io/terms/v7/EDUC
+        > Education
+    - 'EMIG': https://gedcom.io/terms/v7/EMIG
+        > Emigration
+    - 'ENGA': https://gedcom.io/terms/v7/ENGA
+        > Engagement
     - 'EVEN': https://gedcom.io/terms/v7/enum-EVEN
         > A generic event; either `https://gedcom.io/terms/v7/INDI-EVEN` or
         > `https://gedcom.io/terms/v7/FAM-EVEN`
     - 'FACT': https://gedcom.io/terms/v7/enum-FACT
         > A generic attribute; either `https://gedcom.io/terms/v7/INDI-FACT` or
         > `https://gedcom.io/terms/v7/FAM-FACT`
+    - 'FCOM': https://gedcom.io/terms/v7/FCOM
+        > First communion
+    - 'GRAD': https://gedcom.io/terms/v7/GRAD
+        > Graduation
+    - 'IDNO': https://gedcom.io/terms/v7/IDNO
+        > Identification number
+    - 'IMMI': https://gedcom.io/terms/v7/IMMI
+        > Immigration
+    - 'RELI': https://gedcom.io/terms/v7/INDI-RELI
+        > Religion
+    - 'TITL': https://gedcom.io/terms/v7/INDI-TITL
+        > Title
+    - 'MARB': https://gedcom.io/terms/v7/MARB
+        > Marriage banns
+    - 'MARC': https://gedcom.io/terms/v7/MARC
+        > Marriage contract
+    - 'MARL': https://gedcom.io/terms/v7/MARL
+        > Marriage license
+    - 'MARR': https://gedcom.io/terms/v7/MARR
+        > Marriage
+    - 'MARS': https://gedcom.io/terms/v7/MARS
+        > Marriage settlement
+    - 'NATI': https://gedcom.io/terms/v7/NATI
+        > Nationality
+    - 'NATU': https://gedcom.io/terms/v7/NATU
+        > Naturalization
     - 'NCHI': https://gedcom.io/terms/v7/enum-NCHI
         > A count of children; either `https://gedcom.io/terms/v7/INDI-NCHI` or
         > `https://gedcom.io/terms/v7/FAM-NCHI`
+    - 'NMR': https://gedcom.io/terms/v7/NMR
+        > Number of marriages
+    - 'OCCU': https://gedcom.io/terms/v7/OCCU
+        > Occupation
+    - 'ORDN': https://gedcom.io/terms/v7/ORDN
+        > Ordination
+    - 'PROB': https://gedcom.io/terms/v7/PROB
+        > Probate
+    - 'PROP': https://gedcom.io/terms/v7/PROP
+        > Property
     - 'RESI': https://gedcom.io/terms/v7/enum-RESI
         > A residence attribute; either `https://gedcom.io/terms/v7/INDI-RESI` or
         > `https://gedcom.io/terms/v7/FAM-RESI`
+    - 'RETI': https://gedcom.io/terms/v7/RETI
+        > Retirement
+    - 'SSN': https://gedcom.io/terms/v7/SSN
+        > Social security number
+    - 'WILL': https://gedcom.io/terms/v7/WILL
+        > Will
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |

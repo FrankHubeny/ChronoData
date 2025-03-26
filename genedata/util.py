@@ -11,6 +11,7 @@ import math
 import re
 import urllib.request
 import zipfile
+from pathlib import Path
 
 #from textwrap import indent
 from typing import Any
@@ -115,16 +116,18 @@ class Util:
             url: The name of the file or the internet url.
         """
 
-        # Read the internet file or a local file.
+        raw: str = Default.EMPTY
         if url[0:4] == 'http':
             webUrl = urllib.request.urlopen(url)
             result_code = str(webUrl.getcode())
             if result_code == '404':
                 raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-            raw: str = webUrl.read().decode(Default.UTF8)
-        else:
-            with open(url) as file:  # noqa: PTH123
+            raw = webUrl.read().decode(Default.UTF8)
+        elif Path(url).exists():
+            with Path.open(Path(url)) as file:  
                 raw = file.read()
+        else:
+            logging.info(Msg.FILE_NOT_FOUND.format(url))
         return raw
 
     @staticmethod
@@ -146,18 +149,19 @@ class Util:
             url: The name of the file or the internet url.
         """
 
+        raw: str = Default.EMPTY
         # Retrieve the file.
         try:
-            raw: str = Util.read(url)
+            raw = Util.read(url)
         except Exception:
             logging.info(Msg.LOG_READ_FAILED.format(url))
             try:
                 raw = Util.read_binary(url)
             except Exception:
-                logging.info(Msg.LOG_READ_BINARY_FAILED.format(url))
+                logging.info(Msg.FILE_NOT_FOUND.format(url))
 
         # Check that file has proper yaml directive.
-        if Default.YAML_DIRECTIVE not in raw:
+        if raw != Default.EMPTY and Default.YAML_DIRECTIVE not in raw:
             raise ValueError(
                 Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
             )

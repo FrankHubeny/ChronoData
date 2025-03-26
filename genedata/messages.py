@@ -42,6 +42,7 @@ class Msg:
     )
     FACT_REQUIRES_TYPE: str = 'The FACT tag requires a non-empty TYPE.'
     FILE_EXISTS: str = 'The file "{0}" already exists.'
+    FILE_NOT_FOUND: str = 'The file "{0}" could not be found.'
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
     IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
