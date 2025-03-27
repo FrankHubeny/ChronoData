@@ -50,6 +50,9 @@ class Default:
     ATSIGN: str = '@'
     ATSIGN_DOUBLE: str = '@@'
     BANNED: str = r'[\u0000-\u001F\u007F\uD800-\uDFFF\uFFFE\uFFFF]'
+    BAR: str = '|'
+    BRACE_LEFT: str = '{'
+    BRACE_RIGHT: str = '}'
     BRACKET_RIGHT: str = ']'
     BRACKET_LEFT: str = '['
     BRACKET_LEFT_RIGHT: str = '[]'
@@ -61,6 +64,7 @@ class Default:
     CODE_GENEALOGY: str = 'g'
     CODE_SUBS: str = 'subs'
     CODE_VALUE: str = 'value'
+    COLON: str = ':'
     COMMA: str = ','
     COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
@@ -88,6 +92,7 @@ class Default:
     LATI_PRECISION: str = '.6f'
     LATI_SOUTH: str = 'S'
     LEFT: int = 0
+    LINE_LENGTH: int = 75
     LIST_ITEM_SEPARATOR: str = ', '
     LONG_DEFAULT: float = 0.0
     LONG_EAST: str = 'E'
@@ -95,10 +100,13 @@ class Default:
     LONG_LOW: float = -180.0
     LONG_PRECISION: str = '.6f'
     LONG_WEST: str = 'W'
+    MANY: str = 'Many'
     MIME: str = ''
     MONTHS: int = 0
+    NO: str = 'No'
     NONE: str = 'None'
     OCCURRED: str = 'Y'
+    ONLY_ONE: str = 'Only One'
     PARENS_LEFT: str = '('
     PARENS_RIGHT: str = ')'
     PAYLOAD_EMPTY: str = EMPTY
@@ -118,6 +126,7 @@ class Default:
     PLACE_FORM4: str = 'Country'
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
+    RECORD: str = 'record'
     FAM_RECORD_TYPE: str = 'fam'
     INDI_RECORD_TYPE: str = 'indi'
     OBJE_RECORD_TYPE: str = 'obje'
@@ -158,6 +167,13 @@ class Default:
     WEEKS: int = 0
     WIDTH: int = 0
     XREF: str = 'xref'
+    XREF_FAMILY: str = 'FamilyXref'
+    XREF_INDIVIDUAL: str = 'IndividualXref'
+    XREF_MULTIMEDIA: str = 'MultimediaXref'
+    XREF_REPOSITORY: str = 'RepositoryXref'
+    XREF_SHARED_NOTE: str = 'SharedNoteXref'
+    XREF_SOURCE: str = 'SourceXref'
+    XREF_SUBMITTER: str = 'SubmitterXref'
     YAML_CALENDARS: str = 'calendars'
     YAML_CARDINALITY_ANY_NUMBER: str = ':M}'
     YAML_CARDINALITY_OPTIONAL: str = '{0:'
@@ -196,6 +212,7 @@ class Default:
     YAML_WITH_HYPHEN: str = '\n    > - '
     YAML_WITHOUT_HYPHEN: str = '\n    >   '
     YEARS: int = 0
+    YES: str = 'Yes'
     Z: str = 'Z'
 
 

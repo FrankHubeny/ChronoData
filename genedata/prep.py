@@ -27,6 +27,7 @@ __all__ = [
 ]
 
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import wrap
@@ -35,6 +36,7 @@ from typing import Any
 from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Config, Default
+from genedata.messages import Msg
 from genedata.util import Util
 
 
@@ -488,34 +490,64 @@ from typing import Any
         return lines
 
     @staticmethod
-    def calendar(url: str) -> str:
+    def calendar_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_CALENDAR}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_CALENDAR}'
         path_end = '.yaml'
-        lines: str = 'Calendar: dict[str, dict[str, Any]] = {'
         for item in Keys.CALENDARS:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location: str = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT, Default.EOL, Default.EOL])
+    
+    @staticmethod
+    def calendar(url: str) -> str:
+        return ''.join(
+            [
+                'Calendar: dict[str, dict[str, Any]] = ', 
+                Convert.calendar_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
-    def datatype(url: str) -> str:
-        # path_start = url
+    def datatype_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_DATATYPE}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_DATATYPE}'
         path_end = '.yaml'
-        lines: str = 'DataType: dict[str, dict[str, Any]] = {'
         for item in Keys.DATATYPES:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            lines = f"{lines}\n    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location: str = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}\n    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+    
+    @staticmethod
+    def datatype(url: str) -> str:
+        return ''.join(
+            [
+                'DataType: dict[str, dict[str, Any]] = ', 
+                Convert.datatype_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
     def enumeration_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_ENUMERATION}'
             alt_path_start: str = f'{url}{Default.URL_STRUCTURE}'
@@ -523,72 +555,94 @@ from typing import Any
             path_start = f'{url}{Default.SLASH}{Default.URL_ENUMERATION}'
             alt_path_start = f'{url}{Default.SLASH}{Default.URL_STRUCTURE}'
         path_end = '.yaml'
-        lines: str = '{'
-        url_path: str = Default.EMPTY
         for item in Keys.ENUMERATIONS:
-            url_path = f'{path_start}{item}{path_end}'
-            if not Path(url_path).exists():
-                url_path = f'{alt_path_start}{item}{path_end}'
-            yamldict = Util.read_yaml(url_path)
-            lines = f"{lines}'{item}': {yamldict}, "
-        return ''.join([lines, Default.EOL, '}', Default.EOL])
-
+            location: str = f'{path_start}{item}{path_end}'
+            if not Path(location).exists():
+                location = f'{alt_path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}'{item}': {yamldict}, "
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+    
     @staticmethod
     def enumeration(url: str) -> str:
-        if url[-1] == Default.SLASH:
-            path_start: str = f'{url}{Default.URL_ENUMERATION}'
-            alt_path_start: str = f'{url}{Default.URL_STRUCTURE}'
-        else:
-            path_start = f'{url}{Default.SLASH}{Default.URL_ENUMERATION}'
-            alt_path_start = f'{url}{Default.SLASH}{Default.URL_STRUCTURE}'
-        path_end = '.yaml'
-        lines: str = 'Enumeration: dict[str, dict[str, Any]] = {'
-        url_path: str = Default.EMPTY
-        for item in Keys.ENUMERATIONS:
-            url_path = f'{path_start}{item}{path_end}'
-            if not Path(url_path).exists():
-                url_path = f'{alt_path_start}{item}{path_end}'
-            yamldict = Util.read_yaml(url_path)
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+        return ''.join(
+            [
+                'Enumeration: dict[str, dict[str, Any]] = ', 
+                Convert.enumeration_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
+
 
     @staticmethod
-    def enumerationset(url: str) -> str:
-        # path_start = url
+    def enumerationset_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_ENUMERATION_SET}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_ENUMERATION_SET}'
         path_end = '.yaml'
-        lines: str = 'EnumerationSet: dict[str, dict[str, Any]] = {'
         for item in Keys.ENUMERATION_SETS:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+    
+    @staticmethod
+    def enumerationset(url: str) -> str:
+        return ''.join(
+            [
+                'EnumerationSet: dict[str, dict[str, Any]] = ', 
+                Convert.enumerationset_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
-    def month(url: str) -> str:
-        # path_start = url
+    def month_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_MONTH}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_MONTH}'
         path_end = '.yaml'
-        lines: str = 'Month: dict[str, dict[str, Any]] = {'
         for item in Keys.MONTHS:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+    
+    @staticmethod
+    def month(url: str) -> str:
+        return ''.join(
+            [
+                'Month: dict[str, dict[str, Any]] = ', 
+                Convert.month_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
     def structure_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_STRUCTURE}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_STRUCTURE}'
         path_end = '.yaml'
         enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
-        lines: str = '{'
         for item in Keys.STRUCTURES:
             yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
             required = []
@@ -622,61 +676,22 @@ from typing import Any
                 .replace(Default.HYPHEN, Default.EMPTY)
             )
             lines = f"{lines}'{item}': {yamldict}, "
-        return ''.join([lines, Default.EOL, '}', Default.EOL])
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT, Default.EOL])
 
     @staticmethod
     def structure(url: str) -> str:
-        if url[-1] == Default.SLASH:
-            path_start: str = f'{url}{Default.URL_STRUCTURE}'
-        else:
-            path_start = f'{url}{Default.SLASH}{Default.URL_STRUCTURE}'
-        path_end = '.yaml'
-        enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
-        lines: str = 'Structure: dict[str, dict[str, Any]] = {'
-        for item in Keys.STRUCTURES:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            required = []
-            single = []
-            permitted = []
-            permitted_key = []
-            enums = []
-            if Default.YAML_SUBSTRUCTURES in yamldict:
-                for key, value in yamldict[Default.YAML_SUBSTRUCTURES].items():
-                    tag = (
-                        key[key.rfind(Default.SLASH) + 1 :]
-                        .title()
-                        .replace(Default.UNDERLINE, Default.EMPTY)
-                        .replace(Default.HYPHEN, Default.EMPTY)
-                    )
-                    permitted.append(tag)
-                    permitted_key.append(key[key.rfind(Default.SLASH) + 1 :])
-                    if Default.YAML_CARDINALITY_REQUIRED in value:
-                        required.append(tag)
-                    if Default.YAML_CARDINALITY_SINGULAR in value:
-                        single.append(tag)
-            yamldict[Default.YAML_PERMITTED] = permitted
-            yamldict[Default.YAML_PERMITTED_KEY] = permitted_key
-            yamldict[Default.YAML_REQUIRED] = required
-            yamldict[Default.YAML_SINGULAR] = single
-            if Default.YAML_ENUMERATION_SET in yamldict:
-                enumset = yamldict[Default.YAML_ENUMERATION_SET]
-                if yamldict[Default.YAML_ENUMERATION_SET] is not None:
-                    for key, value in enumeration.items():  # noqa: B007
-                        if enumset in value[Default.YAML_VALUE_OF]:
-                            enums.append(value[Default.YAML_STANDARD_TAG])
-            yamldict[Default.YAML_ENUMS] = enums
-            yamldict[Default.YAML_CLASS_NAME] = (
-                item.title()
-                .replace(Default.UNDERLINE, Default.EMPTY)
-                .replace(Default.HYPHEN, Default.EMPTY)
-            )
-            yamldict[Default.YAML_KEY] = item
-
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+        return ''.join(
+            [
+                'Structure: dict[str, dict[str, Any]] = ', 
+                Convert.structure_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
-    def structure_extension(url: str) -> str:
+    def structure_extension_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_STRUCTURE_EXTENSION}'
         else:
@@ -685,60 +700,89 @@ from typing import Any
             )
         path_end = '.yaml'
         enumeration: dict[str, Any] = eval(Convert.enumeration_dictionary(url))
-        lines: str = 'ExtensionStructure: dict[str, dict[str, Any]] = {'
         for item in Keys.STRUCTURE_EXTENSIONS:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            required = []
-            single = []
-            permitted = []
-            permitted_key = []
-            enums = []
-            if Default.YAML_SUBSTRUCTURES in yamldict:
-                for key, value in yamldict[Default.YAML_SUBSTRUCTURES].items():
-                    tag = (
-                        key[key.rfind(Default.SLASH) + 1 :]
-                        .title()
-                        .replace(Default.UNDERLINE, Default.EMPTY)
-                        .replace(Default.HYPHEN, Default.EMPTY)
-                    )
-                    permitted.append(tag)
-                    permitted_key.append(key[key.rfind(Default.SLASH) + 1 :])
-                    if Default.YAML_CARDINALITY_REQUIRED in value:
-                        required.append(tag)
-                    if Default.YAML_CARDINALITY_SINGULAR in value:
-                        single.append(tag)
-            yamldict[Default.YAML_PERMITTED] = permitted
-            yamldict[Default.YAML_PERMITTED_KEY] = permitted_key
-            yamldict[Default.YAML_REQUIRED] = required
-            yamldict[Default.YAML_SINGULAR] = single
-            if Default.YAML_ENUMERATION_SET in yamldict:
-                enumset = yamldict[Default.YAML_ENUMERATION_SET]
-                for key, value in enumeration.items():  # noqa: B007
-                    if enumset in value[Default.YAML_VALUE_OF]:
-                        enums.append(value[Default.YAML_STANDARD_TAG])
-            yamldict[Default.YAML_ENUMS] = enums
-            yamldict[Default.YAML_CLASS_NAME] = (
-                item.title()
-                .replace(Default.UNDERLINE, Default.EMPTY)
-                .replace(Default.HYPHEN, Default.EMPTY)
-            )
-            yamldict[Default.YAML_KEY] = item
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                required = []
+                single = []
+                permitted = []
+                permitted_key = []
+                enums = []
+                if Default.YAML_SUBSTRUCTURES in yamldict:
+                    for key, value in yamldict[Default.YAML_SUBSTRUCTURES].items():
+                        tag = (
+                            key[key.rfind(Default.SLASH) + 1 :]
+                            .title()
+                            .replace(Default.UNDERLINE, Default.EMPTY)
+                            .replace(Default.HYPHEN, Default.EMPTY)
+                        )
+                        permitted.append(tag)
+                        permitted_key.append(key[key.rfind(Default.SLASH) + 1 :])
+                        if Default.YAML_CARDINALITY_REQUIRED in value:
+                            required.append(tag)
+                        if Default.YAML_CARDINALITY_SINGULAR in value:
+                            single.append(tag)
+                yamldict[Default.YAML_PERMITTED] = permitted
+                yamldict[Default.YAML_PERMITTED_KEY] = permitted_key
+                yamldict[Default.YAML_REQUIRED] = required
+                yamldict[Default.YAML_SINGULAR] = single
+                if Default.YAML_ENUMERATION_SET in yamldict:
+                    enumset = yamldict[Default.YAML_ENUMERATION_SET]
+                    for key, value in enumeration.items():  # noqa: B007
+                        if enumset in value[Default.YAML_VALUE_OF]:
+                            enums.append(value[Default.YAML_STANDARD_TAG])
+                yamldict[Default.YAML_ENUMS] = enums
+                yamldict[Default.YAML_CLASS_NAME] = (
+                    item.title()
+                    .replace(Default.UNDERLINE, Default.EMPTY)
+                    .replace(Default.HYPHEN, Default.EMPTY)
+                )
+                yamldict[Default.YAML_KEY] = item
+                lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+
 
     @staticmethod
-    def uri(url: str) -> str:
-        # path_start = url
+    def structure_extension(url: str) -> str:
+        return ''.join(
+            [
+                'ExtensionStructure: dict[str, dict[str, Any]] = ', 
+                Convert.structure_extension_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
+
+    @staticmethod
+    def uri_dictionary(url: str) -> str:
+        lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             path_start: str = f'{url}{Default.URL_URI}'
         else:
             path_start = f'{url}{Default.SLASH}{Default.URL_URI}'
         path_end = '.yaml'
-        lines: str = 'Uri: dict[str, dict[str, Any]] = {'
         for item in Keys.URIS:
-            yamldict = Util.read_yaml(f'{path_start}{item}{path_end}')
-            lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
-        return ''.join([lines, Default.EOL, '}', Default.EOL, Default.EOL])
+            location = f'{path_start}{item}{path_end}'
+            if Path(location).exists():
+                yamldict = Util.read_yaml(location)
+                lines = f"{lines}{Default.EOL}    '{item}': {yamldict},"
+            else:
+                logging.info(Msg.FILE_NOT_FOUND.format(location))
+        return ''.join([lines, Default.EOL, Default.BRACE_RIGHT])
+
+    @staticmethod
+    def uri(url: str) -> str:
+        return ''.join(
+            [
+                'Uri: dict[str, dict[str, Any]] = ', 
+                Convert.uri_dictionary(url),
+                Default.EOL,
+                Default.EOL,
+            ]
+        )
 
     @staticmethod
     def build_all(source: str, version: str, url: str) -> str:
@@ -1489,9 +1533,7 @@ Examples: dict[str, str] = {
 
 
 class Construct:
-    # @staticmethod
-    # def get_class_name(key: str) -> str:
-    #     return key.title().replace('_', '').replace('-', '')
+    """Methods to construct classes from the GEDCOM specification."""
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
@@ -1508,18 +1550,32 @@ The specifications for this module are from the
 """
 
     @staticmethod
+    def classname(name: str) -> str:
+        return (
+            name.title()
+            .replace(Default.UNDERLINE, Default.EMPTY)
+            .replace(Default.HYPHEN, Default.EMPTY)
+        )
+
+    @staticmethod
+    def tableheader() -> str:
+        return """
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |"""
+
+    @staticmethod
     def generate__all__() -> str:
         """Generate the __all__ = [] by filling in the list with the modified keys from Structure."""
         lines: str = '__all__ = ['
         for key in Keys.STRUCTURES:
-            if key not in ['CONT']:
-                edited_key: str = key.title().replace('_', '').replace('-', '')
-                lines = f"{lines}\n    '{edited_key}',"
-        return f'{lines}\n]\n'
+            if key not in [Default.CONT]:
+                edited_key: str = Construct.classname(key)
+                lines = f"{lines}{Default.EOL}{Default.INDENT}'{edited_key}'{Default.COMMA}"
+        return f'{lines}{Default.EOL}]{Default.EOL}'
 
     @staticmethod
     def generate_imports() -> str:
-        return """
+        return f"""
 import logging
 from typing import Any
 
@@ -1527,13 +1583,13 @@ from genedata.messages import Msg
 from genedata.structure import (
     BaseStructure,
     ExtensionXref,
-    FamilyXref,
-    IndividualXref,
-    MultimediaXref,
-    RepositoryXref,
-    SharedNoteXref,
-    SourceXref,
-    SubmitterXref,
+    {Default.XREF_FAMILY},
+    {Default.XREF_INDIVIDUAL},
+    {Default.XREF_MULTIMEDIA},
+    {Default.XREF_REPOSITORY},
+    {Default.XREF_SHARED_NOTE},
+    {Default.XREF_SOURCE},
+    {Default.XREF_SUBMITTER},
 )
 """
 
@@ -1545,7 +1601,7 @@ from genedata.structure import (
         return (
             text.replace(
                 '[BCP 47]',
-                '\n[BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag)',
+                f'{Default.EOL}[BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag)',
             )
             .replace(
                 '[documented extension tag]',
@@ -1553,12 +1609,16 @@ from genedata.structure import (
             )
             .replace('[E.123]', '[E.123](https://en.wikipedia.org/wiki/E.123)')
             .replace(
-                '[E.164]', '\n[E.164](https://en.wikipedia.org/wiki/E.164)'
+                '[E.164]',
+                f'{Default.EOL}[E.164](https://en.wikipedia.org/wiki/E.164)',
             )
             .replace(
-                '[exid-types registry]', f'\n[exid-types registry]({site}#EXID)'
+                '[exid-types registry]',
+                f'{Default.EOL}[exid-types registry]({site}#EXID)',
             )
-            .replace('[Extensions]', f'\n[Extensions]({site}#extensions)')
+            .replace(
+                '[Extensions]', f'{Default.EOL}[Extensions]({site}#extensions)'
+            )
             .replace(
                 '[Family Attribute]',
                 f'[Family Attribute]({site}#family-attributes)',
@@ -1580,32 +1640,46 @@ from genedata.structure import (
                 '[Latter-Day Saint Ordinance]',
                 f'[Latter-Day Saint Ordinance]({site}#latter-day-saint-ordinances)',
             )
-            .replace('[List]', f'[List]({site}#list)\n')
+            .replace('[List]', f'[List]({site}#list){Default.EOL}')
             .replace(
                 '[media type]',
-                f'[media type]({site}#media-type)\n',
+                f'[media type]({site}#media-type){Default.EOL}',
             )
             .replace(
-                '[Removing data]', f'\n[Removing data]({site}#removing-data)'
+                '[Removing data]',
+                f'{Default.EOL}[Removing data]({site}#removing-data)',
             )
             .replace(
                 '[registry of component subtags] ',
                 '[registry of component subtags](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry)\n',
             )
             .replace('[RFC 3696]', f'[RFC 3696]({datatracker}3696)')
-            .replace('[RFC\n3696]', f'\n[RFC 3696]({datatracker}3696)')
-            .replace('[RFC\n3986]', f'\n[RFC 3986]({datatracker}3986)')
-            .replace('[RFC 3987]', f'\n[RFC 3987]({datatracker}3987)')
-            .replace('[RFC 4122]', f'[RFC 4122]({datatracker}4122)')
-            .replace('[RFC 5321]', f'\n[RFC 5321]({datatracker}5321)')
-            .replace('[RFC 5322]', f'\n[RFC 5322]({datatracker}5322)')
-            .replace('. See also ', '.\nSee also ')
             .replace(
-                '[The Header and Trailer]',
-                f'\n[The Header and Trailer]({site}#the-header)',
+                f'[RFC{Default.EOL}3696]',
+                f'{Default.EOL}[RFC 3696]({datatracker}3696)',
             )
             .replace(
-                '[whatwg/url]', '\n[whatwg/url](https://url.spec.whatwg.org/)'
+                f'[RFC{Default.EOL}3986]',
+                f'{Default.EOL}[RFC 3986]({datatracker}3986)',
+            )
+            .replace(
+                '[RFC 3987]', f'{Default.EOL}[RFC 3987]({datatracker}3987)'
+            )
+            .replace('[RFC 4122]', f'[RFC 4122]({datatracker}4122)')
+            .replace(
+                '[RFC 5321]', f'{Default.EOL}[RFC 5321]({datatracker}5321)'
+            )
+            .replace(
+                '[RFC 5322]', f'{Default.EOL}[RFC 5322]({datatracker}5322)'
+            )
+            .replace('. See also ', f'.{Default.EOL}See also ')
+            .replace(
+                '[The Header and Trailer]',
+                f'{Default.EOL}[The Header and Trailer]({site}#the-header)',
+            )
+            .replace(
+                '[whatwg/url]',
+                f'{Default.EOL}[whatwg/url](https://url.spec.whatwg.org/)',
             )
             .replace('[YAML file format]', f'[YAML file format]({site})')
         )
@@ -1619,16 +1693,18 @@ from genedata.structure import (
     GEDCOM Specification:"""
         for string in specification:
             string_linked = Construct.add_links(string)
-            if '\n' not in string_linked and len(string_linked) > 80:
+            if (
+                Default.EOL not in string_linked
+                and len(string_linked) > Default.LINE_LENGTH
+            ):
                 wrapped = wrap(
                     string_linked,
-                    75,
+                    Default.LINE_LENGTH,
                     break_long_words=False,
                     break_on_hyphens=False,
                 )
                 if len(wrapped) > 1:
                     for index, line in enumerate(wrapped):
-                        # spec = ''.join([spec, '\n    > ', line])
                         if index == 0:
                             spec = ''.join(
                                 [spec, Default.YAML_WITH_HYPHEN, line]
@@ -1637,7 +1713,7 @@ from genedata.structure import (
                             spec = ''.join(
                                 [spec, Default.YAML_WITHOUT_HYPHEN, line]
                             )
-            elif '\n' in string_linked:
+            elif Default.EOL in string_linked:
                 string_linked_split: list[str] = string_linked.split('\n')
                 for line in string_linked_split:
                     if len(line) > 80:
@@ -1649,7 +1725,6 @@ from genedata.structure import (
                         )
                         if len(line_wrapped) > 1:
                             for index, item in enumerate(line_wrapped):
-                                # spec = ''.join([spec, '\n    > ', item])
                                 if index == 0:
                                     spec = ''.join(
                                         [spec, Default.YAML_WITH_HYPHEN, item]
@@ -1667,9 +1742,6 @@ from genedata.structure import (
                             [spec, Default.YAML_WITHOUT_HYPHEN, line]
                         )
             else:
-                # spec = ''.join(
-                #     [spec, '\n    > - ', string_linked.replace('\n', '\n    >   ')]
-                # )
                 spec = ''.join([spec, Default.YAML_WITH_HYPHEN, string_linked])
         return spec
 
@@ -1697,25 +1769,33 @@ from genedata.structure import (
                     and structure[key][Default.YAML_ENUMERATION_SET]
                     in value[Default.YAML_VALUE_OF]
                 ):
-                    wrapped = wrap(value[Default.YAML_SPECIFICATION][0], 75)
+                    wrapped = wrap(
+                        value[Default.YAML_SPECIFICATION][0],
+                        Default.LINE_LENGTH,
+                    )
                     enumvalue: str = Default.EMPTY
                     if len(wrapped) > 1:
                         for line in wrapped:
                             enumvalue = ''.join(
-                                [enumvalue, '\n        > ', line]
+                                [enumvalue, Default.EOL, '        > ', line]
                             )
                     else:
                         enumvalue = ''.join(
                             [
                                 enumvalue,
-                                '\n        > ',
-                                wrapped[0].replace('\n', '\n    '),
+                                Default.EOL,
+                                '        > ',
+                                wrapped[0].replace(
+                                    Default.EOL,
+                                    f'{Default.EOL}{Default.INDENT}',
+                                ),
                             ]
                         )
                     enumeration_set = ''.join(
                         [
                             enumeration_set,
-                            "\n    - '",
+                            Default.EOL,
+                            "    - '",
                             value[Default.YAML_STANDARD_TAG],
                             "': ",
                             value[Default.YAML_URI],
@@ -1733,40 +1813,43 @@ from genedata.structure import (
             subs = structure[key][Default.YAML_SUBSTRUCTURES]
         substructures: str = Default.EMPTY
         if len(subs) > 0:
-            substructures = """
+            substructures = f"""
         
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |"""
+    Substructures:{Construct.tableheader()}"""
+
             for subskey, value in subs.items():
-                yes: str = 'No'
-                one: str = 'Many'
+                yes: str = Default.NO
+                one: str = Default.MANY
                 if Default.YAML_CARDINALITY_REQUIRED in value:
-                    yes = 'Yes'
+                    yes = Default.YES
                 if Default.YAML_CARDINALITY_SINGULAR in value:
-                    one = 'Only One'
-                class_name = (
-                    subskey[subskey.rfind('/') + 1 :]
-                    .title()
-                    .replace('_', '')
-                    .replace('-', '')
+                    one = Default.ONLY_ONE
+                class_name = Construct.classname(
+                    subskey[subskey.rfind(Default.SLASH) + 1 :]
                 )
                 substructures = ''.join(
                     [
                         substructures,
-                        '\n    | ',
+                        Default.EOL,
+                        Default.INDENT,
+                        Default.BAR,
+                        Default.SPACE,
                         subskey,
-                        ' ' * (42 - len(subskey)),
-                        ' | ',
+                        Default.SPACE * (42 - len(subskey)+1),
+                        Default.BAR,
+                        Default.SPACE,
                         one,
-                        ' ' * (8 - len(one)),
-                        ' | ',
+                        Default.SPACE * (8 - len(one)+1),
+                        Default.BAR,
+                        Default.SPACE,
                         yes,
-                        ' ' * (8 - len(yes)),
-                        ' | ',
+                        Default.SPACE * (8 - len(yes)+1),
+                        Default.BAR,
+                        Default.SPACE,
                         class_name,
-                        ' ' * (12 - len(class_name)),
-                        ' |',
+                        Default.SPACE * (12 - len(class_name)+1),
+                        Default.BAR,
+                        Default.SPACE,
                     ]
                 )
         return substructures
@@ -1780,43 +1863,56 @@ from genedata.structure import (
             supers = structure[key][Default.YAML_SUPERSTRUCTURES]
         superstructures: str = Default.EMPTY
         if len(supers) > 0:
-            superstructures = """
+            superstructures = f"""
         
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |"""
+    Superstructures:{Construct.tableheader()}"""
             for superskey, value in supers.items():
-                yes: str = 'No'
-                one: str = 'Many'
+                yes: str = Default.NO
+                one: str = Default.MANY
                 if Default.YAML_CARDINALITY_REQUIRED in value:
-                    yes = 'Yes'
+                    yes = Default.YES
                 if Default.YAML_CARDINALITY_SINGULAR in value:
-                    one = 'Only One'
-                class_name = (
-                    superskey[superskey.rfind('/') + 1 :]
-                    .title()
-                    .replace('_', '')
-                    .replace('-', '')
+                    one = Default.ONLY_ONE
+                class_name = Construct.classname(
+                    superskey[superskey.rfind(Default.SLASH) + 1 :]
                 )
                 superstructures = ''.join(
                     [
                         superstructures,
-                        '\n    | ',
+                        Default.EOL,
+                        Default.INDENT,
+                        Default.BAR,
+                        Default.SPACE,
                         superskey,
-                        ' ' * (42 - len(superskey)),
-                        ' | ',
+                        Default.SPACE * (42 - len(superskey) + 1),
+                        Default.BAR,
+                        Default.SPACE,
                         one,
-                        ' ' * (8 - len(one)),
-                        ' | ',
+                        Default.SPACE * (8 - len(one) + 1),
+                        Default.BAR,
+                        Default.SPACE,
                         yes,
-                        ' ' * (8 - len(yes)),
-                        ' | ',
+                        Default.SPACE * (8 - len(yes) + 1),
+                        Default.BAR,
+                        Default.SPACE,
                         class_name,
-                        ' ' * (12 - len(class_name)),
-                        ' |',
+                        Default.SPACE * (12 - len(class_name) + 1),
+                        Default.BAR,
                     ]
                 )
         return superstructures
+
+    @staticmethod
+    def generate_value_of(key: str, structure: dict[str, Any]) -> str:
+        """Construct the Enumerations section of the documentation."""
+        value_of: str = Default.EMPTY
+        if Default.YAML_VALUE_OF in structure[key]:
+            value_of = """
+        
+    Enumeration Value Of:"""
+            for value in structure[key][Default.YAML_VALUE_OF]:
+                value_of = f'{value_of}{Default.EOL}{Default.INDENT}{Default.HYPHEN} {value}'
+        return value_of
 
     @staticmethod
     def generate_args(key: str, structure: dict[str, Any]) -> str:
@@ -1827,22 +1923,24 @@ from genedata.structure import (
         if (
             Default.YAML_PAYLOAD in structure[key]
             and structure[key][Default.YAML_PAYLOAD] is not None
-            and key[0:6] != 'record'
+            and key[0:6] != Default.RECORD
         ):
             args = ''.join(
                 [
                     args,
-                    '\n        ',
+                    Default.EOL,
+                    Default.INDENT * 2,
                     Default.CODE_VALUE,
                     ': A value of data type ',
                     structure[key][Default.YAML_PAYLOAD],
                 ]
             )
-        if key[0:6] == 'record':
+        if key[0:6] == Default.RECORD:
             args = ''.join(
                 [
                     args,
-                    '\n        ',
+                    Default.EOL,
+                    Default.INDENT * 2,
                     Default.CODE_VALUE,
                     ': A value of data type ',
                     Construct.get_record_datatype(key),
@@ -1851,7 +1949,8 @@ from genedata.structure import (
         return ''.join(
             [
                 args,
-                '\n        ',
+                Default.EOL,
+                Default.INDENT * 2,
                 Default.CODE_SUBS,
                 ': A permitted substructure or list of permitted substructures.',
             ]
@@ -1881,19 +1980,19 @@ from genedata.structure import (
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                 return 'int'
             case '@<https://gedcom.io/terms/v7/record-INDI>@':
-                return 'IndividualXref'
+                return Default.XREF_INDIVIDUAL
             case '@<https://gedcom.io/terms/v7/record-FAM>@':
-                return 'FamilyXref'
+                return Default.XREF_FAMILY
             case '@<https://gedcom.io/terms/v7/record-SUBM>@':
-                return 'SubmitterXref'
+                return Default.XREF_SUBMITTER
             case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                return 'MultimediaXref'
+                return Default.XREF_MULTIMEDIA
             case '@<https://gedcom.io/terms/v7/record-REPO>@':
-                return 'RepositoryXref'
+                return Default.XREF_REPOSITORY
             case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                return 'SharedNoteXref'
+                return Default.XREF_SHARED_NOTE
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-                return 'SourceXref'
+                return Default.XREF_SOURCE
             case _:
                 return 'str'
 
@@ -1902,22 +2001,22 @@ from genedata.structure import (
         """Assign a cross reference datatype to specific records."""
         datatype: str = key[7:]
         match datatype:
-            case 'FAM':
-                return 'FamilyXref'
-            case 'INDI':
-                return 'IndividualXref'
-            case 'OBJE':
-                return 'MultimediaXref'
-            case 'REPO':
-                return 'RepositoryXref'
-            case 'SNOTE':
-                return 'SharedNoteXref'
-            case 'SOUR':
-                return 'SourceXref'
-            case 'SUBM':
-                return 'SubmitterXref'
+            case Default.TAG_FAM:
+                return Default.XREF_FAMILY
+            case Default.TAG_INDI:
+                return Default.XREF_INDIVIDUAL
+            case Default.TAG_OBJE:
+                return Default.XREF_MULTIMEDIA
+            case Default.TAG_REPO:
+                return Default.XREF_REPOSITORY
+            case Default.TAG_SNOTE:
+                return Default.XREF_SHARED_NOTE
+            case Default.TAG_SOUR:
+                return Default.XREF_SOURCE
+            case Default.TAG_SUBM:
+                return Default.XREF_SUBMITTER
             case _:
-                return 'Xref'
+                return Default.XREF.title()
 
     @staticmethod
     def generate_init(key: str, structure: dict[str, Any]) -> str:
@@ -1937,18 +2036,17 @@ from genedata.structure import (
             and structure[key][Default.YAML_PAYLOAD] is not None
         ):
             payload = structure[key][Default.YAML_PAYLOAD]
-        init: str = f"\n    key: str = '{key}'"
+        init: str = f"{Default.EOL}    key: str = '{key}'"
         if payload == Default.EMPTY or key == 'record-SNOTE':
             value_arg = Default.EMPTY
-            # value_init = 'Default.EMPTY'
             value_init = 'None'
             if 'record-' in key:
-                init = f"\n    key: str = '{key}'"
+                init = f"{Default.EOL}    key: str = '{key}'"
                 value_arg = f', {Default.CODE_VALUE}: {Construct.get_record_datatype(key)}'
                 value_init = Default.CODE_VALUE
         deprecation_line: str = Default.EMPTY
         if key in ['ADR1', 'ADR2', 'ADR3']:
-            deprecation_line = '\n        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))'
+            deprecation_line = f'{Default.EOL}        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))'
         init_line: str = f"""
         
     def __init__(self{value_arg}{subs_arg}) -> None:
@@ -1990,9 +2088,10 @@ from genedata.structure import (
             [
                 Construct.generate_specification(key, structure),
                 Construct.generate_examples(key),
-                Construct.generate_enumerations(key, structure, enumeration),
                 Construct.generate_substructures(key, structure),
                 Construct.generate_superstructures(key, structure),
+                Construct.generate_enumerations(key, structure, enumeration),
+                Construct.generate_value_of(key, structure),
                 Construct.generate_args(key, structure),
                 Construct.generate_references(key, structure),
             ]
@@ -2027,7 +2126,7 @@ class {class_name}(BaseStructure):
         )
         lines: str = Default.EMPTY
         for key in Keys.STRUCTURES:
-            if key not in ['CONT']:
+            if key not in [Default.CONT]:
                 lines = ''.join(
                     [
                         lines,

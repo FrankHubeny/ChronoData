@@ -286,13 +286,13 @@ class Addr(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADR1            | Only One | No       | Adr1         |
-    | https://gedcom.io/terms/v7/ADR2            | Only One | No       | Adr2         |
-    | https://gedcom.io/terms/v7/ADR3            | Only One | No       | Adr3         |
-    | https://gedcom.io/terms/v7/CITY            | Only One | No       | City         |
-    | https://gedcom.io/terms/v7/CTRY            | Only One | No       | Ctry         |
-    | https://gedcom.io/terms/v7/POST            | Only One | No       | Post         |
-    | https://gedcom.io/terms/v7/STAE            | Only One | No       | Stae         |
+    | https://gedcom.io/terms/v7/ADR1            | Only One | No       | Adr1         | 
+    | https://gedcom.io/terms/v7/ADR2            | Only One | No       | Adr2         | 
+    | https://gedcom.io/terms/v7/ADR3            | Only One | No       | Adr3         | 
+    | https://gedcom.io/terms/v7/CITY            | Only One | No       | City         | 
+    | https://gedcom.io/terms/v7/CTRY            | Only One | No       | Ctry         | 
+    | https://gedcom.io/terms/v7/POST            | Only One | No       | Post         | 
+    | https://gedcom.io/terms/v7/STAE            | Only One | No       | Stae         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -388,32 +388,36 @@ class Adop(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       | AdopFamc     |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       | AdopFamc     | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -453,7 +457,7 @@ class AdopFamc(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/FAMC-ADOP       | Only One | No       | FamcAdop     |
+    | https://gedcom.io/terms/v7/FAMC-ADOP       | Only One | No       | FamcAdop     | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -624,7 +628,7 @@ class Age(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -802,7 +806,7 @@ class Alia(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -878,32 +882,36 @@ class Anul(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1000,11 +1008,11 @@ class Asso(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-    | https://gedcom.io/terms/v7/ROLE            | Only One | Yes      | Role         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+    | https://gedcom.io/terms/v7/ROLE            | Only One | Yes      | Role         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1135,13 +1143,13 @@ class Bapl(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1182,31 +1190,35 @@ class Bapm(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1243,31 +1255,35 @@ class Barm(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1305,31 +1321,35 @@ class Basm(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1366,32 +1386,36 @@ class Birt(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | No       | Famc         |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAMC            | Only One | No       | Famc         | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1429,31 +1453,35 @@ class Bles(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1498,31 +1526,35 @@ class Buri(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1557,7 +1589,7 @@ class Caln(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/MEDI            | Only One | No       | Medi         |
+    | https://gedcom.io/terms/v7/MEDI            | Only One | No       | Medi         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1601,31 +1633,34 @@ class Cast(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -1752,9 +1787,9 @@ class Chan(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1798,7 +1833,7 @@ class Chil(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -1840,32 +1875,36 @@ class Chr(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | No       | Famc         |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAMC            | Only One | No       | Famc         | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1902,31 +1941,35 @@ class Chra(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -1997,31 +2040,35 @@ class Conf(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -2059,13 +2106,13 @@ class Conl(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2138,11 +2185,11 @@ class Corp(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2185,7 +2232,7 @@ class Crea(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    |
+    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2232,31 +2279,35 @@ class Crem(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -2310,10 +2361,10 @@ class Crop(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/HEIGHT          | Only One | No       | Height       |
-    | https://gedcom.io/terms/v7/LEFT            | Only One | No       | Left         |
-    | https://gedcom.io/terms/v7/TOP             | Only One | No       | Top          |
-    | https://gedcom.io/terms/v7/WIDTH           | Only One | No       | Width        |
+    | https://gedcom.io/terms/v7/HEIGHT          | Only One | No       | Height       | 
+    | https://gedcom.io/terms/v7/LEFT            | Only One | No       | Left         | 
+    | https://gedcom.io/terms/v7/TOP             | Only One | No       | Top          | 
+    | https://gedcom.io/terms/v7/WIDTH           | Only One | No       | Width        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2387,10 +2438,10 @@ class Data(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       | DataEven     |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/DATA-EVEN       | Many     | No       | DataEven     | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2427,6 +2478,17 @@ class DataEven(BaseStructure):
     >   events that were recorded in a particular source. Each event type is
     >   separated by a comma and space. For example, a parish register of births,
     >   deaths, and marriages would be `BIRT, DEAT, MARR`.
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Only One | No       | DataEvenDate | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/DATA            | Many     | No       | Data         |
         
     Enumerations:
     - 'ADOP': https://gedcom.io/terms/v7/ADOP
@@ -2527,17 +2589,6 @@ class DataEven(BaseStructure):
     - 'WILL': https://gedcom.io/terms/v7/WILL
         > Will
         
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATA-EVEN-DATE  | Only One | No       | DataEvenDate |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATA            | Many     | No       | Data         |
-        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure or list of permitted substructures.
@@ -2570,7 +2621,7 @@ class DataEvenDate(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2636,8 +2687,8 @@ class Date(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2733,7 +2784,7 @@ class DateExact(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         |
+    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -2778,31 +2829,35 @@ class Deat(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -2908,32 +2963,36 @@ class Div(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -2970,32 +3029,36 @@ class Divf(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3032,31 +3095,34 @@ class Dscr(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -3093,31 +3159,34 @@ class Educ(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -3255,31 +3324,35 @@ class Emig(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3318,13 +3391,13 @@ class Endl(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3365,32 +3438,36 @@ class Enga(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -3436,7 +3513,7 @@ class Exid(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/EXID-TYPE       | Only One | No       | ExidType     |
+    | https://gedcom.io/terms/v7/EXID-TYPE       | Only One | No       | ExidType     | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3534,27 +3611,27 @@ class FamCens(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3592,27 +3669,27 @@ class FamEven(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3650,27 +3727,27 @@ class FamFact(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3708,7 +3785,7 @@ class FamHusb(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3750,27 +3827,27 @@ class FamNchi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3816,27 +3893,27 @@ class FamResi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3874,7 +3951,7 @@ class FamWife(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -3945,6 +4022,16 @@ class FamcAdop(BaseStructure):
     > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-ADOP`
     >   indicating which parent(s) in the family adopted this individual.
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       | AdopFamc     |
+        
     Enumerations:
     - 'HUSB': https://gedcom.io/terms/v7/enum-ADOP-HUSB
         > Adopted by the `HUSB` of the `FAM` pointed to by `FAMC`.
@@ -3952,16 +4039,6 @@ class FamcAdop(BaseStructure):
         > Adopted by the `WIFE` of the `FAM` pointed to by `FAMC`.
     - 'BOTH': https://gedcom.io/terms/v7/enum-BOTH
         > Adopted by both `HUSB` and `WIFE` of the `FAM` pointed to by `FAMC`
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       | AdopFamc     |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -3993,6 +4070,16 @@ class FamcStat(BaseStructure):
     >   assessing of the state or condition of a researcher's belief in a family
     >   connection.
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
+        
     Enumerations:
     - 'CHALLENGED': https://gedcom.io/terms/v7/enum-CHALLENGED
         > Linking this child to this family is suspect, but the linkage has been
@@ -4002,16 +4089,6 @@ class FamcStat(BaseStructure):
         > the linkage has been disproven.
     - 'PROVEN': https://gedcom.io/terms/v7/enum-PROVEN
         > Linking this child to this family has been proven.
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -4045,8 +4122,8 @@ class Fams(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4175,31 +4252,35 @@ class Fcom(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -4234,9 +4315,9 @@ class File(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/FILE-TRAN       | Many     | No       | FileTran     |
-    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      | Form         |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         |
+    | https://gedcom.io/terms/v7/FILE-TRAN       | Many     | No       | FileTran     | 
+    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      | Form         | 
+    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4346,7 +4427,7 @@ class FileTran(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      | Form         |
+    | https://gedcom.io/terms/v7/FORM            | Only One | Yes      | Form         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4386,7 +4467,7 @@ class Form(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/MEDI            | Only One | No       | Medi         |
+    | https://gedcom.io/terms/v7/MEDI            | Only One | No       | Medi         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4429,7 +4510,7 @@ class Gedc(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/GEDC-VERS       | Only One | Yes      | GedcVers     |
+    | https://gedcom.io/terms/v7/GEDC-VERS       | Only One | Yes      | GedcVers     | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4541,31 +4622,35 @@ class Grad(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -4623,17 +4708,17 @@ class Head(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/COPR            | Only One | No       | Copr         |
-    | https://gedcom.io/terms/v7/DEST            | Only One | No       | Dest         |
-    | https://gedcom.io/terms/v7/GEDC            | Only One | Yes      | Gedc         |
-    | https://gedcom.io/terms/v7/HEAD-DATE       | Only One | No       | HeadDate     |
-    | https://gedcom.io/terms/v7/HEAD-LANG       | Only One | No       | HeadLang     |
-    | https://gedcom.io/terms/v7/HEAD-PLAC       | Only One | No       | HeadPlac     |
-    | https://gedcom.io/terms/v7/HEAD-SOUR       | Only One | No       | HeadSour     |
-    | https://gedcom.io/terms/v7/NOTE            | Only One | No       | Note         |
-    | https://gedcom.io/terms/v7/SCHMA           | Only One | No       | Schma        |
-    | https://gedcom.io/terms/v7/SNOTE           | Only One | No       | Snote        |
-    | https://gedcom.io/terms/v7/SUBM            | Only One | No       | Subm         |
+    | https://gedcom.io/terms/v7/COPR            | Only One | No       | Copr         | 
+    | https://gedcom.io/terms/v7/DEST            | Only One | No       | Dest         | 
+    | https://gedcom.io/terms/v7/GEDC            | Only One | Yes      | Gedc         | 
+    | https://gedcom.io/terms/v7/HEAD-DATE       | Only One | No       | HeadDate     | 
+    | https://gedcom.io/terms/v7/HEAD-LANG       | Only One | No       | HeadLang     | 
+    | https://gedcom.io/terms/v7/HEAD-PLAC       | Only One | No       | HeadPlac     | 
+    | https://gedcom.io/terms/v7/HEAD-SOUR       | Only One | No       | HeadSour     | 
+    | https://gedcom.io/terms/v7/NOTE            | Only One | No       | Note         | 
+    | https://gedcom.io/terms/v7/SCHMA           | Only One | No       | Schma        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Only One | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SUBM            | Only One | No       | Subm         | 
         
     Args:
         subs: A permitted substructure or list of permitted substructures.
@@ -4665,7 +4750,7 @@ class HeadDate(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         |
+    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4761,7 +4846,7 @@ class HeadPlac(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Only One | Yes      | HeadPlacForm |
+    | https://gedcom.io/terms/v7/HEAD-PLAC-FORM  | Only One | Yes      | HeadPlacForm | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4834,10 +4919,10 @@ class HeadSour(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CORP            | Only One | No       | Corp         |
-    | https://gedcom.io/terms/v7/HEAD-SOUR-DATA  | Only One | No       | HeadSourData |
-    | https://gedcom.io/terms/v7/NAME            | Only One | No       | Name         |
-    | https://gedcom.io/terms/v7/VERS            | Only One | No       | Vers         |
+    | https://gedcom.io/terms/v7/CORP            | Only One | No       | Corp         | 
+    | https://gedcom.io/terms/v7/HEAD-SOUR-DATA  | Only One | No       | HeadSourData | 
+    | https://gedcom.io/terms/v7/NAME            | Only One | No       | Name         | 
+    | https://gedcom.io/terms/v7/VERS            | Only One | No       | Vers         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4878,8 +4963,8 @@ class HeadSourData(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/COPR            | Only One | No       | Copr         |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | No       | DateExact    |
+    | https://gedcom.io/terms/v7/COPR            | Only One | No       | Copr         | 
+    | https://gedcom.io/terms/v7/DATE-exact      | Only One | No       | DateExact    | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -4986,7 +5071,7 @@ class Husb(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      | Age          |
+    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      | Age          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5042,31 +5127,34 @@ class Idno(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5103,31 +5191,35 @@ class Immi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -5165,26 +5257,26 @@ class IndiCens(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5275,26 +5367,26 @@ class IndiEven(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5365,26 +5457,26 @@ class IndiFact(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | Yes      | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5424,10 +5516,10 @@ class IndiFamc(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/FAMC-STAT       | Only One | No       | FamcStat     |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PEDI            | Only One | No       | Pedi         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/FAMC-STAT       | Only One | No       | FamcStat     | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PEDI            | Only One | No       | Pedi         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5460,7 +5552,8 @@ class IndiName(BaseStructure):
     
     GEDCOM Specification:
     > - Name
-    > - A `PERSONAL_NAME_STRUCTURE` with parts, translations, sources, and so forth.
+    > - A `PERSONAL_NAME_STRUCTURE` with parts, translations, sources, and so
+    >   forth.
     >   Names of individuals are represented in the manner the name is normally spoken,
     >   with the family name, surname, or nearest cultural parallel thereunto separated
     >   by slashes (U+002F `/`). Based on the dynamic nature or unknown compositions of
@@ -5495,17 +5588,17 @@ class IndiName(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/GIVN            | Many     | No       | Givn         |
-    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       | NameTran     |
-    | https://gedcom.io/terms/v7/NAME-TYPE       | Only One | No       | NameType     |
-    | https://gedcom.io/terms/v7/NICK            | Many     | No       | Nick         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/NPFX            | Many     | No       | Npfx         |
-    | https://gedcom.io/terms/v7/NSFX            | Many     | No       | Nsfx         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/SPFX            | Many     | No       | Spfx         |
-    | https://gedcom.io/terms/v7/SURN            | Many     | No       | Surn         |
+    | https://gedcom.io/terms/v7/GIVN            | Many     | No       | Givn         | 
+    | https://gedcom.io/terms/v7/NAME-TRAN       | Many     | No       | NameTran     | 
+    | https://gedcom.io/terms/v7/NAME-TYPE       | Only One | No       | NameType     | 
+    | https://gedcom.io/terms/v7/NICK            | Many     | No       | Nick         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/NPFX            | Many     | No       | Npfx         | 
+    | https://gedcom.io/terms/v7/NSFX            | Many     | No       | Nsfx         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/SPFX            | Many     | No       | Spfx         | 
+    | https://gedcom.io/terms/v7/SURN            | Many     | No       | Surn         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5548,26 +5641,26 @@ class IndiNchi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5610,31 +5703,34 @@ class IndiReli(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5714,26 +5810,26 @@ class IndiResi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -5776,31 +5872,34 @@ class IndiTitl(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -5842,13 +5941,13 @@ class Inil(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6192,8 +6291,8 @@ class Map(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/LATI            | Only One | Yes      | Lati         |
-    | https://gedcom.io/terms/v7/LONG            | Only One | Yes      | Long         |
+    | https://gedcom.io/terms/v7/LATI            | Only One | Yes      | Lati         | 
+    | https://gedcom.io/terms/v7/LONG            | Only One | Yes      | Long         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6234,32 +6333,36 @@ class Marb(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6298,32 +6401,36 @@ class Marc(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6360,32 +6467,36 @@ class Marl(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6423,32 +6534,36 @@ class Marr(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6487,32 +6602,36 @@ class Mars(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/HUSB            | Only One | No       | Husb         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WIFE            | Only One | No       | Wife         | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -6598,6 +6717,17 @@ class Medi(BaseStructure):
         2 MEDI AUDIO
         <BLANKLINE>
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/CALN            | Only One | No       | Caln         |
+    | https://gedcom.io/terms/v7/FORM            | Only One | No       | Form         |
+        
     Enumerations:
     - 'AUDIO': https://gedcom.io/terms/v7/enum-AUDIO
         > An audio recording
@@ -6627,17 +6757,6 @@ class Medi(BaseStructure):
         > Burial marker or related memorial
     - 'VIDEO': https://gedcom.io/terms/v7/enum-VIDEO
         > Motion picture recording
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CALN            | Only One | No       | Caln         |
-    | https://gedcom.io/terms/v7/FORM            | Only One | No       | Form         |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -6863,13 +6982,13 @@ class NameTran(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/GIVN            | Many     | No       | Givn         |
-    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      | Lang         |
-    | https://gedcom.io/terms/v7/NICK            | Many     | No       | Nick         |
-    | https://gedcom.io/terms/v7/NPFX            | Many     | No       | Npfx         |
-    | https://gedcom.io/terms/v7/NSFX            | Many     | No       | Nsfx         |
-    | https://gedcom.io/terms/v7/SPFX            | Many     | No       | Spfx         |
-    | https://gedcom.io/terms/v7/SURN            | Many     | No       | Surn         |
+    | https://gedcom.io/terms/v7/GIVN            | Many     | No       | Givn         | 
+    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      | Lang         | 
+    | https://gedcom.io/terms/v7/NICK            | Many     | No       | Nick         | 
+    | https://gedcom.io/terms/v7/NPFX            | Many     | No       | Npfx         | 
+    | https://gedcom.io/terms/v7/NSFX            | Many     | No       | Nsfx         | 
+    | https://gedcom.io/terms/v7/SPFX            | Many     | No       | Spfx         | 
+    | https://gedcom.io/terms/v7/SURN            | Many     | No       | Surn         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -6905,6 +7024,16 @@ class NameType(BaseStructure):
     > - An enumerated value from set `https://gedcom.io/terms/v7/enumset-NAME-TYPE`
     >   indicating the type of the name.
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/INDI-NAME       | Only One | No       | IndiName     |
+        
     Enumerations:
     - 'AKA': https://gedcom.io/terms/v7/enum-AKA
         > Also known as, alias, etc.
@@ -6920,16 +7049,6 @@ class NameType(BaseStructure):
         > A value not listed here; should have a `PHRASE` substructure
     - 'PROFESSIONAL': https://gedcom.io/terms/v7/enum-PROFESSIONAL
         > Name used professionally (pen, screen, stage name).
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/INDI-NAME       | Only One | No       | IndiName     |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -6967,31 +7086,34 @@ class Nati(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7028,31 +7150,35 @@ class Natu(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -7139,31 +7265,34 @@ class Nmr(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#nonNegativeInteger
@@ -7222,6 +7351,20 @@ class No(BaseStructure):
     >   
     >   </div>
     >   
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/NO-DATE         | Only One | No       | NoDate       | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
+    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
         
     Enumerations:
     - 'ADOP': https://gedcom.io/terms/v7/ADOP
@@ -7288,20 +7431,6 @@ class No(BaseStructure):
     - 'WILL': https://gedcom.io/terms/v7/WILL
         > Will
         
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/NO-DATE         | Only One | No       | NoDate       |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
-    | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
-        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure or list of permitted substructures.
@@ -7334,7 +7463,7 @@ class NoDate(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7378,10 +7507,10 @@ class Note(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         |
-    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       | NoteTran     |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
+    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         | 
+    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         | 
+    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       | NoteTran     | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7567,8 +7696,8 @@ class NoteTran(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         |
+    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         | 
+    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7602,7 +7731,8 @@ class Npfx(BaseStructure):
     
     GEDCOM Specification:
     > - Name prefix
-    > - Text that appears on a name line before the given and surname parts of a name.
+    > - Text that appears on a name line before the given and surname parts of a
+    >   name.
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7684,8 +7814,8 @@ class Obje(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CROP            | Only One | No       | Crop         |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         |
+    | https://gedcom.io/terms/v7/CROP            | Only One | No       | Crop         | 
+    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -7782,31 +7912,34 @@ class Occu(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -7849,6 +7982,21 @@ class OrdStat(BaseStructure):
         2 DATE 15 JAN 2020
         <BLANKLINE>
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/BAPL            | Only One | No       | Bapl         |
+    | https://gedcom.io/terms/v7/CONL            | Only One | No       | Conl         |
+    | https://gedcom.io/terms/v7/ENDL            | Only One | No       | Endl         |
+    | https://gedcom.io/terms/v7/INIL            | Only One | No       | Inil         |
+    | https://gedcom.io/terms/v7/SLGC            | Only One | No       | Slgc         |
+    | https://gedcom.io/terms/v7/SLGS            | Only One | No       | Slgs         |
+        
     Enumerations:
     - 'BIC': https://gedcom.io/terms/v7/enum-BIC
         > Applies to: `SLGC`
@@ -7874,21 +8022,6 @@ class OrdStat(BaseStructure):
         > Applies to: All
     - 'UNCLEARED': https://gedcom.io/terms/v7/enum-UNCLEARED
         > Applies to: All
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE-exact      | Only One | Yes      | DateExact    |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/BAPL            | Only One | No       | Bapl         |
-    | https://gedcom.io/terms/v7/CONL            | Only One | No       | Conl         |
-    | https://gedcom.io/terms/v7/ENDL            | Only One | No       | Endl         |
-    | https://gedcom.io/terms/v7/INIL            | Only One | No       | Inil         |
-    | https://gedcom.io/terms/v7/SLGC            | Only One | No       | Slgc         |
-    | https://gedcom.io/terms/v7/SLGS            | Only One | No       | Slgs         |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -7925,31 +8058,35 @@ class Ordn(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -8086,6 +8223,16 @@ class Pedi(BaseStructure):
         1 PEDI ADOPTED
         <BLANKLINE>
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
+        
     Enumerations:
     - 'ADOPTED': https://gedcom.io/terms/v7/enum-ADOPTED
         > Adoptive parents
@@ -8097,16 +8244,6 @@ class Pedi(BaseStructure):
         > A value not listed here; should have a `PHRASE` substructure
     - 'SEALING': https://gedcom.io/terms/v7/enum-SEALING
         > The child was sealed to parents other than birth parents
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -8512,13 +8649,13 @@ class Plac(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         |
-    | https://gedcom.io/terms/v7/MAP             | Only One | No       | Map          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC-FORM       | Only One | No       | PlacForm     |
-    | https://gedcom.io/terms/v7/PLAC-TRAN       | Many     | No       | PlacTran     |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         | 
+    | https://gedcom.io/terms/v7/MAP             | Only One | No       | Map          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC-FORM       | Only One | No       | PlacForm     | 
+    | https://gedcom.io/terms/v7/PLAC-TRAN       | Many     | No       | PlacTran     | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8734,7 +8871,7 @@ class PlacTran(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      | Lang         |
+    | https://gedcom.io/terms/v7/LANG            | Only One | Yes      | Lang         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -8811,31 +8948,35 @@ class Prob(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -8867,36 +9008,40 @@ class Prop(BaseStructure):
     >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - property
-    > - Pertaining to possessions such as real estate or other property of interest.
+    > - Pertaining to possessions such as real estate or other property of
+    >   interest.
         
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -8981,6 +9126,11 @@ class Quay(BaseStructure):
         1 QUAY 0
         <BLANKLINE>
         
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
+        
     Enumerations:
     - '0': https://gedcom.io/terms/v7/enum-0
         > Unreliable evidence or estimated data
@@ -8991,11 +9141,6 @@ class Quay(BaseStructure):
         > Secondary evidence, data officially recorded sometime after the event
     - '3': https://gedcom.io/terms/v7/enum-3
         > Direct and primary evidence used, or by dominance of the evidence
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -9092,37 +9237,37 @@ class RecordFam(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ANUL            | Many     | No       | Anul         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CHIL            | Many     | No       | Chil         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/DIV             | Many     | No       | Div          |
-    | https://gedcom.io/terms/v7/DIVF            | Many     | No       | Divf         |
-    | https://gedcom.io/terms/v7/ENGA            | Many     | No       | Enga         |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       | FamCens      |
-    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       | FamEven      |
-    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       | FamFact      |
-    | https://gedcom.io/terms/v7/FAM-HUSB        | Only One | No       | FamHusb      |
-    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       | FamNchi      |
-    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       | FamResi      |
-    | https://gedcom.io/terms/v7/FAM-WIFE        | Only One | No       | FamWife      |
-    | https://gedcom.io/terms/v7/MARB            | Many     | No       | Marb         |
-    | https://gedcom.io/terms/v7/MARC            | Many     | No       | Marc         |
-    | https://gedcom.io/terms/v7/MARL            | Many     | No       | Marl         |
-    | https://gedcom.io/terms/v7/MARR            | Many     | No       | Marr         |
-    | https://gedcom.io/terms/v7/MARS            | Many     | No       | Mars         |
-    | https://gedcom.io/terms/v7/NO              | Many     | No       | No           |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SLGS            | Many     | No       | Slgs         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/SUBM            | Many     | No       | Subm         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/ANUL            | Many     | No       | Anul         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CHIL            | Many     | No       | Chil         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/DIV             | Many     | No       | Div          | 
+    | https://gedcom.io/terms/v7/DIVF            | Many     | No       | Divf         | 
+    | https://gedcom.io/terms/v7/ENGA            | Many     | No       | Enga         | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/FAM-CENS        | Many     | No       | FamCens      | 
+    | https://gedcom.io/terms/v7/FAM-EVEN        | Many     | No       | FamEven      | 
+    | https://gedcom.io/terms/v7/FAM-FACT        | Many     | No       | FamFact      | 
+    | https://gedcom.io/terms/v7/FAM-HUSB        | Only One | No       | FamHusb      | 
+    | https://gedcom.io/terms/v7/FAM-NCHI        | Many     | No       | FamNchi      | 
+    | https://gedcom.io/terms/v7/FAM-RESI        | Many     | No       | FamResi      | 
+    | https://gedcom.io/terms/v7/FAM-WIFE        | Only One | No       | FamWife      | 
+    | https://gedcom.io/terms/v7/MARB            | Many     | No       | Marb         | 
+    | https://gedcom.io/terms/v7/MARC            | Many     | No       | Marc         | 
+    | https://gedcom.io/terms/v7/MARL            | Many     | No       | Marl         | 
+    | https://gedcom.io/terms/v7/MARR            | Many     | No       | Marr         | 
+    | https://gedcom.io/terms/v7/MARS            | Many     | No       | Mars         | 
+    | https://gedcom.io/terms/v7/NO              | Many     | No       | No           | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SLGS            | Many     | No       | Slgs         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/SUBM            | Many     | No       | Subm         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
         
     Args:
         value: A value of data type FamilyXref
@@ -9214,68 +9359,68 @@ class RecordIndi(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADOP            | Many     | No       | Adop         |
-    | https://gedcom.io/terms/v7/ALIA            | Many     | No       | Alia         |
-    | https://gedcom.io/terms/v7/ANCI            | Many     | No       | Anci         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/BAPL            | Many     | No       | Bapl         |
-    | https://gedcom.io/terms/v7/BAPM            | Many     | No       | Bapm         |
-    | https://gedcom.io/terms/v7/BARM            | Many     | No       | Barm         |
-    | https://gedcom.io/terms/v7/BASM            | Many     | No       | Basm         |
-    | https://gedcom.io/terms/v7/BIRT            | Many     | No       | Birt         |
-    | https://gedcom.io/terms/v7/BLES            | Many     | No       | Bles         |
-    | https://gedcom.io/terms/v7/BURI            | Many     | No       | Buri         |
-    | https://gedcom.io/terms/v7/CAST            | Many     | No       | Cast         |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CHR             | Many     | No       | Chr          |
-    | https://gedcom.io/terms/v7/CHRA            | Many     | No       | Chra         |
-    | https://gedcom.io/terms/v7/CONF            | Many     | No       | Conf         |
-    | https://gedcom.io/terms/v7/CONL            | Many     | No       | Conl         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/CREM            | Many     | No       | Crem         |
-    | https://gedcom.io/terms/v7/DEAT            | Many     | No       | Deat         |
-    | https://gedcom.io/terms/v7/DESI            | Many     | No       | Desi         |
-    | https://gedcom.io/terms/v7/DSCR            | Many     | No       | Dscr         |
-    | https://gedcom.io/terms/v7/EDUC            | Many     | No       | Educ         |
-    | https://gedcom.io/terms/v7/EMIG            | Many     | No       | Emig         |
-    | https://gedcom.io/terms/v7/ENDL            | Many     | No       | Endl         |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/FAMS            | Many     | No       | Fams         |
-    | https://gedcom.io/terms/v7/FCOM            | Many     | No       | Fcom         |
-    | https://gedcom.io/terms/v7/GRAD            | Many     | No       | Grad         |
-    | https://gedcom.io/terms/v7/IDNO            | Many     | No       | Idno         |
-    | https://gedcom.io/terms/v7/IMMI            | Many     | No       | Immi         |
-    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       | IndiCens     |
-    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       | IndiEven     |
-    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       | IndiFact     |
-    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       | IndiFamc     |
-    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       | IndiName     |
-    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       | IndiNchi     |
-    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       | IndiReli     |
-    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       | IndiResi     |
-    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       | IndiTitl     |
-    | https://gedcom.io/terms/v7/INIL            | Many     | No       | Inil         |
-    | https://gedcom.io/terms/v7/NATI            | Many     | No       | Nati         |
-    | https://gedcom.io/terms/v7/NATU            | Many     | No       | Natu         |
-    | https://gedcom.io/terms/v7/NMR             | Many     | No       | Nmr          |
-    | https://gedcom.io/terms/v7/NO              | Many     | No       | No           |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/OCCU            | Many     | No       | Occu         |
-    | https://gedcom.io/terms/v7/ORDN            | Many     | No       | Ordn         |
-    | https://gedcom.io/terms/v7/PROB            | Many     | No       | Prob         |
-    | https://gedcom.io/terms/v7/PROP            | Many     | No       | Prop         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/RETI            | Many     | No       | Reti         |
-    | https://gedcom.io/terms/v7/SEX             | Only One | No       | Sex          |
-    | https://gedcom.io/terms/v7/SLGC            | Many     | No       | Slgc         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/SSN             | Many     | No       | Ssn          |
-    | https://gedcom.io/terms/v7/SUBM            | Many     | No       | Subm         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WILL            | Many     | No       | Will         |
+    | https://gedcom.io/terms/v7/ADOP            | Many     | No       | Adop         | 
+    | https://gedcom.io/terms/v7/ALIA            | Many     | No       | Alia         | 
+    | https://gedcom.io/terms/v7/ANCI            | Many     | No       | Anci         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/BAPL            | Many     | No       | Bapl         | 
+    | https://gedcom.io/terms/v7/BAPM            | Many     | No       | Bapm         | 
+    | https://gedcom.io/terms/v7/BARM            | Many     | No       | Barm         | 
+    | https://gedcom.io/terms/v7/BASM            | Many     | No       | Basm         | 
+    | https://gedcom.io/terms/v7/BIRT            | Many     | No       | Birt         | 
+    | https://gedcom.io/terms/v7/BLES            | Many     | No       | Bles         | 
+    | https://gedcom.io/terms/v7/BURI            | Many     | No       | Buri         | 
+    | https://gedcom.io/terms/v7/CAST            | Many     | No       | Cast         | 
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CHR             | Many     | No       | Chr          | 
+    | https://gedcom.io/terms/v7/CHRA            | Many     | No       | Chra         | 
+    | https://gedcom.io/terms/v7/CONF            | Many     | No       | Conf         | 
+    | https://gedcom.io/terms/v7/CONL            | Many     | No       | Conl         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/CREM            | Many     | No       | Crem         | 
+    | https://gedcom.io/terms/v7/DEAT            | Many     | No       | Deat         | 
+    | https://gedcom.io/terms/v7/DESI            | Many     | No       | Desi         | 
+    | https://gedcom.io/terms/v7/DSCR            | Many     | No       | Dscr         | 
+    | https://gedcom.io/terms/v7/EDUC            | Many     | No       | Educ         | 
+    | https://gedcom.io/terms/v7/EMIG            | Many     | No       | Emig         | 
+    | https://gedcom.io/terms/v7/ENDL            | Many     | No       | Endl         | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/FAMS            | Many     | No       | Fams         | 
+    | https://gedcom.io/terms/v7/FCOM            | Many     | No       | Fcom         | 
+    | https://gedcom.io/terms/v7/GRAD            | Many     | No       | Grad         | 
+    | https://gedcom.io/terms/v7/IDNO            | Many     | No       | Idno         | 
+    | https://gedcom.io/terms/v7/IMMI            | Many     | No       | Immi         | 
+    | https://gedcom.io/terms/v7/INDI-CENS       | Many     | No       | IndiCens     | 
+    | https://gedcom.io/terms/v7/INDI-EVEN       | Many     | No       | IndiEven     | 
+    | https://gedcom.io/terms/v7/INDI-FACT       | Many     | No       | IndiFact     | 
+    | https://gedcom.io/terms/v7/INDI-FAMC       | Many     | No       | IndiFamc     | 
+    | https://gedcom.io/terms/v7/INDI-NAME       | Many     | No       | IndiName     | 
+    | https://gedcom.io/terms/v7/INDI-NCHI       | Many     | No       | IndiNchi     | 
+    | https://gedcom.io/terms/v7/INDI-RELI       | Many     | No       | IndiReli     | 
+    | https://gedcom.io/terms/v7/INDI-RESI       | Many     | No       | IndiResi     | 
+    | https://gedcom.io/terms/v7/INDI-TITL       | Many     | No       | IndiTitl     | 
+    | https://gedcom.io/terms/v7/INIL            | Many     | No       | Inil         | 
+    | https://gedcom.io/terms/v7/NATI            | Many     | No       | Nati         | 
+    | https://gedcom.io/terms/v7/NATU            | Many     | No       | Natu         | 
+    | https://gedcom.io/terms/v7/NMR             | Many     | No       | Nmr          | 
+    | https://gedcom.io/terms/v7/NO              | Many     | No       | No           | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/OCCU            | Many     | No       | Occu         | 
+    | https://gedcom.io/terms/v7/ORDN            | Many     | No       | Ordn         | 
+    | https://gedcom.io/terms/v7/PROB            | Many     | No       | Prob         | 
+    | https://gedcom.io/terms/v7/PROP            | Many     | No       | Prop         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/RETI            | Many     | No       | Reti         | 
+    | https://gedcom.io/terms/v7/SEX             | Only One | No       | Sex          | 
+    | https://gedcom.io/terms/v7/SLGC            | Many     | No       | Slgc         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/SSN             | Many     | No       | Ssn          | 
+    | https://gedcom.io/terms/v7/SUBM            | Many     | No       | Subm         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WILL            | Many     | No       | Will         | 
         
     Args:
         value: A value of data type IndividualXref
@@ -9318,16 +9463,16 @@ class RecordObje(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/FILE            | Many     | Yes      | File         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/FILE            | Many     | Yes      | File         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
         
     Args:
         value: A value of data type MultimediaXref
@@ -9373,19 +9518,19 @@ class RecordRepo(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      | Name         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      | Name         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Args:
         value: A value of data type RepositoryXref
@@ -9496,15 +9641,15 @@ class RecordSnote(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         |
-    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       | NoteTran     |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         | 
+    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         | 
+    | https://gedcom.io/terms/v7/NOTE-TRAN       | Many     | No       | NoteTran     | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
         
     Args:
         value: A value of data type SharedNoteXref
@@ -9554,21 +9699,21 @@ class RecordSour(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ABBR            | Only One | No       | Abbr         |
-    | https://gedcom.io/terms/v7/AUTH            | Only One | No       | Auth         |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/DATA            | Only One | No       | Data         |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PUBL            | Only One | No       | Publ         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/REPO            | Many     | No       | Repo         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/TEXT            | Only One | No       | Text         |
-    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
+    | https://gedcom.io/terms/v7/ABBR            | Only One | No       | Abbr         | 
+    | https://gedcom.io/terms/v7/AUTH            | Only One | No       | Auth         | 
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/DATA            | Only One | No       | Data         | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PUBL            | Only One | No       | Publ         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/REPO            | Many     | No       | Repo         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/TEXT            | Only One | No       | Text         | 
+    | https://gedcom.io/terms/v7/TITL            | Only One | No       | Titl         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
         
     Args:
         value: A value of data type SourceXref
@@ -9607,21 +9752,21 @@ class RecordSubm(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         |
-    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      | Name         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SUBM-LANG       | Many     | No       | SubmLang     |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/CHAN            | Only One | No       | Chan         | 
+    | https://gedcom.io/terms/v7/CREA            | Only One | No       | Crea         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/EXID            | Many     | No       | Exid         | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NAME            | Only One | Yes      | Name         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/REFN            | Many     | No       | Refn         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SUBM-LANG       | Many     | No       | SubmLang     | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Args:
         value: A value of data type SubmitterXref
@@ -9662,7 +9807,7 @@ class Refn(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9796,9 +9941,9 @@ class Repo(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/CALN            | Many     | No       | Caln         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
+    | https://gedcom.io/terms/v7/CALN            | Many     | No       | Caln         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -9865,17 +10010,6 @@ class Resn(BaseStructure):
         1 RESN CONFIDENTIAL, LOCKED
         <BLANKLINE>
         
-    Enumerations:
-    - 'CONFIDENTIAL': https://gedcom.io/terms/v7/enum-CONFIDENTIAL
-        > This data was marked as confidential by the user.
-    - 'LOCKED': https://gedcom.io/terms/v7/enum-LOCKED
-        > Some systems may ignore changes to this data.
-    - 'PRIVACY': https://gedcom.io/terms/v7/enum-PRIVACY
-        > This data is not to be shared outside of a trusted circle, generally
-        > because it contains information about living individuals. This definition
-        > is known to admit multiple interpretations, so use of the `PRIVACY`
-        > restriction notice is not recommended.
-        
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
@@ -9934,6 +10068,17 @@ class Resn(BaseStructure):
     | https://gedcom.io/terms/v7/record-INDI     | Only One | No       | RecordIndi   |
     | https://gedcom.io/terms/v7/record-OBJE     | Only One | No       | RecordObje   |
         
+    Enumerations:
+    - 'CONFIDENTIAL': https://gedcom.io/terms/v7/enum-CONFIDENTIAL
+        > This data was marked as confidential by the user.
+    - 'LOCKED': https://gedcom.io/terms/v7/enum-LOCKED
+        > Some systems may ignore changes to this data.
+    - 'PRIVACY': https://gedcom.io/terms/v7/enum-PRIVACY
+        > This data is not to be shared outside of a trusted circle, generally
+        > because it contains information about living individuals. This definition
+        > is known to admit multiple interpretations, so use of the `PRIVACY`
+        > restriction notice is not recommended.
+        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
         subs: A permitted substructure or list of permitted substructures.
@@ -9970,31 +10115,35 @@ class Reti(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
@@ -10128,6 +10277,17 @@ class Role(BaseStructure):
         1 ROLE CHIL
         <BLANKLINE>
         
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/ASSO            | Only One | Yes      | Asso         |
+    | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       | SourEven     |
+        
     Enumerations:
     - 'CHIL': https://gedcom.io/terms/v7/enum-CHIL
         > Child
@@ -10160,17 +10320,6 @@ class Role(BaseStructure):
         > Wife; implies `SPOU`
     - 'WITN': https://gedcom.io/terms/v7/enum-WITN
         > Witness
-        
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ASSO            | Only One | Yes      | Asso         |
-    | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       | SourEven     |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -10206,7 +10355,7 @@ class Schma(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/TAG             | Many     | No       | Tag          |
+    | https://gedcom.io/terms/v7/TAG             | Many     | No       | Tag          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10259,8 +10408,8 @@ class Sdate(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+    | https://gedcom.io/terms/v7/TIME            | Only One | No       | Time         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10355,6 +10504,11 @@ class Sex(BaseStructure):
         1 SEX F
         <BLANKLINE>
         
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/record-INDI     | Only One | No       | RecordIndi   |
+        
     Enumerations:
     - 'F': https://gedcom.io/terms/v7/enum-F
         > Female
@@ -10364,11 +10518,6 @@ class Sex(BaseStructure):
         > Cannot be determined from available sources
     - 'X': https://gedcom.io/terms/v7/enum-X
         > Does not fit the typical definition of only Male or only Female
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/record-INDI     | Only One | No       | RecordIndi   |
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -10407,14 +10556,14 @@ class Slgc(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/FAMC            | Only One | Yes      | Famc         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/FAMC            | Only One | Yes      | Famc         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10460,13 +10609,13 @@ class Slgs(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         |
-    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TEMP            | Only One | No       | Temp         | 
+    | https://gedcom.io/terms/v7/ord-STAT        | Only One | No       | OrdStat      | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10632,13 +10781,13 @@ class Sour(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PAGE            | Only One | No       | Page         |
-    | https://gedcom.io/terms/v7/QUAY            | Only One | No       | Quay         |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR-DATA       | Only One | No       | SourData     |
-    | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       | SourEven     |
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PAGE            | Only One | No       | Page         | 
+    | https://gedcom.io/terms/v7/QUAY            | Only One | No       | Quay         | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR-DATA       | Only One | No       | SourData     | 
+    | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       | SourEven     | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10740,8 +10889,8 @@ class SourData(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/TEXT            | Many     | No       | Text         |
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/TEXT            | Many     | No       | Text         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -10779,6 +10928,17 @@ class SourEven(BaseStructure):
     >   record a birth of a child, then the type would be `BIRT` regardless of the
     >   assertions made from that record, such as the mother's name or mother's
     >   birth date.
+        
+    Substructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       | 
+    | https://gedcom.io/terms/v7/ROLE            | Only One | No       | Role         | 
+        
+    Superstructures:
+    |               Specification                | Quantity | Required |  Class Name  |
+    | ------------------------------------------ | -------- | -------- | ------------ |
+    | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
         
     Enumerations:
     - 'ADOP': https://gedcom.io/terms/v7/ADOP
@@ -10879,17 +11039,6 @@ class SourEven(BaseStructure):
     - 'WILL': https://gedcom.io/terms/v7/WILL
         > Will
         
-    Substructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/PHRASE          | Only One | No       | Phrase       |
-    | https://gedcom.io/terms/v7/ROLE            | Only One | No       | Role         |
-        
-    Superstructures:
-    |               Specification                | Quantity | Required |  Class Name  |
-    | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
-        
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
         subs: A permitted substructure or list of permitted substructures.
@@ -10960,31 +11109,34 @@ class Ssn(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type http://www.w3.org/2001/XMLSchema#string
@@ -11239,8 +11391,8 @@ class Text(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         |
-    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         |
+    | https://gedcom.io/terms/v7/LANG            | Only One | No       | Lang         | 
+    | https://gedcom.io/terms/v7/MIME            | Only One | No       | Mime         | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11787,7 +11939,7 @@ class Wife(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      | Age          |
+    | https://gedcom.io/terms/v7/AGE             | Only One | Yes      | Age          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
@@ -11843,31 +11995,35 @@ class Will(BaseStructure):
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
-    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         |
-    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          |
-    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         |
-    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         |
-    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         |
-    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         |
-    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        |
-    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          |
-    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         |
-    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         |
-    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         |
-    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         |
-    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         |
-    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         |
-    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        |
-    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        |
-    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         |
-    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         |
-    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          |
-    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          |
+    | https://gedcom.io/terms/v7/ADDR            | Only One | No       | Addr         | 
+    | https://gedcom.io/terms/v7/AGE             | Only One | No       | Age          | 
+    | https://gedcom.io/terms/v7/AGNC            | Only One | No       | Agnc         | 
+    | https://gedcom.io/terms/v7/ASSO            | Many     | No       | Asso         | 
+    | https://gedcom.io/terms/v7/CAUS            | Only One | No       | Caus         | 
+    | https://gedcom.io/terms/v7/DATE            | Only One | No       | Date         | 
+    | https://gedcom.io/terms/v7/EMAIL           | Many     | No       | Email        | 
+    | https://gedcom.io/terms/v7/FAX             | Many     | No       | Fax          | 
+    | https://gedcom.io/terms/v7/NOTE            | Many     | No       | Note         | 
+    | https://gedcom.io/terms/v7/OBJE            | Many     | No       | Obje         | 
+    | https://gedcom.io/terms/v7/PHON            | Many     | No       | Phon         | 
+    | https://gedcom.io/terms/v7/PLAC            | Only One | No       | Plac         | 
+    | https://gedcom.io/terms/v7/RELI            | Only One | No       | Reli         | 
+    | https://gedcom.io/terms/v7/RESN            | Only One | No       | Resn         | 
+    | https://gedcom.io/terms/v7/SDATE           | Only One | No       | Sdate        | 
+    | https://gedcom.io/terms/v7/SNOTE           | Many     | No       | Snote        | 
+    | https://gedcom.io/terms/v7/SOUR            | Many     | No       | Sour         | 
+    | https://gedcom.io/terms/v7/TYPE            | Only One | No       | Type         | 
+    | https://gedcom.io/terms/v7/UID             | Many     | No       | Uid          | 
+    | https://gedcom.io/terms/v7/WWW             | Many     | No       | Www          | 
         
     Superstructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
+        
+    Enumeration Value Of:
+    - https://gedcom.io/terms/v7/enumset-EVEN
+    - https://gedcom.io/terms/v7/enumset-EVENATTR
         
     Args:
         value: A value of data type Y|<NULL>
