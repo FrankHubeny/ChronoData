@@ -27,7 +27,7 @@ __all__ = [
 
 from pathlib import Path
 from textwrap import wrap
-from typing import Any
+from typing import Any, ClassVar
 
 from genedata.constants import Config, Default
 from genedata.messages import Msg
@@ -35,6 +35,10 @@ from genedata.util import Util
 
 
 class Convert:
+    """Read and store GEDCOM specification."""
+
+    enumerationset_dict: ClassVar[dict[str, Any]] = {}
+
     @staticmethod
     def preamble(source: str, version: str) -> str:
         lines: str = f'''"""Store the GEDCOM verson {version} specifications in a dictionary format from yaml files.
@@ -84,7 +88,12 @@ from typing import Any
         return lines
 
     @staticmethod
-    def dictionary(url: str, base: str, prefix: str) -> str:
+    def dictionary(
+        url: str,
+        base: str,
+        prefix: str,
+        class_dict: dict[str, Any] | None = None,
+    ) -> str:
         lines: str = Default.BRACE_LEFT
         if url[-1] == Default.SLASH:
             directory: str = f'{url}{base}'
@@ -96,38 +105,84 @@ from typing import Any
                 if file.suffix == Default.YAML_FILE_END:
                     key = file.stem.replace(prefix, Default.EMPTY)
                     yamldict = Util.read_yaml(str(file))
-                    if base in [
-                        Default.URL_STRUCTURE,
-                        Default.URL_STRUCTURE_EXTENSION,
-                    ]:
-                        required: list[str] = []
-                        single: list[str] = []
-                        permitted: list[str] = []
-                        enums: list[str] = []
-                        if Default.YAML_SUBSTRUCTURES in yamldict:
-                            for keyname, value in yamldict[
-                                Default.YAML_SUBSTRUCTURES
-                            ].items():
-                                tag = (
-                                    keyname[keyname.rfind(Default.SLASH) + 1 :]
-                                    .title()
-                                    .replace(Default.HYPHEN, Default.EMPTY)
-                                )
-                                permitted.append(tag)
-                                if Default.YAML_CARDINALITY_REQUIRED in value:
-                                    required.append(tag)
-                                if Default.YAML_CARDINALITY_SINGULAR in value:
-                                    single.append(tag)
-                        yamldict[Default.YAML_PERMITTED] = permitted
-                        yamldict[Default.YAML_REQUIRED] = required
-                        yamldict[Default.YAML_SINGULAR] = single
-                        yamldict[Default.YAML_ENUMS] = enums
-                        yamldict[Default.YAML_CLASS_NAME] = (
-                            file.stem.title()
-                            .replace(Default.UNDERLINE, Default.EMPTY)
-                            .replace(Default.HYPHEN, Default.EMPTY)
-                        )
-                        yamldict[Default.YAML_KEY] = file.stem
+                    match base:
+                        case (
+                            Default.URL_STRUCTURE
+                            | Default.URL_STRUCTURE_EXTENSION
+                        ):
+                            # if base in [
+                            #     Default.URL_STRUCTURE,
+                            #     Default.URL_STRUCTURE_EXTENSION,
+                            # ]:
+                            required: list[str] = []
+                            single: list[str] = []
+                            permitted: list[str] = []
+                            enumset: str = Default.EMPTY
+                            if Default.YAML_SUBSTRUCTURES in yamldict:
+                                for keyname, value in yamldict[
+                                    Default.YAML_SUBSTRUCTURES
+                                ].items():
+                                    tag = (
+                                        keyname[
+                                            keyname.rfind(Default.SLASH) + 1 :
+                                        ]
+                                        .title()
+                                        .replace(Default.HYPHEN, Default.EMPTY)
+                                    )
+                                    permitted.append(tag)
+                                    if (
+                                        Default.YAML_CARDINALITY_REQUIRED
+                                        in value
+                                    ):
+                                        required.append(tag)
+                                    if (
+                                        Default.YAML_CARDINALITY_SINGULAR
+                                        in value
+                                    ):
+                                        single.append(tag)
+                            if Default.YAML_PAYLOAD in yamldict and yamldict[
+                                Default.YAML_PAYLOAD
+                            ] in [
+                                'https://gedcom.io/terms/v7/type-List#Enum',
+                                'https://gedcom.io/terms/v7/type-Enum',
+                            ]:
+                                enumset = yamldict[Default.YAML_ENUMERATION_SET]
+
+                            yamldict[Default.YAML_PERMITTED] = permitted
+                            yamldict[Default.YAML_REQUIRED] = required
+                            yamldict[Default.YAML_SINGULAR] = single
+                            yamldict[Default.YAML_ENUMERATION_SET] = enumset
+                            yamldict[Default.YAML_ENUM_KEY] = enumset[
+                                enumset.rfind(Default.SLASH) + 1 :
+                            ].replace(
+                                Default.URL_ENUMERATION_SET_PREFIX,
+                                Default.EMPTY,
+                            )
+                            yamldict[Default.YAML_CLASS_NAME] = (
+                                file.stem.title()
+                                .replace(Default.UNDERLINE, Default.EMPTY)
+                                .replace(Default.HYPHEN, Default.EMPTY)
+                            )
+                            yamldict[Default.YAML_KEY] = file.stem
+                            if class_dict is not None:
+                                class_dict = yamldict
+                        case Default.URL_ENUMERATION_SET:
+                            enum_tags: list[str] = []
+                            for tag in yamldict[
+                                Default.YAML_ENUMERATION_VALUES
+                            ]:
+                                # enum_tags.append(
+                                #     tag[tag.rfind(Default.SLASH) + 1 :]
+                                #     .replace(
+                                #         Default.URL_ENUMERATION_PREFIX,
+                                #         Default.EMPTY,
+                                #     )
+                                #     .replace(
+                                #         Default.QUOTE_DOUBLE, Default.EMPTY
+                                #     )
+                                # )
+                                enum_tags.append(Construct.get_enum_tag(tag))
+                            yamldict[Default.YAML_ENUM_TAGS] = enum_tags
                     lines = f"{lines}{Default.EOL}    '{key}': {yamldict},"
         else:
             raise ValueError(Msg.DIRECTORY_NOT_FOUND.format(directory))
@@ -1054,7 +1109,7 @@ The specifications for this module are from the
     def generate__all__(url: str) -> str:
         """Generate the __all__ = [] by filling in the list with the modified keys from Structure."""
         count: int = 0
-        lines: str = '__all__ = ['
+        lines: str = '__all__ = [    # noqa: RUF022'
         if url[-1] == Default.SLASH:
             directory: str = f'{url}{Default.URL_STRUCTURE}'
         else:
@@ -1066,9 +1121,10 @@ The specifications for this module are from the
                     key = file.stem.replace(
                         Default.URL_STRUCTURE_PREFIX, Default.EMPTY
                     )
-                    edited_key: str = Construct.classname(key)
-                    lines = f"{lines}{Default.EOL}{Default.INDENT}'{edited_key}'{Default.COMMA}"
-                    count += 1
+                    if key not in [Default.CONT, Default.TRLR]:
+                        edited_key: str = Construct.classname(key)
+                        lines = f"{lines}{Default.EOL}{Default.INDENT}'{edited_key}'{Default.COMMA}"
+                        count += 1
         else:
             raise ValueError(Msg.DIRECTORY_NOT_FOUND.format(directory))
         if count == 0:
@@ -1084,7 +1140,6 @@ from typing import Any
 from genedata.messages import Msg
 from genedata.structure import (
     BaseStructure,
-    ExtensionXref,
     {Default.XREF_FAMILY},
     {Default.XREF_INDIVIDUAL},
     {Default.XREF_MULTIMEDIA},
@@ -1256,55 +1311,91 @@ from genedata.structure import (
         return example
 
     @staticmethod
+    def get_enum_tag(value: str) -> str:
+        tag: str = (
+            value[value.rfind(Default.SLASH) + 1 :]
+            .replace(Default.URL_ENUMERATION_PREFIX, Default.EMPTY)
+            .replace(Default.QUOTE_DOUBLE, Default.EMPTY)
+        )
+        if Default.HYPHEN in tag:
+            tag = tag[tag.rfind(Default.HYPHEN) + 1 :]
+        return tag
+
+    @staticmethod
     def generate_enumerations(
-        key: str, structure: dict[str, Any], enumeration: dict[str, Any]
+        key: str, structure: dict[str, Any], enumerationset: dict[str, Any]
     ) -> str:
         """Construct the Enumerations section of the documentation."""
-        enumeration_set: str = Default.EMPTY
-        if Default.YAML_ENUMERATION_SET in structure[key]:
-            enumeration_set = """
+        enumeration_values: str = Default.EMPTY
+        if (
+            Default.YAML_ENUMERATION_SET in structure[key]
+            and structure[key][Default.YAML_ENUM_KEY] != Default.EMPTY
+        ):
+            enum_key: str = structure[key][Default.YAML_ENUM_KEY]
+            enumeration_values = """
 
-    Enumerations:"""
-            for _keyname, value in enumeration.items():
-                if (
-                    Default.YAML_VALUE_OF in value
-                    and structure[key][Default.YAML_ENUMERATION_SET]
-                    in value[Default.YAML_VALUE_OF]
-                ):
-                    wrapped = wrap(
-                        value[Default.YAML_SPECIFICATION][0],
-                        Default.LINE_LENGTH,
-                    )
-                    enumvalue: str = Default.EMPTY
-                    if len(wrapped) > 1:
-                        for line in wrapped:
-                            enumvalue = ''.join(
-                                [enumvalue, Default.EOL, '        > ', line]
-                            )
-                    else:
-                        enumvalue = ''.join(
-                            [
-                                enumvalue,
-                                Default.EOL,
-                                '        > ',
-                                wrapped[0].replace(
-                                    Default.EOL,
-                                    f'{Default.EOL}{Default.INDENT}',
-                                ),
-                            ]
-                        )
-                    enumeration_set = ''.join(
-                        [
-                            enumeration_set,
-                            Default.EOL,
-                            "    - '",
-                            value[Default.YAML_STANDARD_TAG],
-                            "': ",
-                            value[Default.YAML_URI],
-                            enumvalue,
-                        ]
-                    )
-        return enumeration_set
+    Enumeration Values:"""
+            for value in enumerationset[enum_key][
+                Default.YAML_ENUMERATION_VALUES
+            ]:
+                enumeration_values = ''.join(
+                    [
+                        enumeration_values,
+                        Default.EOL,
+                        Default.INDENT,
+                        Default.HYPHEN,
+                        Default.SPACE,
+                        Default.BRACKET_LEFT,
+                        Construct.get_enum_tag(value),
+                        # value[value.rfind(Default.SLASH) + 1 :].replace(
+                        #     Default.URL_ENUMERATION_PREFIX, Default.EMPTY
+                        # ),
+                        Default.BRACKET_RIGHT,
+                        Default.PARENS_LEFT,
+                        value,
+                        Default.PARENS_RIGHT,
+                    ]
+                )
+            # for _keyname, value in enumerationset.items():
+            #     if (
+            #         Default.YAML_VALUE_OF in value
+            #         and structure[key][Default.YAML_ENUMERATION_SET]
+            #         in value[Default.YAML_VALUE_OF]
+            #     ):
+            #         wrapped = wrap(
+            #             value[Default.YAML_SPECIFICATION][0],
+            #             Default.LINE_LENGTH,
+            #         )
+            #         enumvalue: str = Default.EMPTY
+            #         if len(wrapped) > 1:
+            #             for line in wrapped:
+            #                 enumvalue = ''.join(
+            #                     [enumvalue, Default.EOL, '        > ', line]
+            #                 )
+            #         else:
+            #             enumvalue = ''.join(
+            #                 [
+            #                     enumvalue,
+            #                     Default.EOL,
+            #                     '        > ',
+            #                     wrapped[0].replace(
+            #                         Default.EOL,
+            #                         f'{Default.EOL}{Default.INDENT}',
+            #                     ),
+            #                 ]
+            #             )
+            #         enumeration_set = ''.join(
+            #             [
+            #                 enumeration_set,
+            #                 Default.EOL,
+            #                 "    - '",
+            #                 value[Default.YAML_STANDARD_TAG],
+            #                 "': ",
+            #                 value[Default.YAML_URI],
+            #                 enumvalue,
+            #             ]
+            #         )
+        return enumeration_values
 
     @staticmethod
     def generate_substructures(key: str, structure: dict[str, Any]) -> str:
@@ -1560,7 +1651,7 @@ from genedata.structure import (
         key: str,
         url: str,
         structure_dictionary: dict[str, Any] | None = None,
-        enumeration_dictionary: dict[str, Any] | None = None,
+        enumerationset_dictionary: dict[str, Any] | None = None,
     ) -> str:
         """Generate a single class and its documentation defined by its Structure definition.
 
@@ -1576,14 +1667,14 @@ from genedata.structure import (
             base_url = f'{url}{Default.SLASH}'
         if structure_dictionary is None:
             structure_dictionary = {}
-        if enumeration_dictionary is None:
-            enumeration_dictionary = {}
+        if enumerationset_dictionary is None:
+            enumerationset_dictionary = {}
         structure: dict[str, Any] = structure_dictionary
         if len(structure) == 0:
             structure = eval(Convert.structure_dictionary(base_url))
-        enumeration: dict[str, Any] = enumeration_dictionary
-        if len(enumeration) == 0:
-            enumeration = eval(Convert.enumeration_dictionary(base_url))
+        enumerationset: dict[str, Any] = enumerationset_dictionary
+        if len(enumerationset) == 0:
+            enumerationset = eval(Convert.enumeration_dictionary(base_url))
         tag: str = structure[key][Default.YAML_STANDARD_TAG]
         class_name: str = structure[key][Default.YAML_CLASS_NAME]
         parts: str = ''.join(
@@ -1592,7 +1683,7 @@ from genedata.structure import (
                 Construct.generate_examples(key),
                 Construct.generate_substructures(key, structure),
                 Construct.generate_superstructures(key, structure),
-                Construct.generate_enumerations(key, structure, enumeration),
+                Construct.generate_enumerations(key, structure, enumerationset),
                 Construct.generate_value_of(key, structure),
                 Construct.generate_args(key, structure),
                 Construct.generate_references(key, structure),
@@ -1623,17 +1714,17 @@ class {class_name}(BaseStructure):
         else:
             base_url = f'{url}{Default.SLASH}'
         structure: dict[str, Any] = eval(Convert.structure_dictionary(base_url))
-        enumeration: dict[str, Any] = eval(
-            Convert.enumeration_dictionary(base_url)
+        enumerationset: dict[str, Any] = eval(
+            Convert.enumerationset_dictionary(base_url)
         )
         lines: str = Default.EMPTY
         for key in structure:
-            if key not in [Default.CONT]:
+            if key not in [Default.CONT, Default.TRLR]:
                 lines = ''.join(
                     [
                         lines,
                         Construct.generate_class(
-                            key, url, structure, enumeration
+                            key, url, structure, enumerationset
                         ),
                     ]
                 )

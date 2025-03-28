@@ -154,7 +154,7 @@ class Util:
         try:
             raw = Util.read(url)
         except Exception:
-            logging.info(Msg.LOG_READ_FAILED.format(url))
+            #logging.info(Msg.LOG_READ_FAILED.format(url))
             try:
                 raw = Util.read_binary(url)
             except Exception:

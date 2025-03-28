@@ -22,7 +22,7 @@ import re
 
 import pytest
 
-from genedata.classes7 import Age, Lati, Phrase
+import genedata.classes7 as gc
 from genedata.messages import Msg
 from genedata.util import Input
 
@@ -32,25 +32,25 @@ from genedata.util import Input
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
-    m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y')])
+    m = gc.Age('> 2y 1m 1w 1d', [gc.Phrase('Original: 2.2y')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
-    m = Age('> 2y 1m 1w 1d', Phrase('Original: 2.2y'))
+    m = gc.Age('> 2y 1m 1w 1d', gc.Phrase('Original: 2.2y'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
-    m = Age('> 2y 1m 1w 1d')
+    m = gc.Age('> 2y 1m 1w 1d')
     assert m.validate()
 
 
 def test_good_run_only_phrase() -> None:
     """Run a successful use of the structure."""
-    m = Age('', Phrase('Original: 2.2y'))
+    m = gc.Age('', gc.Phrase('Original: 2.2y'))
     assert m.validate()
 
 
@@ -59,7 +59,7 @@ def test_good_run_only_phrase() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y'), Lati('N30.0')])
+    m = gc.Age('> 2y 1m 1w 1d', [gc.Phrase('Original: 2.2y'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -77,7 +77,9 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
-    m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y'), Phrase('friend2')])
+    m = gc.Age(
+        '> 2y 1m 1w 1d', [gc.Phrase('Original: 2.2y'), gc.Phrase('friend2')]
+    )
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
     ):
@@ -89,7 +91,7 @@ def test_phrase_only_one() -> None:
 
 def test_not_string_value() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Age(Phrase('Original: 2.2y'))  # type: ignore[arg-type]
+    m = gc.Age(gc.Phrase('Original: 2.2y'))  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.NOT_STRING.format(m.value, m.class_name)),
@@ -99,7 +101,7 @@ def test_not_string_value() -> None:
 
 def test_no_keys() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Age('12345')
+    m = gc.Age('12345')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -109,7 +111,7 @@ def test_no_keys() -> None:
 
 def test_wrong_keys() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Age('12345x')
+    m = gc.Age('12345x')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -119,7 +121,7 @@ def test_wrong_keys() -> None:
 
 def test_multiple_y() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Age('2yy')
+    m = gc.Age('2yy')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -129,7 +131,7 @@ def test_multiple_y() -> None:
 
 def test_odd_character() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Age('> 2y 3m 1w 1dt')
+    m = gc.Age('> 2y 3m 1w 1dt')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -139,7 +141,7 @@ def test_odd_character() -> None:
 
 def test_no_numbers() -> None:
     """Check that numbers must be in a non-empty age."""
-    m = Age('> y m w d')
+    m = gc.Age('> y m w d')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -149,7 +151,7 @@ def test_no_numbers() -> None:
 
 def test_not_proper_beginning() -> None:
     """Check that numbers must be in a non-empty age."""
-    m = Age('y 1m 1w 1d')
+    m = gc.Age('y 1m 1w 1d')
     with pytest.raises(
         ValueError,
         match=Msg.NOT_AGE.format(str(m.value), m.class_name),
@@ -162,19 +164,19 @@ def test_not_proper_beginning() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
-    m = Age('> 2y 1m 1w 1d', Phrase('Original: 2.2y'))
+    m = gc.Age('> 2y 1m 1w 1d', gc.Phrase('Original: 2.2y'))
     assert m.ged(1) == '1 AGE > 2y 1m 1w 1d\n2 PHRASE Original: 2.2y\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
-    m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y')])
+    m = gc.Age('> 2y 1m 1w 1d', [gc.Phrase('Original: 2.2y')])
     assert m.ged(1) == '1 AGE > 2y 1m 1w 1d\n2 PHRASE Original: 2.2y\n'
 
 
 def test_ged_only_phrase() -> None:
     """Run a successful use of the structure."""
-    m = Age('', Phrase('Original: 2.2y'))
+    m = gc.Age('', gc.Phrase('Original: 2.2y'))
     assert m.ged(1) == '1 AGE\n2 PHRASE Original: 2.2y\n'
 
 
@@ -183,14 +185,17 @@ def test_ged_only_phrase() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    m = Age('> 2y 1m 1w 1d', Phrase('Original: 2.2y'))
-    assert m.code() == "\nAge('> 2y 1m 1w 1d', Phrase('Original: 2.2y'))"
+    m = gc.Age('> 2y 1m 1w 1d', gc.Phrase('Original: 2.2y'))
+    assert m.code() == "\ngc.Age('> 2y 1m 1w 1d', gc.Phrase('Original: 2.2y'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    m = Age('> 2y 1m 1w 1d', [Phrase('Original: 2.2y')])
-    assert m.code() == "\nAge('> 2y 1m 1w 1d',\n    [\n        Phrase('Original: 2.2y'),\n    ]\n)"
+    m = gc.Age('> 2y 1m 1w 1d', [gc.Phrase('Original: 2.2y')])
+    assert (
+        m.code()
+        == "\ngc.Age('> 2y 1m 1w 1d',\n    [\n        gc.Phrase('Original: 2.2y'),\n    ]\n)"
+    )
 
 
 # 4. Examples:  Demonstrate that all of the examples
@@ -307,104 +312,104 @@ def test_age_from_age_ged_example_file(
 
     Reference:
     - [GEDCOM Age Example File](https://gedcom.io/testfiles/gedcom70/age.ged)"""
-    a1 = Age('0y').ged(2)  # noqa: F841
-    a2 = Age('< 0y').ged(2)  # noqa: F841
-    a3 = Age('0m').ged(2)  # noqa: F841
-    a4 = Age('< 0m').ged(2)  # noqa: F841
-    a5 = Age('0w').ged(2)  # noqa: F841
-    a6 = Age('< 0w').ged(2)  # noqa: F841
-    a7 = Age('0d').ged(2)  # noqa: F841
-    a8 = Age('< 0d').ged(2)  # noqa: F841
-    a9 = Age('0y 0m').ged(2)  # noqa: F841
-    a10 = Age('< 0y 0m').ged(2)  # noqa: F841
-    a11 = Age('0y 0w').ged(2)  # noqa: F841
-    a12 = Age('< 0y 0w').ged(2)  # noqa: F841
-    a13 = Age('0y 0d').ged(2)  # noqa: F841
-    a14 = Age('< 0y 0d').ged(2)  # noqa: F841
-    a15 = Age('0m 0w').ged(2)  # noqa: F841
-    a16 = Age('< 0m 0w').ged(2)  # noqa: F841
-    a17 = Age('0m 0d').ged(2)  # noqa: F841
-    a18 = Age('< 0m 0d').ged(2)  # noqa: F841
-    a19 = Age('0w 0d').ged(2)  # noqa: F841
-    a20 = Age('< 0w 0d').ged(2)  # noqa: F841
-    a21 = Age('0y 0m 0w').ged(2)  # noqa: F841
-    a22 = Age('< 0y 0m 0w').ged(2)  # noqa: F841
-    a23 = Age('0y 0m 0d').ged(2)  # noqa: F841
-    a24 = Age('< 0y 0m 0d').ged(2)  # noqa: F841
-    a25 = Age('0y 0w 0d').ged(2)  # noqa: F841
-    a26 = Age('< 0y 0w 0d').ged(2)  # noqa: F841
-    a27 = Age('0m 0w 0d').ged(2)  # noqa: F841
-    a28 = Age('< 0m 0w 0d').ged(2)  # noqa: F841
-    a29 = Age('0y 0m 0w 0d').ged(2)  # noqa: F841
-    a30 = Age('< 0y 0m 0w 0d').ged(2)  # noqa: F841
-    a31 = Age('').ged(2)  # noqa: F841
-    a32 = Age('> 0y').ged(2)  # noqa: F841
-    a33 = Age('99y').ged(2)  # noqa: F841
-    a34 = Age('> 99y').ged(2)  # noqa: F841
-    a35 = Age('< 99y').ged(2)  # noqa: F841
-    a36 = Age('> 0m').ged(2)  # noqa: F841
-    a37 = Age('11m').ged(2)  # noqa: F841
-    a38 = Age('> 11m').ged(2)  # noqa: F841
-    a39 = Age('< 11m').ged(2)  # noqa: F841
-    a40 = Age('> 0w').ged(2)  # noqa: F841
-    a41 = Age('3w').ged(2)  # noqa: F841
-    a42 = Age('> 3w').ged(2)  # noqa: F841
-    a43 = Age('< 3w').ged(2)  # noqa: F841
-    a44 = Age('> 0d').ged(2)  # noqa: F841
-    a45 = Age('6d').ged(2)  # noqa: F841
-    a46 = Age('> 6d').ged(2)  # noqa: F841
-    a47 = Age('< 6d').ged(2)  # noqa: F841
-    a48 = Age('> 0y 0m').ged(2)  # noqa: F841
-    a49 = Age('99y 11m').ged(2)  # noqa: F841
-    a50 = Age('> 99y 11m').ged(2)  # noqa: F841
-    a51 = Age('< 99y 11m').ged(2)  # noqa: F841
-    a52 = Age('> 0y 0w').ged(2)  # noqa: F841
-    a53 = Age('99y 3w').ged(2)  # noqa: F841
-    a54 = Age('> 99y 3w').ged(2)  # noqa: F841
-    a55 = Age('< 99y 3w').ged(2)  # noqa: F841
-    a56 = Age('> 0y 0d').ged(2)  # noqa: F841
-    a57 = Age('99y 6d').ged(2)  # noqa: F841
-    a58 = Age('> 99y 6d').ged(2)  # noqa: F841
-    a59 = Age('< 99y 6d').ged(2)  # noqa: F841
-    a60 = Age('> 0m 0w').ged(2)  # noqa: F841
-    a61 = Age('11m 3w').ged(2)  # noqa: F841
-    a62 = Age('> 11m 3w').ged(2)  # noqa: F841
-    a63 = Age('< 11m 3w').ged(2)  # noqa: F841
-    a64 = Age('> 0m 0d').ged(2)  # noqa: F841
-    a65 = Age('11m 6d').ged(2)  # noqa: F841
-    a66 = Age('> 11m 6d').ged(2)  # noqa: F841
-    a67 = Age('< 11m 6d').ged(2)  # noqa: F841
-    a68 = Age('> 0w 0d').ged(2)  # noqa: F841
-    a69 = Age('3w 6d').ged(2)  # noqa: F841
-    a70 = Age('> 3w 6d').ged(2)  # noqa: F841
-    a71 = Age('< 3w 6d').ged(2)  # noqa: F841
-    a72 = Age('> 0y 0m 0w').ged(2)  # noqa: F841
-    a73 = Age('99y 11m 3w').ged(2)  # noqa: F841
-    a74 = Age('> 99y 11m 3w').ged(2)  # noqa: F841
-    a75 = Age('< 99y 11m 3w').ged(2)  # noqa: F841
-    a76 = Age('> 0y 0m 0d').ged(2)  # noqa: F841
-    a77 = Age('99y 11m 6d').ged(2)  # noqa: F841
-    a78 = Age('> 99y 11m 6d').ged(2)  # noqa: F841
-    a79 = Age('< 99y 11m 6d').ged(2)  # noqa: F841
-    a80 = Age('> 0y 0w 0d').ged(2)  # noqa: F841
-    a81 = Age('99y 3w 6d').ged(2)  # noqa: F841
-    a82 = Age('> 99y 3w 6d').ged(2)  # noqa: F841
-    a83 = Age('< 99y 3w 6d').ged(2)  # noqa: F841
-    a84 = Age('> 0m 0w 0d').ged(2)  # noqa: F841
-    a85 = Age('99m 3w 6d').ged(2)  # noqa: F841
-    a86 = Age('> 99m 3w 6d').ged(2)  # noqa: F841
-    a87 = Age('< 99m 3w 6d').ged(2)  # noqa: F841
-    a88 = Age('> 0y 0m 0w 0d').ged(2)  # noqa: F841
-    a89 = Age('99y 11m 3w 6d').ged(2)  # noqa: F841
-    a90 = Age('> 99y 11m 3w 6d').ged(2)  # noqa: F841
-    a91 = Age('< 99y 11m 3w 6d').ged(2)  # noqa: F841
-    a92 = Age('1y 30m').ged(2)  # noqa: F841
-    a93 = Age('1y 100w').ged(2)  # noqa: F841
-    a94 = Age('1y 400d').ged(2)  # noqa: F841
-    a95 = Age('1m 40d').ged(2)  # noqa: F841
-    a96 = Age('1m 10w').ged(2)  # noqa: F841
-    a97 = Age('1w 30d').ged(2)  # noqa: F841
-    a98 = Age('1y 30m 100w 400d').ged(2)  # noqa: F841
+    a1 = gc.Age('0y').ged(2)  # noqa: F841
+    a2 = gc.Age('< 0y').ged(2)  # noqa: F841
+    a3 = gc.Age('0m').ged(2)  # noqa: F841
+    a4 = gc.Age('< 0m').ged(2)  # noqa: F841
+    a5 = gc.Age('0w').ged(2)  # noqa: F841
+    a6 = gc.Age('< 0w').ged(2)  # noqa: F841
+    a7 = gc.Age('0d').ged(2)  # noqa: F841
+    a8 = gc.Age('< 0d').ged(2)  # noqa: F841
+    a9 = gc.Age('0y 0m').ged(2)  # noqa: F841
+    a10 = gc.Age('< 0y 0m').ged(2)  # noqa: F841
+    a11 = gc.Age('0y 0w').ged(2)  # noqa: F841
+    a12 = gc.Age('< 0y 0w').ged(2)  # noqa: F841
+    a13 = gc.Age('0y 0d').ged(2)  # noqa: F841
+    a14 = gc.Age('< 0y 0d').ged(2)  # noqa: F841
+    a15 = gc.Age('0m 0w').ged(2)  # noqa: F841
+    a16 = gc.Age('< 0m 0w').ged(2)  # noqa: F841
+    a17 = gc.Age('0m 0d').ged(2)  # noqa: F841
+    a18 = gc.Age('< 0m 0d').ged(2)  # noqa: F841
+    a19 = gc.Age('0w 0d').ged(2)  # noqa: F841
+    a20 = gc.Age('< 0w 0d').ged(2)  # noqa: F841
+    a21 = gc.Age('0y 0m 0w').ged(2)  # noqa: F841
+    a22 = gc.Age('< 0y 0m 0w').ged(2)  # noqa: F841
+    a23 = gc.Age('0y 0m 0d').ged(2)  # noqa: F841
+    a24 = gc.Age('< 0y 0m 0d').ged(2)  # noqa: F841
+    a25 = gc.Age('0y 0w 0d').ged(2)  # noqa: F841
+    a26 = gc.Age('< 0y 0w 0d').ged(2)  # noqa: F841
+    a27 = gc.Age('0m 0w 0d').ged(2)  # noqa: F841
+    a28 = gc.Age('< 0m 0w 0d').ged(2)  # noqa: F841
+    a29 = gc.Age('0y 0m 0w 0d').ged(2)  # noqa: F841
+    a30 = gc.Age('< 0y 0m 0w 0d').ged(2)  # noqa: F841
+    a31 = gc.Age('').ged(2)  # noqa: F841
+    a32 = gc.Age('> 0y').ged(2)  # noqa: F841
+    a33 = gc.Age('99y').ged(2)  # noqa: F841
+    a34 = gc.Age('> 99y').ged(2)  # noqa: F841
+    a35 = gc.Age('< 99y').ged(2)  # noqa: F841
+    a36 = gc.Age('> 0m').ged(2)  # noqa: F841
+    a37 = gc.Age('11m').ged(2)  # noqa: F841
+    a38 = gc.Age('> 11m').ged(2)  # noqa: F841
+    a39 = gc.Age('< 11m').ged(2)  # noqa: F841
+    a40 = gc.Age('> 0w').ged(2)  # noqa: F841
+    a41 = gc.Age('3w').ged(2)  # noqa: F841
+    a42 = gc.Age('> 3w').ged(2)  # noqa: F841
+    a43 = gc.Age('< 3w').ged(2)  # noqa: F841
+    a44 = gc.Age('> 0d').ged(2)  # noqa: F841
+    a45 = gc.Age('6d').ged(2)  # noqa: F841
+    a46 = gc.Age('> 6d').ged(2)  # noqa: F841
+    a47 = gc.Age('< 6d').ged(2)  # noqa: F841
+    a48 = gc.Age('> 0y 0m').ged(2)  # noqa: F841
+    a49 = gc.Age('99y 11m').ged(2)  # noqa: F841
+    a50 = gc.Age('> 99y 11m').ged(2)  # noqa: F841
+    a51 = gc.Age('< 99y 11m').ged(2)  # noqa: F841
+    a52 = gc.Age('> 0y 0w').ged(2)  # noqa: F841
+    a53 = gc.Age('99y 3w').ged(2)  # noqa: F841
+    a54 = gc.Age('> 99y 3w').ged(2)  # noqa: F841
+    a55 = gc.Age('< 99y 3w').ged(2)  # noqa: F841
+    a56 = gc.Age('> 0y 0d').ged(2)  # noqa: F841
+    a57 = gc.Age('99y 6d').ged(2)  # noqa: F841
+    a58 = gc.Age('> 99y 6d').ged(2)  # noqa: F841
+    a59 = gc.Age('< 99y 6d').ged(2)  # noqa: F841
+    a60 = gc.Age('> 0m 0w').ged(2)  # noqa: F841
+    a61 = gc.Age('11m 3w').ged(2)  # noqa: F841
+    a62 = gc.Age('> 11m 3w').ged(2)  # noqa: F841
+    a63 = gc.Age('< 11m 3w').ged(2)  # noqa: F841
+    a64 = gc.Age('> 0m 0d').ged(2)  # noqa: F841
+    a65 = gc.Age('11m 6d').ged(2)  # noqa: F841
+    a66 = gc.Age('> 11m 6d').ged(2)  # noqa: F841
+    a67 = gc.Age('< 11m 6d').ged(2)  # noqa: F841
+    a68 = gc.Age('> 0w 0d').ged(2)  # noqa: F841
+    a69 = gc.Age('3w 6d').ged(2)  # noqa: F841
+    a70 = gc.Age('> 3w 6d').ged(2)  # noqa: F841
+    a71 = gc.Age('< 3w 6d').ged(2)  # noqa: F841
+    a72 = gc.Age('> 0y 0m 0w').ged(2)  # noqa: F841
+    a73 = gc.Age('99y 11m 3w').ged(2)  # noqa: F841
+    a74 = gc.Age('> 99y 11m 3w').ged(2)  # noqa: F841
+    a75 = gc.Age('< 99y 11m 3w').ged(2)  # noqa: F841
+    a76 = gc.Age('> 0y 0m 0d').ged(2)  # noqa: F841
+    a77 = gc.Age('99y 11m 6d').ged(2)  # noqa: F841
+    a78 = gc.Age('> 99y 11m 6d').ged(2)  # noqa: F841
+    a79 = gc.Age('< 99y 11m 6d').ged(2)  # noqa: F841
+    a80 = gc.Age('> 0y 0w 0d').ged(2)  # noqa: F841
+    a81 = gc.Age('99y 3w 6d').ged(2)  # noqa: F841
+    a82 = gc.Age('> 99y 3w 6d').ged(2)  # noqa: F841
+    a83 = gc.Age('< 99y 3w 6d').ged(2)  # noqa: F841
+    a84 = gc.Age('> 0m 0w 0d').ged(2)  # noqa: F841
+    a85 = gc.Age('99m 3w 6d').ged(2)  # noqa: F841
+    a86 = gc.Age('> 99m 3w 6d').ged(2)  # noqa: F841
+    a87 = gc.Age('< 99m 3w 6d').ged(2)  # noqa: F841
+    a88 = gc.Age('> 0y 0m 0w 0d').ged(2)  # noqa: F841
+    a89 = gc.Age('99y 11m 3w 6d').ged(2)  # noqa: F841
+    a90 = gc.Age('> 99y 11m 3w 6d').ged(2)  # noqa: F841
+    a91 = gc.Age('< 99y 11m 3w 6d').ged(2)  # noqa: F841
+    a92 = gc.Age('1y 30m').ged(2)  # noqa: F841
+    a93 = gc.Age('1y 100w').ged(2)  # noqa: F841
+    a94 = gc.Age('1y 400d').ged(2)  # noqa: F841
+    a95 = gc.Age('1m 40d').ged(2)  # noqa: F841
+    a96 = gc.Age('1m 10w').ged(2)  # noqa: F841
+    a97 = gc.Age('1w 30d').ged(2)  # noqa: F841
+    a98 = gc.Age('1y 30m 100w 400d').ged(2)  # noqa: F841
 
     assert eval(test_input) == expected
 
@@ -417,153 +422,165 @@ def test_input_age_from_age_ged_example_file(
 
     Reference:
     - [GEDCOM Age Example File](https://gedcom.io/testfiles/gedcom70/age.ged)"""
-    a1 = Age(Input.age(years=0, greater_less_than='')).ged(2)  # noqa: F841
-    a2 = Age(Input.age(years=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a3 = Age(Input.age(months=0, greater_less_than='')).ged(2)  # noqa: F841
-    a4 = Age(Input.age(months=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a5 = Age(Input.age(weeks=0, greater_less_than='')).ged(2)  # noqa: F841
-    a6 = Age(Input.age(weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a7 = Age(Input.age(days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a8 = Age(Input.age(days=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a9 = Age(Input.age(years=0, months=0, greater_less_than='')).ged(2)  # noqa: F841
-    a10 = Age(Input.age(years=0, months=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a11 = Age(Input.age(years=0, weeks=0, greater_less_than='')).ged(2)  # noqa: F841
-    a12 = Age(Input.age(years=0, weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a13 = Age(Input.age(years=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a14 = Age(Input.age(years=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a15 = Age(Input.age(months=0, weeks=0, greater_less_than='')).ged(2)  # noqa: F841
-    a16 = Age(Input.age(months=0, weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a17 = Age(Input.age(months=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a18 = Age(Input.age(months=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a19 = Age(Input.age(weeks=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a20 = Age(Input.age(weeks=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a21 = Age(Input.age(years=0, months=0, weeks=0, greater_less_than='')).ged(
+    a1 = gc.Age(Input.age(years=0, greater_less_than='')).ged(2)  # noqa: F841
+    a2 = gc.Age(Input.age(years=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a3 = gc.Age(Input.age(months=0, greater_less_than='')).ged(2)  # noqa: F841
+    a4 = gc.Age(Input.age(months=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a5 = gc.Age(Input.age(weeks=0, greater_less_than='')).ged(2)  # noqa: F841
+    a6 = gc.Age(Input.age(weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a7 = gc.Age(Input.age(days=0, greater_less_than='')).ged(2)  # noqa: F841
+    a8 = gc.Age(Input.age(days=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a9 = gc.Age(Input.age(years=0, months=0, greater_less_than='')).ged(2)  # noqa: F841
+    a10 = gc.Age(Input.age(years=0, months=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a11 = gc.Age(Input.age(years=0, weeks=0, greater_less_than='')).ged(2)  # noqa: F841
+    a12 = gc.Age(Input.age(years=0, weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a13 = gc.Age(Input.age(years=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
+    a14 = gc.Age(Input.age(years=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a15 = gc.Age(Input.age(months=0, weeks=0, greater_less_than='')).ged(2)  # noqa: F841
+    a16 = gc.Age(Input.age(months=0, weeks=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a17 = gc.Age(Input.age(months=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
+    a18 = gc.Age(Input.age(months=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a19 = gc.Age(Input.age(weeks=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
+    a20 = gc.Age(Input.age(weeks=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
+    a21 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, weeks=0, greater_less_than='')
+    ).ged(2)
+    a22 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, weeks=0, greater_less_than='<')
+    ).ged(2)
+    a23 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, days=0, greater_less_than='')
+    ).ged(2)
+    a24 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, days=0, greater_less_than='<')
+    ).ged(2)
+    a25 = gc.Age(Input.age(years=0, weeks=0, days=0, greater_less_than='')).ged(  # noqa: F841
         2
-    )  # noqa: F841
-    a22 = Age(Input.age(years=0, months=0, weeks=0, greater_less_than='<')).ged(
-        2
-    )  # noqa: F841
-    a23 = Age(Input.age(years=0, months=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a24 = Age(Input.age(years=0, months=0, days=0, greater_less_than='<')).ged(
-        2
-    )  # noqa: F841
-    a25 = Age(Input.age(years=0, weeks=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a26 = Age(Input.age(years=0, weeks=0, days=0, greater_less_than='<')).ged(2)  # noqa: F841
-    a27 = Age(Input.age(months=0, weeks=0, days=0, greater_less_than='')).ged(2)  # noqa: F841
-    a28 = Age(Input.age(months=0, weeks=0, days=0, greater_less_than='<')).ged(
-        2
-    )  # noqa: F841
-    a29 = Age(
+    )
+    a26 = gc.Age(  # noqa: F841
+        Input.age(years=0, weeks=0, days=0, greater_less_than='<')
+    ).ged(2)
+    a27 = gc.Age(  # noqa: F841
+        Input.age(months=0, weeks=0, days=0, greater_less_than='')
+    ).ged(2)
+    a28 = gc.Age(  # noqa: F841
+        Input.age(months=0, weeks=0, days=0, greater_less_than='<')
+    ).ged(2)
+    a29 = gc.Age(  # noqa: F841
         Input.age(years=0, months=0, weeks=0, days=0, greater_less_than='')
-    ).ged(2)  # noqa: F841
-    a30 = Age(
+    ).ged(2)
+    a30 = gc.Age(  # noqa: F841
         Input.age(years=0, months=0, weeks=0, days=0, greater_less_than='<')
-    ).ged(2)  # noqa: F841
-    a31 = Age(Input.age()).ged(2)  # noqa: F841
-    a32 = Age(Input.age(years=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a33 = Age(Input.age(years=99, greater_less_than='')).ged(2)  # noqa: F841
-    a34 = Age(Input.age(years=99, greater_less_than='>')).ged(2)  # noqa: F841
-    a35 = Age(Input.age(years=99, greater_less_than='<')).ged(2)  # noqa: F841
-    a36 = Age(Input.age(months=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a37 = Age(Input.age(months=11, greater_less_than='')).ged(2)  # noqa: F841
-    a38 = Age(Input.age(months=11, greater_less_than='>')).ged(2)  # noqa: F841
-    a39 = Age(Input.age(months=11, greater_less_than='<')).ged(2)  # noqa: F841
-    a40 = Age(Input.age(weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a41 = Age(Input.age(weeks=3, greater_less_than='')).ged(2)  # noqa: F841
-    a42 = Age(Input.age(weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
-    a43 = Age(Input.age(weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
-    a44 = Age(Input.age(days=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a45 = Age(Input.age(days=6, greater_less_than='')).ged(2)  # noqa: F841
-    a46 = Age(Input.age(days=6, greater_less_than='>')).ged(2)  # noqa: F841
-    a47 = Age(Input.age(days=6, greater_less_than='<')).ged(2)  # noqa: F841
-    a48 = Age(Input.age(years=0, months=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a49 = Age(Input.age(years=99, months=11, greater_less_than='')).ged(2)  # noqa: F841
-    a50 = Age(Input.age(years=99, months=11, greater_less_than='>')).ged(2)  # noqa: F841
-    a51 = Age(Input.age(years=99, months=11, greater_less_than='<')).ged(2)  # noqa: F841
-    a52 = Age(Input.age(years=0, weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a53 = Age(Input.age(years=99, weeks=3, greater_less_than='')).ged(2)  # noqa: F841
-    a54 = Age(Input.age(years=99, weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
-    a55 = Age(Input.age(years=99, weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
-    a56 = Age(Input.age(years=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a57 = Age(Input.age(years=99, days=6, greater_less_than='')).ged(2)  # noqa: F841
-    a58 = Age(Input.age(years=99, days=6, greater_less_than='>')).ged(2)  # noqa: F841
-    a59 = Age(Input.age(years=99, days=6, greater_less_than='<')).ged(2)  # noqa: F841
-    a60 = Age(Input.age(months=0, weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a61 = Age(Input.age(months=11, weeks=3, greater_less_than='')).ged(2)  # noqa: F841
-    a62 = Age(Input.age(months=11, weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
-    a63 = Age(Input.age(months=11, weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
-    a64 = Age(Input.age(months=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a65 = Age(Input.age(months=11, days=6, greater_less_than='')).ged(2)  # noqa: F841
-    a66 = Age(Input.age(months=11, days=6, greater_less_than='>')).ged(2)  # noqa: F841
-    a67 = Age(Input.age(months=11, days=6, greater_less_than='<')).ged(2)  # noqa: F841
-    a68 = Age(Input.age(weeks=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a69 = Age(Input.age(weeks=3, days=6, greater_less_than='')).ged(2)  # noqa: F841
-    a70 = Age(Input.age(weeks=3, days=6, greater_less_than='>')).ged(2)  # noqa: F841
-    a71 = Age(Input.age(weeks=3, days=6, greater_less_than='<')).ged(2)  # noqa: F841
-    a72 = Age(Input.age(years=0, months=0, weeks=0, greater_less_than='>')).ged(
-        2
-    )  # noqa: F841
-    a73 = Age(
+    ).ged(2)
+    a31 = gc.Age(Input.age()).ged(2)  # noqa: F841
+    a32 = gc.Age(Input.age(years=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a33 = gc.Age(Input.age(years=99, greater_less_than='')).ged(2)  # noqa: F841
+    a34 = gc.Age(Input.age(years=99, greater_less_than='>')).ged(2)  # noqa: F841
+    a35 = gc.Age(Input.age(years=99, greater_less_than='<')).ged(2)  # noqa: F841
+    a36 = gc.Age(Input.age(months=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a37 = gc.Age(Input.age(months=11, greater_less_than='')).ged(2)  # noqa: F841
+    a38 = gc.Age(Input.age(months=11, greater_less_than='>')).ged(2)  # noqa: F841
+    a39 = gc.Age(Input.age(months=11, greater_less_than='<')).ged(2)  # noqa: F841
+    a40 = gc.Age(Input.age(weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a41 = gc.Age(Input.age(weeks=3, greater_less_than='')).ged(2)  # noqa: F841
+    a42 = gc.Age(Input.age(weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
+    a43 = gc.Age(Input.age(weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
+    a44 = gc.Age(Input.age(days=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a45 = gc.Age(Input.age(days=6, greater_less_than='')).ged(2)  # noqa: F841
+    a46 = gc.Age(Input.age(days=6, greater_less_than='>')).ged(2)  # noqa: F841
+    a47 = gc.Age(Input.age(days=6, greater_less_than='<')).ged(2)  # noqa: F841
+    a48 = gc.Age(Input.age(years=0, months=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a49 = gc.Age(Input.age(years=99, months=11, greater_less_than='')).ged(2)  # noqa: F841
+    a50 = gc.Age(Input.age(years=99, months=11, greater_less_than='>')).ged(2)  # noqa: F841
+    a51 = gc.Age(Input.age(years=99, months=11, greater_less_than='<')).ged(2)  # noqa: F841
+    a52 = gc.Age(Input.age(years=0, weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a53 = gc.Age(Input.age(years=99, weeks=3, greater_less_than='')).ged(2)  # noqa: F841
+    a54 = gc.Age(Input.age(years=99, weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
+    a55 = gc.Age(Input.age(years=99, weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
+    a56 = gc.Age(Input.age(years=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a57 = gc.Age(Input.age(years=99, days=6, greater_less_than='')).ged(2)  # noqa: F841
+    a58 = gc.Age(Input.age(years=99, days=6, greater_less_than='>')).ged(2)  # noqa: F841
+    a59 = gc.Age(Input.age(years=99, days=6, greater_less_than='<')).ged(2)  # noqa: F841
+    a60 = gc.Age(Input.age(months=0, weeks=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a61 = gc.Age(Input.age(months=11, weeks=3, greater_less_than='')).ged(2)  # noqa: F841
+    a62 = gc.Age(Input.age(months=11, weeks=3, greater_less_than='>')).ged(2)  # noqa: F841
+    a63 = gc.Age(Input.age(months=11, weeks=3, greater_less_than='<')).ged(2)  # noqa: F841
+    a64 = gc.Age(Input.age(months=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a65 = gc.Age(Input.age(months=11, days=6, greater_less_than='')).ged(2)  # noqa: F841
+    a66 = gc.Age(Input.age(months=11, days=6, greater_less_than='>')).ged(2)  # noqa: F841
+    a67 = gc.Age(Input.age(months=11, days=6, greater_less_than='<')).ged(2)  # noqa: F841
+    a68 = gc.Age(Input.age(weeks=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
+    a69 = gc.Age(Input.age(weeks=3, days=6, greater_less_than='')).ged(2)  # noqa: F841
+    a70 = gc.Age(Input.age(weeks=3, days=6, greater_less_than='>')).ged(2)  # noqa: F841
+    a71 = gc.Age(Input.age(weeks=3, days=6, greater_less_than='<')).ged(2)  # noqa: F841
+    a72 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, weeks=0, greater_less_than='>')
+    ).ged(2)
+    a73 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, greater_less_than='')
-    ).ged(2)  # noqa: F841
-    a74 = Age(
+    ).ged(2)
+    a74 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, greater_less_than='>')
-    ).ged(2)  # noqa: F841
-    a75 = Age(
+    ).ged(2)
+    a75 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, greater_less_than='<')
-    ).ged(2)  # noqa: F841
-    a76 = Age(Input.age(years=0, months=0, days=0, greater_less_than='>')).ged(
-        2
-    )  # noqa: F841
-    a77 = Age(Input.age(years=99, months=11, days=6, greater_less_than='')).ged(
-        2
-    )  # noqa: F841
-    a78 = Age(
+    ).ged(2)
+    a76 = gc.Age(  # noqa: F841
+        Input.age(years=0, months=0, days=0, greater_less_than='>')
+    ).ged(2)
+    a77 = gc.Age(  # noqa: F841
+        Input.age(years=99, months=11, days=6, greater_less_than='')
+    ).ged(2)
+    a78 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, days=6, greater_less_than='>')
-    ).ged(2)  # noqa: F841
-    a79 = Age(
+    ).ged(2)
+    a79 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, days=6, greater_less_than='<')
-    ).ged(2)  # noqa: F841
-    a80 = Age(Input.age(years=0, weeks=0, days=0, greater_less_than='>')).ged(2)  # noqa: F841
-    a81 = Age(Input.age(years=99, weeks=3, days=6, greater_less_than='')).ged(2)  # noqa: F841
-    a82 = Age(Input.age(years=99, weeks=3, days=6, greater_less_than='>')).ged(
-        2
-    )  # noqa: F841
-    a83 = Age(Input.age(years=99, weeks=3, days=6, greater_less_than='<')).ged(
-        2
-    )  # noqa: F841
-    a84 = Age(Input.age(months=0, weeks=0, days=0, greater_less_than='>')).ged(
-        2
-    )  # noqa: F841
-    a85 = Age(Input.age(months=99, weeks=3, days=6, greater_less_than='')).ged(
-        2
-    )  # noqa: F841
-    a86 = Age(Input.age(months=99, weeks=3, days=6, greater_less_than='>')).ged(
-        2
-    )  # noqa: F841
-    a87 = Age(Input.age(months=99, weeks=3, days=6, greater_less_than='<')).ged(
-        2
-    )  # noqa: F841
-    a88 = Age(
+    ).ged(2)
+    a80 = gc.Age(  # noqa: F841
+        Input.age(years=0, weeks=0, days=0, greater_less_than='>')
+    ).ged(2)
+    a81 = gc.Age(  # noqa: F841
+        Input.age(years=99, weeks=3, days=6, greater_less_than='')
+    ).ged(2)
+    a82 = gc.Age(  # noqa: F841
+        Input.age(years=99, weeks=3, days=6, greater_less_than='>')
+    ).ged(2)
+    a83 = gc.Age(  # noqa: F841
+        Input.age(years=99, weeks=3, days=6, greater_less_than='<')
+    ).ged(2)
+    a84 = gc.Age(  # noqa: F841
+        Input.age(months=0, weeks=0, days=0, greater_less_than='>')
+    ).ged(2)
+    a85 = gc.Age(  # noqa: F841
+        Input.age(months=99, weeks=3, days=6, greater_less_than='')
+    ).ged(2)
+    a86 = gc.Age(  # noqa: F841
+        Input.age(months=99, weeks=3, days=6, greater_less_than='>')
+    ).ged(2)
+    a87 = gc.Age(  # noqa: F841
+        Input.age(months=99, weeks=3, days=6, greater_less_than='<')
+    ).ged(2)
+    a88 = gc.Age(  # noqa: F841
         Input.age(years=0, months=0, weeks=0, days=0, greater_less_than='>')
-    ).ged(2)  # noqa: F841
-    a89 = Age(
+    ).ged(2)
+    a89 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, days=6, greater_less_than='')
-    ).ged(2)  # noqa: F841
-    a90 = Age(
+    ).ged(2)
+    a90 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, days=6, greater_less_than='>')
-    ).ged(2)  # noqa: F841
-    a91 = Age(
+    ).ged(2)
+    a91 = gc.Age(  # noqa: F841
         Input.age(years=99, months=11, weeks=3, days=6, greater_less_than='<')
-    ).ged(2)  # noqa: F841
-    a92 = Age(Input.age(years=1, months=30, greater_less_than='')).ged(2)  # noqa: F841
-    a93 = Age(Input.age(years=1, weeks=100, greater_less_than='')).ged(2)  # noqa: F841
-    a94 = Age(Input.age(years=1, days=400, greater_less_than='')).ged(2)  # noqa: F841
-    a95 = Age(Input.age(months=1, days=40, greater_less_than='')).ged(2)  # noqa: F841
-    a96 = Age(Input.age(months=1, weeks=10, greater_less_than='')).ged(2)  # noqa: F841
-    a97 = Age(Input.age(weeks=1, days=30, greater_less_than='')).ged(2)  # noqa: F841
-    a98 = Age(
+    ).ged(2)
+    a92 = gc.Age(Input.age(years=1, months=30, greater_less_than='')).ged(2)  # noqa: F841
+    a93 = gc.Age(Input.age(years=1, weeks=100, greater_less_than='')).ged(2)  # noqa: F841
+    a94 = gc.Age(Input.age(years=1, days=400, greater_less_than='')).ged(2)  # noqa: F841
+    a95 = gc.Age(Input.age(months=1, days=40, greater_less_than='')).ged(2)  # noqa: F841
+    a96 = gc.Age(Input.age(months=1, weeks=10, greater_less_than='')).ged(2)  # noqa: F841
+    a97 = gc.Age(Input.age(weeks=1, days=30, greater_less_than='')).ged(2)  # noqa: F841
+    a98 = gc.Age(  # noqa: F841
         Input.age(years=1, months=30, weeks=100, days=400, greater_less_than='')
-    ).ged(2)  # noqa: F841
+    ).ged(2)
 
     assert eval(test_input) == expected

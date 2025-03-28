@@ -25,6 +25,7 @@ from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.specs7 import (
     Enumeration,
+    EnumerationSet,
     ExtensionStructure,
     Structure,
 )
@@ -436,8 +437,17 @@ class BaseStructure:
         self.permitted: list[str] = Structure[self.key][Default.YAML_PERMITTED]
         self.required: list[str] = Structure[self.key][Default.YAML_REQUIRED]
         self.single: list[str] = Structure[self.key][Default.YAML_SINGULAR]
-        self.enums: list[str] = Structure[self.key][Default.YAML_ENUMS]
-        if len(self.enums) > 0 and isinstance(self.value, str):
+        self.enum_key: str = Default.EMPTY
+        self.enum_tags: list[str] = []
+        if (
+            Default.YAML_ENUM_KEY in Structure[self.key]
+            and Structure[self.key][Default.YAML_ENUM_KEY] != Default.EMPTY
+        ):
+            self.enum_key = Structure[self.key][Default.YAML_ENUM_KEY]
+            self.enum_tags = EnumerationSet[self.enum_key][
+                Default.YAML_ENUM_TAGS
+            ]
+        if len(self.enum_tags) > 0 and isinstance(self.value, str):
             self.value = self.value.upper()
             self.code_value = f"'{self.value}'"
         self.payload: str | None = Structure[self.key][Default.YAML_PAYLOAD]
@@ -524,10 +534,10 @@ class BaseStructure:
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
                 for value in self.value.split(','):
-                    if value.strip() not in self.enums:
+                    if value.strip() not in self.enum_tags:
                         raise ValueError(
                             Msg.NOT_VALID_ENUM.format(
-                                self.value, self.enums, self.class_name
+                                self.value, self.enum_tags, self.class_name
                             )
                         )
             case 'https://gedcom.io/terms/v7/type-Enum':
@@ -535,10 +545,10 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if self.value not in self.enums:
+                if self.value not in self.enum_tags:
                     raise ValueError(
                         Msg.NOT_VALID_ENUM.format(
-                            self.value, self.enums, self.class_name
+                            self.value, self.enum_tags, self.class_name
                         )
                     )
             case '@<https://gedcom.io/terms/v7/record-INDI>@':
@@ -832,7 +842,6 @@ class BaseStructure:
                 f'{Default.CODE_CLASS}.RecordSnote',
                 f'{Default.CODE_CLASS}.RecordSour',
                 f'{Default.CODE_CLASS}.RecordSubm',
-                f'{Default.CODE_CLASS}.Trlr',
             ]:
                 level = 0
 
@@ -1054,12 +1063,12 @@ class Ext(BaseStructure):
                 for yamlkey, yamlvalue in Enumeration.items():  # noqa: B007
                     if enumset in yamlvalue[Default.YAML_VALUE_OF]:
                         enums.append(yamlvalue[Default.YAML_STANDARD_TAG])
-            yamldict[Default.YAML_ENUMS] = enums
+            yamldict[Default.YAML_ENUM_TAGS] = enums
             self.tag = yamldict[Default.YAML_EXTENSION_TAGS][0]
             self.permitted = yamldict[Default.YAML_PERMITTED]
             self.required = yamldict[Default.YAML_REQUIRED]
             self.single = yamldict[Default.YAML_SINGULAR]
-            self.enums = yamldict[Default.YAML_ENUMS]
+            self.enums = yamldict[Default.YAML_ENUM_TAGS]
             self.payload = yamldict[Default.YAML_PAYLOAD]
         else:
             self.tag = ExtensionStructure[self.key][
@@ -1070,7 +1079,7 @@ class Ext(BaseStructure):
             ]
             self.required = ExtensionStructure[self.key][Default.YAML_REQUIRED]
             self.single = ExtensionStructure[self.key][Default.YAML_SINGULAR]
-            self.enums = ExtensionStructure[self.key][Default.YAML_ENUMS]
+            self.enums = ExtensionStructure[self.key][Default.YAML_ENUM_TAGS]
             self.payload = ExtensionStructure[self.key][Default.YAML_PAYLOAD]
             # self.class_name: str = (
             #     self.key.title().replace('_', '').replace('-', '')

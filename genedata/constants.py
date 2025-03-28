@@ -153,6 +153,7 @@ class Default:
     TIME_UTC: bool = False
     TOP: int = 0
     TRAILER: str = '0 TRLR'
+    TRLR: str = 'TRLR'
     UNDERLINE: str = '_'
     URL_CALENDAR: str = 'calendar/standard/'
     URL_CALENDAR_PREFIX: str = 'cal-'
@@ -195,7 +196,8 @@ class Default:
     YAML_DOCUMENT_END_MARKER: str = '...'
     YAML_DOCUMENTATION: str = 'documentation'
     YAML_ENUMERATION_SET: str = 'enumeration set'
-    YAML_ENUMS: str = 'enums'
+    YAML_ENUM_KEY: str = 'enum key'
+    YAML_ENUM_TAGS: str = 'enum tags'
     YAML_ENUMERATION_VALUES: str = 'enumeration values'
     YAML_EPOCHS: str = 'epochs'
     YAML_EXTENSION_TAGS: str = 'extension tags'

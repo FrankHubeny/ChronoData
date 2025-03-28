@@ -18,7 +18,8 @@ import re
 
 import pytest
 
-from genedata.classes7 import FamilyXref, FamWife, IndividualXref, Lati, Phrase
+import genedata.classes7 as gc
+from genedata.build import Genealogy
 from genedata.messages import Msg
 
 # 1. Validate: Exercise all validation checks.
@@ -27,22 +28,25 @@ from genedata.messages import Msg
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, [Phrase('indi')])
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, [gc.Phrase('indi')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, Phrase('indi'))
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, gc.Phrase('indi'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi)
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi)
     assert m.validate()
 
 
@@ -51,8 +55,9 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, [Phrase('indi'), Lati('N30.0')])
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, [gc.Phrase('indi'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -70,8 +75,9 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, [Phrase('indi'), Phrase('friend2')])
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, [gc.Phrase('indi'), gc.Phrase('friend2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
     ):
@@ -83,7 +89,7 @@ def test_phrase_only_one() -> None:
 
 def test_bad_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = FamWife('indi')  # type: ignore[arg-type]
+    m = gc.FamWife('indi')  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -95,8 +101,9 @@ def test_bad_xref() -> None:
 
 def test_bad_other_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    fam = FamilyXref('@2@')
-    m = FamWife(fam)  # type: ignore[arg-type]
+    g = Genealogy('test')
+    fam = g.family_xref('2')
+    m = gc.FamWife(fam)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -111,22 +118,25 @@ def test_bad_other_xref() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, Phrase('proven'))
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, gc.Phrase('proven'))
     assert m.ged(1) == '1 WIFE @1@\n2 PHRASE proven\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, [Phrase('proven')])
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, [gc.Phrase('proven')])
     assert m.ged(1) == '1 WIFE @1@\n2 PHRASE proven\n'
 
 
 def test_ged_no_sub() -> None:
     """Illustrate the standard use of the class."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi)
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi)
     assert m.ged(1) == '1 WIFE @1@\n'
 
 
@@ -135,20 +145,23 @@ def test_ged_no_sub() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, Phrase('proven'))
-    assert m.code() == "\nFamWife(IndividualXref('@1@'), Phrase('proven'))"
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, gc.Phrase('proven'))
+    assert m.code() == "\ngc.FamWife(IndividualXref('@1@'), gc.Phrase('proven'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi, [Phrase('proven')])
-    assert m.code() == "\nFamWife(IndividualXref('@1@'), Phrase('proven'))"
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi, [gc.Phrase('proven')])
+    assert m.code() == "\ngc.FamWife(IndividualXref('@1@'),\n    [\n        gc.Phrase('proven'),\n    ]\n)"
 
 
 def test_code_no_sub() -> None:
     """Illustrate code running."""
-    indi = IndividualXref('@1@')
-    m = FamWife(indi)
-    assert m.code() == "\nFamWife(IndividualXref('@1@'))"
+    g = Genealogy('test')
+    indi = g.individual_xref('1')
+    m = gc.FamWife(indi)
+    assert m.code() == "\ngc.FamWife(IndividualXref('@1@'))"

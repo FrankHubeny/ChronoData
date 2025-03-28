@@ -54,20 +54,8 @@ import re
 
 import pytest
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    # Ext,
-    File,
-    Form,
-    Name,
-    RecordFam,
-    RecordIndi,
-    RecordObje,
-    RecordRepo,
-    RecordSnote,
-    RecordSour,
-    RecordSubm,
-)
 from genedata.messages import Msg
 
 # 1. FamilyXref
@@ -86,7 +74,7 @@ def test_good_family_record() -> None:
     """Instantiate a minimal RecordFam."""
     g = Genealogy('test')
     fam = g.family_xref('fam')
-    m = RecordFam(fam)
+    m = gc.RecordFam(fam)
     assert m.ged() == '0 @FAM@ FAM\n'
 
 
@@ -97,8 +85,8 @@ def test_family_record_code() -> None:
     """Generate the code to run the minimal RecordFam."""
     g = Genealogy('test')
     fam = g.family_xref('fam')
-    m = RecordFam(fam)
-    assert m.code() == "\nRecordFam(FamilyXref('@FAM@'))"
+    m = gc.RecordFam(fam)
+    assert m.code() == "\ngc.RecordFam(FamilyXref('@FAM@'))"
 
 
 #     d. Exceptions raised
@@ -108,7 +96,7 @@ def test_bad_family_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordFam(indi)  # type: ignore[arg-type]
+    m = gc.RecordFam(indi)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.NOT_FAMILY_XREF.format(str(m.value), m.class_name)),
@@ -132,7 +120,7 @@ def test_good_individual_record() -> None:
     """Instantiate a minimal RecordIndi."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordIndi(indi)
+    m = gc.RecordIndi(indi)
     assert m.ged() == '0 @INDI@ INDI\n'
 
 
@@ -143,8 +131,8 @@ def test_individual_record_code() -> None:
     """Generate the code to run the minimal RecordIndi."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordIndi(indi)
-    assert m.code() == "\nRecordIndi(IndividualXref('@INDI@'))"
+    m = gc.RecordIndi(indi)
+    assert m.code() == "\ngc.RecordIndi(IndividualXref('@INDI@'))"
 
 
 #     d. Exceptions raised
@@ -154,7 +142,7 @@ def test_bad_individual_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     fam = g.family_xref('fam')
-    m = RecordIndi(fam)  # type: ignore[arg-type]
+    m = gc.RecordIndi(fam)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -180,7 +168,7 @@ def test_good_multimedia_record() -> None:
     """Instantiate a minimal RecordObje."""
     g = Genealogy('test')
     obje = g.multimedia_xref('obje')
-    m = RecordObje(obje, subs=File('a file', Form('text/html')))
+    m = gc.RecordObje(obje, subs=gc.File('a file', gc.Form('text/html')))
     assert m.ged() == '0 @OBJE@ OBJE\n1 FILE a file\n2 FORM text/html\n'
 
 
@@ -191,10 +179,10 @@ def test_multimedia_record_code() -> None:
     """Generate the code to run the minimal RecordObje."""
     g = Genealogy('test')
     obje = g.multimedia_xref('obje')
-    m = RecordObje(obje, subs=File('a file', Form('text/html')))
+    m = gc.RecordObje(obje, subs=gc.File('a file', gc.Form('text/html')))
     assert (
         m.code()
-        == "\nRecordObje(MultimediaXref('@OBJE@'), File('a file', Form('text/html')))"
+        == "\ngc.RecordObje(MultimediaXref('@OBJE@'), gc.File('a file', gc.Form('text/html')))"
     )
 
 
@@ -205,7 +193,7 @@ def test_bad_multimedia_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordObje(indi, subs=File('a file', Form('text/html')))  # type: ignore[arg-type]
+    m = gc.RecordObje(indi, subs=gc.File('a file', gc.Form('text/html')))  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -231,7 +219,7 @@ def test_good_repository_record() -> None:
     """Instantiate a minimal RecordRepo."""
     g = Genealogy('test')
     repo = g.repository_xref('repo')
-    m = RecordRepo(repo, Name('my name'))
+    m = gc.RecordRepo(repo, gc.Name('my name'))
     assert m.ged() == '0 @REPO@ REPO\n1 NAME my name\n'
 
 
@@ -242,8 +230,8 @@ def test_repository_record_code() -> None:
     """Generate the code to run the minimal RecordRepo."""
     g = Genealogy('test')
     repo = g.repository_xref('repo')
-    m = RecordRepo(repo, subs=Name('my name'))
-    assert m.code() == "\nRecordRepo(RepositoryXref('@REPO@'), Name('my name'))"
+    m = gc.RecordRepo(repo, subs=gc.Name('my name'))
+    assert m.code() == "\ngc.RecordRepo(RepositoryXref('@REPO@'), gc.Name('my name'))"
 
 
 #     d. Exceptions raised
@@ -253,7 +241,7 @@ def test_bad_repository_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordRepo(indi, subs=Name('my name'))  # type: ignore[arg-type]
+    m = gc.RecordRepo(indi, subs=gc.Name('my name'))  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -279,7 +267,7 @@ def test_good_shared_note_record() -> None:
     """Instantiate a minimal RecordSnote."""
     g = Genealogy('test')
     snote = g.shared_note_xref('snote', text='A shared note.')
-    m = RecordSnote(snote)
+    m = gc.RecordSnote(snote)
     assert m.ged() == '0 @SNOTE@ SNOTE A shared note.\n'
 
 
@@ -290,10 +278,10 @@ def test_shared_note_record_code() -> None:
     """Generate the code to run the minimal RecordSnote."""
     g = Genealogy('test')
     snote = g.shared_note_xref('snote', text='A shared note.')
-    m = RecordSnote(snote)
+    m = gc.RecordSnote(snote)
     assert (
         m.code()
-        == "\nRecordSnote(SharedNoteXref('@SNOTE@', text='A shared note.'))"
+        == "\ngc.RecordSnote(SharedNoteXref('@SNOTE@', 'A shared note.'))"
     )
 
 
@@ -304,7 +292,7 @@ def test_bad_shared_note_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordSnote(indi)  # type: ignore[arg-type]
+    m = gc.RecordSnote(indi)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -330,7 +318,7 @@ def test_good_source_record() -> None:
     """Instantiate a minimal RecordSour."""
     g = Genealogy('test')
     sour = g.source_xref('sour')
-    m = RecordSour(sour)
+    m = gc.RecordSour(sour)
     assert m.ged() == '0 @SOUR@ SOUR\n'
 
 
@@ -341,8 +329,8 @@ def test_source_record_code() -> None:
     """Generate the code to run the minimal RecordSour."""
     g = Genealogy('test')
     sour = g.source_xref('sour')
-    m = RecordSour(sour)
-    assert m.code() == "\nRecordSour(SourceXref('@SOUR@'))"
+    m = gc.RecordSour(sour)
+    assert m.code() == "\ngc.RecordSour(SourceXref('@SOUR@'))"
 
 
 #     d. Exceptions raised
@@ -352,7 +340,7 @@ def test_bad_source_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordSour(indi)  # type: ignore[arg-type]
+    m = gc.RecordSour(indi)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=Msg.NOT_SOURCE_XREF.format(str(m.value), m.class_name),
@@ -376,7 +364,7 @@ def test_good_submitter_record() -> None:
     """Instantiate a minimal RecordSubm."""
     g = Genealogy('test')
     subm = g.submitter_xref('subm')
-    m = RecordSubm(subm, Name('my name'))
+    m = gc.RecordSubm(subm, gc.Name('my name'))
     assert m.ged() == '0 @SUBM@ SUBM\n1 NAME my name\n'
 
 
@@ -387,8 +375,8 @@ def test_submitter_record_code() -> None:
     """Generate the code to run the minimal RecordSubm."""
     g = Genealogy('test')
     subm = g.submitter_xref('subm')
-    m = RecordSubm(subm, Name('my name'))
-    assert m.code() == "\nRecordSubm(SubmitterXref('@SUBM@'), Name('my name'))"
+    m = gc.RecordSubm(subm, gc.Name('my name'))
+    assert m.code() == "\ngc.RecordSubm(SubmitterXref('@SUBM@'), gc.Name('my name'))"
 
 
 #     d. Exceptions raised
@@ -398,7 +386,7 @@ def test_bad_submitter_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     g = Genealogy('test')
     indi = g.individual_xref('indi')
-    m = RecordSubm(indi, Name('my name'))  # type: ignore[arg-type]
+    m = gc.RecordSubm(indi, gc.Name('my name'))  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=Msg.NOT_SUBMITTER_XREF.format(str(m.value), m.class_name),

@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from genedata.classes7 import FamcStat, Lati, Phrase
+import genedata.classes7 as gc
 from genedata.messages import Msg
 
 # 1. Validate: Exercise all validation checks.
@@ -27,19 +27,19 @@ from genedata.messages import Msg
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
-    m = FamcStat('proven', [Phrase('proven')])
+    m = gc.FamcStat('proven', [gc.Phrase('proven')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
-    m = FamcStat('PROVEN', Phrase('proven'))
+    m = gc.FamcStat('PROVEN', gc.Phrase('proven'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
-    m = FamcStat('Proven')
+    m = gc.FamcStat('Proven')
     assert m.validate()
 
 
@@ -48,7 +48,7 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = FamcStat('PROVEN', [Phrase('proven'), Lati('N30.0')])
+    m = gc.FamcStat('PROVEN', [gc.Phrase('proven'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -66,7 +66,7 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
-    m = FamcStat('PROVEN', [Phrase('proven'), Phrase('friend2')])
+    m = gc.FamcStat('PROVEN', [gc.Phrase('proven'), gc.Phrase('friend2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
     ):
@@ -78,11 +78,11 @@ def test_phrase_only_one() -> None:
 
 def test_bad_enum() -> None:
     """Check that the wrong enumeration is caught."""
-    m = FamcStat('%$@')
+    m = gc.FamcStat('%$@')
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_VALID_ENUM.format('%$@', m.enums, m.class_name)
+            Msg.NOT_VALID_ENUM.format('%$@', m.enum_tags, m.class_name)
         ),
     ):
         m.validate()
@@ -93,13 +93,13 @@ def test_bad_enum() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
-    m = FamcStat('Proven', Phrase('proven'))
+    m = gc.FamcStat('Proven', gc.Phrase('proven'))
     assert m.ged(1) == '1 STAT PROVEN\n2 PHRASE proven\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
-    m = FamcStat('Proven', [Phrase('proven')])
+    m = gc.FamcStat('Proven', [gc.Phrase('proven')])
     assert m.ged(1) == '1 STAT PROVEN\n2 PHRASE proven\n'
 
 
@@ -108,11 +108,11 @@ def test_ged_with_list() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    m = FamcStat('PROven', Phrase('proven'))
-    assert m.code() == "\nFamcStat('PROVEN', Phrase('proven'))"
+    m = gc.FamcStat('PROven', gc.Phrase('proven'))
+    assert m.code() == "\ngc.FamcStat('PROVEN', gc.Phrase('proven'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    m = FamcStat('PROVEN', [Phrase('proven')])
-    assert m.code() == "\nFamcStat('PROVEN', Phrase('proven'))"
+    m = gc.FamcStat('PROVEN', [gc.Phrase('proven')])
+    assert m.code() == "\ngc.FamcStat('PROVEN',\n    [\n        gc.Phrase('proven'),\n    ]\n)"

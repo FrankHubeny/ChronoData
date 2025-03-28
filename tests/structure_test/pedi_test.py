@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from genedata.classes7 import Lati, Pedi, Phrase
+import genedata.classes7 as gc
 from genedata.messages import Msg
 
 # 1. Validate: Exercise all validation checks.
@@ -27,19 +27,19 @@ from genedata.messages import Msg
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure."""
-    m = Pedi('BIRTH', [Phrase('birth pedigree')])
+    m = gc.Pedi('BIRTH', [gc.Phrase('birth pedigree')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
-    m = Pedi('BIRTH', Phrase('birth pedigree'))
+    m = gc.Pedi('BIRTH', gc.Phrase('birth pedigree'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
-    m = Pedi('BIRTH')
+    m = gc.Pedi('BIRTH')
     assert m.validate()
 
 
@@ -48,7 +48,7 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = Pedi('BIRTH', [Phrase('birth pedigree'), Lati('N30.0')])
+    m = gc.Pedi('BIRTH', [gc.Phrase('birth pedigree'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -66,7 +66,7 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Pedi."""
-    m = Pedi('BIRTH', [Phrase('birth pedigree'), Phrase('birth pedigree2')])
+    m = gc.Pedi('BIRTH', [gc.Phrase('birth pedigree'), gc.Phrase('birth pedigree2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
     ):
@@ -78,11 +78,11 @@ def test_phrase_only_one() -> None:
 
 def test_bad_enum() -> None:
     """Check that the wrong enumeration is caught."""
-    m = Pedi('abc')
+    m = gc.Pedi('abc')
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)
+            Msg.NOT_VALID_ENUM.format('ABC', m.enum_tags, m.class_name)
         ),
     ):
         m.validate()
@@ -93,13 +93,13 @@ def test_bad_enum() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
-    m = Pedi('BIRTH', Phrase('birth pedigree'))
+    m = gc.Pedi('BIRTH', gc.Phrase('birth pedigree'))
     assert m.ged(1) == '1 PEDI BIRTH\n2 PHRASE birth pedigree\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
-    m = Pedi('BIRTH', [Phrase('birth pedigree')])
+    m = gc.Pedi('BIRTH', [gc.Phrase('birth pedigree')])
     assert m.ged(1) == '1 PEDI BIRTH\n2 PHRASE birth pedigree\n'
 
 
@@ -108,11 +108,11 @@ def test_ged_with_list() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    m = Pedi('BIRTH', Phrase('birth pedigree'))
-    assert m.code() == "\nPedi('BIRTH', Phrase('birth pedigree'))"
+    m = gc.Pedi('BIRTH', gc.Phrase('birth pedigree'))
+    assert m.code() == "\ngc.Pedi('BIRTH', gc.Phrase('birth pedigree'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    m = Pedi('BIRTH', [Phrase('birth pedigree')])
-    assert m.code() == "\nPedi('BIRTH', Phrase('birth pedigree'))"
+    m = gc.Pedi('BIRTH', [gc.Phrase('birth pedigree')])
+    assert m.code() == "\ngc.Pedi('BIRTH',\n    [\n        gc.Phrase('birth pedigree'),\n    ]\n)"

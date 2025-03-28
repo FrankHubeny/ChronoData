@@ -18,8 +18,9 @@ import re
 
 import pytest
 
-from genedata.classes7 import Alia, FamilyXref, IndividualXref, Lati, Phrase
+import genedata.classes7 as gc
 from genedata.messages import Msg
+from genedata.structure import FamilyXref, IndividualXref
 
 # 1. Validate: Exercise all validation checks.
 #     a. Good run.
@@ -28,21 +29,21 @@ from genedata.messages import Msg
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure with list using lower case."""
     indi = IndividualXref('@1@')
-    m = Alia(indi, [Phrase('indi')])
+    m = gc.Alia(indi, [gc.Phrase('indi')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
     indi = IndividualXref('@1@')
-    m = Alia(indi, Phrase('indi'))
+    m = gc.Alia(indi, gc.Phrase('indi'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
     indi = IndividualXref('@1@')
-    m = Alia(indi)
+    m = gc.Alia(indi)
     assert m.validate()
 
 
@@ -51,7 +52,7 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = Alia('HUSB', [Phrase('indi'), Lati('N30.0')])
+    m = gc.Alia('HUSB', [gc.Phrase('indi'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -70,7 +71,7 @@ def test_not_permitted() -> None:
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by Role."""
     indi = IndividualXref('@1@')
-    m = Alia(indi, [Phrase('indi'), Phrase('friend2')])
+    m = gc.Alia(indi, [gc.Phrase('indi'), gc.Phrase('friend2')])
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
     ):
@@ -82,7 +83,7 @@ def test_phrase_only_one() -> None:
 
 def test_bad_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
-    m = Alia('indi')
+    m = gc.Alia('indi')
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -95,7 +96,7 @@ def test_bad_xref() -> None:
 def test_bad_other_xref() -> None:
     """Check that the wrong cross reference identifier is caught."""
     fam = FamilyXref('@2@')
-    m = Alia(fam)
+    m = gc.Alia(fam)
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -111,14 +112,14 @@ def test_bad_other_xref() -> None:
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
     indi = IndividualXref('@1@')
-    m = Alia(indi, Phrase('proven'))
+    m = gc.Alia(indi, gc.Phrase('proven'))
     assert m.ged(1) == '1 ALIA @1@\n2 PHRASE proven\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
     indi = IndividualXref('@1@')
-    m = Alia(indi, [Phrase('proven')])
+    m = gc.Alia(indi, [gc.Phrase('proven')])
     assert m.ged(1) == '1 ALIA @1@\n2 PHRASE proven\n'
 
 
@@ -127,13 +128,11 @@ def test_ged_with_list() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    indi = IndividualXref('@1@')
-    m = Alia(indi, Phrase('proven'))
-    assert m.code() == "\nAlia(IndividualXref('@1@'), Phrase('proven'))"
+    m = gc.Alia(IndividualXref('@1@'), gc.Phrase('proven'))
+    assert m.code() == "\ngc.Alia(IndividualXref('@1@'), gc.Phrase('proven'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    indi = IndividualXref('@1@')
-    m = Alia(indi, [Phrase('proven')])
-    assert m.code() == "\nAlia(IndividualXref('@1@'), Phrase('proven'))"
+    m = gc.Alia(IndividualXref('@1@'), [gc.Phrase('proven')])
+    assert m.code() == "\ngc.Alia(IndividualXref('@1@'),\n    [\n        gc.Phrase('proven'),\n    ]\n)"

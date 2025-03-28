@@ -8,7 +8,7 @@ The specifications for this module are from the
 [GEDCOM files](https://github.com/FamilySearch/GEDCOM-registries) for version 7.0.
 '''
 
-__all__ = [
+__all__ = [    # noqa: RUF022
     'Abbr',
     'Addr',
     'AdopFamc',
@@ -40,7 +40,6 @@ __all__ = [
     'City',
     'Conf',
     'Conl',
-    'Cont',
     'Copr',
     'Corp',
     'Crea',
@@ -181,7 +180,6 @@ __all__ = [
     'Time',
     'Titl',
     'Top',
-    'Trlr',
     'Type',
     'Uid',
     'Vers',
@@ -197,7 +195,6 @@ from typing import Any
 from genedata.messages import Msg
 from genedata.structure import (
     BaseStructure,
-    ExtensionXref,
     FamilyXref,
     IndividualXref,
     MultimediaXref,
@@ -2487,7 +2484,53 @@ class DataEven(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/DATA            | Many     | No       | Data         |
 
-    Enumerations:
+    Enumeration Values:
+    - [CENS](https://gedcom.io/terms/v7/enum-CENS)
+    - [NCHI](https://gedcom.io/terms/v7/enum-NCHI)
+    - [RESI](https://gedcom.io/terms/v7/enum-RESI)
+    - [FACT](https://gedcom.io/terms/v7/enum-FACT)
+    - [EVEN](https://gedcom.io/terms/v7/enum-EVEN)
+    - [ADOP](https://gedcom.io/terms/v7/ADOP)
+    - [BAPM](https://gedcom.io/terms/v7/BAPM)
+    - [BARM](https://gedcom.io/terms/v7/BARM)
+    - [BASM](https://gedcom.io/terms/v7/BASM)
+    - [BIRT](https://gedcom.io/terms/v7/BIRT)
+    - [BLES](https://gedcom.io/terms/v7/BLES)
+    - [BURI](https://gedcom.io/terms/v7/BURI)
+    - [CHR](https://gedcom.io/terms/v7/CHR)
+    - [CHRA](https://gedcom.io/terms/v7/CHRA)
+    - [CONF](https://gedcom.io/terms/v7/CONF)
+    - [CREM](https://gedcom.io/terms/v7/CREM)
+    - [DEAT](https://gedcom.io/terms/v7/DEAT)
+    - [EMIG](https://gedcom.io/terms/v7/EMIG)
+    - [FCOM](https://gedcom.io/terms/v7/FCOM)
+    - [GRAD](https://gedcom.io/terms/v7/GRAD)
+    - [IMMI](https://gedcom.io/terms/v7/IMMI)
+    - [NATU](https://gedcom.io/terms/v7/NATU)
+    - [ORDN](https://gedcom.io/terms/v7/ORDN)
+    - [PROB](https://gedcom.io/terms/v7/PROB)
+    - [RETI](https://gedcom.io/terms/v7/RETI)
+    - [WILL](https://gedcom.io/terms/v7/WILL)
+    - [ANUL](https://gedcom.io/terms/v7/ANUL)
+    - [DIV](https://gedcom.io/terms/v7/DIV)
+    - [DIVF](https://gedcom.io/terms/v7/DIVF)
+    - [ENGA](https://gedcom.io/terms/v7/ENGA)
+    - [MARB](https://gedcom.io/terms/v7/MARB)
+    - [MARC](https://gedcom.io/terms/v7/MARC)
+    - [MARL](https://gedcom.io/terms/v7/MARL)
+    - [MARR](https://gedcom.io/terms/v7/MARR)
+    - [MARS](https://gedcom.io/terms/v7/MARS)
+    - [CAST](https://gedcom.io/terms/v7/CAST)
+    - [DSCR](https://gedcom.io/terms/v7/DSCR)
+    - [EDUC](https://gedcom.io/terms/v7/EDUC)
+    - [IDNO](https://gedcom.io/terms/v7/IDNO)
+    - [NATI](https://gedcom.io/terms/v7/NATI)
+    - [NMR](https://gedcom.io/terms/v7/NMR)
+    - [OCCU](https://gedcom.io/terms/v7/OCCU)
+    - [PROP](https://gedcom.io/terms/v7/PROP)
+    - [RELI](https://gedcom.io/terms/v7/INDI-RELI)
+    - [SSN](https://gedcom.io/terms/v7/SSN)
+    - [TITL](https://gedcom.io/terms/v7/INDI-TITL)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
@@ -3901,7 +3944,10 @@ class FamcAdop(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/ADOP-FAMC       | Only One | No       | AdopFamc     |
 
-    Enumerations:
+    Enumeration Values:
+    - [HUSB](https://gedcom.io/terms/v7/enum-ADOP-HUSB)
+    - [WIFE](https://gedcom.io/terms/v7/enum-ADOP-WIFE)
+    - [BOTH](https://gedcom.io/terms/v7/enum-BOTH)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -3943,7 +3989,10 @@ class FamcStat(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
 
-    Enumerations:
+    Enumeration Values:
+    - [CHALLENGED](https://gedcom.io/terms/v7/enum-CHALLENGED)
+    - [DISPROVEN](https://gedcom.io/terms/v7/enum-DISPROVEN)
+    - [PROVEN](https://gedcom.io/terms/v7/enum-PROVEN)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -6618,7 +6667,21 @@ class Medi(BaseStructure):
     | https://gedcom.io/terms/v7/CALN            | Only One | No       | Caln         |
     | https://gedcom.io/terms/v7/FORM            | Only One | No       | Form         |
 
-    Enumerations:
+    Enumeration Values:
+    - [AUDIO](https://gedcom.io/terms/v7/enum-AUDIO)
+    - [BOOK](https://gedcom.io/terms/v7/enum-BOOK)
+    - [CARD](https://gedcom.io/terms/v7/enum-CARD)
+    - [ELECTRONIC](https://gedcom.io/terms/v7/enum-ELECTRONIC)
+    - [FICHE](https://gedcom.io/terms/v7/enum-FICHE)
+    - [FILM](https://gedcom.io/terms/v7/enum-FILM)
+    - [MAGAZINE](https://gedcom.io/terms/v7/enum-MAGAZINE)
+    - [MANUSCRIPT](https://gedcom.io/terms/v7/enum-MANUSCRIPT)
+    - [MAP](https://gedcom.io/terms/v7/enum-MAP)
+    - [NEWSPAPER](https://gedcom.io/terms/v7/enum-NEWSPAPER)
+    - [PHOTO](https://gedcom.io/terms/v7/enum-PHOTO)
+    - [TOMBSTONE](https://gedcom.io/terms/v7/enum-TOMBSTONE)
+    - [VIDEO](https://gedcom.io/terms/v7/enum-VIDEO)
+    - [OTHER](https://gedcom.io/terms/v7/enum-OTHER)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -6861,7 +6924,14 @@ class NameType(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/INDI-NAME       | Only One | No       | IndiName     |
 
-    Enumerations:
+    Enumeration Values:
+    - [AKA](https://gedcom.io/terms/v7/enum-AKA)
+    - [BIRTH](https://gedcom.io/terms/v7/enum-BIRTH)
+    - [IMMIGRANT](https://gedcom.io/terms/v7/enum-IMMIGRANT)
+    - [MAIDEN](https://gedcom.io/terms/v7/enum-MAIDEN)
+    - [MARRIED](https://gedcom.io/terms/v7/enum-MARRIED)
+    - [PROFESSIONAL](https://gedcom.io/terms/v7/enum-PROFESSIONAL)
+    - [OTHER](https://gedcom.io/terms/v7/enum-OTHER)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -7253,7 +7323,38 @@ class No(BaseStructure):
     | https://gedcom.io/terms/v7/record-FAM      | Many     | No       | RecordFam    |
     | https://gedcom.io/terms/v7/record-INDI     | Many     | No       | RecordIndi   |
 
-    Enumerations:
+    Enumeration Values:
+    - [CENS](https://gedcom.io/terms/v7/enum-CENS)
+    - [ADOP](https://gedcom.io/terms/v7/ADOP)
+    - [BAPM](https://gedcom.io/terms/v7/BAPM)
+    - [BARM](https://gedcom.io/terms/v7/BARM)
+    - [BASM](https://gedcom.io/terms/v7/BASM)
+    - [BIRT](https://gedcom.io/terms/v7/BIRT)
+    - [BLES](https://gedcom.io/terms/v7/BLES)
+    - [BURI](https://gedcom.io/terms/v7/BURI)
+    - [CHR](https://gedcom.io/terms/v7/CHR)
+    - [CHRA](https://gedcom.io/terms/v7/CHRA)
+    - [CONF](https://gedcom.io/terms/v7/CONF)
+    - [CREM](https://gedcom.io/terms/v7/CREM)
+    - [DEAT](https://gedcom.io/terms/v7/DEAT)
+    - [EMIG](https://gedcom.io/terms/v7/EMIG)
+    - [FCOM](https://gedcom.io/terms/v7/FCOM)
+    - [GRAD](https://gedcom.io/terms/v7/GRAD)
+    - [IMMI](https://gedcom.io/terms/v7/IMMI)
+    - [NATU](https://gedcom.io/terms/v7/NATU)
+    - [ORDN](https://gedcom.io/terms/v7/ORDN)
+    - [PROB](https://gedcom.io/terms/v7/PROB)
+    - [RETI](https://gedcom.io/terms/v7/RETI)
+    - [WILL](https://gedcom.io/terms/v7/WILL)
+    - [ANUL](https://gedcom.io/terms/v7/ANUL)
+    - [DIV](https://gedcom.io/terms/v7/DIV)
+    - [DIVF](https://gedcom.io/terms/v7/DIVF)
+    - [ENGA](https://gedcom.io/terms/v7/ENGA)
+    - [MARB](https://gedcom.io/terms/v7/MARB)
+    - [MARC](https://gedcom.io/terms/v7/MARC)
+    - [MARL](https://gedcom.io/terms/v7/MARL)
+    - [MARR](https://gedcom.io/terms/v7/MARR)
+    - [MARS](https://gedcom.io/terms/v7/MARS)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -7782,7 +7883,19 @@ class OrdStat(BaseStructure):
     | https://gedcom.io/terms/v7/SLGC            | Only One | No       | Slgc         |
     | https://gedcom.io/terms/v7/SLGS            | Only One | No       | Slgs         |
 
-    Enumerations:
+    Enumeration Values:
+    - [BIC](https://gedcom.io/terms/v7/enum-BIC)
+    - [CANCELED](https://gedcom.io/terms/v7/enum-CANCELED)
+    - [CHILD](https://gedcom.io/terms/v7/enum-CHILD)
+    - [COMPLETED](https://gedcom.io/terms/v7/enum-COMPLETED)
+    - [EXCLUDED](https://gedcom.io/terms/v7/enum-EXCLUDED)
+    - [DNS](https://gedcom.io/terms/v7/enum-DNS)
+    - [DNS_CAN](https://gedcom.io/terms/v7/enum-DNS_CAN)
+    - [INFANT](https://gedcom.io/terms/v7/enum-INFANT)
+    - [PRE_1970](https://gedcom.io/terms/v7/enum-PRE_1970)
+    - [STILLBORN](https://gedcom.io/terms/v7/enum-STILLBORN)
+    - [SUBMITTED](https://gedcom.io/terms/v7/enum-SUBMITTED)
+    - [UNCLEARED](https://gedcom.io/terms/v7/enum-UNCLEARED)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -7994,7 +8107,12 @@ class Pedi(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/INDI-FAMC       | Only One | No       | IndiFamc     |
 
-    Enumerations:
+    Enumeration Values:
+    - [ADOPTED](https://gedcom.io/terms/v7/enum-ADOPTED)
+    - [BIRTH](https://gedcom.io/terms/v7/enum-BIRTH)
+    - [FOSTER](https://gedcom.io/terms/v7/enum-FOSTER)
+    - [SEALING](https://gedcom.io/terms/v7/enum-SEALING)
+    - [OTHER](https://gedcom.io/terms/v7/enum-OTHER)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -8882,7 +9000,11 @@ class Quay(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
 
-    Enumerations:
+    Enumeration Values:
+    - [0](https://gedcom.io/terms/v7/enum-0)
+    - [1](https://gedcom.io/terms/v7/enum-1)
+    - [2](https://gedcom.io/terms/v7/enum-2)
+    - [3](https://gedcom.io/terms/v7/enum-3)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -9810,7 +9932,10 @@ class Resn(BaseStructure):
     | https://gedcom.io/terms/v7/record-INDI     | Only One | No       | RecordIndi   |
     | https://gedcom.io/terms/v7/record-OBJE     | Only One | No       | RecordObje   |
 
-    Enumerations:
+    Enumeration Values:
+    - [CONFIDENTIAL](https://gedcom.io/terms/v7/enum-CONFIDENTIAL)
+    - [LOCKED](https://gedcom.io/terms/v7/enum-LOCKED)
+    - [PRIVACY](https://gedcom.io/terms/v7/enum-PRIVACY)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-List#Enum
@@ -10021,7 +10146,22 @@ class Role(BaseStructure):
     | https://gedcom.io/terms/v7/ASSO            | Only One | Yes      | Asso         |
     | https://gedcom.io/terms/v7/SOUR-EVEN       | Only One | No       | SourEven     |
 
-    Enumerations:
+    Enumeration Values:
+    - [CHIL](https://gedcom.io/terms/v7/enum-CHIL)
+    - [CLERGY](https://gedcom.io/terms/v7/enum-CLERGY)
+    - [FATH](https://gedcom.io/terms/v7/enum-FATH)
+    - [FRIEND](https://gedcom.io/terms/v7/enum-FRIEND)
+    - [GODP](https://gedcom.io/terms/v7/enum-GODP)
+    - [HUSB](https://gedcom.io/terms/v7/enum-HUSB)
+    - [MOTH](https://gedcom.io/terms/v7/enum-MOTH)
+    - [MULTIPLE](https://gedcom.io/terms/v7/enum-MULTIPLE)
+    - [NGHBR](https://gedcom.io/terms/v7/enum-NGHBR)
+    - [OFFICIATOR](https://gedcom.io/terms/v7/enum-OFFICIATOR)
+    - [PARENT](https://gedcom.io/terms/v7/enum-PARENT)
+    - [SPOU](https://gedcom.io/terms/v7/enum-SPOU)
+    - [WIFE](https://gedcom.io/terms/v7/enum-WIFE)
+    - [WITN](https://gedcom.io/terms/v7/enum-WITN)
+    - [OTHER](https://gedcom.io/terms/v7/enum-OTHER)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -10211,7 +10351,11 @@ class Sex(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/record-INDI     | Only One | No       | RecordIndi   |
 
-    Enumerations:
+    Enumeration Values:
+    - [M](https://gedcom.io/terms/v7/enum-M)
+    - [F](https://gedcom.io/terms/v7/enum-F)
+    - [X](https://gedcom.io/terms/v7/enum-X)
+    - [U](https://gedcom.io/terms/v7/enum-U)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -10504,7 +10648,53 @@ class SourEven(BaseStructure):
     | ------------------------------------------ | -------- | -------- | ------------ |
     | https://gedcom.io/terms/v7/SOUR            | Only One | No       | Sour         |
 
-    Enumerations:
+    Enumeration Values:
+    - [CENS](https://gedcom.io/terms/v7/enum-CENS)
+    - [NCHI](https://gedcom.io/terms/v7/enum-NCHI)
+    - [RESI](https://gedcom.io/terms/v7/enum-RESI)
+    - [FACT](https://gedcom.io/terms/v7/enum-FACT)
+    - [EVEN](https://gedcom.io/terms/v7/enum-EVEN)
+    - [ADOP](https://gedcom.io/terms/v7/ADOP)
+    - [BAPM](https://gedcom.io/terms/v7/BAPM)
+    - [BARM](https://gedcom.io/terms/v7/BARM)
+    - [BASM](https://gedcom.io/terms/v7/BASM)
+    - [BIRT](https://gedcom.io/terms/v7/BIRT)
+    - [BLES](https://gedcom.io/terms/v7/BLES)
+    - [BURI](https://gedcom.io/terms/v7/BURI)
+    - [CHR](https://gedcom.io/terms/v7/CHR)
+    - [CHRA](https://gedcom.io/terms/v7/CHRA)
+    - [CONF](https://gedcom.io/terms/v7/CONF)
+    - [CREM](https://gedcom.io/terms/v7/CREM)
+    - [DEAT](https://gedcom.io/terms/v7/DEAT)
+    - [EMIG](https://gedcom.io/terms/v7/EMIG)
+    - [FCOM](https://gedcom.io/terms/v7/FCOM)
+    - [GRAD](https://gedcom.io/terms/v7/GRAD)
+    - [IMMI](https://gedcom.io/terms/v7/IMMI)
+    - [NATU](https://gedcom.io/terms/v7/NATU)
+    - [ORDN](https://gedcom.io/terms/v7/ORDN)
+    - [PROB](https://gedcom.io/terms/v7/PROB)
+    - [RETI](https://gedcom.io/terms/v7/RETI)
+    - [WILL](https://gedcom.io/terms/v7/WILL)
+    - [ANUL](https://gedcom.io/terms/v7/ANUL)
+    - [DIV](https://gedcom.io/terms/v7/DIV)
+    - [DIVF](https://gedcom.io/terms/v7/DIVF)
+    - [ENGA](https://gedcom.io/terms/v7/ENGA)
+    - [MARB](https://gedcom.io/terms/v7/MARB)
+    - [MARC](https://gedcom.io/terms/v7/MARC)
+    - [MARL](https://gedcom.io/terms/v7/MARL)
+    - [MARR](https://gedcom.io/terms/v7/MARR)
+    - [MARS](https://gedcom.io/terms/v7/MARS)
+    - [CAST](https://gedcom.io/terms/v7/CAST)
+    - [DSCR](https://gedcom.io/terms/v7/DSCR)
+    - [EDUC](https://gedcom.io/terms/v7/EDUC)
+    - [IDNO](https://gedcom.io/terms/v7/IDNO)
+    - [NATI](https://gedcom.io/terms/v7/NATI)
+    - [NMR](https://gedcom.io/terms/v7/NMR)
+    - [OCCU](https://gedcom.io/terms/v7/OCCU)
+    - [PROP](https://gedcom.io/terms/v7/PROP)
+    - [RELI](https://gedcom.io/terms/v7/INDI-RELI)
+    - [SSN](https://gedcom.io/terms/v7/SSN)
+    - [TITL](https://gedcom.io/terms/v7/INDI-TITL)
         
     Args:
         value: A value of data type https://gedcom.io/terms/v7/type-Enum
@@ -11157,36 +11347,6 @@ class Top(BaseStructure):
         
     def __init__(self, value: int, subs: Any = None) -> None:
         super().__init__(value, subs, self.key)
-    
-
-class Trlr(BaseStructure):
-    '''Store, validate and format the TRLR structure. 
-    
-    This class was generated by `Construct.generate_class` in the prep module
-    using GEDCOM yaml specification files.  Links were added to the specification 
-    and tables constructed from the yaml files to aid the user of these classes.  
-    DO NOT CHANGE THIS CLASS MANUALLY.  
-
-    
-    GEDCOM Specification:
-    > - Trailer
-    >   A pseudo-structure marking the end of a dataset. See 
-    > - [The Header and
-    >   Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header)
-    >   for more details.
-        
-    Args:
-        subs: A permitted substructure or list of permitted substructures.
-
-    References:
-    - [GEDCOM TRLR Structure](https://gedcom.io/terms/v7/TRLR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
-    '''
-    
-    key: str = 'TRLR'
-        
-    def __init__(self, subs: Any = None) -> None:
-        super().__init__(None, subs, self.key)
     
 
 class Type(BaseStructure):

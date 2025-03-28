@@ -30,7 +30,6 @@ from genedata.classes7 import (
     RecordSnote,
     RecordSour,
     RecordSubm,
-    Trlr,
 )
 from genedata.constants import (
     Config,
@@ -245,7 +244,7 @@ class Genealogy:
         lines = self.record_header.ged()
         for record in self.records:
             lines = ''.join([lines, record.ged()])
-        return ''.join([lines, Trlr().ged()])
+        return ''.join([lines, Default.TRAILER])
 
     def save_ged(self, file_name: str = Default.EMPTY) -> None:
         """Save the ged file constructed by this instance of the Genealogy class."""
@@ -1538,9 +1537,9 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 
             The third example shows the output when the name is to be used as the initial
             part of the identifier.
-            >>> id3 = a.shared_note_xref('SN', '  ')
+            >>> id3 = a.shared_note_xref('SNOTE', '  ')
             >>> print(id3)
-            @SN2@
+            @SNOTE@
 
             The final example shows what happens if we try to assign two different
             records with the same name.  We already have @SN@ so we will try

@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-from genedata.classes7 import Lati, NameType, Phrase
+import genedata.classes7 as gc
 from genedata.messages import Msg
 
 # 1. Validate: Exercise all validation checks.
@@ -27,19 +27,19 @@ from genedata.messages import Msg
 
 def test_good_run_using_list() -> None:
     """Run a successful use of the structure."""
-    m = NameType('AKA', [Phrase('also known as')])
+    m = gc.NameType('AKA', [gc.Phrase('also known as')])
     assert m.validate()
 
 
 def test_good_run_using_single_substructure() -> None:
     """Run a successful use of the structure."""
-    m = NameType('AKA', Phrase('also known as'))
+    m = gc.NameType('AKA', gc.Phrase('also known as'))
     assert m.validate()
 
 
 def test_good_run_no_subs() -> None:
     """Run a successful use of the structure."""
-    m = NameType('AKA')
+    m = gc.NameType('AKA')
     assert m.validate()
 
 
@@ -48,7 +48,7 @@ def test_good_run_no_subs() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = NameType('BIRTH', [Phrase('birth name'), Lati('N30.0')])
+    m = gc.NameType('BIRTH', [gc.Phrase('birth name'), gc.Lati('N30.0')])
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -66,8 +66,8 @@ def test_not_permitted() -> None:
 
 def test_phrase_only_one() -> None:
     """Check that the Phrase substructure can be used only once by NameType."""
-    m = NameType(
-        'MAIDEN', [Phrase('first maiden name'), Phrase('another maiden name')]
+    m = gc.NameType(
+        'MAIDEN', [gc.Phrase('first maiden name'), gc.Phrase('another maiden name')]
     )
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Phrase', m.class_name)
@@ -80,11 +80,11 @@ def test_phrase_only_one() -> None:
 
 def test_bad_enum() -> None:
     """Check that the wrong enumeration is caught."""
-    m = NameType('abc')
+    m = gc.NameType('abc')
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_VALID_ENUM.format('ABC', m.enums, m.class_name)
+            Msg.NOT_VALID_ENUM.format('ABC', m.enum_tags, m.class_name)
         ),
     ):
         m.validate()
@@ -95,13 +95,13 @@ def test_bad_enum() -> None:
 
 def test_ged() -> None:
     """Illustrate the standard use of the class."""
-    m = NameType('BIRTH', Phrase('birth name'))
+    m = gc.NameType('BIRTH', gc.Phrase('birth name'))
     assert m.ged(1) == '1 TYPE BIRTH\n2 PHRASE birth name\n'
 
 
 def test_ged_with_list() -> None:
     """Illustrate the standard use of the class."""
-    m = NameType('BIRTH', [Phrase('birth name')])
+    m = gc.NameType('BIRTH', [gc.Phrase('birth name')])
     assert m.ged(1) == '1 TYPE BIRTH\n2 PHRASE birth name\n'
 
 
@@ -110,11 +110,11 @@ def test_ged_with_list() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    m = NameType('BIRTH', Phrase('birth name'))
-    assert m.code() == "\nNameType('BIRTH', Phrase('birth name'))"
+    m = gc.NameType('BIRTH', gc.Phrase('birth name'))
+    assert m.code() == "\ngc.NameType('BIRTH', gc.Phrase('birth name'))"
 
 
 def test_code_with_list() -> None:
     """Illustrate code running."""
-    m = NameType('BIRTH', [Phrase('birth name')])
-    assert m.code() == "\nNameType('BIRTH', Phrase('birth name'))"
+    m = gc.NameType('BIRTH', [gc.Phrase('birth name')])
+    assert m.code() == "\ngc.NameType('BIRTH',\n    [\n        gc.Phrase('birth name'),\n    ]\n)"
