@@ -37,7 +37,7 @@ from genedata.util import Util
 class Convert:
     """Read and store GEDCOM specification."""
 
-    enumerationset_dict: ClassVar[dict[str, Any]] = {}
+    #enumerationset_dict: ClassVar[dict[str, Any]] = {}
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
@@ -86,19 +86,55 @@ from typing import Any
 
 '''
         return lines
+    
+    @staticmethod
+    def get_enum_tag(value: str) -> str:
+        """Extract the tag from the file name specifying an enumeration tag.
+        
+        This can also be obtained from the `standard tag` key within that file.
+        
+        Example:
+            Suppose the file name is "https://gedcom.io/terms/v7/enum-ADOP-HUSB".
+            This method returns only HUSB as the tag.
+            >>> from genedata.prep import Convert
+            >>> print(Convert.get_enum_tag('"https://gedcom.io/terms/v7/enum-ADOP-HUSB"'))
+            HUSB
+
+            """
+        tag: str = (
+            value[value.rfind(Default.SLASH) + 1 :]
+            .replace(Default.URL_ENUMERATION_PREFIX, Default.EMPTY)
+            .replace(Default.QUOTE_DOUBLE, Default.EMPTY)
+        )
+        if Default.HYPHEN in tag:
+            tag = tag[tag.rfind(Default.HYPHEN) + 1 :]
+        return tag
+    
+    @staticmethod
+    def get_slash(url: str) -> str:
+        """Add a '/' at the end of a string if one is not there already.
+        
+        This makes sure that a directory string ends with a /.
+        
+        Example:
+            Let `abcdefghi` be the name of the directory.
+            >>> from genedata.prep import Convert
+            >>> print(Convert.get_slash('abcdefghi'))
+            abcdefghi/
+
+        """
+        if url[-1] == Default.SLASH:
+            return url
+        return f'{url}{Default.SLASH}'
 
     @staticmethod
     def dictionary(
         url: str,
         base: str,
         prefix: str,
-        class_dict: dict[str, Any] | None = None,
     ) -> str:
         lines: str = Default.BRACE_LEFT
-        if url[-1] == Default.SLASH:
-            directory: str = f'{url}{base}'
-        else:
-            directory = f'{url}{Default.SLASH}{base}'
+        directory: str = f'{Convert.get_slash(url)}{base}'
         p = Path(directory)
         if p.exists():
             for file in p.iterdir():
@@ -110,10 +146,6 @@ from typing import Any
                             Default.URL_STRUCTURE
                             | Default.URL_STRUCTURE_EXTENSION
                         ):
-                            # if base in [
-                            #     Default.URL_STRUCTURE,
-                            #     Default.URL_STRUCTURE_EXTENSION,
-                            # ]:
                             required: list[str] = []
                             single: list[str] = []
                             permitted: list[str] = []
@@ -164,24 +196,12 @@ from typing import Any
                                 .replace(Default.HYPHEN, Default.EMPTY)
                             )
                             yamldict[Default.YAML_KEY] = file.stem
-                            if class_dict is not None:
-                                class_dict = yamldict
                         case Default.URL_ENUMERATION_SET:
                             enum_tags: list[str] = []
                             for tag in yamldict[
                                 Default.YAML_ENUMERATION_VALUES
                             ]:
-                                # enum_tags.append(
-                                #     tag[tag.rfind(Default.SLASH) + 1 :]
-                                #     .replace(
-                                #         Default.URL_ENUMERATION_PREFIX,
-                                #         Default.EMPTY,
-                                #     )
-                                #     .replace(
-                                #         Default.QUOTE_DOUBLE, Default.EMPTY
-                                #     )
-                                # )
-                                enum_tags.append(Construct.get_enum_tag(tag))
+                                enum_tags.append(Convert.get_enum_tag(tag))
                             yamldict[Default.YAML_ENUM_TAGS] = enum_tags
                     lines = f"{lines}{Default.EOL}    '{key}': {yamldict},"
         else:
@@ -192,12 +212,14 @@ from typing import Any
 
     @staticmethod
     def calendar_dictionary(url: str) -> str:
+        """Retrive the calendar dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_CALENDAR, Default.URL_CALENDAR_PREFIX
         )
 
     @staticmethod
     def calendar(url: str) -> str:
+        """Format the calendar dictionary for use in the specs module."""
         return ''.join(
             [
                 'Calendar: dict[str, dict[str, Any]] = ',
@@ -209,12 +231,14 @@ from typing import Any
 
     @staticmethod
     def datatype_dictionary(url: str) -> str:
+        """Retrive the data type dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_DATATYPE, Default.URL_DATATYPE_PREFIX
         )
 
     @staticmethod
     def datatype(url: str) -> str:
+        """Format the data type dictionary for use in the specs module."""
         return ''.join(
             [
                 'DataType: dict[str, dict[str, Any]] = ',
@@ -226,12 +250,14 @@ from typing import Any
 
     @staticmethod
     def enumeration_dictionary(url: str) -> str:
+        """Retrive the enumeration dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_ENUMERATION_SET, Default.URL_ENUMERATION_SET_PREFIX
         )
 
     @staticmethod
     def enumeration(url: str) -> str:
+        """Format the enumeration dictionary for use in the specs module."""
         return ''.join(
             [
                 'Enumeration: dict[str, dict[str, Any]] = ',
@@ -243,12 +269,14 @@ from typing import Any
 
     @staticmethod
     def enumerationset_dictionary(url: str) -> str:
+        """Retrive the enumeration set dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_ENUMERATION_SET, Default.URL_ENUMERATION_SET_PREFIX
         )
 
     @staticmethod
     def enumerationset(url: str) -> str:
+        """Format the enumeration set dictionary for use in the specs module."""
         return ''.join(
             [
                 'EnumerationSet: dict[str, dict[str, Any]] = ',
@@ -260,12 +288,14 @@ from typing import Any
 
     @staticmethod
     def month_dictionary(url: str) -> str:
+        """Retrive the month dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_MONTH, Default.URL_MONTH_PREFIX
         )
 
     @staticmethod
     def month(url: str) -> str:
+        """Format the month dictionary for use in the specs module."""
         return ''.join(
             [
                 'Month: dict[str, dict[str, Any]] = ',
@@ -277,12 +307,14 @@ from typing import Any
 
     @staticmethod
     def structure_dictionary(url: str) -> str:
+        """Retrive the structure dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url, Default.URL_STRUCTURE, Default.URL_STRUCTURE_PREFIX
         )
 
     @staticmethod
     def structure(url: str) -> str:
+        """Format the structure dictionary for use in the specs module."""
         return ''.join(
             [
                 'Structure: dict[str, dict[str, Any]] = ',
@@ -294,6 +326,7 @@ from typing import Any
 
     @staticmethod
     def structure_extension_dictionary(url: str) -> str:
+        """Retrive the extension structure dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(
             url,
             Default.URL_STRUCTURE_EXTENSION,
@@ -302,6 +335,7 @@ from typing import Any
 
     @staticmethod
     def structure_extension(url: str) -> str:
+        """Format the extension structure dictionary for use in the specs module."""
         return ''.join(
             [
                 'ExtensionStructure: dict[str, dict[str, Any]] = ',
@@ -313,10 +347,12 @@ from typing import Any
 
     @staticmethod
     def uri_dictionary(url: str) -> str:
+        """Retrive the uri dictionary as a string that can be sent to `eval`."""
         return Convert.dictionary(url, Default.URL_URI, Default.URL_URI_PREFIX)
 
     @staticmethod
     def uri(url: str) -> str:
+        """Format the uri dictionary for use in the specs module."""
         return ''.join(
             [
                 'Uri: dict[str, dict[str, Any]] = ',
@@ -1110,10 +1146,7 @@ The specifications for this module are from the
         """Generate the __all__ = [] by filling in the list with the modified keys from Structure."""
         count: int = 0
         lines: str = '__all__ = [    # noqa: RUF022'
-        if url[-1] == Default.SLASH:
-            directory: str = f'{url}{Default.URL_STRUCTURE}'
-        else:
-            directory = f'{url}{Default.SLASH}{Default.URL_STRUCTURE}'
+        directory: str = f'{Convert.get_slash(url)}{Default.URL_STRUCTURE}'
         p = Path(directory)
         if p.exists():
             for file in p.iterdir():
@@ -1310,16 +1343,7 @@ from genedata.structure import (
             example = Examples[key]
         return example
 
-    @staticmethod
-    def get_enum_tag(value: str) -> str:
-        tag: str = (
-            value[value.rfind(Default.SLASH) + 1 :]
-            .replace(Default.URL_ENUMERATION_PREFIX, Default.EMPTY)
-            .replace(Default.QUOTE_DOUBLE, Default.EMPTY)
-        )
-        if Default.HYPHEN in tag:
-            tag = tag[tag.rfind(Default.HYPHEN) + 1 :]
-        return tag
+    
 
     @staticmethod
     def generate_enumerations(
@@ -1346,55 +1370,13 @@ from genedata.structure import (
                         Default.HYPHEN,
                         Default.SPACE,
                         Default.BRACKET_LEFT,
-                        Construct.get_enum_tag(value),
-                        # value[value.rfind(Default.SLASH) + 1 :].replace(
-                        #     Default.URL_ENUMERATION_PREFIX, Default.EMPTY
-                        # ),
+                        Convert.get_enum_tag(value),
                         Default.BRACKET_RIGHT,
                         Default.PARENS_LEFT,
                         value,
                         Default.PARENS_RIGHT,
                     ]
                 )
-            # for _keyname, value in enumerationset.items():
-            #     if (
-            #         Default.YAML_VALUE_OF in value
-            #         and structure[key][Default.YAML_ENUMERATION_SET]
-            #         in value[Default.YAML_VALUE_OF]
-            #     ):
-            #         wrapped = wrap(
-            #             value[Default.YAML_SPECIFICATION][0],
-            #             Default.LINE_LENGTH,
-            #         )
-            #         enumvalue: str = Default.EMPTY
-            #         if len(wrapped) > 1:
-            #             for line in wrapped:
-            #                 enumvalue = ''.join(
-            #                     [enumvalue, Default.EOL, '        > ', line]
-            #                 )
-            #         else:
-            #             enumvalue = ''.join(
-            #                 [
-            #                     enumvalue,
-            #                     Default.EOL,
-            #                     '        > ',
-            #                     wrapped[0].replace(
-            #                         Default.EOL,
-            #                         f'{Default.EOL}{Default.INDENT}',
-            #                     ),
-            #                 ]
-            #             )
-            #         enumeration_set = ''.join(
-            #             [
-            #                 enumeration_set,
-            #                 Default.EOL,
-            #                 "    - '",
-            #                 value[Default.YAML_STANDARD_TAG],
-            #                 "': ",
-            #                 value[Default.YAML_URI],
-            #                 enumvalue,
-            #             ]
-            #         )
         return enumeration_values
 
     @staticmethod
@@ -1593,23 +1575,23 @@ from genedata.structure import (
     def get_record_datatype(key: str) -> str:
         """Assign a cross reference datatype to specific records."""
         datatype: str = key[7:]
+        result: str = Default.EMPTY
         match datatype:
             case Default.TAG_FAM:
-                return Default.XREF_FAMILY
+                result = Default.XREF_FAMILY
             case Default.TAG_INDI:
-                return Default.XREF_INDIVIDUAL
+                result = Default.XREF_INDIVIDUAL
             case Default.TAG_OBJE:
-                return Default.XREF_MULTIMEDIA
+                result = Default.XREF_MULTIMEDIA
             case Default.TAG_REPO:
-                return Default.XREF_REPOSITORY
+                result = Default.XREF_REPOSITORY
             case Default.TAG_SNOTE:
-                return Default.XREF_SHARED_NOTE
+                result = Default.XREF_SHARED_NOTE
             case Default.TAG_SOUR:
-                return Default.XREF_SOURCE
+                result = Default.XREF_SOURCE
             case Default.TAG_SUBM:
-                return Default.XREF_SUBMITTER
-            case _:
-                return Default.XREF.title()
+                result = Default.XREF_SUBMITTER
+        return result
 
     @staticmethod
     def generate_init(key: str, structure: dict[str, Any]) -> str:
@@ -1661,10 +1643,7 @@ from genedata.structure import (
             structure_dictionary: The structure dictionary as an alternative to using the url to get this.
             enumeration_dictionary: The enumeration dictionary as an alternative to using the url to get this.
         """
-        if url[-1] == Default.SLASH:
-            base_url: str = url
-        else:
-            base_url = f'{url}{Default.SLASH}'
+        base_url: str = Convert.get_slash(url)
         if structure_dictionary is None:
             structure_dictionary = {}
         if enumerationset_dictionary is None:
@@ -1709,10 +1688,7 @@ class {class_name}(BaseStructure):
     def generate_all_classes(url: str) -> str:
         """Generate all classes and their documentation defined by the Structure dictionary."""
 
-        if url[-1] == Default.SLASH:
-            base_url: str = url
-        else:
-            base_url = f'{url}{Default.SLASH}'
+        base_url: str = Convert.get_slash(url)
         structure: dict[str, Any] = eval(Convert.structure_dictionary(base_url))
         enumerationset: dict[str, Any] = eval(
             Convert.enumerationset_dictionary(base_url)

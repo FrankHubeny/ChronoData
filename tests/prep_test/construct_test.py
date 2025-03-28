@@ -77,7 +77,7 @@ def test_generate_enumerations_retrieval_empty() -> None:
 
 def test_generate_enumerations_retrieval() -> None:
     """Retrieve data from the `generate_enumerations` method."""
-    lookfor: str = '\n\n    Enumerations:'
+    lookfor: str = '\n\n    Enumeration Values:'
     all_specs: str = Default.EMPTY
     all_specs = Construct.generate_enumerations('SEX', structure, enumeration)
     assert all_specs[0:len(lookfor)] == lookfor
@@ -88,7 +88,7 @@ def test_generate_value_of_retrieval() -> None:
 
     Enumeration Value Of:"""
     all_specs: str = Default.EMPTY
-    all_specs = Construct.generate_value_of('SEX', structure)
+    all_specs = Construct.generate_value_of('ADOP', structure)
     assert all_specs[0:len(lookfor)] == lookfor
 
 def test_generate_value_of_retrieval_empty() -> None:
@@ -121,6 +121,15 @@ def test_generate_class_retrieval() -> None:
 class"""
     all_specs: str = Default.EMPTY
     all_specs = Construct.generate_class('LATI', directory, structure, enumeration)
+    assert all_specs[0:len(lookfor)] == lookfor
+
+def test_generate_class_retrieval_with_none() -> None:
+    """Retrieve data from the `generate_class` method."""
+    lookfor: str = """
+
+class"""
+    all_specs: str = Default.EMPTY
+    all_specs = Construct.generate_class('LATI', directory, None, None)
     assert all_specs[0:len(lookfor)] == lookfor
 
 def test_build_all_retrieval() -> None:

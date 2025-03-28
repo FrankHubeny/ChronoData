@@ -10,6 +10,7 @@ from genedata.messages import Msg
 from genedata.prep import Convert
 
 directory: str = 'tests/prep_test/gedtest/'
+directory_no_slash: str = 'tests/prep_test/gedtest'
 empty_directory: str = 'tests/prep_test/gedtest_empty/'
 onlydir_directory: str = 'tests/prep_test/gedtest_onlydir/'
 
@@ -80,6 +81,16 @@ def test_uri_dictionary() -> None:
     """Retrieve the uri dictionary."""
     uri: dict[str, dict[str, Any]] = eval(Convert.uri_dictionary(directory))
     assert uri['AFN']['label'] == 'Ancestral File Number'
+
+def test_uri_dictionary_no_slash() -> None:
+    """Retrieve the uri dictionary from directory with no final slash."""
+    uri: dict[str, dict[str, Any]] = eval(Convert.uri_dictionary(directory_no_slash))
+    assert uri['AFN']['label'] == 'Ancestral File Number'
+
+def test_get_enum_tag() -> None:
+    """Test the building a tag from an enumeration file."""
+    file: str = f'abcdefg{Default.URL_ENUMERATION_PREFIX}ABC-DEF'
+    assert Convert.get_enum_tag(file) == 'DEF'
 
 def test_onlydir_uri() -> None:
     """Test that nothing should be returned if a yaml file is not in the directory."""
