@@ -28,6 +28,7 @@ class Msg:
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
     CIRCULAR: str = '"{0}" has "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
+    DIRECTORY_NOT_FOUND: str = 'The directory "{0}" could not be found.'
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
     )
