@@ -27,17 +27,17 @@ __all__ = [
 
 from pathlib import Path
 from textwrap import wrap
-from typing import Any, ClassVar
+from typing import Any
 
 from genedata.constants import Config, Default
 from genedata.messages import Msg
-from genedata.util import Util
+from genedata.util import Names, Util
 
 
 class Convert:
     """Read and store GEDCOM specification."""
 
-    #enumerationset_dict: ClassVar[dict[str, Any]] = {}
+    # enumerationset_dict: ClassVar[dict[str, Any]] = {}
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
@@ -86,21 +86,25 @@ from typing import Any
 
 '''
         return lines
-    
+
     @staticmethod
     def get_enum_tag(value: str) -> str:
         """Extract the tag from the file name specifying an enumeration tag.
-        
+
         This can also be obtained from the `standard tag` key within that file.
-        
+
         Example:
             Suppose the file name is "https://gedcom.io/terms/v7/enum-ADOP-HUSB".
             This method returns only HUSB as the tag.
             >>> from genedata.prep import Convert
-            >>> print(Convert.get_enum_tag('"https://gedcom.io/terms/v7/enum-ADOP-HUSB"'))
+            >>> print(
+            ...     Convert.get_enum_tag(
+            ...         '"https://gedcom.io/terms/v7/enum-ADOP-HUSB"'
+            ...     )
+            ... )
             HUSB
 
-            """
+        """
         tag: str = (
             value[value.rfind(Default.SLASH) + 1 :]
             .replace(Default.URL_ENUMERATION_PREFIX, Default.EMPTY)
@@ -109,13 +113,13 @@ from typing import Any
         if Default.HYPHEN in tag:
             tag = tag[tag.rfind(Default.HYPHEN) + 1 :]
         return tag
-    
+
     @staticmethod
     def get_slash(url: str) -> str:
         """Add a '/' at the end of a string if one is not there already.
-        
+
         This makes sure that a directory string ends with a /.
-        
+
         Example:
             Let `abcdefghi` be the name of the directory.
             >>> from genedata.prep import Convert
@@ -123,6 +127,8 @@ from typing import Any
             abcdefghi/
 
         """
+        if url == Default.EMPTY:
+            return url
         if url[-1] == Default.SLASH:
             return url
         return f'{url}{Default.SLASH}'
@@ -446,6 +452,125 @@ Examples: dict[str, str] = {
         3 FORM audio/ogg
         2 TRAN media/transcript.vtt
         3 FORM text/vtt
+        <BLANKLINE>""",
+    'HEAD': f"""
+
+    Example:
+        The following is the header structure.
+        [HEADER](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#HEADER)
+        n HEAD                                     {{1:1}}  g7:HEAD
+          +1 GEDC                                  {{1:1}}  g7:GEDC
+             +2 VERS <Special>                     {{1:1}}  g7:GEDC-VERS
+          +1 SCHMA                                 {{0:1}}  g7:SCHMA
+             +2 TAG <Special>                      {{0:M}}  g7:TAG
+          +1 SOUR <Special>                        {{0:1}}  g7:HEAD-SOUR
+             +2 VERS <Special>                     {{0:1}}  g7:VERS
+             +2 NAME <Text>                        {{0:1}}  g7:NAME
+             +2 CORP <Text>                        {{0:1}}  g7:CORP
+                +3 <<ADDRESS_STRUCTURE>>           {{0:1}}
+                +3 PHON <Special>                  {{0:M}}  g7:PHON
+                +3 EMAIL <Special>                 {{0:M}}  g7:EMAIL
+                +3 FAX <Special>                   {{0:M}}  g7:FAX
+                +3 WWW <Special>                   {{0:M}}  g7:WWW
+             +2 DATA <Text>                        {{0:1}}  g7:HEAD-SOUR-DATA
+                +3 DATE <DateExact>                {{0:1}}  g7:DATE-exact
+                   +4 TIME <Time>                  {{0:1}}  g7:TIME
+                +3 COPR <Text>                     {{0:1}}  g7:COPR
+          +1 DEST <Special>                        {{0:1}}  g7:DEST
+          +1 DATE <DateExact>                      {{0:1}}  g7:HEAD-DATE
+             +2 TIME <Time>                        {{0:1}}  g7:TIME
+          +1 SUBM @<XREF:SUBM>@                    {{0:1}}  g7:SUBM
+          +1 COPR <Text>                           {{0:1}}  g7:COPR
+          +1 LANG <Language>                       {{0:1}}  g7:HEAD-LANG
+          +1 PLAC                                  {{0:1}}  g7:HEAD-PLAC
+             +2 FORM <List:Text>                   {{1:1}}  g7:HEAD-PLAC-FORM
+          +1 <<NOTE_STRUCTURE>>                    {{0:1}}
+        It can be implemented as follows using data from the 
+        [GEDCOM Maximal70 Test File]
+        First, import the required classes.
+        >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+        >>> from genedata.build import Genealogy
+
+        Second, instantiate a Genealogy along with any cross reference identifiers
+        that will be needed.  In this case, we need a source and a submitter xref.
+        >>> {Default.CODE_GENEALOGY} = Genealogy('header test')
+        >>> subm_xref = {Default.CODE_GENEALOGY}.submitter_xref('U1')
+        >>> sour_xref = {Default.CODE_CLASS}.source_xref('S1')
+
+        Third, construct the header record.
+        >>> head = {Default.CODE_CLASS}.Head(
+        ...     [
+        ...         {Default.CODE_CLASS}.Gedc({Default.CODE_CLASS}.GedcVers('7.0')),
+        ...         {Default.CODE_CLASS}.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.',
+        ...             [
+        ...                 {Default.CODE_CLASS}.Mime('text/plain'),
+        ...                 {Default.CODE_CLASS}.Lang('en-US'),
+        ...                 {Default.CODE_CLASS}.NoteTran('Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.', {Default.CODE_CLASS}.Lang('de')),
+        ...                 {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page(1)),
+        ...                 {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page(2)),
+        ...             ]
+        ...         ),
+        ...         {Default.CODE_CLASS}.Schma(
+        ...             [
+        ...                 {Default.CODE_CLASS}.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
+        ...                 {Default.CODE_CLASS}.Tag(_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
+        ...             ]
+        ...         )
+        ...     ]
+        ... )
+
+        Finally, generate and print the ged lines to see how they look.  If this were in
+        a full ged file the Genealogy class would produce the ged file.
+        >>> print(head.ged())
+        0 HEAD
+        1 GEDC
+        2 VERS 7.0
+        1 NOTE This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.
+        2 MIME text/plain
+        2 LANG en-US
+        2 TRAN Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.
+        3 LANG de
+        2 SOUR @S1@
+        3 PAGE 1
+        2 SOUR @S1@
+        3 PAGE 2
+        1 SCHMA
+        2 TAG _SKYPEID http://xmlns.com/foaf/0.1/skypeID
+        2 TAG _JABBERID http://xmlns.com/foaf/0.1/jabberID
+        1 SOUR https://gedcom.io/
+        2 VERS 0.4
+        2 NAME GEDCOM Steering Committee
+        2 CORP FamilySearch
+        3 ADDR Family History Department
+        4 CONT 15 East South Temple Street
+        4 CONT Salt Lake City, UT 84150 USA
+        4 ADR1 Family History Department
+        4 ADR2 15 East South Temple Street
+        4 ADR3 Salt Lake City, UT 84150 USA
+        4 CITY Salt Lake City
+        4 STAE UT
+        4 POST 84150
+        4 CTRY USA
+        3 PHON +1 (555) 555-1212
+        3 PHON +1 (555) 555-1234
+        3 EMAIL GEDCOM@FamilySearch.org
+        3 EMAIL GEDCOM@example.com
+        3 FAX +1 (555) 555-1212
+        3 FAX +1 (555) 555-1234
+        3 WWW http://gedcom.io
+        3 WWW http://gedcom.info
+        2 DATA HEAD-SOUR-DATA
+        3 DATE 1 NOV 2022
+        4 TIME 8:38
+        3 COPR copyright statement
+        1 DEST https://gedcom.io/
+        1 DATE 10 JUN 2022
+        2 TIME 15:43:20.48Z
+        1 SUBM @U1@
+        1 COPR another copyright statement
+        1 LANG en-US
+        1 PLAC
+        2 FORM City, County, State, Country
         <BLANKLINE>""",
     'HEIGHT': f"""
 
@@ -1142,24 +1267,34 @@ The specifications for this module are from the
     | ------------------------------------------ | -------- | -------- | ------------ |"""
 
     @staticmethod
-    def generate__all__(url: str) -> str:
+    def generate__all__(
+        url: str = Default.EMPTY,
+        structure: dict[str, dict[str, Any]] | None = None,
+    ) -> str:
         """Generate the __all__ = [] by filling in the list with the modified keys from Structure."""
         count: int = 0
         lines: str = '__all__ = [    # noqa: RUF022'
-        directory: str = f'{Convert.get_slash(url)}{Default.URL_STRUCTURE}'
-        p = Path(directory)
-        if p.exists():
-            for file in p.iterdir():
-                if file.suffix == Default.YAML_FILE_END:
-                    key = file.stem.replace(
-                        Default.URL_STRUCTURE_PREFIX, Default.EMPTY
-                    )
-                    if key not in [Default.CONT, Default.TRLR]:
-                        edited_key: str = Construct.classname(key)
-                        lines = f"{lines}{Default.EOL}{Default.INDENT}'{edited_key}'{Default.COMMA}"
-                        count += 1
+        if url != Default.EMPTY:
+            directory: str = f'{Convert.get_slash(url)}{Default.URL_STRUCTURE}'
+            p = Path(directory)
+            if p.exists():
+                for file in p.iterdir():
+                    if file.suffix == Default.YAML_FILE_END:
+                        key = file.stem.replace(
+                            Default.URL_STRUCTURE_PREFIX, Default.EMPTY
+                        )
+                        if key not in [Default.CONT, Default.TRLR]:
+                            edited_key: str = Construct.classname(key)
+                            lines = f"{lines}{Default.EOL}{Default.INDENT}'{edited_key}'{Default.COMMA}"
+                            count += 1
+            else:
+                raise ValueError(Msg.DIRECTORY_NOT_FOUND.format(directory))
+        elif structure is None:
+            raise ValueError(Msg.MISSING_URL_AND_DICTIONARIES)
         else:
-            raise ValueError(Msg.DIRECTORY_NOT_FOUND.format(directory))
+            for key in structure:
+                lines = f"{lines}{Default.EOL}{Default.INDENT}'{Construct.classname(key)}'{Default.COMMA}"
+                count += 1
         if count == 0:
             return Default.EMPTY
         return f'{lines}{Default.EOL}]{Default.EOL}'
@@ -1342,8 +1477,6 @@ from genedata.structure import (
         if key in Examples:
             example = Examples[key]
         return example
-
-    
 
     @staticmethod
     def generate_enumerations(
@@ -1631,11 +1764,33 @@ from genedata.structure import (
     @staticmethod
     def generate_class(
         key: str,
-        url: str,
-        structure_dictionary: dict[str, Any] | None = None,
-        enumerationset_dictionary: dict[str, Any] | None = None,
+        url: str = Default.EMPTY,
+        structure_dict: dict[str, Any] | None = None,
+        enumerationset_dict: dict[str, Any] | None = None,
     ) -> str:
         """Generate a single class and its documentation defined by its Structure definition.
+
+        Examples:
+            If we have the structure and enumeration set dictionaries constructed in a specs.py file,
+            we can use them to build a string that represents the class in the classes module.
+            >>> from genedata.prep import Construct
+            >>> from genedata.specs7 import Structure, EnumerationSet
+            >>> map = Construct.generate_class(
+            ...     'MAP', '', Structure, EnumerationSet
+            ... )
+
+            If one doesn't have a specs module one will need a base directory where the
+            yaml files are stored.  The test directory is 'tests/prep_test/gedtest' which
+            will be used here.
+            >>> map2 = Construct.generate_class(
+            ...     'MAP', 'tests/prep_test/gedtest'
+            ... )
+
+            However, without either the url or the dictionaries passed to thie method,
+            it will through a ValueError.
+            >>> map3 = Construct.generate_class('MAP')
+            Traceback (most recent call last):
+            ValueError: Missing both a url and specification dictionaries.
 
         Args:
             key: The key of the Structure dictionary.
@@ -1643,17 +1798,19 @@ from genedata.structure import (
             structure_dictionary: The structure dictionary as an alternative to using the url to get this.
             enumeration_dictionary: The enumeration dictionary as an alternative to using the url to get this.
         """
-        base_url: str = Convert.get_slash(url)
-        if structure_dictionary is None:
-            structure_dictionary = {}
-        if enumerationset_dictionary is None:
-            enumerationset_dictionary = {}
-        structure: dict[str, Any] = structure_dictionary
-        if len(structure) == 0:
-            structure = eval(Convert.structure_dictionary(base_url))
-        enumerationset: dict[str, Any] = enumerationset_dictionary
-        if len(enumerationset) == 0:
-            enumerationset = eval(Convert.enumeration_dictionary(base_url))
+        if url != Default.EMPTY:
+            base_url: str = Convert.get_slash(url)
+            structure: dict[str, Any] = eval(
+                Convert.structure_dictionary(base_url)
+            )
+            enumerationset: dict[str, Any] = eval(
+                Convert.enumerationset_dictionary(base_url)
+            )
+        elif structure_dict is None or enumerationset_dict is None:
+            raise ValueError(Msg.MISSING_URL_AND_DICTIONARIES)
+        else:
+            structure = structure_dict
+            enumerationset = enumerationset_dict
         tag: str = structure[key][Default.YAML_STANDARD_TAG]
         class_name: str = structure[key][Default.YAML_CLASS_NAME]
         parts: str = ''.join(
@@ -1685,14 +1842,26 @@ class {class_name}(BaseStructure):
         return lines
 
     @staticmethod
-    def generate_all_classes(url: str) -> str:
+    def generate_all_classes(
+        url: str = Default.EMPTY,
+        structure_dict: dict[str, dict[str, Any]] | None = None,
+        enumerationset_dict: dict[str, dict[str, Any]] | None = None,
+    ) -> str:
         """Generate all classes and their documentation defined by the Structure dictionary."""
 
-        base_url: str = Convert.get_slash(url)
-        structure: dict[str, Any] = eval(Convert.structure_dictionary(base_url))
-        enumerationset: dict[str, Any] = eval(
-            Convert.enumerationset_dictionary(base_url)
-        )
+        if url != Default.EMPTY:
+            base_url: str = Convert.get_slash(url)
+            structure: dict[str, Any] = eval(
+                Convert.structure_dictionary(base_url)
+            )
+            enumerationset: dict[str, Any] = eval(
+                Convert.enumerationset_dictionary(base_url)
+            )
+        elif structure_dict is None or enumerationset_dict is None:
+            raise ValueError(Msg.MISSING_URL_AND_DICTIONARIES)
+        else:
+            structure = structure_dict
+            enumerationset = enumerationset_dict
         lines: str = Default.EMPTY
         for key in structure:
             if key not in [Default.CONT, Default.TRLR]:
@@ -1707,13 +1876,285 @@ class {class_name}(BaseStructure):
         return lines
 
     @staticmethod
-    def build_all(source: str, version: str, url: str) -> str:
-        """Construct the entire module containing GEDCOM structures converted to classes."""
+    def build_all(
+        source: str,
+        version: str,
+        url: str = Default.EMPTY,
+        structure: dict[str, dict[str, Any]] | None = None,
+        enumerationset: dict[str, dict[str, Any]] | None = None,
+    ) -> str:
+        """Construct the entire module containing GEDCOM structures converted to classes.
+
+        To build the classes module one either needs a base directory where the yaml files
+        are stored, a base url or a specs module that has already been build.  From the
+        specs module one will need the Structure and EnumerationSet dictionaries.
+
+        Example:
+            This example constructs a string that could be used for a classes module
+            using a specification module that has already been constructed.
+            >>> from genedata.prep import Construct
+            >>> from genedata.specs7 import Structure, EnumerationSet
+            >>> all = Construct.build_all(
+            ...     'specify-ged-source', '7.0', '', Structure, EnumerationSet
+            ... )
+
+            Alternatively, if one has a directory or yaml files containing the specifications,
+            one can enter it as the url.  The sample test directory for these files is
+            'tests/prep_test/gedtest'
+            >>> all = Construct.build_all(
+            ...     'specify-ged-source', '7.0', 'tests/prep_test/gedtest'
+            ... )
+
+            Without either a url or the dictionaries a ValueError is returned.
+            >>> all = Construct.build_all('specify-ged-source', '7.0')
+            Traceback (most recent call last):
+            ValueError: Missing both a url and specification dictionaries.
+
+            For testing there is a sample directory of yaml files.  One could use this
+            to build a classes module based only on the files available.
+            >> all = Construct.build_all('specify-ged-source', '7.0', 'tests/prep_test/gedtest')
+
+            Using a directory that doesn't exist raises another ValueError:
+            >>> all = Construct.build_all(
+            ...     'specify-ged-source', '7.0', 'directory/does/not/exist/'
+            ... )
+            Traceback (most recent call last):
+            ValueError: The directory "directory/does/not/exist/structure/standard/" could not be found.
+
+        """
         return ''.join(
             [
                 Construct.preamble(source, version),
-                Construct.generate__all__(url),
+                Construct.generate__all__(url, structure),
                 Construct.generate_imports(),
-                Construct.generate_all_classes(url),
+                Construct.generate_all_classes(url, structure, enumerationset),
             ]
         )
+
+
+class Tests:
+    """Generate tests for the classes based on the specifications."""
+
+    @staticmethod
+    def no_subs_good_test(
+        key: str, value: str | int, xref: str = Default.EMPTY
+    ) -> str:
+        class_name: str = Names.classname(key)
+        xref_code: str = Default.EMPTY
+        input: str | int = f"'{value}'"
+        if isinstance(value, int):
+            input = value
+        if xref != Default.EMPTY:
+            input = f'{xref}'
+            xref_code = f"""g = Genealogy('test')
+    {xref} = g.{xref}_xref('1')
+    """
+            if xref == 'shared_note':
+                xref_code = """g = Genealogy('test')
+    shared_note = g.shared_note_xref('1', 'text')
+    """
+        lines: str = f"""
+
+def test_no_subs_{class_name}() -> None:
+    '''Validate the {class_name} structure with a value, but without substructures.'''
+    {xref_code}m = {Default.CODE_CLASS}.{class_name}({input})
+    assert m.validate()
+"""
+        return lines
+
+    @staticmethod
+    def build_no_subs_good_tests(
+        structure: dict[str, dict[str, Any]],
+        enumerationset: dict[str, dict[str, Any]],
+    ) -> str:
+        lines: str = f"""'''The tests in this file have been generated from the specs module
+to test the classes in the classes module.  None of these have required substructures
+nor exercise the use ob substructures.
+
+DO NOT MANUALLY MODIFY THIS FILE.
+'''
+
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+from genedata.build import Genealogy
+"""
+        input: str = 'abc'
+        for key, value in structure.items():
+            if len(value[Default.YAML_REQUIRED]) == 0:
+                match value[Default.YAML_PAYLOAD]:
+                    case 'http://www.w3.org/2001/XMLSchema#string':
+                        match key:
+                            case 'LATI':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(key, 'N10.1'),
+                                    ]
+                                )
+                            case 'LONG':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(key, 'E10.1'),
+                                    ]
+                                )
+                            case 'record-SNOTE':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(
+                                            key, '', 'shared_note'
+                                        ),
+                                    ]
+                                )
+                            case _:
+                                lines = ''.join(
+                                    [lines, Tests.no_subs_good_test(key, input)]
+                                )
+                    case 'Y|<NULL>':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, 'Y')]
+                        )
+                    case None:
+                        match key:
+                            case 'record-INDI':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(
+                                            key, '', 'individual'
+                                        ),
+                                    ]
+                                )
+                            case 'record-FAM':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(
+                                            key, '', 'family'
+                                        ),
+                                    ]
+                                )
+                            case 'record-SNOTE':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(
+                                            key, '', 'shared_note'
+                                        ),
+                                    ]
+                                )
+                    case 'https://gedcom.io/terms/v7/type-Enum':
+                        enum = enumerationset[value[Default.YAML_ENUM_KEY]][
+                            Default.YAML_ENUM_TAGS
+                        ][0]
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, enum)]
+                        )
+                    case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, 1)]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-INDI>@':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '', 'individual'),
+                            ]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-FAM>@':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, '', 'family')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-List#Text':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, input)]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '', 'submitter'),
+                            ]
+                        )
+                    case 'http://www.w3.org/2001/XMLSchema#Language':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, 'en-US')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Date#period':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(
+                                    key, 'FROM 1 DEC 2000 TO 5 DEC 2000'
+                                ),
+                            ]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-List#Enum':
+                        enum = enumerationset[value[Default.YAML_ENUM_KEY]][
+                            Default.YAML_ENUM_TAGS
+                        ][0]
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, enum)]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Date#exact':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, '1 JAN 2026')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Date':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, '1 JAN 2026')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-FilePath':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(
+                                    key, 'dir/to/somewhere'
+                                ),
+                            ]
+                        )
+                    case 'http://www.w3.org/ns/dcat#mediaType':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, 'mime/text')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Name':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, 'John /Doe/')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Age':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '> 25y 10m 1d'),
+                            ]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '', 'multimedia'),
+                            ]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-REPO>@':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '', 'repository'),
+                            ]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                        lines = ''.join(
+                            [
+                                lines,
+                                Tests.no_subs_good_test(key, '', 'shared_note'),
+                            ]
+                        )
+                    case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, '', 'source')]
+                        )
+                    case 'https://gedcom.io/terms/v7/type-Time':
+                        lines = ''.join(
+                            [lines, Tests.no_subs_good_test(key, '12:12:12')]
+                        )
+        return lines

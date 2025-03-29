@@ -74,6 +74,7 @@ class Msg:
     MISSING_REQUIRED: str = (
         'The substructure "{0}" is required for the "{1}" structure.'
     )
+    MISSING_URL_AND_DICTIONARIES: str = 'Missing both a url and specification dictionaries.'
     NEGATIVE_ERROR: str = (
         'The value "{0}" is less than zero in structure "{1}".'
     )

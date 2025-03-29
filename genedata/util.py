@@ -13,7 +13,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-#from textwrap import indent
+# from textwrap import indent
 from typing import Any
 
 import requests  # type: ignore[import-untyped]
@@ -22,7 +22,7 @@ from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specs7 import Calendar, Month
+from genedata.specs7 import Calendar, Month, Structure
 
 
 class Util:
@@ -81,11 +81,6 @@ class Util:
         if password == b'':
             with zipfile.ZipFile(zipped_files, 'r') as zip_ref:
                 zip_ref.extract(file, to_directory)
-        # else:
-        #     with zipfile.ZipFile(
-        #         zipped_files, 'r', zipfile.ZipFile.setpassword(pwd=password)
-        #     ) as zip_ref:
-        #         zip_ref.extract(file, to_directory)
 
     @staticmethod
     def read_binary(url: str) -> str:
@@ -124,7 +119,7 @@ class Util:
                 raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
             raw = webUrl.read().decode(Default.UTF8)
         elif Path(url).exists():
-            with Path.open(Path(url)) as file:  
+            with Path.open(Path(url)) as file:
                 raw = file.read()
         else:
             logging.info(Msg.FILE_NOT_FOUND.format(url))
@@ -154,7 +149,7 @@ class Util:
         try:
             raw = Util.read(url)
         except Exception:
-            #logging.info(Msg.LOG_READ_FAILED.format(url))
+            # logging.info(Msg.LOG_READ_FAILED.format(url))
             try:
                 raw = Util.read_binary(url)
             except Exception:
@@ -167,31 +162,9 @@ class Util:
             )
 
         # Return the dictionary.
-        yaml_data = raw #.replace('\n  - |\n', '\n  - bar\n')
+        yaml_data = raw  # .replace('\n  - |\n', '\n  - bar\n')
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
         return yaml_dict
-    
-    # @staticmethod
-    # def read_yaml_full(url: str) -> dict[str, Any]:
-    #     """Read a yaml file and convert it into a dictionary.
-
-    #     Args:
-    #         url: The name of the file or the internet url.
-    #     """
-
-    #     # Retrieve the file.
-    #     raw: str = Util.read_binary(url)
-
-    #     # Check that file has proper yaml directive.
-    #     if Default.YAML_DIRECTIVE not in raw:
-    #         raise ValueError(
-    #             Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
-    #         )
-
-    #     # Return the dictionary.
-    #     yaml_data = raw
-    #     yaml_dict: dict[str, Any] = yaml.full_load(yaml_data)
-    #     return yaml_dict
 
     @staticmethod
     def ged_summary(ged: str) -> str:
@@ -287,52 +260,6 @@ submitters    {subm_count!s}
                     ]
                 )
         return lines
-    
-
-
-# class Checker:
-#     """Global methods supporting validation of data."""
-
-#     @staticmethod
-#     def verify_type(value: Any, value_type: Any, no_list: bool = False) -> bool:
-#         """Check if the value has the specified type."""
-#         check: bool = True
-#         if value is None:
-#             return check
-#         if isinstance(value, list):
-#             if no_list and isinstance(value, list):
-#                 raise TypeError(Msg.NO_LIST)
-#             for item in value:
-#                 if not isinstance(item, value_type):
-#                     raise TypeError(
-#                         Msg.WRONG_TYPE.format(item, type(item), value_type)
-#                     )
-#             return check
-#         if not isinstance(value, value_type):
-#             raise TypeError(
-#                 Msg.WRONG_TYPE.format(value, type(value), value_type)
-#             )
-#         return check
-
-#     @staticmethod
-#     def verify_tuple_type(name: Any, value_type: Any) -> bool:
-#         """Check if each member of the tuple has the specified type."""
-#         if name != [] and name is not None:
-#             for value in name:
-#                 Checker.verify_type(value, value_type)
-#         return True
-
-#     @staticmethod
-#     def verify_not_empty(value: Any) -> bool:
-#         if value is None:
-#             raise ValueError(Msg.NO_NONE)
-#         if isinstance(value, str) and value == Default.EMPTY:
-#             raise ValueError(Msg.NO_EMPTY_STRING)
-#         if isinstance(value, list) and len(value) == 0:
-#             raise ValueError(Msg.NO_EMPTY_LIST)
-#         # if isinstance(value, Xref) and value.fullname == Default.VOID_POINTER:
-#         #     raise ValueError(Msg.NO_EMPTY_POINTER)
-#         return True
 
 
 class Input:
@@ -696,6 +623,29 @@ class Input:
     def lati(
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> str:
+        """Construct a latitude given degrees, minutes and seconds.
+
+        Example:
+            In this example not how a string is returned preceded with 'N' for North
+            because the degrees integer is positive.
+            >>> from genedata.util import Input
+            >>> Input.lati(10, 5, 1)
+            'N10.083611'
+
+            If one goes outside the range a ValueError is thrown.
+            >>> Input.lati(91, 0, 0)
+            Traceback (most recent call last):
+            ValueError: The value "91.0" is not between -90.0 and 90.0 in method Input.lati.
+
+        Args:
+            degrees: An integer value of degrees, positive or negative,
+                between -90 and 90.
+            minutes: An integer value of minutes, positive only,
+                between 0 and 59.
+            seconds: A float value of seconds, positive only,
+                between 0 and 60.
+            precision: The precision desired for the latitude with default 6.
+        """
         latitude = Input.to_decimal(degrees, minutes, seconds, precision)
         if latitude > Default.LATI_HIGH or latitude < Default.LATI_LOW:
             raise ValueError(
@@ -711,6 +661,29 @@ class Input:
     def long(
         degrees: int, minutes: int, seconds: float, precision: int = 6
     ) -> str:
+        """Construct a longitude given degrees, minutes and seconds.
+
+        Example:
+            In this example not how a string is returned preceded with 'E' for East
+            because the degrees integer is positive.
+            >>> from genedata.util import Input
+            >>> Input.long(10, 5, 1)
+            'E10.083611'
+
+            If one goes outside the range a ValueError is thrown.
+            >>> Input.long(181, 0, 0)
+            Traceback (most recent call last):
+            ValueError: The value "181.0" is not between -180.0 and 180.0 in method Input.long.
+
+        Args:
+            degrees: An integer value of degrees, positive or negative,
+                between -180 and 180.
+            minutes: An integer value of minutes, positive only,
+                between 0 and 59.
+            seconds: A float value of seconds, positive only,
+                between 0 and 60.
+            precision: The precision desired for the latitude with default 6.
+        """
         longitude = Input.to_decimal(degrees, minutes, seconds, precision)
         if longitude > Default.LONG_HIGH or longitude < Default.LONG_LOW:
             raise ValueError(
@@ -962,6 +935,125 @@ class Input:
         return url
 
 
+class Names:
+    """Format various names derived from file names.
+
+    These methods extract information from the name of the yaml file
+    containing the specification.  Future versions of the specification
+    may require that these names be derived in other ways.
+    """
+
+    @staticmethod
+    def keyname(value: str) -> str:
+        """Return the name used by the dictionary keys in the specs module.
+
+        The value is expected to be the name of a yaml file where the
+        specification of the concept is defined.  This file name contains
+        the information needed to produce the key name.
+
+        Example:
+            Suppose the file name is 'dir/to/yaml/file/enum-ABCD'. Then
+            we want to retrieve 'enum-ABCD' since that will be used as the
+            key to this specification in the Enumerations dictionary
+            of the specs module.
+            >>> from genedata.util import Names
+            >>> Names.keyname('dir/to/yaml/file/enum-ABCD')
+            'enum-ABCD'
+
+            If no '/' character is in the name, return the name.
+            >>> Names.keyname('abcdedf')
+            'abcdefg'
+
+            If the value is empty return the empty string.
+            >>> Names.keyname('')
+            ''
+
+        Args:
+            value: The name of the yaml file.
+        """
+        if value == Default.EMPTY:
+            return value
+        if Default.SLASH in value:
+            return value[value.rfind(Default.SLASH) + 1 :].replace(
+                Default.QUOTE_DOUBLE, Default.EMPTY
+            )
+        return value.replace(Default.QUOTE_DOUBLE, Default.EMPTY)
+
+    @staticmethod
+    def classname(value: str) -> str:
+        """Construct the class name from the keyname.
+
+        The class name will have title capitalization of the capital letters.
+        Other characters will be removed.
+
+        Examples:
+            Suppose the yaml file is '/dir/to/yaml/file/enum-XYZ' Then
+            the class name would be 'Xyz'.
+            >>> from genedata.util import Names
+            >>> Names.classname('/dir/to/yaml/file/enum-XYZ')
+            'Xyz'
+
+        Args:
+            value: The name of the yaml file containing the specification.
+        """
+        base: str = re.sub(
+            '[a-z]',
+            Default.EMPTY,
+            Names.keyname(value).replace('record', 'RECORD').replace('exact','EXACT'),
+        )
+        return (
+            base.title()
+            .replace(Default.HYPHEN, Default.EMPTY)
+            .replace(Default.UNDERLINE, Default.EMPTY)
+        )
+
+    @staticmethod
+    def slash(url: str) -> str:
+        """Add a '/' at the end of a string if one is not there already.
+
+        This makes sure that a directory string ends with a /.
+
+        Example:
+            Let `abcdefghi` be the name of the directory.
+            >>> from genedata.prep import Convert
+            >>> print(Convert.get_slash('abcdefghi'))
+            abcdefghi/
+
+        """
+        if url == Default.EMPTY:
+            return url
+        if url[-1] == Default.SLASH:
+            return url
+        return f'{url}{Default.SLASH}'
+
+    @staticmethod
+    def tagname(value: str) -> str:
+        """Return the standard tag as derived from the yaml file name.
+
+        This is the keyname with lower characters removed starting
+        with the last hyphen in the name.  The standard tag is also
+        provided in the specification under the key 'standard tag'.
+
+        Example:
+            Suppose the yaml file is '/path/to/yaml/file/something-ABC-XYZ'.
+            Then the tag would be 'XYZ'.
+            >>> from genedata.util import Names
+            >>> Names.tagname('/path/to/yaml/file/something-ABC-XYZ')
+            'XYZ'
+
+        Args:
+            value: The name of the yaml file containing the specification.
+        """
+        # base: str = re.sub('[a-z]', Default.EMPTY, Names.keyname(value))
+        # if Default.HYPHEN in base:
+        #     return base[base.rfind(Default.HYPHEN) + 1 :]
+        # return base
+        tag: str = str(
+            Structure[Names.keyname(value)][Default.YAML_STANDARD_TAG]
+        )
+        return tag
+
+
 class Tagger:
     """Global methods to tag GEDCOM information.
 
@@ -1204,28 +1296,6 @@ class Tagger:
                         ),
                     ]
                 )
-        # if extra != Default.EMPTY:
-        #     if Default.EOL in extra:
-        #         extras: list[str] = extra.split(Default.EOL)
-        #         lines = Tagger.string(
-        #             lines, level, tag, payload, extras[0], format=format, xref=xref
-        #         )
-        #         lines = Tagger.string(
-        #             lines,
-        #             level + 1,
-        #             Default.CONT,
-        #             extras[1:],
-        #             format=format,
-        #         )
-        #     else:
-        #         return ''.join(
-        #             [
-        #                 lines,
-        #                 Tagger.taginfo(
-        #                     level, tag, payload, extra, format=format, xref=xref
-        #                 ),
-        #             ]
-        #         )
         return lines
 
     @staticmethod
@@ -1278,9 +1348,7 @@ class Tagger:
         if payload is None or payload == Default.EMPTY:
             return lines
         if isinstance(payload, list):
-            # unique_payload = OrderedSet(payload)
-            for item in payload:  # unique_payload:
-                # for item in payload:
+            for item in payload:
                 if flag != Default.EMPTY:
                     lines = ''.join(
                         [lines, item.ged(level, flag, recordkey=recordkey)]
@@ -1290,7 +1358,6 @@ class Tagger:
                         [lines, item.ged(level, recordkey=recordkey)]
                     )
             return lines
-        # if payload != default:
         if flag != Default.EMPTY:
             lines = ''.join(
                 [lines, payload.ged(level, flag, recordkey=recordkey)]
@@ -1312,101 +1379,3 @@ class Tagger:
                 if unique_types[index] == type(sub).__name__:
                     ordered.append(sub)
         return ordered
-
-
-# class Formatter:
-#     """Methods to support formatting strings to meet the GEDCOM standard."""
-
-#     @staticmethod
-#     def codes_single(item: Any, tabs: int, full: bool) -> str:
-#         if isinstance(item, str):
-#             return f'{item!r}'
-#         if isinstance(item, int | float):
-#             return f'{item!r}'
-#         # if isinstance(item, Xref):
-#         #     return f'{item!r}'
-#         code_lines: str = (
-#             item.code(tabs - 1, full=full)
-#             .replace(Default.EOL, Default.EMPTY, 1)
-#             .replace(Default.INDENT, Default.EMPTY, 1)
-#         )
-#         return code_lines
-
-#     @staticmethod
-#     def codes(
-#         items: Any, tabs: int = 1, full: bool = False, required: bool = False
-#     ) -> str:
-#         if items is None:
-#             return Default.NONE
-#         if isinstance(items, list):
-#             if len(items) == 0:
-#                 return Default.BRACKET_LEFT_RIGHT
-#             if len(items) == 1:
-#                 return Formatter.codes_single(items[0], tabs, full)
-#             lines: str = Default.BRACKET_LEFT
-#             for item in items:
-#                 line_end = Default.COMMA
-#                 if required:
-#                     line_end = Default.COMMA_REQUIRED
-#                 if isinstance(item, int | float):
-#                     lines = ''.join(
-#                         [
-#                             lines,
-#                             Default.EOL,
-#                             Default.INDENT * (tabs),
-#                             str(item),
-#                             line_end,
-#                         ]
-#                     )
-#                 elif isinstance(item, str):
-#                     quote_mark: str = Default.QUOTE_SINGLE
-#                     if quote_mark in str(item):
-#                         quote_mark = Default.QUOTE_DOUBLE
-#                     lines = ''.join(
-#                         [
-#                             lines,
-#                             Default.EOL,
-#                             Default.INDENT * (tabs),
-#                             quote_mark,
-#                             str(item),
-#                             quote_mark,
-#                             line_end,
-#                         ]
-#                     )
-#                 else:
-#                     lines = ''.join(
-#                         [lines, item.code(tabs, full=full), Default.COMMA]
-#                     )
-#             return ''.join(
-#                 [
-#                     lines,
-#                     Default.EOL,
-#                     Default.INDENT * (tabs - 1),
-#                     Default.BRACKET_RIGHT,
-#                 ]
-#             )
-#         return Formatter.codes_single(items, tabs, full)
-
-#     @staticmethod
-#     def codes_line(initial: str, items: Any, tabs: int, full: bool) -> str:
-#         line_end: str = Default.COMMA
-#         result: str = Formatter.codes(items, tabs, full)
-#         keep: bool = full or result not in ['None']
-#         if keep:
-#             return ''.join([initial, result, line_end])
-#         return Default.EMPTY
-
-#     @staticmethod
-#     def display_code(
-#         name: str, *code_lines: tuple[str, Any, int, bool, bool]
-#     ) -> str:
-#         if len(code_lines) > 0:
-#             lines: str = ''.join([Default.EOL, name, '('])
-#             for line in code_lines:
-#                 returned_line = Formatter.codes_line(
-#                     line[0], line[1], line[2], line[3]
-#                 )
-#                 if returned_line != Default.EMPTY:
-#                     lines = ''.join([lines, Default.EOL, returned_line])
-#             return ''.join([lines, Default.EOL, ')'])
-#         return ''.join([Default.EOL, name])
