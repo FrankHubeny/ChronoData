@@ -22,7 +22,7 @@ from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specs7 import Calendar, Month, Structure
+from genedata.specs7 import Calendar, Enumeration, Month, Structure
 
 
 class Util:
@@ -961,8 +961,8 @@ class Names:
             'enum-ABCD'
 
             If no '/' character is in the name, return the name.
-            >>> Names.keyname('abcdedf')
-            'abcdefg'
+            >>> Names.keyname('abcdef')
+            'abcdef'
 
             If the value is empty return the empty string.
             >>> Names.keyname('')
@@ -1016,7 +1016,7 @@ class Names:
         Example:
             Let `abcdefghi` be the name of the directory.
             >>> from genedata.prep import Convert
-            >>> print(Convert.get_slash('abcdefghi'))
+            >>> print(Names.slash('abcdefghi'))
             abcdefghi/
 
         """
@@ -1035,11 +1035,11 @@ class Names:
         provided in the specification under the key 'standard tag'.
 
         Example:
-            Suppose the yaml file is '/path/to/yaml/file/something-ABC-XYZ'.
-            Then the tag would be 'XYZ'.
+            Suppose the yaml file is '/path/to/yaml/file/record-INDI'.
+            Then the tag would be 'INDI'.
             >>> from genedata.util import Names
-            >>> Names.tagname('/path/to/yaml/file/something-ABC-XYZ')
-            'XYZ'
+            >>> Names.tagname('/path/to/yaml/file/record-INDI')
+            'INDI'
 
         Args:
             value: The name of the yaml file containing the specification.
@@ -1052,6 +1052,29 @@ class Names:
             Structure[Names.keyname(value)][Default.YAML_STANDARD_TAG]
         )
         return tag
+    
+    # @staticmethod
+    # def enum_tagname(value: str) -> str:
+    #     """Return the standard tag as derived from the enumeration dictionary.
+
+    #     This is the keyname with lower characters removed starting
+    #     with the last hyphen in the name.  The standard tag is also
+    #     provided in the specification under the key 'standard tag'.
+
+    #     Example:
+    #         Suppose the yaml file is '/path/to/yaml/file/enum-ADOP-HUSB'.
+    #         Then the tag would be 'HUSB'.
+    #         >>> from genedata.util import Names
+    #         >>> Names.enum_tagname('/path/to/yaml/file/enum-ADOP-HUSB')
+    #         'HUSB'
+
+    #     Args:
+    #         value: The name of the yaml file containing the specification.
+    #     """
+    #     tag: str = str(
+    #         Enumeration[Names.keyname(value)][Default.YAML_STANDARD_TAG]
+    #     )
+    #     return tag
 
 
 class Tagger:

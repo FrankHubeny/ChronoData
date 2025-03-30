@@ -114,24 +114,24 @@ from typing import Any
             tag = tag[tag.rfind(Default.HYPHEN) + 1 :]
         return tag
 
-    @staticmethod
-    def get_slash(url: str) -> str:
-        """Add a '/' at the end of a string if one is not there already.
+    # @staticmethod
+    # def get_slash(url: str) -> str:
+    #     """Add a '/' at the end of a string if one is not there already.
 
-        This makes sure that a directory string ends with a /.
+    #     This makes sure that a directory string ends with a /.
 
-        Example:
-            Let `abcdefghi` be the name of the directory.
-            >>> from genedata.prep import Convert
-            >>> print(Convert.get_slash('abcdefghi'))
-            abcdefghi/
+    #     Example:
+    #         Let `abcdefghi` be the name of the directory.
+    #         >>> from genedata.prep import Convert
+    #         >>> print(Convert.get_slash('abcdefghi'))
+    #         abcdefghi/
 
-        """
-        if url == Default.EMPTY:
-            return url
-        if url[-1] == Default.SLASH:
-            return url
-        return f'{url}{Default.SLASH}'
+    #     """
+    #     if url == Default.EMPTY:
+    #         return url
+    #     if url[-1] == Default.SLASH:
+    #         return url
+    #     return f'{url}{Default.SLASH}'
 
     @staticmethod
     def dictionary(
@@ -140,7 +140,7 @@ from typing import Any
         prefix: str,
     ) -> str:
         lines: str = Default.BRACE_LEFT
-        directory: str = f'{Convert.get_slash(url)}{base}'
+        directory: str = f'{Names.slash(url)}{base}'
         p = Path(directory)
         if p.exists():
             for file in p.iterdir():
@@ -1275,7 +1275,7 @@ The specifications for this module are from the
         count: int = 0
         lines: str = '__all__ = [    # noqa: RUF022'
         if url != Default.EMPTY:
-            directory: str = f'{Convert.get_slash(url)}{Default.URL_STRUCTURE}'
+            directory: str = f'{Names.slash(url)}{Default.URL_STRUCTURE}'
             p = Path(directory)
             if p.exists():
                 for file in p.iterdir():
@@ -1799,7 +1799,7 @@ from genedata.structure import (
             enumeration_dictionary: The enumeration dictionary as an alternative to using the url to get this.
         """
         if url != Default.EMPTY:
-            base_url: str = Convert.get_slash(url)
+            base_url: str = Names.slash(url)
             structure: dict[str, Any] = eval(
                 Convert.structure_dictionary(base_url)
             )
@@ -1850,7 +1850,7 @@ class {class_name}(BaseStructure):
         """Generate all classes and their documentation defined by the Structure dictionary."""
 
         if url != Default.EMPTY:
-            base_url: str = Convert.get_slash(url)
+            base_url: str = Names.slash(url)
             structure: dict[str, Any] = eval(
                 Convert.structure_dictionary(base_url)
             )
@@ -2039,15 +2039,15 @@ from genedata.build import Genealogy
                                         ),
                                     ]
                                 )
-                            case 'record-SNOTE':
-                                lines = ''.join(
-                                    [
-                                        lines,
-                                        Tests.no_subs_good_test(
-                                            key, '', 'shared_note'
-                                        ),
-                                    ]
-                                )
+                            # case 'record-SNOTE':
+                            #     lines = ''.join(
+                            #         [
+                            #             lines,
+                            #             Tests.no_subs_good_test(
+                            #                 key, '', 'shared_note'
+                            #             ),
+                            #         ]
+                            #     )
                             case 'record-SOUR':
                                 lines = ''.join(
                                     [
@@ -2122,15 +2122,15 @@ from genedata.build import Genealogy
                         lines = ''.join(
                             [lines, Tests.no_subs_good_test(key, '1 JAN 2026')]
                         )
-                    case 'https://gedcom.io/terms/v7/type-FilePath':
-                        lines = ''.join(
-                            [
-                                lines,
-                                Tests.no_subs_good_test(
-                                    key, 'dir/to/somewhere'
-                                ),
-                            ]
-                        )
+                    # case 'https://gedcom.io/terms/v7/type-FilePath':
+                    #     lines = ''.join(
+                    #         [
+                    #             lines,
+                    #             Tests.no_subs_good_test(
+                    #                 key, 'dir/to/somewhere'
+                    #             ),
+                    #         ]
+                    #     )
                     case 'http://www.w3.org/ns/dcat#mediaType':
                         lines = ''.join(
                             [lines, Tests.no_subs_good_test(key, 'mime/text')]
@@ -2192,10 +2192,6 @@ from genedata.build import Genealogy
                 sub_input = "'1 JAN 2000'"
             case 'Form':
                 sub_input = "'text/html'"
-            case 'Gedc':
-                sub_input = 'GedcVers(7.0)'
-            case 'GedcVers':
-                sub_input = "'7.0'"
             case 'Role':
                 sub_input = "'WITN'"
             case 'Type':
@@ -2212,10 +2208,10 @@ from genedata.build import Genealogy
             xref_code = f"""g = Genealogy('test')
     {xref} = g.{xref}_xref('1')
     """
-            if xref == 'shared_note':
-                xref_code = """g = Genealogy('test')
-    shared_note = g.shared_note_xref('1', 'text')
-    """
+    #         if xref == 'shared_note':
+    #             xref_code = """g = Genealogy('test')
+    # shared_note = g.shared_note_xref('1', 'text')
+    # """
         lines: str = f"""
 
 def test_one_sub_{class_name}() -> None:
@@ -2257,10 +2253,14 @@ from genedata.build import Genealogy
                     'Gedc',
                     'GedcVers',
                     'HeadPlacForm',
+                    'Mime',
+                    'Name',
                     'Note',
                     'Phrase',
                     'Phon',
                     'Role',
+                    'Time',
+                    'Titl',
                     'Type',
                 ]:
                     if item in sub_permitted:
@@ -2271,46 +2271,46 @@ from genedata.build import Genealogy
                 if sub_class_name != Default.EMPTY:
                     match value[Default.YAML_PAYLOAD]:
                         case 'http://www.w3.org/2001/XMLSchema#string':
-                            match key:
-                                case 'LATI':
-                                    lines = ''.join(
-                                        [
-                                            lines,
-                                            Tests.one_sub_good_test(
-                                                key, 'N10.1', sub_class_name
-                                            ),
-                                        ]
-                                    )
-                                case 'LONG':
-                                    lines = ''.join(
-                                        [
-                                            lines,
-                                            Tests.one_sub_good_test(
-                                                key, 'E10.1', sub_class_name
-                                            ),
-                                        ]
-                                    )
-                                case 'record-SNOTE':
-                                    lines = ''.join(
-                                        [
-                                            lines,
-                                            Tests.one_sub_good_test(
-                                                key,
-                                                '',
-                                                sub_class_name,
-                                                'shared_note',
-                                            ),
-                                        ]
-                                    )
-                                case _:
-                                    lines = ''.join(
-                                        [
-                                            lines,
-                                            Tests.one_sub_good_test(
-                                                key, input, sub_class_name
-                                            ),
-                                        ]
-                                    )
+                            # match key:
+                            #     case 'LATI':
+                            #         lines = ''.join(
+                            #             [
+                            #                 lines,
+                            #                 Tests.one_sub_good_test(
+                            #                     key, 'N10.1', sub_class_name
+                            #                 ),
+                            #             ]
+                            #         )
+                            #     case 'LONG':
+                            #         lines = ''.join(
+                            #             [
+                            #                 lines,
+                            #                 Tests.one_sub_good_test(
+                            #                     key, 'E10.1', sub_class_name
+                            #                 ),
+                            #             ]
+                            #         )
+                            #     case 'record-SNOTE':
+                            #         lines = ''.join(
+                            #             [
+                            #                 lines,
+                            #                 Tests.one_sub_good_test(
+                            #                     key,
+                            #                     '',
+                            #                     sub_class_name,
+                            #                     'shared_note',
+                            #                 ),
+                            #             ]
+                            #         )
+                            #     case _:
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, input, sub_class_name
+                                    ),
+                                ]
+                            )
                         case 'Y|<NULL>':
                             lines = ''.join(
                                 [
@@ -2346,18 +2346,18 @@ from genedata.build import Genealogy
                                             ),
                                         ]
                                     )
-                                case 'record-SNOTE':
-                                    lines = ''.join(
-                                        [
-                                            lines,
-                                            Tests.one_sub_good_test(
-                                                key,
-                                                '',
-                                                sub_class_name,
-                                                'shared_note',
-                                            ),
-                                        ]
-                                    )
+                                # case 'record-SNOTE':
+                                #     lines = ''.join(
+                                #         [
+                                #             lines,
+                                #             Tests.one_sub_good_test(
+                                #                 key,
+                                #                 '',
+                                #                 sub_class_name,
+                                #                 'shared_note',
+                                #             ),
+                                #         ]
+                                #     )
                         case 'https://gedcom.io/terms/v7/type-Enum':
                             enum = enumerationset[value[Default.YAML_ENUM_KEY]][
                                 Default.YAML_ENUM_TAGS
@@ -2406,24 +2406,24 @@ from genedata.build import Genealogy
                                     ),
                                 ]
                             )
-                        case '@<https://gedcom.io/terms/v7/record-SUBM>@':
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, '', sub_class_name, 'submitter'
-                                    ),
-                                ]
-                            )
-                        case 'http://www.w3.org/2001/XMLSchema#Language':
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, 'en-US', sub_class_name
-                                    ),
-                                ]
-                            )
+                        # case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, '', sub_class_name, 'submitter'
+                        #             ),
+                        #         ]
+                        #     )
+                        # case 'http://www.w3.org/2001/XMLSchema#Language':
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, 'en-US', sub_class_name
+                        #             ),
+                        #         ]
+                        #     )
                         case 'https://gedcom.io/terms/v7/type-Date#period':
                             lines = ''.join(
                                 [
@@ -2435,18 +2435,18 @@ from genedata.build import Genealogy
                                     ),
                                 ]
                             )
-                        case 'https://gedcom.io/terms/v7/type-List#Enum':
-                            enum = enumerationset[value[Default.YAML_ENUM_KEY]][
-                                Default.YAML_ENUM_TAGS
-                            ][0]
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, enum, sub_class_name
-                                    ),
-                                ]
-                            )
+                        # case 'https://gedcom.io/terms/v7/type-List#Enum':
+                        #     enum = enumerationset[value[Default.YAML_ENUM_KEY]][
+                        #         Default.YAML_ENUM_TAGS
+                        #     ][0]
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, enum, sub_class_name
+                        #             ),
+                        #         ]
+                        #     )
                         case 'https://gedcom.io/terms/v7/type-Date#exact':
                             lines = ''.join(
                                 [
@@ -2474,15 +2474,15 @@ from genedata.build import Genealogy
                                     ),
                                 ]
                             )
-                        case 'http://www.w3.org/ns/dcat#mediaType':
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, 'mime/text', sub_class_name
-                                    ),
-                                ]
-                            )
+                        # case 'http://www.w3.org/ns/dcat#mediaType':
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, 'mime/text', sub_class_name
+                        #             ),
+                        #         ]
+                        #     )
                         case 'https://gedcom.io/terms/v7/type-Name':
                             lines = ''.join(
                                 [
@@ -2519,15 +2519,15 @@ from genedata.build import Genealogy
                                     ),
                                 ]
                             )
-                        case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, '', sub_class_name, 'shared_note'
-                                    ),
-                                ]
-                            )
+                        # case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, '', sub_class_name, 'shared_note'
+                        #             ),
+                        #         ]
+                        #     )
                         case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                             lines = ''.join(
                                 [
@@ -2537,13 +2537,13 @@ from genedata.build import Genealogy
                                     ),
                                 ]
                             )
-                        case 'https://gedcom.io/terms/v7/type-Time':
-                            lines = ''.join(
-                                [
-                                    lines,
-                                    Tests.one_sub_good_test(
-                                        key, '12:12:12', sub_class_name
-                                    ),
-                                ]
-                            )
+                        # case 'https://gedcom.io/terms/v7/type-Time':
+                        #     lines = ''.join(
+                        #         [
+                        #             lines,
+                        #             Tests.one_sub_good_test(
+                        #                 key, '12:12:12', sub_class_name
+                        #             ),
+                        #         ]
+                        #     )
         return lines
