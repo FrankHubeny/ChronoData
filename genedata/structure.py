@@ -29,7 +29,7 @@ from genedata.specs7 import (
     ExtensionStructure,
     Structure,
 )
-from genedata.util import Tagger
+from genedata.methods import Tagger
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None

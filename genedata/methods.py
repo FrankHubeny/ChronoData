@@ -277,7 +277,7 @@ class Input:
             The following example has 1.1 years, 2.2 weeks and 1 day.  Since the values
             are rounded down it is best to include non-negative integers for the years, months,
             weeks and days.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.age(1.1, -1, 2.2, 1)
             '> 1y 2w 1d'
 
@@ -368,7 +368,7 @@ class Input:
 
         Examples:
             This example constructs a date period using the Input.date method to construct the from and to dates.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_period(
             ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1)
             ... )
@@ -407,7 +407,7 @@ class Input:
         Examples:
             This example constructs a date period using the Input.date method to construct each date.
             The default calendar is the Gregorian calendar.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_between_and(
             ...     Input.date(2024, 1, 1), Input.date(2025, 1, 1)
             ... )
@@ -440,7 +440,7 @@ class Input:
 
         Examples:
             This example constructs a date after using the Input.date method to construct date.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_after(Input.date(2024, 1, 1))
             'AFT 1 JAN 2024'
 
@@ -466,7 +466,7 @@ class Input:
         Examples:
             This example constructs a date from the Input.date method.
             This method attached the BEF tag in front of that date.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_before(Input.date(2024, 1, 1))
             'BEF 1 JAN 2024'
 
@@ -492,7 +492,7 @@ class Input:
         Examples:
             This example constructs a date from the Input.date method.
             This method attaches the ABT tag in front of that date.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_about(Input.date(2024, 1, 1))
             'ABT 1 JAN 2024'
 
@@ -518,7 +518,7 @@ class Input:
         Examples:
             This example constructs a date from the Input.date method.
             This method attaches the CAL tag in front of that date.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_calculated(Input.date(2024, 1, 1))
             'CAL 1 JAN 2024'
 
@@ -544,7 +544,7 @@ class Input:
         Examples:
             This example constructs a date from the Input.date method.
             This method attaches the EST tag in front of that date.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.date_estimated(Input.date(2024, 1, 1))
             'EST 1 JAN 2024'
 
@@ -569,7 +569,7 @@ class Input:
 
         Example:
             This example illustrates the formatting provided.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.form('City', 'State', 'County', 'Country')
             'City, State, County, Country'
         """
@@ -628,7 +628,7 @@ class Input:
         Example:
             In this example not how a string is returned preceded with 'N' for North
             because the degrees integer is positive.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.lati(10, 5, 1)
             'N10.083611'
 
@@ -666,7 +666,7 @@ class Input:
         Example:
             In this example not how a string is returned preceded with 'E' for East
             because the degrees integer is positive.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.long(10, 5, 1)
             'E10.083611'
 
@@ -700,7 +700,7 @@ class Input:
         """Format a personal name to meet GEDCOM name type specifications.
 
         Example:
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.name('Jim Smith', 'Smith')
             'Jim /Smith/'
 
@@ -772,7 +772,7 @@ class Input:
 
         Examples:
             The first example shows the use of the default, US, international number.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.phone(1, 123, 456, 7890)
             '+1 123 456 7890'
 
@@ -824,7 +824,7 @@ class Input:
 
         Example:
             This example illustrates the formatting provided.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.form('Chicago', 'Illinois', 'Cook', 'USA')
             'Chicago, Illinois, Cook, USA'
         """
@@ -845,7 +845,7 @@ class Input:
         """Convert a measurment in decimals to one showing degrees, minutes
         and sconds.
 
-        >>> from genedata.util import Input
+        >>> from genedata.methods import Input
         >>> Input.to_dms(49.29722222222, 10)
         (49, 17, 49.999999992)
 
@@ -873,7 +873,7 @@ class Input:
         Example:
             The specification for the LATI and LONG structures (tags) offer the
             following example.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> Input.to_decimal(168, 9, 3.4, 6)
             168.150944
 
@@ -918,7 +918,7 @@ class Input:
         Example:
             The following example would send a logging message warning
             that the site "abc" cannot be reached.
-            >>> from genedata.util import Input
+            >>> from genedata.methods import Input
             >>> import genedata.classes7 as gc
             >>> response = gc.Www(Input.www('abc'))
             >>> print(response.ged(1))
@@ -956,7 +956,7 @@ class Names:
             we want to retrieve 'enum-ABCD' since that will be used as the
             key to this specification in the Enumerations dictionary
             of the specs module.
-            >>> from genedata.util import Names
+            >>> from genedata.methods import Names
             >>> Names.keyname('dir/to/yaml/file/enum-ABCD')
             'enum-ABCD'
 
@@ -989,7 +989,7 @@ class Names:
         Examples:
             Suppose the yaml file is '/dir/to/yaml/file/enum-XYZ' Then
             the class name would be 'Xyz'.
-            >>> from genedata.util import Names
+            >>> from genedata.methods import Names
             >>> Names.classname('/dir/to/yaml/file/enum-XYZ')
             'Xyz'
 
@@ -1037,7 +1037,7 @@ class Names:
         Example:
             Suppose the yaml file is '/path/to/yaml/file/record-INDI'.
             Then the tag would be 'INDI'.
-            >>> from genedata.util import Names
+            >>> from genedata.methods import Names
             >>> Names.tagname('/path/to/yaml/file/record-INDI')
             'INDI'
 
@@ -1064,7 +1064,7 @@ class Names:
     #     Example:
     #         Suppose the yaml file is '/path/to/yaml/file/enum-ADOP-HUSB'.
     #         Then the tag would be 'HUSB'.
-    #         >>> from genedata.util import Names
+    #         >>> from genedata.methods import Names
     #         >>> Names.enum_tagname('/path/to/yaml/file/enum-ADOP-HUSB')
     #         'HUSB'
 
@@ -1138,7 +1138,7 @@ class Tagger:
             The main use of this method generates a GEDCOM line.
             Note how the initial and ending spaces have been stripped from
             the input value.
-            >>> from genedata.util import Tagger
+            >>> from genedata.methods import Tagger
             >>> print(Tagger.taginfo(1, 'NAME', '  Some Name'))
             1 NAME   Some Name
             <BLANKLINE>
@@ -1200,7 +1200,7 @@ class Tagger:
         > as its payload are encoded with no LineVal and no space after the Tag.
 
         Example:
-            >>> from genedata.util import Tagger
+            >>> from genedata.methods import Tagger
             >>> lines = ''
             >>> lines = Tagger.empty(lines, 1, 'MAP')
             >>> print(lines)
@@ -1237,7 +1237,7 @@ class Tagger:
 
         Examples:
             Suppose there is only one string that should be tagged.
-            >>> from genedata.util import Tagger
+            >>> from genedata.methods import Tagger
             >>> lines = ''
             >>> lines = Tagger.empty(lines, 1, 'MAP')
             >>> lines = Tagger.string(lines, 2, 'LATI', 'N30.0')
@@ -1338,7 +1338,7 @@ class Tagger:
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
             >>> import genedata.classes7 as gc
-            >>> from genedata.util import Tagger
+            >>> from genedata.methods import Tagger
             >>> map1 = gc.Map([gc.Lati('N30.000000'), gc.Long('W30.000000')])
             >>> map2 = gc.Map([gc.Lati('S40.000000'), gc.Long('E20.000000')])
             >>> lines = ''

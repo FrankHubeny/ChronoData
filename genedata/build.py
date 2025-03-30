@@ -50,7 +50,7 @@ from genedata.structure import (
     SubmitterXref,
     Void,
 )
-from genedata.util import Tagger, Util
+from genedata.methods import Tagger, Util
 
 
 class StructureSpecs(NamedTuple):

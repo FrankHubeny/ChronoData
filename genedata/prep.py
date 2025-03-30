@@ -31,7 +31,7 @@ from typing import Any
 
 from genedata.constants import Config, Default
 from genedata.messages import Msg
-from genedata.util import Names, Util
+from genedata.methods import Names, Util
 
 
 class Convert:
@@ -680,7 +680,7 @@ Examples: dict[str, str] = {
         Since it may be difficult to convert from degrees, minutes
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
-        >>> from genedata.util import Input
+        >>> from genedata.methods import Input
         >>> m = {Default.CODE_CLASS}.Map(
         ...     [
         ...         {Default.CODE_CLASS}.Lati(Input.lati(18, 9, 3.4)), 
@@ -714,7 +714,7 @@ Examples: dict[str, str] = {
         Since it may be difficult to convert from degrees, minutes
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
-        >>> from genedata.util import Input
+        >>> from genedata.methods import Input
         >>> m = {Default.CODE_CLASS}.Map(
         ...     [
         ...         {Default.CODE_CLASS}.Lati('N18.150944'), 
@@ -731,7 +731,7 @@ Examples: dict[str, str] = {
     Examples:
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
         coordinates into a map structure to produce the GEDCOM output.
-        >>> from genedata.util import Input
+        >>> from genedata.methods import Input
         >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         >>> m = {Default.CODE_CLASS}.Map(
         ...     [
@@ -1218,7 +1218,7 @@ Examples: dict[str, str] = {
     Examples:
         The following example would send a logging message warning
         that the site "abc" cannot be reached.
-        >>> from genedata.util import Input
+        >>> from genedata.methods import Input
         >>> import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         >>> response = Www(Input.www('abc'))
         >>> print(response.ged(1))
