@@ -93,6 +93,12 @@ def test_no_subs_Auth() -> None:
     assert m.validate()
 
 
+def test_no_subs_Bapl() -> None:
+    '''Validate the Bapl structure with a value, but without substructures.'''
+    m = gc.Bapl()
+    assert m.validate()
+
+
 def test_no_subs_Bapm() -> None:
     '''Validate the Bapm structure with a value, but without substructures.'''
     m = gc.Bapm('Y')
@@ -179,6 +185,12 @@ def test_no_subs_Conf() -> None:
     assert m.validate()
 
 
+def test_no_subs_Conl() -> None:
+    '''Validate the Conl structure with a value, but without substructures.'''
+    m = gc.Conl()
+    assert m.validate()
+
+
 def test_no_subs_Copr() -> None:
     '''Validate the Copr structure with a value, but without substructures.'''
     m = gc.Copr('abc')
@@ -197,6 +209,12 @@ def test_no_subs_Crem() -> None:
     assert m.validate()
 
 
+def test_no_subs_Crop() -> None:
+    '''Validate the Crop structure with a value, but without substructures.'''
+    m = gc.Crop()
+    assert m.validate()
+
+
 def test_no_subs_Ctry() -> None:
     '''Validate the Ctry structure with a value, but without substructures.'''
     m = gc.Ctry('abc')
@@ -212,6 +230,12 @@ def test_no_subs_DataEvenDate() -> None:
 def test_no_subs_DataEven() -> None:
     '''Validate the DataEven structure with a value, but without substructures.'''
     m = gc.DataEven('CENS')
+    assert m.validate()
+
+
+def test_no_subs_Data() -> None:
+    '''Validate the Data structure with a value, but without substructures.'''
+    m = gc.Data()
     assert m.validate()
 
 
@@ -280,6 +304,12 @@ def test_no_subs_Email() -> None:
 def test_no_subs_Emig() -> None:
     '''Validate the Emig structure with a value, but without substructures.'''
     m = gc.Emig('Y')
+    assert m.validate()
+
+
+def test_no_subs_Endl() -> None:
+    '''Validate the Endl structure with a value, but without substructures.'''
+    m = gc.Endl()
     assert m.validate()
 
 
@@ -482,6 +512,12 @@ def test_no_subs_IndiResi() -> None:
 def test_no_subs_IndiTitl() -> None:
     '''Validate the IndiTitl structure with a value, but without substructures.'''
     m = gc.IndiTitl('abc')
+    assert m.validate()
+
+
+def test_no_subs_Inil() -> None:
+    '''Validate the Inil structure with a value, but without substructures.'''
+    m = gc.Inil()
     assert m.validate()
 
 
@@ -733,6 +769,14 @@ def test_no_subs_RecordSnote() -> None:
     assert m.validate()
 
 
+def test_no_subs_RecordSour() -> None:
+    '''Validate the RecordSour structure with a value, but without substructures.'''
+    g = Genealogy('test')
+    source = g.source_xref('1')
+    m = gc.RecordSour(source)
+    assert m.validate()
+
+
 def test_no_subs_Refn() -> None:
     '''Validate the Refn structure with a value, but without substructures.'''
     m = gc.Refn('abc')
@@ -771,6 +815,12 @@ def test_no_subs_Role() -> None:
     assert m.validate()
 
 
+def test_no_subs_Schma() -> None:
+    '''Validate the Schma structure with a value, but without substructures.'''
+    m = gc.Schma()
+    assert m.validate()
+
+
 def test_no_subs_Sdate() -> None:
     '''Validate the Sdate structure with a value, but without substructures.'''
     m = gc.Sdate('1 JAN 2026')
@@ -783,11 +833,23 @@ def test_no_subs_Sex() -> None:
     assert m.validate()
 
 
+def test_no_subs_Slgs() -> None:
+    '''Validate the Slgs structure with a value, but without substructures.'''
+    m = gc.Slgs()
+    assert m.validate()
+
+
 def test_no_subs_Snote() -> None:
     '''Validate the Snote structure with a value, but without substructures.'''
     g = Genealogy('test')
     shared_note = g.shared_note_xref('1', 'text')
     m = gc.Snote(shared_note)
+    assert m.validate()
+
+
+def test_no_subs_SourData() -> None:
+    '''Validate the SourData structure with a value, but without substructures.'''
+    m = gc.SourData()
     assert m.validate()
 
 

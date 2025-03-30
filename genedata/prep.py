@@ -1942,6 +1942,8 @@ class Tests:
         class_name: str = Names.classname(key)
         xref_code: str = Default.EMPTY
         input: str | int = f"'{value}'"
+        if value == Default.EMPTY:
+            input = ''
         if isinstance(value, int):
             input = value
         if xref != Default.EMPTY:
@@ -1979,7 +1981,10 @@ from genedata.build import Genealogy
 """
         input: str = 'abc'
         for key, value in structure.items():
-            if len(value[Default.YAML_REQUIRED]) == 0:
+            if len(value[Default.YAML_REQUIRED]) == 0 and key not in [
+                Default.TRLR,
+                Default.CONT,
+            ]:
                 match value[Default.YAML_PAYLOAD]:
                     case 'http://www.w3.org/2001/XMLSchema#string':
                         match key:
@@ -2042,6 +2047,19 @@ from genedata.build import Genealogy
                                             key, '', 'shared_note'
                                         ),
                                     ]
+                                )
+                            case 'record-SOUR':
+                                lines = ''.join(
+                                    [
+                                        lines,
+                                        Tests.no_subs_good_test(
+                                            key, '', 'source'
+                                        ),
+                                    ]
+                                )
+                            case _:
+                                lines = ''.join(
+                                    [lines, Tests.no_subs_good_test(key, '')]
                                 )
                     case 'https://gedcom.io/terms/v7/type-Enum':
                         enum = enumerationset[value[Default.YAML_ENUM_KEY]][
@@ -2157,4 +2175,375 @@ from genedata.build import Genealogy
                         lines = ''.join(
                             [lines, Tests.no_subs_good_test(key, '12:12:12')]
                         )
+        return lines
+
+    @staticmethod
+    def one_sub_good_test(
+        key: str,
+        value: str | int,
+        sub_class_name: str,
+        xref: str = Default.EMPTY,
+    ) -> str:
+        class_name: str = Names.classname(key)
+        xref_code: str = Default.EMPTY
+        sub_input: str | int = "'abc'"
+        match sub_class_name:
+            case 'DateExact':
+                sub_input = "'1 JAN 2000'"
+            case 'Form':
+                sub_input = "'text/html'"
+            case 'Gedc':
+                sub_input = 'GedcVers(7.0)'
+            case 'GedcVers':
+                sub_input = "'7.0'"
+            case 'Role':
+                sub_input = "'WITN'"
+            case 'Type':
+                sub_input = "'Bishop'"
+            case 'Age':
+                sub_input = "'> 25y'"
+        # if isinstance(value, int):
+        #     sub_input = sub_value
+        input: str | int = f"'{value}'"
+        if isinstance(value, int):
+            input = value
+        if xref != Default.EMPTY:
+            input = f'{xref}'
+            xref_code = f"""g = Genealogy('test')
+    {xref} = g.{xref}_xref('1')
+    """
+            if xref == 'shared_note':
+                xref_code = """g = Genealogy('test')
+    shared_note = g.shared_note_xref('1', 'text')
+    """
+        lines: str = f"""
+
+def test_one_sub_{class_name}() -> None:
+    '''Validate the {class_name} structure with a value and one substructure.'''
+    {xref_code}m = {Default.CODE_CLASS}.{class_name}({input}, {Default.CODE_CLASS}.{sub_class_name}({sub_input}))
+    assert m.validate()
+"""
+        return lines
+
+    @staticmethod
+    def build_one_sub_good_tests(
+        structure: dict[str, dict[str, Any]],
+        enumerationset: dict[str, dict[str, Any]],
+    ) -> str:
+        lines: str = f"""'''The tests in this file have been generated from the specs module
+to test the classes in the classes module.  These tests are for classes that 
+permit at least one substructure and require less than one.  Some of the classes
+tested in the no_subs_test are tested again here.
+
+DO NOT MANUALLY MODIFY THIS FILE.
+'''
+
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+from genedata.build import Genealogy
+"""
+        input: str = 'abc'
+        for key, value in structure.items():
+            if (
+                key not in [Default.TRLR, Default.CONT]
+                and len(value[Default.YAML_REQUIRED]) < 2
+                and len(value[Default.YAML_PERMITTED]) > 0
+            ):
+                sub_permitted: list[str] = value[Default.YAML_PERMITTED]
+                sub_class_name: str = Default.EMPTY
+                for item in [
+                    'Age',
+                    'DateExact',
+                    'Form',
+                    'Gedc',
+                    'GedcVers',
+                    'HeadPlacForm',
+                    'Note',
+                    'Phrase',
+                    'Phon',
+                    'Role',
+                    'Type',
+                ]:
+                    if item in sub_permitted:
+                        sub_class_name = item
+                        break
+                if len(value[Default.YAML_REQUIRED]) == 1:
+                    sub_class_name = value[Default.YAML_REQUIRED][0]
+                if sub_class_name != Default.EMPTY:
+                    match value[Default.YAML_PAYLOAD]:
+                        case 'http://www.w3.org/2001/XMLSchema#string':
+                            match key:
+                                case 'LATI':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key, 'N10.1', sub_class_name
+                                            ),
+                                        ]
+                                    )
+                                case 'LONG':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key, 'E10.1', sub_class_name
+                                            ),
+                                        ]
+                                    )
+                                case 'record-SNOTE':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key,
+                                                '',
+                                                sub_class_name,
+                                                'shared_note',
+                                            ),
+                                        ]
+                                    )
+                                case _:
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key, input, sub_class_name
+                                            ),
+                                        ]
+                                    )
+                        case 'Y|<NULL>':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 'Y', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case None:
+                            match key:
+                                case 'record-INDI':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key,
+                                                '',
+                                                sub_class_name,
+                                                'individual',
+                                            ),
+                                        ]
+                                    )
+                                case 'record-FAM':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key,
+                                                '',
+                                                sub_class_name,
+                                                'family',
+                                            ),
+                                        ]
+                                    )
+                                case 'record-SNOTE':
+                                    lines = ''.join(
+                                        [
+                                            lines,
+                                            Tests.one_sub_good_test(
+                                                key,
+                                                '',
+                                                sub_class_name,
+                                                'shared_note',
+                                            ),
+                                        ]
+                                    )
+                        case 'https://gedcom.io/terms/v7/type-Enum':
+                            enum = enumerationset[value[Default.YAML_ENUM_KEY]][
+                                Default.YAML_ENUM_TAGS
+                            ][0]
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, enum, sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 1, sub_class_name
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-INDI>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'individual'
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-FAM>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'family'
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-List#Text':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, input, sub_class_name
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-SUBM>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'submitter'
+                                    ),
+                                ]
+                            )
+                        case 'http://www.w3.org/2001/XMLSchema#Language':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 'en-US', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Date#period':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key,
+                                        'FROM 1 DEC 2000 TO 5 DEC 2000',
+                                        sub_class_name,
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-List#Enum':
+                            enum = enumerationset[value[Default.YAML_ENUM_KEY]][
+                                Default.YAML_ENUM_TAGS
+                            ][0]
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, enum, sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Date#exact':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '1 JAN 2026', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Date':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '1 JAN 2026', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-FilePath':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 'dir/to/somewhere', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'http://www.w3.org/ns/dcat#mediaType':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 'mime/text', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Name':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, 'John /Doe/', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Age':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '> 25y 10m 1d', sub_class_name
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'multimedia'
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-REPO>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'repository'
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'shared_note'
+                                    ),
+                                ]
+                            )
+                        case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '', sub_class_name, 'source'
+                                    ),
+                                ]
+                            )
+                        case 'https://gedcom.io/terms/v7/type-Time':
+                            lines = ''.join(
+                                [
+                                    lines,
+                                    Tests.one_sub_good_test(
+                                        key, '12:12:12', sub_class_name
+                                    ),
+                                ]
+                            )
         return lines

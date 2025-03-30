@@ -999,7 +999,7 @@ class Names:
         base: str = re.sub(
             '[a-z]',
             Default.EMPTY,
-            Names.keyname(value).replace('record', 'RECORD').replace('exact','EXACT'),
+            Names.keyname(value).replace('record', 'RECORD').replace('exact','EXACT').replace('ord', 'ORD'),
         )
         return (
             base.title()
