@@ -147,6 +147,12 @@ class Default:
     TAG_SNOTE: str = 'SNOTE'
     TAG_SOUR: str = 'SOUR'
     TAG_SUBM: str = 'SUBM'
+    TEST_BASE: str = 'Base'
+    TEST_ONE_SUB: str = 'One Sub'
+    TEST_REQUIRED: str = 'Required'
+    TEST_PERMITTED: str = 'Permitted'
+    TEST_SINGLE: str = 'Single'
+    TEST_PAYLOAD: str = 'Payload'
     TIME_HOUR: int = 0
     TIME_MINUTE: int = 0
     TIME_SECOND: float = 0.0

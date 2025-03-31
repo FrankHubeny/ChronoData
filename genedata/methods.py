@@ -22,7 +22,7 @@ from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specs7 import Calendar, Enumeration, Month, Structure
+from genedata.specs7 import Calendar, Month, Structure
 
 
 class Util:
