@@ -20,7 +20,7 @@ import pytest
 import genedata.classes7 as gc
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.util import Input
+from genedata.methods import Input
 
 
 # 1. Validate Section

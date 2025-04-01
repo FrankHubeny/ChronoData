@@ -22,7 +22,7 @@ from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specs7 import Calendar, Month, Structure
+from genedata.specifications7 import Calendar, Month, Structure
 
 
 class Util:
@@ -329,32 +329,33 @@ class Input:
             show: If True then the calendar name will be displayed in front of the date.
 
         Reference:
-        - [GEDCOM Date Type](https://gedcom.io/terms/v7/type-Date)"""
-        calendar_tag: str = Default.EMPTY
+        - [GEDCOM Date Type](https://gedcom.io/terms/v7/type-Date)
+        """
+        calendar_key: str = ''.join([Default.URL_CALENDAR_PREFIX, calendar.upper()])
+        calendar_tag: str = Calendar[calendar_key][Default.YAML_STANDARD_TAG]
+        show_calendar: str = Default.EMPTY
         if show:
-            calendar_tag = Calendar[calendar]['standard tag']
-        epoch_list: list[str] = Calendar[calendar]['epochs']
+            show_calendar = calendar_tag
+        epoch_list: list[str] = Calendar[calendar_key][Default.YAML_EPOCHS]
         epoch: str = Default.EMPTY
         if year < 0 and len(epoch_list) > 0:
             epoch = epoch_list[0]
             year = abs(year)
-        if calendar in ['GREGORIAN', 'JULIAN'] and year == 0:
+        if calendar_tag in ['GREGORIAN', 'JULIAN'] and year == 0:
             raise ValueError(Msg.ZERO_YEAR.format(calendar))
         month_tag: str = Default.EMPTY
         if month > 0:
-            month_spec: str = Calendar[calendar]['months'][month - 1]
-            month_tag = Month[month_spec[month_spec.rfind('month-') + 6 :]][
-                'standard tag'
-            ]
+            month_uri: str = Calendar[calendar_key][Default.YAML_MONTHS][month - 1]
+            month_tag = Month[Names.stem(month_uri)][Default.YAML_STANDARD_TAG]
         day_tag: str = Default.EMPTY
         if day > 0:
             day_tag = str(day)
         return (
-            f'{calendar_tag} {day_tag} {month_tag} {year!s} {epoch}'.replace(
-                '  ', ' '
+            f'{show_calendar} {day_tag} {month_tag} {year!s} {epoch}'.replace(
+                Default.SPACE_DOUBLE, Default.SPACE
             )
-            .replace('  ', ' ')
-            .replace('  ', ' ')
+            .replace(Default.SPACE_DOUBLE, Default.SPACE)
+            .replace(Default.SPACE_DOUBLE, Default.SPACE)
             .strip()
         )
 
@@ -971,13 +972,18 @@ class Names:
         Args:
             value: The name of the yaml file.
         """
-        if value == Default.EMPTY:
+        if value == Default.EMPTY or value[-1] == Default.SLASH:
             return value
         if Default.SLASH in value:
             return value[value.rfind(Default.SLASH) + 1 :].replace(
                 Default.QUOTE_DOUBLE, Default.EMPTY
             )
         return value.replace(Default.QUOTE_DOUBLE, Default.EMPTY)
+
+    @staticmethod
+    def stem(file_name: str) -> str:
+        p = Path(file_name)
+        return p.stem
 
     @staticmethod
     def classname(value: str) -> str:
@@ -1015,7 +1021,7 @@ class Names:
 
         Example:
             Let `abcdefghi` be the name of the directory.
-            >>> from genedata.prep import Convert
+            >>> from genedata.methods import Names
             >>> print(Names.slash('abcdefghi'))
             abcdefghi/
 
@@ -1053,28 +1059,36 @@ class Names:
         )
         return tag
     
-    # @staticmethod
-    # def enum_tagname(value: str) -> str:
-    #     """Return the standard tag as derived from the enumeration dictionary.
 
-    #     This is the keyname with lower characters removed starting
-    #     with the last hyphen in the name.  The standard tag is also
-    #     provided in the specification under the key 'standard tag'.
+    @staticmethod
+    def quote_text(value: str) -> str:
+        """Put quote marks around a string checking for multiline strings 
+        and single quotes in the string.
+        
+        Example:
+            Suppose the value to quote is `happy birthday`. This is a single line string
+            with no single quote mark in the string.  This should return "'happy birthday'"
+            >>> from genedata.methods import Names
+            >>> Names.quote_text('happy birthday')
+            "'happy birthday'"
 
-    #     Example:
-    #         Suppose the yaml file is '/path/to/yaml/file/enum-ADOP-HUSB'.
-    #         Then the tag would be 'HUSB'.
-    #         >>> from genedata.methods import Names
-    #         >>> Names.enum_tagname('/path/to/yaml/file/enum-ADOP-HUSB')
-    #         'HUSB'
+            If we put this on two lines `happy\nbirthday` we would get "'''happy\nbirthday'''".
+            >> Names.quote_text('happy\nbirthday')
+            "'''happy\nbirthday'''"
 
-    #     Args:
-    #         value: The name of the yaml file containing the specification.
-    #     """
-    #     tag: str = str(
-    #         Enumeration[Names.keyname(value)][Default.YAML_STANDARD_TAG]
-    #     )
-    #     return tag
+            If there is a single quote in the string, `Tom's birthday` we would get "Tom's birthday".
+            >>> Names.quote_text("Tom's birthday")
+            '"Tom\\'s birthday"'
+
+
+        """
+        if Default.EOL in value:
+            if Default.QUOTE_SINGLE in value:
+                return f'"""{value}"""'
+            return f"'''{value}'''"
+        if Default.QUOTE_SINGLE in value:
+            return f'"{value}"'
+        return f"'{value}'"
 
 
 class Tagger:

@@ -13,32 +13,22 @@ import re
 
 import pytest
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    Chan,
-    DateExact,
-    Gedc,
-    GedcVers,
-    Head,
-    HeadSour,
-    Name,
-    Note,
-    RecordSnote,
-    RecordSour,
-    RecordSubm,
-    Snote,
-    Sour,
-    Subm,
-    Trlr,
-)
-from genedata.constants import Config
+from genedata.constants import Config, Default
 from genedata.messages import Msg
+from genedata.structure import (  # noqa: F401
+    SharedNoteXref,
+    SourceXref,
+    SubmitterXref,
+    Xref,
+)
 
 
 def test_note1_ged() -> None:
-    # Test constructing the note1_ged test data without circular issue.
+    # Test constructing the note1_ged test data without the circular issue.
 
-    file = """0 HEAD
+    file_not_circular = """0 HEAD
 1 SOUR conversion test
 1 SUBM @1@
 1 GEDC
@@ -68,32 +58,32 @@ def test_note1_ged() -> None:
     snote5_xref = g.shared_note_xref('5', 'A cyclic note record')
     sour_xref = g.source_xref('2')
 
-    head = Head(
+    head = gc.Head(
         [
-            HeadSour('conversion test'),
-            Subm(subm_xref),
-            Gedc(GedcVers(Config.GEDVERSION)),
-            Note('the header note'),
+            gc.HeadSour('conversion test'),
+            gc.Subm(subm_xref),
+            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Note('the header note'),
         ]
     )
-    subm = RecordSubm(
+    subm = gc.RecordSubm(
         subm_xref,
         [
-            Name('Luther Tychonievich'),
-            Note('An inline submission note'),
-            Snote(snote4_xref),
+            gc.Name('Luther Tychonievich'),
+            gc.Note('An inline submission note'),
+            gc.Snote(snote4_xref),
         ],
     )
-    sour = RecordSour(
+    sour = gc.RecordSour(
         sour_xref,
         [
-            Snote(snote3_xref),
-            Snote(snote4_xref),
-            Snote(snote5_xref),
+            gc.Snote(snote3_xref),
+            gc.Snote(snote4_xref),
+            gc.Snote(snote5_xref),
         ],
     )
-    snote3 = RecordSnote(snote3_xref, Chan(DateExact('25 MAY 2021')))
-    snote4 = RecordSnote(snote4_xref, Chan(DateExact('25 MAY 2021')))
+    snote3 = gc.RecordSnote(snote3_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
+    snote4 = gc.RecordSnote(snote4_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
 
     gedcom = ''.join(
         [
@@ -102,39 +92,36 @@ def test_note1_ged() -> None:
             sour.ged(),
             snote3.ged(),
             snote4.ged(),
-            Trlr().ged(),
+            Default.TRAILER,
         ]
     )
 
-    assert gedcom == file
+    assert gedcom == file_not_circular
 
+def test_note1_ged_code() -> None:
+    # Test generating code, evaluating it and then finding the ged lines.
 
-def test_note1_ged_circular() -> None:
-    """Test constructing the note1_ged test data with the circular issue."""
-
-    #     file_circular = """0 HEAD
-    # 1 SOUR conversion test
-    # 1 SUBM @1@
-    # 1 GEDC
-    # 2 VERS 7.0
-    # 1 NOTE the header note
-    # 0 @1@ SUBM
-    # 1 NAME Luther Tychonievich
-    # 1 NOTE An inline submission note
-    # 1 SNOTE @4@
-    # 0 @2@ SOUR
-    # 1 SNOTE @3@
-    # 1 SNOTE @4@
-    # 1 SNOTE @5@
-    # 0 @3@ SNOTE A single-use note record
-    # 1 CHAN
-    # 2 DATE 25 MAY 2021
-    # 0 @4@ SNOTE A dual-use note record
-    # 1 CHAN
-    # 2 DATE 25 MAY 2021
-    # 0 @5@ SNOTE A cyclic note record
-    # 1 SOUR @2@
-    # 0 TRLR"""
+    file_not_circular = """0 HEAD
+1 SOUR conversion test
+1 SUBM @1@
+1 GEDC
+2 VERS 7.0
+1 NOTE the header note
+0 @1@ SUBM
+1 NAME Luther Tychonievich
+1 NOTE An inline submission note
+1 SNOTE @4@
+0 @2@ SOUR
+1 SNOTE @3@
+1 SNOTE @4@
+1 SNOTE @5@
+0 @3@ SNOTE A single-use note record
+1 CHAN
+2 DATE 25 MAY 2021
+0 @4@ SNOTE A dual-use note record
+1 CHAN
+2 DATE 25 MAY 2021
+0 TRLR"""
 
     g = Genealogy('test')
 
@@ -144,33 +131,85 @@ def test_note1_ged_circular() -> None:
     snote5_xref = g.shared_note_xref('5', 'A cyclic note record')
     sour_xref = g.source_xref('2')
 
-    head = Head(
+    head = gc.Head(
         [
-            HeadSour('conversion test'),
-            Subm(subm_xref),
-            Gedc(GedcVers(Config.GEDVERSION)),
-            Note('the header note'),
+            gc.HeadSour('conversion test'),
+            gc.Subm(subm_xref),
+            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Note('the header note'),
         ]
     )
-    subm = RecordSubm(
+    subm = gc.RecordSubm(
         subm_xref,
         [
-            Name('Luther Tychonievich'),
-            Note('An inline submission note'),
-            Snote(snote4_xref),
+            gc.Name('Luther Tychonievich'),
+            gc.Note('An inline submission note'),
+            gc.Snote(snote4_xref),
         ],
     )
-    sour = RecordSour(
+    sour = gc.RecordSour(
         sour_xref,
         [
-            Snote(snote3_xref),
-            Snote(snote4_xref),
-            Snote(snote5_xref),
+            gc.Snote(snote3_xref),
+            gc.Snote(snote4_xref),
+            gc.Snote(snote5_xref),
         ],
     )
-    snote3 = RecordSnote(snote3_xref, Chan(DateExact('25 MAY 2021')))
-    snote4 = RecordSnote(snote4_xref, Chan(DateExact('25 MAY 2021')))
-    snote5 = RecordSnote(snote5_xref, Sour(sour_xref))
+    snote3 = gc.RecordSnote(snote3_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
+    snote4 = gc.RecordSnote(snote4_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
+
+    gedcom = ''.join(
+        [
+            eval(head.code()).ged(),
+            eval(subm.code()).ged(),
+            eval(sour.code()).ged(),
+            eval(snote3.code()).ged(),
+            eval(snote4.code()).ged(),
+            Default.TRAILER,
+        ]
+    )
+
+    assert gedcom == file_not_circular
+
+
+def test_note1_ged_circular() -> None:
+    """Test constructing the note1_ged test data with the circular issue."""
+
+    g = Genealogy('test')
+
+    subm_xref = g.submitter_xref('1')
+    snote3_xref = g.shared_note_xref('3', 'A single-use note record')
+    snote4_xref = g.shared_note_xref('4', 'A dual-use note record')
+    snote5_xref = g.shared_note_xref('5', 'A cyclic note record')
+    sour_xref = g.source_xref('2')
+
+    head = gc.Head(
+        [
+            gc.HeadSour('conversion test'),
+            gc.Subm(subm_xref),
+            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Note('the header note'),
+        ]
+    )
+    subm = gc.RecordSubm(
+        subm_xref,
+        [
+            gc.Name('Luther Tychonievich'),
+            gc.Note('An inline submission note'),
+            gc.Snote(snote4_xref),
+        ],
+    )
+    sour = gc.RecordSour(
+        sour_xref,
+        [
+            gc.Snote(snote3_xref),
+            gc.Snote(snote4_xref),
+            gc.Snote(snote5_xref),
+        ],
+    )
+    snote3 = gc.RecordSnote(snote3_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
+    snote4 = gc.RecordSnote(snote4_xref, gc.Chan(gc.DateExact('25 MAY 2021')))
+    snote5 = gc.RecordSnote(snote5_xref, gc.Sour(sour_xref))
 
     with pytest.raises(
         ValueError,
@@ -184,6 +223,6 @@ def test_note1_ged_circular() -> None:
                 snote3.ged(),
                 snote4.ged(),
                 snote5.ged(),
-                Trlr().ged(),
+                Default.TRAILER,
             ]
         )

@@ -1,27 +1,11 @@
 # remarriage1_ged_test.py
 """Generate the Remarriage 1 example gedcom file."""
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    Date,
-    Deat,
-    Div,
-    FamHusb,
-    Fams,
-    FamWife,
-    Gedc,
-    GedcVers,
-    Head,
-    IndiName,
-    Marr,
-    RecordFam,
-    RecordIndi,
-    Sex,
-    Trlr,
-)
-from genedata.constants import Config
+from genedata.constants import Config, Default
 from genedata.structure import FamilyXref, IndividualXref  # noqa: F401
-from genedata.util import Util
+from genedata.methods import Util
 
 
 def test_remarriage1_ged() -> None:
@@ -34,53 +18,53 @@ def test_remarriage1_ged() -> None:
     fam_f1_xref = g.family_xref('F1')
     fam_f2_xref = g.family_xref('F2')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    indi1 = RecordIndi(
+    indi1 = gc.RecordIndi(
         indi_i1_xref,
         [
-            IndiName('John Q /Public/'),
-            Sex('M'),
-            Fams(fam_f1_xref),
-            Fams(fam_f2_xref),
+            gc.IndiName('John Q /Public/'),
+            gc.Sex('M'),
+            gc.Fams(fam_f1_xref),
+            gc.Fams(fam_f2_xref),
         ],
     )
 
-    indi2 = RecordIndi(
+    indi2 = gc.RecordIndi(
         indi_i2_xref,
         [
-            IndiName('Jane /Doe/'),
-            Sex('F'),
-            Fams(fam_f1_xref),
+            gc.IndiName('Jane /Doe/'),
+            gc.Sex('F'),
+            gc.Fams(fam_f1_xref),
         ],
     )
 
-    indi3 = RecordIndi(
+    indi3 = gc.RecordIndi(
         indi_i3_xref,
         [
-            IndiName('Mary /Roe/'),
-            Deat('', Date('1 MAR 1914')),
-            Fams(fam_f2_xref),
+            gc.IndiName('Mary /Roe/'),
+            gc.Deat('', gc.Date('1 MAR 1914')),
+            gc.Fams(fam_f2_xref),
         ],
     )
 
-    fam1 = RecordFam(
+    fam1 = gc.RecordFam(
         fam_f1_xref,
         [
-            FamHusb(indi_i1_xref),
-            FamWife(indi_i2_xref),
-            Marr('', Date('1 APR 1911')),
-            Div('', Date('2 MAY 1912')),
-            Marr('', Date('4 JUL 1914')),
+            gc.FamHusb(indi_i1_xref),
+            gc.FamWife(indi_i2_xref),
+            gc.Marr('', gc.Date('1 APR 1911')),
+            gc.Div('', gc.Date('2 MAY 1912')),
+            gc.Marr('', gc.Date('4 JUL 1914')),
         ],
     )
 
-    fam2 = RecordFam(
+    fam2 = gc.RecordFam(
         fam_f2_xref,
         [
-            FamHusb(indi_i1_xref),
-            FamWife(indi_i3_xref),
-            Marr('', Date('3 JUN 1913')),
+            gc.FamHusb(indi_i1_xref),
+            gc.FamWife(indi_i3_xref),
+            gc.Marr('', gc.Date('3 JUN 1913')),
         ],
     )
 
@@ -92,7 +76,7 @@ def test_remarriage1_ged() -> None:
             indi3.ged(),
             fam1.ged(),
             fam2.ged(),
-            Trlr().ged(),
+            Default.TRAILER,
         ]
     )
 
@@ -109,53 +93,53 @@ def test_remarriage1_ged_code() -> None:
     fam_f1_xref = g.family_xref('F1')
     fam_f2_xref = g.family_xref('F2')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    indi1 = RecordIndi(
+    indi1 = gc.RecordIndi(
         indi_i1_xref,
         [
-            IndiName('John Q /Public/'),
-            Sex('M'),
-            Fams(fam_f1_xref),
-            Fams(fam_f2_xref),
+            gc.IndiName('John Q /Public/'),
+            gc.Sex('M'),
+            gc.Fams(fam_f1_xref),
+            gc.Fams(fam_f2_xref),
         ],
     )
 
-    indi2 = RecordIndi(
+    indi2 = gc.RecordIndi(
         indi_i2_xref,
         [
-            IndiName('Jane /Doe/'),
-            Sex('F'),
-            Fams(fam_f1_xref),
+            gc.IndiName('Jane /Doe/'),
+            gc.Sex('F'),
+            gc.Fams(fam_f1_xref),
         ],
     )
 
-    indi3 = RecordIndi(
+    indi3 = gc.RecordIndi(
         indi_i3_xref,
         [
-            IndiName('Mary /Roe/'),
-            Deat('', Date('1 MAR 1914')),
-            Fams(fam_f2_xref),
+            gc.IndiName('Mary /Roe/'),
+            gc.Deat('', gc.Date('1 MAR 1914')),
+            gc.Fams(fam_f2_xref),
         ],
     )
 
-    fam1 = RecordFam(
+    fam1 = gc.RecordFam(
         fam_f1_xref,
         [
-            FamHusb(indi_i1_xref),
-            FamWife(indi_i2_xref),
-            Marr('', Date('1 APR 1911')),
-            Div('', Date('2 MAY 1912')),
-            Marr('', Date('4 JUL 1914')),
+            gc.FamHusb(indi_i1_xref),
+            gc.FamWife(indi_i2_xref),
+            gc.Marr('', gc.Date('1 APR 1911')),
+            gc.Div('', gc.Date('2 MAY 1912')),
+            gc.Marr('', gc.Date('4 JUL 1914')),
         ],
     )
 
-    fam2 = RecordFam(
+    fam2 = gc.RecordFam(
         fam_f2_xref,
         [
-            FamHusb(indi_i1_xref),
-            FamWife(indi_i3_xref),
-            Marr('', Date('3 JUN 1913')),
+            gc.FamHusb(indi_i1_xref),
+            gc.FamWife(indi_i3_xref),
+            gc.Marr('', gc.Date('3 JUN 1913')),
         ],
     )
 
@@ -167,7 +151,7 @@ def test_remarriage1_ged_code() -> None:
             eval(indi3.code()).ged(),
             eval(fam1.code()).ged(),
             eval(fam2.code()).ged(),
-            eval(Trlr().code()).ged(),
+            Default.TRAILER,
         ]
     )
 

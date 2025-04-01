@@ -5,24 +5,11 @@ Reference:
     [GEDCOM Age test file](https://gedcom.io/testfiles/gedcom70/obje-1.ged)
 """
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    File,
-    Form,
-    Gedc,
-    GedcVers,
-    Head,
-    Medi,
-    Note,
-    Obje,
-    RecordIndi,
-    RecordObje,
-    Titl,
-    Trlr,
-)
-from genedata.constants import Config
+from genedata.constants import Config, Default
 from genedata.structure import IndividualXref, MultimediaXref  # noqa: F401
-from genedata.util import Util
+from genedata.methods import Util
 
 
 def test_obje1_ged() -> None:
@@ -33,52 +20,52 @@ def test_obje1_ged() -> None:
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    obje1 = RecordObje(
+    obje1 = gc.RecordObje(
         obje1_xref,
         [
-            File(
+            gc.File(
                 'example.jpg',
                 [
-                    Form('image/jpeg', Medi('PHOTO')),
-                    Titl('Example Image File'),
+                    gc.Form('image/jpeg', gc.Medi('PHOTO')),
+                    gc.Titl('Example Image File'),
                 ],
             ),
-            File(
+            gc.File(
                 'example.mp3',
                 [
-                    Form('application/x-mp3'),
-                    Titl('Sound Clip'),
+                    gc.Form('application/x-mp3'),
+                    gc.Titl('Sound Clip'),
                 ],
             ),
-            Note('note in OBJE record'),
+            gc.Note('note in OBJE record'),
         ],
     )
-    obje2 = RecordObje(
+    obje2 = gc.RecordObje(
         obje2_xref,
         [
-            File(
+            gc.File(
                 'gifts.webm',
-                Form('application/x-other', Medi('VIDEO')),
+                gc.Form('application/x-other', gc.Medi('VIDEO')),
             ),
-            File(
+            gc.File(
                 'cake.webm',
-                Form('application/x-other', Medi('VIDEO')),
+                gc.Form('application/x-other', gc.Medi('VIDEO')),
             ),
-            Note('note in OBJE link'),
+            gc.Note('note in OBJE link'),
         ],
     )
-    indi = RecordIndi(
+    indi = gc.RecordIndi(
         indi_xref,
         [
-            Obje(obje1_xref),
-            Obje(obje2_xref, Titl('fifth birthday party')),
+            gc.Obje(obje1_xref),
+            gc.Obje(obje2_xref, gc.Titl('fifth birthday party')),
         ],
     )
 
     gedcom = ''.join(
-        [head.ged(), obje1.ged(), obje2.ged(), indi.ged(), Trlr().ged()]
+        [head.ged(), obje1.ged(), obje2.ged(), indi.ged(), Default.TRAILER]
     )
     assert file == gedcom
 
@@ -91,47 +78,47 @@ def test_obje1_ged_code() -> None:
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    obje1 = RecordObje(
+    obje1 = gc.RecordObje(
         obje1_xref,
         [
-            File(
+            gc.File(
                 'example.jpg',
                 [
-                    Form('image/jpeg', Medi('PHOTO')),
-                    Titl('Example Image File'),
+                    gc.Form('image/jpeg', gc.Medi('PHOTO')),
+                    gc.Titl('Example Image File'),
                 ],
             ),
-            File(
+            gc.File(
                 'example.mp3',
                 [
-                    Form('application/x-mp3'),
-                    Titl('Sound Clip'),
+                    gc.Form('application/x-mp3'),
+                    gc.Titl('Sound Clip'),
                 ],
             ),
-            Note('note in OBJE record'),
+            gc.Note('note in OBJE record'),
         ],
     )
-    obje2 = RecordObje(
+    obje2 = gc.RecordObje(
         obje2_xref,
         [
-            File(
+            gc.File(
                 'gifts.webm',
-                Form('application/x-other', Medi('VIDEO')),
+                gc.Form('application/x-other', gc.Medi('VIDEO')),
             ),
-            File(
+            gc.File(
                 'cake.webm',
-                Form('application/x-other', Medi('VIDEO')),
+                gc.Form('application/x-other', gc.Medi('VIDEO')),
             ),
-            Note('note in OBJE link'),
+            gc.Note('note in OBJE link'),
         ],
     )
-    indi = RecordIndi(
+    indi = gc.RecordIndi(
         indi_xref,
         [
-            Obje(obje1_xref),
-            Obje(obje2_xref, Titl('fifth birthday party')),
+            gc.Obje(obje1_xref),
+            gc.Obje(obje2_xref, gc.Titl('fifth birthday party')),
         ],
     )
 
@@ -141,7 +128,7 @@ def test_obje1_ged_code() -> None:
             eval(obje1.code()).ged(),
             eval(obje2.code()).ged(),
             eval(indi.code()).ged(),
-            eval(Trlr().code()).ged(),
+            Default.TRAILER,
         ]
     )
     assert file == gedcom

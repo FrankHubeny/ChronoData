@@ -1,26 +1,11 @@
 # void_ged_test.py
 """Construct the Void GEDCOM Example file."""
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    Chil,
-    FamHusb,
-    Fams,
-    FamWife,
-    Gedc,
-    GedcVers,
-    Head,
-    IndiFamc,
-    IndiName,
-    Note,
-    Pedi,
-    RecordFam,
-    RecordIndi,
-    Trlr,
-)
-from genedata.constants import Config
+from genedata.constants import Config, Default
 from genedata.structure import FamilyXref, IndividualXref, Void  # noqa: F401
-from genedata.util import Util
+from genedata.methods import Util
 
 
 def test_void_ged() -> None:
@@ -31,42 +16,42 @@ def test_void_ged() -> None:
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    indi1 = RecordIndi(
+    indi1 = gc.RecordIndi(
         indi1_xref,
         [
-            IndiName('John /Smith/'),
-            Fams(
+            gc.IndiName('John /Smith/'),
+            gc.Fams(
                 Void.FAM,
-                Note(
+                gc.Note(
                     'This tests a case where we want to show that Jane Doe was the 2nd wife.'
                 ),
             ),
-            Fams(fam_xref),
-            IndiFamc(Void.FAM, Pedi('ADOPTED')),
+            gc.Fams(fam_xref),
+            gc.IndiFamc(Void.FAM, gc.Pedi('ADOPTED')),
         ],
     )
 
-    indi2 = RecordIndi(
+    indi2 = gc.RecordIndi(
         indi2_xref,
         [
-            IndiName('Jane /Doe/'),
-            Fams(fam_xref),
+            gc.IndiName('Jane /Doe/'),
+            gc.Fams(fam_xref),
         ],
     )
 
-    fam = RecordFam(
+    fam = gc.RecordFam(
         fam_xref,
         [
-            FamHusb(indi1_xref),
-            FamWife(indi2_xref),
-            Chil(Void.INDI),
+            gc.FamHusb(indi1_xref),
+            gc.FamWife(indi2_xref),
+            gc.Chil(Void.INDI),
         ],
     )
 
     gedcom = ''.join(
-        [head.ged(), indi1.ged(), indi2.ged(), fam.ged(), Trlr().ged()]
+        [head.ged(), indi1.ged(), indi2.ged(), fam.ged(), Default.TRAILER]
     )
 
     assert file == gedcom
@@ -80,37 +65,37 @@ def test_void_ged_code() -> None:
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
 
-    head = Head(Gedc(GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
 
-    indi1 = RecordIndi(
+    indi1 = gc.RecordIndi(
         indi1_xref,
         [
-            IndiName('John /Smith/'),
-            Fams(
+            gc.IndiName('John /Smith/'),
+            gc.Fams(
                 Void.FAM,
-                Note(
+                gc.Note(
                     'This tests a case where we want to show that Jane Doe was the 2nd wife.'
                 ),
             ),
-            Fams(fam_xref),
-            IndiFamc(Void.FAM, Pedi('ADOPTED')),
+            gc.Fams(fam_xref),
+            gc.IndiFamc(Void.FAM, gc.Pedi('ADOPTED')),
         ],
     )
 
-    indi2 = RecordIndi(
+    indi2 = gc.RecordIndi(
         indi2_xref,
         [
-            IndiName('Jane /Doe/'),
-            Fams(fam_xref),
+            gc.IndiName('Jane /Doe/'),
+            gc.Fams(fam_xref),
         ],
     )
 
-    fam = RecordFam(
+    fam = gc.RecordFam(
         fam_xref,
         [
-            FamHusb(indi1_xref),
-            FamWife(indi2_xref),
-            Chil(Void.INDI),
+            gc.FamHusb(indi1_xref),
+            gc.FamWife(indi2_xref),
+            gc.Chil(Void.INDI),
         ],
     )
 
@@ -120,7 +105,7 @@ def test_void_ged_code() -> None:
             eval(indi1.code()).ged(),
             eval(indi2.code()).ged(),
             eval(fam.code()).ged(),
-            eval(Trlr().code()).ged(),
+            Default.TRAILER,
         ]
     )
 

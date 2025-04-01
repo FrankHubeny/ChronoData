@@ -119,7 +119,7 @@ Examples7: dict[str, str] = {
         that will be needed.  In this case, we need a source and a submitter xref.
         >>> {Default.CODE_GENEALOGY} = Genealogy('header test')
         >>> subm_xref = {Default.CODE_GENEALOGY}.submitter_xref('U1')
-        >>> sour_xref = {Default.CODE_CLASS}.source_xref('S1')
+        >>> sour_xref = {Default.CODE_GENEALOGY}.source_xref('S1')
 
         Third, construct the header record.
         >>> head = {Default.CODE_CLASS}.Head(
@@ -137,7 +137,7 @@ Examples7: dict[str, str] = {
         ...         {Default.CODE_CLASS}.Schma(
         ...             [
         ...                 {Default.CODE_CLASS}.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
-        ...                 {Default.CODE_CLASS}.Tag(_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
+        ...                 {Default.CODE_CLASS}.Tag('_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
         ...             ]
         ...         )
         ...     ]

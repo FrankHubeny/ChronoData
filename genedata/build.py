@@ -38,7 +38,8 @@ from genedata.constants import (
     String,
 )
 from genedata.messages import Issue, Msg
-from genedata.specs7 import Structure
+from genedata.methods import Tagger, Util
+from genedata.specifications7 import Structure
 from genedata.structure import (
     ExtensionXref,
     FamilyXref,
@@ -50,7 +51,6 @@ from genedata.structure import (
     SubmitterXref,
     Void,
 )
-from genedata.methods import Tagger, Util
 
 
 class StructureSpecs(NamedTuple):

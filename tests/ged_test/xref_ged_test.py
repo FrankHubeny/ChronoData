@@ -5,18 +5,11 @@ Reference:
     [GEDCOM Age test file](https://gedcom.io/testfiles/gedcom70/xref.ged)
 """
 
+import genedata.classes7 as gc
 from genedata.build import Genealogy
-from genedata.classes7 import (
-    Gedc,
-    GedcVers,
-    Head,
-    Note,
-    RecordIndi,
-    Trlr,
-)
-from genedata.constants import Config
+from genedata.constants import Config, Default
 from genedata.structure import IndividualXref, Void  # noqa: F401
-from genedata.util import Util
+from genedata.methods import Util
 
 
 def test_xref_ged() -> None:
@@ -25,32 +18,32 @@ def test_xref_ged() -> None:
 
     g = Genealogy('test')
 
-    head = Head(
+    head = gc.Head(
         [
-            Gedc(GedcVers(Config.GEDVERSION)),
-            Note(
+            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Note(
                 'This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'
             ),
         ]
     )
 
     indi4_xref = g.individual_xref('1')
-    indi4 = RecordIndi(indi4_xref)
-    indi1 = RecordIndi(
-        Void.INDI, Note('This individual has no cross-reference identifier.')
+    indi4 = gc.RecordIndi(indi4_xref)
+    indi1 = gc.RecordIndi(
+        Void.INDI, gc.Note('This individual has no cross-reference identifier.')
     )
     indi2_xref = g.individual_xref('I', True)
-    indi2 = RecordIndi(indi2_xref)
+    indi2 = gc.RecordIndi(indi2_xref)
     indi3_xref = g.individual_xref('I')
-    indi3 = RecordIndi(indi3_xref)
+    indi3 = gc.RecordIndi(indi3_xref)
     indi5_xref = g.individual_xref('_')
-    indi5 = RecordIndi(indi5_xref)
+    indi5 = gc.RecordIndi(indi5_xref)
     indi6_xref = g.individual_xref('0XFFFFFFFF')
-    indi6 = RecordIndi(indi6_xref)
+    indi6 = gc.RecordIndi(indi6_xref)
     indi7_xref = g.individual_xref(
         'THEXREFPRODUCTIONDOESNOTHAVEAMAXIMUMLENGTHSOTHISISATESTOFALONGCROSSREFERENCEIDENTIFIER'
     )
-    indi7 = RecordIndi(indi7_xref)
+    indi7 = gc.RecordIndi(indi7_xref)
 
     gedcom = ''.join(
         [
@@ -62,7 +55,7 @@ def test_xref_ged() -> None:
             indi5.ged(),
             indi6.ged(),
             indi7.ged(),
-            Trlr().ged(),
+            Default.TRAILER,
         ]
     )
 
@@ -75,32 +68,32 @@ def test_xref_ged_code() -> None:
 
     g = Genealogy('test')
 
-    head = Head(
+    head = gc.Head(
         [
-            Gedc(GedcVers(Config.GEDVERSION)),
-            Note(
+            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Note(
                 'This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'
             ),
         ]
     )
 
     indi4_xref = g.individual_xref('1')
-    indi4 = RecordIndi(indi4_xref)
-    indi1 = RecordIndi(
-        Void.INDI, Note('This individual has no cross-reference identifier.')
+    indi4 = gc.RecordIndi(indi4_xref)
+    indi1 = gc.RecordIndi(
+        Void.INDI, gc.Note('This individual has no cross-reference identifier.')
     )
     indi2_xref = g.individual_xref('I', True)
-    indi2 = RecordIndi(indi2_xref)
+    indi2 = gc.RecordIndi(indi2_xref)
     indi3_xref = g.individual_xref('I')
-    indi3 = RecordIndi(indi3_xref)
+    indi3 = gc.RecordIndi(indi3_xref)
     indi5_xref = g.individual_xref('_')
-    indi5 = RecordIndi(indi5_xref)
+    indi5 = gc.RecordIndi(indi5_xref)
     indi6_xref = g.individual_xref('0XFFFFFFFF')
-    indi6 = RecordIndi(indi6_xref)
+    indi6 = gc.RecordIndi(indi6_xref)
     indi7_xref = g.individual_xref(
         'THEXREFPRODUCTIONDOESNOTHAVEAMAXIMUMLENGTHSOTHISISATESTOFALONGCROSSREFERENCEIDENTIFIER'
     )
-    indi7 = RecordIndi(indi7_xref)
+    indi7 = gc.RecordIndi(indi7_xref)
 
     gedcom = ''.join(
         [
@@ -112,7 +105,7 @@ def test_xref_ged_code() -> None:
             eval(indi5.code()).ged(),
             eval(indi6.code()).ged(),
             eval(indi7.code()).ged(),
-            eval(Trlr().code()).ged(),
+            Default.TRAILER,
         ]
     )
 

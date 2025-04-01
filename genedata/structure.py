@@ -23,13 +23,11 @@ import yaml  # type: ignore[import-untyped]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specs7 import (
-    Enumeration,
-    EnumerationSet,
-    ExtensionStructure,
-    Structure,
-)
 from genedata.methods import Tagger
+from genedata.specifications7 import (
+    Enumeration,
+    ExtensionStructure,
+)
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -402,6 +400,15 @@ class BaseStructure:
         value: str | int | Xref | None = None,
         subs: Self | list[Self] | None = None,
         key: str = Default.EMPTY,
+        tag: str = Default.EMPTY,
+        permitted: list[str] | None = None,
+        required: list[str] | None = None,
+        single: list[str] | None = None,
+        enum_key: str = Default.EMPTY,
+        enum_tags: list[str] | None = None,
+        payload: str = Default.EMPTY,
+        class_name: str = Default.EMPTY,
+        
     ):
         # Process value argument
         self.value: str | int | Xref | None = value
@@ -433,28 +440,38 @@ class BaseStructure:
 
         # Process key argument
         self.key = key
-        self.tag: str = Structure[self.key][Default.YAML_STANDARD_TAG]
-        self.permitted: list[str] = Structure[self.key][Default.YAML_PERMITTED]
-        self.required: list[str] = Structure[self.key][Default.YAML_REQUIRED]
-        self.single: list[str] = Structure[self.key][Default.YAML_SINGULAR]
-        self.enum_key: str = Default.EMPTY
-        self.enum_tags: list[str] = []
-        if (
-            Default.YAML_ENUM_KEY in Structure[self.key]
-            and Structure[self.key][Default.YAML_ENUM_KEY] != Default.EMPTY
-        ):
-            self.enum_key = Structure[self.key][Default.YAML_ENUM_KEY]
-            self.enum_tags = EnumerationSet[self.enum_key][
-                Default.YAML_ENUM_TAGS
-            ]
+        self.tag: str = tag
+        if permitted is None:
+            permitted = []
+        if required is None:
+            required = []
+        if single is None:
+            single = []
+        if enum_tags is None:
+            enum_tags = []
+        self.permitted: list[str] = permitted
+        self.required: list[str] = required
+        self.single: list[str] = single
+        self.enum_key: str = enum_key
+        self.enum_tags: list[str] = enum_tags
+        self.payload: str = payload
+        self.class_name: str = class_name
+        # if (
+        #     Default.YAML_ENUM_KEY in Structure[self.key]
+        #     and Structure[self.key][Default.YAML_ENUM_KEY] != Default.EMPTY
+        # ):
+        #     self.enum_key = Structure[self.key][Default.YAML_ENUM_KEY]
+        #     self.enum_tags = EnumerationSet[self.enum_key][
+        #         Default.YAML_ENUM_TAGS
+        #     ]
         if len(self.enum_tags) > 0 and isinstance(self.value, str):
             self.value = self.value.upper()
             self.code_value = f"'{self.value}'"
-        self.payload: str | None = Structure[self.key][Default.YAML_PAYLOAD]
-        self.class_name: str = (
-            self.key.title().replace('_', '').replace('-', '')
-        )
-        self.class_name = f'{Default.CODE_CLASS}.{self.class_name}'
+        #self.payload: str | None = Default.EMPTY #Structure[self.key][Default.YAML_PAYLOAD]
+        # self.class_name: str = (
+        #     self.key.title().replace('_', '').replace('-', '')
+        # )
+        #self.class_name = Default.EMPTY #f'{Default.CODE_CLASS}.{self.class_name}'
 
         # Identify which cross reference identifier started opened the record.
         self.originator: Xref = Void.XREF
@@ -760,7 +777,7 @@ class BaseStructure:
 
         # Is value formatted correctly for its structure specification?
         match self.class_name:
-            case 'gc.Lati':
+            case 'Lati':
                 if not isinstance(self.value, str):
                     raise ValueError(Msg.NOT_STRING.format(str(self.value)))
                 if self.value[0] not in [
@@ -788,7 +805,7 @@ class BaseStructure:
                             self.class_name,
                         )
                     )
-            case 'gc.Long':
+            case 'Long':
                 if not isinstance(self.value, str):
                     raise ValueError(Msg.NOT_STRING.format(str(self.value)))
                 if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
@@ -834,14 +851,14 @@ class BaseStructure:
         if self.validate():
             lines: str = Default.EMPTY
             if self.class_name in [
-                f'{Default.CODE_CLASS}.Head',
-                f'{Default.CODE_CLASS}.RecordFam',
-                f'{Default.CODE_CLASS}.RecordIndi',
-                f'{Default.CODE_CLASS}.RecordObje',
-                f'{Default.CODE_CLASS}.RecordRepo',
-                f'{Default.CODE_CLASS}.RecordSnote',
-                f'{Default.CODE_CLASS}.RecordSour',
-                f'{Default.CODE_CLASS}.RecordSubm',
+                'Head',
+                'RecordFam',
+                'RecordIndi',
+                'RecordObje',
+                'RecordRepo',
+                'RecordSnote',
+                'RecordSour',
+                'RecordSubm',
             ]:
                 level = 0
 
@@ -1014,7 +1031,7 @@ class Ext(BaseStructure):
         self.required: list[str] = []
         self.single: list[str] = []
         self.enums: list[str] = []
-        self.payload: str | None = Default.EMPTY
+        self.payload: str = Default.EMPTY
         self.yamldict: dict[str, Any] = {}
         if '.yaml' in key:
             if key[0:4] == 'http':

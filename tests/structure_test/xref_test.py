@@ -86,7 +86,7 @@ def test_family_record_code() -> None:
     g = Genealogy('test')
     fam = g.family_xref('fam')
     m = gc.RecordFam(fam)
-    assert m.code() == "\ngc.RecordFam(FamilyXref('@FAM@'))"
+    assert m.code() == "\nRecordFam(FamilyXref('@FAM@'))"
 
 
 #     d. Exceptions raised
@@ -132,7 +132,7 @@ def test_individual_record_code() -> None:
     g = Genealogy('test')
     indi = g.individual_xref('indi')
     m = gc.RecordIndi(indi)
-    assert m.code() == "\ngc.RecordIndi(IndividualXref('@INDI@'))"
+    assert m.code() == "\nRecordIndi(IndividualXref('@INDI@'))"
 
 
 #     d. Exceptions raised
@@ -182,7 +182,7 @@ def test_multimedia_record_code() -> None:
     m = gc.RecordObje(obje, subs=gc.File('a file', gc.Form('text/html')))
     assert (
         m.code()
-        == "\ngc.RecordObje(MultimediaXref('@OBJE@'), gc.File('a file', gc.Form('text/html')))"
+        == "\nRecordObje(MultimediaXref('@OBJE@'), File('a file', Form('text/html')))"
     )
 
 
@@ -231,7 +231,7 @@ def test_repository_record_code() -> None:
     g = Genealogy('test')
     repo = g.repository_xref('repo')
     m = gc.RecordRepo(repo, subs=gc.Name('my name'))
-    assert m.code() == "\ngc.RecordRepo(RepositoryXref('@REPO@'), gc.Name('my name'))"
+    assert m.code() == "\nRecordRepo(RepositoryXref('@REPO@'), Name('my name'))"
 
 
 #     d. Exceptions raised
@@ -281,7 +281,7 @@ def test_shared_note_record_code() -> None:
     m = gc.RecordSnote(snote)
     assert (
         m.code()
-        == "\ngc.RecordSnote(SharedNoteXref('@SNOTE@', 'A shared note.'))"
+        == "\nRecordSnote(SharedNoteXref('@SNOTE@', 'A shared note.'))"
     )
 
 
@@ -330,7 +330,7 @@ def test_source_record_code() -> None:
     g = Genealogy('test')
     sour = g.source_xref('sour')
     m = gc.RecordSour(sour)
-    assert m.code() == "\ngc.RecordSour(SourceXref('@SOUR@'))"
+    assert m.code() == "\nRecordSour(SourceXref('@SOUR@'))"
 
 
 #     d. Exceptions raised
@@ -376,7 +376,7 @@ def test_submitter_record_code() -> None:
     g = Genealogy('test')
     subm = g.submitter_xref('subm')
     m = gc.RecordSubm(subm, gc.Name('my name'))
-    assert m.code() == "\ngc.RecordSubm(SubmitterXref('@SUBM@'), gc.Name('my name'))"
+    assert m.code() == "\nRecordSubm(SubmitterXref('@SUBM@'), Name('my name'))"
 
 
 #     d. Exceptions raised

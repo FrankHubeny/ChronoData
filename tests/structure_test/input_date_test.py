@@ -38,7 +38,7 @@
 import pytest
 
 from genedata.messages import Msg
-from genedata.util import Input
+from genedata.methods import Input
 
 # 1. Check Input.date().
 #     a. Good run.

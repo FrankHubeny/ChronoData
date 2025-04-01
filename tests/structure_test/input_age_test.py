@@ -6,7 +6,7 @@
     b. Catch range errors.
 """
 
-from genedata.util import Input
+from genedata.methods import Input
 
 # 1. Check Input.age().
 #     a. Good run.
