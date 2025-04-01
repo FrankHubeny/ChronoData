@@ -538,7 +538,6 @@ from genedata.structure import (
                     required.append(class_name)
                 if Default.YAML_CARDINALITY_SINGULAR in cardinality:
                     single.append(class_name)
-        # required: list[str] = structure[key][Default.YAML_REQUIRED]
         value_arg: str = f', {Default.CODE_VALUE}: {Classes.get_datatype(full_structure[key])}'
         value_init: str = Default.CODE_VALUE
         subs_arg: str = f', {Default.CODE_SUBS}: Any'
@@ -551,34 +550,31 @@ from genedata.structure import (
             and full_structure[key][Default.YAML_PAYLOAD] is not None
         ):
             payload = full_structure[key][Default.YAML_PAYLOAD]
-        init: str = f"{Default.EOL}    key: str = '{key}'"
         if payload == Default.EMPTY or key == 'record-SNOTE':
             value_arg = Default.EMPTY
             value_init = 'None'
             if 'record-' in key:
-                init = f"{Default.EOL}    key: str = '{key}'"
                 value_arg = f', {Default.CODE_VALUE}: {Classes.get_record_datatype(key)}'
                 value_init = Default.CODE_VALUE
         deprecation_line: str = Default.EMPTY
         if key in ['ADR1', 'ADR2', 'ADR3']:
             deprecation_line = f'{Default.EOL}        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))'
         init_line: str = f"""
-        
     def __init__(self{value_arg}{subs_arg}) -> None:
         super().__init__(
-            value = {value_init}, 
-            subs = {subs_init}, 
-            key = '{key}',
-            tag = '{tag}',
-            permitted = {permitted},
-            required = {required},
-            single = {single},
-            enum_key = '{enum_key}',
-            enum_tags = {enum_tags},
-            payload = '{full_structure[key][Default.YAML_PAYLOAD]}',
-            class_name = '{Names.classname(key)}',
+            value={value_init}, 
+            subs={subs_init}, 
+            key='{key}',
+            tag='{tag}',
+            permitted={permitted},
+            required={required},
+            single={single},
+            enum_key='{enum_key}',
+            enum_tags={enum_tags},
+            payload='{full_structure[key][Default.YAML_PAYLOAD]}',
+            class_name='{Names.classname(key)}',
         ){deprecation_line}"""
-        return ''.join([init, init_line])
+        return init_line #''.join([init, init_line])
 
     @staticmethod
     def generate_class(
@@ -738,7 +734,9 @@ class Tests:
         enumerations: dict[str, dict[str, Any]],
     ) -> str:
         if Default.YAML_ENUMERATION_SET in structures[key]:
-            enum_set_key = structures[key][Default.YAML_ENUMERATION_SET]
+            enum_set_key = Names.keyname(
+                structures[key][Default.YAML_ENUMERATION_SET]
+            )
             enum_value = enumerationsets[enum_set_key][
                 Default.YAML_ENUMERATION_VALUES
             ][0]
@@ -756,11 +754,21 @@ class Tests:
         enumerations: dict[str, dict[str, Any]],
         y: bool = True,
     ) -> str:
-        enum: str = Tests.get_enum(key, structures, enumerationsets, enumerations)
+        enum: str = Tests.get_enum(
+            key, structures, enumerationsets, enumerations
+        )
         payload: str = structures[key][Default.YAML_PAYLOAD]
         match payload:
             case 'http://www.w3.org/2001/XMLSchema#string':
-                return "'abc'"
+                match key:
+                    case 'LATI':
+                        return "'N10.1'"
+                    case 'LONG':
+                        return "'E10.1'"
+                    case 'record-SNOTE':
+                        return 'snote'
+                    case _:
+                        return "'abc'"
             case 'Y|<NULL>':
                 if y:
                     return "'Y'"
@@ -775,14 +783,12 @@ class Tests:
                         return 'obje'
                     case 'record-REPO':
                         return 'repo'
-                    case 'record-SNOTE':
-                        return 'snote'
                     case 'record-SOUR':
                         return 'sour'
                     case 'record-SUBM':
                         return 'subm'
             case 'https://gedcom.io/terms/v7/type-Enum':
-                return enum
+                return f"'{enum}'"
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                 return '1'
             case '@<https://gedcom.io/terms/v7/record-FAM>@':
@@ -798,7 +804,7 @@ class Tests:
             case 'https://gedcom.io/terms/v7/type-Date#period':
                 return "'FROM 1 JAN 2000 TO 1 JAN 2001'"
             case 'https://gedcom.io/terms/v7/type-List#Enum':
-                return enum
+                return f"'{enum}'"
             case 'https://gedcom.io/terms/v7/type-Date#exact':
                 return "'1 JAN 2000'"
             case 'https://gedcom.io/terms/v7/type-Date':
@@ -820,13 +826,28 @@ class Tests:
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                 return 'sour'
             case 'https://gedcom.io/terms/v7/type-Time':
-                return '12:12:12'
+                return "'12:12:12'"
             case _:
                 return Default.EMPTY
         return Default.EMPTY
 
     @staticmethod
-    def test_preamble(test: str) -> str:
+    def there_are_required_substructures(substructures: dict[str, str]) -> bool:
+        """Return true if there dictionary of substructures contains a required substructure.
+
+        Args:
+            substructures: The subdictionary of Structure containing the uri as key
+                and its cardinality code as value.  The cardinality code `{1:`
+                signals a required substructure.
+        """
+        for _key, cardinality in substructures.items():
+            if Default.CARDINALITY_REQUIRED in cardinality:
+                return True
+        return False
+
+    @staticmethod
+    def preamble(test: str) -> str:
+        """Construct a document to describe a module containing a set of tests."""
         return f"""'''This module contains {test} tests to be run with pytest.
 
 The file was generated by methods of the `{__class__.__name__}` class in the `{__name__}` module.
@@ -834,55 +855,63 @@ The file was generated by methods of the `{__class__.__name__}` class in the `{_
 DO NOT MODIFY THIS FILE.
 '''
 
+from genedata.build import Genealogy   # noqa: I001
 import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
-from genedata.build import Genealogy
 
 
-g = Genealogy('test')
-indi = g.individual_xref('1')
-fam = g.family_xref('1')
-obje = g.multimedia_xref('1')
-repo = g.repository_xref('1')
-snote = g.shared_note_xref('1', 'a note')
-sour = g.source_xref('1')
-subm = g.submitter_xref('1')
-
+{Default.CODE_GENEALOGY} = Genealogy('test')
+fam = {Default.CODE_GENEALOGY}.family_xref('1')
+indi = {Default.CODE_GENEALOGY}.individual_xref('1')
+obje = {Default.CODE_GENEALOGY}.multimedia_xref('1')
+repo = {Default.CODE_GENEALOGY}.repository_xref('1')
+snote = {Default.CODE_GENEALOGY}.shared_note_xref('1', 'a note')
+sour = {Default.CODE_GENEALOGY}.source_xref('1')
+subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
 """
 
     @staticmethod
-    def just_value(
+    def value(
         structures: dict[str, dict[str, Any]],
         enumerationsets: dict[str, dict[str, Any]],
         enumerations: dict[str, dict[str, Any]],
     ) -> str:
+        """Construct the set of all value tests.
+
+        The structures tested do not have any required substructures so that
+        only a value need be displayed with them.  All tests are expected to pass
+        the validation process in the BaseStructure class.
+
+        Args:
+            structures: The full Structure dictionary containing all structures.
+            enumerationsets: The full EnumerationSet dictionary containing all structures.
+            enumerations: The full Enumeration dictionary containing the enumerations.
+        """
+
         def write(key: str, value: str) -> str:
+            """Write out a single test for class `key` with value `value`."""
             class_name: str = Names.classname(key)
             lines: str = f"""
-def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
-'''Validate the `{class_name}` structure with a value, but without substructures.'''
-m = {Default.CODE_CLASS}.{class_name}({value})
-assert m.validate()
 
+def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    '''Validate the `{class_name}` structure with a value, but without substructures.'''
+    m = {Default.CODE_CLASS}.{class_name}({value})
+    assert m.validate()
 """
             return lines
 
-        test_name: str = 'Just Value'
-        lines: str = Tests.test_preamble(test_name)
+        test_name: str = 'Value'
+        lines: str = Tests.preamble(test_name)
         value: str = Default.EMPTY
         for key, structure in structures.items():
-            count: int = 0
-            for _subkey, cardinality in structure[
-                Default.YAML_SUBSTRUCTURES
-            ].items():
-                if Default.CARDINALITY_REQUIRED in cardinality:
-                    count += 1
-            if count == 0:
+            if not Tests.there_are_required_substructures(
+                structure[Default.YAML_SUBSTRUCTURES]
+            ):
                 value = Tests.get_value(
                     key,
                     structures,
                     enumerationsets,
                     enumerations,
                 )
-            if value != Default.EMPTY:
-                lines = ''.join([lines, write(key, value)])
+                if value != Default.EMPTY:
+                    lines = ''.join([lines, write(key, value)])
         return lines
