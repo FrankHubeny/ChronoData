@@ -494,8 +494,8 @@ class BaseStructure:
                 )
 
         # Are there substructures when none are permitted?
-        if len(self.permitted) == 0 and len(self.counted) > 0:
-            raise ValueError(Msg.NO_SUBS.format(self.class_name))
+        # if len(self.permitted) == 0 and len(self.counted) > 0:
+        #     raise ValueError(Msg.NO_SUBS.format(self.class_name))
 
         # Are there substructures not in the permitted list of substructures?
         for name in self.counted:
