@@ -167,13 +167,13 @@ def test_remarriage2_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(),
-            eval(indi1.code()).ged(),
-            eval(indi2.code()).ged(),
-            eval(indi3.code()).ged(),
-            eval(fam1.code()).ged(),
-            eval(fam2.code()).ged(),
-            eval(fam3.code()).ged(),
+            eval(head.code(as_name='gc')).ged(),
+            eval(indi1.code(as_name='gc')).ged(),
+            eval(indi2.code(as_name='gc')).ged(),
+            eval(indi3.code(as_name='gc')).ged(),
+            eval(fam1.code(as_name='gc')).ged(),
+            eval(fam2.code(as_name='gc')).ged(),
+            eval(fam3.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

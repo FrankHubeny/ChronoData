@@ -574,7 +574,7 @@ from genedata.structure import (
             payload='{full_structure[key][Default.YAML_PAYLOAD]}',
             class_name='{Names.classname(key)}',
         ){deprecation_line}"""
-        return init_line #''.join([init, init_line])
+        return init_line  #''.join([init, init_line])
 
     @staticmethod
     def generate_class(
@@ -590,7 +590,7 @@ from genedata.structure import (
             If we have the structure and enumeration set dictionaries constructed in a specs.py file,
             we can use them to build a string that represents the class in the classes module.
             >>> from genedata.examples import Examples7
-            >>> from genedata.load import Classes
+            >>> from genedata.generate import Classes
             >>> from genedata.specifications7 import (
             ...     Structure,
             ...     EnumerationSet,
@@ -692,7 +692,7 @@ class {class_name}(BaseStructure):
             This example constructs a string that could be used for a classes module
             using a specification module that has already been constructed.
             >>> from genedata.examples import Examples7
-            >>> from genedata.load import Classes
+            >>> from genedata.generate import Classes
             >>> from genedata.specifications7 import (
             ...     Structure,
             ...     EnumerationSet,
@@ -747,6 +747,75 @@ class Tests:
         return Default.EMPTY
 
     @staticmethod
+    def get_one_sub_with_value(
+        substructures: dict[str, str],
+    ) -> tuple[str, str]:
+        substructure: str = Default.EMPTY
+        sub_value: str = Default.EMPTY
+        subs_class_name: list[str] = []
+        for sub in substructures:
+            subs_class_name.append(Names.classname(sub))
+        if 'DateExact' in subs_class_name:
+            return 'DateExact', "'1 JAN 2000'"
+        if 'Lang' in subs_class_name:
+            return 'Lang', "'en-US'"
+        if 'Note' in subs_class_name:
+            return 'Note', "'hello'"
+        if 'Phon' in subs_class_name:
+            return 'Phon', "'+1 123 4567 8901'"
+        if 'Phrase' in subs_class_name:
+            return 'Phrase', "'hi'"
+        return substructure, sub_value
+
+    @staticmethod
+    def get_required(
+        key: str,
+        structures: dict[str, Any],
+        enumerationsets: dict[str, Any],
+        enumerations: dict[str, Any],
+    ) -> str:
+        more_than_one: bool = False
+        required: str = Default.EMPTY
+        for uri, cardinality in structures[key][
+            Default.YAML_SUBSTRUCTURES
+        ].items():
+            if Default.CARDINALITY_REQUIRED in cardinality:
+                sub_key = Names.keyname(uri)
+                sub_value = Tests.get_value(
+                    sub_key, structures, enumerationsets, enumerations
+                )
+                sub_required = Tests.get_required(sub_key, structures, enumerationsets, enumerations)
+                class_name = Names.classname(sub_key)
+                if required != Default.EMPTY:
+                    if sub_required != Default.EMPTY:
+                        required = (
+                            f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
+                        )
+                    else:
+                        more_than_one = True
+                        required = (
+                            f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
+                        )
+                else:  # noqa: PLR5501
+                    if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
+                        required = (
+                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_required})'
+                        )
+                    elif sub_required != Default.EMPTY:
+                        required = (
+                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
+                        )
+                    else:
+                        required = (
+                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_value})'
+                        )
+        if required == Default.EMPTY:
+            return required
+        if more_than_one:
+            return f'[{required}]'
+        return required
+
+    @staticmethod
     def get_value(
         key: str,
         structures: dict[str, dict[str, Any]],
@@ -787,6 +856,8 @@ class Tests:
                         return 'sour'
                     case 'record-SUBM':
                         return 'subm'
+                    case _:
+                        return Default.EMPTY
             case 'https://gedcom.io/terms/v7/type-Enum':
                 return f"'{enum}'"
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -829,7 +900,6 @@ class Tests:
                 return "'12:12:12'"
             case _:
                 return Default.EMPTY
-        return Default.EMPTY
 
     @staticmethod
     def there_are_required_substructures(substructures: dict[str, str]) -> bool:
@@ -846,8 +916,30 @@ class Tests:
         return False
 
     @staticmethod
-    def preamble(test: str) -> str:
+    def there_are_single_substructures(substructures: dict[str, str]) -> bool:
+        """Return true if there dictionary of substructures contains a required substructure.
+
+        Args:
+            substructures: The subdictionary of Structure containing the uri as key
+                and its cardinality code as value.  The cardinality code `:1}`
+                signals a single occurence substructure.
+        """
+        for _key, cardinality in substructures.items():
+            if Default.CARDINALITY_SINGULAR in cardinality:
+                return True
+        return False
+
+    @staticmethod
+    def preamble(test: str, add_pytest: bool = False) -> str:
         """Construct a document to describe a module containing a set of tests."""
+        pytest: str = f"""from genedata.build import Genealogy   # noqa: I001
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}"""
+        if add_pytest:
+            pytest = f"""import pytest   # noqa: I001
+
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+from genedata.build import Genealogy
+from genedata.messages import Msg"""
         return f"""'''This module contains {test} tests to be run with pytest.
 
 The file was generated by methods of the `{__class__.__name__}` class in the `{__name__}` module.
@@ -855,8 +947,7 @@ The file was generated by methods of the `{__class__.__name__}` class in the `{_
 DO NOT MODIFY THIS FILE.
 '''
 
-from genedata.build import Genealogy   # noqa: I001
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+{pytest}
 
 
 {Default.CODE_GENEALOGY} = Genealogy('test')
@@ -870,16 +961,63 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
 """
 
     @staticmethod
-    def value(
+    def all(
         structures: dict[str, dict[str, Any]],
         enumerationsets: dict[str, dict[str, Any]],
         enumerations: dict[str, dict[str, Any]],
     ) -> str:
-        """Construct the set of all value tests.
+        """Generate a test for each generated class.
 
-        The structures tested do not have any required substructures so that
-        only a value need be displayed with them.  All tests are expected to pass
-        the validation process in the BaseStructure class.
+        All generated classes are validated with their required substructures, if any.
+
+        Args:
+            structures: The full Structure dictionary containing all structures.
+            enumerationsets: The full EnumerationSet dictionary containing all structures.
+            enumerations: The full Enumeration dictionary containing the enumerations.
+        """
+
+        def write(key: str, value: str, subs: str) -> str:
+            """Write out a single test for the class `key` with value `value`."""
+            separator: str = Default.EMPTY
+            if value != Default.EMPTY and subs != Default.EMPTY:  # noqa: PLR1714
+                separator = ', '
+            class_name: str = Names.classname(key)
+            lines: str = f"""
+
+def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    '''Validate the `{class_name}` structure with a value and required substructures.'''
+    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    assert m.validate()
+"""
+            return lines
+
+        test_name: str = 'All'
+        lines: str = Tests.preamble(test_name)
+        value: str = Default.EMPTY
+        subs: str = Default.EMPTY
+        for key in structures:
+            if key not in [Default.CONT, Default.TRLR]:
+                value = Tests.get_value(
+                    key,
+                    structures,
+                    enumerationsets,
+                    enumerations,
+                )
+                subs = Tests.get_required(key, structures, enumerationsets, enumerations)
+                lines = ''.join([lines, write(key, value, subs)])
+        return lines
+
+    @staticmethod
+    def one_sub(
+        structures: dict[str, dict[str, Any]],
+        enumerationsets: dict[str, dict[str, Any]],
+        enumerations: dict[str, dict[str, Any]],
+    ) -> str:
+        """Test structures with only one substructure.
+
+        Construct the set of all structures without required substructures,
+        but with either `DateExact`, `Lang`, `Phone`, `Note` or `Phrase`
+        substructures.
 
         Args:
             structures: The full Structure dictionary containing all structures.
@@ -893,13 +1031,13 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
             lines: str = f"""
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
-    '''Validate the `{class_name}` structure with a value, but without substructures.'''
-    m = {Default.CODE_CLASS}.{class_name}({value})
+    '''Validate the `{class_name}` structure with a value and one substructure.'''
+    m = {Default.CODE_CLASS}.{class_name}({value}, {Default.CODE_CLASS}.{sub_name}({sub_value}))
     assert m.validate()
 """
             return lines
 
-        test_name: str = 'Value'
+        test_name: str = 'One Substructure'
         lines: str = Tests.preamble(test_name)
         value: str = Default.EMPTY
         for key, structure in structures.items():
@@ -911,6 +1049,105 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     structures,
                     enumerationsets,
                     enumerations,
+                )
+                sub_name, sub_value = Tests.get_one_sub_with_value(
+                    structure[Default.YAML_SUBSTRUCTURES]
+                )
+                if Default.EMPTY not in (value, sub_name):
+                    lines = ''.join([lines, write(key, value)])
+        return lines
+
+    #     @staticmethod
+    #     def missing_required_sub(
+    #         structures: dict[str, dict[str, Any]],
+    #         enumerationsets: dict[str, dict[str, Any]],
+    #         enumerations: dict[str, dict[str, Any]],
+    #     ) -> str:
+    #         """Test that structures with a required substructure will error if that substructure
+    #         is not present.
+
+    #         Args:
+    #             structures: The full Structure dictionary containing all structures.
+    #             enumerationsets: The full EnumerationSet dictionary containing all structures.
+    #             enumerations: The full Enumeration dictionary containing the enumerations.
+    #         """
+
+    #         def write(key: str, value: str) -> str:
+    #             """Write out a single test for class `key` with value `value`."""
+    #             class_name: str = Names.classname(key)
+    #             lines: str = f"""
+
+    # def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    #     '''Validate the `{class_name}` structure with a value but missing its required substructure(s).'''
+    #     m = {Default.CODE_CLASS}.{class_name}({value})  # type: ignore[call-arg]
+    #     with pytest.raises(
+    #         ValueError, match=Msg.MISSING_REQUIRED.format({required}, m.class_name)
+    #     ):
+    #         assert m.validate()
+    # """
+    #             return lines
+
+    #         test_name: str = 'Missing Required Sub'
+    #         lines: str = Tests.preamble(test_name, add_pytest=True)
+    #         value: str = Default.EMPTY
+    #         for key, structure in structures.items():
+    #             if Tests.there_are_required_substructures(
+    #                 structure[Default.YAML_SUBSTRUCTURES]
+    #             ):
+    #                 value = Tests.get_value(
+    #                     key,
+    #                     structures,
+    #                     enumerationsets,
+    #                     enumerations,
+    #                 )
+    #                 required: list[str] = Tests.get_required(
+    #                     structure[Default.YAML_SUBSTRUCTURES]
+    #                 )
+    #                 if value != Default.EMPTY:
+    #                     lines = ''.join([lines, write(key, value)])
+    #         return lines
+
+    @staticmethod
+    def required_sub(
+        structures: dict[str, dict[str, Any]],
+        enumerationsets: dict[str, dict[str, Any]],
+        enumerations: dict[str, dict[str, Any]],
+    ) -> str:
+        """Test that structures with required substructures do not error out.
+
+        Args:
+            structures: The full Structure dictionary containing all structures.
+            enumerationsets: The full EnumerationSet dictionary containing all structures.
+            enumerations: The full Enumeration dictionary containing the enumerations.
+        """
+
+        def write(key: str, value: str) -> str:
+            """Write out a single test for class `key` with value `value`."""
+            class_name: str = Names.classname(key)
+            lines: str = f"""
+
+def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    '''Validate the `{class_name}` structure with its required substructure(s).'''
+    m = {Default.CODE_CLASS}.{class_name}({value}, [{required}])
+    assert m.validate()
+"""
+            return lines
+
+        test_name: str = 'Required Sub'
+        lines: str = Tests.preamble(test_name)
+        value: str = Default.EMPTY
+        for key, structure in structures.items():
+            if Tests.there_are_required_substructures(
+                structure[Default.YAML_SUBSTRUCTURES]
+            ):
+                value = Tests.get_value(
+                    key,
+                    structures,
+                    enumerationsets,
+                    enumerations,
+                )
+                required: str = Tests.get_required(
+                    key, structures, enumerationsets, enumerations
                 )
                 if value != Default.EMPTY:
                     lines = ''.join([lines, write(key, value)])

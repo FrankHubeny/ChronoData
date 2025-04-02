@@ -97,14 +97,14 @@ def test_xref_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(),
-            eval(indi1.code()).ged(),
-            eval(indi2.code()).ged(),
-            eval(indi3.code()).ged(),
-            eval(indi4.code()).ged(),
-            eval(indi5.code()).ged(),
-            eval(indi6.code()).ged(),
-            eval(indi7.code()).ged(),
+            eval(head.code(as_name='gc')).ged(),
+            eval(indi1.code(as_name='gc')).ged(),
+            eval(indi2.code(as_name='gc')).ged(),
+            eval(indi3.code(as_name='gc')).ged(),
+            eval(indi4.code(as_name='gc')).ged(),
+            eval(indi5.code(as_name='gc')).ged(),
+            eval(indi6.code(as_name='gc')).ged(),
+            eval(indi7.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

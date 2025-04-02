@@ -72,7 +72,7 @@ class Msg:
     MISSING: str = 'These xref values {0} are missing record definitions.'
     MISSING_HEADER: str = 'The header record has not been added to the genealogy by the `add_header` method.'
     MISSING_REQUIRED: str = (
-        'The substructure "{0}" is required for the "{1}" structure.'
+        'One of the substructures in "{0}" are missing from the "{1}" structure.'
     )
     MISSING_URL_AND_DICTIONARIES: str = 'Missing both a url and specification dictionaries.'
     NEGATIVE_ERROR: str = (

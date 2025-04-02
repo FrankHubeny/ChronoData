@@ -5,14 +5,13 @@ This is a generated module. DO NOT MODIFY THIS MODULE MANUALLY.
 Changes should be made to the `Specs` class in the `genedata.load` module.
 
 The specification was obtained from the [GEDCOM-registeries](https://github.com/FamilySearch/GEDCOM-registries)
-made available under an Apache 2.0 license.
+made available under the Apache 2.0 license.
 
 The names of the dictionaries are based on the directories in this registry.  Each yaml file
-in the directory is read into a dictionary which is then added to a dictionary named after
-the directory.  Other keys besides those in the yaml file have been added
-to assist this application to read and write ged files.
+in the directory is read into the appropriate dictionary with the stem of the yaml file acting as the key
+and the contents of the yaml file being its value.
 
-The following dictionaries are available.  Each item in the dictionary corresponds to a
+The following dictionaries are available.  Each key in the dictionary corresponds to a
 single yaml file.
 - `Calendar` corresponding to yaml files in the calendar directory.
 - `DataType` corresponding to yaml files in the data-type directory.
@@ -22,56 +21,6 @@ single yaml file.
 - `Structure` corresponding to yaml files in the structure/standard directory.
 - `ExtensionStructure` corresponding to yaml files in the structure/extenion directory.
 - `Uri` corresponding to yaml files in the uri directory.
-
-Example:
-    Suppose one has a new GEDCOM specification to load.  Download the yaml files
-    to the standard directory structure used by registries. The subdirectory
-    locations are defined in the module `constants` and class `Default`.  Once the
-    files are positioned run the following:
-    >>> from genedata.load import Specs
-    >>> source = 'place where the yaml files were downloaded'
-    >>> version = '7.0'
-    >>> url = 'tests/load_test/gedtest/'
-    >>> print(Specs.build_all(source, version, url))
-
-    The final '/' character on the directory is optional.  The following would also work.
-    >>> url = 'tests/load_test/gedtest'
-    >>> print(Specs.build_all(source, version, url))
-
-    Copy the output into a python file and call it `specs8.py`.
-    For the example I will use the current specifications7.py module.
-    To generate the classes import the dictionaries and run `Classes.build_all`.
-    >>> from genedata.examples import Example7
-    >>> from genedata.load import Classes
-    >>> from genedata.specifications7 import (
-    ...     Structure,
-    ...     Enumeration,
-    ...     EnumerationSet,
-    ... )
-    >>> print(Classes.build_all(Structure, EnumerationSet, Enumeration, Example7))
-
-    Place the output into a `classes7.py` python module file.  From this file one
-    can build test cases using the Tests class and the specifications.  There are six
-    test modules.
-    - Basic: Test for good runs without substructures (unless a substructure is required).
-    - One Sub: Test for good runs with one substructure (unless more are required).
-    - Required: Test to fail validation if they do not have all of their required substructures.
-    - Permitted: Test to fail validation if they have substructures not in their permitted set.
-    - Single: Test to fail validation if they violate the singuarity requirement for a substructure.
-    - Payload: Test to fail validation if not in compliance with their payload datatype.
-
-    To print the first test, run:
-    >>> from genedata.load import Tests
-    >>> import genedata.classes7 as gc
-    >>> basic = Tests.basic(Structure)
-    >>> one_sub = Tests.one_sub(Structure)
-    >>> required = Tests.required(Structure)
-    >>> permitted = Tests.permitted(Structure)
-    >>> single = Tests.single(Structure)
-    >>> payload = Tests.payload(Structure)
-
-    Print and save each of these to their own files in a test directory, say `tests/load_v7_test`.
-    From there you can run `pytest tests/load_v7_test` to check the classes constructure.
 
 Reference:
     [GEDCOM-registeries](https://github.com/FamilySearch/GEDCOM-registries)
@@ -2174,7 +2123,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The event of baptism performed at age 8 or later by priesthood authority of The Church of Jesus Christ of Latter-day Saints. (See also [`BAPM`])',
         ],
         'label': 'Baptism, Latter-Day Saint',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -2572,7 +2521,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The date of the most recent modification of the superstructure, optionally with\nnotes about that modification.\n\nThe `NOTE` substructure may describe previous changes as well as the most\nrecent, although only the most recent change is described by the `DATE`\nsubstructure.\n',
         ],
         'label': 'Change',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE-exact': '{1:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -2758,7 +2707,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The religious event by which a person receives membership in The Church of Jesus Christ of Latter-day Saints. (See also [`CONF`])',
         ],
         'label': 'Confirmation, Latter-Day Saint',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -2781,7 +2730,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A pseudo-structure to indicate a line break. The `CONT` tag is generated during serialization and is never present in parsed datasets. See [Lines] for more details.',
         ],
         'label': 'Continued',
-        'payload': None,
+        'payload': 'None',
         'substructures': {},
         'superstructures': {},
         'contact': 'https://gedcom.io/community/',
@@ -2836,7 +2785,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The date of the initial creation of the superstructure. Because this refers to the initial creation, it should not be modified after the structure is created.',
         ],
         'label': 'Creation',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/DATE-exact': '{1:1}'},
         'superstructures': {
             'https://gedcom.io/terms/v7/record-FAM': '{0:1}',
@@ -2901,7 +2850,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A subregion of an image to display. It is only valid when the superstructure\nlinks to a `MULTIMEDIA_RECORD` with at least 1 `FILE` substructure that refers\nto an external file with a defined pixel unit.\n\n`LEFT` and `TOP` indicate the top-left corner of the region to display. `WIDTH`\nand `HEIGHT` indicate how many pixels wide and tall the region to display is.\nIf omitted, `LEFT` and `TOP` each default to 0; `WIDTH` defaults to the image\nwidth minus `LEFT`; and `HEIGHT` defaults to the image height minus `TOP`.\n\nIf the superstructure links to a `MULTIMEDIA_RECORD` that includes multiple\n`FILE` substructures, the `CROP` applies to the first `FILE` to which it can\napply, namely the first external file with a defined pixel unit.\n\nIt is recommended that `CROP` be used only with a single-FILE\n`MULTIMEDIA_RECORD`.\n\nThe following are errors:\n\n- `LEFT` or `LEFT` + `WIDTH` exceed the image width.\n- `TOP` or `TOP` + `HEIGHT` exceed the image height.\n- `CROP` applied to a non-image or image without a defined pixel unit.\n',
         ],
         'label': 'Crop',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/HEIGHT': '{0:1}',
             'https://gedcom.io/terms/v7/LEFT': '{0:1}',
@@ -2970,7 +2919,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A structure with no payload used to distinguish a description of something from metadata about it. For example, `SOUR` and its other substructures describe a source itself, while `SOUR`.`DATA` describes the content of the source.',
         ],
         'label': 'Data',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/AGNC': '{0:1}',
             'https://gedcom.io/terms/v7/DATA-EVEN': '{0:M}',
@@ -3438,7 +3387,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A religious event where an endowment ordinance for an individual was performed by priesthood authority in a temple of The Church of Jesus Christ of Latter-day Saints.',
         ],
         'label': 'Endowment, Latter-Day Saint',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -4013,7 +3962,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A container for information about the entire document.\n\nIt is recommended that applications write `GEDC` with its required substructure\n`https://gedcom.io/terms/v7/GEDC-VERS` as the first substructure of `HEAD`.\n',
         ],
         'label': 'GEDCOM',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/GEDC-VERS': '{1:1}'},
         'superstructures': {'https://gedcom.io/terms/v7/HEAD': '{1:1}'},
         'contact': 'https://gedcom.io/community/',
@@ -4133,7 +4082,7 @@ Structure: dict[str, dict[str, Any]] = {
             'This is a placeholder for providing a default `PLAC`.`FORM`, and must not have a payload.',
         ],
         'label': 'Place',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/HEAD-PLAC-FORM': '{1:1}'},
         'superstructures': {'https://gedcom.io/terms/v7/HEAD': '{0:1}'},
         'contact': 'https://gedcom.io/community/',
@@ -4187,7 +4136,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The header pseudo-structure provides metadata about the entire dataset. A few\nsubstructures of note:\n\n- `GEDC` identifies the specification that this document conforms to. It is\n  recommended that `GEDC` be the first substructure of the header.\n- `SCHMA` gives the meaning of extension tags; see [Extensions] for more\n  details.\n- `SOUR` describes the originating software.\n  - `CORP` describes the corporation creating the software.\n  - `HEAD`.`SOUR`.`DATA` describes a larger database, electronic data source,\n    or digital repository this data is extracted from.\n- `LANG` and `PLAC` give a default value for the rest of the document.\n\n<div class="deprecation">\n\n`HEAD`.`SOUR`.`DATA` is now deprecated and applications should use\n`HEAD`.`SOUR`.`NAME` instead.\n\n</div>\n',
         ],
         'label': 'Header',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/COPR': '{0:1}',
             'https://gedcom.io/terms/v7/DEST': '{0:1}',
@@ -4229,7 +4178,7 @@ Structure: dict[str, dict[str, Any]] = {
             "A container for information relevant to the subject of the superstructure specific to the individual described by the associated `FAM`'s `HUSB` substructure.",
         ],
         'label': 'Husband',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/AGE': '{1:1}'},
         'superstructures': {
             'https://gedcom.io/terms/v7/ANUL': '{0:1}',
@@ -4654,7 +4603,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A religious event where an initiatory ordinance for an individual was performed by priesthood authority in a temple of The Church of Jesus Christ of Latter-day Saints.',
         ],
         'label': 'Initiatory, Latter-Day Saint',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -4745,7 +4694,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A representative point for a location, as defined by `LATI` and `LONG`\nsubstructures.\n\nNote that `MAP` provides neither a notion of accuracy (for example, the `MAP`\nfor a birth event may be some distance from the point where the birth occurred)\nnor a notion of region size (for example, the `MAP` for a place "Belarus" may\nbe anywhere within that nation\'s 200,000 square kilometer area).\n',
         ],
         'label': 'Map',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/LATI': '{1:1}',
             'https://gedcom.io/terms/v7/LONG': '{1:1}',
@@ -5963,7 +5912,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The `FAM` record was originally structured to represent families where a male\n`HUSB` (husband or father) and female `WIFE` (wife or mother) produce `CHIL`\n(children). The `FAM` record may also be used for cultural parallels to this,\nincluding nuclear families, marriage, cohabitation, fostering, adoption, and so\non, regardless of the gender of the partners. Sex, gender, titles, and roles of\npartners should not be inferred based on the partner that the `HUSB` or `WIFE`\nstructure points to.\n\nThe individuals pointed to by the `HUSB` and `WIFE` are collectively referred\nto as "partners", "parents" or "spouses".\n\nSome displays may be unable to display more than 2 partners. Displays may use\n`HUSB` and `WIFE` as layout hints, for example, by consistently displaying the\n`HUSB` on the same side of the `WIFE` in a tree view. Family structures with\nmore than 2 partners may either use several `FAM` records or use\n`ASSOCIATION_STRUCTURE`s to indicate additional partners. `ASSO` should not be\nused for relationships that can be expressed using `HUSB`, `WIFE`, or `CHIL`\ninstead.\n\n<div class="note">\n\nThe `FAM` record will be revised in a future version to more fully express the\ndiversity of human family relationships.\n\n</div>\n\nThe order of the `CHIL` (children) pointers within a `FAM` (family) structure\nshould be chronological by birth; this is an exception to the usual "most\npreferred value first" rule. A `CHIL` with a `voidPtr` indicates a placeholder\nfor an unknown child in this birth order.\n\nIf a `FAM` record uses `HUSB` or `WIFE` to point to an `INDI` record, the\n`INDI` record must use `FAMS` to point to the `FAM` record. If a `FAM` record\nuses `CHIL` to point to an `INDI` record, the `INDI` record must use a `FAMC`\nto point to the `FAM` record.\n\nAn `INDI` record should not have multiple `FAMS` substructures pointing to the\nsame `FAM`.\n\nA `FAM` record should not have multiple `CHIL` substructures pointing to the\nsame `INDI`; doing so implies a nonsensical birth order. An `INDI` record may\nhave multiple `FAMC` substructures pointing to the same `FAM`, but doing so is\nnot recommended.\n',
         ],
         'label': 'Family record',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/ANUL': '{0:M}',
             'https://gedcom.io/terms/v7/ASSO': '{0:M}',
@@ -6011,7 +5960,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The individual record is a compilation of facts or hypothesized facts about an\nindividual. These facts may come from multiple sources. Source citations and\nnotes allow documentation of the source where each of the facts were\ndiscovered.\n\nA single individual may have facts distributed across multiple individual\nrecords, connected by `ALIA` (alias, in the computing sense not the pseudonym\nsense) pointers. See `ALIA` for more details.\n\nIndividual records are linked to Family records by use of bi-directional\npointers. Details about those links are stored as substructures of the pointers\nin the individual record.\n\nOther associations or relationships are represented by the `ASSO` (association)\ntag. The person\'s relation or associate is the person being pointed to. The\nassociation or relationship is stated by the value on the subordinate `ROLE`\nline. `ASSO` should not be used for relationships that can be expressed using\n`FAMS` or `FAMC` instead.\n\n<div class="example">\n\nThe following example refers to 2 individuals, `@I1@` and `@I2@`, where `@I2@`\nis a godparent of `@I1@`:\n\n```gedcom\n0 @I1@ INDI\n1 ASSO @I2@\n2 ROLE GODP\n```\n\n</div>\n\nEvents stored as facts within an `INDI` record may also have `FAMC` or `ASSO`\ntags to indicate families and individuals that participated in those events.\nFor example, a `FAMC` pointer subordinate to an adoption event indicates a\nrelationship to family by adoption; biological parents can be shown by a `FAMC`\npointer subordinate to the birth event; the eulogist at a funeral can be shown\nby an `ASSO` pointer subordinate to the burial event; and so on. A subordinate\n`FAMC` pointer is allowed to refer to a family where the individual does not\nappear as a child.\n',
         ],
         'label': 'Individual',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/ADOP': '{0:M}',
             'https://gedcom.io/terms/v7/ALIA': '{0:M}',
@@ -6090,7 +6039,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The multimedia record refers to 1 or more external digital files, and may\nprovide some additional information about the files and the media they encode.\n\nThe file reference can occur more than once to group multiple files together.\nGrouped files should each pertain to the same context. For example, a sound\nclip and a photo both of the same event might be grouped in a single `OBJE`.\n\nThe change and creation dates should be for the `OBJE` record itself, not the\nunderlying files.\n',
         ],
         'label': 'Object',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/CHAN': '{0:1}',
             'https://gedcom.io/terms/v7/CREA': '{0:1}',
@@ -6117,7 +6066,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The repository record provides information about an institution or person that\nhas a collection of sources. Informal repositories include the owner of an\nunpublished work or of a rare published source, or a keeper of personal\ncollections. An example would be the owner of a family Bible containing\nunpublished family genealogical entries.\n\nLayered repositories, such as an archive containing copies of a subset of\nrecords from another archive or archives that have moved or been bought by\nother archives, are not modeled in this version of the specification. It is\nexpected they will be added in a later version. Until such time, it is\nrecommended that the repository record store current contact information, if\nknown.\n',
         ],
         'label': 'Repository',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/ADDR': '{0:1}',
             'https://gedcom.io/terms/v7/CHAN': '{0:1}',
@@ -6173,7 +6122,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A source record describes an entire source. A source may also point to `REPO`s\nto describe repositories or archives where the source document may be found.\nThe part of a source relevant to a specific fact, such as a specific page or\nentry, is indicated in a `SOURCE_CITATION` that points to the source record.\n\n<div class="note">\n\nThis sourcing model is known to be insufficient for some use cases and may be\nrefined in a future version of this specification.\n\n</div>\n\nA `SOURCE_RECORD` may contain a pointer to a `SHARED_NOTE_RECORD` and vice\nversa. Applications must not create datasets where these mutual pointers form a\ncycle. Applications should also ensure they can handle invalid files with such\ncycles in a safe manner.\n',
         ],
         'label': 'Source',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/ABBR': '{0:1}',
             'https://gedcom.io/terms/v7/AUTH': '{0:1}',
@@ -6205,7 +6154,7 @@ Structure: dict[str, dict[str, Any]] = {
             'The submitter record identifies an individual or organization that contributed information contained in the dataset. All records in the document are assumed to be contributed by the submitter referenced in the `HEAD`, unless a `SUBM` structure inside a specific record points at a different submitter record.',
         ],
         'label': 'Submitter',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/ADDR': '{0:1}',
             'https://gedcom.io/terms/v7/CHAN': '{0:1}',
@@ -6478,7 +6427,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A container for storing meta-information about the extension tags used in this document. See [Extensions] for more details.',
         ],
         'label': 'Extension schema',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/TAG': '{0:M}'},
         'superstructures': {'https://gedcom.io/terms/v7/HEAD': '{0:1}'},
         'contact': 'https://gedcom.io/community/',
@@ -6581,7 +6530,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A religious event pertaining to the sealing of a child to his or her parents in a temple ceremony of The Church of Jesus Christ of Latter-day Saints.',
         ],
         'label': 'Sealing, child',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/FAMC': '{1:1}',
@@ -6608,7 +6557,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A religious event pertaining to the sealing of a husband and wife in a temple ceremony of The Church of Jesus Christ of Latter-day Saints. (See also [`MARR`])',
         ],
         'label': 'Sealing, spouse',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/NOTE': '{0:M}',
@@ -6718,7 +6667,7 @@ Structure: dict[str, dict[str, Any]] = {
         'standard tag': 'DATA',
         'specification': ['Data', 'See `https://gedcom.io/terms/v7/DATA`.'],
         'label': 'Data',
-        'payload': None,
+        'payload': 'None',
         'substructures': {
             'https://gedcom.io/terms/v7/DATE': '{0:1}',
             'https://gedcom.io/terms/v7/TEXT': '{0:M}',
@@ -7078,7 +7027,7 @@ Structure: dict[str, dict[str, Any]] = {
             'A pseudo-structure marking the end of a dataset. See [The Header and Trailer] for more details.',
         ],
         'label': 'Trailer',
-        'payload': None,
+        'payload': 'None',
         'substructures': {},
         'superstructures': {},
         'contact': 'https://gedcom.io/community/',
@@ -7265,7 +7214,7 @@ Structure: dict[str, dict[str, Any]] = {
             "A container for information relevant to the subject of the superstructure specific to the individual described by the associated `FAM`'s `WIFE` substructure.",
         ],
         'label': 'Wife',
-        'payload': None,
+        'payload': 'None',
         'substructures': {'https://gedcom.io/terms/v7/AGE': '{1:1}'},
         'superstructures': {
             'https://gedcom.io/terms/v7/ANUL': '{0:1}',

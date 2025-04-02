@@ -3,7 +3,7 @@
 
 from genedata.constants import Default
 from genedata.examples import Examples7
-from genedata.load import Classes
+from genedata.generate import Classes
 from genedata.specifications7 import Enumeration, EnumerationSet, Structure
 
 

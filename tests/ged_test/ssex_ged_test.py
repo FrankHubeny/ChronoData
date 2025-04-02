@@ -94,10 +94,10 @@ def test_ssex_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(), 
-            eval(indi1.code()).ged(),
-            eval(indi2.code()).ged(),
-            eval(fam.code()).ged(),
+            eval(head.code(as_name='gc')).ged(), 
+            eval(indi1.code(as_name='gc')).ged(),
+            eval(indi2.code(as_name='gc')).ged(),
+            eval(fam.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

@@ -4,8 +4,8 @@
 import genedata.classes7 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
-from genedata.structure import MultimediaXref  # noqa: F401
 from genedata.methods import Util
+from genedata.structure import MultimediaXref  # noqa: F401
 
 
 def test_filename1_ged() -> None:
@@ -96,8 +96,8 @@ def test_filename1_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(), 
-            eval(obje.code()).ged(),
+            eval(head.code(as_name='gc')).ged(), 
+            eval(obje.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

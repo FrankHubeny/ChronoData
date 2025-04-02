@@ -264,9 +264,9 @@ def test_lang_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(), 
-            eval(subm1.code()).ged(),
-            eval(subm2.code()).ged(),
+            eval(head.code(as_name='gc')).ged(), 
+            eval(subm1.code(as_name='gc')).ged(),
+            eval(subm2.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

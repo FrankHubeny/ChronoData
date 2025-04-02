@@ -16,5 +16,5 @@ def test_minimal_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines from it.
     file = Util.read('tests\\ged_test\\minimal70.ged')
     head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
-    gedcom = f'{eval(head.code()).ged()}{Default.TRAILER}'
+    gedcom = f'{eval(head.code(as_name='gc')).ged()}{Default.TRAILER}'
     assert file == gedcom

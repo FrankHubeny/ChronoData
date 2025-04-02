@@ -483,7 +483,7 @@ class BaseStructure:
         for name in self.required:
             if name not in self.counted:
                 raise ValueError(
-                    Msg.MISSING_REQUIRED.format(name, self.class_name)
+                    Msg.MISSING_REQUIRED.format(self.required, self.class_name)
                 )
 
         # Does a single substructure appear only once?
@@ -922,10 +922,13 @@ class BaseStructure:
                 lines = Tagger.structure(
                     lines, level + 1, self.subs, recordkey=recordkey
                 )
-        return lines.replace('0 TRLR\n', '0 TRLR')
+        return lines #.replace('0 TRLR\n', '0 TRLR')
 
-    def code(self, tabs: int = 0, no_indent: bool = False) -> str:
+    def code(self, tabs: int = 0, no_indent: bool = False, as_name: str = Default.EMPTY) -> str:
         """Generate a formatted code that can be evaluated of the class."""
+        class_name: str = self.class_name
+        if as_name != Default.EMPTY:
+            class_name = f'{as_name}.{self.class_name}'
         indent: str = Default.INDENT * tabs
         indent_plus_one: str = Default.INDENT * (tabs + 1)
         initial: str = indent
@@ -938,7 +941,7 @@ class BaseStructure:
             code_lines = ''.join(
                 [
                     initial,
-                    self.class_name,
+                    class_name,
                     Default.PARENS_LEFT,
                 ]
             )
@@ -946,7 +949,7 @@ class BaseStructure:
             code_lines = ''.join(
                 [
                     initial,
-                    self.class_name,
+                    class_name,
                     Default.PARENS_LEFT,
                     self.code_value,
                 ]
@@ -957,7 +960,7 @@ class BaseStructure:
             return ''.join(
                 [
                     code_lines,
-                    self.subs.code(no_indent=True),
+                    self.subs.code(no_indent=True, as_name=as_name),
                     Default.PARENS_RIGHT,
                 ]
             )
@@ -967,7 +970,7 @@ class BaseStructure:
                     code_lines,
                     Default.COMMA,
                     Default.SPACE,
-                    self.subs.code(no_indent=True),
+                    self.subs.code(no_indent=True, as_name=as_name),
                     Default.PARENS_RIGHT,
                     # Default.COMMA,
                 ]
@@ -990,7 +993,7 @@ class BaseStructure:
                         code_lines,
                         Default.COMMA,
                         Default.EOL,
-                        sub.code(tabs + 2),
+                        sub.code(tabs + 2, as_name=as_name),
                         # Default.EOL,
                     ]
                 )
@@ -998,7 +1001,7 @@ class BaseStructure:
                 code_lines = ''.join(
                     [
                         code_lines,
-                        sub.code(tabs + 2),
+                        sub.code(tabs + 2, as_name=as_name),
                         # Default.EOL,
                     ]
                 )

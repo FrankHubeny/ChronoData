@@ -124,10 +124,10 @@ def test_obje1_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(),
-            eval(obje1.code()).ged(),
-            eval(obje2.code()).ged(),
-            eval(indi.code()).ged(),
+            eval(head.code(as_name='gc')).ged(),
+            eval(obje1.code(as_name='gc')).ged(),
+            eval(obje2.code(as_name='gc')).ged(),
+            eval(indi.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

@@ -8,7 +8,7 @@ __all__ = ['Specs']
 
 from pathlib import Path
 
-from genedata.constants import Config, Default
+from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Names, Util
 
@@ -30,11 +30,10 @@ The specification was obtained from the [GEDCOM-registeries]({source})
 made available under the Apache 2.0 license.
 
 The names of the dictionaries are based on the directories in this registry.  Each yaml file
-in the directory is read into a dictionary which is then added to a dictionary named after
-the directory.  Other keys besides those in the yaml file have been added
-to assist this application to read and write ged files.
+in the directory is read into the appropriate dictionary with the stem of the yaml file acting as the key
+and the contents of the yaml file being its value.
 
-The following dictionaries are available.  Each item in the dictionary corresponds to a
+The following dictionaries are available.  Each key in the dictionary corresponds to a
 single yaml file.
 - `Calendar` corresponding to yaml files in the calendar directory.
 - `DataType` corresponding to yaml files in the data-type directory.
@@ -44,51 +43,6 @@ single yaml file.
 - `Structure` corresponding to yaml files in the structure/standard directory.
 - `ExtensionStructure` corresponding to yaml files in the structure/extenion directory.
 - `Uri` corresponding to yaml files in the uri directory.
-
-Example:
-    Suppose one has a new GEDCOM specification to load.  Download the yaml files
-    to the standard directory structure used by registries. The subdirectory
-    locations are defined in the module `constants` and class `Default`.  Once the
-    files are positioned run the following:
-    >>> from genedata.load import Specs
-    >>> source = 'place where the yaml files were downloaded'
-    >>> version = '{Config.GEDVERSION}'
-    >>> url = 'stage/v7/'
-    >>> print(Specs.build_all(source, version, url))
-
-    The final '/' character on the directory is optional.  The following would also work.
-    >>> url = 'stage/v8'
-    >>> print(Specs.build_all(source, version, url))
-
-    Copy the output into a python file and call it `specs8.py`.  
-    For the example I will use the current specifications7.py module.
-    To generate the classes import the dictionaries and run `Classes.build_all`.
-    >>> from genedata.load import Classes
-    >>> from genedata.specifications7 import Structure, Enumeration, EnumerationSet
-    >>> print(Classes.build_all(Structure, Enumeration, EnumerationSet))
-
-    Place the output into a `classes7.py` python module file.  From this file one
-    can build test cases using the Tests class and the specifications.  There are six
-    test modules.
-    - Basic: Test for good runs without substructures (unless a substructure is required).
-    - One Sub: Test for good runs with one substructure (unless more are required).
-    - Required: Test to fail validation if they do not have all of their required substructures.
-    - Permitted: Test to fail validation if they have substructures not in their permitted set.
-    - Single: Test to fail validation if they violate the singuarity requirement for a substructure.
-    - Payload: Test to fail validation if not in compliance with their payload datatype.
-
-    To print the first test, run:
-    >>> from genedata.load import Tests
-    >>> import genedata.classes7 as gc
-    >>> basic = Tests.basic(Structure)
-    >>> one_sub = Tests.one_sub(Structure)
-    >>> required = Tests.required(Structure)
-    >>> permitted = Tests.permitted(Structure)
-    >>> single = Tests.required(Structure)
-    >>> payload = Tests.permitted(Structure)
-
-    Print and save each of these to their own files in a test directory, say `tests/load_v7_test`.
-    From there you can run `pytest tests/load_v7_test` to check the classes constructure.
 
 Reference:
     [GEDCOM-registeries]({source})
@@ -122,6 +76,10 @@ from typing import Any
             for file in p.iterdir():
                 if file.suffix == Default.YAML_FILE_END:
                     yamldict = Util.read_yaml(str(file))
+                    # if base in [Default.URL_STRUCTURE, Default.URL_STRUCTURE_EXTENSION]:
+                    #     for _key, value in yamldict.items():
+                    #         if value[Default.YAML_PAYLOAD] is None:
+                    #             value[Default.YAML_PAYLOAD] = 'None'
                     lines = (
                         f"{lines}{Default.EOL}    '{file.stem}': {yamldict},"
                     )
@@ -227,7 +185,7 @@ from typing import Any
         return ''.join(
             [
                 'Structure: dict[str, dict[str, Any]] = ',
-                Specs.structure_dictionary(url),
+                Specs.structure_dictionary(url).replace("'payload': None,", "'payload': 'None',"),
                 Default.EOL,
                 Default.EOL,
             ]

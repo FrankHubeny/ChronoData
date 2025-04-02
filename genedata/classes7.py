@@ -8567,7 +8567,7 @@ class Lati(BaseStructure):
     - [GEDCOM LATI Structure](https://gedcom.io/terms/v7/LATI)
     - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
     """
-
+    
     def __init__(self, value: str, subs: Any = None) -> None:
         super().__init__(
             value=value,

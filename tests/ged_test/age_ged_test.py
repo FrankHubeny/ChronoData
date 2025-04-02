@@ -262,8 +262,8 @@ def test_age_ged_code() -> None:
     )
     gedcom = ''.join(
         [
-            eval(head.code()).ged(),
-            eval(indi.code()).ged(),
+            eval(head.code(as_name='gc')).ged(),
+            eval(indi.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

@@ -160,11 +160,11 @@ def test_note1_ged_code() -> None:
 
     gedcom = ''.join(
         [
-            eval(head.code()).ged(),
-            eval(subm.code()).ged(),
-            eval(sour.code()).ged(),
-            eval(snote3.code()).ged(),
-            eval(snote4.code()).ged(),
+            eval(head.code(as_name='gc')).ged(),
+            eval(subm.code(as_name='gc')).ged(),
+            eval(sour.code(as_name='gc')).ged(),
+            eval(snote3.code(as_name='gc')).ged(),
+            eval(snote4.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )

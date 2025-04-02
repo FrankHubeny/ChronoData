@@ -63,8 +63,8 @@ def test_longurl_ged_code() -> None:
         
     gedcom = ''.join(
         [
-            eval(head.code()).ged(), 
-            eval(subm.code()).ged(),
+            eval(head.code(as_name='gc')).ged(), 
+            eval(subm.code(as_name='gc')).ged(),
             Default.TRAILER,
         ]
     )
