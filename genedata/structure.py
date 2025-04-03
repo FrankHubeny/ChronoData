@@ -456,24 +456,11 @@ class BaseStructure:
         self.enum_tags: list[str] = enum_tags
         self.payload: str = payload
         self.class_name: str = class_name
-        # if (
-        #     Default.YAML_ENUM_KEY in Structure[self.key]
-        #     and Structure[self.key][Default.YAML_ENUM_KEY] != Default.EMPTY
-        # ):
-        #     self.enum_key = Structure[self.key][Default.YAML_ENUM_KEY]
-        #     self.enum_tags = EnumerationSet[self.enum_key][
-        #         Default.YAML_ENUM_TAGS
-        #     ]
         if len(self.enum_tags) > 0 and isinstance(self.value, str):
             self.value = self.value.upper()
             self.code_value = f"'{self.value}'"
-        #self.payload: str | None = Default.EMPTY #Structure[self.key][Default.YAML_PAYLOAD]
-        # self.class_name: str = (
-        #     self.key.title().replace('_', '').replace('-', '')
-        # )
-        #self.class_name = Default.EMPTY #f'{Default.CODE_CLASS}.{self.class_name}'
 
-        # Identify which cross reference identifier started opened the record.
+        # Identify which cross reference identifier opened the record.
         self.originator: Xref = Void.XREF
 
     def validate(self) -> bool:
@@ -493,10 +480,6 @@ class BaseStructure:
                     Msg.ONLY_ONE_PERMITTED.format(name, self.class_name)
                 )
 
-        # Are there substructures when none are permitted?
-        # if len(self.permitted) == 0 and len(self.counted) > 0:
-        #     raise ValueError(Msg.NO_SUBS.format(self.class_name))
-
         # Are there substructures not in the permitted list of substructures?
         for name in self.counted:
             if name not in self.permitted:
@@ -506,7 +489,7 @@ class BaseStructure:
                     )
                 )
 
-        # Check that extenions meet requirements.
+        # Check that extensions meet requirements.
         # if self.ext is not None:
         #     # Is an extension tag the same as a standard tag?
         #     if isinstance(self.ext, list):
@@ -521,12 +504,17 @@ class BaseStructure:
 
         # Does value have the required data type?
         match self.payload:
+            case 'http://www.w3.org/2001/XMLSchema#string':
+                if not isinstance(self.value, str):
+                    raise ValueError(
+                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
+                    )
             case 'Y|<NULL>':
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if str(self.value) not in ['Y', '']:
+                if self.value not in ['Y', '']:
                     raise ValueError(
                         Msg.VALUE_NOT_Y_OR_NULL.format(
                             self.value, self.class_name
@@ -534,15 +522,9 @@ class BaseStructure:
                     )
                 return True
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                if not isinstance(self.value, int):
+                if not isinstance(self.value, int) or self.value < 0:
                     raise ValueError(
                         Msg.NOT_INTEGER.format(self.value, self.class_name)
-                    )
-                if int(self.value) < 0:
-                    raise ValueError(
-                        Msg.NEGATIVE_ERROR.format(
-                            str(self.value), self.class_name
-                        )
                     )
                 return True
             case 'https://gedcom.io/terms/v7/type-List#Enum':
