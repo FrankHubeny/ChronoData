@@ -404,7 +404,7 @@ from genedata.structure import (
     Args:"""
         if (
             Default.YAML_PAYLOAD in structure
-            and structure[Default.YAML_PAYLOAD] is not None
+            and structure[Default.YAML_PAYLOAD] != 'None'
             and key[0:6] != Default.RECORD
         ):
             args = ''.join(
@@ -428,15 +428,17 @@ from genedata.structure import (
                     Classes.get_record_datatype(key),
                 ]
             )
-        return ''.join(
-            [
-                args,
-                Default.EOL,
-                Default.INDENT * 2,
-                Default.CODE_SUBS,
-                ': A permitted substructure or list of permitted substructures.',
-            ]
-        )
+        if len(structure[Default.YAML_SUBSTRUCTURES]) > 0:
+            return ''.join(
+                [
+                    args,
+                    Default.EOL,
+                    Default.INDENT * 2,
+                    Default.CODE_SUBS,
+                    ': A permitted substructure or list of permitted substructures.',
+                ]
+            )
+        return args
 
     @staticmethod
     def references(structure: dict[str, Any]) -> str:
@@ -540,10 +542,17 @@ from genedata.structure import (
                     single.append(class_name)
         value_arg: str = f', {Default.CODE_VALUE}: {Classes.get_datatype(full_structure[key])}'
         value_init: str = Default.CODE_VALUE
-        subs_arg: str = f', {Default.CODE_SUBS}: Any'
-        if len(required) == 0:
-            subs_arg = f', {Default.CODE_SUBS}: Any = None'
-        subs_init: str = Default.CODE_SUBS
+        if len(permitted) == 0:
+            subs_arg: str = Default.EMPTY
+            subs_init: str = 'None'
+        else:
+            subs_arg = f'{Default.CODE_SUBS}: Any'
+            if len(required) == 0:
+                subs_arg = f'{Default.CODE_SUBS}: Any = None'
+            subs_init = Default.CODE_SUBS
+        separator: str = Default.EMPTY
+        if value_arg != Default.EMPTY and subs_arg != Default.EMPTY:  # noqa: PLR1714
+            separator = ', '
         payload: str = Default.EMPTY
         if (
             Default.YAML_PAYLOAD in full_structure[key]
@@ -560,7 +569,7 @@ from genedata.structure import (
         if key in ['ADR1', 'ADR2', 'ADR3']:
             deprecation_line = f'{Default.EOL}        logging.info(Msg.DEPRECATION_WARNING.format(self.class_name))'
         init_line: str = f"""
-    def __init__(self{value_arg}{subs_arg}) -> None:
+    def __init__(self{value_arg}{separator}{subs_arg}) -> None:
         super().__init__(
             value={value_init}, 
             subs={subs_init}, 
@@ -726,20 +735,39 @@ class {class_name}(BaseStructure):
 class Tests:
     """Generate pytest modules for testing the generated classes.
 
-    There are seven tests:
+    There are eight tests:
     - All: Validate a mininal instantiation of each structure.  This test covers
         all of the generated classes.
-    - Permitted: Test that a substructure that is not permitted fails validation.
+    - Bad Enum: Test that an enumeration value not in the enumeration set fails
+        validation.  Only substructures whose values are enumerations are in this test.
+    - Bad Payload: Test that the wrong datatype for the value of a structure fails
+        the validation test.
+    - Bad Singular: Test that a substructure with singular cardinality fails validation
+        if two of those singular substructures are included as substructures.
+    - Empty Subs: Test that a substructure without a subs argument will trigger a
+        TypeError if a subs argument is provided.
+    - Empty Value: Test that a substructure without a value argument will trigger a
+        TypeError if a value argument is provided.
+    - Not Permitted: Test that a substructure that is not permitted fails validation.
         This test covers all of the generated classes.
     - Missing Required: Test that a substructure without its required substructures
         fails validation.  Only structures with required substructions and at least
         one non-required substructure are part of this test.
-    - Bad Enum: Test that an enumeration value not in the enumeration set fails
-        validation.  Only substructures whose values are enumerations are in this test.
-    - Bad Singular: Test that a substructure with singular cardinality fails validation
-        if two of those singular substructures are included as substructures.
-    - Bad Payload: Test that the wrong datatype for the value of a structure fails
-        the validation test.
+    
+    These tests are designed to check that the specifications in the yaml files have been
+    correctly transferred to the dictionaries and that the generated classes conform
+    to the specifications.
+
+    There is one exception to this conforming.  The user explicitly creates cross reference
+    identifiers in this application.  They are not hidden in the application.  
+    The record structures require a cross reference identifer to be entered as the first argument.  
+    The GEDCOM yaml specification does not allow a value argument for these record structures,
+    but they are required in this application.
+
+    The reason for this is that the user of this application is provided the opportunity
+    to build multiple genealogies which may conflict with each other.  These genealogies are
+    synched with each other through the cross reference identifiers.
+    
     - No Subs: Test that structures without substructures generate the exception:
     """
 
@@ -1067,17 +1095,25 @@ class Tests:
         return False
 
     @staticmethod
-    def preamble(test: str, add_pytest: bool = False) -> str:
+    def preamble(test: str, add_pytest: int = 0) -> str:
         """Construct a document to describe a module containing a set of tests."""
-        pytest: str = f"""from genedata.build import Genealogy   # noqa: I001
+        match add_pytest:
+            case 0:
+                pytest: str = f"""from genedata.build import Genealogy   # noqa: I001
 import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}"""
-        if add_pytest:
-            pytest = f"""import pytest   # noqa: I001
+            case 1:
+                pytest = f"""import pytest   # noqa: I001
 import re
 
 import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 from genedata.build import Genealogy
 from genedata.messages import Msg"""
+            case 2:
+                pytest = f"""import pytest   # noqa: I001
+import re
+
+import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+from genedata.build import Genealogy"""
         return f"""'''This module contains {test} tests to be run with pytest.
 
 The file was generated by methods of the `{__class__.__name__}` class in the `{__name__}` module.
@@ -1183,7 +1219,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
         test_name: str = 'Not Permitted'
         not_permitted_sub: str = f'{Default.CODE_CLASS}.RecordIndi(indi)'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        lines: str = Tests.preamble(test_name, add_pytest=1)
         value: str = Default.EMPTY
         subs: str = Default.EMPTY
         for key in structures:
@@ -1206,7 +1242,8 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     )
                 else:
                     subs = f'[{not_permitted_sub}, {subs}]'
-                lines = ''.join([lines, write(key, value, subs)])
+                if len(structures[key][Default.YAML_SUBSTRUCTURES]) > 0:
+                    lines = ''.join([lines, write(key, value, subs)])
         return lines
 
     @staticmethod
@@ -1245,7 +1282,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
         test_name: str = 'Bad Payload'
         error_message: str = 'NOT_STRING'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        lines: str = Tests.preamble(test_name, add_pytest=1)
         value: str = '-1'
         subs: str = Default.EMPTY
         for key in structures:
@@ -1298,7 +1335,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
         test_name: str = 'Bad Enum'
         bad_enum: str = "'XYZ1234567890'"
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             if (
@@ -1347,7 +1384,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             return lines
 
         test_name: str = 'Bad Singular'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             value = Tests.get_value(
@@ -1424,7 +1461,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             return lines
 
         test_name: str = 'Missing Required'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             if key not in [
@@ -1455,7 +1492,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def no_subs(
+    def empty_subs(
         structures: dict[str, dict[str, Any]],
         enumerationsets: dict[str, dict[str, Any]],
         enumerations: dict[str, dict[str, Any]],
@@ -1482,14 +1519,14 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` without substructures cannot receive a substructure.'''
     with pytest.raises(
-        TypeError, match=re.escape("{class_name}.__init__ takes 2 positional parameters but 3 were given.")
+        TypeError, match=re.escape("{class_name}.__init__() takes 2 positional arguments but 3 were given")
     ):
-        {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+        {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})  # type: ignore[call-arg]
 """
             return lines
 
-        test_name: str = 'No Subs'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        test_name: str = 'Empty Subs'
+        lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
             if (
                 key
@@ -1510,7 +1547,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def no_value(
+    def empty_value(
         structures: dict[str, dict[str, Any]],
         enumerationsets: dict[str, dict[str, Any]],
         enumerations: dict[str, dict[str, Any]],
@@ -1537,15 +1574,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` without substructures cannot receive a substructure.'''
     with pytest.raises(
-        TypeError, match=re.escape("{class_name}.__init__ takes 2 positional parameters but 3 were given.")
+        TypeError, match=re.escape("{class_name}.__init__() got an unexpected keyword argument 'value'")
     ):
-        {Default.CODE_CLASS}.{class_name}(value={value}{separator}{subs})
+        {Default.CODE_CLASS}.{class_name}(value={value}{separator}subs={subs})  # type: ignore[call-arg]
 """
             return lines
 
-        test_name: str = 'No Value'
-        value: str = 'hi'
-        lines: str = Tests.preamble(test_name, add_pytest=True)
+        test_name: str = 'Empty Value'
+        value: str = "'hi'"
+        lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
             if (
                 key
@@ -1571,5 +1608,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     enumerationsets,
                     enumerations,
                 )
+                if subs == Default.EMPTY:
+                    subs = 'None'
                 lines = ''.join([lines, write(key, value, subs)])
         return lines

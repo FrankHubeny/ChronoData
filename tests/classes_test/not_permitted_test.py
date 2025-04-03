@@ -23,15 +23,6 @@ sour = g.source_xref('1')
 subm = g.submitter_xref('1')
 
 
-def test_not_permitted_Abbr() -> None:
-    '''Validate the `Abbr` structure with a value and required substructures.'''
-    m = gc.Abbr('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Addr() -> None:
     '''Validate the `Addr` structure with a value and required substructures.'''
     m = gc.Addr('abc', gc.RecordIndi(indi))
@@ -59,33 +50,6 @@ def test_not_permitted_Adop() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Adr1() -> None:
-    '''Validate the `Adr1` structure with a value and required substructures.'''
-    m = gc.Adr1('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Adr2() -> None:
-    '''Validate the `Adr2` structure with a value and required substructures.'''
-    m = gc.Adr2('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Adr3() -> None:
-    '''Validate the `Adr3` structure with a value and required substructures.'''
-    m = gc.Adr3('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Age() -> None:
     '''Validate the `Age` structure with a value and required substructures.'''
     m = gc.Age('> 10y 2m 1d', gc.RecordIndi(indi))
@@ -95,27 +59,9 @@ def test_not_permitted_Age() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Agnc() -> None:
-    '''Validate the `Agnc` structure with a value and required substructures.'''
-    m = gc.Agnc('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Alia() -> None:
     '''Validate the `Alia` structure with a value and required substructures.'''
     m = gc.Alia(indi, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Anci() -> None:
-    '''Validate the `Anci` structure with a value and required substructures.'''
-    m = gc.Anci(subm, gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -134,15 +80,6 @@ def test_not_permitted_Anul() -> None:
 def test_not_permitted_Asso() -> None:
     '''Validate the `Asso` structure with a value and required substructures.'''
     m = gc.Asso(indi, [gc.RecordIndi(indi), gc.Role('CHIL')])
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Auth() -> None:
-    '''Validate the `Auth` structure with a value and required substructures.'''
-    m = gc.Auth('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -230,15 +167,6 @@ def test_not_permitted_Cast() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Caus() -> None:
-    '''Validate the `Caus` structure with a value and required substructures.'''
-    m = gc.Caus('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Chan() -> None:
     '''Validate the `Chan` structure with a value and required substructures.'''
     m = gc.Chan([gc.RecordIndi(indi), gc.DateExact('1 JAN 2000')])
@@ -275,15 +203,6 @@ def test_not_permitted_Chra() -> None:
         assert m.validate()
 
 
-def test_not_permitted_City() -> None:
-    '''Validate the `City` structure with a value and required substructures.'''
-    m = gc.City('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Conf() -> None:
     '''Validate the `Conf` structure with a value and required substructures.'''
     m = gc.Conf('Y', gc.RecordIndi(indi))
@@ -296,15 +215,6 @@ def test_not_permitted_Conf() -> None:
 def test_not_permitted_Conl() -> None:
     '''Validate the `Conl` structure with a value and required substructures.'''
     m = gc.Conl(gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Copr() -> None:
-    '''Validate the `Copr` structure with a value and required substructures.'''
-    m = gc.Copr('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -341,15 +251,6 @@ def test_not_permitted_Crem() -> None:
 def test_not_permitted_Crop() -> None:
     '''Validate the `Crop` structure with a value and required substructures.'''
     m = gc.Crop(gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Ctry() -> None:
-    '''Validate the `Ctry` structure with a value and required substructures.'''
-    m = gc.Ctry('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -410,24 +311,6 @@ def test_not_permitted_Deat() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Desi() -> None:
-    '''Validate the `Desi` structure with a value and required substructures.'''
-    m = gc.Desi(subm, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Dest() -> None:
-    '''Validate the `Dest` structure with a value and required substructures.'''
-    m = gc.Dest('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Div() -> None:
     '''Validate the `Div` structure with a value and required substructures.'''
     m = gc.Div('Y', gc.RecordIndi(indi))
@@ -464,15 +347,6 @@ def test_not_permitted_Educ() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Email() -> None:
-    '''Validate the `Email` structure with a value and required substructures.'''
-    m = gc.Email('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Emig() -> None:
     '''Validate the `Emig` structure with a value and required substructures.'''
     m = gc.Emig('Y', gc.RecordIndi(indi))
@@ -494,15 +368,6 @@ def test_not_permitted_Endl() -> None:
 def test_not_permitted_Enga() -> None:
     '''Validate the `Enga` structure with a value and required substructures.'''
     m = gc.Enga('Y', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_ExidType() -> None:
-    '''Validate the `ExidType` structure with a value and required substructures.'''
-    m = gc.ExidType('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -599,27 +464,9 @@ def test_not_permitted_FamcStat() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Famc() -> None:
-    '''Validate the `Famc` structure with a value and required substructures.'''
-    m = gc.Famc(fam, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Fams() -> None:
     '''Validate the `Fams` structure with a value and required substructures.'''
     m = gc.Fams(fam, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Fax() -> None:
-    '''Validate the `Fax` structure with a value and required substructures.'''
-    m = gc.Fax('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -662,27 +509,9 @@ def test_not_permitted_Form() -> None:
         assert m.validate()
 
 
-def test_not_permitted_GedcVers() -> None:
-    '''Validate the `GedcVers` structure with a value and required substructures.'''
-    m = gc.GedcVers('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Gedc() -> None:
     '''Validate the `Gedc` structure with a value and required substructures.'''
     m = gc.Gedc([gc.RecordIndi(indi), gc.GedcVers('abc')])
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Givn() -> None:
-    '''Validate the `Givn` structure with a value and required substructures.'''
-    m = gc.Givn('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -701,24 +530,6 @@ def test_not_permitted_Grad() -> None:
 def test_not_permitted_HeadDate() -> None:
     '''Validate the `HeadDate` structure with a value and required substructures.'''
     m = gc.HeadDate('1 JAN 2000', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_HeadLang() -> None:
-    '''Validate the `HeadLang` structure with a value and required substructures.'''
-    m = gc.HeadLang('en-US', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_HeadPlacForm() -> None:
-    '''Validate the `HeadPlacForm` structure with a value and required substructures.'''
-    m = gc.HeadPlacForm('text', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -755,15 +566,6 @@ def test_not_permitted_HeadSour() -> None:
 def test_not_permitted_Head() -> None:
     '''Validate the `Head` structure with a value and required substructures.'''
     m = gc.Head([gc.RecordIndi(indi), gc.Gedc(gc.GedcVers('abc'))])
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Height() -> None:
-    '''Validate the `Height` structure with a value and required substructures.'''
-    m = gc.Height(1, gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -887,42 +689,6 @@ def test_not_permitted_Inil() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Lang() -> None:
-    '''Validate the `Lang` structure with a value and required substructures.'''
-    m = gc.Lang('en-US', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Lati() -> None:
-    '''Validate the `Lati` structure with a value and required substructures.'''
-    m = gc.Lati('N10.1', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Left() -> None:
-    '''Validate the `Left` structure with a value and required substructures.'''
-    m = gc.Left(1, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Long() -> None:
-    '''Validate the `Long` structure with a value and required substructures.'''
-    m = gc.Long('E10.1', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Map() -> None:
     '''Validate the `Map` structure with a value and required substructures.'''
     m = gc.Map([gc.RecordIndi(indi), gc.Lati('N10.1'), gc.Long('E10.1')])
@@ -986,15 +752,6 @@ def test_not_permitted_Medi() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Mime() -> None:
-    '''Validate the `Mime` structure with a value and required substructures.'''
-    m = gc.Mime('text/html', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_NameTran() -> None:
     '''Validate the `NameTran` structure with a value and required substructures.'''
     m = gc.NameTran('John /Doe/', [gc.RecordIndi(indi), gc.Lang('en-US')])
@@ -1013,15 +770,6 @@ def test_not_permitted_NameType() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Name() -> None:
-    '''Validate the `Name` structure with a value and required substructures.'''
-    m = gc.Name('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Nati() -> None:
     '''Validate the `Nati` structure with a value and required substructures.'''
     m = gc.Nati('abc', gc.RecordIndi(indi))
@@ -1034,15 +782,6 @@ def test_not_permitted_Nati() -> None:
 def test_not_permitted_Natu() -> None:
     '''Validate the `Natu` structure with a value and required substructures.'''
     m = gc.Natu('Y', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Nick() -> None:
-    '''Validate the `Nick` structure with a value and required substructures.'''
-    m = gc.Nick('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1094,24 +833,6 @@ def test_not_permitted_Note() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Npfx() -> None:
-    '''Validate the `Npfx` structure with a value and required substructures.'''
-    m = gc.Npfx('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Nsfx() -> None:
-    '''Validate the `Nsfx` structure with a value and required substructures.'''
-    m = gc.Nsfx('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Obje() -> None:
     '''Validate the `Obje` structure with a value and required substructures.'''
     m = gc.Obje(obje, gc.RecordIndi(indi))
@@ -1148,45 +869,9 @@ def test_not_permitted_Ordn() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Page() -> None:
-    '''Validate the `Page` structure with a value and required substructures.'''
-    m = gc.Page('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Pedi() -> None:
     '''Validate the `Pedi` structure with a value and required substructures.'''
     m = gc.Pedi('ADOPTED', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Phon() -> None:
-    '''Validate the `Phon` structure with a value and required substructures.'''
-    m = gc.Phon('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Phrase() -> None:
-    '''Validate the `Phrase` structure with a value and required substructures.'''
-    m = gc.Phrase('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_PlacForm() -> None:
-    '''Validate the `PlacForm` structure with a value and required substructures.'''
-    m = gc.PlacForm('text', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1211,15 +896,6 @@ def test_not_permitted_Plac() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Post() -> None:
-    '''Validate the `Post` structure with a value and required substructures.'''
-    m = gc.Post('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Prob() -> None:
     '''Validate the `Prob` structure with a value and required substructures.'''
     m = gc.Prob('Y', gc.RecordIndi(indi))
@@ -1232,24 +908,6 @@ def test_not_permitted_Prob() -> None:
 def test_not_permitted_Prop() -> None:
     '''Validate the `Prop` structure with a value and required substructures.'''
     m = gc.Prop('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Publ() -> None:
-    '''Validate the `Publ` structure with a value and required substructures.'''
-    m = gc.Publ('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Quay() -> None:
-    '''Validate the `Quay` structure with a value and required substructures.'''
-    m = gc.Quay('0', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1328,27 +986,9 @@ def test_not_permitted_Refn() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Reli() -> None:
-    '''Validate the `Reli` structure with a value and required substructures.'''
-    m = gc.Reli('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Repo() -> None:
     '''Validate the `Repo` structure with a value and required substructures.'''
     m = gc.Repo(repo, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Resn() -> None:
-    '''Validate the `Resn` structure with a value and required substructures.'''
-    m = gc.Resn('CONFIDENTIAL', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1391,15 +1031,6 @@ def test_not_permitted_Sdate() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Sex() -> None:
-    '''Validate the `Sex` structure with a value and required substructures.'''
-    m = gc.Sex('M', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Slgc() -> None:
     '''Validate the `Slgc` structure with a value and required substructures.'''
     m = gc.Slgc([gc.RecordIndi(indi), gc.Famc(fam)])
@@ -1412,15 +1043,6 @@ def test_not_permitted_Slgc() -> None:
 def test_not_permitted_Slgs() -> None:
     '''Validate the `Slgs` structure with a value and required substructures.'''
     m = gc.Slgs(gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Snote() -> None:
-    '''Validate the `Snote` structure with a value and required substructures.'''
-    m = gc.Snote(snote, gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1454,15 +1076,6 @@ def test_not_permitted_Sour() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Spfx() -> None:
-    '''Validate the `Spfx` structure with a value and required substructures.'''
-    m = gc.Spfx('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Ssn() -> None:
     '''Validate the `Ssn` structure with a value and required substructures.'''
     m = gc.Ssn('abc', gc.RecordIndi(indi))
@@ -1472,126 +1085,9 @@ def test_not_permitted_Ssn() -> None:
         assert m.validate()
 
 
-def test_not_permitted_Stae() -> None:
-    '''Validate the `Stae` structure with a value and required substructures.'''
-    m = gc.Stae('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_SubmLang() -> None:
-    '''Validate the `SubmLang` structure with a value and required substructures.'''
-    m = gc.SubmLang('en-US', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Subm() -> None:
-    '''Validate the `Subm` structure with a value and required substructures.'''
-    m = gc.Subm(subm, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Surn() -> None:
-    '''Validate the `Surn` structure with a value and required substructures.'''
-    m = gc.Surn('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Tag() -> None:
-    '''Validate the `Tag` structure with a value and required substructures.'''
-    m = gc.Tag('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Temp() -> None:
-    '''Validate the `Temp` structure with a value and required substructures.'''
-    m = gc.Temp('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
 def test_not_permitted_Text() -> None:
     '''Validate the `Text` structure with a value and required substructures.'''
     m = gc.Text('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Time() -> None:
-    '''Validate the `Time` structure with a value and required substructures.'''
-    m = gc.Time('12:12:12', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Titl() -> None:
-    '''Validate the `Titl` structure with a value and required substructures.'''
-    m = gc.Titl('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Top() -> None:
-    '''Validate the `Top` structure with a value and required substructures.'''
-    m = gc.Top(1, gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Type() -> None:
-    '''Validate the `Type` structure with a value and required substructures.'''
-    m = gc.Type('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Uid() -> None:
-    '''Validate the `Uid` structure with a value and required substructures.'''
-    m = gc.Uid('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Vers() -> None:
-    '''Validate the `Vers` structure with a value and required substructures.'''
-    m = gc.Vers('abc', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Width() -> None:
-    '''Validate the `Width` structure with a value and required substructures.'''
-    m = gc.Width(1, gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1610,15 +1106,6 @@ def test_not_permitted_Wife() -> None:
 def test_not_permitted_Will() -> None:
     '''Validate the `Will` structure with a value and required substructures.'''
     m = gc.Will('Y', gc.RecordIndi(indi))
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
-    ):
-        assert m.validate()
-
-
-def test_not_permitted_Www() -> None:
-    '''Validate the `Www` structure with a value and required substructures.'''
-    m = gc.Www('abc', gc.RecordIndi(indi))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
