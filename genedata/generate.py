@@ -547,7 +547,7 @@ from genedata.structure import (
         payload: str = Default.EMPTY
         if (
             Default.YAML_PAYLOAD in full_structure[key]
-            and full_structure[key][Default.YAML_PAYLOAD] is not None
+            and full_structure[key][Default.YAML_PAYLOAD] != 'None'
         ):
             payload = full_structure[key][Default.YAML_PAYLOAD]
         if payload == Default.EMPTY or key == 'record-SNOTE':
@@ -724,7 +724,24 @@ class {class_name}(BaseStructure):
 
 
 class Tests:
-    """Generate pytest modules for testing the classes."""
+    """Generate pytest modules for testing the generated classes.
+
+    There are seven tests:
+    - All: Validate a mininal instantiation of each structure.  This test covers
+        all of the generated classes.
+    - Permitted: Test that a substructure that is not permitted fails validation.
+        This test covers all of the generated classes.
+    - Missing Required: Test that a substructure without its required substructures
+        fails validation.  Only structures with required substructions and at least
+        one non-required substructure are part of this test.
+    - Bad Enum: Test that an enumeration value not in the enumeration set fails
+        validation.  Only substructures whose values are enumerations are in this test.
+    - Bad Singular: Test that a substructure with singular cardinality fails validation
+        if two of those singular substructures are included as substructures.
+    - Bad Payload: Test that the wrong datatype for the value of a structure fails
+        the validation test.
+    - No Subs: Test that structures without substructures generate the exception:
+    """
 
     @staticmethod
     def get_enum(
@@ -746,26 +763,19 @@ class Tests:
             return str(structures[enum_key][Default.YAML_STANDARD_TAG])
         return Default.EMPTY
 
-    @staticmethod
-    def get_one_sub_with_value(
-        substructures: dict[str, str],
-    ) -> tuple[str, str]:
-        substructure: str = Default.EMPTY
-        sub_value: str = Default.EMPTY
-        subs_class_name: list[str] = []
-        for sub in substructures:
-            subs_class_name.append(Names.classname(sub))
-        if 'DateExact' in subs_class_name:
-            return 'DateExact', "'1 JAN 2000'"
-        if 'Lang' in subs_class_name:
-            return 'Lang', "'en-US'"
-        if 'Note' in subs_class_name:
-            return 'Note', "'hello'"
-        if 'Phon' in subs_class_name:
-            return 'Phon', "'+1 123 4567 8901'"
-        if 'Phrase' in subs_class_name:
-            return 'Phrase', "'hi'"
-        return substructure, sub_value
+    # @staticmethod
+    # def get_sub(
+    #     uri: str,
+    #     structures: dict[str, dict[str, Any]],
+    #     enumerationsets: dict[str, dict[str, Any]],
+    #     enumerations: dict[str, dict[str, Any]],
+    # ) -> str:
+    #     key: str = Names.keyname(uri)
+    #     class_name = Names.classname(key)
+    #     value: str = Tests.get_value(
+    #         key, structures, enumerationsets, enumerations
+    #     )
+    #     return f'{Default.CODE_CLASS}.{class_name}({value})'
 
     @staticmethod
     def get_singular(
@@ -773,47 +783,67 @@ class Tests:
         structures: dict[str, Any],
         enumerationsets: dict[str, Any],
         enumerations: dict[str, Any],
-    ) -> str:
-        more_than_one: bool = False
+    ) -> tuple[str, str]:
+        """Get one singular substructure."""
         singular: str = Default.EMPTY
+        name: str = Default.EMPTY
         for uri, cardinality in structures[key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             if Default.CARDINALITY_SINGULAR in cardinality:
                 sub_key = Names.keyname(uri)
+                name = f"'{Names.classname(sub_key)}'"
                 sub_value = Tests.get_value(
                     sub_key, structures, enumerationsets, enumerations
                 )
-                sub_required = Tests.get_required(sub_key, structures, enumerationsets, enumerations)
+                sub_required = Tests.get_required(
+                    sub_key, structures, enumerationsets, enumerations
+                )
                 class_name = Names.classname(sub_key)
-                if singular != Default.EMPTY:
-                    if sub_required != Default.EMPTY:
-                        singular = (
-                            f'{singular}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
-                        )
+                if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
+                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_required})'
+                elif sub_required != Default.EMPTY:
+                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
+                else:
+                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value})'
+                break
+        return name, singular
+
+    @staticmethod
+    def get_one_not_required(
+        key: str,
+        structures: dict[str, Any],
+        enumerationsets: dict[str, Any],
+        enumerations: dict[str, Any],
+    ) -> str:
+        """Get one substructure with its values and required substructure that is not required."""
+        not_required: str = Default.EMPTY
+        for uri, cardinality in structures[key][
+            Default.YAML_SUBSTRUCTURES
+        ].items():
+            if Default.CARDINALITY_REQUIRED not in cardinality:
+                sub_key = Names.keyname(uri)
+                sub_value = Tests.get_value(
+                    sub_key, structures, enumerationsets, enumerations
+                )
+                sub_not_required = Tests.get_required(
+                    sub_key, structures, enumerationsets, enumerations
+                )
+                class_name = Names.classname(sub_key)
+                if sub_not_required != Default.EMPTY:
+                    if sub_value != Default.EMPTY:
+                        not_required = f'{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_not_required})'
                     else:
-                        more_than_one = True
-                        singular = (
-                            f'{singular}, {Default.CODE_CLASS}.{class_name}({sub_value})'
-                        )
+                        not_required = f'{Default.CODE_CLASS}.{class_name}({sub_not_required})'
                 else:  # noqa: PLR5501
-                    if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
-                        singular = (
-                            f'{singular}{Default.CODE_CLASS}.{class_name}({sub_required})'
-                        )
-                    elif sub_required != Default.EMPTY:
-                        singular = (
-                            f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
+                    if sub_value != Default.EMPTY:
+                        not_required = (
+                            f'{Default.CODE_CLASS}.{class_name}({sub_value})'
                         )
                     else:
-                        singular = (
-                            f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value})'
-                        )
-        if singular == Default.EMPTY:
-            return singular
-        if more_than_one:
-            return f'[{singular}]'
-        return singular
+                        not_required = f'{Default.CODE_CLASS}.{class_name}()'
+                break
+        return not_required
 
     @staticmethod
     def get_required(
@@ -832,43 +862,34 @@ class Tests:
                 sub_value = Tests.get_value(
                     sub_key, structures, enumerationsets, enumerations
                 )
-                sub_required = Tests.get_required(sub_key, structures, enumerationsets, enumerations)
+                sub_required = Tests.get_required(
+                    sub_key, structures, enumerationsets, enumerations
+                )
                 class_name = Names.classname(sub_key)
                 if required != Default.EMPTY:
                     if sub_required != Default.EMPTY:
-                        required = (
-                            f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
-                        )
+                        required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
                     else:
                         more_than_one = True
-                        required = (
-                            f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
-                        )
+                        required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
                 else:  # noqa: PLR5501
-                    if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
-                        required = (
-                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_required})'
-                        )
+                    if (
+                        sub_required != Default.EMPTY
+                        and sub_value == Default.EMPTY
+                    ):
+                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_required})'
                     elif sub_required != Default.EMPTY:
-                        required = (
-                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
-                        )
+                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
                     else:
-                        required = (
-                            f'{required}{Default.CODE_CLASS}.{class_name}({sub_value})'
-                        )
+                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_value})'
         if required == Default.EMPTY:
             return required
         if more_than_one:
             return f'[{required}]'
         return required
 
-
     @staticmethod
-    def get_message(
-        key: str,
-        payload: str
-    ) -> str:
+    def get_message(key: str, payload: str) -> str:
         match payload:
             case 'http://www.w3.org/2001/XMLSchema#string':
                 return 'NOT_STRING'
@@ -1120,10 +1141,12 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     enumerationsets,
                     enumerations,
                 )
-                subs = Tests.get_required(key, structures, enumerationsets, enumerations)
+                subs = Tests.get_required(
+                    key, structures, enumerationsets, enumerations
+                )
                 lines = ''.join([lines, write(key, value, subs)])
         return lines
-    
+
     @staticmethod
     def not_permitted(
         structures: dict[str, dict[str, Any]],
@@ -1171,16 +1194,21 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     enumerationsets,
                     enumerations,
                 )
-                subs = Tests.get_required(key, structures, enumerationsets, enumerations)
+                subs = Tests.get_required(
+                    key, structures, enumerationsets, enumerations
+                )
                 if subs == Default.EMPTY:
                     subs = not_permitted_sub
                 elif Default.BRACKET_LEFT in subs:
-                    subs = subs.replace(Default.BRACKET_LEFT, f'{Default.BRACKET_LEFT}{not_permitted_sub}, ')
+                    subs = subs.replace(
+                        Default.BRACKET_LEFT,
+                        f'{Default.BRACKET_LEFT}{not_permitted_sub}, ',
+                    )
                 else:
                     subs = f'[{not_permitted_sub}, {subs}]'
                 lines = ''.join([lines, write(key, value, subs)])
         return lines
-    
+
     @staticmethod
     def bad_payload(
         structures: dict[str, dict[str, Any]],
@@ -1221,12 +1249,18 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         value: str = '-1'
         subs: str = Default.EMPTY
         for key in structures:
-            if key not in [Default.CONT, Default.TRLR] and structures[key][Default.YAML_PAYLOAD] != 'None':
-                subs = Tests.get_required(key, structures, enumerationsets, enumerations)
-                error_message = Tests.get_message(key, structures[key][Default.YAML_PAYLOAD])
+            if (
+                key not in [Default.CONT, Default.TRLR]
+                and structures[key][Default.YAML_PAYLOAD] != 'None'
+            ):
+                subs = Tests.get_required(
+                    key, structures, enumerationsets, enumerations
+                )
+                error_message = Tests.get_message(
+                    key, structures[key][Default.YAML_PAYLOAD]
+                )
                 lines = ''.join([lines, write(key, value, subs, error_message)])
         return lines
-
 
     @staticmethod
     def bad_enum(
@@ -1267,11 +1301,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         lines: str = Tests.preamble(test_name, add_pytest=True)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
-            if key not in [Default.CONT, Default.TRLR] and Default.YAML_ENUMERATION_SET in structure:
-                subs = Tests.get_required(key, structures, enumerationsets, enumerations)
+            if (
+                key not in [Default.CONT, Default.TRLR]
+                and Default.YAML_ENUMERATION_SET in structure
+            ):
+                subs = Tests.get_required(
+                    key, structures, enumerationsets, enumerations
+                )
                 lines = ''.join([lines, write(key, bad_enum, subs)])
         return lines
-
 
     @staticmethod
     def bad_singular(
@@ -1290,7 +1328,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             enumerations: The full Enumeration dictionary containing the enumerations.
         """
 
-        def write(key: str, value: str, subs: str) -> str:
+        def write(key: str, value: str, subs: str, name: str) -> str:
             """Write out a single test for the class `key` with value `value`."""
             separator: str = Default.EMPTY
             if value != Default.EMPTY and subs != Default.EMPTY:  # noqa: PLR1714
@@ -1302,7 +1340,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
     '''Validate the `{class_name}` structure with a single substructure that is repeated.'''
     m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
     with pytest.raises(
-        ValueError, match=re.escape(Msg.ONLY_ONE_PERMITTED.format({value}, m.class_name))
+        ValueError, match=re.escape(Msg.ONLY_ONE_PERMITTED.format({name}, m.class_name))
     ):
         assert m.validate()
 """
@@ -1313,16 +1351,42 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             value = Tests.get_value(
-                    key,
-                    structures,
-                    enumerationsets,
-                    enumerations,
-                )
+                key,
+                structures,
+                enumerationsets,
+                enumerations,
+            )
             if key not in [Default.CONT, Default.TRLR]:
-                for _subkey, subvalue in structure[Default.YAML_SUBSTRUCTURES]:
+                for _subkey, subvalue in structure[
+                    Default.YAML_SUBSTRUCTURES
+                ].items():
                     if Default.CARDINALITY_SINGULAR in subvalue:
-                        subs = Tests.get_required(key, structures, enumerationsets, enumerations)
-                        lines = ''.join([lines, write(key, value, subs)])
+                        subs = Tests.get_required(
+                            key, structures, enumerationsets, enumerations
+                        )
+                        name, singular = Tests.get_singular(
+                            key, structures, enumerationsets, enumerations
+                        )
+                        if subs != Default.EMPTY:
+                            subs = ''.join(
+                                [
+                                    Default.BRACKET_LEFT,
+                                    singular,
+                                    ', ',
+                                    singular,
+                                    ', ',
+                                    subs.replace(
+                                        Default.BRACKET_LEFT, Default.EMPTY
+                                    ).replace(
+                                        Default.BRACKET_RIGHT, Default.EMPTY
+                                    ),
+                                    Default.BRACKET_RIGHT,
+                                ]
+                            )
+                        else:
+                            subs = ''.join(['[', singular, ', ', singular, ']'])
+                        lines = ''.join([lines, write(key, value, subs, name)])
+                        break
         return lines
 
     @staticmethod
@@ -1331,8 +1395,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         enumerationsets: dict[str, dict[str, Any]],
         enumerations: dict[str, dict[str, Any]],
     ) -> str:
-        """Generate a test verifying that a substructure without its required substructure is rejected
-        if entered more than once.
+        """Generate a test verifying that a substructure without its required substructures is rejected.
 
         Only structures with a permitted substructure besides the required substructures are tested.
 
@@ -1354,7 +1417,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
     '''Validate the `{class_name}` structure with a single substructure that is repeated.'''
     m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
     with pytest.raises(
-        ValueError, match=re.escape(Msg.ONLY_ONE_PERMITTED.format({value}, m.class_name))
+        ValueError, match=re.escape(Msg.MISSING_REQUIRED.format(m.required, m.class_name))
     ):
         assert m.validate()
 """
@@ -1364,15 +1427,149 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         lines: str = Tests.preamble(test_name, add_pytest=True)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
-            value = Tests.get_value(
+            if key not in [
+                Default.CONT,
+                Default.TRLR,
+            ] and Tests.there_are_required_substructures(
+                structure[Default.YAML_SUBSTRUCTURES]
+            ):
+                value = Tests.get_value(
                     key,
                     structures,
                     enumerationsets,
                     enumerations,
                 )
-            if key not in [Default.CONT, Default.TRLR]:
-                for _subkey, subvalue in structure[Default.YAML_SUBSTRUCTURES]:
-                    if Default.CARDINALITY_SINGULAR in subvalue:
-                        subs = Tests.get_required(key, structures, enumerationsets, enumerations)
-                        lines = ''.join([lines, write(key, value, subs)])
+                # for _uri, cardinality in structure[
+                #     Default.YAML_SUBSTRUCTURES
+                # ].items():
+                #     if Default.CARDINALITY_SINGULAR in cardinality:
+                #         found_required = True
+                # if found_required:
+                # for uri, cardinality in structure[Default.YAML_SUBSTRUCTURES].items():
+                #     if Default.CARDINALITY_SINGULAR not in cardinality:
+                subs = Tests.get_one_not_required(
+                    key, structures, enumerationsets, enumerations
+                )
+                if subs != Default.EMPTY:
+                    lines = ''.join([lines, write(key, value, subs)])
+        return lines
+
+    @staticmethod
+    def no_subs(
+        structures: dict[str, dict[str, Any]],
+        enumerationsets: dict[str, dict[str, Any]],
+        enumerations: dict[str, dict[str, Any]],
+    ) -> str:
+        """Generate tests verifying that a substructure without substructures in its specification
+        cannot enter a substructure.
+
+        Only structures with a value of `{}` for the `substructures` key are tested.
+
+        Args:
+            structures: The full Structure dictionary containing all structures.
+            enumerationsets: The full EnumerationSet dictionary containing all structures.
+            enumerations: The full Enumeration dictionary containing the enumerations.
+        """
+
+        def write(key: str, value: str, subs: str = 'gc.Phrase("hi")') -> str:
+            """Write out a single test for the class `key` with value `value`."""
+            separator: str = Default.EMPTY
+            if value != Default.EMPTY and subs != Default.EMPTY:  # noqa: PLR1714
+                separator = ', '
+            class_name: str = Names.classname(key)
+            lines: str = f"""
+
+def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    '''Validate the `{class_name}` without substructures cannot receive a substructure.'''
+    with pytest.raises(
+        TypeError, match=re.escape("{class_name}.__init__ takes 2 positional parameters but 3 were given.")
+    ):
+        {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+"""
+            return lines
+
+        test_name: str = 'No Subs'
+        lines: str = Tests.preamble(test_name, add_pytest=True)
+        for key, structure in structures.items():
+            if (
+                key
+                not in [
+                    Default.CONT,
+                    Default.TRLR,
+                ]
+                and len(structure[Default.YAML_SUBSTRUCTURES]) == 0
+                and structure[Default.YAML_PAYLOAD] != 'None'
+            ):
+                value = Tests.get_value(
+                    key,
+                    structures,
+                    enumerationsets,
+                    enumerations,
+                )
+                lines = ''.join([lines, write(key, value)])
+        return lines
+
+    @staticmethod
+    def no_value(
+        structures: dict[str, dict[str, Any]],
+        enumerationsets: dict[str, dict[str, Any]],
+        enumerations: dict[str, dict[str, Any]],
+    ) -> str:
+        """Generate tests verifying that a substructure without substructures in its specification
+        cannot enter a substructure.
+
+        Only structures with a value of `None` for the `payload` key are tested.
+
+        Args:
+            structures: The full Structure dictionary containing all structures.
+            enumerationsets: The full EnumerationSet dictionary containing all structures.
+            enumerations: The full Enumeration dictionary containing the enumerations.
+        """
+
+        def write(key: str, value: str, subs: str = 'gc.Phrase("hi")') -> str:
+            """Write out a single test for the class `key` with value `value`."""
+            separator: str = Default.EMPTY
+            if value != Default.EMPTY and subs != Default.EMPTY:  # noqa: PLR1714
+                separator = ', '
+            class_name: str = Names.classname(key)
+            lines: str = f"""
+
+def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
+    '''Validate the `{class_name}` without substructures cannot receive a substructure.'''
+    with pytest.raises(
+        TypeError, match=re.escape("{class_name}.__init__ takes 2 positional parameters but 3 were given.")
+    ):
+        {Default.CODE_CLASS}.{class_name}(value={value}{separator}{subs})
+"""
+            return lines
+
+        test_name: str = 'No Value'
+        value: str = 'hi'
+        lines: str = Tests.preamble(test_name, add_pytest=True)
+        for key, structure in structures.items():
+            if (
+                key
+                not in [
+                    Default.CONT,
+                    Default.TRLR,
+                ]
+                and structure[Default.YAML_PAYLOAD] == 'None'
+                and key
+                not in [
+                    'record-FAM',
+                    'record-INDI',
+                    'record-OBJE',
+                    'record-REPO',
+                    'record-SNOTE',
+                    'record-SOUR',
+                    'record-SUBM',
+                ]
+            ):
+                subs = Tests.get_required(
+                    key,
+                    structures,
+                    enumerationsets,
+                    enumerations,
+                )
+                lines = ''.join([lines, write(key, value, subs)])
         return lines
