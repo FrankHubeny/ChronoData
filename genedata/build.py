@@ -38,7 +38,7 @@ from genedata.constants import (
     String,
 )
 from genedata.messages import Issue, Msg
-from genedata.methods import Tagger, Util
+from genedata.methods import Tagger, Names, Queries, Util
 from genedata.specifications7 import Structure
 from genedata.structure import (
     ExtensionXref,
@@ -226,7 +226,7 @@ class Genealogy:
             >>> fam_xref = g.family_xref('2')
             >>> indi = gc.RecordIndi(indi_xref)
             >>> fam = gc.RecordFam(fam_xref)
-            >>> head = gc.Head(gc.Gedc(gc.GedcVers(7.0)))
+            >>> head = gc.Head(gc.Gedc(gc.GedcVers('7.0')))
             >>> g.stage(head)
             >>> g.stage(fam)
             >>> g.stage(indi)
@@ -255,417 +255,200 @@ class Genealogy:
         self.filename = file_name
         self.ged_file = Util.read(self.filename)
 
-    def split_subs(self, ged: str, level: int = 0) -> list[str]:
-        """Split a ged string on substructures at the specified level."""
-        marker: str = f'{Default.EOL}{level}{Default.SPACE}'
-        return ged.split(marker)
 
-    def split_ged(self) -> None:
-        """Validate the ged string then split it into records without the trailer."""
+    # def get_substructures(self, key: str) -> list[StructureSpecs]:
+    #     """Associate the permitted substructure classes with the tags in the ged file."""
+    #     subs: list[StructureSpecs] = []
+    #     permitted_keys: list[str] = Queries.permitted_keys(key, Structure)
+    #     for sub in permitted_keys:
+    #         subs.append(
+    #             StructureSpecs(
+    #                 tag=Structure[sub][Default.YAML_STANDARD_TAG],
+    #                 key=sub,
+    #                 class_name=Names.classname(sub),
+    #             )
+    #         )
+    #     return subs
 
-        # A trailer record `0 TRLR` must be in the file.
-        if Default.TRAILER not in self.ged_file:
-            raise ValueError(Msg.NO_TRAILER.format(Default.TRAILER))
+    # def get_record_type(self, tag: str) -> str:
+    #     """Get the kind of record based on the tag in the ged file on the line with level 0."""
+    #     match tag:
+    #         case Default.TAG_FAM:
+    #             return Default.FAM_RECORD_TYPE
+    #         case Default.TAG_INDI:
+    #             return Default.INDI_RECORD_TYPE
+    #         case Default.TAG_OBJE:
+    #             return Default.OBJE_RECORD_TYPE
+    #         case Default.TAG_REPO:
+    #             return Default.REPO_RECORD_TYPE
+    #         case Default.TAG_SNOTE:
+    #             return Default.SNOTE_RECORD_TYPE
+    #         case Default.TAG_SOUR:
+    #             return Default.SOUR_RECORD_TYPE
+    #         case Default.TAG_SUBM:
+    #             return Default.SUBM_RECORD_TYPE
+    #     return Default.EMPTY
 
-        # A header record `0 HEAD` must be in the file.
-        if Default.HEADER not in self.ged_file:
-            raise ValueError(Msg.NO_HEADER.format(Default.HEADER))
 
-        # Each line starts with a digit.
-        if re.search('\n\\D', self.ged_file):
-            raise ValueError(Msg.NOT_GED_STRINGS)
+    # def format_value(self, key: str, words: list[str]) -> str:
+    #     if len(words) == 1:
+    #         return Default.EMPTY
+    #     payload: str = Structure[key][Default.YAML_PAYLOAD]
+    #     match payload:
+    #         case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+    #             return f'{words[1]}{Default.COMMA}'
+    #         case '@<https://gedcom.io/terms/v7/record-FAM>@':
+    #             return (
+    #                 f'family_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #             )
+    #         case '@<https://gedcom.io/terms/v7/record-INDI>@':
+    #             return f'individual_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #         case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+    #             return f'multimedia_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #         case '@<https://gedcom.io/terms/v7/record-REPO>@':
+    #             return f'repository_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #         case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+    #             return f'shared_note_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #         case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+    #             return (
+    #                 f'source_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #             )
+    #         case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+    #             return f'submitter_{self.format_xref(words[1])}_xref{Default.COMMA}'
+    #     return self.format_text(words[1])
 
-        # Remove the trailer along with everything after it.
-        ged: str = Default.EMPTY
-        ged, _, _ = self.ged_file.partition(Default.TRAILER)
+    # def format_subs(
+    #     self, ged: list[str], key_name: str, level: int = 0, base: bool = False
+    # ) -> str:
+    #     permitted: list[StructureSpecs] = self.get_substructures(key_name)
+    #     lines: str = Default.EMPTY
+    #     if len(ged) > 1:
+    #         lines = ''.join([lines, self.start_subs(level)])
+    #         for structure in ged:
+    #             tag: str = structure.split(Default.SPACE, 1)[0]
+    #             for good in permitted:
+    #                 if tag == good.tag:
+    #                     lines = ''.join(
+    #                         [
+    #                             lines,
+    #                             self.genealogy_structure(
+    #                                 structure,
+    #                                 level + 2,
+    #                                 good.class_name,
+    #                                 good.key,
+    #                             ),
+    #                         ]
+    #                     )
+    #         lines = ''.join(
+    #             [
+    #                 lines,
+    #                 self.end_subs(level + 1),
+    #                 Default.EOL,
+    #                 self.end_value(level, base),
+    #             ]
+    #         )
+    #     else:
+    #         lines = ''.join([lines, self.end_value(0, base)])
+    #     return lines
 
-        # Remove anything before the header record even an end of line character.
-        ged_temp: str = Default.EMPTY
-        _, _, ged_temp = ged.partition(Default.HEADER)
-        ged = ''.join([Default.HEADER, ged_temp])
 
-        # Remove CONT tags.
-        ged = re.sub('\n[0-9] CONT @', Default.EOL, ged)
-        ged = re.sub('\n[0-9] CONT ', Default.EOL, ged)
+    # def genealogy_structure(
+    #     self, ged: str, level: int, class_name: str, key_name: str
+    # ) -> str:
+    #     lines: str = Default.EMPTY
+    #     ged_structures: list[str] = self.split_subs(ged, level)
+    #     first_line_words: list[str] = ged_structures[0].split(Default.SPACE, 1)
+    #     if len(first_line_words) > 1:
+    #         return ''.join(
+    #             [
+    #                 lines,
+    #                 self.start_value(class_name, level),
+    #                 self.format_value(key_name, first_line_words),
+    #                 self.format_subs(ged_structures, key_name, level),
+    #             ]
+    #         )
+    #     return ''.join(
+    #         [
+    #             lines,
+    #             self.start_value(class_name, level),
+    #             self.format_subs(ged_structures, key_name, level, base=True),
+    #         ]
+    #     )
 
-        # Split the rest into a list of ged records.
-        self.ged_file_records = self.split_subs(ged, 0)
-
-    # def format_payload(self, key: str, payload: str) -> str:
-    #     """Format the payload as either a string, an integer or a cross reference identifier."""
-    #     datatype: str = Default.EMPTY
-    #     yaml_payload: Any = Structure[key][Default.YAML_PAYLOAD]
-    #     if payload is not None:
-    #         datatype = yaml_payload
-    #     return datatype
-
-    def get_substructures(self, key: str) -> list[StructureSpecs]:
-        """Associate the permitted substructure classes with the tags in the ged file."""
-        subs: list[StructureSpecs] = []
-        permitted_keys: list[str] = Structure[key][Default.YAML_PERMITTED_KEY]
-        for sub in permitted_keys:
-            subs.append(
-                StructureSpecs(
-                    tag=Structure[sub][Default.YAML_STANDARD_TAG],
-                    key=Structure[sub][Default.YAML_KEY],
-                    class_name=Structure[sub][Default.YAML_CLASS_NAME],
-                )
-            )
-        return subs
-
-    def get_record_type(self, tag: str) -> str:
-        """Get the kind of record based on the tag in the ged file on the line with level 0."""
-        match tag:
-            case Default.TAG_FAM:
-                return Default.FAM_RECORD_TYPE
-            case Default.TAG_INDI:
-                return Default.INDI_RECORD_TYPE
-            case Default.TAG_OBJE:
-                return Default.OBJE_RECORD_TYPE
-            case Default.TAG_REPO:
-                return Default.REPO_RECORD_TYPE
-            case Default.TAG_SNOTE:
-                return Default.SNOTE_RECORD_TYPE
-            case Default.TAG_SOUR:
-                return Default.SOUR_RECORD_TYPE
-            case Default.TAG_SUBM:
-                return Default.SUBM_RECORD_TYPE
-        return Default.EMPTY
-
-    def genealogy_imports(self) -> str:
-        """Construct the section of the code where the imports are made."""
-        return f"""# Import the required packages and classes.
-from genedata.build import Genealogy
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
-
-"""
-
-    def genealogy_initialize(self) -> str:
-        """Construct the section of the code where the Genealogy class is instantiated."""
-        return f"""# Instantiate a Genealogy class with the name of the ged file.
-{Default.CODE_GENEALOGY} = Genealogy('{self.filename}')
-"""
-
-    def format_text(self, text: str) -> str:
-        """Format text with proper quotes based on single quotes or newlines being in the text."""
-        if text == Default.EMPTY:
-            return "''"
-        if text[0:2] == Default.ATSIGN_DOUBLE:
-            text = text[1:]
-        if Default.EOL in text:
-            if Default.QUOTE_SINGLE in text:
-                return f'"""{text}"""'
-            return f"'''{text}'''"
-        if Default.QUOTE_SINGLE in text:
-            return f'"{text}"'
-        return f"'{text}'"
-
-    def format_xref(self, xref: str) -> str:
-        return xref.replace(Default.ATSIGN, Default.EMPTY).lower()
-
-    def format_value(self, key: str, words: list[str]) -> str:
-        if len(words) == 1:
-            return Default.EMPTY
-        payload: str = Structure[key][Default.YAML_PAYLOAD]
-        match payload:
-            case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                return f'{words[1]}{Default.COMMA}'
-            case '@<https://gedcom.io/terms/v7/record-FAM>@':
-                return (
-                    f'family_{self.format_xref(words[1])}_xref{Default.COMMA}'
-                )
-            case '@<https://gedcom.io/terms/v7/record-INDI>@':
-                return f'individual_{self.format_xref(words[1])}_xref{Default.COMMA}'
-            case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                return f'multimedia_{self.format_xref(words[1])}_xref{Default.COMMA}'
-            case '@<https://gedcom.io/terms/v7/record-REPO>@':
-                return f'repository_{self.format_xref(words[1])}_xref{Default.COMMA}'
-            case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                return f'shared_note_{self.format_xref(words[1])}_xref{Default.COMMA}'
-            case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-                return (
-                    f'source_{self.format_xref(words[1])}_xref{Default.COMMA}'
-                )
-            case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                return f'submitter_{self.format_xref(words[1])}_xref{Default.COMMA}'
-        return self.format_text(words[1])
-
-    def format_subs(
-        self, ged: list[str], key_name: str, level: int = 0, base: bool = False
-    ) -> str:
-        permitted: list[StructureSpecs] = self.get_substructures(key_name)
-        lines: str = Default.EMPTY
-        if len(ged) > 1:
-            lines = ''.join([lines, self.start_subs(level)])
-            for structure in ged:
-                tag: str = structure.split(Default.SPACE, 1)[0]
-                for good in permitted:
-                    if tag == good.tag:
-                        lines = ''.join(
-                            [
-                                lines,
-                                self.genealogy_structure(
-                                    structure,
-                                    level + 2,
-                                    good.class_name,
-                                    good.key,
-                                ),
-                            ]
-                        )
-            lines = ''.join(
-                [
-                    lines,
-                    self.end_subs(level + 1),
-                    Default.EOL,
-                    self.end_value(level, base),
-                ]
-            )
-        else:
-            lines = ''.join([lines, self.end_value(0, base)])
-        return lines
-
-    def get_record_name(self, name: str) -> str:
-        """Remove the @ around the record name and lower case it."""
-        return name.replace(Default.ATSIGN, Default.EMPTY).lower()
-
-    def start_subs(self, level: int = 0) -> str:
-        return ''.join(
-            [
-                Default.COMMA,
-                Default.EOL,
-                Default.INDENT,
-                Default.BRACKET_LEFT,
-                Default.EOL,
-                Default.INDENT * level,
-            ]
-        )
-
-    def end_subs(self, level: int = 0) -> str:
-        return ''.join(
-            [
-                # Default.EOL,
-                Default.INDENT * level,
-                Default.BRACKET_RIGHT,
-            ]
-        )
-
-    def start_value(self, class_name: str, level: int = 0) -> str:
-        return ''.join(
-            [
-                Default.INDENT * level,
-                Default.CODE_CLASS,
-                Default.PERIOD,
-                class_name,
-                Default.PARENS_LEFT,
-            ]
-        )
-
-    def end_value(self, level: int = 0, base: bool = False) -> str:
-        if base:
-            return ''.join(
-                [
-                    Default.INDENT * level,
-                    Default.PARENS_RIGHT,
-                    Default.EOL,
-                ]
-            )
-        return ''.join(
-            [
-                Default.INDENT * level,
-                Default.PARENS_RIGHT,
-                Default.COMMA,
-                Default.EOL,
-            ]
-        )
-
-    def genealogy_xrefs(self) -> str:
-        """Construct the section of the code where the cross reference identifiers are instantiated."""
-        lines: str = """
-# Instantiate the cross reference identifiers.
-"""
-        for record in self.ged_file_records:
-            # Remove the first lines prior to the first substructure starting with 1.
-            record_split: list[str] = self.split_subs(record, 1)
-
-            # Split the first two strings from the first split.
-            line_words: list[str] = record_split[0].split(Default.SPACE, 2)
-
-            # Avoid the trailer record which has one string 'TRLR'
-            # and the header record which still has a '0' string.
-            if line_words[0] != '0':
-                record_name: str = self.get_record_name(line_words[0])
-                record_type: str = self.get_record_type(line_words[1])
-                record_call: str = self.record_dict[line_words[1]]['call']
-                text: str = Default.EMPTY
-                if record_type == Default.SNOTE_RECORD_TYPE:
-                    formatted_text: str = self.format_text(line_words[2])
-                    text = f', {formatted_text}'
-                lines = ''.join(
-                    [
-                        lines,
-                        record_type,
-                        Default.UNDERLINE,
-                        record_name,
-                        Default.UNDERLINE,
-                        Default.XREF,
-                        Default.EQUAL,
-                        Default.CODE_GENEALOGY,
-                        Default.PERIOD,
-                        record_call,
-                        # record_type,
-                        # Default.UNDERLINE,
-                        # Default.XREF,
-                        Default.PARENS_LEFT,
-                        record_name,
-                        Default.QUOTE_SINGLE,
-                        text,
-                        Default.PARENS_RIGHT,
-                        Default.EOL,
-                    ]
-                )
-        return lines
-
-    def genealogy_structure(
-        self, ged: str, level: int, class_name: str, key_name: str
-    ) -> str:
-        lines: str = Default.EMPTY
-        ged_structures: list[str] = self.split_subs(ged, level)
-        first_line_words: list[str] = ged_structures[0].split(Default.SPACE, 1)
-        if len(first_line_words) > 1:
-            return ''.join(
-                [
-                    lines,
-                    self.start_value(class_name, level),
-                    self.format_value(key_name, first_line_words),
-                    self.format_subs(ged_structures, key_name, level),
-                ]
-            )
-        return ''.join(
-            [
-                lines,
-                self.start_value(class_name, level),
-                self.format_subs(ged_structures, key_name, level, base=True),
-            ]
-        )
-
-    def genealogy_header(self) -> str:
-        header_subs: list[str] = self.split_subs(self.ged_file_records[0], 1)
-        lines: str = f"""
-# Instantiate the header record.
-header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
-        return ''.join(
-            [
-                lines,
-                self.format_subs(header_subs, 'HEAD', 0),
-            ]
-        )
-
-    def genealogy_records(self) -> str:
-        lines: str = """
-# Instantiate the records holding the GED data.
-"""
-        for record in self.ged_file_records:
-            record_lines: list[str] = record.split(Default.EOL)
-            record_subs: list[str] = self.split_subs(record, 1)
-            line_words: list[str] = record_lines[0].split(Default.SPACE)
-            if line_words[0] != '0':
-                record_name: str = self.get_record_name(line_words[0])
-                tag: str = line_words[1]
-                record_key: str = self.record_dict[tag]['key']
-                record_class: str = self.record_dict[tag]['class']
-                record_type: str = self.record_dict[tag]['type']
-                lines = ''.join(
-                    [
-                        lines,
-                        record_type,
-                        Default.UNDERLINE,
-                        record_name,
-                        Default.EQUAL,
-                        Default.CODE_CLASS,
-                        Default.PERIOD,
-                        record_class,
-                        Default.PARENS_LEFT,
-                        record_type,
-                        Default.UNDERLINE,
-                        record_name,
-                        Default.UNDERLINE,
-                        Default.XREF,
-                        self.format_subs(record_subs, record_key, 0, base=True),
-                    ]
-                )
-        return lines
-
-    def genealogy_stage(self) -> str:
-        lines: str = f"""
-# Stage the GEDCOM records to generate the ged lines.
-{Default.CODE_GENEALOGY}.stage(header)
-"""
-        for record in self.ged_file_records:
-            record_split: list[str] = record.split(Default.EOL)
-            line_words: list[str] = record_split[0].split(Default.SPACE)
-            if line_words[0] != '0':
-                record_name: str = self.get_record_name(line_words[0])
-                record_type: str = self.get_record_type(line_words[1])
-                lines = ''.join(
-                    [
-                        lines,
-                        Default.CODE_GENEALOGY,
-                        Default.PERIOD,
-                        Default.STAGE,
-                        Default.PARENS_LEFT,
-                        record_type,
-                        Default.UNDERLINE,
-                        record_name,
-                        Default.PARENS_RIGHT,
-                        Default.EOL,
-                    ]
-                )
-        return lines
-
-    def code_from_ged(self) -> str:
-        """Construct code that would generate the loaded ged file."""
-        self.split_ged()
-        return ''.join(
-            [
-                self.genealogy_imports(),
-                self.genealogy_initialize(),
-                self.genealogy_xrefs(),
-                self.genealogy_header(),
-                self.genealogy_records(),
-                self.genealogy_stage(),
-            ]
-        )
 
     ######################################## New version
 
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
 
-        def start_subs(level: int = 0) -> str:
+        def split_subs(ged: str, level: int = 0) -> list[str]:
+            """Split a ged string on substructures at the specified level."""
+            marker: str = f'{Default.EOL}{level}{Default.SPACE}'
+            return ged.split(marker)
+
+        def split_ged() -> None:
+            """Validate the ged string then split it into records without the trailer."""
+
+            # A trailer record `0 TRLR` must be in the file.
+            if Default.TRAILER not in self.ged_file:
+                raise ValueError(Msg.NO_TRAILER.format(Default.TRAILER))
+
+            # A header record `0 HEAD` must be in the file.
+            if Default.HEADER not in self.ged_file:
+                raise ValueError(Msg.NO_HEADER.format(Default.HEADER))
+
+            # Each line starts with a digit.
+            if re.search('\n\\D', self.ged_file):
+                raise ValueError(Msg.NOT_GED_STRINGS)
+
+            # Remove the trailer along with everything after it.
+            ged: str = Default.EMPTY
+            ged, _, _ = self.ged_file.partition(Default.TRAILER)
+
+            # Remove anything before the header record even an end of line character.
+            ged_temp: str = Default.EMPTY
+            _, _, ged_temp = ged.partition(Default.HEADER)
+            ged = ''.join([Default.HEADER, ged_temp])
+
+            # Remove CONT tags.
+            ged = re.sub('\n[0-9] CONT @', Default.EOL, ged)
+            ged = re.sub('\n[0-9] CONT ', Default.EOL, ged)
+
+            # Split the rest into a list of ged records.
+            self.ged_file_records = split_subs(ged, 0)
+
+        def header() -> str:
+            header_subs: list[str] = split_subs(self.ged_file_records[0], 1)
+            lines: str = f"""
+# Instantiate the header record.
+header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
             return ''.join(
                 [
-                    Default.COMMA,
-                    Default.EOL,
-                    Default.INDENT,
-                    Default.BRACKET_LEFT,
-                    Default.EOL,
-                    Default.INDENT * level,
+                    lines,
+                    format_subs(header_subs, 'HEAD', 1),
                 ]
             )
 
         def end_subs(level: int = 0) -> str:
+            if level == 0:
+                return ''.join(
+                    [
+                        Default.BRACKET_RIGHT,
+                        Default.PARENS_RIGHT,
+                    ]
+                )
             return ''.join(
                 [
-                    # Default.EOL,
                     Default.INDENT * level,
                     Default.BRACKET_RIGHT,
+                    Default.PARENS_RIGHT,
+                    Default.COMMA,
                 ]
             )
 
         def start_value(class_name: str, level: int = 0) -> str:
             return ''.join(
                 [
-                    Default.INDENT * level,
                     Default.CODE_CLASS,
                     Default.PERIOD,
                     class_name,
@@ -673,78 +456,102 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
                 ]
             )
 
-        def end_value(level: int = 0, base: bool = False) -> str:
-            if base:
-                return ''.join(
-                    [
-                        Default.INDENT * level,
-                        Default.PARENS_RIGHT,
-                        Default.EOL,
-                    ]
-                )
-            return ''.join(
-                [
-                    Default.INDENT * level,
-                    Default.PARENS_RIGHT,
-                    Default.COMMA,
-                    Default.EOL,
-                ]
-            )
-        
+        def format_xref(xref: str) -> str:
+            return xref.replace(Default.ATSIGN, Default.EMPTY).lower()
+
         def get_subs_specs(key: str) -> list[StructureSpecs]:
             """Associate the permitted substructure classes with the tags in the ged file."""
             subs: list[StructureSpecs] = []
-            permitted_keys: list[str] = Structure[key][Default.YAML_PERMITTED_KEY]
+            permitted_keys: list[str] = Queries.permitted_keys(key, Structure)
             for sub in permitted_keys:
                 subs.append(
                     StructureSpecs(
                         tag=Structure[sub][Default.YAML_STANDARD_TAG],
-                        key=Structure[sub][Default.YAML_KEY],
-                        class_name=Structure[sub][Default.YAML_CLASS_NAME],
+                        key=sub,
+                        class_name=Names.classname(sub),
                     )
                 )
             return subs
-        
+
         def substructure(
             ged: str, level: int, class_name: str, key_name: str
         ) -> str:
             lines: str = Default.EMPTY
             ged_structures: list[str] = split_subs(ged, level)
-            first_line_words: list[str] = ged_structures[0].split(Default.SPACE, 1)
+            first_line_words: list[str] = ged_structures[0].split(
+                Default.SPACE, 1
+            )
             if len(first_line_words) > 1:
+                value: str = format_value(key_name, first_line_words)
                 return ''.join(
                     [
                         lines,
                         start_value(class_name, level),
-                        self.format_value(key_name, first_line_words),
-                        format_subs(ged_structures, key_name, level),
+                        value,
+                        format_subs(
+                            ged_structures[1:], key_name, level, value=value
+                        ),
                     ]
                 )
             return ''.join(
                 [
                     lines,
                     start_value(class_name, level),
-                    format_subs(ged_structures, key_name, level, base=True),
+                    format_subs(
+                        ged_structures[1:], key_name, level
+                    ), 
                 ]
             )
 
+        def format_value(key: str, words: list[str]) -> str:
+            if len(words) == 1:
+                return Default.EMPTY
+            payload: str = Structure[key][Default.YAML_PAYLOAD]
+            match payload:
+                case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
+                    return f'{words[1]}'
+                case '@<https://gedcom.io/terms/v7/record-FAM>@':
+                    return f'family_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-INDI>@':
+                    return f'individual_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                    return f'multimedia_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-REPO>@':
+                    return f'repository_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
+                    return f'shared_note_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-SOUR>@':
+                    return f'source_{format_xref(words[1])}_xref'
+                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
+                    return f'submitter_{format_xref(words[1])}_xref'
+            return Names.quote_text(words[1])
+
         def format_subs(
-            ged: list[str], key_name: str, level: int = 0, base: bool = False
+            ged: list[str],
+            key_name: str,
+            level: int = 0,
+            value: str = Default.EMPTY,
         ) -> str:
             permitted: list[StructureSpecs] = get_subs_specs(key_name)
             lines: str = Default.EMPTY
             if len(ged) > 1:
-                lines = ''.join([lines, start_subs(level)])
+                if value != Default.EMPTY:
+                    lines = ''.join(
+                        [lines, ', ', Default.BRACKET_LEFT, Default.EOL]
+                    )
+                else:
+                    lines = ''.join([lines, Default.BRACKET_LEFT, Default.EOL])
                 for structure in ged:
-                    tag: str = structure.split(Default.SPACE, 1)[0]
+                    tag: str = structure.split(Default.SPACE, 2)[0]
                     for good in permitted:
                         if tag == good.tag:
                             lines = ''.join(
                                 [
                                     lines,
+                                    Default.INDENT * level,
                                     substructure(
                                         structure,
-                                        level + 2,
+                                        level + 1,
                                         good.class_name,
                                         good.key,
                                     ),
@@ -753,60 +560,15 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
                 lines = ''.join(
                     [
                         lines,
-                        end_subs(level + 1),
+                        end_subs(level - 1),
                         Default.EOL,
-                        end_value(level, base),
                     ]
                 )
             else:
-                lines = ''.join([lines, end_value(0, base)])
+                lines = ''.join(
+                    [lines, Default.PARENS_RIGHT, Default.COMMA, Default.EOL]
+                )
             return lines
-
-        def format_text(text: str) -> str:
-            """Format text with proper quotes based on single quotes or newlines being in the text."""
-            if text == Default.EMPTY:
-                return "''"
-            if text[0:2] == Default.ATSIGN_DOUBLE:
-                text = text[1:]
-            if Default.EOL in text:
-                if Default.QUOTE_SINGLE in text:
-                    return f'"""{text}"""'
-                return f"'''{text}'''"
-            if Default.QUOTE_SINGLE in text:
-                return f'"{text}"'
-            return f"'{text}'"
-        
-        def format_value(key: str, words: list[str]) -> str:
-            if len(words) == 1:
-                return Default.EMPTY
-            payload: str = Structure[key][Default.YAML_PAYLOAD]
-            match payload:
-                case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                    return f'{words[1]}{Default.COMMA}'
-                case '@<https://gedcom.io/terms/v7/record-FAM>@':
-                    return (
-                        f'family_{xref_name(words[1])}_xref{Default.COMMA}'
-                    )
-                case '@<https://gedcom.io/terms/v7/record-INDI>@':
-                    return f'individual_{xref_name(words[1])}_xref{Default.COMMA}'
-                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                    return f'multimedia_{xref_name(words[1])}_xref{Default.COMMA}'
-                case '@<https://gedcom.io/terms/v7/record-REPO>@':
-                    return f'repository_{xref_name(words[1])}_xref{Default.COMMA}'
-                case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-                    return f'shared_note_{xref_name(words[1])}_xref{Default.COMMA}'
-                case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-                    return (
-                        f'source_{xref_name(words[1])}_xref{Default.COMMA}'
-                    )
-                case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-                    return f'submitter_{xref_name(words[1])}_xref{Default.COMMA}'
-            return format_text(words[1])
-
-        def split_subs(ged: str, level: int = 0) -> list[str]:
-            """Split a ged string on substructures at the specified level."""
-            marker: str = f'{Default.EOL}{level}{Default.SPACE}'
-            return ged.split(marker)
 
         def xref_name(xref: str) -> str:
             return xref.replace(Default.ATSIGN, Default.EMPTY)
@@ -837,15 +599,14 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                 # Split the first two strings from the first split.
                 line_words: list[str] = record_subs[0].split(Default.SPACE, 2)
 
-                # Avoid the trailer record which has one string 'TRLR'
-                # and the header record which still has a '0' string.
+                # Avoid the header record which still has a '0' string.
                 if line_words[0] != '0':
                     name: str = xref_name(line_words[0])
                     tag: str = line_words[1].lower()
                     call: str = self.record_dict[line_words[1]]['call']
                     text: str = Default.EMPTY
                     if tag == Default.SNOTE_RECORD_TYPE:
-                        text = format_text(line_words[2])
+                        text = Names.quote_text(line_words[2])
                         text = f', {text}'
                     lines = ''.join(
                         [
@@ -876,7 +637,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 """
             for record in self.ged_file_records:
                 record_lines: list[str] = record.split(Default.EOL)
-                record_subs: list[str] = self.split_subs(record, 1)
+                record_subs: list[str] = split_subs(record, 1)
                 line_words: list[str] = record_lines[0].split(Default.SPACE)
                 if line_words[0] != '0':
                     record_name: str = xref_name(line_words[0])
@@ -900,9 +661,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                             record_name,
                             Default.UNDERLINE,
                             Default.XREF,
-                            self.format_subs(
-                                record_subs, record_key, 0, base=True
-                            ),
+                            format_subs(record_subs, record_key, 1, value=' '),
                         ]
                     )
             return lines
@@ -934,17 +693,19 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                     )
             return lines
 
-        self.split_ged()
+        split_ged()
         return ''.join(
             [
                 imports(),
                 initialize(),
                 xrefs(),
-                self.genealogy_header(),
+                header(),
                 records(),
                 stage(),
             ]
         )
+
+    ###################################################
 
     def code(self) -> str:
         lines: str = f"""from genedata.build import Genealogy

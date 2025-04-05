@@ -47,6 +47,7 @@ class Msg:
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
     IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
+    KEY_NOT_FOUND: str = 'A Structure key could not be derived from the name "{0}".'
     LATI_NORTH_SOUTH: str = (
         'The character "{0}" of the latitude "{1}" is not "N" or "S".'
     )

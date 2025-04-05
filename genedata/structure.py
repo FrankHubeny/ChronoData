@@ -505,7 +505,12 @@ class BaseStructure:
         # Does value have the required data type?
         match self.payload:
             case 'http://www.w3.org/2001/XMLSchema#string':
-                if not isinstance(self.value, str):
+                if self.key == 'record-SNOTE':
+                    if not isinstance(self.value, SharedNoteXref):
+                        raise ValueError(
+                            Msg.NOT_SHARED_NOTE_XREF.format(repr(self.value), self.class_name)
+                        )
+                elif not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
@@ -870,8 +875,6 @@ class BaseStructure:
                 lines = Tagger.empty(lines, level, self.tag)
             elif isinstance(self.value, Xref) and level == 0:
                 lines = self.value.ged()
-            # elif isinstance(self.value, Xref):
-            #     lines = self.value.fullname
             else:
                 lines = Tagger.string(
                     lines,

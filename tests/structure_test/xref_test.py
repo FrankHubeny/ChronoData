@@ -296,7 +296,7 @@ def test_bad_shared_note_xref() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
-            Msg.NOT_SHARED_NOTE_XREF.format(str(m.value), m.class_name)
+            Msg.NOT_SHARED_NOTE_XREF.format(repr(m.value), m.class_name)
         ),
     ):
         m.validate()

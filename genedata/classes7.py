@@ -5809,26 +5809,53 @@ class Head(BaseStructure):
         >>> sour_xref = g.source_xref('S1')
 
         Third, construct the header record.
-        >>> head = gc.Head(
-        ...     [
-        ...         gc.Gedc(gc.GedcVers('7.0')),
-        ...         gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.',
-        ...             [
-        ...                 gc.Mime('text/plain'),
-        ...                 gc.Lang('en-US'),
-        ...                 gc.NoteTran('Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.', gc.Lang('de')),
-        ...                 gc.Sour(sour_xref, gc.Page(1)),
-        ...                 gc.Sour(sour_xref, gc.Page(2)),
-        ...             ]
-        ...         ),
-        ...         gc.Schma(
-        ...             [
-        ...                 gc.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
-        ...                 gc.Tag('_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
-        ...             ]
-        ...         )
-        ...     ]
-        ... )
+        >>> head = gc.Head([
+        ...     gc.Gedc(gc.GedcVers('7.0')),
+        ...     gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.',[
+        ...         gc.Mime('text/plain'),
+        ...         gc.Lang('en-US'),
+        ...         gc.NoteTran('Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.', gc.Lang('de')),
+        ...         gc.Sour(sour_xref, gc.Page('1')),
+        ...         gc.Sour(sour_xref, gc.Page('2')),
+        ...     ]),
+        ...     gc.Schma([
+        ...         gc.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
+        ...         gc.Tag('_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
+        ...     ]),
+        ...     gc.HeadSour('https://gedcom.io/',[
+        ...         gc.Vers('0.4'),
+        ...         gc.Name('GEDCOM Steering Committee'),
+        ...         gc.Corp('FamilySearch',[
+        ...             gc.Addr('Family History Department\\n15 East South Temple Street\\nSalt Lake City, UT 84150 USA',[
+        ...                 gc.Adr1('Family History Department'),
+        ...                 gc.Adr2('15 East South Temple Street'),
+        ...                 gc.Adr3('Salt Lake City, UT 84150 USA'),
+        ...                 gc.City('Salt Lake City'),
+        ...                 gc.Stae('UT'),
+        ...                 gc.Post('84150'),
+        ...                 gc.Ctry('USA'),
+        ...             ]),
+        ...             gc.Phon('+1 (555) 555-1212'),
+        ...             gc.Phon('+1 (555) 555-1234'),
+        ...             gc.Email('GEDCOM@FamilySearch.org'),
+        ...             gc.Email('GEDCOM@example.com'),
+        ...             gc.Fax('+1 (555) 555-1212'),
+        ...             gc.Fax('+1 (555) 555-1234'),
+        ...             gc.Www('http://gedcom.io'),
+        ...             gc.Www('http://gedcom.info'),
+        ...         ]),
+        ...         gc.HeadSourData('HEAD-SOUR-DATA',[
+        ...             gc.DateExact('1 NOV 2022', gc.Time('8:38')),
+        ...             gc.Copr('copyright statement'),
+        ...         ]),
+        ...     ]),
+        ...     gc.Dest('https://gedcom.io/'),
+        ...     gc.HeadDate('10 JUN 2022', gc.Time('15:43:20.48Z')),
+        ...     gc.Subm(subm_xref),
+        ...     gc.Copr('another copyright statement'),
+        ...     gc.HeadLang('en-US'),
+        ...     gc.HeadPlac(gc.HeadPlacForm('City, County, State, Country')),
+        ... ])
 
         Finally, generate and print the ged lines to see how they look.  If this were in
         a full ged file the Genealogy class would produce the ged file.
@@ -10817,6 +10844,418 @@ class RecordIndi(BaseStructure):
         1 ASSO @I2@
         2 ROLE GODP
         <BLANKLINE>
+
+        The Maximal 70 file contains four examples of individual records.  Each of these will be
+        created next as examples.  We will need the following cross reference identifiers for
+        these examples plus the imports.  We already have the first two individuals from the
+        previous example.
+        >>> from genedata.build import Genealogy     # To create record cross reference identifiers.
+        >>> import genedata.classes7 as gc           # To access the GEDCOM structures.
+        >>> from genedata.structure import Void      # To represent a void pointer.
+        >>> fam_f1_xref = g.family_xref('F1')        # Family 1 cross reference identifier.
+        >>> fam_f2_xref = g.family_xref('F2')        
+        >>> indi_i3_xref = g.individual_xref('i3')
+        >>> indi_i4_xref = g.individual_xref('i4')
+        >>> obje_o1_xref = g.multimedia_xref('o1')
+        >>> obje_o2_xref = g.multimedia_xref('o2')
+        >>> snote_n1_xref = g.shared_note_xref('n1', '')
+        >>> sour_s1_xref = g.source_xref('s1')
+        >>> sour_s2_xref = g.source_xref('s2')
+        >>> subm_u1_xref = g.submitter_xref('u1')
+        >>> subm_u2_xref = g.submitter_xref('u2')
+
+        The third and fourth individuals are the simplest. So we will start with them.
+        >>> indi_i3 = gc.RecordIndi(indi_i3_xref, gc.Sex('X'))
+
+        >>> indi_i4 = gc.RecordIndi(indi_i4_xref, [gc.Sex('U'), gc.IndiFamc(fam_f1_xref)])
+
+        We can see what the ged file looks like for each as we proceed.
+        >>> print(indi_i3.ged())
+        0 @I3@ INDI
+        1 SEX X
+        <BLANKLINE>
+
+        >>> print(indi_i4.ged())  # Famc is not a substructure of RecordIndi.
+        0 @I4@ INDI
+        1 SEX U
+        1 FAMC @F1@
+        <BLANKLINE>
+
+        The second individual is more detailed.
+        >>> indi_i2 = gc.RecordIndi(indi_i2_xref, [
+        ...     gc.IndiName('Maiden Name', gc.Type('MAIDEN')),
+        ...     gc.IndiName('Married Name', gc.Type('MARRIED')),
+        ...     gc.IndiName('Professional Name', gc.Type('PROFESSIONAL')),
+        ...     gc.Sex('F'),
+        ...     gc.Fams(fam_f1_xref),
+        ... ])
+
+        The first individual contains most of the features.
+        >>> indi_i1 = RecordIndi(indi_i1_xref, [
+        ...     gc.Resn('confidential, locked'),
+        ...     gc.IndiName('Lt. Cmndr. Joseph "John" /de Allen/ jr.', [
+        ...         gc.Type('OTHER', gc.Phrase('Name type phrase')),
+        ...         gc.Npfx('Lt. Cmndr.'),
+        ...         gc.Givn('Joseph'),
+        ...         gc.Nick('John'),
+        ...         gc.Spfx('de'),
+        ...         gc.Surn('Allen'),
+        ...         gc.Nsfx('jr.'),
+        ...         gc.NameTran('npfx John /spfx Doe/ nsfx', [
+        ...             gc.Lang('en-GB'),
+        ...             gc.Npfx('npfx'),
+        ...             gc.Givn('John'),
+        ...             gc.Nick('John'),
+        ...             gc.Spfx('spfx'),
+        ...             gc.Surn('Doe'),
+        ...             gc.Nsfx('nsfx'),
+        ...         ]),
+        ...         gc.NameTran('John /Doe/', gc.Lang('en-CA')),
+        ...         gc.Note('Note text'),
+        ...         gc.Snote(snote_n1_xref),
+        ...         gc.Snote(Void.SNOTE),
+        ...         gc.Sour(sour_s1_xref, gc.Page('1')),
+        ...         gc.Sour(sour_s2_xref),
+        ...     ]),
+        ...     gc.IndiName('John /Doe/', gc.Type('birth')),
+        ...     gc.IndiName('Aka', gc.Type('aka')),
+        ...     gc.IndiName('Immigrant Name', gc.Type('immigrant')),
+        ...     gc.Sex('m'),
+        ...     gc.Cast('caste', gc.Type('Caste type')),
+        ...     gc.Desc('Description', [
+        ...         gc.Type('Description type'),
+        ...         gc.Sour(Void.SOUR, gc.Page('entire range')),
+        ...     ]),
+        ...     gc.Educ('Education', gc.Type('Education type')),
+        ...     gc.Idno('ID number', gc.Type('ID number type')),
+        ...     gc.Nati('Nationality', gc.Type('Nationality type')),
+        ...     gc.Nchi(2, gc.Type('nchi type')),
+        ...     gc.Nmr(2, gc.Type('nmr type')),
+        ...     gc.Occu('occu', gc.Type('occu type')),
+        ...     gc.Prop('prop', gc.Type('prop type')),
+        ...     gc.Reli('reli', gc.Type('reli type')),
+        ...     gc.Resi('resi', gc.Type('resi type')),
+        ...     gc.Ssn('ssn', gc.Type('ssn type')),
+        ...     gc.Titl('titl', gc.Type('titl type')),
+        ...     gc.Fact('fact', gc.Type('fact type')),
+        ...     gc.Bapm('', gc.Type('bapm type')),
+        ...     gc.Bapm('Y'),
+        ...     gc.Barm('', gc.Type('barm type')),
+        ...     gc.Basm('', gc.Type('basm type')),
+        ...     gc.Bles('', gc.Type('bles type')),
+        ...     gc.Buri('', [gc.Type('buri type'), gc.DateExact('30 MAR 2022')]),
+        ...     gc.Cens('', gc.Type('cens type')),
+        ...     gc.Chra('', gc.Type('chra type')),
+        ...     gc.Conf('', gc.Type('conf type')),
+        ...     gc.Crem('', gc.Type('crem type')),
+        ...     gc.Deat('', [
+        ...         gc.Type('deat type'), 
+        ...         gc.DateExact('28 MAR 2022'),
+        ...         gc.Plac('Somewhere'),
+        ...         gc.Addr('Address'),
+        ...         gc.Phon('+1 (555) 555-1212'),
+        ...     ]),
+        ... ])
+
+        0 @I1@ INDI
+        1 RESN CONFIDENTIAL, LOCKED
+        1 NAME Lt. Cmndr. Joseph "John" /de Allen/ jr.
+        2 TYPE OTHER
+        3 PHRASE Name type phrase
+        2 NPFX Lt. Cmndr.
+        2 GIVN Joseph
+        2 NICK John
+        2 SPFX de
+        2 SURN Allen
+        2 NSFX jr.
+        2 TRAN npfx John /spfx Doe/ nsfx
+        3 LANG en-GB
+        3 NPFX npfx
+        3 GIVN John
+        3 NICK John
+        3 SPFX spfx
+        3 SURN Doe
+        3 NSFX nsfx
+        2 TRAN John /Doe/
+        3 LANG en-CA
+        2 NOTE Note text
+        2 SNOTE @N1@
+        2 SNOTE @VOID@
+        2 SOUR @S1@
+        3 PAGE 1
+        2 SOUR @S2@
+        1 NAME John /Doe/
+        2 TYPE BIRTH
+        1 NAME Aka
+        2 TYPE AKA
+        1 NAME Immigrant Name
+        2 TYPE IMMIGRANT
+        1 SEX M
+        1 CAST Caste
+        2 TYPE Caste type
+        1 DSCR Description
+        2 TYPE Description type
+        2 SOUR @VOID@
+        3 PAGE Entire source
+        1 EDUC Education
+        2 TYPE Education type
+        1 IDNO ID number
+        2 TYPE ID number type
+        1 NATI Nationality
+        2 TYPE Nationality type
+        1 NCHI 2
+        2 TYPE nchi type
+        1 NMR 2
+        2 TYPE nmr type
+        1 OCCU occu
+        2 TYPE occu type
+        1 PROP prop
+        2 TYPE prop type
+        1 RELI reli
+        2 TYPE reli type
+        1 RESI resi
+        2 TYPE resi type
+        1 SSN ssn
+        2 TYPE ssn type
+        1 TITL titl
+        2 TYPE titl type
+        1 FACT fact
+        2 TYPE fact type
+        1 BAPM
+        2 TYPE bapm type
+        1 BAPM Y
+        1 BARM
+        2 TYPE barm type
+        1 BASM
+        2 TYPE basm type
+        1 BLES
+        2 TYPE bles type
+        1 BURI
+        2 TYPE buri type
+        2 DATE 30 MAR 2022
+        1 CENS
+        2 TYPE cens type
+        1 CHRA
+        2 TYPE chra type
+        1 CONF
+        2 TYPE conf type
+        1 CREM
+        2 TYPE crem type
+        1 DEAT
+        2 TYPE deat type
+        2 DATE 28 MAR 2022
+        2 PLAC Somewhere
+        2 ADDR Address
+        2 PHON +1 (555) 555-1212
+        2 PHON +1 (555) 555-1234
+        2 EMAIL GEDCOM@FamilySearch.org
+        2 EMAIL GEDCOM@example.com
+        2 FAX +1 (555) 555-1212
+        2 FAX +1 (555) 555-1234
+        2 WWW http://gedcom.io
+        2 WWW http://gedcom.info
+        2 AGNC Agency
+        2 RELI Religion
+        2 CAUS Cause of death
+        2 RESN CONFIDENTIAL, LOCKED
+        2 SDATE 28 MAR 2022
+        3 TIME 16:47
+        3 PHRASE sdate phrase
+        2 ASSO @I3@
+        3 ROLE CHIL
+        2 ASSO @VOID@
+        3 ROLE PARENT
+        2 NOTE Note text
+        2 SNOTE @N1@
+        2 SOUR @S1@
+        3 PAGE 1
+        2 SOUR @S2@
+        3 PAGE 2
+        2 OBJE @O1@
+        2 OBJE @O2@
+        2 UID 82092878-6f4f-4bca-ad59-d1ae87c5e521
+        2 UID daf4b8c0-4141-42c4-bec8-01d1d818dfaf
+        1 EMIG
+        2 TYPE emig type
+        1 FCOM
+        2 TYPE fcom type
+        1 GRAD
+        2 TYPE grad type
+        1 IMMI
+        2 TYPE immi type
+        1 NATU
+        2 TYPE natu type
+        1 ORDN
+        2 TYPE ordn type
+        1 PROB
+        2 TYPE prob type
+        1 RETI
+        2 TYPE reti type
+        1 WILL
+        2 TYPE will type
+        1 ADOP
+        2 TYPE adop type
+        2 FAMC @VOID@
+        3 ADOP BOTH
+        4 PHRASE Adoption phrase
+        1 ADOP
+        2 FAMC @VOID@
+        3 ADOP HUSB
+        1 ADOP
+        2 FAMC @VOID@
+        3 ADOP WIFE
+        1 BIRT
+        2 TYPE birth type
+        2 DATE 1 JAN 2000
+        1 CHR
+        2 TYPE chr type
+        2 DATE 9 JAN 2000
+        2 AGE 8d
+        3 PHRASE Age phrase
+        1 EVEN Event
+        2 TYPE Event type
+        1 NO NATU
+        2 DATE FROM 1700 TO 1800
+        3 PHRASE No date phrase
+        2 NOTE Note text
+        2 SNOTE @N1@
+        2 SOUR @S1@
+        3 PAGE 1
+        2 SOUR @S1@
+        3 PAGE 2
+        1 NO EMIG
+        1 BAPL
+        2 STAT STILLBORN
+        3 DATE 27 MAR 2022
+        1 BAPL
+        2 STAT SUBMITTED
+        3 DATE 27 MAR 2022
+        1 BAPL
+        2 DATE 27 MAR 2022
+        1 CONL
+        2 STAT INFANT
+        3 DATE 27 MAR 2022
+        1 CONL
+        2 DATE 27 MAR 2022
+        1 ENDL
+        2 STAT CHILD
+        3 DATE 27 MAR 2022
+        1 ENDL
+        2 DATE 27 MAR 2022
+        1 INIL
+        2 STAT EXCLUDED
+        3 DATE 27 MAR 2022
+        1 INIL
+        2 DATE 27 MAR 2022
+        1 SLGC
+        2 DATE 27 MAR 2022
+        3 TIME 15:47
+        3 PHRASE Afternoon
+        2 TEMP SLAKE
+        2 FAMC @VOID@
+        1 SLGC
+        2 PLAC Place
+        2 STAT BIC
+        3 DATE 27 MAR 2022
+        4 TIME 15:48
+        2 NOTE Note text
+        2 SNOTE @N1@
+        2 SOUR @S1@
+        3 PAGE 1
+        2 SOUR @S2@
+        3 PAGE 2
+        2 FAMC @VOID@
+        1 SLGC
+        2 FAMC @F2@
+        1 FAMC @VOID@
+        2 PEDI OTHER
+        3 PHRASE Other type
+        2 STAT CHALLENGED
+        3 PHRASE Phrase
+        1 FAMC @VOID@
+        2 PEDI FOSTER
+        1 FAMC @VOID@
+        2 PEDI SEALING
+        1 FAMC @F2@
+        2 PEDI ADOPTED
+        2 STAT PROVEN
+        1 FAMC @F2@
+        2 PEDI BIRTH
+        2 STAT DISPROVEN
+        1 FAMS @VOID@
+        2 NOTE Note text
+        2 SNOTE @N1@
+        1 FAMS @F1@
+        1 SUBM @U1@
+        1 SUBM @U2@
+        1 ASSO @VOID@
+        2 PHRASE Mr Stockdale
+        2 ROLE FRIEND
+        1 ASSO @VOID@
+        2 ROLE NGHBR
+        1 ASSO @VOID@
+        2 ROLE FATH
+        1 ASSO @VOID@
+        2 ROLE GODP
+        1 ASSO @VOID@
+        2 ROLE HUSB
+        1 ASSO @VOID@
+        2 ROLE MOTH
+        1 ASSO @VOID@
+        2 ROLE MULTIPLE
+        1 ASSO @VOID@
+        2 ROLE SPOU
+        1 ASSO @VOID@
+        2 ROLE WIFE
+        1 ALIA @VOID@
+        1 ALIA @I3@
+        2 PHRASE Alias
+        1 ANCI @U1@
+        1 ANCI @VOID@
+        1 DESI @U1@
+        1 DESI @VOID@
+        1 REFN 1
+        2 TYPE User-generated identifier
+        1 REFN 10
+        2 TYPE User-generated identifier
+        1 UID 3d75b5eb-36e9-40b3-b79f-f088b5c18595
+        1 UID cb49c361-7124-447e-b587-4c6d36e51825
+        1 EXID 123
+        2 TYPE http://example.com
+        1 EXID 456
+        2 TYPE http://example.com
+        1 NOTE me@example.com is an example email address.
+        2 CONT @@me and @I are example social media handles.
+        2 CONT @@@@@ has four @ characters where only the first is escaped.
+        1 SNOTE @N1@
+        1 SOUR @S1@
+        2 PAGE 1
+        2 QUAY 3
+        1 SOUR @S2@
+        1 OBJE @O1@
+        1 OBJE @O2@
+        1 CHAN
+        2 DATE 27 MAR 2022
+        3 TIME 08:56
+        2 NOTE Change date note 1
+        2 NOTE Change date note 2
+        1 CREA
+        2 DATE 27 MAR 2022
+        3 TIME 08:55
+        0 @I2@ INDI
+        1 NAME Maiden Name
+        2 TYPE MAIDEN
+        1 NAME Married Name
+        2 TYPE MARRIED
+        1 NAME Professional Name
+        2 TYPE PROFESSIONAL
+        1 SEX F
+        1 FAMS @F1@
+        0 @I3@ INDI
+        1 SEX X
+        0 @I4@ INDI
+        1 SEX U
+        1 FAMC @F1@
 
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |

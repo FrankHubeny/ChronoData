@@ -788,7 +788,7 @@ class Tests:
             enum_key = Names.keyname(enum_value)
             if enum_key in enumerations:
                 return str(enumerations[enum_key][Default.YAML_STANDARD_TAG])
-            return str(structures[enum_key][Default.YAML_STANDARD_TAG])
+            # return str(structures[enum_key][Default.YAML_STANDARD_TAG])
         return Default.EMPTY
 
     # @staticmethod
@@ -830,8 +830,8 @@ class Tests:
                 class_name = Names.classname(sub_key)
                 if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
                     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_required})'
-                elif sub_required != Default.EMPTY:
-                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
+                # elif sub_required != Default.EMPTY:
+                #     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
                 else:
                     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value})'
                 break
@@ -863,13 +863,13 @@ class Tests:
                         not_required = f'{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_not_required})'
                     else:
                         not_required = f'{Default.CODE_CLASS}.{class_name}({sub_not_required})'
-                else:  # noqa: PLR5501
-                    if sub_value != Default.EMPTY:
-                        not_required = (
-                            f'{Default.CODE_CLASS}.{class_name}({sub_value})'
-                        )
-                    else:
-                        not_required = f'{Default.CODE_CLASS}.{class_name}()'
+                else:  
+                    # if sub_value != Default.EMPTY:
+                    not_required = (
+                        f'{Default.CODE_CLASS}.{class_name}({sub_value})'
+                    )
+                    # else:
+                    #     not_required = f'{Default.CODE_CLASS}.{class_name}()'
                 break
         return not_required
 
@@ -895,11 +895,11 @@ class Tests:
                 )
                 class_name = Names.classname(sub_key)
                 if required != Default.EMPTY:
-                    if sub_required != Default.EMPTY:
-                        required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
-                    else:
-                        more_than_one = True
-                        required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
+                    # if sub_required != Default.EMPTY:
+                    #     required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
+                    # else:
+                    more_than_one = True
+                    required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
                 else:  # noqa: PLR5501
                     if (
                         sub_required != Default.EMPTY
@@ -920,23 +920,29 @@ class Tests:
     def get_message(key: str, payload: str) -> str:
         match payload:
             case 'http://www.w3.org/2001/XMLSchema#string':
-                return 'NOT_STRING'
-            case 'None':
                 match key:
-                    case 'record-FAM':
-                        return 'NOT_FAMILY_XREF'
-                    case 'record-INDI':
-                        return 'NOT_INDIVIDUAL_XREF'
-                    case 'record-OBJE':
-                        return 'NOT_MULTIMEDIA_XREF'
-                    case 'record-REPO':
-                        return 'NOT_REPOSITORY_XREF'
-                    case 'record-SOUR':
-                        return 'NOT_SOURCE_XREF'
-                    case 'record-SUBM':
-                        return 'NOT_SUBMITTER_XREF'
+                    case 'record-SNOTE':
+                        return 'NOT_SHARED_NOTE_XREF'
                     case _:
                         return 'NOT_STRING'
+            # case 'None':
+            #     match key:
+            #         case 'record-FAM':
+            #             return 'NOT_FAMILY_XREF'
+            #         case 'record-INDI':
+            #             return 'NOT_INDIVIDUAL_XREF'
+            #         case 'record-OBJE':
+            #             return 'NOT_MULTIMEDIA_XREF'
+            #         case 'record-REPO':
+            #             return 'NOT_REPOSITORY_XREF'
+            #         case 'record-SNOTE':
+            #             return 'NOT_SHARED_NOTE_XREF'
+            #         case 'record-SOUR':
+            #             return 'NOT_SOURCE_XREF'
+            #         case 'record-SUBM':
+            #             return 'NOT_SUBMITTER_XREF'
+            #         case _:
+            #             return 'NOT_STRING'
             case 'https://gedcom.io/terms/v7/type-Enum':
                 return 'NOT_STRING'
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -1061,10 +1067,12 @@ class Tests:
                 return 'snote'
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                 return 'sour'
-            case 'https://gedcom.io/terms/v7/type-Time':
-                return "'12:12:12'"
+            #case 'https://gedcom.io/terms/v7/type-Time':
             case _:
-                return Default.EMPTY
+                return "'12:12:12'"
+            # case _:
+            #     return Default.EMPTY
+        #return Default.EMPTY
 
     @staticmethod
     def there_are_required_substructures(substructures: dict[str, str]) -> bool:
@@ -1080,22 +1088,22 @@ class Tests:
                 return True
         return False
 
-    @staticmethod
-    def there_are_single_substructures(substructures: dict[str, str]) -> bool:
-        """Return true if there dictionary of substructures contains a required substructure.
+    # @staticmethod
+    # def there_are_single_substructures(substructures: dict[str, str]) -> bool:
+    #     """Return true if there dictionary of substructures contains a required substructure.
 
-        Args:
-            substructures: The subdictionary of Structure containing the uri as key
-                and its cardinality code as value.  The cardinality code `:1}`
-                signals a single occurence substructure.
-        """
-        for _key, cardinality in substructures.items():
-            if Default.CARDINALITY_SINGULAR in cardinality:
-                return True
-        return False
+    #     Args:
+    #         substructures: The subdictionary of Structure containing the uri as key
+    #             and its cardinality code as value.  The cardinality code `:1}`
+    #             signals a single occurence substructure.
+    #     """
+    #     for _key, cardinality in substructures.items():
+    #         if Default.CARDINALITY_SINGULAR in cardinality:
+    #             return True
+    #     return False
 
     @staticmethod
-    def preamble(test: str, add_pytest: int = 0) -> str:
+    def preamble(test: str, add_pytest: int = 0, firstline: str = Default.EMPTY) -> str:
         """Construct a document to describe a module containing a set of tests."""
         match add_pytest:
             case 0:
@@ -1114,7 +1122,7 @@ import re
 
 import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 from genedata.build import Genealogy"""
-        return f"""'''This module contains {test} tests to be run with pytest.
+        return f"""{firstline}'''This module contains {test} tests to be run with pytest.
 
 The file was generated by methods of the `{__class__.__name__}` class in the `{__name__}` module.
 
@@ -1169,6 +1177,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         lines: str = Tests.preamble(test_name)
         value: str = Default.EMPTY
         subs: str = Default.EMPTY
+        y: bool = True
         for key in structures:
             if key not in [Default.CONT, Default.TRLR]:
                 value = Tests.get_value(
@@ -1176,7 +1185,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     structures,
                     enumerationsets,
                     enumerations,
+                    y,
                 )
+                y = not y
                 subs = Tests.get_required(
                     key, structures, enumerationsets, enumerations
                 )
@@ -1272,7 +1283,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a value and required substructures.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})  # type: ignore[arg-type]
+    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.{error_message}.format('-1', m.class_name))
     ):
@@ -1282,7 +1293,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
         test_name: str = 'Bad Payload'
         error_message: str = 'NOT_STRING'
-        lines: str = Tests.preamble(test_name, add_pytest=1)
+        lines: str = Tests.preamble(test_name, add_pytest=1, firstline='# mypy: disable-error-code="arg-type, unused-ignore"\n')
         value: str = '-1'
         subs: str = Default.EMPTY
         for key in structures:

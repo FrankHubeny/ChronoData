@@ -122,26 +122,53 @@ Examples7: dict[str, str] = {
         >>> sour_xref = {Default.CODE_GENEALOGY}.source_xref('S1')
 
         Third, construct the header record.
-        >>> head = {Default.CODE_CLASS}.Head(
-        ...     [
-        ...         {Default.CODE_CLASS}.Gedc({Default.CODE_CLASS}.GedcVers('7.0')),
-        ...         {Default.CODE_CLASS}.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.',
-        ...             [
-        ...                 {Default.CODE_CLASS}.Mime('text/plain'),
-        ...                 {Default.CODE_CLASS}.Lang('en-US'),
-        ...                 {Default.CODE_CLASS}.NoteTran('Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.', {Default.CODE_CLASS}.Lang('de')),
-        ...                 {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page(1)),
-        ...                 {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page(2)),
-        ...             ]
-        ...         ),
-        ...         {Default.CODE_CLASS}.Schma(
-        ...             [
-        ...                 {Default.CODE_CLASS}.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
-        ...                 {Default.CODE_CLASS}.Tag('_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
-        ...             ]
-        ...         )
-        ...     ]
-        ... )
+        >>> head = {Default.CODE_CLASS}.Head([
+        ...     {Default.CODE_CLASS}.Gedc({Default.CODE_CLASS}.GedcVers('7.0')),
+        ...     {Default.CODE_CLASS}.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.',[
+        ...         {Default.CODE_CLASS}.Mime('text/plain'),
+        ...         {Default.CODE_CLASS}.Lang('en-US'),
+        ...         {Default.CODE_CLASS}.NoteTran('Diese Datei soll Teile der Spezifikation abdecken und enthält keine aussagekräftigen historischen oder genealogischen Daten.', gc.Lang('de')),
+        ...         {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page('1')),
+        ...         {Default.CODE_CLASS}.Sour(sour_xref, {Default.CODE_CLASS}.Page('2')),
+        ...     ]),
+        ...     {Default.CODE_CLASS}.Schma([
+        ...         {Default.CODE_CLASS}.Tag('_SKYPEID http://xmlns.com/foaf/0.1/skypeID'),
+        ...         {Default.CODE_CLASS}.Tag('_JABBERID http://xmlns.com/foaf/0.1/jabberID'),
+        ...     ]),
+        ...     {Default.CODE_CLASS}.HeadSour('https://gedcom.io/',[
+        ...         {Default.CODE_CLASS}.Vers('0.4'),
+        ...         {Default.CODE_CLASS}.Name('GEDCOM Steering Committee'),
+        ...         {Default.CODE_CLASS}.Corp('FamilySearch',[
+        ...             {Default.CODE_CLASS}.Addr('Family History Department\\\\n15 East South Temple Street\\\\nSalt Lake City, UT 84150 USA',[
+        ...                 {Default.CODE_CLASS}.Adr1('Family History Department'),
+        ...                 {Default.CODE_CLASS}.Adr2('15 East South Temple Street'),
+        ...                 {Default.CODE_CLASS}.Adr3('Salt Lake City, UT 84150 USA'),
+        ...                 {Default.CODE_CLASS}.City('Salt Lake City'),
+        ...                 {Default.CODE_CLASS}.Stae('UT'),
+        ...                 {Default.CODE_CLASS}.Post('84150'),
+        ...                 {Default.CODE_CLASS}.Ctry('USA'),
+        ...             ]),
+        ...             {Default.CODE_CLASS}.Phon('+1 (555) 555-1212'),
+        ...             {Default.CODE_CLASS}.Phon('+1 (555) 555-1234'),
+        ...             {Default.CODE_CLASS}.Email('GEDCOM@FamilySearch.org'),
+        ...             {Default.CODE_CLASS}.Email('GEDCOM@example.com'),
+        ...             {Default.CODE_CLASS}.Fax('+1 (555) 555-1212'),
+        ...             {Default.CODE_CLASS}.Fax('+1 (555) 555-1234'),
+        ...             {Default.CODE_CLASS}.Www('http://gedcom.io'),
+        ...             {Default.CODE_CLASS}.Www('http://gedcom.info'),
+        ...         ]),
+        ...         {Default.CODE_CLASS}.HeadSourData('HEAD-SOUR-DATA',[
+        ...             {Default.CODE_CLASS}.DateExact('1 NOV 2022', {Default.CODE_CLASS}.Time('8:38')),
+        ...             {Default.CODE_CLASS}.Copr('copyright statement'),
+        ...         ]),
+        ...     ]),
+        ...     {Default.CODE_CLASS}.Dest('https://gedcom.io/'),
+        ...     {Default.CODE_CLASS}.HeadDate('10 JUN 2022', {Default.CODE_CLASS}.Time('15:43:20.48Z')),
+        ...     {Default.CODE_CLASS}.Subm(subm_xref),
+        ...     {Default.CODE_CLASS}.Copr('another copyright statement'),
+        ...     {Default.CODE_CLASS}.HeadLang('en-US'),
+        ...     {Default.CODE_CLASS}.HeadPlac({Default.CODE_CLASS}.HeadPlacForm('City, County, State, Country')),
+        ... ])
 
         Finally, generate and print the ged lines to see how they look.  If this were in
         a full ged file the Genealogy class would produce the ged file.

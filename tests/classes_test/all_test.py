@@ -39,7 +39,7 @@ def test_all_AdopFamc() -> None:
 
 def test_all_Adop() -> None:
     '''Validate the `Adop` structure with a value and required substructures.'''
-    m = gc.Adop('Y')
+    m = gc.Adop('')
     assert m.validate()
 
 
@@ -87,7 +87,7 @@ def test_all_Anci() -> None:
 
 def test_all_Anul() -> None:
     '''Validate the `Anul` structure with a value and required substructures.'''
-    m = gc.Anul('Y')
+    m = gc.Anul('')
     assert m.validate()
 
 
@@ -111,7 +111,7 @@ def test_all_Bapl() -> None:
 
 def test_all_Bapm() -> None:
     '''Validate the `Bapm` structure with a value and required substructures.'''
-    m = gc.Bapm('Y')
+    m = gc.Bapm('')
     assert m.validate()
 
 
@@ -123,7 +123,7 @@ def test_all_Barm() -> None:
 
 def test_all_Basm() -> None:
     '''Validate the `Basm` structure with a value and required substructures.'''
-    m = gc.Basm('Y')
+    m = gc.Basm('')
     assert m.validate()
 
 
@@ -135,7 +135,7 @@ def test_all_Birt() -> None:
 
 def test_all_Bles() -> None:
     '''Validate the `Bles` structure with a value and required substructures.'''
-    m = gc.Bles('Y')
+    m = gc.Bles('')
     assert m.validate()
 
 
@@ -183,7 +183,7 @@ def test_all_Chr() -> None:
 
 def test_all_Chra() -> None:
     '''Validate the `Chra` structure with a value and required substructures.'''
-    m = gc.Chra('Y')
+    m = gc.Chra('')
     assert m.validate()
 
 
@@ -195,7 +195,7 @@ def test_all_City() -> None:
 
 def test_all_Conf() -> None:
     '''Validate the `Conf` structure with a value and required substructures.'''
-    m = gc.Conf('Y')
+    m = gc.Conf('')
     assert m.validate()
 
 
@@ -291,7 +291,7 @@ def test_all_Dest() -> None:
 
 def test_all_Div() -> None:
     '''Validate the `Div` structure with a value and required substructures.'''
-    m = gc.Div('Y')
+    m = gc.Div('')
     assert m.validate()
 
 
@@ -351,7 +351,7 @@ def test_all_Exid() -> None:
 
 def test_all_FamCens() -> None:
     '''Validate the `FamCens` structure with a value and required substructures.'''
-    m = gc.FamCens('Y')
+    m = gc.FamCens('')
     assert m.validate()
 
 
@@ -423,7 +423,7 @@ def test_all_Fax() -> None:
 
 def test_all_Fcom() -> None:
     '''Validate the `Fcom` structure with a value and required substructures.'''
-    m = gc.Fcom('Y')
+    m = gc.Fcom('')
     assert m.validate()
 
 
@@ -531,7 +531,7 @@ def test_all_Idno() -> None:
 
 def test_all_Immi() -> None:
     '''Validate the `Immi` structure with a value and required substructures.'''
-    m = gc.Immi('Y')
+    m = gc.Immi('')
     assert m.validate()
 
 
@@ -627,7 +627,7 @@ def test_all_Map() -> None:
 
 def test_all_Marb() -> None:
     '''Validate the `Marb` structure with a value and required substructures.'''
-    m = gc.Marb('Y')
+    m = gc.Marb('')
     assert m.validate()
 
 
@@ -639,7 +639,7 @@ def test_all_Marc() -> None:
 
 def test_all_Marl() -> None:
     '''Validate the `Marl` structure with a value and required substructures.'''
-    m = gc.Marl('Y')
+    m = gc.Marl('')
     assert m.validate()
 
 
@@ -651,7 +651,7 @@ def test_all_Marr() -> None:
 
 def test_all_Mars() -> None:
     '''Validate the `Mars` structure with a value and required substructures.'''
-    m = gc.Mars('Y')
+    m = gc.Mars('')
     assert m.validate()
 
 
@@ -819,7 +819,7 @@ def test_all_Post() -> None:
 
 def test_all_Prob() -> None:
     '''Validate the `Prob` structure with a value and required substructures.'''
-    m = gc.Prob('Y')
+    m = gc.Prob('')
     assert m.validate()
 
 

@@ -105,3 +105,10 @@ def test_build_all_retrieval() -> None:
     all_specs: str = Default.EMPTY
     all_specs = Classes.build_all('GED', '7.0', Structure, EnumerationSet, Enumeration, Examples7)
     assert len(all_specs) > 0
+
+def test_all_listing_with_empty_dictionary() -> None:
+    """Retrieve the empty set if the dictionary is empty."""
+    #lookfor: str = "'''This module of classes"
+    all_list: str = Default.EMPTY
+    all_list = Classes.all_listing({})
+    assert len(all_list) == 0

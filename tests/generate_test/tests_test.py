@@ -3,68 +3,68 @@
 
 from genedata.constants import Default
 from genedata.generate import Tests
-from genedata.specifications7 import EnumerationSet, Structure
+from genedata.specifications7 import Enumeration, EnumerationSet, Structure
 
 
-# def test_no_subs_retrieval() -> None:
-#     """Retrieve test data for the no subs Lati structure."""
-#     lookfor: str = '\n\ndef test_no_subs_Lati() -> None:\n'
-#     out: str = Default.EMPTY
-#     out = Tests.no_subs_good_test('LATI', 'N10.1')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_all_retrieval() -> None:
+    """Retrieve test data for the All test module."""
+    lookfor: str = "'''This module contains All tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.all(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_no_subs_indi_retrieval() -> None:
-#     """Retrieve test data for the no subs RecordIndi structure."""
-#     lookfor: str = '\n\ndef test_no_subs_RecordIndi() -> None:\n'
-#     out: str = Default.EMPTY
-#     out = Tests.no_subs_good_test('record-INDI', '', 'individual')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_not_permitted_retrieval() -> None:
+    """Retrieve test data for the Not Permitted test module."""
+    lookfor: str = "'''This module contains Not Permitted tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.not_permitted(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_no_subs_fam_retrieval() -> None:
-#     """Retrieve test data for the no subs RecordFam structure."""
-#     lookfor: str = '\n\ndef test_no_subs_RecordFam() -> None:\n'
-#     out: str = Default.EMPTY
-#     out = Tests.no_subs_good_test('record-FAM', '', 'family')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_bad_payload_retrieval() -> None:
+    """Retrieve test data for the Bad Payload test module."""
+    lookfor: str = '# mypy: disable-error-code="arg-type, unused-ignore"'
+    out: str = Default.EMPTY
+    out = Tests.bad_payload(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_no_subs_snote_retrieval() -> None:
-#     """Retrieve test data for the no subs RecordSnote structure."""
-#     lookfor: str = '\n\ndef test_no_subs_RecordSnote() -> None:\n'
-#     out: str = Default.EMPTY
-#     out = Tests.no_subs_good_test('record-SNOTE', '', 'shared_note')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_bad_enum_retrieval() -> None:
+    """Retrieve test data for the Bad Enum test module."""
+    lookfor: str = "'''This module contains Bad Enum tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.bad_enum(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_one_sub_retrieval() -> None:
-#     """Retrieve test data for the Adop structure."""
-#     lookfor: str = '\n\ndef test_one_sub_Adop() -> None:\n'
-#     out: str = Default.EMPTY
-#     out = Tests.one_sub_good_test('ADOP', 'Y', 'Age')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_bad_singular_retrieval() -> None:
+    """Retrieve test data for the Bad Singular test module."""
+    lookfor: str = "'''This module contains Bad Singular tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.bad_singular(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_one_sub_xref_retrieval() -> None:
-#     """Retrieve test data for the RecordRepo structure."""
-#     lookfor: str = '\n\ndef test_one_sub_RecordRepo() -> None:'
-#     out: str = Default.EMPTY
-#     out = Tests.one_sub_good_test('record-REPO', '', 'Note', 'repository')
-#     assert out[0 : len(lookfor)] == lookfor
+def test_missing_required_retrieval() -> None:
+    """Retrieve test data for the Missing Required test module."""
+    lookfor: str = "'''This module contains Missing Required tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.missing_required(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_no_subs_all() -> None:
-#     """Retrieve test data for all no subs tests."""
-#     lookfor: str = "'''The tests in this file "
-#     out: str = Default.EMPTY
-#     out = Tests.build_no_subs_good_tests(Structure, EnumerationSet)
-#     assert out[0 : len(lookfor)] == lookfor
+def test_empty_subs_retrieval() -> None:
+    """Retrieve test data for the Empty Subs test module."""
+    lookfor: str = "'''This module contains Empty Subs tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.empty_subs(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
 
 
-# def test_one_sub_all() -> None:
-#     """Retrieve test data for all no subs tests."""
-#     lookfor: str = "'''The tests in this file "
-#     out: str = Default.EMPTY
-#     out = Tests.build_one_sub_good_tests(Structure, EnumerationSet)
-#     assert out[0 : len(lookfor)] == lookfor
+def test_empty_value_retrieval() -> None:
+    """Retrieve test data for the Empty Value test module."""
+    lookfor: str = "'''This module contains Empty Value tests to be run with pytest."
+    out: str = Default.EMPTY
+    out = Tests.empty_value(Structure, EnumerationSet, Enumeration)
+    assert out[0 : len(lookfor)] == lookfor
