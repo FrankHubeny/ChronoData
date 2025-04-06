@@ -15,7 +15,7 @@
 
 import pytest
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.messages import Msg
 
 # 1. Validate: Exercise all validation checks.

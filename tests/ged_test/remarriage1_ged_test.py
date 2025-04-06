@@ -1,7 +1,7 @@
 # remarriage1_ged_test.py
 """Generate the Remarriage 1 example gedcom file."""
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.structure import FamilyXref, IndividualXref  # noqa: F401

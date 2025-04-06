@@ -24,7 +24,7 @@ import yaml  # type: ignore[import-untyped]
 from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Tagger
-from genedata.specifications7 import (
+from genedata.specifications70 import (
     Enumeration,
     ExtensionStructure,
 )
@@ -116,7 +116,7 @@ class ExtensionXref(Xref):
         super().__init__(name, exttag)
 
     def __repr__(self) -> str:
-        return f"MultimediaXref('{self.fullname}')"
+        return f"ExtensionXref('{self.fullname}')"
 
 
 class FamilyXref(Xref):
@@ -892,17 +892,17 @@ class BaseStructure:
 
             # Construct the ged lines for any substructures.
             if isinstance(self.subs, list):
-                if order:
-                    lines = Tagger.structure(
-                        lines,
-                        level + 1,
-                        Tagger.order(self.subs),
-                        recordkey=recordkey,
-                    )
-                else:
-                    lines = Tagger.structure(
-                        lines, level + 1, self.subs, recordkey=recordkey
-                    )
+                # if order:
+                #     lines = Tagger.structure(
+                #         lines,
+                #         level + 1,
+                #         Tagger.order(self.subs),
+                #         recordkey=recordkey,
+                #     )
+                # else:
+                lines = Tagger.structure(
+                    lines, level + 1, self.subs, recordkey=recordkey
+                )
             else:
                 lines = Tagger.structure(
                     lines, level + 1, self.subs, recordkey=recordkey

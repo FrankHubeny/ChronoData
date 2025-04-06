@@ -1,5 +1,5 @@
 # minimal70_ged_test
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.methods import Util

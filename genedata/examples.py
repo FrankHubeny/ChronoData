@@ -706,7 +706,7 @@ Examples7: dict[str, str] = {
         >>> indi_xref = {Default.CODE_GENEALOGY}.individual_xref('I1')
 
         Next create the record for the shared note:
-        >>> import genedata.classes7 as {Default.CODE_CLASS}
+        >>> import genedata.classes70 as {Default.CODE_CLASS}
         >>> snote = {Default.CODE_CLASS}.RecordSnote(snote_xref)
 
         Next create the individual record.
@@ -812,7 +812,7 @@ Examples7: dict[str, str] = {
         As a simpler example shows a successful run of the Role structure using
         the enumeration value 'CHIL'.  However, ultimately these lines would
         have to be part of a larger record.
-        >>> import genedata.classes7 as {Default.CODE_CLASS}
+        >>> import genedata.classes70 as {Default.CODE_CLASS}
         >>> m = {Default.CODE_CLASS}.Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL

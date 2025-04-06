@@ -1,7 +1,7 @@
 # ssex_ged_test.py
 """Generate the [Same Sex Marriange GEDCOM Example File](https://gedcom.io/testfiles/gedcom70/same-sex-marriage.ged)."""
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.structure import FamilyXref, IndividualXref  # noqa: F401

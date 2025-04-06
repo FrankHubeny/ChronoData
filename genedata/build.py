@@ -21,7 +21,7 @@ import re
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from genedata.classes7 import (
+from genedata.classes70 import (
     Head,
     RecordFam,
     RecordIndi,
@@ -39,7 +39,7 @@ from genedata.constants import (
 )
 from genedata.messages import Issue, Msg
 from genedata.methods import Tagger, Names, Queries, Util
-from genedata.specifications7 import Structure
+from genedata.specifications70 import Structure
 from genedata.structure import (
     ExtensionXref,
     FamilyXref,
@@ -220,7 +220,7 @@ class Genealogy:
             This example has a minimal header, two records and a trailer.  It is constructed
             using the following steps.
             >>> from genedata.build import Genealogy
-            >>> import genedata.classes7 as gc
+            >>> import genedata.classes70 as gc
             >>> g = Genealogy('minimal example')
             >>> indi_xref = g.individual_xref('1')
             >>> fam_xref = g.family_xref('2')
@@ -1476,7 +1476,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordFam
+            >>> from genedata.classes70 import RecordFam
             >>> a = Genealogy('test')
             >>> family_id = a.family_xref()
             >>> family = RecordFam(family_id)
@@ -1524,7 +1524,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordIndi
+            >>> from genedata.classes70 import RecordIndi
             >>> a = Genealogy('test')
             >>> individual_id = a.individual_xref()
             >>> individual = RecordIndi(individual_id)
@@ -1572,7 +1572,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import File, Form, RecordObje
+            >>> from genedata.classes70 import File, Form, RecordObje
             >>> a = Genealogy('test')
             >>> mm_id = a.multimedia_xref()
             >>> mm = RecordObje(
@@ -1630,7 +1630,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordRepo, Name
+            >>> from genedata.classes70 import RecordRepo, Name
             >>> a = Genealogy('test')
             >>> repo_id = a.repository_xref()
             >>> repo = RecordRepo(repo_id, Name('Repo Name'))
@@ -1681,7 +1681,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordSnote, Name
+            >>> from genedata.classes70 import RecordSnote, Name
             >>> a = Genealogy('test')
             >>> sn_id = a.shared_note_xref('1', 'The text of a shared note')
             >>> sn = RecordSnote(sn_id)
@@ -1729,7 +1729,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordSour
+            >>> from genedata.classes70 import RecordSour
             >>> a = Genealogy('test')
             >>> source_id = a.source_xref()
             >>> source = RecordSour(source_id)
@@ -1777,7 +1777,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
-            >>> from genedata.classes7 import RecordSubm, Name
+            >>> from genedata.classes70 import RecordSubm, Name
             >>> a = Genealogy('test')
             >>> sub_id = a.submitter_xref()
             >>> sub = RecordSubm(sub_id, Name('Tom'))

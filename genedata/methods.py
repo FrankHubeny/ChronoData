@@ -1,4 +1,4 @@
-# util.py
+# methods.py
 
 __all__ = [
     'Input',
@@ -20,23 +20,23 @@ from typing import Any
 
 import requests  # type: ignore[import-untyped]
 import yaml  # type: ignore[import-untyped]
-from ordered_set import OrderedSet  # type: ignore[import-not-found]
 
+# from ordered_set import OrderedSet  # type: ignore[import-not-found]
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specifications7 import Calendar, Month, Structure
+from genedata.specifications70 import Calendar, Month, Structure
 
 
 class Util:
     """Utilities to read and write yaml or ged files."""
 
     @staticmethod
-    def www_status(url: str) -> int:
-        request: int = 0
+    def www_status(url: str) -> str:
+        request: str
         try:
             request = requests.head(url)
         except requests.exceptions.RequestException:
-            return 0
+            return '<Response [0]>'
         return request
 
     @staticmethod
@@ -93,17 +93,16 @@ class Util:
         """
 
         # Read the internet file or a local file.
-        if url[0:4] == 'http':
-            webUrl = urllib.request.urlopen(url)
-            result_code = str(webUrl.getcode())
-            if result_code == '404':
-                raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-            raw: str = webUrl.read().decode(Default.UTF8)
-        else:
-            with open(url, 'rb') as file:  # noqa: PTH123
-                binary_raw = file.read()
-            raw = binary_raw.decode('utf-8')
-        return raw
+        # if url[0:4] == 'http':
+        #    webUrl = urllib.request.urlopen(url)
+        # result_code = str(webUrl.getcode())
+        # if result_code == '404':
+        #     raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+        #    raw: str = webUrl.read().decode(Default.UTF8)
+        # else:
+        with open(url, 'rb') as file:  # noqa: PTH123
+            binary_raw = file.read()
+        return binary_raw.decode('utf-8')
 
     @staticmethod
     def read(url: str) -> str:
@@ -116,9 +115,9 @@ class Util:
         raw: str = Default.EMPTY
         if url[0:4] == 'http':
             webUrl = urllib.request.urlopen(url)
-            result_code = str(webUrl.getcode())
-            if result_code == '404':
-                raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
+            # result_code = str(webUrl.getcode())
+            # if result_code == '404':
+            #     raise ValueError(Msg.PAGE_NOT_FOUND)
             raw = webUrl.read().decode(Default.UTF8)
         elif Path(url).exists():
             with Path.open(Path(url)) as file:
@@ -166,6 +165,46 @@ class Util:
         # Return the dictionary.
         yaml_data = raw  # .replace('\n  - |\n', '\n  - bar\n')
         yaml_dict: dict[str, Any] = yaml.safe_load(yaml_data)
+
+        # Check that a lang field exists and is not empty.
+        if (
+            Default.YAML_LANG not in yaml_dict
+            or yaml_dict[Default.YAML_LANG] == Default.EMPTY
+            or yaml_dict[Default.YAML_LANG] is None
+        ):
+            raise ValueError(Msg.YAML_MISSING_REQUIRED_LANG.format(url))
+
+        # Check that a uri field exists and is not empty.
+        if (
+            Default.YAML_URI not in yaml_dict
+            or yaml_dict[Default.YAML_URI] == Default.EMPTY
+            or yaml_dict[Default.YAML_URI] is None
+        ):
+            raise ValueError(Msg.YAML_MISSING_REQUIRED_URI.format(url))
+
+        # Check that a type field exists and is not empty.
+        if (
+            Default.YAML_TYPE not in yaml_dict
+            or yaml_dict[Default.YAML_TYPE] == Default.EMPTY
+            or yaml_dict[Default.YAML_TYPE] is None
+        ):
+            raise ValueError(Msg.YAML_MISSING_REQUIRED_TYPE.format(url))
+
+        # Check that `calendar``, `enumeration``, `month`` and `structure`` types
+        # have either a `standard tag`` or an `extension tags`` fields.
+        if yaml_dict[Default.YAML_TYPE] in Default.YAML_TAG_TYPES and (
+            Default.YAML_STANDARD_TAG not in yaml_dict
+            and Default.YAML_EXTENSION_TAGS not in yaml_dict
+        ):
+            raise ValueError(Msg.YAML_NO_TAG_NAME)
+
+        # Check for valid type.
+        if yaml_dict[Default.YAML_TYPE] not in Default.YAML_TYPE_CODES:
+            raise ValueError(
+                Msg.YAML_UNRECOGNIZED_TYPE.format(
+                    yaml_dict[Default.YAML_TYPE], Default.YAML_TYPE_CODES
+                )
+            )
         return yaml_dict
 
     @staticmethod
@@ -193,7 +232,7 @@ Multimedia    {obje_count!s}
 Repositories  {repo_count!s}
 Shared Notes  {snote_count!s}
 Sources       {sour_count!s}
-submitters    {subm_count!s}
+Submitters    {subm_count!s}
 """
 
     @staticmethod
@@ -216,7 +255,9 @@ submitters    {subm_count!s}
                         problem,
                         "'",
                         split_first[i],
-                        "'  * DOES NOT EQUAL * '",
+                        "'",
+                        Msg.DOES_NOT_EQUAL,
+                        "'",
                         split_second[i],
                         "'",
                     ]
@@ -234,7 +275,7 @@ submitters    {subm_count!s}
                 [
                     lines,
                     Default.EOL,
-                    'The first string is longer than the second.  Here are the remaining lines:',
+                    Msg.LONGER_FIRST,
                 ]
             )
             for line in split_first[len_split_second:]:
@@ -250,7 +291,7 @@ submitters    {subm_count!s}
                 [
                     lines,
                     Default.EOL,
-                    'The second string is longer than the first.  Here are the remaining lines:',
+                    Msg.LONGER_SECOND,
                 ]
             )
             for line in split_second[len_split_first:]:
@@ -592,39 +633,39 @@ class Input:
             ]
         )
 
-    @staticmethod
-    def from_ged(lines: str | list[list[str]]) -> str:
-        if isinstance(lines, str):
-            strlist: list[list[str]] = [
-                a.split(' ') for a in lines.split('\n') if a != ''
-            ]
-            return Input.from_ged(strlist)
-        level: int = int(lines[0][0])
-        tag: str = lines[0][1]
-        payload: str = Default.EMPTY
-        output: str = Default.EMPTY
-        number_of_lines: int = len(lines)
-        if len(lines[0]) == 3:
-            payload = lines[0][2]
-        output = f'{tag}({payload}'
-        intermediate_lines: list[list[str]] = []
-        number_of_lines = len(lines[1:])
-        for i in range(number_of_lines):
-            if int(lines[i][0]) == level and len(intermediate_lines) > 0:
-                output = ''.join(
-                    [output, '[', Input.from_ged(intermediate_lines), '])']
-                )
-                intermediate_lines = []
-            elif int(lines[i][0]) == level:
-                output = ''.join([output, ')'])
-                if i < number_of_lines:
-                    return ''.join(
-                        [',', output, Input.from_ged(lines[i:]), ')']
-                    )
-                return output
-            else:
-                intermediate_lines.append(lines[i])
-        return output
+    # @staticmethod
+    # def from_ged(lines: str | list[list[str]]) -> str:
+    #     if isinstance(lines, str):
+    #         strlist: list[list[str]] = [
+    #             a.split(' ') for a in lines.split('\n') if a != ''
+    #         ]
+    #         return Input.from_ged(strlist)
+    #     level: int = int(lines[0][0])
+    #     tag: str = lines[0][1]
+    #     payload: str = Default.EMPTY
+    #     output: str = Default.EMPTY
+    #     number_of_lines: int = len(lines)
+    #     if len(lines[0]) == 3:
+    #         payload = lines[0][2]
+    #     output = f'{tag}({payload}'
+    #     intermediate_lines: list[list[str]] = []
+    #     number_of_lines = len(lines[1:])
+    #     for i in range(number_of_lines):
+    #         if int(lines[i][0]) == level and len(intermediate_lines) > 0:
+    #             output = ''.join(
+    #                 [output, '[', Input.from_ged(intermediate_lines), '])']
+    #             )
+    #             intermediate_lines = []
+    #         elif int(lines[i][0]) == level:
+    #             output = ''.join([output, ')'])
+    #             if i < number_of_lines:
+    #                 return ''.join(
+    #                     [',', output, Input.from_ged(lines[i:]), ')']
+    #                 )
+    #             return output
+    #         else:
+    #             intermediate_lines.append(lines[i])
+    #     return output
 
     @staticmethod
     def lati(
@@ -721,7 +762,7 @@ class Input:
             'Jim /Smith/'
 
             This methods assists formatting a personal name using IndiName.
-            >>> import genedata.classes7 as gc
+            >>> import genedata.classes70 as gc
             >>> m = gc.IndiName(Input.name('Jim Smith', 'Smith'))
             >>> print(m.ged())
             1 NAME Jim /Smith/
@@ -832,7 +873,7 @@ class Input:
         Example:
             This example illustrates the formatting provided.
             >>> from genedata.methods import Input
-            >>> Input.form('Chicago', 'Illinois', 'Cook', 'USA')
+            >>> Input.place('Chicago', 'Illinois', 'Cook', 'USA')
             'Chicago, Illinois, Cook, USA'
         """
         return ''.join(
@@ -926,7 +967,7 @@ class Input:
             The following example would send a logging message warning
             that the site "abc" cannot be reached.
             >>> from genedata.methods import Input
-            >>> import genedata.classes7 as gc
+            >>> import genedata.classes70 as gc
             >>> response = gc.Www(Input.www('abc'))
             >>> print(response.ged(1))
             1 WWW abc
@@ -936,8 +977,8 @@ class Input:
         - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
 
         """
-        response: int = Util.www_status(url)
-        if response != 200:
+        response: str = str(Util.www_status(url))
+        if response != '<Response [200]>':
             logging.warning(Msg.WWW_RESPONSE.format(url, response))
         return url
 
@@ -951,13 +992,15 @@ class Names:
     """
 
     @staticmethod
-    def key_from_classname(classname: str, structure: dict[str, dict[str, Any]]) -> str:
+    def key_from_classname(
+        classname: str, structure: dict[str, dict[str, Any]]
+    ) -> str:
         """Return the key from a class name.
 
         Example:
             Suppose the class name is `RecordIndi`.
             >>> from genedata.methods import Names
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Names.key_from_classname('RecordIndi', Structure)
             'record-INDI'
 
@@ -1018,7 +1061,7 @@ class Names:
             value: The name of the yaml file.
         """
         if value == Default.EMPTY or value[-1] == Default.SLASH:
-            return value
+            return Default.EMPTY
         if Default.SLASH in value:
             return value[value.rfind(Default.SLASH) + 1 :].replace(
                 Default.QUOTE_DOUBLE, Default.EMPTY
@@ -1127,7 +1170,8 @@ class Names:
             >>> Names.quote_text("Tom's birthday")
             '"Tom\\'s birthday"'
 
-
+        Args:
+            value: The text to be quoted.
         """
         if Default.EOL in value:
             if Default.QUOTE_SINGLE in value:
@@ -1152,7 +1196,7 @@ class Queries:
             Here is how to use this method to find that information from
             the GEDCOM version 7 specifications.
             >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Queries.classes_with_tag('FAMC', Structure)
             ['AdopFamc', 'Famc', 'IndiFamc']
 
@@ -1167,43 +1211,43 @@ class Queries:
                 classes.append(Names.classname(key))
         return classes
 
-    @staticmethod
-    def enums_with_tag(
-        tag: str,
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
-    ) -> list[str]:
-        """Provide a list of classes using an enumeration set that contains the tag.
+    # @staticmethod
+    # def enums_with_tag(
+    #     tag: str,
+    #     structures: dict[str, dict[str, Any]],
+    #     enumerationsets: dict[str, dict[str, Any]],
+    #     enumerations: dict[str, dict[str, Any]],
+    # ) -> list[str]:
+    #     """Provide a list of classes using an enumeration set that contains the tag.
 
-        Example:
-            Suppose we want to know what enumeration sets contain the 'ADOP' tag.
-            Here is how to use this method to find that information from
-            the GEDCOM version 7 specifications.
-            >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import (
-            ...     Structure,
-            ...     EnumerationSet,
-            ...     Enumeration,
-            ... )
-            >>> Queries.enums_with_tag(
-            ...     'ADOP', Structure, EnumerationSet, Enumeration
-            ... )
-            ['AdopFamc', 'Famc', 'IndiFamc']
+    #     Example:
+    #         Suppose we want to know what enumeration sets contain the 'ADOP' tag.
+    #         Here is how to use this method to find that information from
+    #         the GEDCOM version 7 specifications.
+    #         >>> from genedata.methods import Queries
+    #         >>> from genedata.specifications70 import (
+    #         ...     Structure,
+    #         ...     EnumerationSet,
+    #         ...     Enumeration,
+    #         ... )
+    #         >>> Queries.enums_with_tag(
+    #         ...     'ADOP', Structure, EnumerationSet, Enumeration
+    #         ... )
+    #         ['AdopFamc', 'Famc', 'IndiFamc']
 
-        Args:
-            tag: The tag that one sees in a ged file.
-            structures: The dictionary of structures to search over.
-            enumerationsets: The dictionary of enumeration set to search over.
-            enumerations: The dictionary of enumerations to search over.
-        """
-        classes: list[str] = []
-        enumsets: list[str] = []
-        tagname: str = tag.upper()
-        for key, structure in structures.items():
-            if structure[Default.YAML_STANDARD_TAG] == tagname:
-                classes.append(Names.classname(key))
-        return classes
+    #     Args:
+    #         tag: The tag that one sees in a ged file.
+    #         structures: The dictionary of structures to search over.
+    #         enumerationsets: The dictionary of enumeration set to search over.
+    #         enumerations: The dictionary of enumerations to search over.
+    #     """
+    #     classes: list[str] = []
+    #     enumsets: list[str] = []
+    #     tagname: str = tag.upper()
+    #     for key, structure in structures.items():
+    #         if structure[Default.YAML_STANDARD_TAG] == tagname:
+    #             classes.append(Names.classname(key))
+    #     return classes
 
     @staticmethod
     def permitted(key: str, structures: dict[str, dict[str, Any]]) -> list[str]:
@@ -1213,7 +1257,7 @@ class Queries:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Queries.permitted('HEAD', Structure)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
@@ -1227,16 +1271,18 @@ class Queries:
         ].items():
             classes.append(Names.classname(uri))
         return classes
-    
+
     @staticmethod
-    def permitted_keys(key: str, structures: dict[str, dict[str, Any]]) -> list[str]:
+    def permitted_keys(
+        key: str, structures: dict[str, dict[str, Any]]
+    ) -> list[str]:
         """Provide a list of keys to Structure that represented permitted classes.
 
         Example:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Queries.permitted_keys('HEAD', Structure)
             ['COPR', 'DEST', 'GEDC', 'HEAD-DATE', 'HEAD-LANG', 'HEAD-PLAC', 'HEAD-SOUR', 'NOTE', 'SCHMA', 'SNOTE', 'SUBM']
 
@@ -1259,7 +1305,7 @@ class Queries:
             We can find the classes that are required under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Queries.required('HEAD', Structure)
             ['Gedc']
 
@@ -1283,7 +1329,7 @@ class Queries:
             We can find the classes that can only be used once as substructures
             in the GEDCOM version 7 specifications under the `HEAD` key by doing the following:
             >>> from genedata.methods import Queries
-            >>> from genedata.specifications7 import Structure
+            >>> from genedata.specifications70 import Structure
             >>> Queries.singular('HEAD', Structure)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
@@ -1331,7 +1377,16 @@ class Tagger:
         [Specials](https://www.unicode.org/charts/PDF/UFFF0.pdf) standard.
 
         Examples:
+            >>> from genedata.constants import Default
+            >>> from genedata.methods import Tagger
+            >>> include_some_banned_characters: str = (
+            ...     '\\u001F\\u007F\\uD800' + 'hello'
+            ... )
+            >>> Tagger.clean_input(include_some_banned_characters)
+            'hello'
 
+        Args:
+            input: A string value from which banned characters will be removed.
 
         Reference:
             - [GEDCOM Characters](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#characters)
@@ -1375,7 +1430,7 @@ class Tagger:
             Note how the `@me` was reformatted as `@@me`.
             > 1 NOTE me@example.com is my email
             > 2 CONT @@me and @I are my social media handles
-            >>> import genedata.classes7 as gc
+            >>> import genedata.classes70 as gc
             >>> mynote = gc.Note(
             ...     '''me@example.com is my email
             ... @me and @I are my social media handles'''
@@ -1549,7 +1604,7 @@ class Tagger:
         lines: str,
         level: int,
         payload: list[Any] | Any,
-        flag: str = Default.EMPTY,
+        #flag: str = Default.EMPTY,
         recordkey: Any = Default.EMPTY,
     ) -> str:
         """Join a structure or a list of structure to GEDCOM lines.
@@ -1560,7 +1615,7 @@ class Tagger:
 
         Examples:
             Suppose there is one structure to write to GEDCOM lines.
-            >>> import genedata.classes7 as gc
+            >>> import genedata.classes70 as gc
             >>> from genedata.methods import Tagger
             >>> map1 = gc.Map([gc.Lati('N30.000000'), gc.Long('W30.000000')])
             >>> map2 = gc.Map([gc.Lati('S40.000000'), gc.Long('E20.000000')])
@@ -1595,33 +1650,30 @@ class Tagger:
             return lines
         if isinstance(payload, list):
             for item in payload:
-                if flag != Default.EMPTY:
-                    lines = ''.join(
-                        [lines, item.ged(level, flag, recordkey=recordkey)]
-                    )
-                else:
-                    lines = ''.join(
-                        [lines, item.ged(level, recordkey=recordkey)]
-                    )
+                # if flag != Default.EMPTY:
+                #     lines = ''.join(
+                #         [lines, item.ged(level, flag, recordkey=recordkey)]
+                #     )
+                # else:
+                lines = ''.join([lines, item.ged(level, recordkey=recordkey)])
             return lines
-        if flag != Default.EMPTY:
-            lines = ''.join(
-                [lines, payload.ged(level, flag, recordkey=recordkey)]
-            )
-        else:
-            lines = ''.join([lines, payload.ged(level, recordkey=recordkey)])
-        return lines
+        # if flag != Default.EMPTY:
+        #     lines = ''.join(
+        #         [lines, payload.ged(level, flag, recordkey=recordkey)]
+        #     )
+        # else:
+        return ''.join([lines, payload.ged(level, recordkey=recordkey)])
 
-    @staticmethod
-    def order(substructure: list[Any] | None) -> list[Any]:
-        """Order structures by collecting similar ones together, but in the same order as presented."""
-        if substructure is None:
-            return []
-        ordered: list[Any] = []
-        subs_types: list[str] = [type(sub).__name__ for sub in substructure]
-        unique_types: list[str] = OrderedSet(subs_types)
-        for index in range(len(unique_types)):
-            for sub in substructure:
-                if unique_types[index] == type(sub).__name__:
-                    ordered.append(sub)
-        return ordered
+    # @staticmethod
+    # def order(substructure: list[Any] | None) -> list[Any]:
+    #     """Order structures by collecting similar ones together, but in the same order as presented."""
+    #     if substructure is None:
+    #         return []
+    #     ordered: list[Any] = []
+    #     subs_types: list[str] = [type(sub).__name__ for sub in substructure]
+    #     unique_types: list[str] = OrderedSet(subs_types)
+    #     for index in range(len(unique_types)):
+    #         for sub in substructure:
+    #             if unique_types[index] == type(sub).__name__:
+    #                 ordered.append(sub)
+    #     return ordered

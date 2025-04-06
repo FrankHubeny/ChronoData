@@ -1,5 +1,5 @@
 # longurl_ged_test.py
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.structure import SubmitterXref  # noqa: F401

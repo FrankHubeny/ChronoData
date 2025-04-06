@@ -1095,7 +1095,7 @@ class Asso(BaseStructure):
         This example illustrates how one may construct the example in the
         specification. First create two individual cross reference identifiers.
         The add the data to a RecordIndi class for the first individual.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> from genedata.structure import Void
         >>> g = Genealogy('example')
@@ -5027,7 +5027,7 @@ class FileTran(BaseStructure):
 
     Examples:
         The following example shows how to construct the example in the specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> obje_xref = g.multimedia_xref('EX')
@@ -5799,7 +5799,7 @@ class Head(BaseStructure):
         It can be implemented as follows using data from the 
         [GEDCOM Maximal70 Test File]
         First, import the required classes.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
 
         Second, instantiate a Genealogy along with any cross reference identifiers
@@ -5984,7 +5984,7 @@ class Height(BaseStructure):
 
     Examples:
         The following example shows how to construct the example in the specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> indi_xref = g.individual_xref('I45')
@@ -6353,7 +6353,7 @@ class IndiEven(BaseStructure):
 
     Example:
         The following example shows how to construct the example in the specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> indi_xref = g.individual_xref('I1')
@@ -6471,7 +6471,7 @@ class IndiFact(BaseStructure):
     
     Examples:
         The following example shows how to construct the example in the specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> indi_xref = g.individual_xref('I1')
@@ -6875,7 +6875,7 @@ class IndiResi(BaseStructure):
 
     Examples:
         The following examples show how to construct the examples in the specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> resi = gc.IndiResi('living with an aunt', gc.Date('ABT MAR 1894'))
         >>> print(resi.ged())
         1 RESI living with an aunt
@@ -7219,7 +7219,7 @@ class Lati(BaseStructure):
         The following example shows how to enter the latitude (Lati))
         coordinates into a Map structure to produce the GEDCOM example
         mentioned in the GEDCOM Specification section.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Map(
         ...     [
         ...         gc.Lati('N18.150944'), 
@@ -7350,7 +7350,7 @@ class Long(BaseStructure):
         The following example howss how to enter the longitude (Long)
         coordinates into a map structure to produce the GEDCOM output
         mentioned in the GEDCOM Specification.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Map(
         ...     [
         ...         gc.Lati('N18.150944'), 
@@ -7433,7 +7433,7 @@ class Map(BaseStructure):
         The following example illustrates how to enter latitude (Lati) and longitude (Long)
         coordinates into a map structure to produce the GEDCOM output.
         >>> from genedata.methods import Input
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Map(
         ...     [
         ...         gc.Lati('N18.150944'), 
@@ -7914,7 +7914,7 @@ class Medi(BaseStructure):
         These are the steps to build the example in the specification.
         First import the classes and build a multimedia cross reference identifier.
         >>> from genedata.build import Genealogy
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> g = Genealogy('example')
         >>> obje_xref = g.multimedia_xref('M1')
 
@@ -7935,7 +7935,7 @@ class Medi(BaseStructure):
 
         This example shows a successful run of the Medi structure using
         the enumeration value 'AUDIO'.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Medi('AUDIO')
         >>> print(m.ged(2))
         2 MEDI AUDIO
@@ -8151,7 +8151,7 @@ class NameTran(BaseStructure):
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.IndiName('/孔/德庸',
         ...         [
         ...             gc.Givn('德庸'),
@@ -8836,7 +8836,7 @@ class NoteTran(BaseStructure):
     Example:
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.IndiName('Arete /Hernandez/', 
         ...     gc.Note('Named after Arete from <i>The Odyssey</i>',
         ...         [
@@ -9326,7 +9326,7 @@ class OrdStat(BaseStructure):
     Examples:
         This example shows a successful run of the OrdStat structure using
         the enumeration value 'BIC' occurring on January 15, 2020.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.OrdStat('BIC', 
         ...     gc.DateExact('15 JAN 2020')
         ... )
@@ -9516,7 +9516,7 @@ class Page(BaseStructure):
         First we will import the classes and then create a source cross reference `S1`.
         The void cross reference identifier comes from the Void class.
         >>> from genedata.build import Genealogy
-        >>> import genedata.classes7 as gc 
+        >>> import genedata.classes70 as gc 
         >>> from genedata.structure import Void
         >>> g = Genealogy('example')
         >>> sour_xref = g.source_xref('S1')
@@ -9590,7 +9590,7 @@ class Pedi(BaseStructure):
     Examples:
         This example shows a successful run of the Pedi structure using
         the enumeration value 'ADOPTED'.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Pedi('ADOPTED')
         >>> print(m.ged(1))
         1 PEDI ADOPTED
@@ -9837,7 +9837,7 @@ class Phrase(BaseStructure):
         The following steps would generate the examples in the specification.
         We will need the following imports for these examples along with one
         individual cross reference identifier `I2` for the fifth example:
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> indi = g.individual_xref('I2')
@@ -9968,7 +9968,7 @@ class PlacForm(BaseStructure):
 
     Example:
         The following steps would generate the example in the specifications:
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Plac('Baltimore, , Maryland, USA', 
         ...     gc.PlacForm('City, County, State, Country')
         ... )
@@ -10060,7 +10060,7 @@ class PlacTran(BaseStructure):
 
     Example:
         The following steps would generate the example in the specifications.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Plac('千代田, 東京, 日本',
         ...     [
         ...         gc.PlacForm('区, 都, 国'),
@@ -10204,7 +10204,7 @@ class Plac(BaseStructure):
         The following steps would generate the example in the specification.  
         First create source cross reference identifier `S1` and then build the ged lines
         in a RecordSour.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> g = Genealogy('example')
         >>> sour = g.source_xref('S1')
@@ -10593,7 +10593,7 @@ class Quay(BaseStructure):
     Examples:
         This example shows a successful run of the Quay structure using
         the enumeration value '0'.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Quay('0')
         >>> print(m.ged(1))
         1 QUAY 0
@@ -10832,7 +10832,7 @@ class RecordIndi(BaseStructure):
         First create the two individual cross reference identifiers.  Then let a
         RecordIndi class format them into the desired ged lines.
         >>> from genedata.build import Genealogy
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> g = Genealogy('example')
         >>> indi_i1_xref = g.individual_xref('I1')
         >>> indi_i2_xref = g.individual_xref('I2')
@@ -10850,7 +10850,7 @@ class RecordIndi(BaseStructure):
         these examples plus the imports.  We already have the first two individuals from the
         previous example.
         >>> from genedata.build import Genealogy     # To create record cross reference identifiers.
-        >>> import genedata.classes7 as gc           # To access the GEDCOM structures.
+        >>> import genedata.classes70 as gc           # To access the GEDCOM structures.
         >>> from genedata.structure import Void      # To represent a void pointer.
         >>> fam_f1_xref = g.family_xref('F1')        # Family 1 cross reference identifier.
         >>> fam_f2_xref = g.family_xref('F2')        
@@ -11548,7 +11548,7 @@ class RecordSnote(BaseStructure):
         >>> indi_xref = g.individual_xref('I1')
 
         Next create the record for the shared note:
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> snote = gc.RecordSnote(snote_xref)
 
         Next create the individual record.
@@ -11996,7 +11996,7 @@ class Resn(BaseStructure):
     Examples:
         This example shows a successful run of the Resn structure using
         the enumeration value 'CONFIDENTIAL'.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Resn('CONFIDENTIAL')
         >>> print(m.ged(1))
         1 RESN CONFIDENTIAL
@@ -12231,7 +12231,7 @@ class Role(BaseStructure):
         >>> sour = g.source_xref('S1')
 
         With these cross reference identifiers we can create the ged lines:
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.RecordIndi(indi, 
         ...     gc.IndiName('Mary //', 
         ...         gc.Sour(sour, 
@@ -12285,7 +12285,7 @@ class Role(BaseStructure):
         As a simpler example shows a successful run of the Role structure using
         the enumeration value 'CHIL'.  However, ultimately these lines would
         have to be part of a larger record.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Role('CHIL')
         >>> print(m.ged(1))
         1 ROLE CHIL
@@ -12529,7 +12529,7 @@ class Sex(BaseStructure):
     Examples:
         This example shows a successful run of the Sex structure using
         the enumeration value 'F'.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.Sex('F')
         >>> print(m.ged(1))
         1 SEX F
@@ -13646,7 +13646,7 @@ class Titl(BaseStructure):
     Examples:
         Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
         on April 6, 1920.  Based on the specification one could enter this as follows.
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> m = gc.File('letter.pdf', 
         ...     [
         ...         gc.Form('application/pdf'), 
@@ -13790,7 +13790,7 @@ class Type(BaseStructure):
         first create an individual cross reference identifier then add the
         ordination event as a substructure of the RecordIndi record.
         >>> from genedata.build import Genealogy
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> g = Genealogy('test')
         >>> indi_xref = g.individual_xref('I1')
         >>> m = gc.RecordIndi(indi_xref, 
@@ -14279,7 +14279,7 @@ class Www(BaseStructure):
         The following example would send a logging message warning
         that the site "abc" cannot be reached.
         >>> from genedata.methods import Input
-        >>> import genedata.classes7 as gc
+        >>> import genedata.classes70 as gc
         >>> response = Www(Input.www('abc'))
         >>> print(response.ged(1))
         1 WWW abc

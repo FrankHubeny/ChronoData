@@ -4,7 +4,7 @@
 from genedata.constants import Default
 from genedata.examples import Examples7
 from genedata.generate import Classes
-from genedata.specifications7 import Enumeration, EnumerationSet, Structure
+from genedata.specifications70 import Enumeration, EnumerationSet, Structure
 
 
 def test_specification_retrieval() -> None:

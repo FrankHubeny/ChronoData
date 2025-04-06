@@ -5,7 +5,7 @@ Reference:
     [GEDCOM Escapes test file](https://gedcom.io/testfiles/gedcom70/escapes.ged)
 """
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.methods import Util

@@ -29,6 +29,7 @@ class Msg:
     CIRCULAR: str = '"{0}" has "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
     DIRECTORY_NOT_FOUND: str = 'The directory "{0}" could not be found.'
+    DOES_NOT_EQUAL: str = ' * DOES NOT EQUAL * '
     DUPLICATE_RECORD: str = (
         'The cross-reference identifier {0} has already been used.'
     )
@@ -70,6 +71,8 @@ class Msg:
     LONG_RANGE_METHOD: str = (
         'The value "{0}" is not between {1} and {2} in method Input.long.'
     )
+    LONGER_FIRST: str = 'The first string is longer than the second.  Here are the remaining lines:'
+    LONGER_SECOND: str = 'The second string is longer than the first.  Here are the remaining lines:'
     MISSING: str = 'These xref values {0} are missing record definitions.'
     MISSING_HEADER: str = 'The header record has not been added to the genealogy by the `add_header` method.'
     MISSING_REQUIRED: str = (
@@ -154,7 +157,7 @@ class Msg:
     )
     ONLY_RECORDS: str = 'The object "{0}" is not a record structure such as RecordExt, RecordFam, RecordIndi, RecordObje, RecordRepo, RecordSnote, RecordSour or RecordSubm.'
     ONLY_HEADER: str = 'The object "{0}" is not a Head record structure.'
-    PAGE_NOT_FOUND: str = 'The page at "{0}" was not found.'
+    PAGE_NOT_FOUND: str = 'urllib.error.HTTPError: HTTP Error 404: Not Found'
     PAYLOAD_IS_Y: str = 'The payload is "Y" or the default empty string.'
     PHONE_COUNTRY_CODE: str = 'The phone country code "{0}" is not greater than {1} and less than {2}.'
     PHONE_AREA_CODE: str = (
@@ -218,9 +221,9 @@ class Msg:
     YAML_NO_CALENDAR: str = (
         'Months or epochs are defined but without a calendar type.'
     )
-    YAML_NO_TAG_NAME: str = 'Neither standard nor extension tags were defined.'
+    YAML_NO_TAG_NAME: str = 'Although the type is one of calendar, enumeration, month or structure neither a standard tag nor extension tags were defined.'
     YAML_STRUCTURE_MISSING_VALUES: str = (
         'The structure type has no superstructures nor substructures.'
     )
-    YAML_UNRECOGNIZED_TYPE: str = 'The type "{0}" is not a valid type'
+    YAML_UNRECOGNIZED_TYPE: str = 'The type "{0}" is not in the set of valid types "{1}".'
     ZERO_YEAR: str = 'The "{0}" calendar has no zero year.'

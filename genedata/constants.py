@@ -132,7 +132,7 @@ class Default:
     OBJE_RECORD_TYPE: str = 'obje'
     REPO_RECORD_TYPE: str = 'repo'
     SNOTE_RECORD_TYPE: str = 'snote'
-    SOUR_RECORD_TYPE: str =  'sour'
+    SOUR_RECORD_TYPE: str = 'sour'
     SUBM_RECORD_TYPE: str = 'subm'
     SLASH: str = '/'
     SPACE: str = ' '
@@ -224,6 +224,25 @@ class Default:
     YAML_SUBSTRUCTURES: str = 'substructures'
     YAML_SUPERSTRUCTURES: str = 'superstructures'
     YAML_TYPE: str = 'type'
+    YAML_TYPE_CODES: frozenset[str] = frozenset(
+        [
+            'calendar',
+            'data type',
+            'enumeration',
+            'enumeration set',
+            'month',
+            'structure',
+            'uri',
+        ]
+    )
+    YAML_TAG_TYPES: frozenset[str] = frozenset(
+        [
+            'calendar',
+            'enumeration',
+            'month',
+            'structure',
+        ]
+    )
     YAML_URI: str = 'uri'
     YAML_VALUE_OF: str = 'value of'
     YAML_WITH_HYPHEN: str = '\n    > - '

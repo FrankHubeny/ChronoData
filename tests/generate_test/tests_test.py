@@ -3,7 +3,7 @@
 
 from genedata.constants import Default
 from genedata.generate import Tests
-from genedata.specifications7 import Enumeration, EnumerationSet, Structure
+from genedata.specifications70 import Enumeration, EnumerationSet, Structure
 
 
 def test_all_retrieval() -> None:

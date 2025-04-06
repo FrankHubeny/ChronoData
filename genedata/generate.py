@@ -600,7 +600,7 @@ from genedata.structure import (
             we can use them to build a string that represents the class in the classes module.
             >>> from genedata.examples import Examples7
             >>> from genedata.generate import Classes
-            >>> from genedata.specifications7 import (
+            >>> from genedata.specifications70 import (
             ...     Structure,
             ...     EnumerationSet,
             ...     Enumeration,
@@ -702,7 +702,7 @@ class {class_name}(BaseStructure):
             using a specification module that has already been constructed.
             >>> from genedata.examples import Examples7
             >>> from genedata.generate import Classes
-            >>> from genedata.specifications7 import (
+            >>> from genedata.specifications70 import (
             ...     Structure,
             ...     EnumerationSet,
             ...     Enumeration,

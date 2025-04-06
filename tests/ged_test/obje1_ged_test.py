@@ -5,7 +5,7 @@ Reference:
     [GEDCOM Age test file](https://gedcom.io/testfiles/gedcom70/obje-1.ged)
 """
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Config, Default
 from genedata.structure import IndividualXref, MultimediaXref  # noqa: F401
