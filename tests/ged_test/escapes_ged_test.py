@@ -7,14 +7,15 @@ Reference:
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
+from genedata.constants import Default
 from genedata.methods import Util
 
+ged_version: str = '7.0'
 
 def test_escape_ged() -> None:
     # Test constructing the escapes.ged test data.
     file = Util.read('tests\\ged_test\\escapes.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     indi_xref = g.individual_xref('I1')
     sn1_xref = g.shared_note_xref('N01', '@ one leading')
     sn2_xref = g.shared_note_xref('N02', '@one leading no space')
@@ -32,7 +33,7 @@ def test_escape_ged() -> None:
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note(
                 'This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'
             ),

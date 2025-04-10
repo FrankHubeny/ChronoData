@@ -2,7 +2,7 @@
 """Test the functionality of the Classes class in the load module."""
 
 from genedata.constants import Default
-from genedata.examples import Examples7
+from genedata.examples import Examples70
 from genedata.generate import Classes
 from genedata.specifications70 import Enumeration, EnumerationSet, Structure
 
@@ -96,14 +96,14 @@ def test_generate_class_retrieval() -> None:
 
 class"""
     all_specs: str = Default.EMPTY
-    all_specs = Classes.generate_class('LATI', Structure, EnumerationSet, Enumeration, Examples7['LATI'])
+    all_specs = Classes.generate_class('LATI', Structure, EnumerationSet, Enumeration, Examples70['LATI'])
     assert all_specs[0:len(lookfor)] == lookfor
 
 def test_build_all_retrieval() -> None:
     """Retrieve data from the build_all method."""
     #lookfor: str = "'''This module of classes"
     all_specs: str = Default.EMPTY
-    all_specs = Classes.build_all('GED', '7.0', Structure, EnumerationSet, Enumeration, Examples7)
+    all_specs = Classes.build_all('GED', '7.0', Structure, EnumerationSet, Enumeration, Examples70)
     assert len(all_specs) > 0
 
 def test_all_listing_with_empty_dictionary() -> None:

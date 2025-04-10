@@ -33,11 +33,11 @@ from typing import ClassVar, Literal
 class Config:
     """Values specifying which version of the GEDCOM specification are being used."""
 
-    VERSION: str = '7'
-    GEDVERSION: str = f'{VERSION}.0'
-    TERMS: str = f'https://gedcom.io/terms/v{VERSION}/'
+    VERSION: str = '70'
+    GEDVERSION: str = '7.0'
+    TERMS: str = 'https://gedcom.io/terms/v7/'
     SPECS: str = (
-        f'https://gedcom.io/specifications/FamilySearchGEDCOMv{VERSION}.html'
+        'https://gedcom.io/specifications/FamilySearchGEDCOMv7.html'
     )
 
 
@@ -65,6 +65,8 @@ class Default:
     CODE_SUBS: str = 'subs'
     CODE_VALUE: str = 'value'
     COLON: str = ':'
+    COLUMN_RECORDS: str = 'Records'
+    COLUMN_COUNT: str = 'Count'
     COMMA: str = ','
     COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
@@ -79,9 +81,14 @@ class Default:
     EOL: str = '\n'
     EOL_DOUBLE: str = '\n\n'
     GREATER_LESS_THAN: str = '>'
-    HEADER: str = f'0 HEAD{EOL}'
+    HEAD_LINE: str = f'0 HEAD{EOL}'
+    HEADER: str = f'{HEAD_LINE}1 GEDC{EOL}2 VERS '
     HEIGHT: int = 0
     HYPHEN: str = '-'
+    IGNORE: frozenset[str] = frozenset([
+        'CONT',
+        'TRLR',
+    ])
     INDENT: str = '    '
     KIND_STANDARD: str = 'stdTag'
     KIND_EXTENDED: str = 'extTag'
@@ -134,6 +141,24 @@ class Default:
     SNOTE_RECORD_TYPE: str = 'snote'
     SOUR_RECORD_TYPE: str = 'sour'
     SUBM_RECORD_TYPE: str = 'subm'
+    # RECORD_TYPES: frozenset[str] = frozenset([
+    #     FAM_RECORD_TYPE,
+    #     INDI_RECORD_TYPE,
+    #     OBJE_RECORD_TYPE,
+    #     REPO_RECORD_TYPE,
+    #     SNOTE_RECORD_TYPE,
+    #     SOUR_RECORD_TYPE,
+    #     SUBM_RECORD_TYPE,
+    # ])
+    RECORD_TYPES: tuple[str, str, str, str, str, str, str] = (
+        'FAM',
+        'INDI',
+        'OBJE',
+        'REPO',
+        'SNOTE',
+        'SOUR',
+        'SUBM',
+    )
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
@@ -213,6 +238,8 @@ class Default:
     YAML_KEY: str = 'key'
     YAML_LABEL: str = 'label'
     YAML_LANG: str = 'lang'
+    YAML_LOAD_FILE: str = 'load file'
+    YAML_LOAD_TAG: str = 'load tag'
     YAML_MONTHS: str = 'months'
     YAML_PAYLOAD: str = 'payload'
     YAML_PERMITTED: str = 'permitted'
@@ -224,15 +251,22 @@ class Default:
     YAML_SUBSTRUCTURES: str = 'substructures'
     YAML_SUPERSTRUCTURES: str = 'superstructures'
     YAML_TYPE: str = 'type'
+    YAML_TYPE_CALENDAR: str = 'calendar'
+    YAML_TYPE_DATATYPE: str = 'data type'
+    YAML_TYPE_ENUMERATION: str = 'enumeration'
+    YAML_TYPE_ENUMERATION_SET: str = 'enumeration set'
+    YAML_TYPE_MONTH: str = 'month'
+    YAML_TYPE_STRUCTURE: str = 'structure'
+    YAML_TYPE_URI: str = 'uri'
     YAML_TYPE_CODES: frozenset[str] = frozenset(
         [
-            'calendar',
-            'data type',
-            'enumeration',
-            'enumeration set',
-            'month',
-            'structure',
-            'uri',
+            YAML_TYPE_CALENDAR,
+            YAML_TYPE_DATATYPE,
+            YAML_TYPE_ENUMERATION,
+            YAML_TYPE_ENUMERATION_SET,
+            YAML_TYPE_MONTH,
+            YAML_TYPE_STRUCTURE,
+            YAML_TYPE_URI,
         ]
     )
     YAML_TAG_TYPES: frozenset[str] = frozenset(

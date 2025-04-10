@@ -92,3 +92,4 @@ def test_input_long_range_low() -> None:
         ),
     ):
         Input.long(-181, 0, 0)
+

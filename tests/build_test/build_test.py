@@ -3,7 +3,7 @@
 
 import pytest
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.structure import FamilyXref, IndividualXref
 

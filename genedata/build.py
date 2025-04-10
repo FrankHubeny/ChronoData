@@ -15,10 +15,8 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
-import json
 import logging
 import re
-from pathlib import Path
 from typing import Any, NamedTuple
 
 from genedata.classes70 import (
@@ -37,11 +35,10 @@ from genedata.constants import (
     Number,
     String,
 )
-from genedata.messages import Issue, Msg
-from genedata.methods import Tagger, Names, Queries, Util
+from genedata.messages import Msg
+from genedata.methods import Names, Query, Util
 from genedata.specifications70 import Structure
 from genedata.structure import (
-    ExtensionXref,
     FamilyXref,
     IndividualXref,
     MultimediaXref,
@@ -66,10 +63,11 @@ class Genealogy:
         self,
         name: str = '',
         filename: str = '',
+        version: str = '7.0',
         calendar: str = String.GREGORIAN,
-        log: bool = True,
     ) -> None:
         self.chron_name: str = name
+        self.version: str = version
         self.calendar: str = calendar
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
@@ -97,10 +95,19 @@ class Genealogy:
             | RecordSubm
         ] = []
         self.record_header: Head | None = None
-        self.csv_data: str = ''
+        self.schma: str = Default.EMPTY
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
+        self.extension_specification: dict[str, dict[str, Any]] = {
+            Default.YAML_TYPE_CALENDAR: {},
+            Default.YAML_TYPE_DATATYPE: {},
+            Default.YAML_TYPE_ENUMERATION_SET: {},
+            Default.YAML_TYPE_ENUMERATION: {},
+            Default.YAML_TYPE_MONTH: {},
+            Default.YAML_TYPE_STRUCTURE: {},
+            Default.YAML_TYPE_URI: {},
+        }
         self.extension_xreflist: list[str] = [Void.NAME]
         self.family_xreflist: list[str] = [Void.NAME]
         self.individual_xreflist: list[str] = [Void.NAME]
@@ -110,12 +117,12 @@ class Genealogy:
         self.source_xreflist: list[str] = [Void.NAME]
         self.submitter_xreflist: list[str] = [Void.NAME]
         self.record_dict: dict[str, dict[str, str]] = {
-            'EXT': {
-                'key': 'record-EXT',
-                'type': 'extension',
-                'class': 'RecordExt',
-                'call': 'extension_xref',
-            },
+            # 'EXT': {
+            #     'key': 'record-EXT',
+            #     'type': 'extension',
+            #     'class': 'RecordExt',
+            #     'call': 'extension_xref',
+            # },
             'FAM': {
                 'key': 'record-FAM',
                 'type': Default.FAM_RECORD_TYPE,
@@ -165,25 +172,47 @@ class Genealogy:
                     # Tag.NAME: name,
                     # Key.CAL: calendar,
                 }
-                if log:
-                    logging.info(Msg.STARTED.format(self.chron_name))
-            case String.JSON:
-                self.read_json()
-                if log:
-                    logging.info(Msg.LOADED.format(self.chron_name, filename))
+                # if log:
+                #     logging.info(Msg.STARTED.format(self.chron_name))
+            # case String.JSON:
+            #     self.read_json()
+            #     if log:
+            #         logging.info(Msg.LOADED.format(self.chron_name, filename))
             case String.GED:
-                self.read_ged()
-                if log:
-                    logging.info(Msg.LOADED.format(self.chron_name, filename))
-            case String.CSV:
-                self.read_csv()
-                if log:
-                    logging.info(Msg.LOADED.format(self.chron_name, filename))
+                self.load_ged(self.filename)
+                # if log:
+                #     logging.info(Msg.LOADED.format(self.chron_name, filename))
+            # case String.CSV:
+            #     self.read_csv()
+            #     if log:
+            #         logging.info(Msg.LOADED.format(self.chron_name, filename))
             case _:
-                logging.warning(Msg.UNRECOGNIZED.format(self.filename))
+                raise ValueError(Msg.UNRECOGNIZED.format(self.filename))
 
-    def __str__(self) -> str:
-        return json.dumps(self.chron)
+    # def __str__(self) -> str:
+    #     return json.dumps(self.chron)
+
+    def add_tag(self, tag: str, yaml_file: str) -> None:
+        """Add an extension tag to the extension specifications.
+
+        Run this on a specific yaml file to make the specification
+        available when building the ged files.
+
+        Args:
+            tag: The extension tag with an initial underline and all capitals
+                that must be in the `extension tags` list or which must be
+                the `standard tag`.
+            yaml_file: The location of the yaml_file as either a url or a file
+                in a regular or compressed directory."""
+        tag_edited: str = tag.upper()
+        if tag_edited[0] != Default.UNDERLINE:
+            tag_edited = ''.join([Default.UNDERLINE, tag_edited])
+
+        yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
+        yaml_dict.update({Default.YAML_LOAD_FILE: yaml_file})
+        yaml_dict.update({Default.YAML_LOAD_TAG: tag})
+        type_key: str = str(yaml_dict[Default.YAML_TYPE])
+        self.extension_specification[type_key].update({tag_edited: yaml_dict})
 
     def stage(
         self,
@@ -241,7 +270,16 @@ class Genealogy:
         """
         if self.record_header is None:
             raise ValueError(Msg.MISSING_HEADER)
+
+        # Add in any SCHMA TAG values by replacing `0 HEAD` with complete header lines.
         lines = self.record_header.ged()
+        if Default.HEADER not in lines:
+            lines = self.record_header.ged().replace(
+                Default.HEAD_LINE,
+                f'{Default.HEADER}{self.version}{Default.EOL}{self.schma}',
+            )
+
+        # Construct the ged lines for each record.
         for record in self.records:
             lines = ''.join([lines, record.ged()])
         return ''.join([lines, Default.TRAILER])
@@ -251,132 +289,11 @@ class Genealogy:
         Util.write_ged(self.show_ged(), file_name)
 
     def load_ged(self, file_name: str) -> None:
-        """Load a ged file and split it into records."""
+        """Load a ged file."""
         self.filename = file_name
+        if self.ged_file != Default.EMPTY:
+            raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
         self.ged_file = Util.read(self.filename)
-
-
-    # def get_substructures(self, key: str) -> list[StructureSpecs]:
-    #     """Associate the permitted substructure classes with the tags in the ged file."""
-    #     subs: list[StructureSpecs] = []
-    #     permitted_keys: list[str] = Queries.permitted_keys(key, Structure)
-    #     for sub in permitted_keys:
-    #         subs.append(
-    #             StructureSpecs(
-    #                 tag=Structure[sub][Default.YAML_STANDARD_TAG],
-    #                 key=sub,
-    #                 class_name=Names.classname(sub),
-    #             )
-    #         )
-    #     return subs
-
-    # def get_record_type(self, tag: str) -> str:
-    #     """Get the kind of record based on the tag in the ged file on the line with level 0."""
-    #     match tag:
-    #         case Default.TAG_FAM:
-    #             return Default.FAM_RECORD_TYPE
-    #         case Default.TAG_INDI:
-    #             return Default.INDI_RECORD_TYPE
-    #         case Default.TAG_OBJE:
-    #             return Default.OBJE_RECORD_TYPE
-    #         case Default.TAG_REPO:
-    #             return Default.REPO_RECORD_TYPE
-    #         case Default.TAG_SNOTE:
-    #             return Default.SNOTE_RECORD_TYPE
-    #         case Default.TAG_SOUR:
-    #             return Default.SOUR_RECORD_TYPE
-    #         case Default.TAG_SUBM:
-    #             return Default.SUBM_RECORD_TYPE
-    #     return Default.EMPTY
-
-
-    # def format_value(self, key: str, words: list[str]) -> str:
-    #     if len(words) == 1:
-    #         return Default.EMPTY
-    #     payload: str = Structure[key][Default.YAML_PAYLOAD]
-    #     match payload:
-    #         case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-    #             return f'{words[1]}{Default.COMMA}'
-    #         case '@<https://gedcom.io/terms/v7/record-FAM>@':
-    #             return (
-    #                 f'family_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #             )
-    #         case '@<https://gedcom.io/terms/v7/record-INDI>@':
-    #             return f'individual_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #         case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-    #             return f'multimedia_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #         case '@<https://gedcom.io/terms/v7/record-REPO>@':
-    #             return f'repository_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #         case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
-    #             return f'shared_note_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #         case '@<https://gedcom.io/terms/v7/record-SOUR>@':
-    #             return (
-    #                 f'source_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #             )
-    #         case '@<https://gedcom.io/terms/v7/record-OBJE>@':
-    #             return f'submitter_{self.format_xref(words[1])}_xref{Default.COMMA}'
-    #     return self.format_text(words[1])
-
-    # def format_subs(
-    #     self, ged: list[str], key_name: str, level: int = 0, base: bool = False
-    # ) -> str:
-    #     permitted: list[StructureSpecs] = self.get_substructures(key_name)
-    #     lines: str = Default.EMPTY
-    #     if len(ged) > 1:
-    #         lines = ''.join([lines, self.start_subs(level)])
-    #         for structure in ged:
-    #             tag: str = structure.split(Default.SPACE, 1)[0]
-    #             for good in permitted:
-    #                 if tag == good.tag:
-    #                     lines = ''.join(
-    #                         [
-    #                             lines,
-    #                             self.genealogy_structure(
-    #                                 structure,
-    #                                 level + 2,
-    #                                 good.class_name,
-    #                                 good.key,
-    #                             ),
-    #                         ]
-    #                     )
-    #         lines = ''.join(
-    #             [
-    #                 lines,
-    #                 self.end_subs(level + 1),
-    #                 Default.EOL,
-    #                 self.end_value(level, base),
-    #             ]
-    #         )
-    #     else:
-    #         lines = ''.join([lines, self.end_value(0, base)])
-    #     return lines
-
-
-    # def genealogy_structure(
-    #     self, ged: str, level: int, class_name: str, key_name: str
-    # ) -> str:
-    #     lines: str = Default.EMPTY
-    #     ged_structures: list[str] = self.split_subs(ged, level)
-    #     first_line_words: list[str] = ged_structures[0].split(Default.SPACE, 1)
-    #     if len(first_line_words) > 1:
-    #         return ''.join(
-    #             [
-    #                 lines,
-    #                 self.start_value(class_name, level),
-    #                 self.format_value(key_name, first_line_words),
-    #                 self.format_subs(ged_structures, key_name, level),
-    #             ]
-    #         )
-    #     return ''.join(
-    #         [
-    #             lines,
-    #             self.start_value(class_name, level),
-    #             self.format_subs(ged_structures, key_name, level, base=True),
-    #         ]
-    #     )
-
-
-    ######################################## New version
 
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
@@ -405,7 +322,7 @@ class Genealogy:
             ged: str = Default.EMPTY
             ged, _, _ = self.ged_file.partition(Default.TRAILER)
 
-            # Remove anything before the header record even an end of line character.
+            # Remove anything before the header record the end of line character.
             ged_temp: str = Default.EMPTY
             _, _, ged_temp = ged.partition(Default.HEADER)
             ged = ''.join([Default.HEADER, ged_temp])
@@ -419,13 +336,16 @@ class Genealogy:
 
         def header() -> str:
             header_subs: list[str] = split_subs(self.ged_file_records[0], 1)
+            value_pieces: list[str] = header_subs[0].split(Default.SPACE, 2)
             lines: str = f"""
 # Instantiate the header record.
-header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
+header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{Default.PARENS_LEFT}"""
             return ''.join(
                 [
                     lines,
-                    format_subs(header_subs, 'HEAD', 1),
+                    format_subs(
+                        header_subs, value_pieces[1], 1, value=Default.EMPTY
+                    ),
                 ]
             )
 
@@ -462,7 +382,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
         def get_subs_specs(key: str) -> list[StructureSpecs]:
             """Associate the permitted substructure classes with the tags in the ged file."""
             subs: list[StructureSpecs] = []
-            permitted_keys: list[str] = Queries.permitted_keys(key, Structure)
+            permitted_keys: list[str] = Query.permitted_keys(key, Structure)
             for sub in permitted_keys:
                 subs.append(
                     StructureSpecs(
@@ -489,7 +409,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
                         start_value(class_name, level),
                         value,
                         format_subs(
-                            ged_structures[1:], key_name, level, value=value
+                            ged_structures, key_name, level, value=value
                         ),
                     ]
                 )
@@ -497,9 +417,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
                 [
                     lines,
                     start_value(class_name, level),
-                    format_subs(
-                        ged_structures[1:], key_name, level
-                    ), 
+                    format_subs(ged_structures[1:], key_name, level),
                 ]
             )
 
@@ -532,6 +450,9 @@ header = {Default.CODE_CLASS}{Default.PERIOD}Head("""
             level: int = 0,
             value: str = Default.EMPTY,
         ) -> str:
+            logging.info(
+                f'format_subs: ged={ged}, key_name={key_name}, level={level}, value={value}'
+            )
             permitted: list[StructureSpecs] = get_subs_specs(key_name)
             lines: str = Default.EMPTY
             if len(ged) > 1:
@@ -586,6 +507,33 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             return f"""# Instantiate a Genealogy class with the name of the ged file.
 {Default.CODE_GENEALOGY} = Genealogy('{self.filename}')
 """
+
+        def extensions() -> str:
+            intro: str = """
+# Add any extensions that were registered in the header record.
+"""
+            lines: str = Default.EMPTY
+            split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
+            for line in split_lines:
+                if line[0:6] == '0 TAG ':
+                    words: list[str] = line[6:].split(Default.SPACE, 1)
+                    lines = ''.join(
+                        [
+                            lines,
+                            Default.CODE_GENEALOGY,
+                            Default.PERIOD,
+                            Default.PARENS_LEFT,
+                            words[0],
+                            Default.COMMA,
+                            Default.SPACE,
+                            words[1],
+                            Default.PARENS_RIGHT,
+                            Default.EOL,
+                        ]
+                    )
+            if lines != Default.EMPTY:
+                lines = ''.join([intro, lines])
+            return lines
 
         def xrefs() -> str:
             """Construct the section of the code where the cross reference identifiers are instantiated."""
@@ -699,209 +647,29 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
                 imports(),
                 initialize(),
                 xrefs(),
+                extensions(),
                 header(),
                 records(),
                 stage(),
             ]
         )
 
-    ###################################################
-
-    def code(self) -> str:
-        lines: str = f"""from genedata.build import Genealogy
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
-
-{Default.CODE_GENEALOGY} = Genealogy('{self.chron_name}')
-"""
-        for ext in self.extension_xreflist:
-            item: str = ext.replace(Default.ATSIGN, Default.EMPTY)
-            if ext != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}ext_{item}_xref = {Default.CODE_GENEALOGY}.extension_xref('{item}')"
-        for fam in self.family_xreflist:
-            item = fam.replace(Default.ATSIGN, Default.EMPTY)
-            if fam != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}fam_{item}_xref = {Default.CODE_GENEALOGY}.family_xref('{item}')"
-        for indi in self.individual_xreflist:
-            item = indi.replace(Default.ATSIGN, Default.EMPTY)
-            if indi != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}indi_{item}_xref = {Default.CODE_GENEALOGY}.individual_xref('{item}')"
-        for obje in self.multimedia_xreflist:
-            item = obje.replace(Default.ATSIGN, Default.EMPTY)
-            if obje != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}obje_{item}_xref = {Default.CODE_GENEALOGY}.multimedia_xref('{item}')"
-        for repo in self.repository_xreflist:
-            item = repo.replace(Default.ATSIGN, Default.EMPTY)
-            if repo != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}repo_{item}_xref = {Default.CODE_GENEALOGY}.repository_xref('{item}')"
-        for snote in self.shared_note_xreflist:
-            item = snote.replace(Default.ATSIGN, Default.EMPTY)
-            if snote != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}snote_{item}_xref = {Default.CODE_GENEALOGY}.shared_note_xref('{item}')"
-        for sour in self.source_xreflist:
-            item = sour.replace(Default.ATSIGN, Default.EMPTY)
-            if sour != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}sour_{item}_xref = {Default.CODE_GENEALOGY}.source_xref('{item}')"
-        for subm in self.submitter_xreflist:
-            item = subm.replace(Default.ATSIGN, Default.EMPTY)
-            if subm != Default.VOID_POINTER:
-                lines = f"{lines}{Default.EOL}subm_{item}_xref = {Default.CODE_GENEALOGY}.submitter_xref('{item}')"
-        return lines
-
     def _get_filename_type(self, filename: str) -> str:
         filename_type: str = ''
-        if filename[-Number.JSONLEN :] == String.JSON:
-            filename_type = String.JSON
+        # if filename[-Number.JSONLEN :] == String.JSON:
+        #     filename_type = String.JSON
         if filename[-Number.GEDLEN :] == String.GED:
             filename_type = String.GED
         return filename_type
 
-    def read_csv(self) -> None:
-        try:
-            with Path.open(
-                Path(self.filename), encoding='utf-8', mode=String.READ
-            ) as infile:
-                data: Any = infile.readlines()
-                self.csv_data = ''.join(
-                    [self.csv_data, Tagger.clean_input(data)]
-                )
-                infile.close()
-        except UnicodeDecodeError:
-            logging.error(Msg.NOT_UNICODE.format(self.filename))
-            raise
-        # self.cal_name = self.chron[Key.CAL][Key.NAME]
-        # self.chron_name = self.chron[Key.NAME]
-
-    def read_json(self) -> None:
-        try:
-            with Path.open(
-                Path(self.filename), encoding='utf-8', mode=String.READ
-            ) as infile:
-                self.chron = json.load(infile)
-                infile.close()
-        except UnicodeDecodeError:
-            logging.error(Msg.NOT_UNICODE.format(self.filename))
-            raise
-        # self.cal_name = self.chron[Key.CAL][Key.NAME]
-        # self.chron_name = self.chron[Key.NAME]
-
-    def read_ged(self) -> None:
-        """Read and validate the GEDCOM file."""
-        try:
-            with Path.open(
-                Path(self.filename), encoding='utf-8', mode=String.READ
-            ) as infile:
-                data: Any = infile.readlines()
-                self.ged_data.append(Tagger.clean_input(data))
-                infile.close()
-        except UnicodeDecodeError:
-            logging.error(Msg.NOT_UNICODE.format(self.filename))
-            raise
-        # Split each line into components and remove terminator.
-        for i in data:
-            self.ged_splitdata.append(i.replace('\n', '').split(' ', 2))
-        # Check the level for bad increments and starting point.
-        level: int = 0
-        for index, value in enumerate(self.ged_splitdata, start=1):
-            if index == 1 and value[0] != '0':
-                self.ged_issues.append([index, Issue.NO_ZERO])
-            elif int(value[0]) > level + 1:
-                self.ged_issues.append([index, Issue.BAD_INC])
-            elif int(value[0]) < 0:
-                self.ged_issues.append([index, Issue.LESS_ZERO])
-            else:
-                level = int(value[0])
-        # Report the validation results which exists the function.
-        # if len(issues) > 0:
-        #     #if self.log:
-        #     #logging.info(Msg.LOAD_FAILED.format(filename))
-        #     return pd.DataFrame(
-        #         data=issues, columns=[Column.LINE, Column.ISSUE]
-        #     )
-        # Find version.
-        for i in self.ged_splitdata:
-            if i[1] == 'VERS':
-                self.ged_in_version = i[2]
-                break
-        # add in the base dictionaries.
-        count: int = 0
-        tags: list[str] = []
-        for line in self.ged_splitdata:
-            if line[0] == '0' and len(line) == 3:
-                count = count + 1
-                if line[2] not in self.chron:
-                    self.chron.update({line[2]: {}})
-                # self.chron[line[2]].update({line[1]: {}})
-                tags = []
-                tags.append(line[2])
-                tags.append(line[1])
-            elif line[0] == '1' and len(line) == 3 and count > 0:
-                # t0 = tags[0]
-                # t1 = tags[1]
-                # self.chron[tags[0]][tags[1]].update({line[1]: line[2]})
-                tags.append(line[1])
-            # elif line[0] == '2' and len(line) == 3 and count > 0:
-            #     self.chron[tags[0]][tags[1]][tags[2]].update({line[1]: line[2]})
-            #     tags.append(line[1])
-        # logging.info(Msg.LOADED.format(self.chron_name, self.filename))
-
-    def save(self, filename: str = '', overwrite: bool = False) -> None:
-        """Save the current genealogy.
-
-        Parameters
-        ----------
-        filename:
-            The name of the file. If empty it will use the name
-        """
-
-        if filename == '':
-            filename = self.filename
-        else:
-            self.filename = filename
-            self.filename_type = self._get_filename_type(filename)
-        if Path.exists(Path(filename)) and not overwrite:
-            logging.info(Msg.FILE_EXISTS.format(filename))
-        else:
-            match self.filename_type:
-                # https://stackoverflow.com/questions/10373247/how-do-i-write-a-python-dictionary-to-a-csv-file
-                # case String.CSV:
-                #     with Path.open(
-                #         Path(self.filename), encoding='utf-8', mode=String.WRITE
-                #     ) as file:
-                #         w = csv.DictWriter(file, self.chron.keys())
-                #         w.writerows(self.chron)
-                #     logging.info(
-                #         Msg.SAVED.format(self.chron_name, self.filename)
-                #     )
-                case String.JSON:
-                    with Path.open(
-                        Path(self.filename), encoding='utf-8', mode=String.WRITE
-                    ) as file:
-                        json.dump(self.chron, file)
-                        file.close()
-                    logging.info(Msg.SAVED.format(self.filename))
-                case String.GED:
-                    output: str = ''.join(
-                        [
-                            self.ged_header,
-                            self.ged_family,
-                            self.ged_individual,
-                            self.ged_multimedia,
-                            self.ged_shared_note,
-                            self.ged_source,
-                            self.ged_submitter,
-                            self.ged_trailer,
-                        ]
-                    )
-                    with Path.open(
-                        Path(filename), encoding='utf-8', mode=String.WRITE
-                    ) as file:
-                        file.write(output)
-                        file.close()
-                    logging.info(
-                        Msg.SAVED.format(self.chron_name, self.filename)
-                    )
-                case _:
-                    logging.info(Msg.SAVE_FIRST)
+    # def read_ged(self) -> None:
+    #     """Read and validate the GEDCOM file."""
+    #     # try:
+    #     with Path.open(
+    #         Path(self.filename), encoding='utf-8', mode=String.READ
+    #     ) as infile:
+    #         data: Any = infile.readlines()
+    #         self.ged_data.append(Tagger.clean_input(data))
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -971,42 +739,6 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             xref = self._format_name(xref_name)
         self._set_xref(xref_list, xref, xref_name)
         return xref
-
-    def extension_xref(
-        self, xref_name: str = '', initial: bool = False
-    ) -> ExtensionXref:
-        """
-        Create a FamilyXref identifier from a unique string according to the
-        GEDCOM standard.
-
-        Args:
-            xref_name (str, optional): A name for the identifier. Defaults to ''.
-            initial (bool, optional): Whether to use the name as an initial
-                value with an integer following. Defaults to False.
-
-        Returns:
-            ExtensionXref: A unique identifier string with type ExtensionXref.
-
-        Examples:
-
-        See Also:
-            - `family_xref`: create a typed identifier for an family record.
-            - `individual_xref`: create a typed identifier for an individual record.
-            - `multimedia_xref`: create a typed identifier for a multimedia record.
-            - `repository_xref`: create a typed identifier for a repository record.
-            - `shared_note_xref`: create a typed identifier for a shared note record.
-            - `source_xref`: create a typed identifier for a source record.
-            - `submitter_xref`: create a typed identifier for a submitter record.
-
-        Reference:
-            [GEDCOM Repository Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#FAMILY_RECORD)
-        """
-        extension_xref = self._counter(
-            self.extension_xreflist,
-            xref_name,
-            initial,
-        )
-        return ExtensionXref(extension_xref)
 
     def family_xref(
         self, xref_name: str = '', initial: bool = False
@@ -1819,13 +1551,47 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_submitter = self._gather(records, self.submitter_xreflist)
 
-    def header(self, ged_header: Head) -> None:
-        """Collect and store the header record.
+    # def header(self, ged_header: Head) -> None:
+    #     """Collect and store the header record.
+
+    #     Args:
+    #         ged_header: is the text of the header record.
+
+    #     References:
+    #         [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
+    #     """
+    #     self.ged_header = ged_header.ged()
+
+    def query_record_counts(
+        self,
+        column: str = Default.COLUMN_COUNT,
+    ) -> dict[str, dict[str, int]]:
+        """Return the dictionary for record counts using the loaded ged file.
+
+        This assumes that a gedcom file has been loaded into the Genealogy class.
+        If it is not then the report will be run on the empty string.  The counts
+        for all records would then be 0.  For example:
+        >>> from genedata.build import Genealogy
+        >>> g = Genealogy('test')
+        >>> g.query_record_counts()
+        {'Count': {'FAM': 0, 'INDI': 0, 'OBJE': 0, 'REPO': 0, 'SNOTE': 0, 'SOUR': 0, 'SUBM': 0}}
+
+        This would be better formatted if the dictionary were passed through pandas.
+        >>> import pandas as pd
+        >>> pd.DataFrame(g.query_record_counts())
+               Count
+        FAM        0
+        INDI       0
+        OBJE       0
+        REPO       0
+        SNOTE      0
+        SOUR       0
+        SUBM       0
 
         Args:
-            ged_header: is the text of the header record.
-
-        References:
-            [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
-        """
-        self.ged_header = ged_header.ged()
+            column: The name of the main dictionary key which would be the column
+                name if a pandas DataFrame were used to display the dictionary."""
+        return Query.record_counts(
+            self.ged_file,
+            column=column,
+        )

@@ -9,11 +9,11 @@ Reference:
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
-from genedata.structure import IndividualXref  # noqa: F401
+from genedata.constants import Default
 from genedata.methods import Util
+from genedata.structure import IndividualXref  # noqa: F401
 
-
+ged_version: str = '7.0'
 def test_age_ged() -> None:
     """Reproduce the age_ged example file."""
     file = Util.read('tests\\ged_test\\age.ged')
@@ -22,7 +22,7 @@ def test_age_ged() -> None:
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note(
                 'This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'
             ),
@@ -142,12 +142,12 @@ def test_age_ged() -> None:
 def test_age_ged_code() -> None:
     """Reproduce the age_ged example file."""
     file = Util.read('tests\\ged_test\\age.ged')
-    g = Genealogy('testing')
+    g = Genealogy('testing', version=ged_version)
     indi_xref = g.individual_xref('I1')
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note(
                 'This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'
             ),

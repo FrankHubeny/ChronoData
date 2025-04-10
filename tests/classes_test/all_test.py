@@ -6,7 +6,7 @@ DO NOT MODIFY THIS FILE.
 '''
 
 from genedata.build import Genealogy   # noqa: I001
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 
 
 g = Genealogy('test')

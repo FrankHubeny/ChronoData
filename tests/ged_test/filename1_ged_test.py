@@ -3,21 +3,22 @@
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
+from genedata.constants import Default
 from genedata.methods import Util
 from genedata.structure import MultimediaXref  # noqa: F401
 
+ged_version: str = '7.0'
 
 def test_filename1_ged() -> None:
     # Test constructing the xref_ged test data.
 
     file = Util.read('tests\\ged_test\\filename-1.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     obje_xref = g.multimedia_xref('1')
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)), 
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'),
         ]
     )
@@ -60,12 +61,12 @@ def test_filename1_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
 
     file = Util.read('tests\\ged_test\\filename-1.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     obje_xref = g.multimedia_xref('1')
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)), 
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'),
         ]
     )

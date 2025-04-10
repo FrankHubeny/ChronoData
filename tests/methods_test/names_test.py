@@ -76,7 +76,7 @@ def test_classname_full() -> None:
     assert Names.classname(text) == 'RecordYesNo'
 
 def test_classname_full2() -> None:
-    text: str = 'ord-YES-__NO-MayBE-'
+    text: str = 'ord-YES-__NO-MAYBE-'
     assert Names.classname(text) == 'OrdYesNoMaybe'
 
 def test_classname_full3() -> None:

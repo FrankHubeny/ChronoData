@@ -229,7 +229,7 @@ class Abbr(BaseStructure):
 
     References:
     - [GEDCOM ABBR Structure](https://gedcom.io/terms/v7/ABBR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -238,11 +238,11 @@ class Abbr(BaseStructure):
             subs=None, 
             key='ABBR',
             tag='ABBR',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Abbr',
         )
@@ -366,7 +366,7 @@ class Addr(BaseStructure):
 
     References:
     - [GEDCOM ADDR Structure](https://gedcom.io/terms/v7/ADDR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -376,10 +376,10 @@ class Addr(BaseStructure):
             key='ADDR',
             tag='ADDR',
             permitted=['Adr1', 'Adr2', 'Adr3', 'City', 'Ctry', 'Post', 'Stae'],
-            required=[],
+            required=None,
             single=['Adr1', 'Adr2', 'Adr3', 'City', 'Ctry', 'Post', 'Stae'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Addr',
         )
@@ -422,7 +422,7 @@ class AdopFamc(BaseStructure):
 
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/ADOP-FAMC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
@@ -432,10 +432,10 @@ class AdopFamc(BaseStructure):
             key='ADOP-FAMC',
             tag='FAMC',
             permitted=['FamcAdop'],
-            required=[],
+            required=None,
             single=['FamcAdop'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-FAM>@',
             class_name='AdopFamc',
         )
@@ -454,7 +454,7 @@ class Adop(BaseStructure):
     GEDCOM Specification:
     > - Adoption
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - adoption
     > - Creation of a legally approved child-parent relationship that does not
@@ -500,7 +500,7 @@ class Adop(BaseStructure):
 
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/ADOP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -510,10 +510,10 @@ class Adop(BaseStructure):
             key='ADOP',
             tag='ADOP',
             permitted=['Addr', 'AdopFamc', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'AdopFamc', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Adop',
         )
@@ -553,7 +553,7 @@ class Adr1(BaseStructure):
 
     References:
     - [GEDCOM ADR1 Structure](https://gedcom.io/terms/v7/ADR1)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -562,11 +562,11 @@ class Adr1(BaseStructure):
             subs=None, 
             key='ADR1',
             tag='ADR1',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Adr1',
         )
@@ -607,7 +607,7 @@ class Adr2(BaseStructure):
 
     References:
     - [GEDCOM ADR2 Structure](https://gedcom.io/terms/v7/ADR2)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -616,11 +616,11 @@ class Adr2(BaseStructure):
             subs=None, 
             key='ADR2',
             tag='ADR2',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Adr2',
         )
@@ -661,7 +661,7 @@ class Adr3(BaseStructure):
 
     References:
     - [GEDCOM ADR3 Structure](https://gedcom.io/terms/v7/ADR3)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -670,11 +670,11 @@ class Adr3(BaseStructure):
             subs=None, 
             key='ADR3',
             tag='ADR3',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Adr3',
         )
@@ -750,7 +750,7 @@ class Age(BaseStructure):
 
     References:
     - [GEDCOM AGE Structure](https://gedcom.io/terms/v7/AGE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -760,10 +760,10 @@ class Age(BaseStructure):
             key='AGE',
             tag='AGE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Age',
             class_name='Age',
         )
@@ -848,7 +848,7 @@ class Agnc(BaseStructure):
 
     References:
     - [GEDCOM AGNC Structure](https://gedcom.io/terms/v7/AGNC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -857,11 +857,11 @@ class Agnc(BaseStructure):
             subs=None, 
             key='AGNC',
             tag='AGNC',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Agnc',
         )
@@ -911,7 +911,7 @@ class Alia(BaseStructure):
 
     References:
     - [GEDCOM ALIA Structure](https://gedcom.io/terms/v7/ALIA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
@@ -921,10 +921,10 @@ class Alia(BaseStructure):
             key='ALIA',
             tag='ALIA',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-INDI>@',
             class_name='Alia',
         )
@@ -955,7 +955,7 @@ class Anci(BaseStructure):
 
     References:
     - [GEDCOM ANCI Structure](https://gedcom.io/terms/v7/ANCI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SubmitterXref) -> None:
@@ -964,11 +964,11 @@ class Anci(BaseStructure):
             subs=None, 
             key='ANCI',
             tag='ANCI',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-SUBM>@',
             class_name='Anci',
         )
@@ -987,7 +987,7 @@ class Anul(BaseStructure):
     GEDCOM Specification:
     > - Annulment
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - annulment
     > - Declaring a marriage void from the beginning (never existed).
@@ -1032,7 +1032,7 @@ class Anul(BaseStructure):
 
     References:
     - [GEDCOM ANUL Structure](https://gedcom.io/terms/v7/ANUL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1042,10 +1042,10 @@ class Anul(BaseStructure):
             key='ANUL',
             tag='ANUL',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Anul',
         )
@@ -1201,7 +1201,7 @@ class Asso(BaseStructure):
 
     References:
     - [GEDCOM ASSO Structure](https://gedcom.io/terms/v7/ASSO)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any) -> None:
@@ -1214,7 +1214,7 @@ class Asso(BaseStructure):
             required=['Role'],
             single=['Phrase', 'Role'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-INDI>@',
             class_name='Asso',
         )
@@ -1247,7 +1247,7 @@ class Auth(BaseStructure):
 
     References:
     - [GEDCOM AUTH Structure](https://gedcom.io/terms/v7/AUTH)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -1256,11 +1256,11 @@ class Auth(BaseStructure):
             subs=None, 
             key='AUTH',
             tag='AUTH',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Auth',
         )
@@ -1279,7 +1279,7 @@ class Bapl(BaseStructure):
     GEDCOM Specification:
     > - Baptism, Latter-Day Saint
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     >   See also `LDS_INDIVIDUAL_ORDINANCE`.
     > - baptism
     > - The event of baptism performed at age 8 or later by priesthood authority of
@@ -1306,7 +1306,7 @@ class Bapl(BaseStructure):
 
     References:
     - [GEDCOM BAPL Structure](https://gedcom.io/terms/v7/BAPL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -1316,10 +1316,10 @@ class Bapl(BaseStructure):
             key='BAPL',
             tag='BAPL',
             permitted=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'],
-            required=[],
+            required=None,
             single=['Date', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Bapl',
         )
@@ -1338,7 +1338,7 @@ class Bapm(BaseStructure):
     GEDCOM Specification:
     > - Baptism
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - baptism
     > - Baptism, performed in infancy or later. (See also [`BAPL`] and `CHR`.)
@@ -1382,7 +1382,7 @@ class Bapm(BaseStructure):
 
     References:
     - [GEDCOM BAPM Structure](https://gedcom.io/terms/v7/BAPM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1392,10 +1392,10 @@ class Bapm(BaseStructure):
             key='BAPM',
             tag='BAPM',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Bapm',
         )
@@ -1414,7 +1414,7 @@ class Barm(BaseStructure):
     GEDCOM Specification:
     > - Bar Mitzvah
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - Bar Mitzvah
     > - The ceremonial event held when a Jewish boy reaches age 13.
@@ -1458,7 +1458,7 @@ class Barm(BaseStructure):
 
     References:
     - [GEDCOM BARM Structure](https://gedcom.io/terms/v7/BARM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1468,10 +1468,10 @@ class Barm(BaseStructure):
             key='BARM',
             tag='BARM',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Barm',
         )
@@ -1490,7 +1490,7 @@ class Basm(BaseStructure):
     GEDCOM Specification:
     > - Bas Mitzvah
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - Bas Mitzvah
     > - The ceremonial event held when a Jewish girl reaches age 13, also known as
@@ -1535,7 +1535,7 @@ class Basm(BaseStructure):
 
     References:
     - [GEDCOM BASM Structure](https://gedcom.io/terms/v7/BASM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1545,10 +1545,10 @@ class Basm(BaseStructure):
             key='BASM',
             tag='BASM',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Basm',
         )
@@ -1567,7 +1567,7 @@ class Birt(BaseStructure):
     GEDCOM Specification:
     > - Birth
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - birth
     > - Entering into life.
@@ -1612,7 +1612,7 @@ class Birt(BaseStructure):
 
     References:
     - [GEDCOM BIRT Structure](https://gedcom.io/terms/v7/BIRT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1622,10 +1622,10 @@ class Birt(BaseStructure):
             key='BIRT',
             tag='BIRT',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Famc', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Famc', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Birt',
         )
@@ -1644,7 +1644,7 @@ class Bles(BaseStructure):
     GEDCOM Specification:
     > - Blessing
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - blessing
     > - Bestowing divine care or intercession. Sometimes given in connection with a
@@ -1689,7 +1689,7 @@ class Bles(BaseStructure):
 
     References:
     - [GEDCOM BLES Structure](https://gedcom.io/terms/v7/BLES)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1699,10 +1699,10 @@ class Bles(BaseStructure):
             key='BLES',
             tag='BLES',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Bles',
         )
@@ -1721,7 +1721,7 @@ class Buri(BaseStructure):
     GEDCOM Specification:
     > - Depositing remains
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     >   
     >   Although defined as any depositing of remains since it was introduced in the
@@ -1773,7 +1773,7 @@ class Buri(BaseStructure):
 
     References:
     - [GEDCOM BURI Structure](https://gedcom.io/terms/v7/BURI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1783,10 +1783,10 @@ class Buri(BaseStructure):
             key='BURI',
             tag='BURI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Buri',
         )
@@ -1824,7 +1824,7 @@ class Caln(BaseStructure):
 
     References:
     - [GEDCOM CALN Structure](https://gedcom.io/terms/v7/CALN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1834,10 +1834,10 @@ class Caln(BaseStructure):
             key='CALN',
             tag='CALN',
             permitted=['Medi'],
-            required=[],
+            required=None,
             single=['Medi'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Caln',
         )
@@ -1856,7 +1856,7 @@ class Cast(BaseStructure):
     GEDCOM Specification:
     > - Caste
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - caste
     > - The name of an individual's rank or status in society which is sometimes
@@ -1901,7 +1901,7 @@ class Cast(BaseStructure):
 
     References:
     - [GEDCOM CAST Structure](https://gedcom.io/terms/v7/CAST)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -1911,10 +1911,10 @@ class Cast(BaseStructure):
             key='CAST',
             tag='CAST',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Cast',
         )
@@ -1996,7 +1996,7 @@ class Caus(BaseStructure):
 
     References:
     - [GEDCOM CAUS Structure](https://gedcom.io/terms/v7/CAUS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -2005,11 +2005,11 @@ class Caus(BaseStructure):
             subs=None, 
             key='CAUS',
             tag='CAUS',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Caus',
         )
@@ -2061,7 +2061,7 @@ class Chan(BaseStructure):
 
     References:
     - [GEDCOM CHAN Structure](https://gedcom.io/terms/v7/CHAN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -2074,7 +2074,7 @@ class Chan(BaseStructure):
             required=['DateExact'],
             single=['DateExact'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Chan',
         )
@@ -2111,7 +2111,7 @@ class Chil(BaseStructure):
 
     References:
     - [GEDCOM CHIL Structure](https://gedcom.io/terms/v7/CHIL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
@@ -2121,10 +2121,10 @@ class Chil(BaseStructure):
             key='CHIL',
             tag='CHIL',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-INDI>@',
             class_name='Chil',
         )
@@ -2143,7 +2143,7 @@ class Chr(BaseStructure):
     GEDCOM Specification:
     > - Christening
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - christening
     > - Baptism or naming events for a child.
@@ -2188,7 +2188,7 @@ class Chr(BaseStructure):
 
     References:
     - [GEDCOM CHR Structure](https://gedcom.io/terms/v7/CHR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2198,10 +2198,10 @@ class Chr(BaseStructure):
             key='CHR',
             tag='CHR',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Famc', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Famc', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Chr',
         )
@@ -2220,7 +2220,7 @@ class Chra(BaseStructure):
     GEDCOM Specification:
     > - Christening, adult
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - adult christening
     > - Baptism or naming events for an adult person.
@@ -2264,7 +2264,7 @@ class Chra(BaseStructure):
 
     References:
     - [GEDCOM CHRA Structure](https://gedcom.io/terms/v7/CHRA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2274,10 +2274,10 @@ class Chra(BaseStructure):
             key='CHRA',
             tag='CHRA',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Chra',
         )
@@ -2308,7 +2308,7 @@ class City(BaseStructure):
 
     References:
     - [GEDCOM CITY Structure](https://gedcom.io/terms/v7/CITY)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -2317,11 +2317,11 @@ class City(BaseStructure):
             subs=None, 
             key='CITY',
             tag='CITY',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='City',
         )
@@ -2340,7 +2340,7 @@ class Conf(BaseStructure):
     GEDCOM Specification:
     > - Confirmation
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - confirmation
     > - Conferring full church membership.
@@ -2384,7 +2384,7 @@ class Conf(BaseStructure):
 
     References:
     - [GEDCOM CONF Structure](https://gedcom.io/terms/v7/CONF)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2394,10 +2394,10 @@ class Conf(BaseStructure):
             key='CONF',
             tag='CONF',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Conf',
         )
@@ -2416,7 +2416,7 @@ class Conl(BaseStructure):
     GEDCOM Specification:
     > - Confirmation, Latter-Day Saint
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     >   See also `LDS_INDIVIDUAL_ORDINANCE`.
     > - confirmation
     > - The religious event by which a person receives membership in The Church of
@@ -2443,7 +2443,7 @@ class Conl(BaseStructure):
 
     References:
     - [GEDCOM CONL Structure](https://gedcom.io/terms/v7/CONL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -2453,10 +2453,10 @@ class Conl(BaseStructure):
             key='CONL',
             tag='CONL',
             permitted=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'],
-            required=[],
+            required=None,
             single=['Date', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Conl',
         )
@@ -2488,7 +2488,7 @@ class Copr(BaseStructure):
 
     References:
     - [GEDCOM COPR Structure](https://gedcom.io/terms/v7/COPR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -2497,11 +2497,11 @@ class Copr(BaseStructure):
             subs=None, 
             key='COPR',
             tag='COPR',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Copr',
         )
@@ -2542,7 +2542,7 @@ class Corp(BaseStructure):
 
     References:
     - [GEDCOM CORP Structure](https://gedcom.io/terms/v7/CORP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2552,10 +2552,10 @@ class Corp(BaseStructure):
             key='CORP',
             tag='CORP',
             permitted=['Addr', 'Email', 'Fax', 'Phon', 'Www'],
-            required=[],
+            required=None,
             single=['Addr'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Corp',
         )
@@ -2601,7 +2601,7 @@ class Crea(BaseStructure):
 
     References:
     - [GEDCOM CREA Structure](https://gedcom.io/terms/v7/CREA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -2614,7 +2614,7 @@ class Crea(BaseStructure):
             required=['DateExact'],
             single=['DateExact'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Crea',
         )
@@ -2633,7 +2633,7 @@ class Crem(BaseStructure):
     GEDCOM Specification:
     > - Cremation
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - cremation
     > - The act of reducing a dead body to ashes by fire.
@@ -2677,7 +2677,7 @@ class Crem(BaseStructure):
 
     References:
     - [GEDCOM CREM Structure](https://gedcom.io/terms/v7/CREM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2687,10 +2687,10 @@ class Crem(BaseStructure):
             key='CREM',
             tag='CREM',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Crem',
         )
@@ -2749,7 +2749,7 @@ class Crop(BaseStructure):
 
     References:
     - [GEDCOM CROP Structure](https://gedcom.io/terms/v7/CROP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -2759,10 +2759,10 @@ class Crop(BaseStructure):
             key='CROP',
             tag='CROP',
             permitted=['Height', 'Left', 'Top', 'Width'],
-            required=[],
+            required=None,
             single=['Height', 'Left', 'Top', 'Width'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Crop',
         )
@@ -2793,7 +2793,7 @@ class Ctry(BaseStructure):
 
     References:
     - [GEDCOM CTRY Structure](https://gedcom.io/terms/v7/CTRY)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -2802,11 +2802,11 @@ class Ctry(BaseStructure):
             subs=None, 
             key='CTRY',
             tag='CTRY',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Ctry',
         )
@@ -2843,7 +2843,7 @@ class DataEvenDate(BaseStructure):
 
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATA-EVEN-DATE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2853,10 +2853,10 @@ class DataEvenDate(BaseStructure):
             key='DATA-EVEN-DATE',
             tag='DATE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date#period',
             class_name='DataEvenDate',
         )
@@ -2945,7 +2945,7 @@ class DataEven(BaseStructure):
 
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/DATA-EVEN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -2955,7 +2955,7 @@ class DataEven(BaseStructure):
             key='DATA-EVEN',
             tag='EVEN',
             permitted=['DataEvenDate', 'Plac'],
-            required=[],
+            required=None,
             single=['DataEvenDate', 'Plac'],
             enum_key='INDI-TITL',
             enum_tags=['CENS', 'NCHI', 'RESI', 'FACT', 'EVEN', 'ADOP', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'EMIG', 'FCOM', 'GRAD', 'IMMI', 'NATU', 'ORDN', 'PROB', 'RETI', 'WILL', 'ANUL', 'DIV', 'DIVF', 'ENGA', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'CAST', 'DSCR', 'EDUC', 'IDNO', 'NATI', 'NMR', 'OCCU', 'PROP', 'RELI', 'SSN', 'TITL'],
@@ -2999,7 +2999,7 @@ class Data(BaseStructure):
 
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/DATA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -3009,10 +3009,10 @@ class Data(BaseStructure):
             key='DATA',
             tag='DATA',
             permitted=['Agnc', 'DataEven', 'Note', 'Snote'],
-            required=[],
+            required=None,
             single=['Agnc'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Data',
         )
@@ -3052,7 +3052,7 @@ class DateExact(BaseStructure):
 
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE-exact)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3062,10 +3062,10 @@ class DateExact(BaseStructure):
             key='DATE-exact',
             tag='DATE',
             permitted=['Time'],
-            required=[],
+            required=None,
             single=['Time'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date#exact',
             class_name='DateExact',
         )
@@ -3187,7 +3187,7 @@ class Date(BaseStructure):
 
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/DATE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3197,10 +3197,10 @@ class Date(BaseStructure):
             key='DATE',
             tag='DATE',
             permitted=['Phrase', 'Time'],
-            required=[],
+            required=None,
             single=['Phrase', 'Time'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date',
             class_name='Date',
         )
@@ -3219,7 +3219,7 @@ class Deat(BaseStructure):
     GEDCOM Specification:
     > - Death
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - death
     > - Mortal life terminates.
@@ -3263,7 +3263,7 @@ class Deat(BaseStructure):
 
     References:
     - [GEDCOM DEAT Structure](https://gedcom.io/terms/v7/DEAT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3273,10 +3273,10 @@ class Deat(BaseStructure):
             key='DEAT',
             tag='DEAT',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Deat',
         )
@@ -3308,7 +3308,7 @@ class Desi(BaseStructure):
 
     References:
     - [GEDCOM DESI Structure](https://gedcom.io/terms/v7/DESI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SubmitterXref) -> None:
@@ -3317,11 +3317,11 @@ class Desi(BaseStructure):
             subs=None, 
             key='DESI',
             tag='DESI',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-SUBM>@',
             class_name='Desi',
         )
@@ -3352,7 +3352,7 @@ class Dest(BaseStructure):
 
     References:
     - [GEDCOM DEST Structure](https://gedcom.io/terms/v7/DEST)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -3361,11 +3361,11 @@ class Dest(BaseStructure):
             subs=None, 
             key='DEST',
             tag='DEST',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Dest',
         )
@@ -3384,7 +3384,7 @@ class Div(BaseStructure):
     GEDCOM Specification:
     > - Divorce
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - divorce
     > - Dissolving a marriage through civil action.
@@ -3429,7 +3429,7 @@ class Div(BaseStructure):
 
     References:
     - [GEDCOM DIV Structure](https://gedcom.io/terms/v7/DIV)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3439,10 +3439,10 @@ class Div(BaseStructure):
             key='DIV',
             tag='DIV',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Div',
         )
@@ -3461,7 +3461,7 @@ class Divf(BaseStructure):
     GEDCOM Specification:
     > - Divorce filing
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - divorce filed
     > - Filing for a divorce by a spouse.
@@ -3506,7 +3506,7 @@ class Divf(BaseStructure):
 
     References:
     - [GEDCOM DIVF Structure](https://gedcom.io/terms/v7/DIVF)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3516,10 +3516,10 @@ class Divf(BaseStructure):
             key='DIVF',
             tag='DIVF',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Divf',
         )
@@ -3538,7 +3538,7 @@ class Dscr(BaseStructure):
     GEDCOM Specification:
     > - Description
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - physical description
     > - The physical characteristics of a person.
@@ -3581,7 +3581,7 @@ class Dscr(BaseStructure):
 
     References:
     - [GEDCOM DSCR Structure](https://gedcom.io/terms/v7/DSCR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3591,10 +3591,10 @@ class Dscr(BaseStructure):
             key='DSCR',
             tag='DSCR',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Dscr',
         )
@@ -3613,7 +3613,7 @@ class Educ(BaseStructure):
     GEDCOM Specification:
     > - Education
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - education
     > - Indicator of a level of education attained.
@@ -3656,7 +3656,7 @@ class Educ(BaseStructure):
 
     References:
     - [GEDCOM EDUC Structure](https://gedcom.io/terms/v7/EDUC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3666,10 +3666,10 @@ class Educ(BaseStructure):
             key='EDUC',
             tag='EDUC',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Educ',
         )
@@ -3767,7 +3767,7 @@ class Email(BaseStructure):
 
     References:
     - [GEDCOM EMAIL Structure](https://gedcom.io/terms/v7/EMAIL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -3776,11 +3776,11 @@ class Email(BaseStructure):
             subs=None, 
             key='EMAIL',
             tag='EMAIL',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Email',
         )
@@ -3799,7 +3799,7 @@ class Emig(BaseStructure):
     GEDCOM Specification:
     > - Emigration
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - emigration
     > - Leaving one's homeland with the intent of residing elsewhere.
@@ -3843,7 +3843,7 @@ class Emig(BaseStructure):
 
     References:
     - [GEDCOM EMIG Structure](https://gedcom.io/terms/v7/EMIG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3853,10 +3853,10 @@ class Emig(BaseStructure):
             key='EMIG',
             tag='EMIG',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Emig',
         )
@@ -3875,7 +3875,7 @@ class Endl(BaseStructure):
     GEDCOM Specification:
     > - Endowment, Latter-Day Saint
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     >   See also `LDS_INDIVIDUAL_ORDINANCE`.
     > - endowment
     > - A religious event where an endowment ordinance for an individual was
@@ -3903,7 +3903,7 @@ class Endl(BaseStructure):
 
     References:
     - [GEDCOM ENDL Structure](https://gedcom.io/terms/v7/ENDL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -3913,10 +3913,10 @@ class Endl(BaseStructure):
             key='ENDL',
             tag='ENDL',
             permitted=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'],
-            required=[],
+            required=None,
             single=['Date', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Endl',
         )
@@ -3935,7 +3935,7 @@ class Enga(BaseStructure):
     GEDCOM Specification:
     > - Engagement
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - engagement
     > - Recording or announcing an agreement between 2 people to become married.
@@ -3980,7 +3980,7 @@ class Enga(BaseStructure):
 
     References:
     - [GEDCOM ENGA Structure](https://gedcom.io/terms/v7/ENGA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -3990,10 +3990,10 @@ class Enga(BaseStructure):
             key='ENGA',
             tag='ENGA',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Enga',
         )
@@ -4021,10 +4021,10 @@ class ExidType(BaseStructure):
     >   
     >   Registered URIs are listed in the 
     > - [exid-types
-    >   registry](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#EXID),
+    >   registry](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#EXID),
     >   where fields are
     > - defined using the [YAML file
-    >   format](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html).
+    >   format](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html).
     >   
     >   Additional type URIs can be registered by filing a [GitHub pull request].
     >   
@@ -4039,7 +4039,7 @@ class ExidType(BaseStructure):
 
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/EXID-TYPE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -4048,11 +4048,11 @@ class ExidType(BaseStructure):
             subs=None, 
             key='EXID-TYPE',
             tag='TYPE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='ExidType',
         )
@@ -4108,7 +4108,7 @@ class Exid(BaseStructure):
 
     References:
     - [GEDCOM EXID Structure](https://gedcom.io/terms/v7/EXID)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4118,10 +4118,10 @@ class Exid(BaseStructure):
             key='EXID',
             tag='EXID',
             permitted=['ExidType'],
-            required=[],
+            required=None,
             single=['ExidType'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Exid',
         )
@@ -4140,7 +4140,7 @@ class FamCens(BaseStructure):
     GEDCOM Specification:
     > - Census
     > - An [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     > - census
     > - Periodic count of the population for a designated locality, such as a
     >   national or state census.
@@ -4181,7 +4181,7 @@ class FamCens(BaseStructure):
 
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/FAM-CENS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4191,10 +4191,10 @@ class FamCens(BaseStructure):
             key='FAM-CENS',
             tag='CENS',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='FamCens',
         )
@@ -4250,7 +4250,7 @@ class FamEven(BaseStructure):
 
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/FAM-EVEN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -4263,7 +4263,7 @@ class FamEven(BaseStructure):
             required=['Type'],
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='FamEven',
         )
@@ -4319,7 +4319,7 @@ class FamFact(BaseStructure):
 
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/FAM-FACT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -4332,7 +4332,7 @@ class FamFact(BaseStructure):
             required=['Type'],
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='FamFact',
         )
@@ -4368,7 +4368,7 @@ class FamHusb(BaseStructure):
 
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/FAM-HUSB)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
@@ -4378,10 +4378,10 @@ class FamHusb(BaseStructure):
             key='FAM-HUSB',
             tag='HUSB',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-INDI>@',
             class_name='FamHusb',
         )
@@ -4400,7 +4400,7 @@ class FamNchi(BaseStructure):
     GEDCOM Specification:
     > - Number of children
     > - A [Family
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-attributes).
     >   See also `FAMILY_ATTRIBUTE_STRUCTURE`.
     > - number of children
     > - The number of children that belong to this family.
@@ -4441,7 +4441,7 @@ class FamNchi(BaseStructure):
 
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/FAM-NCHI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int, subs: Any = None) -> None:
@@ -4451,10 +4451,10 @@ class FamNchi(BaseStructure):
             key='FAM-NCHI',
             tag='NCHI',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='FamNchi',
         )
@@ -4473,7 +4473,7 @@ class FamResi(BaseStructure):
     GEDCOM Specification:
     > - Residence
     > - A [Family
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-attributes).
     >   See also `FAMILY_ATTRIBUTE_STRUCTURE`.
     >   
     >   See `https://gedcom.io/terms/v7/INDI-RESI` for comments on the use of payload
@@ -4518,7 +4518,7 @@ class FamResi(BaseStructure):
 
     References:
     - [GEDCOM RESI Structure](https://gedcom.io/terms/v7/FAM-RESI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4528,10 +4528,10 @@ class FamResi(BaseStructure):
             key='FAM-RESI',
             tag='RESI',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='FamResi',
         )
@@ -4567,7 +4567,7 @@ class FamWife(BaseStructure):
 
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/FAM-WIFE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
@@ -4577,10 +4577,10 @@ class FamWife(BaseStructure):
             key='FAM-WIFE',
             tag='WIFE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-INDI>@',
             class_name='FamWife',
         )
@@ -4622,7 +4622,7 @@ class FamcAdop(BaseStructure):
 
     References:
     - [GEDCOM ADOP Structure](https://gedcom.io/terms/v7/FAMC-ADOP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4632,7 +4632,7 @@ class FamcAdop(BaseStructure):
             key='FAMC-ADOP',
             tag='ADOP',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-BOTH',
             enum_tags=['HUSB', 'WIFE', 'BOTH'],
@@ -4678,7 +4678,7 @@ class FamcStat(BaseStructure):
 
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/FAMC-STAT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4688,7 +4688,7 @@ class FamcStat(BaseStructure):
             key='FAMC-STAT',
             tag='STAT',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-PROVEN',
             enum_tags=['CHALLENGED', 'DISPROVEN', 'PROVEN'],
@@ -4723,7 +4723,7 @@ class Famc(BaseStructure):
 
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/FAMC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: FamilyXref) -> None:
@@ -4732,11 +4732,11 @@ class Famc(BaseStructure):
             subs=None, 
             key='FAMC',
             tag='FAMC',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-FAM>@',
             class_name='Famc',
         )
@@ -4774,7 +4774,7 @@ class Fams(BaseStructure):
 
     References:
     - [GEDCOM FAMS Structure](https://gedcom.io/terms/v7/FAMS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
@@ -4784,10 +4784,10 @@ class Fams(BaseStructure):
             key='FAMS',
             tag='FAMS',
             permitted=['Note', 'Snote'],
-            required=[],
-            single=[],
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-FAM>@',
             class_name='Fams',
         )
@@ -4871,7 +4871,7 @@ class Fax(BaseStructure):
 
     References:
     - [GEDCOM FAX Structure](https://gedcom.io/terms/v7/FAX)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -4880,11 +4880,11 @@ class Fax(BaseStructure):
             subs=None, 
             key='FAX',
             tag='FAX',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Fax',
         )
@@ -4903,7 +4903,7 @@ class Fcom(BaseStructure):
     GEDCOM Specification:
     > - First communion
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - first communion
     > - The first act of sharing in the Lord's supper as part of church worship.
@@ -4947,7 +4947,7 @@ class Fcom(BaseStructure):
 
     References:
     - [GEDCOM FCOM Structure](https://gedcom.io/terms/v7/FCOM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -4957,10 +4957,10 @@ class Fcom(BaseStructure):
             key='FCOM',
             tag='FCOM',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Fcom',
         )
@@ -4981,7 +4981,7 @@ class FileTran(BaseStructure):
     >   A type of `TRAN` for external media files. Each
     >   `https://gedcom.io/terms/v7/NOTE-TRAN` must have a `FORM` substructure. See
     > - also `FILE` and the [File Path
-    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path).
+    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#file-path).
     >   
     >   <div class="example">
     >   
@@ -5068,7 +5068,7 @@ class FileTran(BaseStructure):
 
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/FILE-TRAN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -5081,7 +5081,7 @@ class FileTran(BaseStructure):
             required=['Form'],
             single=['Form'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-FilePath',
             class_name='FileTran',
         )
@@ -5100,7 +5100,7 @@ class File(BaseStructure):
     GEDCOM Specification:
     > - File reference
     > - A reference to an external file. See the [File Path
-    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#file-path)
+    >   datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#file-path)
     >   for more details.
 
     Substructures:
@@ -5121,7 +5121,7 @@ class File(BaseStructure):
 
     References:
     - [GEDCOM FILE Structure](https://gedcom.io/terms/v7/FILE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -5134,7 +5134,7 @@ class File(BaseStructure):
             required=['Form'],
             single=['Form', 'Titl'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-FilePath',
             class_name='File',
         )
@@ -5153,7 +5153,7 @@ class Form(BaseStructure):
     GEDCOM Specification:
     > - Format
     > - The [media
-    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
+    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#media-type)
     >    of the file referenced by the superstructure.
 
     Substructures:
@@ -5173,7 +5173,7 @@ class Form(BaseStructure):
 
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/FORM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -5183,10 +5183,10 @@ class Form(BaseStructure):
             key='FORM',
             tag='FORM',
             permitted=['Medi'],
-            required=[],
+            required=None,
             single=['Medi'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/ns/dcat#mediaType',
             class_name='Form',
         )
@@ -5220,7 +5220,7 @@ class GedcVers(BaseStructure):
 
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/GEDC-VERS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -5229,11 +5229,11 @@ class GedcVers(BaseStructure):
             subs=None, 
             key='GEDC-VERS',
             tag='VERS',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='GedcVers',
         )
@@ -5272,7 +5272,7 @@ class Gedc(BaseStructure):
 
     References:
     - [GEDCOM GEDC Structure](https://gedcom.io/terms/v7/GEDC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -5285,7 +5285,7 @@ class Gedc(BaseStructure):
             required=['GedcVers'],
             single=['GedcVers'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Gedc',
         )
@@ -5316,7 +5316,7 @@ class Givn(BaseStructure):
 
     References:
     - [GEDCOM GIVN Structure](https://gedcom.io/terms/v7/GIVN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -5325,11 +5325,11 @@ class Givn(BaseStructure):
             subs=None, 
             key='GIVN',
             tag='GIVN',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Givn',
         )
@@ -5348,7 +5348,7 @@ class Grad(BaseStructure):
     GEDCOM Specification:
     > - Graduation
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - graduation
     > - Awarding educational diplomas or degrees to individuals.
@@ -5392,7 +5392,7 @@ class Grad(BaseStructure):
 
     References:
     - [GEDCOM GRAD Structure](https://gedcom.io/terms/v7/GRAD)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -5402,10 +5402,10 @@ class Grad(BaseStructure):
             key='GRAD',
             tag='GRAD',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Grad',
         )
@@ -5441,7 +5441,7 @@ class HeadDate(BaseStructure):
 
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/HEAD-DATE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -5451,10 +5451,10 @@ class HeadDate(BaseStructure):
             key='HEAD-DATE',
             tag='DATE',
             permitted=['Time'],
-            required=[],
+            required=None,
             single=['Time'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date#exact',
             class_name='HeadDate',
         )
@@ -5508,7 +5508,7 @@ class HeadLang(BaseStructure):
 
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/HEAD-LANG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -5517,11 +5517,11 @@ class HeadLang(BaseStructure):
             subs=None, 
             key='HEAD-LANG',
             tag='LANG',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#Language',
             class_name='HeadLang',
         )
@@ -5551,7 +5551,7 @@ class HeadPlacForm(BaseStructure):
 
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/HEAD-PLAC-FORM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -5560,11 +5560,11 @@ class HeadPlacForm(BaseStructure):
             subs=None, 
             key='HEAD-PLAC-FORM',
             tag='FORM',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-List#Text',
             class_name='HeadPlacForm',
         )
@@ -5600,7 +5600,7 @@ class HeadPlac(BaseStructure):
 
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/HEAD-PLAC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -5613,7 +5613,7 @@ class HeadPlac(BaseStructure):
             required=['HeadPlacForm'],
             single=['HeadPlacForm'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='HeadPlac',
         )
@@ -5653,7 +5653,7 @@ class HeadSourData(BaseStructure):
 
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/HEAD-SOUR-DATA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -5663,10 +5663,10 @@ class HeadSourData(BaseStructure):
             key='HEAD-SOUR-DATA',
             tag='DATA',
             permitted=['Copr', 'DateExact'],
-            required=[],
+            required=None,
             single=['Copr', 'DateExact'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='HeadSourData',
         )
@@ -5708,7 +5708,7 @@ class HeadSour(BaseStructure):
 
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/HEAD-SOUR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -5718,10 +5718,10 @@ class HeadSour(BaseStructure):
             key='HEAD-SOUR',
             tag='SOUR',
             permitted=['Corp', 'HeadSourData', 'Name', 'Vers'],
-            required=[],
+            required=None,
             single=['Corp', 'HeadSourData', 'Name', 'Vers'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='HeadSour',
         )
@@ -5741,7 +5741,7 @@ class Head(BaseStructure):
     > - Header
     >   A pseudo-structure for storing metadata about the document. See 
     > - [The Header and
-    >   Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#the-header)
+    >   Trailer](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#the-header)
     >   for more details.
     >   The header pseudo-structure provides metadata about the entire dataset. A few
     >   substructures of note:
@@ -5749,7 +5749,7 @@ class Head(BaseStructure):
     >   - `GEDC` identifies the specification that this document conforms to. It is
     >     recommended that `GEDC` be the first substructure of the header.
     >   - `SCHMA` gives the meaning of extension tags; see 
-    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#extensions)
     >   for more
     >     details.
     >   - `SOUR` describes the originating software.
@@ -5931,7 +5931,7 @@ class Head(BaseStructure):
 
     References:
     - [GEDCOM HEAD Structure](https://gedcom.io/terms/v7/HEAD)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -5944,7 +5944,7 @@ class Head(BaseStructure):
             required=['Gedc'],
             single=['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Head',
         )
@@ -6008,7 +6008,7 @@ class Height(BaseStructure):
 
     References:
     - [GEDCOM HEIGHT Structure](https://gedcom.io/terms/v7/HEIGHT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int) -> None:
@@ -6017,11 +6017,11 @@ class Height(BaseStructure):
             subs=None, 
             key='HEIGHT',
             tag='HEIGHT',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='Height',
         )
@@ -6071,7 +6071,7 @@ class Husb(BaseStructure):
 
     References:
     - [GEDCOM HUSB Structure](https://gedcom.io/terms/v7/HUSB)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -6084,7 +6084,7 @@ class Husb(BaseStructure):
             required=['Age'],
             single=['Age'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Husb',
         )
@@ -6103,7 +6103,7 @@ class Idno(BaseStructure):
     GEDCOM Specification:
     > - Identification number
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - identifying number
     > - A number or other string assigned to identify a person within some
@@ -6148,7 +6148,7 @@ class Idno(BaseStructure):
 
     References:
     - [GEDCOM IDNO Structure](https://gedcom.io/terms/v7/IDNO)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -6161,7 +6161,7 @@ class Idno(BaseStructure):
             required=['Type'],
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Idno',
         )
@@ -6180,7 +6180,7 @@ class Immi(BaseStructure):
     GEDCOM Specification:
     > - Immigration
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - immigration
     > - Entering into a new locality with the intent of residing there.
@@ -6224,7 +6224,7 @@ class Immi(BaseStructure):
 
     References:
     - [GEDCOM IMMI Structure](https://gedcom.io/terms/v7/IMMI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -6234,10 +6234,10 @@ class Immi(BaseStructure):
             key='IMMI',
             tag='IMMI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Immi',
         )
@@ -6256,7 +6256,7 @@ class IndiCens(BaseStructure):
     GEDCOM Specification:
     > - Census
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - census
     > - Periodic count of the population for a designated locality, such as a
@@ -6297,7 +6297,7 @@ class IndiCens(BaseStructure):
 
     References:
     - [GEDCOM CENS Structure](https://gedcom.io/terms/v7/INDI-CENS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -6307,10 +6307,10 @@ class IndiCens(BaseStructure):
             key='INDI-CENS',
             tag='CENS',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='IndiCens',
         )
@@ -6418,7 +6418,7 @@ class IndiEven(BaseStructure):
 
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/INDI-EVEN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -6431,7 +6431,7 @@ class IndiEven(BaseStructure):
             required=['Type'],
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='IndiEven',
         )
@@ -6519,7 +6519,7 @@ class IndiFact(BaseStructure):
 
     References:
     - [GEDCOM FACT Structure](https://gedcom.io/terms/v7/INDI-FACT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -6532,7 +6532,7 @@ class IndiFact(BaseStructure):
             required=['Type'],
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='IndiFact',
         )
@@ -6573,7 +6573,7 @@ class IndiFamc(BaseStructure):
 
     References:
     - [GEDCOM FAMC Structure](https://gedcom.io/terms/v7/INDI-FAMC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
@@ -6583,10 +6583,10 @@ class IndiFamc(BaseStructure):
             key='INDI-FAMC',
             tag='FAMC',
             permitted=['FamcStat', 'Note', 'Pedi', 'Snote'],
-            required=[],
+            required=None,
             single=['FamcStat', 'Pedi'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-FAM>@',
             class_name='IndiFamc',
         )
@@ -6663,7 +6663,7 @@ class IndiName(BaseStructure):
 
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/INDI-NAME)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -6673,10 +6673,10 @@ class IndiName(BaseStructure):
             key='INDI-NAME',
             tag='NAME',
             permitted=['Givn', 'NameTran', 'NameType', 'Nick', 'Note', 'Npfx', 'Nsfx', 'Snote', 'Sour', 'Spfx', 'Surn'],
-            required=[],
+            required=None,
             single=['NameType'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Name',
             class_name='IndiName',
         )
@@ -6695,7 +6695,7 @@ class IndiNchi(BaseStructure):
     GEDCOM Specification:
     > - Number of children
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - number of children
     > - The number of children that this person is known to be the parent of (all
@@ -6736,7 +6736,7 @@ class IndiNchi(BaseStructure):
 
     References:
     - [GEDCOM NCHI Structure](https://gedcom.io/terms/v7/INDI-NCHI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int, subs: Any = None) -> None:
@@ -6746,10 +6746,10 @@ class IndiNchi(BaseStructure):
             key='INDI-NCHI',
             tag='NCHI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='IndiNchi',
         )
@@ -6768,7 +6768,7 @@ class IndiReli(BaseStructure):
     GEDCOM Specification:
     > - Religion
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - religion
     > - A religious denomination to which a person is affiliated or for which a
@@ -6812,7 +6812,7 @@ class IndiReli(BaseStructure):
 
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/INDI-RELI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -6822,10 +6822,10 @@ class IndiReli(BaseStructure):
             key='INDI-RELI',
             tag='RELI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='IndiReli',
         )
@@ -6844,7 +6844,7 @@ class IndiResi(BaseStructure):
     GEDCOM Specification:
     > - Residence
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     >   
     >   Where possible, the residence should be identified in `PLAC` and/or `ADDR`
@@ -6927,7 +6927,7 @@ class IndiResi(BaseStructure):
 
     References:
     - [GEDCOM RESI Structure](https://gedcom.io/terms/v7/INDI-RESI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -6937,10 +6937,10 @@ class IndiResi(BaseStructure):
             key='INDI-RESI',
             tag='RESI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='IndiResi',
         )
@@ -6959,7 +6959,7 @@ class IndiTitl(BaseStructure):
     GEDCOM Specification:
     > - Title
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - title
     > - A formal designation used by an individual in connection with positions of
@@ -7003,7 +7003,7 @@ class IndiTitl(BaseStructure):
 
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/INDI-TITL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7013,10 +7013,10 @@ class IndiTitl(BaseStructure):
             key='INDI-TITL',
             tag='TITL',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='IndiTitl',
         )
@@ -7035,7 +7035,7 @@ class Inil(BaseStructure):
     GEDCOM Specification:
     > - Initiatory, Latter-Day Saint
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     > - See also `LDS_INDIVIDUAL_ORDINANCE`. Previously, GEDCOM versions 3.0
     >   through 5.3 called this `WAC`; it was not part of 5.4 through 5.5.1.
     >   FamilySearch GEDCOM 7.0 reintroduced it with the name `INIL` for
@@ -7066,7 +7066,7 @@ class Inil(BaseStructure):
 
     References:
     - [GEDCOM INIL Structure](https://gedcom.io/terms/v7/INIL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -7076,10 +7076,10 @@ class Inil(BaseStructure):
             key='INIL',
             tag='INIL',
             permitted=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'],
-            required=[],
+            required=None,
             single=['Date', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Inil',
         )
@@ -7171,7 +7171,7 @@ class Lang(BaseStructure):
 
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/LANG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -7180,11 +7180,11 @@ class Lang(BaseStructure):
             subs=None, 
             key='LANG',
             tag='LANG',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#Language',
             class_name='Lang',
         )
@@ -7258,7 +7258,7 @@ class Lati(BaseStructure):
 
     References:
     - [GEDCOM LATI Structure](https://gedcom.io/terms/v7/LATI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -7267,11 +7267,11 @@ class Lati(BaseStructure):
             subs=None, 
             key='LATI',
             tag='LATI',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Lati',
         )
@@ -7302,7 +7302,7 @@ class Left(BaseStructure):
 
     References:
     - [GEDCOM LEFT Structure](https://gedcom.io/terms/v7/LEFT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int) -> None:
@@ -7311,11 +7311,11 @@ class Left(BaseStructure):
             subs=None, 
             key='LEFT',
             tag='LEFT',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='Left',
         )
@@ -7389,7 +7389,7 @@ class Long(BaseStructure):
 
     References:
     - [GEDCOM LONG Structure](https://gedcom.io/terms/v7/LONG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -7398,11 +7398,11 @@ class Long(BaseStructure):
             subs=None, 
             key='LONG',
             tag='LONG',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Long',
         )
@@ -7462,7 +7462,7 @@ class Map(BaseStructure):
 
     References:
     - [GEDCOM MAP Structure](https://gedcom.io/terms/v7/MAP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -7475,7 +7475,7 @@ class Map(BaseStructure):
             required=['Lati', 'Long'],
             single=['Lati', 'Long'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Map',
         )
@@ -7494,7 +7494,7 @@ class Marb(BaseStructure):
     GEDCOM Specification:
     > - Marriage banns
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - marriage bann
     > - Official public notice given that 2 people intend to marry.
@@ -7539,7 +7539,7 @@ class Marb(BaseStructure):
 
     References:
     - [GEDCOM MARB Structure](https://gedcom.io/terms/v7/MARB)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7549,10 +7549,10 @@ class Marb(BaseStructure):
             key='MARB',
             tag='MARB',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Marb',
         )
@@ -7571,7 +7571,7 @@ class Marc(BaseStructure):
     GEDCOM Specification:
     > - Marriage contract
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - marriage contract
     > - Recording a formal agreement of marriage, including the prenuptial
@@ -7618,7 +7618,7 @@ class Marc(BaseStructure):
 
     References:
     - [GEDCOM MARC Structure](https://gedcom.io/terms/v7/MARC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7628,10 +7628,10 @@ class Marc(BaseStructure):
             key='MARC',
             tag='MARC',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Marc',
         )
@@ -7650,7 +7650,7 @@ class Marl(BaseStructure):
     GEDCOM Specification:
     > - Marriage license
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - marriage license
     > - Obtaining a legal license to marry.
@@ -7695,7 +7695,7 @@ class Marl(BaseStructure):
 
     References:
     - [GEDCOM MARL Structure](https://gedcom.io/terms/v7/MARL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7705,10 +7705,10 @@ class Marl(BaseStructure):
             key='MARL',
             tag='MARL',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Marl',
         )
@@ -7727,7 +7727,7 @@ class Marr(BaseStructure):
     GEDCOM Specification:
     > - Marriage
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - marriage
     > - A legal, common-law, or customary event such as a wedding or marriage
@@ -7773,7 +7773,7 @@ class Marr(BaseStructure):
 
     References:
     - [GEDCOM MARR Structure](https://gedcom.io/terms/v7/MARR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7783,10 +7783,10 @@ class Marr(BaseStructure):
             key='MARR',
             tag='MARR',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Marr',
         )
@@ -7805,7 +7805,7 @@ class Mars(BaseStructure):
     GEDCOM Specification:
     > - Marriage settlement
     > - A [Family
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#family-events).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#family-events).
     >   See also `FAMILY_EVENT_STRUCTURE`.
     > - marriage settlement
     > - Creating an agreement between 2 people contemplating marriage, at which
@@ -7852,7 +7852,7 @@ class Mars(BaseStructure):
 
     References:
     - [GEDCOM MARS Structure](https://gedcom.io/terms/v7/MARS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7862,10 +7862,10 @@ class Mars(BaseStructure):
             key='MARS',
             tag='MARS',
             permitted=['Addr', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Husb', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Wife', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Agnc', 'Caus', 'Date', 'Husb', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type', 'Wife'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Mars',
         )
@@ -7974,7 +7974,7 @@ class Medi(BaseStructure):
 
     References:
     - [GEDCOM MEDI Structure](https://gedcom.io/terms/v7/MEDI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -7984,7 +7984,7 @@ class Medi(BaseStructure):
             key='MEDI',
             tag='MEDI',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-OTHER',
             enum_tags=['AUDIO', 'BOOK', 'CARD', 'ELECTRONIC', 'FICHE', 'FILM', 'MAGAZINE', 'MANUSCRIPT', 'MAP', 'NEWSPAPER', 'PHOTO', 'TOMBSTONE', 'VIDEO', 'OTHER'],
@@ -8006,7 +8006,7 @@ class Mime(BaseStructure):
     GEDCOM Specification:
     > - Media type
     > - Indicates the [media
-    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#media-type)
+    >   type](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#media-type)
     >    of the payload of the superstructure.
     >   
     >   As of version 7.0, only 2 media types are supported by this structure:
@@ -8078,7 +8078,7 @@ class Mime(BaseStructure):
 
     References:
     - [GEDCOM MIME Structure](https://gedcom.io/terms/v7/MIME)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -8087,11 +8087,11 @@ class Mime(BaseStructure):
             subs=None, 
             key='MIME',
             tag='MIME',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/ns/dcat#mediaType',
             class_name='Mime',
         )
@@ -8197,7 +8197,7 @@ class NameTran(BaseStructure):
 
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NAME-TRAN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -8210,7 +8210,7 @@ class NameTran(BaseStructure):
             required=['Lang'],
             single=['Lang'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Name',
             class_name='NameTran',
         )
@@ -8256,7 +8256,7 @@ class NameType(BaseStructure):
 
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/NAME-TYPE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8266,7 +8266,7 @@ class NameType(BaseStructure):
             key='NAME-TYPE',
             tag='TYPE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-OTHER',
             enum_tags=['AKA', 'BIRTH', 'IMMIGRANT', 'MAIDEN', 'MARRIED', 'PROFESSIONAL', 'OTHER'],
@@ -8301,7 +8301,7 @@ class Name(BaseStructure):
 
     References:
     - [GEDCOM NAME Structure](https://gedcom.io/terms/v7/NAME)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -8310,11 +8310,11 @@ class Name(BaseStructure):
             subs=None, 
             key='NAME',
             tag='NAME',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Name',
         )
@@ -8333,7 +8333,7 @@ class Nati(BaseStructure):
     GEDCOM Specification:
     > - Nationality
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - nationality
     > - An individual's national heritage or origin, or other folk, house, kindred,
@@ -8377,7 +8377,7 @@ class Nati(BaseStructure):
 
     References:
     - [GEDCOM NATI Structure](https://gedcom.io/terms/v7/NATI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8387,10 +8387,10 @@ class Nati(BaseStructure):
             key='NATI',
             tag='NATI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Nati',
         )
@@ -8409,7 +8409,7 @@ class Natu(BaseStructure):
     GEDCOM Specification:
     > - Naturalization
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - naturalization
     > - Obtaining citizenship.
@@ -8453,7 +8453,7 @@ class Natu(BaseStructure):
 
     References:
     - [GEDCOM NATU Structure](https://gedcom.io/terms/v7/NATU)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8463,10 +8463,10 @@ class Natu(BaseStructure):
             key='NATU',
             tag='NATU',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Natu',
         )
@@ -8512,7 +8512,7 @@ class Nick(BaseStructure):
 
     References:
     - [GEDCOM NICK Structure](https://gedcom.io/terms/v7/NICK)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -8521,11 +8521,11 @@ class Nick(BaseStructure):
             subs=None, 
             key='NICK',
             tag='NICK',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Nick',
         )
@@ -8544,7 +8544,7 @@ class Nmr(BaseStructure):
     GEDCOM Specification:
     > - Number of marriages
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - number of marriages
     > - The number of times this person has participated in a family as a spouse or
@@ -8588,7 +8588,7 @@ class Nmr(BaseStructure):
 
     References:
     - [GEDCOM NMR Structure](https://gedcom.io/terms/v7/NMR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int, subs: Any = None) -> None:
@@ -8598,10 +8598,10 @@ class Nmr(BaseStructure):
             key='NMR',
             tag='NMR',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='Nmr',
         )
@@ -8638,7 +8638,7 @@ class NoDate(BaseStructure):
 
     References:
     - [GEDCOM DATE Structure](https://gedcom.io/terms/v7/NO-DATE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8648,10 +8648,10 @@ class NoDate(BaseStructure):
             key='NO-DATE',
             tag='DATE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date#period',
             class_name='NoDate',
         )
@@ -8754,7 +8754,7 @@ class No(BaseStructure):
 
     References:
     - [GEDCOM NO Structure](https://gedcom.io/terms/v7/NO)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8764,7 +8764,7 @@ class No(BaseStructure):
             key='NO',
             tag='NO',
             permitted=['NoDate', 'Note', 'Snote', 'Sour'],
-            required=[],
+            required=None,
             single=['NoDate'],
             enum_key='MARS',
             enum_tags=['CENS', 'ADOP', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'EMIG', 'FCOM', 'GRAD', 'IMMI', 'NATU', 'ORDN', 'PROB', 'RETI', 'WILL', 'ANUL', 'DIV', 'DIVF', 'ENGA', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS'],
@@ -8880,7 +8880,7 @@ class NoteTran(BaseStructure):
 
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/NOTE-TRAN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -8890,10 +8890,10 @@ class NoteTran(BaseStructure):
             key='NOTE-TRAN',
             tag='TRAN',
             permitted=['Lang', 'Mime'],
-            required=[],
+            required=None,
             single=['Lang', 'Mime'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='NoteTran',
         )
@@ -9011,7 +9011,7 @@ class Note(BaseStructure):
 
     References:
     - [GEDCOM NOTE Structure](https://gedcom.io/terms/v7/NOTE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -9021,10 +9021,10 @@ class Note(BaseStructure):
             key='NOTE',
             tag='NOTE',
             permitted=['Lang', 'Mime', 'NoteTran', 'Sour'],
-            required=[],
+            required=None,
             single=['Lang', 'Mime'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Note',
         )
@@ -9056,7 +9056,7 @@ class Npfx(BaseStructure):
 
     References:
     - [GEDCOM NPFX Structure](https://gedcom.io/terms/v7/NPFX)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9065,11 +9065,11 @@ class Npfx(BaseStructure):
             subs=None, 
             key='NPFX',
             tag='NPFX',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Npfx',
         )
@@ -9101,7 +9101,7 @@ class Nsfx(BaseStructure):
 
     References:
     - [GEDCOM NSFX Structure](https://gedcom.io/terms/v7/NSFX)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9110,11 +9110,11 @@ class Nsfx(BaseStructure):
             subs=None, 
             key='NSFX',
             tag='NSFX',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Nsfx',
         )
@@ -9214,7 +9214,7 @@ class Obje(BaseStructure):
 
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/OBJE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: MultimediaXref, subs: Any = None) -> None:
@@ -9224,10 +9224,10 @@ class Obje(BaseStructure):
             key='OBJE',
             tag='OBJE',
             permitted=['Crop', 'Titl'],
-            required=[],
+            required=None,
             single=['Crop', 'Titl'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-OBJE>@',
             class_name='Obje',
         )
@@ -9246,7 +9246,7 @@ class Occu(BaseStructure):
     GEDCOM Specification:
     > - Occupation
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - occupation
     > - The type of work or profession of an individual.
@@ -9289,7 +9289,7 @@ class Occu(BaseStructure):
 
     References:
     - [GEDCOM OCCU Structure](https://gedcom.io/terms/v7/OCCU)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -9299,10 +9299,10 @@ class Occu(BaseStructure):
             key='OCCU',
             tag='OCCU',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Occu',
         )
@@ -9370,7 +9370,7 @@ class OrdStat(BaseStructure):
 
     References:
     - [GEDCOM STAT Structure](https://gedcom.io/terms/v7/ord-STAT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -9402,7 +9402,7 @@ class Ordn(BaseStructure):
     GEDCOM Specification:
     > - Ordination
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - ordination
     > - Receiving authority to act in religious matters.
@@ -9446,7 +9446,7 @@ class Ordn(BaseStructure):
 
     References:
     - [GEDCOM ORDN Structure](https://gedcom.io/terms/v7/ORDN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -9456,10 +9456,10 @@ class Ordn(BaseStructure):
             key='ORDN',
             tag='ORDN',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Ordn',
         )
@@ -9552,7 +9552,7 @@ class Page(BaseStructure):
 
     References:
     - [GEDCOM PAGE Structure](https://gedcom.io/terms/v7/PAGE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9561,11 +9561,11 @@ class Page(BaseStructure):
             subs=None, 
             key='PAGE',
             tag='PAGE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Page',
         )
@@ -9619,7 +9619,7 @@ class Pedi(BaseStructure):
 
     References:
     - [GEDCOM PEDI Structure](https://gedcom.io/terms/v7/PEDI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -9629,7 +9629,7 @@ class Pedi(BaseStructure):
             key='PEDI',
             tag='PEDI',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-OTHER',
             enum_tags=['ADOPTED', 'BIRTH', 'FOSTER', 'SEALING', 'OTHER'],
@@ -9725,7 +9725,7 @@ class Phon(BaseStructure):
 
     References:
     - [GEDCOM PHON Structure](https://gedcom.io/terms/v7/PHON)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9734,11 +9734,11 @@ class Phon(BaseStructure):
             subs=None, 
             key='PHON',
             tag='PHON',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Phon',
         )
@@ -9919,7 +9919,7 @@ class Phrase(BaseStructure):
 
     References:
     - [GEDCOM PHRASE Structure](https://gedcom.io/terms/v7/PHRASE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9928,11 +9928,11 @@ class Phrase(BaseStructure):
             subs=None, 
             key='PHRASE',
             tag='PHRASE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Phrase',
         )
@@ -9987,7 +9987,7 @@ class PlacForm(BaseStructure):
 
     References:
     - [GEDCOM FORM Structure](https://gedcom.io/terms/v7/PLAC-FORM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -9996,11 +9996,11 @@ class PlacForm(BaseStructure):
             subs=None, 
             key='PLAC-FORM',
             tag='FORM',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-List#Text',
             class_name='PlacForm',
         )
@@ -10099,7 +10099,7 @@ class PlacTran(BaseStructure):
 
     References:
     - [GEDCOM TRAN Structure](https://gedcom.io/terms/v7/PLAC-TRAN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any) -> None:
@@ -10112,7 +10112,7 @@ class PlacTran(BaseStructure):
             required=['Lang'],
             single=['Lang'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-List#Text',
             class_name='PlacTran',
         )
@@ -10131,7 +10131,7 @@ class Plac(BaseStructure):
     GEDCOM Specification:
     > - Place
     >   The principal place in which the superstructure's subject occurred, represented
-    >   as a [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
+    >   as a [List](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#list)
     >    of jurisdictional entities in a sequence from the lowest to the
     >   highest jurisdiction, where "jurisdiction" includes units in a political,
     >   ecclesiastical, and geographical hierarchies and may include units of any size,
@@ -10304,7 +10304,7 @@ class Plac(BaseStructure):
 
     References:
     - [GEDCOM PLAC Structure](https://gedcom.io/terms/v7/PLAC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -10314,10 +10314,10 @@ class Plac(BaseStructure):
             key='PLAC',
             tag='PLAC',
             permitted=['Exid', 'Lang', 'Map', 'Note', 'PlacForm', 'PlacTran', 'Snote'],
-            required=[],
+            required=None,
             single=['Lang', 'Map', 'PlacForm'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-List#Text',
             class_name='Plac',
         )
@@ -10348,7 +10348,7 @@ class Post(BaseStructure):
 
     References:
     - [GEDCOM POST Structure](https://gedcom.io/terms/v7/POST)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -10357,11 +10357,11 @@ class Post(BaseStructure):
             subs=None, 
             key='POST',
             tag='POST',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Post',
         )
@@ -10380,7 +10380,7 @@ class Prob(BaseStructure):
     GEDCOM Specification:
     > - Probate
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - probate
     > - Judicial determination of the validity of a will. It may indicate several
@@ -10425,7 +10425,7 @@ class Prob(BaseStructure):
 
     References:
     - [GEDCOM PROB Structure](https://gedcom.io/terms/v7/PROB)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -10435,10 +10435,10 @@ class Prob(BaseStructure):
             key='PROB',
             tag='PROB',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Prob',
         )
@@ -10457,7 +10457,7 @@ class Prop(BaseStructure):
     GEDCOM Specification:
     > - Property
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - property
     > - Pertaining to possessions such as real estate or other property of
@@ -10501,7 +10501,7 @@ class Prop(BaseStructure):
 
     References:
     - [GEDCOM PROP Structure](https://gedcom.io/terms/v7/PROP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -10511,10 +10511,10 @@ class Prop(BaseStructure):
             key='PROP',
             tag='PROP',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Prop',
         )
@@ -10552,7 +10552,7 @@ class Publ(BaseStructure):
 
     References:
     - [GEDCOM PUBL Structure](https://gedcom.io/terms/v7/PUBL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -10561,11 +10561,11 @@ class Publ(BaseStructure):
             subs=None, 
             key='PUBL',
             tag='PUBL',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Publ',
         )
@@ -10615,7 +10615,7 @@ class Quay(BaseStructure):
 
     References:
     - [GEDCOM QUAY Structure](https://gedcom.io/terms/v7/QUAY)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -10624,9 +10624,9 @@ class Quay(BaseStructure):
             subs=None, 
             key='QUAY',
             tag='QUAY',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='enum-3',
             enum_tags=['0', '1', '2', '3'],
             payload='https://gedcom.io/terms/v7/type-Enum',
@@ -10753,7 +10753,7 @@ class RecordFam(BaseStructure):
 
     References:
     - [GEDCOM FAM Structure](https://gedcom.io/terms/v7/record-FAM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: FamilyXref, subs: Any = None) -> None:
@@ -10763,10 +10763,10 @@ class RecordFam(BaseStructure):
             key='record-FAM',
             tag='FAM',
             permitted=['Anul', 'Asso', 'Chan', 'Chil', 'Crea', 'Div', 'Divf', 'Enga', 'Exid', 'FamCens', 'FamEven', 'FamFact', 'FamHusb', 'FamNchi', 'FamResi', 'FamWife', 'Marb', 'Marc', 'Marl', 'Marr', 'Mars', 'No', 'Note', 'Obje', 'Refn', 'Resn', 'Slgs', 'Snote', 'Sour', 'Subm', 'Uid'],
-            required=[],
+            required=None,
             single=['Chan', 'Crea', 'FamHusb', 'FamWife', 'Resn'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordFam',
         )
@@ -10845,418 +10845,6 @@ class RecordIndi(BaseStructure):
         2 ROLE GODP
         <BLANKLINE>
 
-        The Maximal 70 file contains four examples of individual records.  Each of these will be
-        created next as examples.  We will need the following cross reference identifiers for
-        these examples plus the imports.  We already have the first two individuals from the
-        previous example.
-        >>> from genedata.build import Genealogy     # To create record cross reference identifiers.
-        >>> import genedata.classes70 as gc           # To access the GEDCOM structures.
-        >>> from genedata.structure import Void      # To represent a void pointer.
-        >>> fam_f1_xref = g.family_xref('F1')        # Family 1 cross reference identifier.
-        >>> fam_f2_xref = g.family_xref('F2')        
-        >>> indi_i3_xref = g.individual_xref('i3')
-        >>> indi_i4_xref = g.individual_xref('i4')
-        >>> obje_o1_xref = g.multimedia_xref('o1')
-        >>> obje_o2_xref = g.multimedia_xref('o2')
-        >>> snote_n1_xref = g.shared_note_xref('n1', '')
-        >>> sour_s1_xref = g.source_xref('s1')
-        >>> sour_s2_xref = g.source_xref('s2')
-        >>> subm_u1_xref = g.submitter_xref('u1')
-        >>> subm_u2_xref = g.submitter_xref('u2')
-
-        The third and fourth individuals are the simplest. So we will start with them.
-        >>> indi_i3 = gc.RecordIndi(indi_i3_xref, gc.Sex('X'))
-
-        >>> indi_i4 = gc.RecordIndi(indi_i4_xref, [gc.Sex('U'), gc.IndiFamc(fam_f1_xref)])
-
-        We can see what the ged file looks like for each as we proceed.
-        >>> print(indi_i3.ged())
-        0 @I3@ INDI
-        1 SEX X
-        <BLANKLINE>
-
-        >>> print(indi_i4.ged())  # Famc is not a substructure of RecordIndi.
-        0 @I4@ INDI
-        1 SEX U
-        1 FAMC @F1@
-        <BLANKLINE>
-
-        The second individual is more detailed.
-        >>> indi_i2 = gc.RecordIndi(indi_i2_xref, [
-        ...     gc.IndiName('Maiden Name', gc.Type('MAIDEN')),
-        ...     gc.IndiName('Married Name', gc.Type('MARRIED')),
-        ...     gc.IndiName('Professional Name', gc.Type('PROFESSIONAL')),
-        ...     gc.Sex('F'),
-        ...     gc.Fams(fam_f1_xref),
-        ... ])
-
-        The first individual contains most of the features.
-        >>> indi_i1 = RecordIndi(indi_i1_xref, [
-        ...     gc.Resn('confidential, locked'),
-        ...     gc.IndiName('Lt. Cmndr. Joseph "John" /de Allen/ jr.', [
-        ...         gc.Type('OTHER', gc.Phrase('Name type phrase')),
-        ...         gc.Npfx('Lt. Cmndr.'),
-        ...         gc.Givn('Joseph'),
-        ...         gc.Nick('John'),
-        ...         gc.Spfx('de'),
-        ...         gc.Surn('Allen'),
-        ...         gc.Nsfx('jr.'),
-        ...         gc.NameTran('npfx John /spfx Doe/ nsfx', [
-        ...             gc.Lang('en-GB'),
-        ...             gc.Npfx('npfx'),
-        ...             gc.Givn('John'),
-        ...             gc.Nick('John'),
-        ...             gc.Spfx('spfx'),
-        ...             gc.Surn('Doe'),
-        ...             gc.Nsfx('nsfx'),
-        ...         ]),
-        ...         gc.NameTran('John /Doe/', gc.Lang('en-CA')),
-        ...         gc.Note('Note text'),
-        ...         gc.Snote(snote_n1_xref),
-        ...         gc.Snote(Void.SNOTE),
-        ...         gc.Sour(sour_s1_xref, gc.Page('1')),
-        ...         gc.Sour(sour_s2_xref),
-        ...     ]),
-        ...     gc.IndiName('John /Doe/', gc.Type('birth')),
-        ...     gc.IndiName('Aka', gc.Type('aka')),
-        ...     gc.IndiName('Immigrant Name', gc.Type('immigrant')),
-        ...     gc.Sex('m'),
-        ...     gc.Cast('caste', gc.Type('Caste type')),
-        ...     gc.Desc('Description', [
-        ...         gc.Type('Description type'),
-        ...         gc.Sour(Void.SOUR, gc.Page('entire range')),
-        ...     ]),
-        ...     gc.Educ('Education', gc.Type('Education type')),
-        ...     gc.Idno('ID number', gc.Type('ID number type')),
-        ...     gc.Nati('Nationality', gc.Type('Nationality type')),
-        ...     gc.Nchi(2, gc.Type('nchi type')),
-        ...     gc.Nmr(2, gc.Type('nmr type')),
-        ...     gc.Occu('occu', gc.Type('occu type')),
-        ...     gc.Prop('prop', gc.Type('prop type')),
-        ...     gc.Reli('reli', gc.Type('reli type')),
-        ...     gc.Resi('resi', gc.Type('resi type')),
-        ...     gc.Ssn('ssn', gc.Type('ssn type')),
-        ...     gc.Titl('titl', gc.Type('titl type')),
-        ...     gc.Fact('fact', gc.Type('fact type')),
-        ...     gc.Bapm('', gc.Type('bapm type')),
-        ...     gc.Bapm('Y'),
-        ...     gc.Barm('', gc.Type('barm type')),
-        ...     gc.Basm('', gc.Type('basm type')),
-        ...     gc.Bles('', gc.Type('bles type')),
-        ...     gc.Buri('', [gc.Type('buri type'), gc.DateExact('30 MAR 2022')]),
-        ...     gc.Cens('', gc.Type('cens type')),
-        ...     gc.Chra('', gc.Type('chra type')),
-        ...     gc.Conf('', gc.Type('conf type')),
-        ...     gc.Crem('', gc.Type('crem type')),
-        ...     gc.Deat('', [
-        ...         gc.Type('deat type'), 
-        ...         gc.DateExact('28 MAR 2022'),
-        ...         gc.Plac('Somewhere'),
-        ...         gc.Addr('Address'),
-        ...         gc.Phon('+1 (555) 555-1212'),
-        ...     ]),
-        ... ])
-
-        0 @I1@ INDI
-        1 RESN CONFIDENTIAL, LOCKED
-        1 NAME Lt. Cmndr. Joseph "John" /de Allen/ jr.
-        2 TYPE OTHER
-        3 PHRASE Name type phrase
-        2 NPFX Lt. Cmndr.
-        2 GIVN Joseph
-        2 NICK John
-        2 SPFX de
-        2 SURN Allen
-        2 NSFX jr.
-        2 TRAN npfx John /spfx Doe/ nsfx
-        3 LANG en-GB
-        3 NPFX npfx
-        3 GIVN John
-        3 NICK John
-        3 SPFX spfx
-        3 SURN Doe
-        3 NSFX nsfx
-        2 TRAN John /Doe/
-        3 LANG en-CA
-        2 NOTE Note text
-        2 SNOTE @N1@
-        2 SNOTE @VOID@
-        2 SOUR @S1@
-        3 PAGE 1
-        2 SOUR @S2@
-        1 NAME John /Doe/
-        2 TYPE BIRTH
-        1 NAME Aka
-        2 TYPE AKA
-        1 NAME Immigrant Name
-        2 TYPE IMMIGRANT
-        1 SEX M
-        1 CAST Caste
-        2 TYPE Caste type
-        1 DSCR Description
-        2 TYPE Description type
-        2 SOUR @VOID@
-        3 PAGE Entire source
-        1 EDUC Education
-        2 TYPE Education type
-        1 IDNO ID number
-        2 TYPE ID number type
-        1 NATI Nationality
-        2 TYPE Nationality type
-        1 NCHI 2
-        2 TYPE nchi type
-        1 NMR 2
-        2 TYPE nmr type
-        1 OCCU occu
-        2 TYPE occu type
-        1 PROP prop
-        2 TYPE prop type
-        1 RELI reli
-        2 TYPE reli type
-        1 RESI resi
-        2 TYPE resi type
-        1 SSN ssn
-        2 TYPE ssn type
-        1 TITL titl
-        2 TYPE titl type
-        1 FACT fact
-        2 TYPE fact type
-        1 BAPM
-        2 TYPE bapm type
-        1 BAPM Y
-        1 BARM
-        2 TYPE barm type
-        1 BASM
-        2 TYPE basm type
-        1 BLES
-        2 TYPE bles type
-        1 BURI
-        2 TYPE buri type
-        2 DATE 30 MAR 2022
-        1 CENS
-        2 TYPE cens type
-        1 CHRA
-        2 TYPE chra type
-        1 CONF
-        2 TYPE conf type
-        1 CREM
-        2 TYPE crem type
-        1 DEAT
-        2 TYPE deat type
-        2 DATE 28 MAR 2022
-        2 PLAC Somewhere
-        2 ADDR Address
-        2 PHON +1 (555) 555-1212
-        2 PHON +1 (555) 555-1234
-        2 EMAIL GEDCOM@FamilySearch.org
-        2 EMAIL GEDCOM@example.com
-        2 FAX +1 (555) 555-1212
-        2 FAX +1 (555) 555-1234
-        2 WWW http://gedcom.io
-        2 WWW http://gedcom.info
-        2 AGNC Agency
-        2 RELI Religion
-        2 CAUS Cause of death
-        2 RESN CONFIDENTIAL, LOCKED
-        2 SDATE 28 MAR 2022
-        3 TIME 16:47
-        3 PHRASE sdate phrase
-        2 ASSO @I3@
-        3 ROLE CHIL
-        2 ASSO @VOID@
-        3 ROLE PARENT
-        2 NOTE Note text
-        2 SNOTE @N1@
-        2 SOUR @S1@
-        3 PAGE 1
-        2 SOUR @S2@
-        3 PAGE 2
-        2 OBJE @O1@
-        2 OBJE @O2@
-        2 UID 82092878-6f4f-4bca-ad59-d1ae87c5e521
-        2 UID daf4b8c0-4141-42c4-bec8-01d1d818dfaf
-        1 EMIG
-        2 TYPE emig type
-        1 FCOM
-        2 TYPE fcom type
-        1 GRAD
-        2 TYPE grad type
-        1 IMMI
-        2 TYPE immi type
-        1 NATU
-        2 TYPE natu type
-        1 ORDN
-        2 TYPE ordn type
-        1 PROB
-        2 TYPE prob type
-        1 RETI
-        2 TYPE reti type
-        1 WILL
-        2 TYPE will type
-        1 ADOP
-        2 TYPE adop type
-        2 FAMC @VOID@
-        3 ADOP BOTH
-        4 PHRASE Adoption phrase
-        1 ADOP
-        2 FAMC @VOID@
-        3 ADOP HUSB
-        1 ADOP
-        2 FAMC @VOID@
-        3 ADOP WIFE
-        1 BIRT
-        2 TYPE birth type
-        2 DATE 1 JAN 2000
-        1 CHR
-        2 TYPE chr type
-        2 DATE 9 JAN 2000
-        2 AGE 8d
-        3 PHRASE Age phrase
-        1 EVEN Event
-        2 TYPE Event type
-        1 NO NATU
-        2 DATE FROM 1700 TO 1800
-        3 PHRASE No date phrase
-        2 NOTE Note text
-        2 SNOTE @N1@
-        2 SOUR @S1@
-        3 PAGE 1
-        2 SOUR @S1@
-        3 PAGE 2
-        1 NO EMIG
-        1 BAPL
-        2 STAT STILLBORN
-        3 DATE 27 MAR 2022
-        1 BAPL
-        2 STAT SUBMITTED
-        3 DATE 27 MAR 2022
-        1 BAPL
-        2 DATE 27 MAR 2022
-        1 CONL
-        2 STAT INFANT
-        3 DATE 27 MAR 2022
-        1 CONL
-        2 DATE 27 MAR 2022
-        1 ENDL
-        2 STAT CHILD
-        3 DATE 27 MAR 2022
-        1 ENDL
-        2 DATE 27 MAR 2022
-        1 INIL
-        2 STAT EXCLUDED
-        3 DATE 27 MAR 2022
-        1 INIL
-        2 DATE 27 MAR 2022
-        1 SLGC
-        2 DATE 27 MAR 2022
-        3 TIME 15:47
-        3 PHRASE Afternoon
-        2 TEMP SLAKE
-        2 FAMC @VOID@
-        1 SLGC
-        2 PLAC Place
-        2 STAT BIC
-        3 DATE 27 MAR 2022
-        4 TIME 15:48
-        2 NOTE Note text
-        2 SNOTE @N1@
-        2 SOUR @S1@
-        3 PAGE 1
-        2 SOUR @S2@
-        3 PAGE 2
-        2 FAMC @VOID@
-        1 SLGC
-        2 FAMC @F2@
-        1 FAMC @VOID@
-        2 PEDI OTHER
-        3 PHRASE Other type
-        2 STAT CHALLENGED
-        3 PHRASE Phrase
-        1 FAMC @VOID@
-        2 PEDI FOSTER
-        1 FAMC @VOID@
-        2 PEDI SEALING
-        1 FAMC @F2@
-        2 PEDI ADOPTED
-        2 STAT PROVEN
-        1 FAMC @F2@
-        2 PEDI BIRTH
-        2 STAT DISPROVEN
-        1 FAMS @VOID@
-        2 NOTE Note text
-        2 SNOTE @N1@
-        1 FAMS @F1@
-        1 SUBM @U1@
-        1 SUBM @U2@
-        1 ASSO @VOID@
-        2 PHRASE Mr Stockdale
-        2 ROLE FRIEND
-        1 ASSO @VOID@
-        2 ROLE NGHBR
-        1 ASSO @VOID@
-        2 ROLE FATH
-        1 ASSO @VOID@
-        2 ROLE GODP
-        1 ASSO @VOID@
-        2 ROLE HUSB
-        1 ASSO @VOID@
-        2 ROLE MOTH
-        1 ASSO @VOID@
-        2 ROLE MULTIPLE
-        1 ASSO @VOID@
-        2 ROLE SPOU
-        1 ASSO @VOID@
-        2 ROLE WIFE
-        1 ALIA @VOID@
-        1 ALIA @I3@
-        2 PHRASE Alias
-        1 ANCI @U1@
-        1 ANCI @VOID@
-        1 DESI @U1@
-        1 DESI @VOID@
-        1 REFN 1
-        2 TYPE User-generated identifier
-        1 REFN 10
-        2 TYPE User-generated identifier
-        1 UID 3d75b5eb-36e9-40b3-b79f-f088b5c18595
-        1 UID cb49c361-7124-447e-b587-4c6d36e51825
-        1 EXID 123
-        2 TYPE http://example.com
-        1 EXID 456
-        2 TYPE http://example.com
-        1 NOTE me@example.com is an example email address.
-        2 CONT @@me and @I are example social media handles.
-        2 CONT @@@@@ has four @ characters where only the first is escaped.
-        1 SNOTE @N1@
-        1 SOUR @S1@
-        2 PAGE 1
-        2 QUAY 3
-        1 SOUR @S2@
-        1 OBJE @O1@
-        1 OBJE @O2@
-        1 CHAN
-        2 DATE 27 MAR 2022
-        3 TIME 08:56
-        2 NOTE Change date note 1
-        2 NOTE Change date note 2
-        1 CREA
-        2 DATE 27 MAR 2022
-        3 TIME 08:55
-        0 @I2@ INDI
-        1 NAME Maiden Name
-        2 TYPE MAIDEN
-        1 NAME Married Name
-        2 TYPE MARRIED
-        1 NAME Professional Name
-        2 TYPE PROFESSIONAL
-        1 SEX F
-        1 FAMS @F1@
-        0 @I3@ INDI
-        1 SEX X
-        0 @I4@ INDI
-        1 SEX U
-        1 FAMC @F1@
-
     Substructures:
     |               Specification                | Quantity | Required |  Class Name  |
     | ------------------------------------------ | -------- | -------- | ------------ |
@@ -11329,7 +10917,7 @@ class RecordIndi(BaseStructure):
 
     References:
     - [GEDCOM INDI Structure](https://gedcom.io/terms/v7/record-INDI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: IndividualXref, subs: Any = None) -> None:
@@ -11339,10 +10927,10 @@ class RecordIndi(BaseStructure):
             key='record-INDI',
             tag='INDI',
             permitted=['Adop', 'Alia', 'Anci', 'Asso', 'Bapl', 'Bapm', 'Barm', 'Basm', 'Birt', 'Bles', 'Buri', 'Cast', 'Chan', 'Chr', 'Chra', 'Conf', 'Conl', 'Crea', 'Crem', 'Deat', 'Desi', 'Dscr', 'Educ', 'Emig', 'Endl', 'Exid', 'Fams', 'Fcom', 'Grad', 'Idno', 'Immi', 'IndiCens', 'IndiEven', 'IndiFact', 'IndiFamc', 'IndiName', 'IndiNchi', 'IndiReli', 'IndiResi', 'IndiTitl', 'Inil', 'Nati', 'Natu', 'Nmr', 'No', 'Note', 'Obje', 'Occu', 'Ordn', 'Prob', 'Prop', 'Refn', 'Resn', 'Reti', 'Sex', 'Slgc', 'Snote', 'Sour', 'Ssn', 'Subm', 'Uid', 'Will'],
-            required=[],
+            required=None,
             single=['Chan', 'Crea', 'Resn', 'Sex'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordIndi',
         )
@@ -11392,7 +10980,7 @@ class RecordObje(BaseStructure):
 
     References:
     - [GEDCOM OBJE Structure](https://gedcom.io/terms/v7/record-OBJE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: MultimediaXref, subs: Any) -> None:
@@ -11405,7 +10993,7 @@ class RecordObje(BaseStructure):
             required=['File'],
             single=['Chan', 'Crea', 'Resn'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordObje',
         )
@@ -11461,7 +11049,7 @@ class RecordRepo(BaseStructure):
 
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/record-REPO)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: RepositoryXref, subs: Any) -> None:
@@ -11474,7 +11062,7 @@ class RecordRepo(BaseStructure):
             required=['Name'],
             single=['Addr', 'Chan', 'Crea', 'Name'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordRepo',
         )
@@ -11591,7 +11179,7 @@ class RecordSnote(BaseStructure):
 
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/record-SNOTE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SharedNoteXref, subs: Any = None) -> None:
@@ -11601,10 +11189,10 @@ class RecordSnote(BaseStructure):
             key='record-SNOTE',
             tag='SNOTE',
             permitted=['Chan', 'Crea', 'Exid', 'Lang', 'Mime', 'NoteTran', 'Refn', 'Sour', 'Uid'],
-            required=[],
+            required=None,
             single=['Chan', 'Crea', 'Lang', 'Mime'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='RecordSnote',
         )
@@ -11666,7 +11254,7 @@ class RecordSour(BaseStructure):
 
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/record-SOUR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SourceXref, subs: Any = None) -> None:
@@ -11676,10 +11264,10 @@ class RecordSour(BaseStructure):
             key='record-SOUR',
             tag='SOUR',
             permitted=['Abbr', 'Auth', 'Chan', 'Crea', 'Data', 'Exid', 'Note', 'Obje', 'Publ', 'Refn', 'Repo', 'Snote', 'Text', 'Titl', 'Uid'],
-            required=[],
+            required=None,
             single=['Abbr', 'Auth', 'Chan', 'Crea', 'Data', 'Publ', 'Text', 'Titl'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordSour',
         )
@@ -11730,7 +11318,7 @@ class RecordSubm(BaseStructure):
 
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/record-SUBM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SubmitterXref, subs: Any) -> None:
@@ -11743,7 +11331,7 @@ class RecordSubm(BaseStructure):
             required=['Name'],
             single=['Addr', 'Chan', 'Crea', 'Name'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='RecordSubm',
         )
@@ -11793,7 +11381,7 @@ class Refn(BaseStructure):
 
     References:
     - [GEDCOM REFN Structure](https://gedcom.io/terms/v7/REFN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -11803,10 +11391,10 @@ class Refn(BaseStructure):
             key='REFN',
             tag='REFN',
             permitted=['Type'],
-            required=[],
+            required=None,
             single=['Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Refn',
         )
@@ -11887,7 +11475,7 @@ class Reli(BaseStructure):
 
     References:
     - [GEDCOM RELI Structure](https://gedcom.io/terms/v7/RELI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -11896,11 +11484,11 @@ class Reli(BaseStructure):
             subs=None, 
             key='RELI',
             tag='RELI',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Reli',
         )
@@ -11944,7 +11532,7 @@ class Repo(BaseStructure):
 
     References:
     - [GEDCOM REPO Structure](https://gedcom.io/terms/v7/REPO)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: RepositoryXref, subs: Any = None) -> None:
@@ -11954,10 +11542,10 @@ class Repo(BaseStructure):
             key='REPO',
             tag='REPO',
             permitted=['Caln', 'Note', 'Snote'],
-            required=[],
-            single=[],
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-REPO>@',
             class_name='Repo',
         )
@@ -11975,7 +11563,7 @@ class Resn(BaseStructure):
     
     GEDCOM Specification:
     > - Restriction
-    >   A [List](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#list)
+    >   A [List](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#list)
     >    of enumerated values from set
     >   `https://gedcom.io/terms/v7/enumset-RESN` signifying access to information may
     >   be denied or otherwise restricted.
@@ -11987,7 +11575,7 @@ class Resn(BaseStructure):
     >   structure and its superstructure being removed from the export. Such removal
     >   must abide by some constraints: see 
     > - [Removing
-    >   data](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#removing-data)
+    >   data](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#removing-data)
     >   for more details.
     >   
     >   This is metadata about the structure itself, not data about its subject.
@@ -12077,7 +11665,7 @@ class Resn(BaseStructure):
 
     References:
     - [GEDCOM RESN Structure](https://gedcom.io/terms/v7/RESN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -12086,9 +11674,9 @@ class Resn(BaseStructure):
             subs=None, 
             key='RESN',
             tag='RESN',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='enum-PRIVACY',
             enum_tags=['CONFIDENTIAL', 'LOCKED', 'PRIVACY'],
             payload='https://gedcom.io/terms/v7/type-List#Enum',
@@ -12109,7 +11697,7 @@ class Reti(BaseStructure):
     GEDCOM Specification:
     > - Retirement
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - retirement
     > - Exiting an occupational relationship with an employer after a qualifying
@@ -12154,7 +11742,7 @@ class Reti(BaseStructure):
 
     References:
     - [GEDCOM RETI Structure](https://gedcom.io/terms/v7/RETI)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -12164,10 +11752,10 @@ class Reti(BaseStructure):
             key='RETI',
             tag='RETI',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Reti',
         )
@@ -12325,7 +11913,7 @@ class Role(BaseStructure):
 
     References:
     - [GEDCOM ROLE Structure](https://gedcom.io/terms/v7/ROLE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -12335,7 +11923,7 @@ class Role(BaseStructure):
             key='ROLE',
             tag='ROLE',
             permitted=['Phrase'],
-            required=[],
+            required=None,
             single=['Phrase'],
             enum_key='enum-OTHER',
             enum_tags=['CHIL', 'CLERGY', 'FATH', 'FRIEND', 'GODP', 'HUSB', 'MOTH', 'MULTIPLE', 'NGHBR', 'OFFICIATOR', 'PARENT', 'SPOU', 'WIFE', 'WITN', 'OTHER'],
@@ -12358,7 +11946,7 @@ class Schma(BaseStructure):
     > - Extension schema
     > - A container for storing meta-information about the extension tags used in
     >   this document. See
-    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#extensions)
     >   for more details.
 
     Substructures:
@@ -12376,7 +11964,7 @@ class Schma(BaseStructure):
 
     References:
     - [GEDCOM SCHMA Structure](https://gedcom.io/terms/v7/SCHMA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -12386,10 +11974,10 @@ class Schma(BaseStructure):
             key='SCHMA',
             tag='SCHMA',
             permitted=['Tag'],
-            required=[],
-            single=[],
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Schma',
         )
@@ -12492,7 +12080,7 @@ class Sdate(BaseStructure):
 
     References:
     - [GEDCOM SDATE Structure](https://gedcom.io/terms/v7/SDATE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -12502,10 +12090,10 @@ class Sdate(BaseStructure):
             key='SDATE',
             tag='SDATE',
             permitted=['Phrase', 'Time'],
-            required=[],
+            required=None,
             single=['Phrase', 'Time'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Date',
             class_name='Sdate',
         )
@@ -12551,7 +12139,7 @@ class Sex(BaseStructure):
 
     References:
     - [GEDCOM SEX Structure](https://gedcom.io/terms/v7/SEX)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -12560,9 +12148,9 @@ class Sex(BaseStructure):
             subs=None, 
             key='SEX',
             tag='SEX',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='enum-U',
             enum_tags=['M', 'F', 'X', 'U'],
             payload='https://gedcom.io/terms/v7/type-Enum',
@@ -12583,7 +12171,7 @@ class Slgc(BaseStructure):
     GEDCOM Specification:
     > - Sealing, child
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     >   See also `LDS_INDIVIDUAL_ORDINANCE`.
     > - sealing child
     > - A religious event pertaining to the sealing of a child to his or her
@@ -12612,7 +12200,7 @@ class Slgc(BaseStructure):
 
     References:
     - [GEDCOM SLGC Structure](https://gedcom.io/terms/v7/SLGC)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -12625,7 +12213,7 @@ class Slgc(BaseStructure):
             required=['Famc'],
             single=['Date', 'Famc', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Slgc',
         )
@@ -12644,7 +12232,7 @@ class Slgs(BaseStructure):
     GEDCOM Specification:
     > - Sealing, spouse
     > - A [Latter-Day Saint
-    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#latter-day-saint-ordinances).
+    >   Ordinance](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#latter-day-saint-ordinances).
     >   See also `LDS_SPOUSE_SEALING`.
     > - Ordinances performed by members of The Church of Jesus Christ of Latter-day
     >   Saints; see [Latter-day Saint Ordinances] for descriptions of each
@@ -12675,7 +12263,7 @@ class Slgs(BaseStructure):
 
     References:
     - [GEDCOM SLGS Structure](https://gedcom.io/terms/v7/SLGS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -12685,10 +12273,10 @@ class Slgs(BaseStructure):
             key='SLGS',
             tag='SLGS',
             permitted=['Date', 'Note', 'Plac', 'Snote', 'Sour', 'Temp', 'OrdStat'],
-            required=[],
+            required=None,
             single=['Date', 'Plac', 'Temp', 'OrdStat'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Slgs',
         )
@@ -12792,7 +12380,7 @@ class Snote(BaseStructure):
 
     References:
     - [GEDCOM SNOTE Structure](https://gedcom.io/terms/v7/SNOTE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SharedNoteXref) -> None:
@@ -12801,11 +12389,11 @@ class Snote(BaseStructure):
             subs=None, 
             key='SNOTE',
             tag='SNOTE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-SNOTE>@',
             class_name='Snote',
         )
@@ -12841,7 +12429,7 @@ class SourData(BaseStructure):
 
     References:
     - [GEDCOM DATA Structure](https://gedcom.io/terms/v7/SOUR-DATA)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any = None) -> None:
@@ -12851,10 +12439,10 @@ class SourData(BaseStructure):
             key='SOUR-DATA',
             tag='DATA',
             permitted=['Date', 'Text'],
-            required=[],
+            required=None,
             single=['Date'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='SourData',
         )
@@ -12944,7 +12532,7 @@ class SourEven(BaseStructure):
 
     References:
     - [GEDCOM EVEN Structure](https://gedcom.io/terms/v7/SOUR-EVEN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -12954,7 +12542,7 @@ class SourEven(BaseStructure):
             key='SOUR-EVEN',
             tag='EVEN',
             permitted=['Phrase', 'Role'],
-            required=[],
+            required=None,
             single=['Phrase', 'Role'],
             enum_key='INDI-TITL',
             enum_tags=['CENS', 'NCHI', 'RESI', 'FACT', 'EVEN', 'ADOP', 'BAPM', 'BARM', 'BASM', 'BIRT', 'BLES', 'BURI', 'CHR', 'CHRA', 'CONF', 'CREM', 'DEAT', 'EMIG', 'FCOM', 'GRAD', 'IMMI', 'NATU', 'ORDN', 'PROB', 'RETI', 'WILL', 'ANUL', 'DIV', 'DIVF', 'ENGA', 'MARB', 'MARC', 'MARL', 'MARR', 'MARS', 'CAST', 'DSCR', 'EDUC', 'IDNO', 'NATI', 'NMR', 'OCCU', 'PROP', 'RELI', 'SSN', 'TITL'],
@@ -13085,7 +12673,7 @@ class Sour(BaseStructure):
 
     References:
     - [GEDCOM SOUR Structure](https://gedcom.io/terms/v7/SOUR)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SourceXref, subs: Any = None) -> None:
@@ -13095,10 +12683,10 @@ class Sour(BaseStructure):
             key='SOUR',
             tag='SOUR',
             permitted=['Note', 'Obje', 'Page', 'Quay', 'Snote', 'SourData', 'SourEven'],
-            required=[],
+            required=None,
             single=['Page', 'Quay', 'SourData', 'SourEven'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-SOUR>@',
             class_name='Sour',
         )
@@ -13129,7 +12717,7 @@ class Spfx(BaseStructure):
 
     References:
     - [GEDCOM SPFX Structure](https://gedcom.io/terms/v7/SPFX)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13138,11 +12726,11 @@ class Spfx(BaseStructure):
             subs=None, 
             key='SPFX',
             tag='SPFX',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Spfx',
         )
@@ -13161,7 +12749,7 @@ class Ssn(BaseStructure):
     GEDCOM Specification:
     > - Social security number
     > - An [Individual
-    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#individual-attributes).
+    >   Attribute](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#individual-attributes).
     >   See also `INDIVIDUAL_ATTRIBUTE_STRUCTURE`.
     > - social security number
     > - A number assigned by the United States Social Security Administration, used
@@ -13205,7 +12793,7 @@ class Ssn(BaseStructure):
 
     References:
     - [GEDCOM SSN Structure](https://gedcom.io/terms/v7/SSN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -13215,10 +12803,10 @@ class Ssn(BaseStructure):
             key='SSN',
             tag='SSN',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Ssn',
         )
@@ -13250,7 +12838,7 @@ class Stae(BaseStructure):
 
     References:
     - [GEDCOM STAE Structure](https://gedcom.io/terms/v7/STAE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13259,11 +12847,11 @@ class Stae(BaseStructure):
             subs=None, 
             key='STAE',
             tag='STAE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Stae',
         )
@@ -13297,7 +12885,7 @@ class SubmLang(BaseStructure):
 
     References:
     - [GEDCOM LANG Structure](https://gedcom.io/terms/v7/SUBM-LANG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13306,11 +12894,11 @@ class SubmLang(BaseStructure):
             subs=None, 
             key='SUBM-LANG',
             tag='LANG',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#Language',
             class_name='SubmLang',
         )
@@ -13343,7 +12931,7 @@ class Subm(BaseStructure):
 
     References:
     - [GEDCOM SUBM Structure](https://gedcom.io/terms/v7/SUBM)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: SubmitterXref) -> None:
@@ -13352,11 +12940,11 @@ class Subm(BaseStructure):
             subs=None, 
             key='SUBM',
             tag='SUBM',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='@<https://gedcom.io/terms/v7/record-SUBM>@',
             class_name='Subm',
         )
@@ -13387,7 +12975,7 @@ class Surn(BaseStructure):
 
     References:
     - [GEDCOM SURN Structure](https://gedcom.io/terms/v7/SURN)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13396,11 +12984,11 @@ class Surn(BaseStructure):
             subs=None, 
             key='SURN',
             tag='SURN',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Surn',
         )
@@ -13419,7 +13007,7 @@ class Tag(BaseStructure):
     GEDCOM Specification:
     > - Extension tag
     >   Information relating to a single extension tag as used in this document. See 
-    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
+    > - [Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#extensions)
     >   for more details.
 
     Superstructures:
@@ -13432,7 +13020,7 @@ class Tag(BaseStructure):
 
     References:
     - [GEDCOM TAG Structure](https://gedcom.io/terms/v7/TAG)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13441,11 +13029,11 @@ class Tag(BaseStructure):
             subs=None, 
             key='TAG',
             tag='TAG',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Tag',
         )
@@ -13483,7 +13071,7 @@ class Temp(BaseStructure):
 
     References:
     - [GEDCOM TEMP Structure](https://gedcom.io/terms/v7/TEMP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13492,11 +13080,11 @@ class Temp(BaseStructure):
             subs=None, 
             key='TEMP',
             tag='TEMP',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Temp',
         )
@@ -13538,7 +13126,7 @@ class Text(BaseStructure):
 
     References:
     - [GEDCOM TEXT Structure](https://gedcom.io/terms/v7/TEXT)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -13548,10 +13136,10 @@ class Text(BaseStructure):
             key='TEXT',
             tag='TEXT',
             permitted=['Lang', 'Mime'],
-            required=[],
+            required=None,
             single=['Lang', 'Mime'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Text',
         )
@@ -13584,7 +13172,7 @@ class Time(BaseStructure):
 
     References:
     - [GEDCOM TIME Structure](https://gedcom.io/terms/v7/TIME)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13593,11 +13181,11 @@ class Time(BaseStructure):
             subs=None, 
             key='TIME',
             tag='TIME',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='https://gedcom.io/terms/v7/type-Time',
             class_name='Time',
         )
@@ -13671,7 +13259,7 @@ class Titl(BaseStructure):
 
     References:
     - [GEDCOM TITL Structure](https://gedcom.io/terms/v7/TITL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13680,11 +13268,11 @@ class Titl(BaseStructure):
             subs=None, 
             key='TITL',
             tag='TITL',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Titl',
         )
@@ -13715,7 +13303,7 @@ class Top(BaseStructure):
 
     References:
     - [GEDCOM TOP Structure](https://gedcom.io/terms/v7/TOP)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int) -> None:
@@ -13724,11 +13312,11 @@ class Top(BaseStructure):
             subs=None, 
             key='TOP',
             tag='TOP',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='Top',
         )
@@ -13865,7 +13453,7 @@ class Type(BaseStructure):
 
     References:
     - [GEDCOM TYPE Structure](https://gedcom.io/terms/v7/TYPE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -13874,11 +13462,11 @@ class Type(BaseStructure):
             subs=None, 
             key='TYPE',
             tag='TYPE',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Type',
         )
@@ -13996,7 +13584,7 @@ class Uid(BaseStructure):
 
     References:
     - [GEDCOM UID Structure](https://gedcom.io/terms/v7/UID)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -14005,11 +13593,11 @@ class Uid(BaseStructure):
             subs=None, 
             key='UID',
             tag='UID',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Uid',
         )
@@ -14040,7 +13628,7 @@ class Vers(BaseStructure):
 
     References:
     - [GEDCOM VERS Structure](https://gedcom.io/terms/v7/VERS)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -14049,11 +13637,11 @@ class Vers(BaseStructure):
             subs=None, 
             key='VERS',
             tag='VERS',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Vers',
         )
@@ -14084,7 +13672,7 @@ class Width(BaseStructure):
 
     References:
     - [GEDCOM WIDTH Structure](https://gedcom.io/terms/v7/WIDTH)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: int) -> None:
@@ -14093,11 +13681,11 @@ class Width(BaseStructure):
             subs=None, 
             key='WIDTH',
             tag='WIDTH',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#nonNegativeInteger',
             class_name='Width',
         )
@@ -14147,7 +13735,7 @@ class Wife(BaseStructure):
 
     References:
     - [GEDCOM WIFE Structure](https://gedcom.io/terms/v7/WIFE)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, subs: Any) -> None:
@@ -14160,7 +13748,7 @@ class Wife(BaseStructure):
             required=['Age'],
             single=['Age'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='None',
             class_name='Wife',
         )
@@ -14179,7 +13767,7 @@ class Will(BaseStructure):
     GEDCOM Specification:
     > - Will
     > - An [Individual
-    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#INDIVIDUAL_EVENT_STRUCTURE).
+    >   Event](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html#INDIVIDUAL_EVENT_STRUCTURE).
     >   See also `INDIVIDUAL_EVENT_STRUCTURE`.
     > - will
     > - A legal document treated as an event, by which a person disposes of his or
@@ -14225,7 +13813,7 @@ class Will(BaseStructure):
 
     References:
     - [GEDCOM WILL Structure](https://gedcom.io/terms/v7/WILL)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str, subs: Any = None) -> None:
@@ -14235,10 +13823,10 @@ class Will(BaseStructure):
             key='WILL',
             tag='WILL',
             permitted=['Addr', 'Age', 'Agnc', 'Asso', 'Caus', 'Date', 'Email', 'Fax', 'Note', 'Obje', 'Phon', 'Plac', 'Reli', 'Resn', 'Sdate', 'Snote', 'Sour', 'Type', 'Uid', 'Www'],
-            required=[],
+            required=None,
             single=['Addr', 'Age', 'Agnc', 'Caus', 'Date', 'Plac', 'Reli', 'Resn', 'Sdate', 'Type'],
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='Y|<NULL>',
             class_name='Will',
         )
@@ -14356,7 +13944,7 @@ class Www(BaseStructure):
 
     References:
     - [GEDCOM WWW Structure](https://gedcom.io/terms/v7/WWW)
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv70.html)
     '''
     
     def __init__(self, value: str) -> None:
@@ -14365,11 +13953,11 @@ class Www(BaseStructure):
             subs=None, 
             key='WWW',
             tag='WWW',
-            permitted=[],
-            required=[],
-            single=[],
+            permitted=None,
+            required=None,
+            single=None,
             enum_key='',
-            enum_tags=[],
+            enum_tags=None,
             payload='http://www.w3.org/2001/XMLSchema#string',
             class_name='Www',
         )

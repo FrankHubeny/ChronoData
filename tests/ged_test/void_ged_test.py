@@ -3,20 +3,22 @@
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
-from genedata.structure import FamilyXref, IndividualXref, Void  # noqa: F401
+from genedata.constants import Default
 from genedata.methods import Util
+from genedata.structure import FamilyXref, IndividualXref, Void  # noqa: F401
+
+ged_version: str = '7.0'
 
 
 def test_void_ged() -> None:
     # Test constructing the remarriage1_ged test data.
     file = Util.read('tests\\ged_test\\voidptr.ged')
-    g = Genealogy('testing')
+    g = Genealogy('testing', version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
 
-    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers('7.0'))) 
 
     indi1 = gc.RecordIndi(
         indi1_xref,
@@ -60,12 +62,12 @@ def test_void_ged() -> None:
 def test_void_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\voidptr.ged')
-    g = Genealogy('testing')
+    g = Genealogy('testing', version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
 
-    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers('7.0'))) 
 
     indi1 = gc.RecordIndi(
         indi1_xref,

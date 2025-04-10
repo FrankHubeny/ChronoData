@@ -24,7 +24,7 @@ def test_phone_bad_country_min() -> None:
 
 def test_phone_bad_country_max() -> None:
     with pytest.raises(ValueError, match=(Msg.PHONE_COUNTRY_CODE.format(
-                    '1001',
+                    '1000',
                     Default.PHONE_COUNTRY_MIN,
                     Default.PHONE_COUNTRY_MAX,
                 )
@@ -74,7 +74,7 @@ def test_phone_bad_line_min() -> None:
                     Default.PHONE_LINE_MAX,
                 )
             )): 
-        Input.phone(1,100,222,10000)
+        Input.phone(1,100,222,0)
 
 def test_phone_bad_line_max() -> None:
     with pytest.raises(ValueError, match=(Msg.PHONE_LINE_CODE.format(
@@ -86,4 +86,4 @@ def test_phone_bad_line_max() -> None:
         Input.phone(1,100,222,10000)
 
 def test_place() -> None:
-    assert Input.place('Chicago', 'Illinis', 'Cook', 'USA') == 'Chicago, Illinois, Cook, USA'
+    assert Input.place('Chicago', 'Illinois', 'Cook', 'USA') == 'Chicago, Illinois, Cook, USA'

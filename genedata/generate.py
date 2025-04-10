@@ -58,7 +58,7 @@ The specifications for this module are from the
         count: int = 0
         lines: str = '__all__ = [    # noqa: RUF022'
         for key in full_structure:
-            if key not in [Default.CONT, Default.TRLR]:
+            if key not in Default.IGNORE:
                 lines = f"{lines}{Default.EOL}{Default.INDENT}'{Names.classname(key)}'{Default.COMMA}"
                 count += 1
         if count == 0:
@@ -246,10 +246,7 @@ from genedata.structure import (
         """Construct the Enumerations section of the documentation."""
         structure: dict[str, Any] = full_structure[key]
         enumeration_values: str = Default.EMPTY
-        if (
-            Default.YAML_ENUMERATION_SET in structure
-            # and structure[Default.YAML_ENUMERATION_SET] != Default.EMPTY
-        ):
+        if Default.YAML_ENUMERATION_SET in structure:
             enum_set_key: str = Names.stem(
                 structure[Default.YAML_ENUMERATION_SET]
             )
@@ -535,16 +532,28 @@ from genedata.structure import (
                 Default.YAML_SUBSTRUCTURES
             ].items():
                 class_name: str = Names.classname(uri)
-                permitted.append(class_name)
-                if Default.YAML_CARDINALITY_REQUIRED in cardinality:
-                    required.append(class_name)
-                if Default.YAML_CARDINALITY_SINGULAR in cardinality:
-                    single.append(class_name)
+                if Names.keyname(uri) not in Default.IGNORE:
+                    permitted.append(class_name)
+                    if Default.YAML_CARDINALITY_REQUIRED in cardinality:
+                        required.append(class_name)
+                    if Default.YAML_CARDINALITY_SINGULAR in cardinality:
+                        single.append(class_name)
         value_arg: str = f', {Default.CODE_VALUE}: {Classes.get_datatype(full_structure[key])}'
         value_init: str = Default.CODE_VALUE
+        required_value: str = str(required)
+        if len(required) == 0:
+            required_value = 'None'
+        single_value: str = str(single)
+        if len(single) == 0:
+            single_value = 'None'
+        enum_tags_value = str(enum_tags)
+        if len(enum_tags) == 0:
+            enum_tags_value = 'None'
+        permitted_value: str = str(permitted)
         if len(permitted) == 0:
             subs_arg: str = Default.EMPTY
             subs_init: str = 'None'
+            permitted_value = 'None'
         else:
             subs_arg = f'{Default.CODE_SUBS}: Any'
             if len(required) == 0:
@@ -575,11 +584,11 @@ from genedata.structure import (
             subs={subs_init}, 
             key='{key}',
             tag='{tag}',
-            permitted={permitted},
-            required={required},
-            single={single},
+            permitted={permitted_value},
+            required={required_value},
+            single={single_value},
             enum_key='{enum_key}',
-            enum_tags={enum_tags},
+            enum_tags={enum_tags_value},
             payload='{full_structure[key][Default.YAML_PAYLOAD]}',
             class_name='{Names.classname(key)}',
         ){deprecation_line}"""
@@ -598,7 +607,7 @@ from genedata.structure import (
         Examples:
             If we have the structure and enumeration set dictionaries constructed in a specs.py file,
             we can use them to build a string that represents the class in the classes module.
-            >>> from genedata.examples import Examples7
+            >>> from genedata.examples import Examples70
             >>> from genedata.generate import Classes
             >>> from genedata.specifications70 import (
             ...     Structure,
@@ -610,7 +619,7 @@ from genedata.structure import (
             ...     Structure,
             ...     EnumerationSet,
             ...     Enumeration,
-            ...     Examples7['MAP'],
+            ...     Examples70['MAP'],
             ... )
 
         Args:
@@ -664,7 +673,7 @@ class {class_name}(BaseStructure):
 
         lines: str = Default.EMPTY
         for key, _structure in full_structure.items():
-            if key not in [Default.CONT, Default.TRLR]:
+            if key not in Default.IGNORE:
                 examples: str = Default.EMPTY
                 if key in full_examples:
                     examples = full_examples[key]
@@ -700,7 +709,7 @@ class {class_name}(BaseStructure):
         Example:
             This example constructs a string that could be used for a classes module
             using a specification module that has already been constructed.
-            >>> from genedata.examples import Examples7
+            >>> from genedata.examples import Examples70
             >>> from genedata.generate import Classes
             >>> from genedata.specifications70 import (
             ...     Structure,
@@ -713,7 +722,7 @@ class {class_name}(BaseStructure):
             ...     Structure,
             ...     EnumerationSet,
             ...     Enumeration,
-            ...     Examples7,
+            ...     Examples70,
             ... )
 
         """
@@ -753,21 +762,21 @@ class Tests:
     - Missing Required: Test that a substructure without its required substructures
         fails validation.  Only structures with required substructions and at least
         one non-required substructure are part of this test.
-    
+
     These tests are designed to check that the specifications in the yaml files have been
     correctly transferred to the dictionaries and that the generated classes conform
     to the specifications.
 
     There is one exception to this conforming.  The user explicitly creates cross reference
-    identifiers in this application.  They are not hidden in the application.  
-    The record structures require a cross reference identifer to be entered as the first argument.  
+    identifiers in this application.  They are not hidden in the application.
+    The record structures require a cross reference identifer to be entered as the first argument.
     The GEDCOM yaml specification does not allow a value argument for these record structures,
     but they are required in this application.
 
     The reason for this is that the user of this application is provided the opportunity
     to build multiple genealogies which may conflict with each other.  These genealogies are
     synched with each other through the cross reference identifiers.
-    
+
     - No Subs: Test that structures without substructures generate the exception:
     """
 
@@ -863,7 +872,7 @@ class Tests:
                         not_required = f'{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_not_required})'
                     else:
                         not_required = f'{Default.CODE_CLASS}.{class_name}({sub_not_required})'
-                else:  
+                else:
                     # if sub_value != Default.EMPTY:
                     not_required = (
                         f'{Default.CODE_CLASS}.{class_name}({sub_value})'
@@ -1067,12 +1076,12 @@ class Tests:
                 return 'snote'
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                 return 'sour'
-            #case 'https://gedcom.io/terms/v7/type-Time':
+            # case 'https://gedcom.io/terms/v7/type-Time':
             case _:
                 return "'12:12:12'"
             # case _:
             #     return Default.EMPTY
-        #return Default.EMPTY
+        # return Default.EMPTY
 
     @staticmethod
     def there_are_required_substructures(substructures: dict[str, str]) -> bool:
@@ -1088,22 +1097,10 @@ class Tests:
                 return True
         return False
 
-    # @staticmethod
-    # def there_are_single_substructures(substructures: dict[str, str]) -> bool:
-    #     """Return true if there dictionary of substructures contains a required substructure.
-
-    #     Args:
-    #         substructures: The subdictionary of Structure containing the uri as key
-    #             and its cardinality code as value.  The cardinality code `:1}`
-    #             signals a single occurence substructure.
-    #     """
-    #     for _key, cardinality in substructures.items():
-    #         if Default.CARDINALITY_SINGULAR in cardinality:
-    #             return True
-    #     return False
-
     @staticmethod
-    def preamble(test: str, add_pytest: int = 0, firstline: str = Default.EMPTY) -> str:
+    def preamble(
+        test: str, add_pytest: int = 0, firstline: str = Default.EMPTY
+    ) -> str:
         """Construct a document to describe a module containing a set of tests."""
         match add_pytest:
             case 0:
@@ -1179,7 +1176,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         subs: str = Default.EMPTY
         y: bool = True
         for key in structures:
-            if key not in [Default.CONT, Default.TRLR]:
+            if key not in Default.IGNORE:
                 value = Tests.get_value(
                     key,
                     structures,
@@ -1234,7 +1231,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         value: str = Default.EMPTY
         subs: str = Default.EMPTY
         for key in structures:
-            if key not in [Default.CONT, Default.TRLR]:
+            if key not in Default.IGNORE:
                 value = Tests.get_value(
                     key,
                     structures,
@@ -1293,12 +1290,16 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
         test_name: str = 'Bad Payload'
         error_message: str = 'NOT_STRING'
-        lines: str = Tests.preamble(test_name, add_pytest=1, firstline='# mypy: disable-error-code="arg-type, unused-ignore"\n')
+        lines: str = Tests.preamble(
+            test_name,
+            add_pytest=1,
+            firstline='# mypy: disable-error-code="arg-type, unused-ignore"\n',
+        )
         value: str = '-1'
         subs: str = Default.EMPTY
         for key in structures:
             if (
-                key not in [Default.CONT, Default.TRLR]
+                key not in Default.IGNORE
                 and structures[key][Default.YAML_PAYLOAD] != 'None'
             ):
                 subs = Tests.get_required(
@@ -1350,7 +1351,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             if (
-                key not in [Default.CONT, Default.TRLR]
+                key not in Default.IGNORE
                 and Default.YAML_ENUMERATION_SET in structure
             ):
                 subs = Tests.get_required(
@@ -1404,7 +1405,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                 enumerationsets,
                 enumerations,
             )
-            if key not in [Default.CONT, Default.TRLR]:
+            if key not in Default.IGNORE:
                 for _subkey, subvalue in structure[
                     Default.YAML_SUBSTRUCTURES
                 ].items():
@@ -1475,11 +1476,11 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
-            if key not in [
-                Default.CONT,
-                Default.TRLR,
-            ] and Tests.there_are_required_substructures(
-                structure[Default.YAML_SUBSTRUCTURES]
+            if (
+                key not in Default.IGNORE
+                and Tests.there_are_required_substructures(
+                    structure[Default.YAML_SUBSTRUCTURES]
+                )
             ):
                 value = Tests.get_value(
                     key,
@@ -1487,14 +1488,6 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
                     enumerationsets,
                     enumerations,
                 )
-                # for _uri, cardinality in structure[
-                #     Default.YAML_SUBSTRUCTURES
-                # ].items():
-                #     if Default.CARDINALITY_SINGULAR in cardinality:
-                #         found_required = True
-                # if found_required:
-                # for uri, cardinality in structure[Default.YAML_SUBSTRUCTURES].items():
-                #     if Default.CARDINALITY_SINGULAR not in cardinality:
                 subs = Tests.get_one_not_required(
                     key, structures, enumerationsets, enumerations
                 )
@@ -1540,11 +1533,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
             if (
-                key
-                not in [
-                    Default.CONT,
-                    Default.TRLR,
-                ]
+                key not in Default.IGNORE
                 and len(structure[Default.YAML_SUBSTRUCTURES]) == 0
                 and structure[Default.YAML_PAYLOAD] != 'None'
             ):
@@ -1597,10 +1586,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         for key, structure in structures.items():
             if (
                 key
-                not in [
-                    Default.CONT,
-                    Default.TRLR,
-                ]
+                not in Default.IGNORE
                 and structure[Default.YAML_PAYLOAD] == 'None'
                 and key
                 not in [

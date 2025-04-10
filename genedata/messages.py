@@ -45,10 +45,13 @@ class Msg:
     FACT_REQUIRES_TYPE: str = 'The FACT tag requires a non-empty TYPE.'
     FILE_EXISTS: str = 'The file "{0}" already exists.'
     FILE_NOT_FOUND: str = 'The file "{0}" could not be found.'
+    GED_FILE_ALREADY_LOADED: str = 'A ged file has already been loaded.'
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
     IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
-    KEY_NOT_FOUND: str = 'A Structure key could not be derived from the name "{0}".'
+    KEY_NOT_FOUND: str = (
+        'A Structure key could not be derived from the name "{0}".'
+    )
     LATI_NORTH_SOUTH: str = (
         'The character "{0}" of the latitude "{1}" is not "N" or "S".'
     )
@@ -75,10 +78,10 @@ class Msg:
     LONGER_SECOND: str = 'The second string is longer than the first.  Here are the remaining lines:'
     MISSING: str = 'These xref values {0} are missing record definitions.'
     MISSING_HEADER: str = 'The header record has not been added to the genealogy by the `add_header` method.'
-    MISSING_REQUIRED: str = (
-        'One of the substructures in "{0}" are missing from the "{1}" structure.'
+    MISSING_REQUIRED: str = 'One of the substructures in "{0}" are missing from the "{1}" structure.'
+    MISSING_URL_AND_DICTIONARIES: str = (
+        'Missing both a url and specification dictionaries.'
     )
-    MISSING_URL_AND_DICTIONARIES: str = 'Missing both a url and specification dictionaries.'
     NEGATIVE_ERROR: str = (
         'The value "{0}" is less than zero in structure "{1}".'
     )
@@ -225,5 +228,7 @@ class Msg:
     YAML_STRUCTURE_MISSING_VALUES: str = (
         'The structure type has no superstructures nor substructures.'
     )
-    YAML_UNRECOGNIZED_TYPE: str = 'The type "{0}" is not in the set of valid types "{1}".'
+    YAML_UNRECOGNIZED_TYPE: str = (
+        'The type "{0}" is not in the set of valid types "{1}".'
+    )
     ZERO_YEAR: str = 'The "{0}" calendar has no zero year.'

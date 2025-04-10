@@ -15,7 +15,7 @@ import re
 
 import pytest
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.constants import Default  # noqa: F401
 from genedata.messages import Msg

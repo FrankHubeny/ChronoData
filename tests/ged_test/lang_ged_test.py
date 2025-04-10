@@ -2,21 +2,23 @@
 """Generate the Lang GEDCOM example file."""
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
-from genedata.structure import SubmitterXref  # noqa: F401
+from genedata.constants import Default
 from genedata.methods import Util
+from genedata.structure import SubmitterXref  # noqa: F401
 
+ged_version: str = '7.0'
 
 def test_lang_ged() -> None:
     # Test constructing the remarriage2_ged test data.
     file = Util.read('tests\\ged_test\\lang.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     subm1_xref = g.submitter_xref('1')
     subm2_xref = g.submitter_xref('2')
+    g.add_tag('_PHRASE', 'https://gedcom.io/terms/v7/PHRASE')
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)), 
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'),
             gc.HeadSour('TEST_FILES'),
             gc.Subm(subm1_xref),
@@ -143,13 +145,14 @@ def test_lang_ged() -> None:
 def test_lang_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\lang.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     subm1_xref = g.submitter_xref('1')
     subm2_xref = g.submitter_xref('2')
+    g.add_tag('_PHRASE', 'https://gedcom.io/terms/v7/PHRASE')
 
     head = gc.Head(
         [
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)), 
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'),
             gc.HeadSour('TEST_FILES'),
             gc.Subm(subm1_xref),

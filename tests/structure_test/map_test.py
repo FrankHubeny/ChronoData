@@ -17,7 +17,7 @@ import re
 
 import pytest
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Input

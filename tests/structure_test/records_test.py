@@ -18,7 +18,7 @@ import re
 
 import pytest
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.messages import Msg
 
@@ -51,6 +51,13 @@ def test_good_run_subm() -> None:
     g = Genealogy('test')
     subm = g.submitter_xref('a')
     h = gc.RecordSubm(subm, gc.Name('this'))
+    assert h.validate()
+
+def test_good_run_snote() -> None:
+    """Run a successful use of the structure."""
+    g = Genealogy('test')
+    snote = g.shared_note_xref('a', 'a note')
+    h = gc.RecordSnote(snote)
     assert h.validate()
 
 #    b. Catch not permitted substructure.
@@ -109,5 +116,18 @@ def test_not_permitted_repo() -> None:
         m.validate()
 
 
-#    d. Catch more than one when only one permitted.
+#    Test if not the correct value.
+
+def test_valid_snote_xref() -> None:
+    """Check that value is not a correct xref value."""
+    g = Genealogy('test')
+    value = g.family_xref()
+    m = gc.RecordSnote(value)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_SHARED_NOTE_XREF.format("FamilyXref('@1@')", m.class_name)),
+    ):
+        m.validate()
+
+
 

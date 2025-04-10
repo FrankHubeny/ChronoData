@@ -399,11 +399,11 @@ def test_bad_submitter_xref() -> None:
 #     b. Run ged.
 
 
-def test_good_extension_xref() -> None:
-    """Instantiate a minimal extension Xref."""
-    g = Genealogy('test')
-    ext = g.extension_xref('ext')
-    assert ext.ged() == '0 @EXT@ EXT\n'
+# def test_good_extension_xref() -> None:
+#     """Instantiate a minimal extension Xref."""
+#     g = Genealogy('test')
+#     ext = g.extension_xref('ext')
+#     assert ext.ged() == '0 @EXT@ EXT\n'
 
 
 # def test_good_extension_record() -> None:

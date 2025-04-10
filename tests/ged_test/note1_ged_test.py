@@ -5,6 +5,10 @@ This test contains a cyclic cross reference which generates a ValueError.
 
 The test is also run without the cyclic cross reference part.
 
+The original file has the "1 GEDC 2 VERS 7.0" start after the source and
+submitter references.  These have been modified so those lines come
+immediately after "0 HEAD".
+
 Reference:
     [GEDCOM Age test file](https://gedcom.io/testfiles/gedcom70/note-1.ged)
 """
@@ -15,7 +19,7 @@ import pytest
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
+from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.structure import (  # noqa: F401
     SharedNoteXref,
@@ -24,6 +28,7 @@ from genedata.structure import (  # noqa: F401
     Xref,
 )
 
+ged_version: str = '7.0'
 
 def test_note1_ged() -> None:
     # Test constructing the note1_ged test data without the circular issue.
@@ -50,7 +55,7 @@ def test_note1_ged() -> None:
 2 DATE 25 MAY 2021
 0 TRLR"""
 
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')
@@ -62,7 +67,7 @@ def test_note1_ged() -> None:
         [
             gc.HeadSour('conversion test'),
             gc.Subm(subm_xref),
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('the header note'),
         ]
     )
@@ -123,7 +128,7 @@ def test_note1_ged_code() -> None:
 2 DATE 25 MAY 2021
 0 TRLR"""
 
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')
@@ -135,7 +140,7 @@ def test_note1_ged_code() -> None:
         [
             gc.HeadSour('conversion test'),
             gc.Subm(subm_xref),
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.Note('the header note'),
         ]
     )
@@ -175,7 +180,7 @@ def test_note1_ged_code() -> None:
 def test_note1_ged_circular() -> None:
     """Test constructing the note1_ged test data with the circular issue."""
 
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')
@@ -185,9 +190,9 @@ def test_note1_ged_circular() -> None:
 
     head = gc.Head(
         [
+            gc.Gedc(gc.GedcVers('7.0')),
             gc.HeadSour('conversion test'),
             gc.Subm(subm_xref),
-            gc.Gedc(gc.GedcVers(Config.GEDVERSION)),
             gc.Note('the header note'),
         ]
     )

@@ -14,20 +14,12 @@ __all__ = [
 ]
 
 import collections
-import io
 import re
-import urllib.request
 from typing import Any, Literal, Self
-
-import yaml  # type: ignore[import-untyped]
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.methods import Tagger
-from genedata.specifications70 import (
-    Enumeration,
-    ExtensionStructure,
-)
+from genedata.methods import Names, Tagger
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -309,81 +301,6 @@ class Void:
     EXTTAG: ExtensionXref = ExtensionXref(NAME)
     XREF: Xref = Xref(NAME)
 
-
-# class Extension(NamedTuple):
-#     """Store, validate and display extension tags.
-
-#     The GEDCOM specification recommends the following:
-
-#     > The recommended way to go beyond the set of standard structure types in this specification
-#     > or to expand their usage is to submit a feature request on the FamilySearch GEDCOM development page
-#     > so that the ramifications of the proposed addition and its interplay with other proposals
-#     > may be discussed and the addition may be included in a subsequent version of this specification.
-#     >
-#     > This specification also provides multiple ways for extension authors to go beyond the specification
-#     > without submitting a feature request, which are described in the remainder of this section.
-
-#     This NamedTuple implements going beyond the specification without submitting
-#     a feature request.
-
-#     Example:
-
-#     Args:
-#         exttag: The tag used entered through ExtTag()
-#         payload: The value on the same line as the tag.
-#         extra: Extra values on the same line as the tag.
-#         substructures: Substructures having this extension as a superstructure.  They are
-#             placed in the ged file with a level one higher than this extension has.
-#             They are also Extension tuples and may have substructures of their own.
-
-#     See Also:
-#         `ExtTag`
-
-#     Reference:
-#         [GedCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
-#     """
-
-#     exttag: str
-#     payload: str = Default.EMPTY
-#     extra: str = Default.EMPTY
-#     substructures: Any = None
-
-#     def validate(self) -> bool:
-#         """Validate the stored value."""
-#         check: bool = (
-#             Checker.verify_type(self.exttag, ExtTag | Tag, no_list=True)
-#             and Checker.verify_type(self.payload, str, no_list=True)
-#             and Checker.verify_type(self.extra, str, no_list=True)
-#         )
-#         if self.substructures is not None:
-#             for sub in self.substructures:
-#                 if check:
-#                     check = sub.validate()
-#         return check
-
-#     def ged(self, level: int = 1) -> str:
-#         lines: str = ''
-#         if self.validate():
-#             lines = Tagger.string(
-#                 lines, level, self.exttag, self.payload, self.extra
-#             )
-#             lines = Tagger.structure(lines, level + 1, self.substructures)
-#         return lines
-
-#     def code(self, tabs: int = 1, full: bool = False) -> str:
-#         return indent(
-#             Formatter.display_code(
-#                 'Extension(',
-#                 ('    exttag = ', self.exttag, tabs, full, True),
-#                 ('    payload = ', self.payload, tabs, full, False),
-#                 ('    extra = ', self.extra, tabs, full, False),
-#                 ('    substructures = ', self.substructures, tabs, full, False),
-#             ),
-#             Default.INDENT * tabs,
-#         )
-
-
-# ExtType = Extension | list[Extension] | None
 ExtType = Any | list[Any] | None
 
 
@@ -414,15 +331,16 @@ class BaseStructure:
         self.value: str | int | Xref | None = value
         self.code_value: str = Default.EMPTY
         if isinstance(self.value, str):
-            if Default.EOL in self.value:
-                if Default.QUOTE_SINGLE in self.value:
-                    self.code_value = f'"""{self.value}"""'
-                else:
-                    self.code_value = f"'''{self.value}'''"
-            elif Default.QUOTE_SINGLE in self.value:
-                self.code_value = f'"{self.value}"'
-            else:
-                self.code_value = f"'{self.value}'"
+            self.code_value = Names.quote_text(self.value)
+            # if Default.EOL in self.value:
+            #     if Default.QUOTE_SINGLE in self.value:
+            #         self.code_value = f'"""{self.value}"""'
+            #     else:
+            #         self.code_value = f"'''{self.value}'''"
+            # elif Default.QUOTE_SINGLE in self.value:
+            #     self.code_value = f'"{self.value}"'
+            # else:
+            #     self.code_value = f"'{self.value}'"
         elif isinstance(self.value, int):
             self.code_value = str(self.value)
         elif isinstance(self.value, Xref):
@@ -488,19 +406,6 @@ class BaseStructure:
                         name, self.permitted, self.class_name
                     )
                 )
-
-        # Check that extensions meet requirements.
-        # if self.ext is not None:
-        #     # Is an extension tag the same as a standard tag?
-        #     if isinstance(self.ext, list):
-        #         for extension in self.ext:
-        #             for yamlkey, yamlvalue in Structure:
-        #                 if extension.tag == yamlvalue[Default.YAML_STANDARD_TAG]:
-        #                     raise ValueError(Msg.EXTENSION_DUPLICATES_TAG.format(extension.tag, yamlvalue[Default.YAML_STANDARD_TAG]))
-        #     else:
-        #         for key, value in Structure:
-        #             if self.ext.tag == value[Default.YAML_STANDARD_TAG]:
-        #                 raise ValueError(Msg.EXTENSION_DUPLICATES_TAG.format(self.ext.tag, value[Default.YAML_STANDARD_TAG]))
 
         # Does value have the required data type?
         match self.payload:
@@ -574,10 +479,6 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if not re.match('', str(self.value)):
-                    raise ValueError(
-                        Msg.NOT_LIST.format(str(self.value), self.class_name)
-                    )
             case '@<https://gedcom.io/terms/v7/record-SUBM>@':
                 if not isinstance(self.value, SubmitterXref):
                     raise ValueError(
@@ -589,10 +490,6 @@ class BaseStructure:
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if not re.match('', str(self.value)):
-                    raise ValueError(
-                        Msg.NOT_LANGUAGE.format(self.value, self.class_name)
                     )
             case 'https://gedcom.io/terms/v7/type-Date#period':
                 if not isinstance(self.value, str):
@@ -627,26 +524,16 @@ class BaseStructure:
                     re.search('[a-z]', self.value) is not None
                     or re.search('[0-9]', self.value) is None
                 ):
-                    raise ValueError(Msg.NOT_DATE.format(self.value))
+                    raise ValueError(Msg.NOT_DATE.format(self.value, self.class_name))
             case 'https://gedcom.io/terms/v7/type-FilePath':
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if not re.match('', self.value):
-                    raise ValueError(
-                        Msg.NOT_FILE_PATH.format(
-                            str(self.value), self.class_name
-                        )
-                    )
             case 'https://gedcom.io/terms/v7/type-Name':
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if not len(re.findall('/', self.value)) == 2:
-                    raise ValueError(
-                        Msg.NOT_NAME.format(self.value, self.class_name)
                     )
             case 'https://gedcom.io/terms/v7/type-Age':
                 if not isinstance(self.value, str):
@@ -667,10 +554,6 @@ class BaseStructure:
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if not re.match('', str(self.value)):
-                    raise ValueError(
-                        Msg.NOT_MEDIA_TYPE.format(self.value, self.class_name)
                     )
             case '@<https://gedcom.io/terms/v7/record-OBJE>@':
                 if not isinstance(self.value, MultimediaXref):
@@ -705,7 +588,7 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if not re.match('', str(self.value)):
+                if re.search('[a-zA-Y]', self.value):
                     raise ValueError(
                         Msg.NOT_TIME.format(self.value, self.class_name)
                     )
@@ -766,7 +649,7 @@ class BaseStructure:
         match self.class_name:
             case 'Lati':
                 if not isinstance(self.value, str):
-                    raise ValueError(Msg.NOT_STRING.format(str(self.value)))
+                    raise ValueError(Msg.NOT_STRING.format(str(self.value), self.class_name))
                 if self.value[0] not in [
                     Default.LATI_NORTH,
                     Default.LATI_SOUTH,
@@ -794,7 +677,7 @@ class BaseStructure:
                     )
             case 'Long':
                 if not isinstance(self.value, str):
-                    raise ValueError(Msg.NOT_STRING.format(str(self.value)))
+                    raise ValueError(Msg.NOT_STRING.format(str(self.value), self.class_name))
                 if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
                     raise ValueError(
                         Msg.LONG_EAST_WEST.format(
@@ -832,7 +715,6 @@ class BaseStructure:
         level: int = 1,
         format: bool = True,
         recordkey: Xref = Void.XREF,
-        order: bool = False,
     ) -> str:
         """Generate the GEDCOM lines."""
         if self.validate():
@@ -907,6 +789,8 @@ class BaseStructure:
                 lines = Tagger.structure(
                     lines, level + 1, self.subs, recordkey=recordkey
                 )
+        # if self.tag == 'HEAD':
+        #     lines = lines.replace('0 HEAD\n', '0 HEAD\n1 GEDC\n2 VERS 7.0\n')
         return lines #.replace('0 TRLR\n', '0 TRLR')
 
     def code(self, tabs: int = 0, no_indent: bool = False, as_name: str = Default.EMPTY) -> str:
@@ -1011,81 +895,93 @@ class BaseStructure:
 class Ext(BaseStructure):
     """Store, validate and format an extension structure."""
 
-    def __init__(self, key: str, value: str, subs: SubsType):
-        super().__init__(value, subs, Default.EMPTY)
+    def __init__(self, structure: dict[str, Any], value: str, subs: SubsType):
+        super().__init__(
+            value=value, 
+            subs=subs, 
+            key=structure[Default.YAML_LOAD_TAG],
+            tag=structure[Default.YAML_LOAD_TAG],
+            permitted=structure[Default.YAML_PERMITTED],
+            required=structure[Default.YAML_REQUIRED],
+            single=structure[Default.YAML_SINGULAR],
+            enum_key=structure[Default.YAML_ENUM_KEY],
+            enum_tags=structure[Default.YAML_ENUM_TAGS],
+            payload=structure[Default.YAML_PAYLOAD],
+            class_name='Ext',
+        )
 
-        self.tag: str = Default.EMPTY
-        self.permitted: list[str] = []
-        self.required: list[str] = []
-        self.single: list[str] = []
-        self.enums: list[str] = []
-        self.payload: str = Default.EMPTY
-        self.yamldict: dict[str, Any] = {}
-        if '.yaml' in key:
-            if key[0:4] == 'http':
-                webUrl = urllib.request.urlopen(key)
-                result_code = str(webUrl.getcode())
-                if result_code == '404':
-                    raise ValueError(Msg.PAGE_NOT_FOUND.format(key))
-                raw: str = webUrl.read().decode(Default.UTF8)
-            else:
-                with io.open(key, 'r', encoding='utf8') as file:  # noqa: UP020
-                    raw = file.read()
+        # self.tag: str = Default.EMPTY
+        # self.permitted: list[str] = []
+        # self.required: list[str] = []
+        # self.single: list[str] = []
+        # self.enums: list[str] = []
+        # self.payload: str = Default.EMPTY
+        # self.yamldict: dict[str, Any] = {}
+        # if '.yaml' in key:
+        #     if key[0:4] == 'http':
+        #         webUrl = urllib.request.urlopen(key)
+        #         result_code = str(webUrl.getcode())
+        #         if result_code == '404':
+        #             raise ValueError(Msg.PAGE_NOT_FOUND.format(key))
+        #         raw: str = webUrl.read().decode(Default.UTF8)
+        #     else:
+        #         with io.open(key, 'r', encoding='utf8') as file:  
+        #             raw = file.read()
 
-            # Check that file has proper yaml directive.
-            if Default.YAML_DIRECTIVE not in raw:
-                raise ValueError(
-                    Msg.YAML_NOT_YAML_FILE.format(key, Default.YAML_DIRECTIVE)
-                )
+        #     # Check that file has proper yaml directive.
+        #     if Default.YAML_DIRECTIVE not in raw:
+        #         raise ValueError(
+        #             Msg.YAML_NOT_YAML_FILE.format(key, Default.YAML_DIRECTIVE)
+        #         )
 
-            # Put the yaml data into a dictionary.
-            raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
-            yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
-            yamldict = yaml.safe_load(yaml_data)
-            required = []
-            single = []
-            permitted = []
-            enums = []
-            if Default.YAML_SUBSTRUCTURES in yamldict:
-                for yamlkey, yamlvalue in yamldict[
-                    Default.YAML_SUBSTRUCTURES
-                ].items():
-                    tag = (
-                        yamlkey[yamlkey.rfind(Default.SLASH) + 1 :]
-                        .title()
-                        .replace('-', '')
-                    )
-                    permitted.append(tag)
-                    if Default.YAML_CARDINALITY_REQUIRED in yamlvalue:
-                        required.append(tag)
-                    if Default.YAML_CARDINALITY_SINGULAR in yamlvalue:
-                        single.append(tag)
-            yamldict[Default.YAML_PERMITTED] = permitted
-            yamldict[Default.YAML_REQUIRED] = required
-            yamldict[Default.YAML_SINGULAR] = single
-            if Default.YAML_ENUMERATION_SET in yamldict:
-                enumset = yamldict[Default.YAML_ENUMERATION_SET]
-                for yamlkey, yamlvalue in Enumeration.items():  # noqa: B007
-                    if enumset in yamlvalue[Default.YAML_VALUE_OF]:
-                        enums.append(yamlvalue[Default.YAML_STANDARD_TAG])
-            yamldict[Default.YAML_ENUM_TAGS] = enums
-            self.tag = yamldict[Default.YAML_EXTENSION_TAGS][0]
-            self.permitted = yamldict[Default.YAML_PERMITTED]
-            self.required = yamldict[Default.YAML_REQUIRED]
-            self.single = yamldict[Default.YAML_SINGULAR]
-            self.enums = yamldict[Default.YAML_ENUM_TAGS]
-            self.payload = yamldict[Default.YAML_PAYLOAD]
-        else:
-            self.tag = ExtensionStructure[self.key][
-                Default.YAML_EXTENSION_TAGS
-            ][0]
-            self.permitted = ExtensionStructure[self.key][
-                Default.YAML_PERMITTED
-            ]
-            self.required = ExtensionStructure[self.key][Default.YAML_REQUIRED]
-            self.single = ExtensionStructure[self.key][Default.YAML_SINGULAR]
-            self.enums = ExtensionStructure[self.key][Default.YAML_ENUM_TAGS]
-            self.payload = ExtensionStructure[self.key][Default.YAML_PAYLOAD]
-            # self.class_name: str = (
-            #     self.key.title().replace('_', '').replace('-', '')
-            # )
+        #     # Put the yaml data into a dictionary.
+        #     raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
+        #     yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
+        #     yamldict = yaml.safe_load(yaml_data)
+        #     required = []
+        #     single = []
+        #     permitted = []
+        #     enums = []
+        #     if Default.YAML_SUBSTRUCTURES in yamldict:
+        #         for yamlkey, yamlvalue in yamldict[
+        #             Default.YAML_SUBSTRUCTURES
+        #         ].items():
+        #             tag = (
+        #                 yamlkey[yamlkey.rfind(Default.SLASH) + 1 :]
+        #                 .title()
+        #                 .replace('-', '')
+        #             )
+        #             permitted.append(tag)
+        #             if Default.YAML_CARDINALITY_REQUIRED in yamlvalue:
+        #                 required.append(tag)
+        #             if Default.YAML_CARDINALITY_SINGULAR in yamlvalue:
+        #                 single.append(tag)
+        #     yamldict[Default.YAML_PERMITTED] = permitted
+        #     yamldict[Default.YAML_REQUIRED] = required
+        #     yamldict[Default.YAML_SINGULAR] = single
+        #     if Default.YAML_ENUMERATION_SET in yamldict:
+        #         enumset = yamldict[Default.YAML_ENUMERATION_SET]
+        #         for yamlkey, yamlvalue in Enumeration.items():  
+        #             if enumset in yamlvalue[Default.YAML_VALUE_OF]:
+        #                 enums.append(yamlvalue[Default.YAML_STANDARD_TAG])
+        #     yamldict[Default.YAML_ENUM_TAGS] = enums
+        #     self.tag = yamldict[Default.YAML_EXTENSION_TAGS][0]
+        #     self.permitted = yamldict[Default.YAML_PERMITTED]
+        #     self.required = yamldict[Default.YAML_REQUIRED]
+        #     self.single = yamldict[Default.YAML_SINGULAR]
+        #     self.enums = yamldict[Default.YAML_ENUM_TAGS]
+        #     self.payload = yamldict[Default.YAML_PAYLOAD]
+        # else:
+        #     self.tag = ExtensionStructure[self.key][
+        #         Default.YAML_EXTENSION_TAGS
+        #     ][0]
+        #     self.permitted = ExtensionStructure[self.key][
+        #         Default.YAML_PERMITTED
+        #     ]
+        #     self.required = ExtensionStructure[self.key][Default.YAML_REQUIRED]
+        #     self.single = ExtensionStructure[self.key][Default.YAML_SINGULAR]
+        #     self.enums = ExtensionStructure[self.key][Default.YAML_ENUM_TAGS]
+        #     self.payload = ExtensionStructure[self.key][Default.YAML_PAYLOAD]
+        #     # self.class_name: str = (
+        #     #     self.key.title().replace('_', '').replace('-', '')
+        #     # )

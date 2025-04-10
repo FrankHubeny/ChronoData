@@ -3,7 +3,7 @@
 __all__ = [
     'Input',
     'Names',
-    'Queries',
+    'Query',
     'Tagger',
     'Util',
 ]
@@ -91,15 +91,6 @@ class Util:
         Args:
             url: The name of the file or the internet url.
         """
-
-        # Read the internet file or a local file.
-        # if url[0:4] == 'http':
-        #    webUrl = urllib.request.urlopen(url)
-        # result_code = str(webUrl.getcode())
-        # if result_code == '404':
-        #     raise ValueError(Msg.PAGE_NOT_FOUND.format(url))
-        #    raw: str = webUrl.read().decode(Default.UTF8)
-        # else:
         with open(url, 'rb') as file:  # noqa: PTH123
             binary_raw = file.read()
         return binary_raw.decode('utf-8')
@@ -150,17 +141,23 @@ class Util:
         try:
             raw = Util.read(url)
         except Exception:
-            # logging.info(Msg.LOG_READ_FAILED.format(url))
-            try:
-                raw = Util.read_binary(url)
-            except Exception:
-                logging.info(Msg.FILE_NOT_FOUND.format(url))
+            raw = Util.read_binary(url)
 
         # Check that file has proper yaml directive.
         if raw != Default.EMPTY and Default.YAML_DIRECTIVE not in raw:
             raise ValueError(
                 Msg.YAML_NOT_YAML_FILE.format(url, Default.YAML_DIRECTIVE)
             )
+
+        # Remove anything in the file prior to the yaml directive.
+        _, _, raw_top_trimmed = raw.partition(Default.YAML_DIRECTIVE)
+        raw = ''.join([Default.YAML_DIRECTIVE, raw_top_trimmed])
+
+        # Remove anything in the file after the yaml end marker `...`.
+        raw_bottom_trimmed, _, _ = raw.partition(
+            Default.YAML_DOCUMENT_END_MARKER
+        )
+        raw = ''.join([raw_bottom_trimmed, Default.YAML_DOCUMENT_END_MARKER])
 
         # Return the dictionary.
         yaml_data = raw  # .replace('\n  - |\n', '\n  - bar\n')
@@ -207,33 +204,33 @@ class Util:
             )
         return yaml_dict
 
-    @staticmethod
-    def ged_summary(ged: str) -> str:
-        """Summarize the contents of a ged file.
+#     @staticmethod
+#     def ged_summary(ged: str) -> str:
+#         """Summarize the contents of a ged file.
 
-        Args:
-            ged: The string obtained from reading or producing a ged file.
-        """
+#         Args:
+#             ged: The string obtained from reading or producing a ged file.
+#         """
 
-        # Count the number of record types.
-        fam_count: int = len(re.findall('\n0.+FAM', ged))
-        indi_count: int = len(re.findall('\n0.+INDI', ged))
-        obje_count: int = len(re.findall('\n0.+OBJE', ged))
-        repo_count: int = len(re.findall('\n0.+REPO', ged))
-        snote_count: int = len(re.findall('\n0.+SNOTE', ged))
-        sour_count: int = len(re.findall('\n0.+SOUR', ged))
-        subm_count: int = len(re.findall('\n0.+SUBM', ged))
+#         # Count the number of record types.
+#         fam_count: int = len(re.findall('\n0.+FAM', ged))
+#         indi_count: int = len(re.findall('\n0.+INDI', ged))
+#         obje_count: int = len(re.findall('\n0.+OBJE', ged))
+#         repo_count: int = len(re.findall('\n0.+REPO', ged))
+#         snote_count: int = len(re.findall('\n0.+SNOTE', ged))
+#         sour_count: int = len(re.findall('\n0.+SOUR', ged))
+#         subm_count: int = len(re.findall('\n0.+SUBM', ged))
 
-        # Return the number of record types.
-        return f"""
-Families      {fam_count!s}
-Individuals   {indi_count!s}
-Multimedia    {obje_count!s}
-Repositories  {repo_count!s}
-Shared Notes  {snote_count!s}
-Sources       {sour_count!s}
-Submitters    {subm_count!s}
-"""
+#         # Return the number of record types.
+#         return f"""
+# Families      {fam_count!s}
+# Individuals   {indi_count!s}
+# Multimedia    {obje_count!s}
+# Repositories  {repo_count!s}
+# Shared Notes  {snote_count!s}
+# Sources       {sour_count!s}
+# Submitters    {subm_count!s}
+# """
 
     @staticmethod
     def compare(first: str, second: str) -> str:
@@ -1151,6 +1148,80 @@ class Names:
         return tag
 
     @staticmethod
+    def key_tag_to_subkey_class(
+        key: str,
+        tag: str,
+        structure: dict[str, dict[str, Any]],
+        extension: dict[str, dict[str, Any]] | None = None,
+    ) -> tuple[str, str]:
+        """Find the key and class name given the superstructure's key and the class's tag.
+
+        Although the tag is similar to the classname, one tag could reference multiple
+        classes.  For example, the tag `INDI` could reference the `Indi` class or
+        the `RecordIndi` class.  The the superstructure's key however removes the
+        ambiguity.
+
+        There are many structures depending on the version of GEDCOM and the
+        availability of extension structures.  To avoid this ambiguity, the structure
+        specification needs to be provided as well as the superstructure's key.
+
+        Example:
+            The first example is the pattern we would expect to see.
+            >>> from genedata.methods import Names
+            >>> from genedata.specifications70 import Structure
+            >>> Names.key_tag_to_subkey_class('record-INDI', 'NOTE', Structure)
+            ('NOTE', 'Note')
+
+            The second example shows that we need to check the specifications
+            for the correct subordinate key name and class name derived from it.
+            >>> Names.key_tag_to_subkey_class('ADOP-FAMC', 'ADOP', Structure)
+            ('FAMC-ADOP', 'FamcAdop')
+
+            If the substructure key and class name cannot be found empty strings
+            for both of them are returned.
+            >>> Names.key_tag_to_subkey_class('record-INDI', 'MAP', Structure)
+            ('', '')
+
+            A structure dictionary of extensions may also be used, but since its
+            substructures may be standard structures, both the dictionary of
+            standard structures and the dictionary of extension structures
+            must be available to search through.  The import adds the GEDCOM
+            provided extension structure dictionary to the already imported
+            Structure containing standard structures.
+            >>> from genedata.specifications70 import ExtensionStructure
+            >>> Names.key_tag_to_subkey_class(
+            ...     '_SOUR', 'DATA', Structure, ExtensionStructure
+            ... )
+            ('SOUR-DATA', 'SourData')
+
+        Args:
+            key: The key of the tag's superstructure.
+            tag: The tag of the structure's key we are looking for.
+            structure: The standard dictionary of structures to search through.
+            extension: An optional dictionary of structures which are extensions
+                to the structure dictionary.
+        """
+        if key in structure:
+            for uri in structure[key][Default.YAML_SUBSTRUCTURES]:
+                sub_key = Names.keyname(uri)
+                if structure[sub_key][Default.YAML_STANDARD_TAG] == tag:
+                    return sub_key, Names.classname(sub_key)
+        if extension is not None and key in extension:
+            for uri in extension[key][Default.YAML_SUBSTRUCTURES]:
+                sub_key = Names.keyname(uri)
+                if (
+                    sub_key in extension
+                    and tag in extension[sub_key][Default.YAML_EXTENSION_TAGS]
+                ):
+                    return sub_key, Names.classname(sub_key)
+                if (
+                    sub_key in structure
+                    and structure[sub_key][Default.YAML_STANDARD_TAG] == tag
+                ):
+                    return sub_key, Names.classname(sub_key)
+        return Default.EMPTY, Default.EMPTY
+
+    @staticmethod
     def quote_text(value: str) -> str:
         """Put quote marks around a string checking for multiline strings
         and single quotes in the string.
@@ -1182,7 +1253,7 @@ class Names:
         return f"'{value}'"
 
 
-class Queries:
+class Query:
     """Some potentially useful queries of the specification."""
 
     @staticmethod
@@ -1195,9 +1266,9 @@ class Queries:
             Suppose we want to know what classes would produce the 'FAMC' tag.
             Here is how to use this method to find that information from
             the GEDCOM version 7 specifications.
-            >>> from genedata.methods import Queries
+            >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Structure
-            >>> Queries.classes_with_tag('FAMC', Structure)
+            >>> Query.classes_with_tag('FAMC', Structure)
             ['AdopFamc', 'Famc', 'IndiFamc']
 
         Args:
@@ -1224,13 +1295,13 @@ class Queries:
     #         Suppose we want to know what enumeration sets contain the 'ADOP' tag.
     #         Here is how to use this method to find that information from
     #         the GEDCOM version 7 specifications.
-    #         >>> from genedata.methods import Queries
+    #         >>> from genedata.methods import Query
     #         >>> from genedata.specifications70 import (
     #         ...     Structure,
     #         ...     EnumerationSet,
     #         ...     Enumeration,
     #         ... )
-    #         >>> Queries.enums_with_tag(
+    #         >>> Query.enums_with_tag(
     #         ...     'ADOP', Structure, EnumerationSet, Enumeration
     #         ... )
     #         ['AdopFamc', 'Famc', 'IndiFamc']
@@ -1256,9 +1327,9 @@ class Queries:
         Example:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
-            >>> from genedata.methods import Queries
+            >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Structure
-            >>> Queries.permitted('HEAD', Structure)
+            >>> Query.permitted('HEAD', Structure)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
         Args:
@@ -1281,9 +1352,9 @@ class Queries:
         Example:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
-            >>> from genedata.methods import Queries
+            >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Structure
-            >>> Queries.permitted_keys('HEAD', Structure)
+            >>> Query.permitted_keys('HEAD', Structure)
             ['COPR', 'DEST', 'GEDC', 'HEAD-DATE', 'HEAD-LANG', 'HEAD-PLAC', 'HEAD-SOUR', 'NOTE', 'SCHMA', 'SNOTE', 'SUBM']
 
         Args:
@@ -1304,9 +1375,9 @@ class Queries:
         Example:
             We can find the classes that are required under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
-            >>> from genedata.methods import Queries
+            >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Structure
-            >>> Queries.required('HEAD', Structure)
+            >>> Query.required('HEAD', Structure)
             ['Gedc']
 
         Args:
@@ -1328,9 +1399,9 @@ class Queries:
         Example:
             We can find the classes that can only be used once as substructures
             in the GEDCOM version 7 specifications under the `HEAD` key by doing the following:
-            >>> from genedata.methods import Queries
+            >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Structure
-            >>> Queries.singular('HEAD', Structure)
+            >>> Query.singular('HEAD', Structure)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
         Args:
@@ -1344,6 +1415,73 @@ class Queries:
             if Default.CARDINALITY_SINGULAR in cardinality:
                 classes.append(Names.classname(uri))
         return classes
+
+    @staticmethod
+    def record_counts(
+        ged: str,
+        column: str = Default.COLUMN_COUNT,
+    ) -> dict[str, dict[str, int]]:
+        """Return a dictionary of record names and counts from a gedcom string.
+
+        Example:
+            Suppose we have this gedcom string: '0 HEAD\\n1 GEDC\\n2 VERS 7.0\\n0 TRLR'
+            We would expect the record count to be zero for all records.  This string
+            would produce the same report as the empty string.
+            >>> file = '0 HEAD\\n1 GEDC\\n2 VERS 7.0\\n0 TRLR'
+            >>> Query.record_counts(file)
+            {'Count': {'FAM': 0, 'INDI': 0, 'OBJE': 0, 'REPO': 0, 'SNOTE': 0, 'SOUR': 0, 'SUBM': 0}}
+
+            We could generate a better report by placing this in a pandas DataFrame.
+            >>> import pandas as pd
+            >>> pd.DataFrame(Query.record_counts(file))
+                   Count
+            FAM        0
+            INDI       0
+            OBJE       0
+            REPO       0
+            SNOTE      0
+            SOUR       0
+            SUBM       0
+
+            Since a dictionary is returned one can do more than report on the results.
+            Suppose we only want to know how many INDI records there are.
+            We could use the `Count` key and then the `INDI` subkey to find the value `0`.
+            >>> Query.record_counts(file)['Count']['INDI']
+            0
+        
+        Args:
+            ged: The gedcom string.
+            record_column: The name of the `record` dictionary key which becomes the
+                pandas record column name.
+            count_column: The name of the `count` dictionary key which becomes the
+                pandas count column name.
+        """
+        data: dict[str, dict[str, int]] = {}
+        count: dict[str, int] = {}
+        searchfor: str = Default.EMPTY
+        howmany: int = 0
+        for record in Default.RECORD_TYPES:
+            searchfor = ''.join(
+                [
+                    Default.EOL,
+                    '0 @.*@ ',
+                    record,
+                    #Default.EOL,
+                ]
+            )
+            howmany = len(re.findall(searchfor, ged))
+            count.update({record: howmany})
+        data.update({column: count})
+        return data
+    
+    @staticmethod
+    def make_dictionary(ged: str) -> dict[str, Any]:
+        ged_dict: dict[str, Any] = {}
+        ged_list: list[str] = ged.split(Default.EOL)
+        for line in ged_list:
+            line_list: list[str] = line.split(Default.SPACE, 2)
+            ged_dict.update({})
+        return ged_dict
 
 
 class Tagger:
@@ -1604,7 +1742,7 @@ class Tagger:
         lines: str,
         level: int,
         payload: list[Any] | Any,
-        #flag: str = Default.EMPTY,
+        # flag: str = Default.EMPTY,
         recordkey: Any = Default.EMPTY,
     ) -> str:
         """Join a structure or a list of structure to GEDCOM lines.

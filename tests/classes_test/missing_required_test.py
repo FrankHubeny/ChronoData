@@ -8,7 +8,7 @@ DO NOT MODIFY THIS FILE.
 import pytest   # noqa: I001
 import re
 
-import genedata.classes7 as gc
+import genedata.classes70 as gc
 from genedata.build import Genealogy
 from genedata.messages import Msg
 

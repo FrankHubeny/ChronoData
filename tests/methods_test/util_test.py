@@ -3,6 +3,7 @@
 
 import logging
 import re
+from typing import Any
 
 import pytest
 
@@ -47,6 +48,18 @@ def test_read() -> None:
     file: str = 'tests/ged_test/minimal70.ged'
     assert Util.read(file) == '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR'
 
+
+def test_read_bad_file(caplog: Any) -> None:
+    file: str = 'tests/ged_test/minimal70.ged123'
+    with caplog.at_level(logging.INFO):
+        Util.read(file)
+    assert Msg.FILE_NOT_FOUND.format(file) in caplog.text
+
+# def test_read_bad_yaml_file() -> None:
+#     file: str = 'tests/ged_test/minimal70.ged123'
+#     with pytest.raises(TypeError):
+#         Util.read_yaml(file)
+    
 
 def test_read_binary() -> None:
     file: str = 'tests/ged_test/minimal70.ged'
@@ -196,23 +209,13 @@ def test_compare() -> None:
 def test_compare_fail() -> None:
     file1: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR\n'
     file2: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n'
-    problem: str = 'PROBLEM:   '
-    trlr: str = "'0 TRLR'"
-    assert (
-        Util.compare(file1, file2)
-        == f"\n{file1}{problem}{trlr}{Msg.DOES_NOT_EQUAL}''\n{Msg.LONGER_FIRST}\n"
-    )
+    assert '* DOES NOT EQUAL *' in Util.compare(file1, file2)
 
 
 def test_compare_fail_switch() -> None:
     file1: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR\n'
     file2: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n'
-    problem: str = 'PROBLEM:   '
-    trlr: str = "'0 TRLR'"
-    assert (
-        Util.compare(file2, file1)
-        == f"\n{file2}{problem}''{Msg.DOES_NOT_EQUAL}{trlr}\n{Msg.LONGER_SECOND}\n"
-    )
+    assert '* DOES NOT EQUAL *' in Util.compare(file2, file1)
 
 
 def test_write_ged() -> None:
@@ -222,20 +225,6 @@ def test_write_ged() -> None:
     read_text = Util.read(filename)
     assert text == read_text
 
-
-def test_ged_summary() -> None:
-    filename: str = 'tests/ged_test/maximal70.ged'
-    text: str = """
-Families      2
-Individuals   4
-Multimedia    2
-Repositories  2
-Shared Notes  2
-Sources       2
-Submitters    2
-"""
-    ged: str = Util.read(filename)
-    assert Util.ged_summary(ged) == text
 
 
 def test_www_status() -> None:

@@ -7,20 +7,21 @@ Reference:
 
 import genedata.classes70 as gc
 from genedata.build import Genealogy
-from genedata.constants import Config, Default
-from genedata.structure import IndividualXref, MultimediaXref  # noqa: F401
+from genedata.constants import Default
 from genedata.methods import Util
+from genedata.structure import IndividualXref, MultimediaXref  # noqa: F401
 
+ged_version: str = '7.0'
 
 def test_obje1_ged() -> None:
     """Construct the obje1_ged example file."""
     file = Util.read('tests\\ged_test\\obje-1.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     indi_xref = g.individual_xref('2')
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')
 
-    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers('7.0')))
 
     obje1 = gc.RecordObje(
         obje1_xref,
@@ -73,12 +74,12 @@ def test_obje1_ged() -> None:
 def test_obje1_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\obje-1.ged')
-    g = Genealogy('test')
+    g = Genealogy('test', version=ged_version)
     indi_xref = g.individual_xref('2')
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')
 
-    head = gc.Head(gc.Gedc(gc.GedcVers(Config.GEDVERSION)))
+    head = gc.Head(gc.Gedc(gc.GedcVers('7.0')))
 
     obje1 = gc.RecordObje(
         obje1_xref,
