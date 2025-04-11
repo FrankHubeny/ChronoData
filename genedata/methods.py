@@ -24,7 +24,7 @@ import yaml  # type: ignore[import-untyped]
 # from ordered_set import OrderedSet  # type: ignore[import-not-found]
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.specifications70 import Calendar, Month, Structure
+from genedata.specifications70 import Specs
 
 
 class Util:
@@ -106,9 +106,6 @@ class Util:
         raw: str = Default.EMPTY
         if url[0:4] == 'http':
             webUrl = urllib.request.urlopen(url)
-            # result_code = str(webUrl.getcode())
-            # if result_code == '404':
-            #     raise ValueError(Msg.PAGE_NOT_FOUND)
             raw = webUrl.read().decode(Default.UTF8)
         elif Path(url).exists():
             with Path.open(Path(url)) as file:
@@ -374,11 +371,11 @@ class Input:
         calendar_key: str = ''.join(
             [Default.URL_CALENDAR_PREFIX, calendar.upper()]
         )
-        calendar_tag: str = Calendar[calendar_key][Default.YAML_STANDARD_TAG]
+        calendar_tag: str = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_STANDARD_TAG]
         show_calendar: str = Default.EMPTY
         if show:
             show_calendar = calendar_tag
-        epoch_list: list[str] = Calendar[calendar_key][Default.YAML_EPOCHS]
+        epoch_list: list[str] = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_EPOCHS]
         epoch: str = Default.EMPTY
         if year < 0 and len(epoch_list) > 0:
             epoch = epoch_list[0]
@@ -387,10 +384,10 @@ class Input:
             raise ValueError(Msg.ZERO_YEAR.format(calendar))
         month_tag: str = Default.EMPTY
         if month > 0:
-            month_uri: str = Calendar[calendar_key][Default.YAML_MONTHS][
+            month_uri: str = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_MONTHS][
                 month - 1
             ]
-            month_tag = Month[Names.stem(month_uri)][Default.YAML_STANDARD_TAG]
+            month_tag = Specs[Default.SPECS_MONTH][Names.stem(month_uri)][Default.YAML_STANDARD_TAG]
         day_tag: str = Default.EMPTY
         if day > 0:
             day_tag = str(day)
@@ -990,27 +987,28 @@ class Names:
 
     @staticmethod
     def key_from_classname(
-        classname: str, structure: dict[str, dict[str, Any]]
+        classname: str, specs: dict[str, dict[str, Any]]
     ) -> str:
         """Return the key from a class name.
 
         Example:
             Suppose the class name is `RecordIndi`.
             >>> from genedata.methods import Names
-            >>> from genedata.specifications70 import Structure
-            >>> Names.key_from_classname('RecordIndi', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Names.key_from_classname('RecordIndi', Specs)
             'record-INDI'
 
             Suppose the class name is `HeadPlacForm`.
-            >>> Names.key_from_classname('HeadPlacForm', Structure)
+            >>> Names.key_from_classname('HeadPlacForm', Specs)
             'HEAD-PLAC-FORM'
 
             Suppose `classname` is not an actual class name.
-            >>> Names.key_from_classname('123456', Structure)
+            >>> Names.key_from_classname('123456', Specs)
             ''
 
         Args:
             classname: The name of a class from classes.
+            specs: The specification dictionary to search through.
         """
         hyphenated: str = classname[0]
         for letter in classname[1:]:
@@ -1025,7 +1023,7 @@ class Names:
             .replace('ORD-', 'ord-')
             .replace('-EXACT', '-exact')
         )
-        if hyphenated not in structure:
+        if hyphenated not in specs[Default.SPECS_STRUCTURE]:
             return Default.EMPTY
         return hyphenated
 
@@ -1143,7 +1141,7 @@ class Names:
         #     return base[base.rfind(Default.HYPHEN) + 1 :]
         # return base
         tag: str = str(
-            Structure[Names.keyname(value)][Default.YAML_STANDARD_TAG]
+            Specs[Default.SPECS_STRUCTURE][Names.keyname(value)][Default.YAML_STANDARD_TAG]
         )
         return tag
 
@@ -1151,7 +1149,7 @@ class Names:
     def key_tag_to_subkey_class(
         key: str,
         tag: str,
-        structure: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]],
         extension: dict[str, dict[str, Any]] | None = None,
     ) -> tuple[str, str]:
         """Find the key and class name given the superstructure's key and the class's tag.
@@ -1168,18 +1166,18 @@ class Names:
         Example:
             The first example is the pattern we would expect to see.
             >>> from genedata.methods import Names
-            >>> from genedata.specifications70 import Structure
-            >>> Names.key_tag_to_subkey_class('record-INDI', 'NOTE', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Names.key_tag_to_subkey_class('record-INDI', 'NOTE', Specs)
             ('NOTE', 'Note')
 
             The second example shows that we need to check the specifications
             for the correct subordinate key name and class name derived from it.
-            >>> Names.key_tag_to_subkey_class('ADOP-FAMC', 'ADOP', Structure)
+            >>> Names.key_tag_to_subkey_class('ADOP-FAMC', 'ADOP', Specs)
             ('FAMC-ADOP', 'FamcAdop')
 
             If the substructure key and class name cannot be found empty strings
             for both of them are returned.
-            >>> Names.key_tag_to_subkey_class('record-INDI', 'MAP', Structure)
+            >>> Names.key_tag_to_subkey_class('record-INDI', 'MAP', Specs)
             ('', '')
 
             A structure dictionary of extensions may also be used, but since its
@@ -1190,21 +1188,21 @@ class Names:
             Structure containing standard structures.
             >>> from genedata.specifications70 import ExtensionStructure
             >>> Names.key_tag_to_subkey_class(
-            ...     '_SOUR', 'DATA', Structure, ExtensionStructure
+            ...     '_SOUR', 'DATA', Specs, Specs['ExtensionStructure']
             ... )
             ('SOUR-DATA', 'SourData')
 
         Args:
             key: The key of the tag's superstructure.
             tag: The tag of the structure's key we are looking for.
-            structure: The standard dictionary of structures to search through.
+            specs: The specification dictionary to search through.
             extension: An optional dictionary of structures which are extensions
                 to the structure dictionary.
         """
-        if key in structure:
-            for uri in structure[key][Default.YAML_SUBSTRUCTURES]:
+        if key in specs[Default.SPECS_STRUCTURE]:
+            for uri in specs[Default.SPECS_STRUCTURE][key][Default.YAML_SUBSTRUCTURES]:
                 sub_key = Names.keyname(uri)
-                if structure[sub_key][Default.YAML_STANDARD_TAG] == tag:
+                if specs[Default.SPECS_STRUCTURE][sub_key][Default.YAML_STANDARD_TAG] == tag:
                     return sub_key, Names.classname(sub_key)
         if extension is not None and key in extension:
             for uri in extension[key][Default.YAML_SUBSTRUCTURES]:
@@ -1215,8 +1213,8 @@ class Names:
                 ):
                     return sub_key, Names.classname(sub_key)
                 if (
-                    sub_key in structure
-                    and structure[sub_key][Default.YAML_STANDARD_TAG] == tag
+                    sub_key in specs[Default.SPECS_STRUCTURE]
+                    and specs[Default.SPECS_STRUCTURE][sub_key][Default.YAML_STANDARD_TAG] == tag
                 ):
                     return sub_key, Names.classname(sub_key)
         return Default.EMPTY, Default.EMPTY
@@ -1258,7 +1256,7 @@ class Query:
 
     @staticmethod
     def classes_with_tag(
-        tag: str, structures: dict[str, dict[str, Any]]
+        tag: str, specs: dict[str, dict[str, Any]]
     ) -> list[str]:
         """Provide a list of classes that would display the given tag.
 
@@ -1267,77 +1265,39 @@ class Query:
             Here is how to use this method to find that information from
             the GEDCOM version 7 specifications.
             >>> from genedata.methods import Query
-            >>> from genedata.specifications70 import Structure
-            >>> Query.classes_with_tag('FAMC', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Query.classes_with_tag('FAMC', Specs)
             ['AdopFamc', 'Famc', 'IndiFamc']
 
         Args:
             tag: The tag that one sees in a ged file.
-            structures: The dictionary of structures to search over.
+            specs: The specification dictionary to search over.
         """
         classes: list[str] = []
         tagname: str = tag.upper()
-        for key, structure in structures.items():
+        for key, structure in specs[Default.SPECS_STRUCTURE].items():
             if structure[Default.YAML_STANDARD_TAG] == tagname:
                 classes.append(Names.classname(key))
         return classes
 
-    # @staticmethod
-    # def enums_with_tag(
-    #     tag: str,
-    #     structures: dict[str, dict[str, Any]],
-    #     enumerationsets: dict[str, dict[str, Any]],
-    #     enumerations: dict[str, dict[str, Any]],
-    # ) -> list[str]:
-    #     """Provide a list of classes using an enumeration set that contains the tag.
-
-    #     Example:
-    #         Suppose we want to know what enumeration sets contain the 'ADOP' tag.
-    #         Here is how to use this method to find that information from
-    #         the GEDCOM version 7 specifications.
-    #         >>> from genedata.methods import Query
-    #         >>> from genedata.specifications70 import (
-    #         ...     Structure,
-    #         ...     EnumerationSet,
-    #         ...     Enumeration,
-    #         ... )
-    #         >>> Query.enums_with_tag(
-    #         ...     'ADOP', Structure, EnumerationSet, Enumeration
-    #         ... )
-    #         ['AdopFamc', 'Famc', 'IndiFamc']
-
-    #     Args:
-    #         tag: The tag that one sees in a ged file.
-    #         structures: The dictionary of structures to search over.
-    #         enumerationsets: The dictionary of enumeration set to search over.
-    #         enumerations: The dictionary of enumerations to search over.
-    #     """
-    #     classes: list[str] = []
-    #     enumsets: list[str] = []
-    #     tagname: str = tag.upper()
-    #     for key, structure in structures.items():
-    #         if structure[Default.YAML_STANDARD_TAG] == tagname:
-    #             classes.append(Names.classname(key))
-    #     return classes
-
     @staticmethod
-    def permitted(key: str, structures: dict[str, dict[str, Any]]) -> list[str]:
+    def permitted(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
         """Provide a list of permitted classes.
 
         Example:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Query
-            >>> from genedata.specifications70 import Structure
-            >>> Query.permitted('HEAD', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Query.permitted('HEAD', Specs)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
         Args:
             key: The top level name in the dictionary.
-            structures: The specific dictionary one wants to search.
+            specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, _cardinality in structures[key][
+        for uri, _cardinality in specs[Default.SPECS_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             classes.append(Names.classname(uri))
@@ -1345,47 +1305,47 @@ class Query:
 
     @staticmethod
     def permitted_keys(
-        key: str, structures: dict[str, dict[str, Any]]
+        key: str, specs: dict[str, dict[str, Any]]
     ) -> list[str]:
-        """Provide a list of keys to Structure that represented permitted classes.
+        """Provide a list of keys to the `Structure` subdictionary that represented permitted classes.
 
         Example:
             We can find the classes that are permitted under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Query
-            >>> from genedata.specifications70 import Structure
-            >>> Query.permitted_keys('HEAD', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Query.permitted_keys('HEAD', Specs)
             ['COPR', 'DEST', 'GEDC', 'HEAD-DATE', 'HEAD-LANG', 'HEAD-PLAC', 'HEAD-SOUR', 'NOTE', 'SCHMA', 'SNOTE', 'SUBM']
 
         Args:
             key: The top level name in the dictionary.
-            structures: The specific dictionary one wants to search.
+            specs: The specification dictionary one wants to search.
         """
         keys: list[str] = []
-        for uri, _cardinality in structures[key][
+        for uri, _cardinality in specs[Default.SPECS_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             keys.append(Names.keyname(uri))
         return keys
 
     @staticmethod
-    def required(key: str, structures: dict[str, dict[str, Any]]) -> list[str]:
+    def required(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
         """Provide a list of required classes.
 
         Example:
             We can find the classes that are required under the `HEAD` key
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Query
-            >>> from genedata.specifications70 import Structure
-            >>> Query.required('HEAD', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Query.required('HEAD', Specs)
             ['Gedc']
 
         Args:
             key: The top level name in the dictionary.
-            structures: The specific dictionary one wants to search.
+            specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in structures[key][
+        for uri, cardinality in specs[Default.SPECS_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             if Default.CARDINALITY_REQUIRED in cardinality:
@@ -1393,23 +1353,23 @@ class Query:
         return classes
 
     @staticmethod
-    def singular(key: str, structures: dict[str, dict[str, Any]]) -> list[str]:
+    def singular(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
         """Provide a list of classes that can be used only once as substructures.
 
         Example:
             We can find the classes that can only be used once as substructures
             in the GEDCOM version 7 specifications under the `HEAD` key by doing the following:
             >>> from genedata.methods import Query
-            >>> from genedata.specifications70 import Structure
-            >>> Query.singular('HEAD', Structure)
+            >>> from genedata.specifications70 import Specs
+            >>> Query.singular('HEAD', Specs)
             ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
 
         Args:
             key: The top level name in the dictionary.
-            structures: The specific dictionary one wants to search.
+            specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in structures[key][
+        for uri, cardinality in specs[Default.SPECS_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             if Default.CARDINALITY_SINGULAR in cardinality:

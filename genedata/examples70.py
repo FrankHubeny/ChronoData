@@ -3,13 +3,13 @@
 """
 
 __all__ = [
-    'Examples70',
+    'Examples',
 ]
 
 
 from genedata.constants import Config, Default
 
-Examples70: dict[str, str] = {
+Examples: dict[str, str] = {
     'ASSO': f"""
 
     Examples:

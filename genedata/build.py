@@ -15,20 +15,21 @@ are placed under `FACT` and `EVEN` tags as
 Some extensions are the use of ISO dates as implemented by NumPy's `datetime64`
 data type."""
 
+import importlib
 import logging
 import re
 from typing import Any, NamedTuple
 
-from genedata.classes70 import (
-    Head,
-    RecordFam,
-    RecordIndi,
-    RecordObje,
-    RecordRepo,
-    RecordSnote,
-    RecordSour,
-    RecordSubm,
-)
+# from genedata.classes70 import (
+#     Head,
+#     RecordFam,
+#     RecordIndi,
+#     RecordObje,
+#     RecordRepo,
+#     RecordSnote,
+#     RecordSour,
+#     RecordSubm,
+# )
 from genedata.constants import (
     Config,
     Default,
@@ -37,7 +38,8 @@ from genedata.constants import (
 )
 from genedata.messages import Msg
 from genedata.methods import Names, Query, Util
-from genedata.specifications70 import Structure
+
+#from genedata.specifications70 import Structure
 from genedata.structure import (
     FamilyXref,
     IndividualXref,
@@ -68,6 +70,9 @@ class Genealogy:
     ) -> None:
         self.chron_name: str = name
         self.version: str = version
+        self.version_no_periods: str = self.version.replace(Default.PERIOD, Default.EMPTY)
+        self.specs = importlib.import_module(f'genedata.specifications{self.version_no_periods}')
+        self.classes = importlib.import_module(f'genedata.classes{self.version_no_periods}')
         self.calendar: str = calendar
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
@@ -85,20 +90,21 @@ class Genealogy:
         self.ged_submitter: str = ''
         self.ged_file: str = ''
         self.ged_file_records: list[str] = []
-        self.records: list[
-            RecordFam
-            | RecordIndi
-            | RecordObje
-            | RecordRepo
-            | RecordSnote
-            | RecordSour
-            | RecordSubm
-        ] = []
-        self.record_header: Head | None = None
+        self.records: list[Any] = []
+            # self.classes.RecordFam
+            # | self.classes.RecordIndi
+            # | self.classes.RecordObje
+            # | self.classes.RecordRepo
+            # | self.classes.RecordSnote
+            # | self.classes.RecordSour
+            # | self.classes.RecordSubm
+        #] = []
+        self.record_header: Any = None #self.classes.Head | None = None
         self.schma: str = Default.EMPTY
         self.filename: str = filename
         self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
+        self.specification: dict[str, dict[str, Any]] = self.specs.Specs
         self.extension_specification: dict[str, dict[str, Any]] = {
             Default.YAML_TYPE_CALENDAR: {},
             Default.YAML_TYPE_DATATYPE: {},
@@ -216,28 +222,29 @@ class Genealogy:
 
     def stage(
         self,
-        record: Head
-        | RecordFam
-        | RecordIndi
-        | RecordObje
-        | RecordRepo
-        | RecordSnote
-        | RecordSour
-        | RecordSubm,
+        record: Any,
+        # Head
+        # | RecordFam
+        # | RecordIndi
+        # | RecordObje
+        # | RecordRepo
+        # | RecordSnote
+        # | RecordSour
+        # | RecordSubm,
     ) -> None:
         if not isinstance(
             record,
-            Head
-            | RecordFam
-            | RecordIndi
-            | RecordObje
-            | RecordRepo
-            | RecordSnote
-            | RecordSour
-            | RecordSubm,
+            self.classes.Head
+            | self.classes.RecordFam
+            | self.classes.RecordIndi
+            | self.classes.RecordObje
+            | self.classes.RecordRepo
+            | self.classes.RecordSnote
+            | self.classes.RecordSour
+            | self.classes.RecordSubm,
         ):
             raise ValueError(Msg.ONLY_RECORDS.format(str(record)))
-        if isinstance(record, Head):
+        if isinstance(record, self.classes.Head):
             self.record_header = record
         else:
             self.records.append(record)
@@ -382,11 +389,11 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
         def get_subs_specs(key: str) -> list[StructureSpecs]:
             """Associate the permitted substructure classes with the tags in the ged file."""
             subs: list[StructureSpecs] = []
-            permitted_keys: list[str] = Query.permitted_keys(key, Structure)
+            permitted_keys: list[str] = Query.permitted_keys(key, self.specs.Structure)
             for sub in permitted_keys:
                 subs.append(
                     StructureSpecs(
-                        tag=Structure[sub][Default.YAML_STANDARD_TAG],
+                        tag=self.specs.Structure[sub][Default.YAML_STANDARD_TAG],
                         key=sub,
                         class_name=Names.classname(sub),
                     )
@@ -424,7 +431,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
         def format_value(key: str, words: list[str]) -> str:
             if len(words) == 1:
                 return Default.EMPTY
-            payload: str = Structure[key][Default.YAML_PAYLOAD]
+            payload: str = self.specs.Structure[key][Default.YAML_PAYLOAD]
             match payload:
                 case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                     return f'{words[1]}'
@@ -1199,7 +1206,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             raise ValueError(Msg.MISSING.format(missing))
         return destination
 
-    def families(self, records: list[RecordFam]) -> None:
+    def families(self, records: list[Any]) -> None:
         """Collect and store all family records for the genealogy.
 
         Args:
@@ -1247,7 +1254,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_family = self._gather(records, self.family_xreflist)
 
-    def individuals(self, records: list[RecordIndi]) -> None:
+    def individuals(self, records: list[Any]) -> None:
         """Collect and store all individual records for the genealogy.
 
         Args:
@@ -1295,7 +1302,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_individual = self._gather(records, self.individual_xreflist)
 
-    def multimedia(self, records: list[RecordObje]) -> None:
+    def multimedia(self, records: list[Any]) -> None:
         """Collect and store all multimedia records for the genealogy.
 
         Args:
@@ -1353,7 +1360,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_multimedia = self._gather(records, self.multimedia_xreflist)
 
-    def repositories(self, records: list[RecordRepo]) -> None:
+    def repositories(self, records: list[Any]) -> None:
         """Collect and store all repository records for the genealogy.
 
         Args:
@@ -1404,7 +1411,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_repository = self._gather(records, self.repository_xreflist)
 
-    def shared_notes(self, records: list[RecordSnote]) -> None:
+    def shared_notes(self, records: list[Any]) -> None:
         """Collect and store all shared note records for the genealogy.
 
         Args:
@@ -1452,7 +1459,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_shared_note = self._gather(records, self.shared_note_xreflist)
 
-    def sources(self, records: list[RecordSour]) -> None:
+    def sources(self, records: list[Any]) -> None:
         """Collect and store all source records for the genealogy.
 
         Args:
@@ -1500,7 +1507,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         """
         self.ged_source = self._gather(records, self.source_xreflist)
 
-    def submitters(self, records: list[RecordSubm]) -> None:
+    def submitters(self, records: list[Any]) -> None:
         """Collect and store all submitter records for the genealogy.
 
         Args:

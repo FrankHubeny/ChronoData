@@ -34,8 +34,7 @@ The names of the dictionaries are based on the directories in this registry.  Ea
 in the directory is read into the appropriate dictionary with the stem of the yaml file acting as the key
 and the contents of the yaml file being its value.
 
-The following dictionaries are available.  Each key in the dictionary corresponds to a
-single yaml file.
+One dictionary is available called `Specs`.  It contains the following subdictionaries.
 - `Calendar` corresponding to yaml files in the calendar directory.
 - `DataType` corresponding to yaml files in the data-type directory.
 - `Enumeration` corresponding to yaml files in the enumeration directory.
@@ -49,17 +48,8 @@ Reference:
     [GEDCOM-registeries]({source})
 """
 
-__all__ = [
-    '{Default.SPECS_CALENDAR}',
-    '{Default.SPECS_DATATYPE}',
-    '{Default.SPECS_ENUMERATION}',
-    '{Default.SPECS_ENUMERATION_SET}',
-    '{Default.SPECS_EXTENSIONSTRUCTURE}',
-    '{Default.SPECS_MONTH}',
-    'Specs',
-    '{Default.SPECS_STRUCTURE}',
-    '{Default.SPECS_URI}',
-]
+__all__ = ['Specs']
+
 
 from typing import Any
 
@@ -229,26 +219,26 @@ from typing import Any
         )
 
     @staticmethod
-    def together() -> str:
+    def together(url: str) -> str:
         return ''.join(
             [
                 'Specs: dict[str, dict[str, Any]] = {',
                 Default.EOL,
-                f"    '{Default.SPECS_CALENDAR}': {Default.SPECS_CALENDAR},",
+                f"    '{Default.SPECS_CALENDAR}': {LoadSpecs.calendar_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_DATATYPE}': {Default.SPECS_DATATYPE},",
+                f"    '{Default.SPECS_DATATYPE}': {LoadSpecs.datatype_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_ENUMERATION}': {Default.SPECS_ENUMERATION},",
+                f"    '{Default.SPECS_ENUMERATION}': {LoadSpecs.enumeration_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_ENUMERATION_SET}': {Default.SPECS_ENUMERATION_SET},",
+                f"    '{Default.SPECS_ENUMERATION_SET}': {LoadSpecs.enumerationset_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_EXTENSIONSTRUCTURE}': {Default.SPECS_EXTENSIONSTRUCTURE},",
+                f"    '{Default.SPECS_EXTENSIONSTRUCTURE}': {LoadSpecs.structure_extension_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_MONTH}': {Default.SPECS_MONTH},",
+                f"    '{Default.SPECS_MONTH}': {LoadSpecs.month_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_STRUCTURE}': {Default.SPECS_STRUCTURE},",
+                f"    '{Default.SPECS_STRUCTURE}': {LoadSpecs.structure_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_URI}': {Default.SPECS_URI},",
+                f"    '{Default.SPECS_URI}': {LoadSpecs.uri_dictionary(url)},",
                 Default.EOL,
                 '}',
                 Default.EOL,
@@ -260,14 +250,14 @@ from typing import Any
         return ''.join(
             [
                 LoadSpecs.preamble(source, version),
-                LoadSpecs.calendar(url),
-                LoadSpecs.datatype(url),
-                LoadSpecs.enumeration(url),
-                LoadSpecs.enumerationset(url),
-                LoadSpecs.month(url),
-                LoadSpecs.structure(url),
-                LoadSpecs.structure_extension(url),
-                LoadSpecs.uri(url),
-                LoadSpecs.together(),
+                #LoadSpecs.calendar(url),
+                # LoadSpecs.datatype(url),
+                # LoadSpecs.enumeration(url),
+                # LoadSpecs.enumerationset(url),
+                # LoadSpecs.month(url),
+                # LoadSpecs.structure(url),
+                # LoadSpecs.structure_extension(url),
+                # LoadSpecs.uri(url),
+                LoadSpecs.together(url),
             ]
         )

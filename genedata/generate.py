@@ -1,11 +1,12 @@
 # mypy: disable-error-code="name-defined"
-"""Generate a module of classes and tests from specification and the BasicStructure and Xref classes.
+"""Generate a module of classes and tests from the GEDCOM specification, 
+the BasicStructure and the Xref classes.
 
 This module depends on the following modules which need to be prepared first. The V stands
 for a version numer.
 - The load module makes the yaml files available as a python dictionary in a specificationsV module
     where N stands for the GEDCOM version.
-- The construction of an ExampleV dictionary in the examples module based on the record
+- The construction of an `Examples` dictionary in the `examplesV` module based on the record
     structure in the specifications and examples provided in the particular structure specification.
 - The structure module containing the BasicStructure from which all of these generated classes
     will inherit.
@@ -13,13 +14,11 @@ for a version numer.
 - The constants module for constants used in all modules.
 - The message module used for messages in logging and exception handling.
 - The methods module containing static methods that can be used in any package.
-
-It the examples module
-
 """
 
 __all__ = ['Classes', 'Tests']
 
+import importlib
 import logging
 from textwrap import wrap
 from typing import Any
@@ -402,6 +401,7 @@ from genedata.structure import (
         if (
             Default.YAML_PAYLOAD in structure
             and structure[Default.YAML_PAYLOAD] != 'None'
+            and structure[Default.YAML_PAYLOAD] is not None
             and key[0:6] != Default.RECORD
         ):
             args = ''.join(
@@ -607,26 +607,24 @@ from genedata.structure import (
         Examples:
             If we have the structure and enumeration set dictionaries constructed in a specs.py file,
             we can use them to build a string that represents the class in the classes module.
-            >>> from genedata.examples import Examples70
+            >>> from genedata.examples70 import Examples
             >>> from genedata.generate import Classes
-            >>> from genedata.specifications70 import (
-            ...     Structure,
-            ...     EnumerationSet,
-            ...     Enumeration,
-            ... )
+            >>> from genedata.specifications70 import Specs
             >>> map = Classes.generate_class(
             ...     'MAP',
-            ...     Structure,
-            ...     EnumerationSet,
-            ...     Enumeration,
-            ...     Examples70['MAP'],
+            ...     Specs['Structure'],
+            ...     Specs['EnumerationSet'],
+            ...     Specs['Enumeration'],
+            ...     Examples['MAP'],
             ... )
 
         Args:
-            key: The key of the Structure dictionary.
+            key: The key of the Specs['Structure'] dictionary.
             structure: The structure dictionary where GEDCOM structure specifications are found.
             enumerationset: The enumerationset dictionary where GEDCOM enumeration-set
                 specifications are found.
+            enumeration: The enumeration dictionary where GEDCOM enumeration specifications
+                are found.
             examples: The dictionary of examples to add to this class.
         """
         tag: str = full_structure[key][Default.YAML_STANDARD_TAG]
@@ -693,13 +691,6 @@ class {class_name}(BaseStructure):
                     [
                         lines,
                         class_data,
-                        # Classes.generate_class(
-                        #     key,
-                        #     full_structure,
-                        #     full_enumeration_set,
-                        #     full_enumeration,
-                        #     examples,
-                        # ),
                     ]
                 )
         return lines
@@ -708,10 +699,6 @@ class {class_name}(BaseStructure):
     def build_all(
         source: str,
         version: str,
-        full_structure: dict[str, dict[str, Any]],
-        full_enumeration_set: dict[str, dict[str, Any]],
-        full_enumeration: dict[str, dict[str, Any]],
-        full_examples: dict[str, str],
     ) -> str:
         """Construct the entire module containing GEDCOM structures converted to classes.
 
@@ -722,33 +709,26 @@ class {class_name}(BaseStructure):
         Example:
             This example constructs a string that could be used for a classes module
             using a specification module that has already been constructed.
-            >>> from genedata.examples import Examples70
             >>> from genedata.generate import Classes
-            >>> from genedata.specifications70 import (
-            ...     Structure,
-            ...     EnumerationSet,
-            ...     Enumeration,
-            ... )
-            >>> all = Classes.build_all(
-            ...     'specify-ged-source',
-            ...     '7.0',
-            ...     Structure,
-            ...     EnumerationSet,
-            ...     Enumeration,
-            ...     Examples70,
-            ... )
+            >>> all = Classes.build_all('specify-ged-source','7.0')
 
+        Args:
+            source: The source of the specification.
+            version: The version of the specification.
         """
+        version_no_periods: str = version.replace(Default.PERIOD, Default.EMPTY)
+        examples = importlib.import_module(f'genedata.examples{version_no_periods}')
+        specifications = importlib.import_module(f'genedata.specifications{version_no_periods}')
         return ''.join(
             [
                 Classes.preamble(source, version),
-                Classes.all_listing(full_structure),
+                Classes.all_listing(specifications.Specs[Default.SPECS_STRUCTURE]),
                 Classes.imports(),
                 Classes.all_classes(
-                    full_structure,
-                    full_enumeration_set,
-                    full_enumeration,
-                    full_examples,
+                    specifications.Specs[Default.SPECS_STRUCTURE],
+                    specifications.Specs[Default.SPECS_ENUMERATION_SET],
+                    specifications.Specs[Default.SPECS_ENUMERATION],
+                    examples.Examples,
                 ),
             ]
         )
@@ -1154,9 +1134,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
 
     @staticmethod
     def all(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test for each generated class.
 
@@ -1167,7 +1145,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
             enumerationsets: The full EnumerationSet dictionary containing all structures.
             enumerations: The full Enumeration dictionary containing the enumerations.
         """
-
+        
         def write(key: str, value: str, subs: str) -> str:
             """Write out a single test for the class `key` with value `value`."""
             separator: str = Default.EMPTY
@@ -1183,6 +1161,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'All'
         lines: str = Tests.preamble(test_name)
         value: str = Default.EMPTY
@@ -1206,9 +1187,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def not_permitted(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test verifying that a substructure not in its permitted list is rejected.
 
@@ -1238,6 +1217,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Not Permitted'
         not_permitted_sub: str = f'{Default.CODE_CLASS}.RecordIndi(indi)'
         lines: str = Tests.preamble(test_name, add_pytest=1)
@@ -1269,9 +1251,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def bad_payload(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test verifying that bad payload is rejected.
 
@@ -1301,6 +1281,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Bad Payload'
         error_message: str = 'NOT_STRING'
         lines: str = Tests.preamble(
@@ -1326,9 +1309,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def bad_enum(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test verifying that a bad enumeration value is rejected.
 
@@ -1358,6 +1339,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Bad Enum'
         bad_enum: str = "'XYZ1234567890'"
         lines: str = Tests.preamble(test_name, add_pytest=1)
@@ -1375,9 +1359,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def bad_singular(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test verifying that a substructure with a single constraint is rejected
         if entered more than once.
@@ -1408,6 +1390,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Bad Singular'
         lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
@@ -1453,9 +1438,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def missing_required(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate a test verifying that a substructure without its required substructures is rejected.
 
@@ -1485,6 +1468,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Missing Required'
         lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
@@ -1510,9 +1496,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def empty_subs(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate tests verifying that a substructure without substructures in its specification
         cannot enter a substructure.
@@ -1542,6 +1526,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Empty Subs'
         lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
@@ -1561,9 +1548,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
     @staticmethod
     def empty_value(
-        structures: dict[str, dict[str, Any]],
-        enumerationsets: dict[str, dict[str, Any]],
-        enumerations: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]]
     ) -> str:
         """Generate tests verifying that a substructure without substructures in its specification
         cannot enter a substructure.
@@ -1593,6 +1578,9 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
+        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
         test_name: str = 'Empty Value'
         value: str = "'hi'"
         lines: str = Tests.preamble(test_name, add_pytest=2)
