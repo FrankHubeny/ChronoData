@@ -204,33 +204,33 @@ class Util:
             )
         return yaml_dict
 
-#     @staticmethod
-#     def ged_summary(ged: str) -> str:
-#         """Summarize the contents of a ged file.
+    #     @staticmethod
+    #     def ged_summary(ged: str) -> str:
+    #         """Summarize the contents of a ged file.
 
-#         Args:
-#             ged: The string obtained from reading or producing a ged file.
-#         """
+    #         Args:
+    #             ged: The string obtained from reading or producing a ged file.
+    #         """
 
-#         # Count the number of record types.
-#         fam_count: int = len(re.findall('\n0.+FAM', ged))
-#         indi_count: int = len(re.findall('\n0.+INDI', ged))
-#         obje_count: int = len(re.findall('\n0.+OBJE', ged))
-#         repo_count: int = len(re.findall('\n0.+REPO', ged))
-#         snote_count: int = len(re.findall('\n0.+SNOTE', ged))
-#         sour_count: int = len(re.findall('\n0.+SOUR', ged))
-#         subm_count: int = len(re.findall('\n0.+SUBM', ged))
+    #         # Count the number of record types.
+    #         fam_count: int = len(re.findall('\n0.+FAM', ged))
+    #         indi_count: int = len(re.findall('\n0.+INDI', ged))
+    #         obje_count: int = len(re.findall('\n0.+OBJE', ged))
+    #         repo_count: int = len(re.findall('\n0.+REPO', ged))
+    #         snote_count: int = len(re.findall('\n0.+SNOTE', ged))
+    #         sour_count: int = len(re.findall('\n0.+SOUR', ged))
+    #         subm_count: int = len(re.findall('\n0.+SUBM', ged))
 
-#         # Return the number of record types.
-#         return f"""
-# Families      {fam_count!s}
-# Individuals   {indi_count!s}
-# Multimedia    {obje_count!s}
-# Repositories  {repo_count!s}
-# Shared Notes  {snote_count!s}
-# Sources       {sour_count!s}
-# Submitters    {subm_count!s}
-# """
+    #         # Return the number of record types.
+    #         return f"""
+    # Families      {fam_count!s}
+    # Individuals   {indi_count!s}
+    # Multimedia    {obje_count!s}
+    # Repositories  {repo_count!s}
+    # Shared Notes  {snote_count!s}
+    # Sources       {sour_count!s}
+    # Submitters    {subm_count!s}
+    # """
 
     @staticmethod
     def compare(first: str, second: str) -> str:
@@ -1448,7 +1448,7 @@ class Query:
             We could use the `Count` key and then the `INDI` subkey to find the value `0`.
             >>> Query.record_counts(file)['Count']['INDI']
             0
-        
+
         Args:
             ged: The gedcom string.
             record_column: The name of the `record` dictionary key which becomes the
@@ -1466,20 +1466,31 @@ class Query:
                     Default.EOL,
                     '0 @.*@ ',
                     record,
-                    #Default.EOL,
+                    # Default.EOL,
                 ]
             )
             howmany = len(re.findall(searchfor, ged))
             count.update({record: howmany})
         data.update({column: count})
         return data
-    
+
     @staticmethod
     def make_dictionary(ged: str) -> dict[str, Any]:
-        ged_dict: dict[str, Any] = {}
+        ged_dict: dict[str, Any] = {
+            'HEAD': {},
+            'FAM': {},
+            'INDI': {},
+            'OBJE': {},
+            'REPO': {},
+            'SNOTE': {},
+            'SOUR': {},
+            'SUBM': {},
+        }
         ged_list: list[str] = ged.split(Default.EOL)
         for line in ged_list:
             line_list: list[str] = line.split(Default.SPACE, 2)
+            if line_list[0] == '0' and len(line_list) > 2 and line_list[2][0:5] != 'SNOTE':
+                ged_dict[line_list[2]].update({line_list[1]:{}})
             ged_dict.update({})
         return ged_dict
 

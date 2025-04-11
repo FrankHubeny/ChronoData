@@ -20,7 +20,7 @@ It the examples module
 
 __all__ = ['Classes', 'Tests']
 
-
+import logging
 from textwrap import wrap
 from typing import Any
 
@@ -672,21 +672,34 @@ class {class_name}(BaseStructure):
         """Generate all classes and their documentation defined by the Structure dictionary."""
 
         lines: str = Default.EMPTY
+        class_data: str = Default.EMPTY
         for key, _structure in full_structure.items():
             if key not in Default.IGNORE:
                 examples: str = Default.EMPTY
                 if key in full_examples:
                     examples = full_examples[key]
+                try:
+                    class_data = Classes.generate_class(
+                                key,
+                                full_structure,
+                                full_enumeration_set,
+                                full_enumeration,
+                                examples,
+                            )
+                except Exception:
+                    logging.info(f'"{key}" failed to generate class.')
+                    raise
                 lines = ''.join(
                     [
                         lines,
-                        Classes.generate_class(
-                            key,
-                            full_structure,
-                            full_enumeration_set,
-                            full_enumeration,
-                            examples,
-                        ),
+                        class_data,
+                        # Classes.generate_class(
+                        #     key,
+                        #     full_structure,
+                        #     full_enumeration_set,
+                        #     full_enumeration,
+                        #     examples,
+                        # ),
                     ]
                 )
         return lines
