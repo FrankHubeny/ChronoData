@@ -9,7 +9,7 @@ from genedata.build import Genealogy   # noqa: I001
 import genedata.classes70 as gc
 
 
-g = Genealogy('test')
+g = Genealogy()
 fam = g.family_xref('1')
 indi = g.individual_xref('1')
 obje = g.multimedia_xref('1')

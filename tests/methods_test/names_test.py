@@ -9,7 +9,7 @@ import pytest
 
 from genedata.constants import Default
 from genedata.methods import Names
-from genedata.specifications70 import Structure
+from genedata.specifications70 import Specs
 
 
 def test_keyname_from_classname() -> None:
@@ -18,9 +18,9 @@ def test_keyname_from_classname() -> None:
     bad: int = 0
     class_name: str = Default.EMPTY
     key_name: str = Default.EMPTY 
-    for key in Structure:
+    for key in Specs[Default.SPECS_STRUCTURE]:
         class_name = Names.classname(key)
-        key_name = Names.key_from_classname(class_name, Structure)
+        key_name = Names.key_from_classname(class_name, Specs)
         if key_name == key:
             good += 1
         else:
@@ -30,7 +30,7 @@ def test_keyname_from_classname() -> None:
 
 def test_key_from_classname_not_present() -> None:
     key = 'abc'
-    assert Names.key_from_classname(key, Structure) == ''
+    assert Names.key_from_classname(key, Specs) == ''
 
 def test_quote_text_single_line_no_quotes() -> None:
     text: str = 'happy'

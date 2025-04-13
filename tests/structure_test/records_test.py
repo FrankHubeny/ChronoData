@@ -27,35 +27,35 @@ from genedata.messages import Msg
 #    a. Good run.
 def test_good_run_obje() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     obje = g.multimedia_xref('a')
     h = gc.RecordObje(obje, gc.File('test.text', gc.Form('text/plain')))
     assert h.validate()
 
 def test_good_run_repo() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     repo = g.repository_xref('a')
     h = gc.RecordRepo(repo, gc.Name('test.text'))
     assert h.validate()
 
 def test_good_run_sour() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     sour = g.source_xref('a')
     h = gc.RecordSour(sour)
     assert h.validate()
 
 def test_good_run_subm() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     subm = g.submitter_xref('a')
     h = gc.RecordSubm(subm, gc.Name('this'))
     assert h.validate()
 
 def test_good_run_snote() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     snote = g.shared_note_xref('a', 'a note')
     h = gc.RecordSnote(snote)
     assert h.validate()
@@ -65,7 +65,7 @@ def test_good_run_snote() -> None:
 
 def test_not_permitted_obje() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     obje = g.multimedia_xref('a')
     m = gc.RecordObje(obje, [gc.File('test.text', gc.Form('text/plain')),gc.Phrase('test')])
     with pytest.raises(
@@ -78,7 +78,7 @@ def test_not_permitted_obje() -> None:
 
 def test_not_permitted_subm() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     subm = g.submitter_xref('a')
     m = gc.RecordSubm(subm, [gc.Name('this'),gc.Phrase('test')])
     with pytest.raises(
@@ -91,7 +91,7 @@ def test_not_permitted_subm() -> None:
 
 def test_not_permitted_sour() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     sour = g.source_xref('a')
     m = gc.RecordSour(sour, gc.Phrase('test'))
     with pytest.raises(
@@ -104,7 +104,7 @@ def test_not_permitted_sour() -> None:
 
 def test_not_permitted_repo() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     repo = g.repository_xref('a')
     m = gc.RecordRepo(repo, [gc.Phrase('test'), gc.Name('this')])
     with pytest.raises(
@@ -120,7 +120,7 @@ def test_not_permitted_repo() -> None:
 
 def test_valid_snote_xref() -> None:
     """Check that value is not a correct xref value."""
-    g = Genealogy('test')
+    g = Genealogy()
     value = g.family_xref()
     m = gc.RecordSnote(value)  # type: ignore[arg-type]
     with pytest.raises(

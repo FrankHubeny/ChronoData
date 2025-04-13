@@ -14,7 +14,7 @@ testdata = [('joe_someone', '@JOE_SOMEONE@')]
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_address(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy(name='genesis5')
+    a = Genealogy()
     # first generation
     joe_someone = str(a.individual_xref(' Joe Someone '))  # noqa: F841
     jill_someone = str(a.individual_xref('Jill Someone'))  # noqa: F841

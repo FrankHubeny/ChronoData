@@ -16,7 +16,7 @@ ged_version: str = '7.0'
 def test_obje1_ged() -> None:
     """Construct the obje1_ged example file."""
     file = Util.read('tests\\ged_test\\obje-1.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi_xref = g.individual_xref('2')
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')
@@ -74,7 +74,7 @@ def test_obje1_ged() -> None:
 def test_obje1_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\obje-1.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi_xref = g.individual_xref('2')
     obje1_xref = g.multimedia_xref('1')
     obje2_xref = g.multimedia_xref('X1')

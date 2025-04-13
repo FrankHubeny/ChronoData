@@ -28,7 +28,7 @@ testdata_indi_xref = [
 def test_create_individual_xrefs(
     test_input: str, expected: str | int | bool
 ) -> None:
-    a = Genealogy('test')
+    a = Genealogy()
 
     # Create the individual xrefs.
     joe_xref = a.individual_xref('joseph')

@@ -63,17 +63,22 @@ class Genealogy:
 
     def __init__(
         self,
-        name: str = '',
-        filename: str = '',
+        #name: str = Default.EMPTY,
+        filename: str = Default.EMPTY,
         version: str = '7.0',
-        calendar: str = String.GREGORIAN,
     ) -> None:
-        self.chron_name: str = name
+        #self.chron_name: str = name
         self.version: str = version
+        self.filename: str = filename
+        self.ged_file: str = Default.EMPTY
+        self.ged_ext_tags: list[list[str]] = []
+        if self.filename != Default.EMPTY:
+            self.ged_file: str = Util.read_ged(self.filename)
+            self.version = Query.version(self.ged_file)
+            self.ged_ext_tags = Query.extensions(self.ged_file)
         self.version_no_periods: str = self.version.replace(Default.PERIOD, Default.EMPTY)
         self.specs = importlib.import_module(f'genedata.specifications{self.version_no_periods}')
         self.classes = importlib.import_module(f'genedata.classes{self.version_no_periods}')
-        self.calendar: str = calendar
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
@@ -88,7 +93,6 @@ class Genealogy:
         self.ged_shared_note: str = ''
         self.ged_source: str = ''
         self.ged_submitter: str = ''
-        self.ged_file: str = ''
         self.ged_file_records: list[str] = []
         self.records: list[Any] = []
             # self.classes.RecordFam
@@ -101,8 +105,8 @@ class Genealogy:
         #] = []
         self.record_header: Any = None #self.classes.Head | None = None
         self.schma: str = Default.EMPTY
-        self.filename: str = filename
-        self.filename_type: str = self._get_filename_type(self.filename)
+        
+        #self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
         self.specification: dict[str, dict[str, Any]] = self.specs.Specs
         self.extension_specification: dict[str, dict[str, Any]] = {
@@ -123,12 +127,6 @@ class Genealogy:
         self.source_xreflist: list[str] = [Void.NAME]
         self.submitter_xreflist: list[str] = [Void.NAME]
         self.record_dict: dict[str, dict[str, str]] = {
-            # 'EXT': {
-            #     'key': 'record-EXT',
-            #     'type': 'extension',
-            #     'class': 'RecordExt',
-            #     'call': 'extension_xref',
-            # },
             'FAM': {
                 'key': 'record-FAM',
                 'type': Default.FAM_RECORD_TYPE,
@@ -172,31 +170,13 @@ class Genealogy:
                 'call': 'submitter_xref',
             },
         }
-        match self.filename_type:
-            case '':
-                self.chron: dict[str, str] = {
-                    # Tag.NAME: name,
-                    # Key.CAL: calendar,
-                }
-                # if log:
-                #     logging.info(Msg.STARTED.format(self.chron_name))
-            # case String.JSON:
-            #     self.read_json()
-            #     if log:
-            #         logging.info(Msg.LOADED.format(self.chron_name, filename))
-            case String.GED:
-                self.load_ged(self.filename)
-                # if log:
-                #     logging.info(Msg.LOADED.format(self.chron_name, filename))
-            # case String.CSV:
-            #     self.read_csv()
-            #     if log:
-            #         logging.info(Msg.LOADED.format(self.chron_name, filename))
-            case _:
-                raise ValueError(Msg.UNRECOGNIZED.format(self.filename))
-
-    # def __str__(self) -> str:
-    #     return json.dumps(self.chron)
+        # match self.filename_type:
+        #     case '':
+        #         self.chron: dict[str, str] = {}
+        #     case String.GED:
+        #         self.load_ged(self.filename)
+        #     case _:
+        #         raise ValueError(Msg.UNRECOGNIZED.format(self.filename))
 
     def add_tag(self, tag: str, yaml_file: str) -> None:
         """Add an extension tag to the extension specifications.
@@ -257,7 +237,7 @@ class Genealogy:
             using the following steps.
             >>> from genedata.build import Genealogy
             >>> import genedata.classes70 as gc
-            >>> g = Genealogy('minimal example')
+            >>> g = Genealogy()
             >>> indi_xref = g.individual_xref('1')
             >>> fam_xref = g.family_xref('2')
             >>> indi = gc.RecordIndi(indi_xref)
@@ -278,15 +258,8 @@ class Genealogy:
         if self.record_header is None:
             raise ValueError(Msg.MISSING_HEADER)
 
-        # Add in any SCHMA TAG values by replacing `0 HEAD` with complete header lines.
-        lines = self.record_header.ged()
-        if Default.HEADER not in lines:
-            lines = self.record_header.ged().replace(
-                Default.HEAD_LINE,
-                f'{Default.HEADER}{self.version}{Default.EOL}{self.schma}',
-            )
-
         # Construct the ged lines for each record.
+        lines = self.record_header.ged()
         for record in self.records:
             lines = ''.join([lines, record.ged()])
         return ''.join([lines, Default.TRAILER])
@@ -295,11 +268,11 @@ class Genealogy:
         """Save the ged file constructed by this instance of the Genealogy class."""
         Util.write_ged(self.show_ged(), file_name)
 
-    def load_ged(self, file_name: str) -> None:
+    def load_ged(self) -> None:
         """Load a ged file."""
-        self.filename = file_name
-        if self.ged_file != Default.EMPTY:
-            raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
+        # self.filename = file_name
+        # if self.ged_file != Default.EMPTY:
+        #     raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
         self.ged_file = Util.read(self.filename)
 
     def ged_to_code(self) -> str:
@@ -512,7 +485,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         def initialize() -> str:
             """Construct the section of the code where the Genealogy class is instantiated."""
             return f"""# Instantiate a Genealogy class with the name of the ged file.
-{Default.CODE_GENEALOGY} = Genealogy('{self.filename}')
+{Default.CODE_GENEALOGY} = Genealogy(version='{self.version}')
 """
 
         def extensions() -> str:
@@ -765,7 +738,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a family record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.family_xref()
             >>> print(id)
             @1@
@@ -830,7 +803,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             The first example shows the output of the counter for an individual record
             without a name.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.individual_xref()
             >>> print(id)
             @1@
@@ -896,7 +869,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a multimedia record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.multimedia_xref()
             >>> print(id)
             @1@
@@ -962,7 +935,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a repository record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.repository_xref()
             >>> print(id)
             @1@
@@ -1025,7 +998,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a shared note record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.shared_note_xref('1', 'This is a shared note.')
             >>> print(id)
             @1@
@@ -1084,7 +1057,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a shared note record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.source_xref()
             >>> print(id)
             @1@
@@ -1143,7 +1116,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         Examples:
             The first example generates identifier for a shared note record.
             >>> from genedata.build import Genealogy
-            >>> a = Genealogy('testing')
+            >>> a = Genealogy()
             >>> id = a.submitter_xref()
             >>> print(id)
             @1@
@@ -1216,7 +1189,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordFam
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> family_id = a.family_xref()
             >>> family = RecordFam(family_id)
             >>> a.families(
@@ -1264,7 +1237,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordIndi
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> individual_id = a.individual_xref()
             >>> individual = RecordIndi(individual_id)
             >>> a.individuals(
@@ -1312,7 +1285,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import File, Form, RecordObje
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> mm_id = a.multimedia_xref()
             >>> mm = RecordObje(
             ...     mm_id, File('/path/to/file', Form('application/pdf'))
@@ -1370,7 +1343,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordRepo, Name
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> repo_id = a.repository_xref()
             >>> repo = RecordRepo(repo_id, Name('Repo Name'))
             >>> a.repositories(
@@ -1421,7 +1394,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordSnote, Name
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> sn_id = a.shared_note_xref('1', 'The text of a shared note')
             >>> sn = RecordSnote(sn_id)
             >>> a.shared_notes(
@@ -1469,7 +1442,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordSour
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> source_id = a.source_xref()
             >>> source = RecordSour(source_id)
             >>> a.sources(
@@ -1517,7 +1490,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
             This is a minimal example illustrating the process.
             >>> from genedata.build import Genealogy
             >>> from genedata.classes70 import RecordSubm, Name
-            >>> a = Genealogy('test')
+            >>> a = Genealogy()
             >>> sub_id = a.submitter_xref()
             >>> sub = RecordSubm(sub_id, Name('Tom'))
             >>> a.submitters(
@@ -1579,7 +1552,7 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
         If it is not then the report will be run on the empty string.  The counts
         for all records would then be 0.  For example:
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('test')
+        >>> g = Genealogy()
         >>> g.query_record_counts()
         {'Count': {'FAM': 0, 'INDI': 0, 'OBJE': 0, 'REPO': 0, 'SNOTE': 0, 'SOUR': 0, 'SUBM': 0}}
 

@@ -17,7 +17,7 @@ def test_xref_ged() -> None:
     # Test constructing the xref_ged test data.
     file = Util.read('tests\\ged_test\\xref.ged')
 
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
 
     head = gc.Head(
         [
@@ -67,7 +67,7 @@ def test_xref_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\xref.ged')
 
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
 
     head = gc.Head(
         [

@@ -1098,25 +1098,19 @@ class Asso(BaseStructure):
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
         >>> from genedata.structure import Void
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi1 = g.individual_xref('I1')
         >>> indi2 = g.individual_xref('I2')
-        >>> indi = gc.RecordIndi(indi1,
-        ...     [
-        ...         gc.Asso(Void.INDI, 
-        ...             [
-        ...                 gc.Phrase('Mr Stockdale'),
-        ...                 gc.Role('OTHER', gc.Phrase('Teacher')),
-        ...             ]
-        ...         ),
-        ...         gc.Bapm('',
-        ...             [
-        ...                 gc.Date('1930'),
-        ...                 gc.Asso(indi2, gc.Role('CLERGY')),
-        ...             ]
-        ...         ),
-        ...     ]
-        ... )
+        >>> indi = gc.RecordIndi(indi1, [
+        ...     gc.Asso(Void.INDI, [
+        ...         gc.Phrase('Mr Stockdale'),
+        ...         gc.Role('OTHER', gc.Phrase('Teacher')),
+        ...     ]),
+        ...     gc.Bapm('', [
+        ...         gc.Date('1930'),
+        ...         gc.Asso(indi2, gc.Role('CLERGY')),
+        ...     ]),
+        ... ])
         >>> print(indi.ged())
         0 @I1@ INDI
         1 ASSO @VOID@
@@ -5029,19 +5023,15 @@ class FileTran(BaseStructure):
         The following example shows how to construct the example in the specification.
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> obje_xref = g.multimedia_xref('EX')
-        >>> obje = gc.RecordObje(obje_xref,
-        ...     [
-        ...         gc.File('media/original.mp3',
-        ...             [
-        ...                 gc.Form('audio/mp3'),
-        ...                 gc.FileTran('media/derived.oga', gc.Form('audio/ogg')),
-        ...                 gc.FileTran('media/transcript.vtt', gc.Form('text/vtt')),
-        ...             ]
-        ...         ),
-        ...     ]
-        ... )
+        >>> obje = gc.RecordObje(obje_xref, [
+        ...     gc.File('media/original.mp3', [
+        ...         gc.Form('audio/mp3'),
+        ...         gc.FileTran('media/derived.oga', gc.Form('audio/ogg')),
+        ...         gc.FileTran('media/transcript.vtt', gc.Form('text/vtt')),
+        ...     ]),
+        ... ])
         >>> print(obje.ged())
         0 @EX@ OBJE
         1 FILE media/original.mp3
@@ -5804,7 +5794,7 @@ class Head(BaseStructure):
 
         Second, instantiate a Genealogy along with any cross reference identifiers
         that will be needed.  In this case, we need a source and a submitter xref.
-        >>> g = Genealogy('header test')
+        >>> g = Genealogy()
         >>> subm_xref = g.submitter_xref('U1')
         >>> sour_xref = g.source_xref('S1')
 
@@ -5986,13 +5976,11 @@ class Height(BaseStructure):
         The following example shows how to construct the example in the specification.
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi_xref = g.individual_xref('I45')
-        >>> indi = gc.RecordIndi(indi_xref, 
-        ...     [
-        ...         gc.Dscr('brown eyes, 5ft 10in, 198 pounds'),
-        ...     ]
-        ... )
+        >>> indi = gc.RecordIndi(indi_xref, [
+        ...     gc.Dscr('brown eyes, 5ft 10in, 198 pounds'),
+        ... ])
         >>> print(indi.ged())
         0 @I45@ INDI
         1 DSCR brown eyes, 5ft 10in, 198 pounds
@@ -6355,24 +6343,18 @@ class IndiEven(BaseStructure):
         The following example shows how to construct the example in the specification.
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi_xref = g.individual_xref('I1')
-        >>> indi = gc.RecordIndi(indi_xref, 
-        ...     [
-        ...         gc.IndiEven('',
-        ...             [
-        ...                 gc.Type('Land Lease'),
-        ...                 gc.Date('2 OCT 1837'),
-        ...             ]
-        ...         ),
-        ...         gc.IndiEven('Mining equipment',
-        ...             [
-        ...                 gc.Type('Equipment Lease'),
-        ...                 gc.Date('4 NOV 1837'),
-        ...             ]
-        ...         ),
-        ...     ]
-        ... )
+        >>> indi = gc.RecordIndi(indi_xref, [
+        ...     gc.IndiEven('', [
+        ...         gc.Type('Land Lease'),
+        ...         gc.Date('2 OCT 1837'),
+        ...     ]),
+        ...     gc.IndiEven('Mining equipment', [
+        ...         gc.Type('Equipment Lease'),
+        ...         gc.Date('4 NOV 1837'),
+        ...     ]),
+        ... ])
         >>> print(indi.ged())
         0 @I1@ INDI
         1 EVEN
@@ -6473,7 +6455,7 @@ class IndiFact(BaseStructure):
         The following example shows how to construct the example in the specification.
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi_xref = g.individual_xref('I1')
         >>> indi = gc.RecordIndi(indi_xref, 
         ...     gc.IndiFact('Woodworking', gc.Type('Skills'))
@@ -7220,12 +7202,10 @@ class Lati(BaseStructure):
         coordinates into a Map structure to produce the GEDCOM example
         mentioned in the GEDCOM Specification section.
         >>> import genedata.classes70 as gc
-        >>> m = gc.Map(
-        ...     [
-        ...         gc.Lati('N18.150944'), 
-        ...         gc.Long('E168.150944')
-        ...     ]
-        ... )
+        >>> m = gc.Map([
+        ...     gc.Lati('N18.150944'), 
+        ...     gc.Long('E168.150944')
+        ... ])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -7236,12 +7216,10 @@ class Lati(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Lati.  A similar one exists for Long.
         >>> from genedata.methods import Input
-        >>> m = gc.Map(
-        ...     [
-        ...         gc.Lati(Input.lati(18, 9, 3.4)), 
-        ...         gc.Long('E168.150944'),
-        ...     ]
-        ... )
+        >>> m = gc.Map([
+        ...     gc.Lati(Input.lati(18, 9, 3.4)), 
+        ...     gc.Long('E168.150944'),
+        ... ])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -7351,12 +7329,10 @@ class Long(BaseStructure):
         coordinates into a map structure to produce the GEDCOM output
         mentioned in the GEDCOM Specification.
         >>> import genedata.classes70 as gc
-        >>> m = gc.Map(
-        ...     [
-        ...         gc.Lati('N18.150944'), 
-        ...         gc.Long('E168.150944')
-        ...     ]
-        ... )
+        >>> m = gc.Map([
+        ...     gc.Lati('N18.150944'), 
+        ...     gc.Long('E168.150944')
+        ... ])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -7367,12 +7343,10 @@ class Long(BaseStructure):
         and seconds to a floating point value, the `Input` class provides
         a utility to do so for Long.  A similar one exists for Lati.
         >>> from genedata.methods import Input
-        >>> m = gc.Map(
-        ...     [
-        ...         gc.Lati('N18.150944'), 
-        ...         gc.Long(Input.long(168, 9, 3.4)),
-        ...     ]
-        ... )
+        >>> m = gc.Map([
+        ...     gc.Lati('N18.150944'), 
+        ...     gc.Long(Input.long(168, 9, 3.4)),
+        ... ])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -7434,12 +7408,10 @@ class Map(BaseStructure):
         coordinates into a map structure to produce the GEDCOM output.
         >>> from genedata.methods import Input
         >>> import genedata.classes70 as gc
-        >>> m = gc.Map(
-        ...     [
-        ...         gc.Lati('N18.150944'), 
-        ...         gc.Long('E168.150944'),
-        ...     ]
-        ... )
+        >>> m = gc.Map([
+        ...     gc.Lati('N18.150944'), 
+        ...     gc.Long('E168.150944'),
+        ... ])
         >>> print(m.ged())
         1 MAP
         2 LATI N18.150944
@@ -7915,7 +7887,7 @@ class Medi(BaseStructure):
         First import the classes and build a multimedia cross reference identifier.
         >>> from genedata.build import Genealogy
         >>> import genedata.classes70 as gc
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> obje_xref = g.multimedia_xref('M1')
 
         Next construct the ged lines.  Let `photo.jpg` be the file name of the photo.
@@ -8152,19 +8124,15 @@ class NameTran(BaseStructure):
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
         >>> import genedata.classes70 as gc
-        >>> m = gc.IndiName('/孔/德庸',
-        ...         [
-        ...             gc.Givn('德庸'),
-        ...             gc.Surn('孔'),
-        ...             gc.NameTran('/Kǒng/ Déyōng',
-        ...                 [
-        ...                     gc.Givn('Déyōng'),
-        ...                     gc.Surn('Kǒng'),
-        ...                     gc.Lang('zh-pinyin'),
-        ...                 ]
-        ...             )
-        ...         ]
-        ... )
+        >>> m = gc.IndiName('/孔/德庸', [
+        ...     gc.Givn('德庸'),
+        ...     gc.Surn('孔'),
+        ...     gc.NameTran('/Kǒng/ Déyōng', [
+        ...         gc.Givn('Déyōng'),
+        ...         gc.Surn('Kǒng'),
+        ...         gc.Lang('zh-pinyin'),
+        ...     ])
+        ... ])
         >>> print(m.ged(1))
         1 NAME /孔/德庸
         2 GIVN 德庸
@@ -8837,20 +8805,18 @@ class NoteTran(BaseStructure):
         These are the steps to build the example in the specification.
         First the classes are imported which construct the ged lines.
         >>> import genedata.classes70 as gc
-        >>> m = gc.IndiName('Arete /Hernandez/', 
-        ...     gc.Note('Named after Arete from <i>The Odyssey</i>',
-        ...         [
-        ...             gc.Lang('en'),
-        ...             gc.Mime('text/html'),
-        ...             gc.NoteTran('Named after Arete from "The Odyssey"', 
-        ...                 gc.Mime('text/plain')
-        ...             ),
-        ...             gc.NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', 
-        ...                 gc.Lang('es')
-        ...             ),
-        ...         ]
-        ...     )
-        ... ) 
+        >>> m = gc.IndiName('Arete /Hernandez/', [
+        ...     gc.Note('Named after Arete from <i>The Odyssey</i>', [
+        ...         gc.Lang('en'),
+        ...         gc.Mime('text/html'),
+        ...         gc.NoteTran('Named after Arete from "The Odyssey"', 
+        ...             gc.Mime('text/plain')
+        ...         ),
+        ...         gc.NoteTran('Nombrada en honor a Arete de <i>La Odisea</i>', 
+        ...             gc.Lang('es')
+        ...         ),
+        ...     ]),
+        ... ]) 
         >>> print(m.ged(1))
         1 NAME Arete /Hernandez/
         2 NOTE Named after Arete from <i>The Odyssey</i>
@@ -9327,9 +9293,9 @@ class OrdStat(BaseStructure):
         This example shows a successful run of the OrdStat structure using
         the enumeration value 'BIC' occurring on January 15, 2020.
         >>> import genedata.classes70 as gc
-        >>> m = gc.OrdStat('BIC', 
+        >>> m = gc.OrdStat('BIC', [
         ...     gc.DateExact('15 JAN 2020')
-        ... )
+        ... ])
         >>> print(m.ged(1))
         1 STAT BIC
         2 DATE 15 JAN 2020
@@ -9518,7 +9484,7 @@ class Page(BaseStructure):
         >>> from genedata.build import Genealogy
         >>> import genedata.classes70 as gc 
         >>> from genedata.structure import Void
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> sour_xref = g.source_xref('S1')
 
         These are the steps to build the first example:
@@ -9839,7 +9805,7 @@ class Phrase(BaseStructure):
         individual cross reference identifier `I2` for the fifth example:
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi = g.individual_xref('I2')
         
         These are the steps for the first example.
@@ -10061,18 +10027,16 @@ class PlacTran(BaseStructure):
     Example:
         The following steps would generate the example in the specifications.
         >>> import genedata.classes70 as gc
-        >>> m = gc.Plac('千代田, 東京, 日本',
-        ...     [
-        ...         gc.PlacForm('区, 都, 国'),
-        ...         gc.Lang('ja'),
-        ...         gc.PlacTran('Chiyoda, Tokyo, Nihon', 
-        ...             gc.Lang('ja-Latn')
-        ...         ),
-        ...         gc.PlacTran('Chiyoda, Tokyo, Japan', 
-        ...             gc.Lang('en')
-        ...         ),
-        ...     ]
-        ... )
+        >>> m = gc.Plac('千代田, 東京, 日本', [
+        ...     gc.PlacForm('区, 都, 国'),
+        ...     gc.Lang('ja'),
+        ...     gc.PlacTran('Chiyoda, Tokyo, Nihon', 
+        ...         gc.Lang('ja-Latn')
+        ...     ),
+        ...     gc.PlacTran('Chiyoda, Tokyo, Japan', 
+        ...         gc.Lang('en')
+        ...     ),
+        ... ])
         >>> print(m.ged(2))
         2 PLAC 千代田, 東京, 日本
         3 FORM 区, 都, 国
@@ -10206,7 +10170,7 @@ class Plac(BaseStructure):
         in a RecordSour.
         >>> import genedata.classes70 as gc
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> sour = g.source_xref('S1')
         >>> m = gc.RecordSour(sour, 
         ...     gc.Data(
@@ -10833,7 +10797,7 @@ class RecordIndi(BaseStructure):
         RecordIndi class format them into the desired ged lines.
         >>> from genedata.build import Genealogy
         >>> import genedata.classes70 as gc
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi_i1_xref = g.individual_xref('I1')
         >>> indi_i2_xref = g.individual_xref('I2')
         >>> m = gc.RecordIndi(indi_i1_xref, 
@@ -11131,8 +11095,9 @@ class RecordSnote(BaseStructure):
         `GORDON` and an individual `I1`.  We will create those cross
         reference identifiers first.
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
-        >>> snote_xref = g.shared_note_xref('GORDON', '"Gordon" is a traditional Scottish surname.\\nIt became a given name in honor of Charles George Gordon.')
+        >>> g = Genealogy()
+        >>> snote_xref = g.shared_note_xref('GORDON', 
+        ...     '"Gordon" is a traditional Scottish surname.\\nIt became a given name in honor of Charles George Gordon.')
         >>> indi_xref = g.individual_xref('I1')
 
         Next create the record for the shared note:
@@ -11142,12 +11107,10 @@ class RecordSnote(BaseStructure):
         Next create the individual record.
         >>> indi = gc.RecordIndi(
         ...     indi_xref,
-        ...     gc.IndiName('Gordon /Jones/',
-        ...         [
-        ...             gc.Note('Named after the astronaut Gordon Cooper'),
-        ...             gc.Snote(snote_xref),
-        ...         ]
-        ...     )
+        ...     gc.IndiName('Gordon /Jones/', [
+        ...         gc.Note('Named after the astronaut Gordon Cooper'),
+        ...         gc.Snote(snote_xref),
+        ...     ])
         ... )
         
         Now generate the ged lines for each record separately:
@@ -11814,7 +11777,7 @@ class Role(BaseStructure):
         the cross reference identifiers for the individual `I1` and the source `S1`.  
         This would be done as follows:
         >>> from genedata.build import Genealogy
-        >>> g = Genealogy('example')
+        >>> g = Genealogy()
         >>> indi = g.individual_xref('I1')
         >>> sour = g.source_xref('S1')
 
@@ -11846,20 +11809,18 @@ class Role(BaseStructure):
         With those cross reference identifiers we can complete the ged lines
         after importing the additional classes.
         Now create the lines:
-        >>> m = gc.RecordIndi(indi2,
-        ...     [
+        >>> m = gc.RecordIndi(indi2, [
+        ...     gc.Asso(indi3, 
+        ...         gc.Role('FRIEND', 
+        ...             gc.Phrase('best friend')
+        ...         )
+        ...     ),
+        ...     gc.Bapm('', 
         ...         gc.Asso(indi3, 
-        ...             gc.Role('FRIEND', 
-        ...                 gc.Phrase('best friend')
-        ...             )
-        ...         ),
-        ...         gc.Bapm('', 
-        ...             gc.Asso(indi3, 
-        ...                 gc.Role('WITN')
-        ...             )
-        ...         ),
-        ...     ]
-        ... )
+        ...             gc.Role('WITN')
+        ...         )
+        ...     ),
+        ... ])
         >>> print(m.ged())
         0 @I2@ INDI
         1 ASSO @I3@
@@ -13235,12 +13196,10 @@ class Titl(BaseStructure):
         Assume that letter.pdf is a scanned copy of a letter from Ann to her husband Henry 
         on April 6, 1920.  Based on the specification one could enter this as follows.
         >>> import genedata.classes70 as gc
-        >>> m = gc.File('letter.pdf', 
-        ...     [
-        ...         gc.Form('application/pdf'), 
-        ...         gc.Titl('Letter from Ann to Henry April 6, 1920'),
-        ...     ]
-        ... )
+        >>> m = gc.File('letter.pdf', [
+        ...     gc.Form('application/pdf'), 
+        ...     gc.Titl('Letter from Ann to Henry April 6, 1920'),
+        ... ])
         >>> print(m.ged(1))
         1 FILE letter.pdf
         2 FORM application/pdf
@@ -13379,7 +13338,7 @@ class Type(BaseStructure):
         ordination event as a substructure of the RecordIndi record.
         >>> from genedata.build import Genealogy
         >>> import genedata.classes70 as gc
-        >>> g = Genealogy('test')
+        >>> g = Genealogy()
         >>> indi_xref = g.individual_xref('I1')
         >>> m = gc.RecordIndi(indi_xref, 
         ...     gc.Ordn('', 

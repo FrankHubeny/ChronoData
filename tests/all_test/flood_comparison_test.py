@@ -16,10 +16,10 @@ testdata = [('ussher_mankind', '@MANKIND@')]
 
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_flood_comparisons(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy(name='ussher')
+    a = Genealogy()
     ussher_mankind = str(a.family_xref(' Mankind '))  # noqa: F841
 
-    b = Genealogy(name='smith')
+    b = Genealogy()
     smith_mankind = str(b.family_xref('Mankind'))  # noqa: F841
 
     assert eval(test_input) == expected

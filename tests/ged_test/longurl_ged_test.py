@@ -10,7 +10,7 @@ ged_version: str = '7.0'
 def test_longurl_ged() -> None:
     # Test constructing the xref_ged test data.
     file = Util.read('tests\\ged_test\\long-url.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     subm_xref = g.submitter_xref('S1')
 
     subm = gc.RecordSubm(
@@ -43,7 +43,7 @@ def test_longurl_ged() -> None:
 def test_longurl_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\long-url.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     subm_xref = g.submitter_xref('S1')
 
     subm = gc.RecordSubm(

@@ -46,7 +46,7 @@ testdata_individual = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_individual)  # noqa: PT006
 def test_individual(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
 
     # Test creation of the IndividualXref type without names.
     individual = a.individual_xref()
@@ -76,7 +76,7 @@ def test_individual(test_input: str, expected: str | int | bool) -> None:
 def test_individual_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello individual'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.individual_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.individual_xref(xref_name)  # noqa: F841
@@ -92,7 +92,7 @@ testdata_family = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_family)  # noqa: PT006
 def test_family(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
     family = a.family_xref('a family')
     family_type = isinstance(family, FamilyXref)  # noqa: F841
     family_name = family.name  # noqa: F841
@@ -105,7 +105,7 @@ def test_family(test_input: str, expected: str | int | bool) -> None:
 def test_family_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello family'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.family_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.family_xref(xref_name)  # noqa: F841
@@ -121,7 +121,7 @@ testdata_multimedia = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_multimedia)  # noqa: PT006
 def test_multimedia(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
     multimedia = a.multimedia_xref()
     multimedia_type = isinstance(multimedia, MultimediaXref)  # noqa: F841
     multimedia_name = multimedia.name  # noqa: F841
@@ -134,7 +134,7 @@ def test_multimedia(test_input: str, expected: str | int | bool) -> None:
 def test_multimedia_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello multimedia'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.multimedia_xref(xref_name)
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.multimedia_xref(xref_name)  # noqa: F841
@@ -150,7 +150,7 @@ testdata_repository = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_repository)  # noqa: PT006
 def test_repository(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
     repository = a.repository_xref()
     repository_type = isinstance(repository, RepositoryXref)  # noqa: F841
     repository_name = repository.name  # noqa: F841
@@ -163,7 +163,7 @@ def test_repository(test_input: str, expected: str | int | bool) -> None:
 def test_repository_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello repository'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.repository_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.repository_xref(xref_name)  # noqa: F841
@@ -179,7 +179,7 @@ testdata_shared_note = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_shared_note)  # noqa: PT006
 def test_shared_note(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
     shared_note = a.shared_note_xref()
     shared_note_type = isinstance(shared_note, SharedNoteXref)  # noqa: F841
     shared_note_name = shared_note.name  # noqa: F841
@@ -192,7 +192,7 @@ def test_shared_note(test_input: str, expected: str | int | bool) -> None:
 def test_shared_note_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello shared note'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.shared_note_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.shared_note_xref(xref_name)  # noqa: F841
@@ -208,7 +208,7 @@ testdata_source = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_source)  # noqa: PT006
 def test_source(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test', version='7.0')
+    a = Genealogy(version='7.0')
     source = a.source_xref()
     source_type = isinstance(source, SourceXref)  # noqa: F841
     source_name = source.name  # noqa: F841
@@ -221,7 +221,7 @@ def test_source(test_input: str, expected: str | int | bool) -> None:
 def test_source_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello source'
-    a = Genealogy('tttt', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.source_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.source_xref(xref_name)  # noqa: F841
@@ -237,7 +237,7 @@ testdata_submitter = [
 
 @pytest.mark.parametrize('test_input,expected', testdata_submitter)  # noqa: PT006
 def test_submitter(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test')
+    a = Genealogy()
     submitter = a.submitter_xref()
     submitter_type = isinstance(submitter, SubmitterXref)  # noqa: F841
     submitter_name = submitter.name  # noqa: F841
@@ -250,7 +250,7 @@ def test_submitter(test_input: str, expected: str | int | bool) -> None:
 def test_submitter_dup() -> None:
     """Test whether a duplicate record can be created."""
     xref_name = 'hello submitter'
-    a = Genealogy('submitter', version='7.0')
+    a = Genealogy(version='7.0')
     name1 = a.submitter_xref(xref_name)  
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(name1.fullname, xref_name)):
         name2 = a.submitter_xref(xref_name)  # noqa: F841
@@ -259,27 +259,22 @@ def test_submitter_dup() -> None:
 # Test staging records including header.
 
 def test_stage_individual() -> None:
-    g = Genealogy('test', version='7.0')
+    g = Genealogy(version='7.0')
     indi_xref = g.individual_xref()
     indi = RecordIndi(indi_xref)
     g.stage(indi)
     assert len(g.records) == 1
 
 def test_stage_header() -> None:
-    g = Genealogy('test', version='7.0')
+    g = Genealogy(version='7.0')
     head = Head(Gedc(GedcVers('7.0')))
     g.stage(head)
     assert g.record_header is not None
 
 def test_stage_only_records() -> None:
-    g = Genealogy('test', version='7.0')
+    g = Genealogy(version='7.0')
     a = 'abc'
     with pytest.raises(ValueError, match=Msg.ONLY_RECORDS.format(a)):
         g.stage(a)  # type: ignore[arg-type]
 
-# def test_header_ged() -> None:
-#     g = Genealogy('test', version='7.0')
-#     head = Head()
-#     g.header(head)
-#     assert g.ged_header == '0 HEAD\n1 GEDC\n2 VERS 7.0\n'
         

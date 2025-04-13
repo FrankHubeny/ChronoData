@@ -26,7 +26,7 @@ from genedata.messages import Msg
 #    a. Good run.
 def test_good_run() -> None:
     """Run a successful use of the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     fam = g.family_xref('a')
     h = gc.Slgc(gc.Famc(fam))
     assert h.validate()
@@ -36,7 +36,7 @@ def test_good_run() -> None:
 
 def test_not_permitted_head() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    g = Genealogy('test')
+    g = Genealogy()
     fam = g.family_xref('a')
     m = gc.Slgc([gc.Famc(fam), gc.Phrase('test')])
     with pytest.raises(

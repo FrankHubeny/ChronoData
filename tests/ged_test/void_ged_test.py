@@ -13,7 +13,7 @@ ged_version: str = '7.0'
 def test_void_ged() -> None:
     # Test constructing the remarriage1_ged test data.
     file = Util.read('tests\\ged_test\\voidptr.ged')
-    g = Genealogy('testing', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
@@ -62,7 +62,7 @@ def test_void_ged() -> None:
 def test_void_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\voidptr.ged')
-    g = Genealogy('testing', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')

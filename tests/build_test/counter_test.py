@@ -38,7 +38,7 @@ testdata = [
 @pytest.mark.parametrize('test_input,expected', testdata)  # noqa: PT006
 def test_counter(test_input: str, expected: str | int | bool) -> None:
     # SETUP Instantiate a Genealogy.
-    a = Genealogy(name='testing')
+    a = Genealogy()
 
     # TEST Initial counter value.
     oldxref = a.xref_counter  # noqa: F841
@@ -77,14 +77,14 @@ def test_counter(test_input: str, expected: str | int | bool) -> None:
 
 def test_use_empty_identifier() -> None:
     """Test that the empty identifier cannot be used."""
-    a = Genealogy('test')
+    a = Genealogy()
     with pytest.raises(ValueError, match=Msg.XREF_EXISTS.format(Void.NAME, 'VOID')):
         a._counter(a.individual_xreflist, 'VOID')
 
 
 def test_reused_identifier() -> None:
     """Test that an identifier cannot be reused."""
-    a = Genealogy('test')
+    a = Genealogy()
     a._counter(a.individual_xreflist, ' joe ')
     with pytest.raises(
         ValueError, match=Msg.XREF_EXISTS.format('@JOE@', ' joe ')

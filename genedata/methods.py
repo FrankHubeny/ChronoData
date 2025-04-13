@@ -113,6 +113,46 @@ class Util:
         else:
             logging.info(Msg.FILE_NOT_FOUND.format(url))
         return raw
+    
+    @staticmethod
+    def read_ged(url: str) -> str:
+        """Read a ged file removing extraneous material from the top and bottom.
+        
+        Args:
+            url: The name of the file or the internet url.
+        """
+        raw: str = Default.EMPTY
+        # Retrieve the file.
+        try:
+            raw = Util.read(url)
+        except Exception:
+            raw = Util.read_binary(url)
+
+        # Check that file has proper ged header and trailer and a recognized version.
+        if raw != Default.EMPTY:
+            if Default.GED_HEADER not in raw:
+                raise ValueError(
+                    Msg.GED_NO_HEADER.format(url, Default.GED_HEADER)
+                )
+            if Default.GED_TRAILER not in raw:
+                raise ValueError(
+                    Msg.GED_NO_TRAILER.format(url, Default.GED_TRAILER)
+                )
+            version: str = Query.version(raw)
+            if version not in Default.GED_VERSIONS:
+                raise ValueError(
+                    Msg.GED_VERSION_NOT_RECOGNIZED.format(url, version)
+                )
+            
+        # Remove anything in the file prior to the ged header.
+        _, _, raw_top_trimmed = raw.partition(Default.GED_HEADER)
+        raw = ''.join([Default.GED_HEADER, raw_top_trimmed])
+
+        # Remove anything in the file after the ged trailer.
+        raw_bottom_trimmed, _, _ = raw.partition(
+            Default.GED_TRAILER
+        )
+        return ''.join([raw_bottom_trimmed, Default.GED_TRAILER])
 
     @staticmethod
     def write_ged(ged: str, file: str) -> None:
@@ -150,7 +190,7 @@ class Util:
         _, _, raw_top_trimmed = raw.partition(Default.YAML_DIRECTIVE)
         raw = ''.join([Default.YAML_DIRECTIVE, raw_top_trimmed])
 
-        # Remove anything in the file after the yaml end marker `...`.
+        # Remove anything in the file after the yaml end marker.
         raw_bottom_trimmed, _, _ = raw.partition(
             Default.YAML_DOCUMENT_END_MARKER
         )
@@ -371,11 +411,15 @@ class Input:
         calendar_key: str = ''.join(
             [Default.URL_CALENDAR_PREFIX, calendar.upper()]
         )
-        calendar_tag: str = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_STANDARD_TAG]
+        calendar_tag: str = Specs[Default.SPECS_CALENDAR][calendar_key][
+            Default.YAML_STANDARD_TAG
+        ]
         show_calendar: str = Default.EMPTY
         if show:
             show_calendar = calendar_tag
-        epoch_list: list[str] = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_EPOCHS]
+        epoch_list: list[str] = Specs[Default.SPECS_CALENDAR][calendar_key][
+            Default.YAML_EPOCHS
+        ]
         epoch: str = Default.EMPTY
         if year < 0 and len(epoch_list) > 0:
             epoch = epoch_list[0]
@@ -384,10 +428,12 @@ class Input:
             raise ValueError(Msg.ZERO_YEAR.format(calendar))
         month_tag: str = Default.EMPTY
         if month > 0:
-            month_uri: str = Specs[Default.SPECS_CALENDAR][calendar_key][Default.YAML_MONTHS][
-                month - 1
+            month_uri: str = Specs[Default.SPECS_CALENDAR][calendar_key][
+                Default.YAML_MONTHS
+            ][month - 1]
+            month_tag = Specs[Default.SPECS_MONTH][Names.stem(month_uri)][
+                Default.YAML_STANDARD_TAG
             ]
-            month_tag = Specs[Default.SPECS_MONTH][Names.stem(month_uri)][Default.YAML_STANDARD_TAG]
         day_tag: str = Default.EMPTY
         if day > 0:
             day_tag = str(day)
@@ -1141,7 +1187,9 @@ class Names:
         #     return base[base.rfind(Default.HYPHEN) + 1 :]
         # return base
         tag: str = str(
-            Specs[Default.SPECS_STRUCTURE][Names.keyname(value)][Default.YAML_STANDARD_TAG]
+            Specs[Default.SPECS_STRUCTURE][Names.keyname(value)][
+                Default.YAML_STANDARD_TAG
+            ]
         )
         return tag
 
@@ -1200,9 +1248,16 @@ class Names:
                 to the structure dictionary.
         """
         if key in specs[Default.SPECS_STRUCTURE]:
-            for uri in specs[Default.SPECS_STRUCTURE][key][Default.YAML_SUBSTRUCTURES]:
+            for uri in specs[Default.SPECS_STRUCTURE][key][
+                Default.YAML_SUBSTRUCTURES
+            ]:
                 sub_key = Names.keyname(uri)
-                if specs[Default.SPECS_STRUCTURE][sub_key][Default.YAML_STANDARD_TAG] == tag:
+                if (
+                    specs[Default.SPECS_STRUCTURE][sub_key][
+                        Default.YAML_STANDARD_TAG
+                    ]
+                    == tag
+                ):
                     return sub_key, Names.classname(sub_key)
         if extension is not None and key in extension:
             for uri in extension[key][Default.YAML_SUBSTRUCTURES]:
@@ -1214,7 +1269,10 @@ class Names:
                     return sub_key, Names.classname(sub_key)
                 if (
                     sub_key in specs[Default.SPECS_STRUCTURE]
-                    and specs[Default.SPECS_STRUCTURE][sub_key][Default.YAML_STANDARD_TAG] == tag
+                    and specs[Default.SPECS_STRUCTURE][sub_key][
+                        Default.YAML_STANDARD_TAG
+                    ]
+                    == tag
                 ):
                     return sub_key, Names.classname(sub_key)
         return Default.EMPTY, Default.EMPTY
@@ -1304,9 +1362,7 @@ class Query:
         return classes
 
     @staticmethod
-    def permitted_keys(
-        key: str, specs: dict[str, dict[str, Any]]
-    ) -> list[str]:
+    def permitted_keys(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
         """Provide a list of keys to the `Structure` subdictionary that represented permitted classes.
 
         Example:
@@ -1379,6 +1435,7 @@ class Query:
     @staticmethod
     def record_counts(
         ged: str,
+        specification: dict[str, dict[str, Any]] | None = None,
         column: str = Default.COLUMN_COUNT,
     ) -> dict[str, dict[str, int]]:
         """Return a dictionary of record names and counts from a gedcom string.
@@ -1411,8 +1468,7 @@ class Query:
 
         Args:
             ged: The gedcom string.
-            record_column: The name of the `record` dictionary key which becomes the
-                pandas record column name.
+            specification: The specification dictionary needed to identify what the records are.
             count_column: The name of the `count` dictionary key which becomes the
                 pandas count column name.
         """
@@ -1420,19 +1476,105 @@ class Query:
         count: dict[str, int] = {}
         searchfor: str = Default.EMPTY
         howmany: int = 0
-        for record in Default.RECORD_TYPES:
-            searchfor = ''.join(
-                [
-                    Default.EOL,
-                    '0 @.*@ ',
-                    record,
-                    # Default.EOL,
-                ]
-            )
-            howmany = len(re.findall(searchfor, ged))
-            count.update({record: howmany})
+        if specification is None:
+            for record in Default.RECORD_TYPES:
+                searchfor = ''.join(
+                    [
+                        Default.EOL,
+                        '0 @.*@ ',
+                        record,
+                    ]
+                )
+                howmany = len(re.findall(searchfor, ged))
+                count.update({record: howmany})
         data.update({column: count})
         return data
+
+    @staticmethod
+    def version(ged: str) -> str:
+        """Retrieve the version number from the ged file.
+
+        Example:
+            >>> from genedata.methods import Query
+            >>> file = '0 HEAD\\nsomething else\\n1 GEDC\\n2 VERS 7.0\\nsomething more\\n0 TRLR'
+            >>> Query.version(file)
+            '7.0'
+
+        Args:
+            ged: The GEDCOM file.
+        """
+        _, _, version_part = ged.partition(Default.GED_VERSION_START)
+        version_value, _, _ = version_part.partition(Default.GED_VERSION_END)
+        return version_value
+
+    @staticmethod
+    def extensions(ged: str) -> list[list[str]]:
+        """Return a list of extention specification tags and uris."""
+        tag_uri_list: list[list[str]] = []
+        length: int = len(Default.GED_EXT_TAG)
+        if Default.GED_EXT_SCHMA in ged:
+            _, _, tags = ged.partition(Default.GED_EXT_SCHMA)
+            while tags[0:length] == Default.GED_EXT_TAG:
+                tag_uri, _, tags = tags[length:].partition(Default.EOL)
+                tag_uri_list.append(tag_uri.split(Default.SPACE))
+        return tag_uri_list
+
+    @staticmethod
+    def top(specs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        structure: dict[str, Any] = specs[Default.SPECS_STRUCTURE]
+        top_dict: dict[str, dict[str, Any]] = {}
+        for key in structure:
+            if (
+                key not in Default.IGNORE
+                and len(structure[key][Default.YAML_SUPERSTRUCTURES]) == 0
+            ):
+                top_dict.update(
+                    {
+                        key: {
+                            Default.YAML_KEY: key,
+                            Default.YAML_CLASS_NAME: Names.classname(key),
+                            Default.YAML_SUBSTRUCTURES: Query.subs(key, specs),
+                        }
+                    }
+                )
+        return top_dict
+
+    @staticmethod
+    def subs(key: str, specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
+        structure: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        subs_dict: dict[str, Any] = {}
+        if len(structure[key][Default.YAML_SUBSTRUCTURES]) > 0:
+            for substructure, cardinality in structure[key][
+                Default.YAML_SUBSTRUCTURES
+            ].items():
+                subkey: str = Names.keyname(substructure)
+                subclass: str = Names.classname(subkey)
+                subtag: str = structure[subkey][Default.YAML_STANDARD_TAG]
+                payload: str | None = structure[subkey][Default.YAML_PAYLOAD]
+                payload = (
+                    Default.NONE if payload is None else Names.keyname(payload)
+                )
+                subsingular: bool = False
+                if Default.YAML_CARDINALITY_SINGULAR in cardinality:
+                    subsingular = True
+                subrequired: bool = False
+                if Default.YAML_CARDINALITY_REQUIRED in cardinality:
+                    subrequired = True
+                subs_dict.update(
+                    {
+                        subkey: {
+                            Default.YAML_STANDARD_TAG: subtag,
+                            Default.YAML_SINGULAR: subsingular,
+                            Default.YAML_REQUIRED: subrequired,
+                            Default.YAML_CLASS_NAME: subclass,
+                            Default.YAML_PAYLOAD: payload,
+                            # Default.YAML_SUBSTRUCTURES: Query.subs(
+                            #     subkey, specs
+                            # ),
+                        }
+                    }
+                )
+        return subs_dict
 
     @staticmethod
     def make_dictionary(ged: str) -> dict[str, Any]:
@@ -1449,8 +1591,12 @@ class Query:
         ged_list: list[str] = ged.split(Default.EOL)
         for line in ged_list:
             line_list: list[str] = line.split(Default.SPACE, 2)
-            if line_list[0] == '0' and len(line_list) > 2 and line_list[2][0:5] != 'SNOTE':
-                ged_dict[line_list[2]].update({line_list[1]:{}})
+            if (
+                line_list[0] == '0'
+                and len(line_list) > 2
+                and line_list[2][0:5] != 'SNOTE'
+            ):
+                ged_dict[line_list[2]].update({line_list[1]: {}})
             ged_dict.update({})
         return ged_dict
 

@@ -30,7 +30,7 @@ testdata_empty = [
 def test_empty_record_lists(
     test_input: str, expected: str | int | bool
 ) -> None:
-    a = Genealogy('test')
+    a = Genealogy()
     a.families([])
     a.individuals([])
     a.multimedia([])
@@ -40,45 +40,6 @@ def test_empty_record_lists(
     a.submitters([])
 
     assert eval(test_input) == expected
-
-
-# testdata_one = (
-#     ('a.ged_family[0:9]', '0 @1@ FAM'),
-#     ('a.ged_individual[0:10]', '0 @2@ INDI'),
-#     ('a.ged_multimedia[0:10]', '0 @3@ OBJE'),
-#     ('a.ged_repository[0:10]', '0 @4@ REPO'),
-#     ('a.ged_shared_note[0:11]', '0 @5@ SNOTE'),
-#     ('a.ged_source[0:10]', '0 @6@ SOUR'),
-#     ('a.ged_submitter[0:10]', '0 @7@ SUBM'),
-# )
-
-
-# @pytest.mark.parametrize('test_input,expected', testdata_one)
-# def test_one_record(test_input: str, expected: str) -> None:
-#     a = Genealogy('test')
-#     familyxref = a.family_xref()
-#     individualxref = a.individual_xref()
-#     multimediaxref = a.multimedia_xref()
-#     repositoryxref = a.repository_xref()
-#     sharednotexref = a.shared_note_xref()
-#     sourcexref = a.source_xref()
-#     submitterxref = a.submitter_xref()
-#     family = Family(familyxref)
-#     individual = Individual(individualxref)
-#     multimedia = Multimedia(multimediaxref)
-#     repository = Repository(repositoryxref)
-#     shared_note = SharedNote(sharednotexref)
-#     source = Source(sourcexref)
-#     submitter = Submitter(submitterxref)
-#     a.families([family])
-#     a.individuals([individual])
-#     a.multimedia([multimedia])
-#     a.repositories([repository])
-#     a.shared_notes([shared_note])
-#     a.sources([source])
-#     a.submitters([submitter])
-
-#     assert eval(test_input) == expected
 
 
 testdata_three: list[tuple[str, int]] = [
@@ -94,7 +55,7 @@ testdata_three: list[tuple[str, int]] = [
 
 @pytest.mark.parametrize(('test_input', 'expected'), testdata_three)
 def test_three_records(test_input: str, expected: str | int | bool) -> None:
-    a = Genealogy('test')
+    a = Genealogy()
     family1 = gc.RecordFam(a.family_xref())
     family2 = gc.RecordFam(a.family_xref())
     family3 = gc.RecordFam(a.family_xref())
@@ -134,7 +95,7 @@ def test_three_records(test_input: str, expected: str | int | bool) -> None:
 
 def test_missing_individual() -> None:
     """Test that an individual identifier was not listed in the individual records."""
-    a = Genealogy('test')
+    a = Genealogy()
     sam_xref = a.individual_xref('sam')
     sam = gc.RecordIndi(sam_xref)
 
@@ -148,7 +109,7 @@ def test_missing_individual() -> None:
 
 def test_missing_family() -> None:
     """Test that a family identifier was not listed in the family records."""
-    a = Genealogy('test')
+    a = Genealogy()
     one_xref = a.family_xref('one')
     one = gc.RecordFam(one_xref)
 
@@ -160,51 +121,9 @@ def test_missing_family() -> None:
         a.families([one])
 
 
-# def test_missing_multimedia() -> None:
-#     """Test that a multimedia identifier was not listed in the multimedia records."""
-#     a = Genealogy('test')
-#     one_xref = a.multimedia_xref('one')
-#     one = Multimedia(one_xref)
-
-#     two = a.multimedia_xref('two')
-#     missing = [two.fullname]
-#     with pytest.raises(
-#         ValueError, match=re.escape(Msg.MISSING.format(missing))
-#     ):
-#         a.multimedia([one])
-
-
-# def test_missing_repository() -> None:
-#     """Test that a repository identifier was not listed in the repository records."""
-#     a = Genealogy('test')
-#     one_xref = a.repository_xref('one')
-#     one = Repository(one_xref)
-
-#     two = a.repository_xref('two')
-#     missing = [two.fullname]
-#     with pytest.raises(
-#         ValueError, match=re.escape(Msg.MISSING.format(missing))
-#     ):
-#         a.repositories([one])
-
-
-# def test_missing_shared_note() -> None:
-#     """Test that a shared note identifier was not listed in the shared note records."""
-#     a = Genealogy('test')
-#     one_xref = a.shared_note_xref('one')
-#     one = SharedNote(one_xref)
-
-#     two = a.shared_note_xref('two')
-#     missing = [two.fullname]
-#     with pytest.raises(
-#         ValueError, match=re.escape(Msg.MISSING.format(missing))
-#     ):
-#         a.shared_notes([one])
-
-
 def test_missing_source() -> None:
     """Test that a source identifier was not listed in the source records."""
-    a = Genealogy('test')
+    a = Genealogy()
     one_xref = a.source_xref('one')
     one = gc.RecordSour(one_xref)
 
@@ -216,23 +135,9 @@ def test_missing_source() -> None:
         a.sources([one])
 
 
-# def test_missing_submitter() -> None:
-#     """Test that a submitter identifier was not listed in the submitter records."""
-#     a = Genealogy('test')
-#     one_xref = a.submitter_xref('one')
-#     one = Submitter(one_xref)
-
-#     two = a.submitter_xref('two')
-#     missing = [two.fullname]
-#     with pytest.raises(
-#         ValueError, match=re.escape(Msg.MISSING.format(missing))
-#     ):
-#         a.submitters([one])
-
-
 def test_many_missing_families() -> None:
     """Test that many family identifiers wer not listed in the family records."""
-    a = Genealogy('test')
+    a = Genealogy()
     one = a.family_xref('one')
 
     two = a.family_xref('two')
@@ -245,7 +150,7 @@ def test_many_missing_families() -> None:
 
 def test_duplicate_family() -> None:
     """Test that an error is raised if a family cross-reference identifier is used twice."""
-    a = Genealogy('duplicate')
+    a = Genealogy()
     fam_one_xref = a.family_xref('one')
     fam = gc.RecordFam(fam_one_xref)
     with pytest.raises(
@@ -257,7 +162,7 @@ def test_duplicate_family() -> None:
 
 def test_duplicate_individual() -> None:
     """Test that an error is raised if an individual cross-reference identifier is used twice."""
-    a = Genealogy('duplicate')
+    a = Genealogy()
     indi_one_xref = a.individual_xref('one')
     indi = gc.RecordIndi(indi_one_xref)
     with pytest.raises(
@@ -267,45 +172,9 @@ def test_duplicate_individual() -> None:
         a.individuals([indi, indi])
 
 
-# def test_duplicate_multimedia() -> None:
-#     """Test that an error is raised if a multimedia cross-reference identifier is used twice."""
-#     a = Genealogy('duplicate')
-#     obje_one_xref = a.multimedia_xref('one')
-#     obje = Multimedia(xref=obje_one_xref)
-#     with pytest.raises(
-#         ValueError,
-#         match=re.escape(Msg.DUPLICATE_RECORD.format(obje_one_xref.fullname)),
-#     ):
-#         a.multimedia([obje, obje])
-
-
-# def test_duplicate_repository() -> None:
-#     """Test that an error is raised if a repository cross-reference identifier is used twice."""
-#     a = Genealogy('duplicate')
-#     repo_one_xref = a.repository_xref('one')
-#     repo = Repository(xref=repo_one_xref)
-#     with pytest.raises(
-#         ValueError,
-#         match=re.escape(Msg.DUPLICATE_RECORD.format(repo_one_xref.fullname)),
-#     ):
-#         a.repositories([repo, repo])
-
-
-# def test_duplicate_shared_note() -> None:
-#     """Test that an error is raised if a shared note cross-reference identifier is used twice."""
-#     a = Genealogy('duplicate')
-#     snote_one_xref = a.shared_note_xref('one')
-#     snote = SharedNote(xref=snote_one_xref)
-#     with pytest.raises(
-#         ValueError,
-#         match=re.escape(Msg.DUPLICATE_RECORD.format(snote_one_xref.fullname)),
-#     ):
-#         a.shared_notes([snote, snote])
-
-
 def test_duplicate_source() -> None:
     """Test that an error is raised if a source cross-reference identifier is used twice."""
-    a = Genealogy('duplicate')
+    a = Genealogy()
     sour_one_xref = a.source_xref('one')
     sour = gc.RecordSour(sour_one_xref)
     with pytest.raises(
@@ -314,14 +183,3 @@ def test_duplicate_source() -> None:
     ):
         a.families([sour, sour])  # type: ignore[list-item]
 
-
-# def test_duplicate_submitter() -> None:
-#     """Test that an error is raised if a submitter cross-reference identifier is used twice."""
-#     a = Genealogy('duplicate')
-#     subm_one_xref = a.submitter_xref('one')
-#     subm = Submitter(xref=subm_one_xref)
-#     with pytest.raises(
-#         ValueError,
-#         match=re.escape(Msg.DUPLICATE_RECORD.format(subm_one_xref.fullname)),
-#     ):
-#         a.families([subm, subm]) # type: ignore[list-item]

@@ -80,6 +80,17 @@ class Default:
     EQUAL: str = ' = '
     EOL: str = '\n'
     EOL_DOUBLE: str = '\n\n'
+    GED_EXT_SCHMA: str = f'{EOL}1 SCHMA{EOL}'
+    GED_EXT_TAG: str = '2 TAG '
+    GED_HEADER: str = f'0 HEAD{EOL}'
+    GED_TRAILER: str = f'{EOL}0 TRLR'
+    GED_VERSIONS: frozenset[str] = frozenset(
+        [
+            '7.0',
+        ]
+    )
+    GED_VERSION_START: str = f'{EOL}1 GEDC{EOL}2 VERS '
+    GED_VERSION_END: str = EOL
     GREATER_LESS_THAN: str = '>'
     HEAD_LINE: str = f'0 HEAD{EOL}'
     HEADER: str = f'{HEAD_LINE}1 GEDC{EOL}2 VERS '

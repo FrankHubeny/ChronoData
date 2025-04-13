@@ -55,7 +55,7 @@ def test_note1_ged() -> None:
 2 DATE 25 MAY 2021
 0 TRLR"""
 
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')
@@ -128,7 +128,7 @@ def test_note1_ged_code() -> None:
 2 DATE 25 MAY 2021
 0 TRLR"""
 
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')
@@ -180,7 +180,7 @@ def test_note1_ged_code() -> None:
 def test_note1_ged_circular() -> None:
     """Test constructing the note1_ged test data with the circular issue."""
 
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
 
     subm_xref = g.submitter_xref('1')
     snote3_xref = g.shared_note_xref('3', 'A single-use note record')

@@ -12,7 +12,7 @@ ged_version: str = '7.0'
 def test_ssex_ged() -> None:
     """ Test constructing the same sex marriage_ged test data."""
     file = Util.read('tests\\ged_test\\same-sex-marriage.ged')
-    g = Genealogy('testing', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')
@@ -60,7 +60,7 @@ def test_ssex_ged() -> None:
 def test_ssex_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\same-sex-marriage.ged')
-    g = Genealogy('testing', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi1_xref = g.individual_xref('I1')
     indi2_xref = g.individual_xref('I2')
     fam_xref = g.family_xref('F1')

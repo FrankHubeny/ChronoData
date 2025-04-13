@@ -17,7 +17,7 @@ ged_version: str = '7.0'
 def test_age_ged() -> None:
     """Reproduce the age_ged example file."""
     file = Util.read('tests\\ged_test\\age.ged')
-    g = Genealogy('testing')
+    g = Genealogy()
     indi_xref = g.individual_xref('I1')
 
     head = gc.Head(
@@ -142,7 +142,7 @@ def test_age_ged() -> None:
 def test_age_ged_code() -> None:
     """Reproduce the age_ged example file."""
     file = Util.read('tests\\ged_test\\age.ged')
-    g = Genealogy('testing', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi_xref = g.individual_xref('I1')
 
     head = gc.Head(

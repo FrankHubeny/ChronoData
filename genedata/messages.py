@@ -46,7 +46,10 @@ class Msg:
     FILE_EXISTS: str = 'The file "{0}" already exists.'
     FILE_NOT_FOUND: str = 'The file "{0}" could not be found.'
     GED_FILE_ALREADY_LOADED: str = 'A ged file has already been loaded.'
+    GED_NO_HEADER: str = 'The file "{0}" does not have the ged header: "{1}".'
+    GED_NO_TRAILER: str = 'The file "{0}" does not have the ged trailer: "{1}".'
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
+    GED_VERSION_NOT_RECOGNIZED: str = 'The file "{0}" has an unrecognized version "{1}".'
     IDNO_REQUIRES_TYPE: str = 'The IDNO tag requires a non-empty TYPE.'
     INVALID_VALUES: str = '"{0}" is not in the valid values of "{1}".'
     KEY_NOT_FOUND: str = (

@@ -8,7 +8,7 @@ from genedata.methods import Util
 def test_minimal_ged() -> None:
     # Test constructing the minimal70.ged test file.
     file = Util.read('tests\\ged_test\\minimal70.ged')
-    g = Genealogy('test')
+    g = Genealogy()
     g.stage(gc.Head(gc.Gedc(gc.GedcVers('7.0'))))
     assert file == g.show_ged()
 

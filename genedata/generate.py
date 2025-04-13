@@ -452,7 +452,7 @@ from genedata.structure import (
     def get_datatype(structure: dict[str, Any]) -> str:
         """Convert the GEDCOM datatype into python datatype."""
         datatype: str = Default.EMPTY
-        if Default.YAML_PAYLOAD in structure and structure is not None:
+        if Default.YAML_PAYLOAD in structure and structure[Default.YAML_PAYLOAD] is not None:
             datatype = structure[Default.YAML_PAYLOAD]
         match datatype:
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -566,6 +566,7 @@ from genedata.structure import (
         if (
             Default.YAML_PAYLOAD in full_structure[key]
             and full_structure[key][Default.YAML_PAYLOAD] != 'None'
+            and full_structure[key][Default.YAML_PAYLOAD] is not None
         ):
             payload = full_structure[key][Default.YAML_PAYLOAD]
         if payload == Default.EMPTY or key == 'record-SNOTE':
@@ -790,22 +791,7 @@ class Tests:
             enum_key = Names.keyname(enum_value)
             if enum_key in enumerations:
                 return str(enumerations[enum_key][Default.YAML_STANDARD_TAG])
-            # return str(structures[enum_key][Default.YAML_STANDARD_TAG])
         return Default.EMPTY
-
-    # @staticmethod
-    # def get_sub(
-    #     uri: str,
-    #     structures: dict[str, dict[str, Any]],
-    #     enumerationsets: dict[str, dict[str, Any]],
-    #     enumerations: dict[str, dict[str, Any]],
-    # ) -> str:
-    #     key: str = Names.keyname(uri)
-    #     class_name = Names.classname(key)
-    #     value: str = Tests.get_value(
-    #         key, structures, enumerationsets, enumerations
-    #     )
-    #     return f'{Default.CODE_CLASS}.{class_name}({value})'
 
     @staticmethod
     def get_singular(
@@ -927,24 +913,6 @@ class Tests:
                         return 'NOT_SHARED_NOTE_XREF'
                     case _:
                         return 'NOT_STRING'
-            # case 'None':
-            #     match key:
-            #         case 'record-FAM':
-            #             return 'NOT_FAMILY_XREF'
-            #         case 'record-INDI':
-            #             return 'NOT_INDIVIDUAL_XREF'
-            #         case 'record-OBJE':
-            #             return 'NOT_MULTIMEDIA_XREF'
-            #         case 'record-REPO':
-            #             return 'NOT_REPOSITORY_XREF'
-            #         case 'record-SNOTE':
-            #             return 'NOT_SHARED_NOTE_XREF'
-            #         case 'record-SOUR':
-            #             return 'NOT_SOURCE_XREF'
-            #         case 'record-SUBM':
-            #             return 'NOT_SUBMITTER_XREF'
-            #         case _:
-            #             return 'NOT_STRING'
             case 'https://gedcom.io/terms/v7/type-Enum':
                 return 'NOT_STRING'
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -1069,12 +1037,8 @@ class Tests:
                 return 'snote'
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                 return 'sour'
-            # case 'https://gedcom.io/terms/v7/type-Time':
             case _:
                 return "'12:12:12'"
-            # case _:
-            #     return Default.EMPTY
-        # return Default.EMPTY
 
     @staticmethod
     def there_are_required_substructures(substructures: dict[str, str]) -> bool:
@@ -1122,7 +1086,7 @@ DO NOT MODIFY THIS FILE.
 {pytest}
 
 
-{Default.CODE_GENEALOGY} = Genealogy('test')
+{Default.CODE_GENEALOGY} = Genealogy()
 fam = {Default.CODE_GENEALOGY}.family_xref('1')
 indi = {Default.CODE_GENEALOGY}.individual_xref('1')
 obje = {Default.CODE_GENEALOGY}.multimedia_xref('1')

@@ -12,7 +12,7 @@ ged_version: str = '7.0'
 def test_remarriage1_ged() -> None:
     # Test constructing the remarriage1_ged test data.
     file = Util.read('tests\\ged_test\\remarriage1.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi_i1_xref = g.individual_xref('I1')
     indi_i2_xref = g.individual_xref('I2')
     indi_i3_xref = g.individual_xref('I3')
@@ -87,7 +87,7 @@ def test_remarriage1_ged() -> None:
 def test_remarriage1_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\remarriage1.ged')
-    g = Genealogy('test', version=ged_version)
+    g = Genealogy(version=ged_version)
     indi_i1_xref = g.individual_xref('I1')
     indi_i2_xref = g.individual_xref('I2')
     indi_i3_xref = g.individual_xref('I3')
