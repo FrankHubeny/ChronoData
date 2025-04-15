@@ -11,7 +11,7 @@ ged_version: str = '7.0'
 def test_lang_ged() -> None:
     # Test constructing the remarriage2_ged test data.
     file = Util.read('tests\\ged_test\\lang.ged')
-    g = Genealogy(version=ged_version)
+    g = Genealogy(version='7.0')
     subm1_xref = g.submitter_xref('1')
     subm2_xref = g.submitter_xref('2')
     g.add_tag('_PHRASE', 'https://gedcom.io/terms/v7/PHRASE')
@@ -145,7 +145,7 @@ def test_lang_ged() -> None:
 def test_lang_ged_code() -> None:
     # Test generating code, evaluating it and then finding the ged lines.
     file = Util.read('tests\\ged_test\\lang.ged')
-    g = Genealogy(version=ged_version)
+    g = Genealogy(version='7.0')
     subm1_xref = g.submitter_xref('1')
     subm2_xref = g.submitter_xref('2')
     g.add_tag('_PHRASE', 'https://gedcom.io/terms/v7/PHRASE')

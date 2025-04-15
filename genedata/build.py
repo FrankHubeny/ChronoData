@@ -20,6 +20,8 @@ import logging
 import re
 from typing import Any, NamedTuple
 
+import pandas as pd
+
 # from genedata.classes70 import (
 #     Head,
 #     RecordFam,
@@ -63,22 +65,44 @@ class Genealogy:
 
     def __init__(
         self,
-        #name: str = Default.EMPTY,
         filename: str = Default.EMPTY,
         version: str = '7.0',
     ) -> None:
-        #self.chron_name: str = name
-        self.version: str = version
+        
+        # Store the input values.
         self.filename: str = filename
+        self.version: str = version
+
+        # Prepare to load the ged file if filename is not empty.
+        self.tag_counter: int = 0
         self.ged_file: str = Default.EMPTY
         self.ged_ext_tags: list[list[str]] = []
+        self.tag_uri: list[list[str]] = []
         if self.filename != Default.EMPTY:
-            self.ged_file: str = Util.read_ged(self.filename)
+            self.ged_file = Util.read_ged(self.filename)
+            self.tag_uri = Query.extensions(self.ged_file)
             self.version = Query.version(self.ged_file)
-            self.ged_ext_tags = Query.extensions(self.ged_file)
+            
+
+        # Remove the periods from the version.
         self.version_no_periods: str = self.version.replace(Default.PERIOD, Default.EMPTY)
+
+        # Import the version's specification module and load the Genealogy's specification with it.
         self.specs = importlib.import_module(f'genedata.specifications{self.version_no_periods}')
+        self.specification: dict[str, dict[str, Any]] = self.specs.Specs
+        if len(self.tag_uri) > 0:
+            for item in self.tag_uri:
+                self.add_tag(item[0], item[1])
+
+        # Load into the Genealogy's specification any extension tags from the file. Set tag counter.
+        
+        # if len(self.ged_ext_tags) > 0:
+        #     for tag_uri in self.ged_ext_tags:
+        #         self.tag_counter += 1
+        #         self.add_tag(str(self.tag_counter), tag_uri[0], tag_uri[1])
         self.classes = importlib.import_module(f'genedata.classes{self.version_no_periods}')
+
+        # Storage areas for ged data that is created through the classes and not read from the file.
         self.ged_data: list[str] = []
         self.ged_splitdata: list[Any] = []
         self.ged_issues: list[Any] = []
@@ -104,20 +128,20 @@ class Genealogy:
             # | self.classes.RecordSubm
         #] = []
         self.record_header: Any = None #self.classes.Head | None = None
-        self.schma: str = Default.EMPTY
+        #self.schma: str = Default.EMPTY
         
         #self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
-        self.specification: dict[str, dict[str, Any]] = self.specs.Specs
-        self.extension_specification: dict[str, dict[str, Any]] = {
-            Default.YAML_TYPE_CALENDAR: {},
-            Default.YAML_TYPE_DATATYPE: {},
-            Default.YAML_TYPE_ENUMERATION_SET: {},
-            Default.YAML_TYPE_ENUMERATION: {},
-            Default.YAML_TYPE_MONTH: {},
-            Default.YAML_TYPE_STRUCTURE: {},
-            Default.YAML_TYPE_URI: {},
-        }
+        
+        # self.extension_specification: dict[str, dict[str, Any]] = {
+        #     Default.YAML_TYPE_CALENDAR: {},
+        #     Default.YAML_TYPE_DATATYPE: {},
+        #     Default.YAML_TYPE_ENUMERATION_SET: {},
+        #     Default.YAML_TYPE_ENUMERATION: {},
+        #     Default.YAML_TYPE_MONTH: {},
+        #     Default.YAML_TYPE_STRUCTURE: {},
+        #     Default.YAML_TYPE_URI: {},
+        # }
         self.extension_xreflist: list[str] = [Void.NAME]
         self.family_xreflist: list[str] = [Void.NAME]
         self.individual_xreflist: list[str] = [Void.NAME]
@@ -170,13 +194,17 @@ class Genealogy:
                 'call': 'submitter_xref',
             },
         }
-        # match self.filename_type:
-        #     case '':
-        #         self.chron: dict[str, str] = {}
-        #     case String.GED:
-        #         self.load_ged(self.filename)
-        #     case _:
-        #         raise ValueError(Msg.UNRECOGNIZED.format(self.filename))
+
+    def view_extensions(self) -> tuple[list[str], list[list[str]], list[str]]:
+        """Display a list of available extensions to use or be aware of."""
+        keys: list[str] = []
+        values: list[list[str]] = []
+        labels: list[str] = ['Tag', 'Specification', 'Documented']
+        for tag in self.ged_ext_tags:
+            keys.append(tag[0])
+            values.append([tag[1], tag[2], tag[3]])
+        return values, keys, labels
+        #pd.DataFrame(data=values, index=keys, columns=labels)
 
     def add_tag(self, tag: str, yaml_file: str) -> None:
         """Add an extension tag to the extension specifications.
@@ -189,16 +217,23 @@ class Genealogy:
                 that must be in the `extension tags` list or which must be
                 the `standard tag`.
             yaml_file: The location of the yaml_file as either a url or a file
-                in a regular or compressed directory."""
+                in a regular or compressed directory.
+        """
+        documented: bool = True
+        yaml_dict: dict[str, dict[str, Any]] = {}
         tag_edited: str = tag.upper()
+        self.tag_counter += 1
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
-
-        yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
-        yaml_dict.update({Default.YAML_LOAD_FILE: yaml_file})
-        yaml_dict.update({Default.YAML_LOAD_TAG: tag})
-        type_key: str = str(yaml_dict[Default.YAML_TYPE])
-        self.extension_specification[type_key].update({tag_edited: yaml_dict})
+        try:
+            yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
+        except Exception:
+            logging.info(Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited))
+            documented = False
+        else:
+            type_key: str = str(yaml_dict[Default.YAML_TYPE])
+            self.specification[type_key].update({self.tag_counter: yaml_dict})
+        self.ged_ext_tags.append([str(self.tag_counter), tag, yaml_file, documented])
 
     def stage(
         self,
@@ -268,12 +303,12 @@ class Genealogy:
         """Save the ged file constructed by this instance of the Genealogy class."""
         Util.write_ged(self.show_ged(), file_name)
 
-    def load_ged(self) -> None:
-        """Load a ged file."""
-        # self.filename = file_name
-        # if self.ged_file != Default.EMPTY:
-        #     raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
-        self.ged_file = Util.read(self.filename)
+    # def load_ged(self) -> None:
+    #     """Load a ged file."""
+    #     # self.filename = file_name
+    #     # if self.ged_file != Default.EMPTY:
+    #     #     raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
+    #     self.ged_file = Util.read(self.filename)
 
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
@@ -493,24 +528,25 @@ import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
 # Add any extensions that were registered in the header record.
 """
             lines: str = Default.EMPTY
-            split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
-            for line in split_lines:
-                if line[0:6] == '0 TAG ':
-                    words: list[str] = line[6:].split(Default.SPACE, 1)
-                    lines = ''.join(
-                        [
-                            lines,
-                            Default.CODE_GENEALOGY,
-                            Default.PERIOD,
-                            Default.PARENS_LEFT,
-                            words[0],
-                            Default.COMMA,
-                            Default.SPACE,
-                            words[1],
-                            Default.PARENS_RIGHT,
-                            Default.EOL,
-                        ]
-                    )
+            #split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
+            for line in self.ged_ext_tags:
+                # if line[0:6] == '0 TAG ':
+                #     words: list[str] = line[6:].split(Default.SPACE, 1)
+                lines = ''.join(
+                    [
+                        lines,
+                        Default.CODE_GENEALOGY,
+                        Default.PERIOD,
+                        'add_tag',
+                        Default.PARENS_LEFT,
+                        line[1],
+                        Default.COMMA,
+                        Default.SPACE,
+                        line[2],
+                        Default.PARENS_RIGHT,
+                        Default.EOL,
+                    ]
+                )
             if lines != Default.EMPTY:
                 lines = ''.join([intro, lines])
             return lines

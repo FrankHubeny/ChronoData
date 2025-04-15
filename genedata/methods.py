@@ -411,13 +411,13 @@ class Input:
         calendar_key: str = ''.join(
             [Default.URL_CALENDAR_PREFIX, calendar.upper()]
         )
-        calendar_tag: str = Specs[Default.SPECS_CALENDAR][calendar_key][
+        calendar_tag: str = Specs[Default.YAML_TYPE_CALENDAR][calendar_key][
             Default.YAML_STANDARD_TAG
         ]
         show_calendar: str = Default.EMPTY
         if show:
             show_calendar = calendar_tag
-        epoch_list: list[str] = Specs[Default.SPECS_CALENDAR][calendar_key][
+        epoch_list: list[str] = Specs[Default.YAML_TYPE_CALENDAR][calendar_key][
             Default.YAML_EPOCHS
         ]
         epoch: str = Default.EMPTY
@@ -428,10 +428,10 @@ class Input:
             raise ValueError(Msg.ZERO_YEAR.format(calendar))
         month_tag: str = Default.EMPTY
         if month > 0:
-            month_uri: str = Specs[Default.SPECS_CALENDAR][calendar_key][
+            month_uri: str = Specs[Default.YAML_TYPE_CALENDAR][calendar_key][
                 Default.YAML_MONTHS
             ][month - 1]
-            month_tag = Specs[Default.SPECS_MONTH][Names.stem(month_uri)][
+            month_tag = Specs[Default.YAML_TYPE_MONTH][Names.stem(month_uri)][
                 Default.YAML_STANDARD_TAG
             ]
         day_tag: str = Default.EMPTY
@@ -1069,7 +1069,7 @@ class Names:
             .replace('ORD-', 'ord-')
             .replace('-EXACT', '-exact')
         )
-        if hyphenated not in specs[Default.SPECS_STRUCTURE]:
+        if hyphenated not in specs[Default.YAML_TYPE_STRUCTURE]:
             return Default.EMPTY
         return hyphenated
 
@@ -1101,13 +1101,14 @@ class Names:
         Args:
             value: The name of the yaml file.
         """
-        if value == Default.EMPTY or value[-1] == Default.SLASH:
+        if value == Default.EMPTY or str(value)[-1] == Default.SLASH:
             return Default.EMPTY
-        if Default.SLASH in value:
-            return value[value.rfind(Default.SLASH) + 1 :].replace(
+        value_str: str = str(value)
+        if Default.SLASH in value_str:
+            return value_str[value_str.rfind(Default.SLASH) + 1 :].replace(
                 Default.QUOTE_DOUBLE, Default.EMPTY
             )
-        return value.replace(Default.QUOTE_DOUBLE, Default.EMPTY)
+        return value_str.replace(Default.QUOTE_DOUBLE, Default.EMPTY)
 
     @staticmethod
     def stem(file_name: str) -> str:
@@ -1187,7 +1188,7 @@ class Names:
         #     return base[base.rfind(Default.HYPHEN) + 1 :]
         # return base
         tag: str = str(
-            Specs[Default.SPECS_STRUCTURE][Names.keyname(value)][
+            Specs[Default.YAML_TYPE_STRUCTURE][Names.keyname(value)][
                 Default.YAML_STANDARD_TAG
             ]
         )
@@ -1228,18 +1229,6 @@ class Names:
             >>> Names.key_tag_to_subkey_class('record-INDI', 'MAP', Specs)
             ('', '')
 
-            A structure dictionary of extensions may also be used, but since its
-            substructures may be standard structures, both the dictionary of
-            standard structures and the dictionary of extension structures
-            must be available to search through.  The import adds the GEDCOM
-            provided extension structure dictionary to the already imported
-            Structure containing standard structures.
-            >>> from genedata.specifications70 import ExtensionStructure
-            >>> Names.key_tag_to_subkey_class(
-            ...     '_SOUR', 'DATA', Specs, Specs['ExtensionStructure']
-            ... )
-            ('SOUR-DATA', 'SourData')
-
         Args:
             key: The key of the tag's superstructure.
             tag: The tag of the structure's key we are looking for.
@@ -1247,13 +1236,13 @@ class Names:
             extension: An optional dictionary of structures which are extensions
                 to the structure dictionary.
         """
-        if key in specs[Default.SPECS_STRUCTURE]:
-            for uri in specs[Default.SPECS_STRUCTURE][key][
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri in specs[Default.YAML_TYPE_STRUCTURE][key][
                 Default.YAML_SUBSTRUCTURES
             ]:
                 sub_key = Names.keyname(uri)
                 if (
-                    specs[Default.SPECS_STRUCTURE][sub_key][
+                    specs[Default.YAML_TYPE_STRUCTURE][sub_key][
                         Default.YAML_STANDARD_TAG
                     ]
                     == tag
@@ -1268,8 +1257,8 @@ class Names:
                 ):
                     return sub_key, Names.classname(sub_key)
                 if (
-                    sub_key in specs[Default.SPECS_STRUCTURE]
-                    and specs[Default.SPECS_STRUCTURE][sub_key][
+                    sub_key in specs[Default.YAML_TYPE_STRUCTURE]
+                    and specs[Default.YAML_TYPE_STRUCTURE][sub_key][
                         Default.YAML_STANDARD_TAG
                     ]
                     == tag
@@ -1333,7 +1322,7 @@ class Query:
         """
         classes: list[str] = []
         tagname: str = tag.upper()
-        for key, structure in specs[Default.SPECS_STRUCTURE].items():
+        for key, structure in specs[Default.YAML_TYPE_STRUCTURE].items():
             if structure[Default.YAML_STANDARD_TAG] == tagname:
                 classes.append(Names.classname(key))
         return classes
@@ -1355,7 +1344,7 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, _cardinality in specs[Default.SPECS_STRUCTURE][key][
+        for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             classes.append(Names.classname(uri))
@@ -1378,7 +1367,7 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         keys: list[str] = []
-        for uri, _cardinality in specs[Default.SPECS_STRUCTURE][key][
+        for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             keys.append(Names.keyname(uri))
@@ -1401,7 +1390,7 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in specs[Default.SPECS_STRUCTURE][key][
+        for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             if Default.CARDINALITY_REQUIRED in cardinality:
@@ -1425,7 +1414,7 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in specs[Default.SPECS_STRUCTURE][key][
+        for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
             Default.YAML_SUBSTRUCTURES
         ].items():
             if Default.CARDINALITY_SINGULAR in cardinality:
@@ -1521,7 +1510,7 @@ class Query:
 
     @staticmethod
     def top(specs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-        structure: dict[str, Any] = specs[Default.SPECS_STRUCTURE]
+        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
         top_dict: dict[str, dict[str, Any]] = {}
         for key in structure:
             if (
@@ -1541,7 +1530,7 @@ class Query:
 
     @staticmethod
     def subs(key: str, specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
-        structure: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
+        structure: dict[str, dict[str, Any]] = specs[Default.YAML_TYPE_STRUCTURE]
         subs_dict: dict[str, Any] = {}
         if len(structure[key][Default.YAML_SUBSTRUCTURES]) > 0:
             for substructure, cardinality in structure[key][

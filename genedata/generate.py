@@ -1,5 +1,5 @@
 # mypy: disable-error-code="name-defined"
-"""Generate a module of classes and tests from the GEDCOM specification, 
+"""Generate a module of classes and tests from the GEDCOM specification,
 the BasicStructure and the Xref classes.
 
 This module depends on the following modules which need to be prepared first. The V stands
@@ -452,7 +452,10 @@ from genedata.structure import (
     def get_datatype(structure: dict[str, Any]) -> str:
         """Convert the GEDCOM datatype into python datatype."""
         datatype: str = Default.EMPTY
-        if Default.YAML_PAYLOAD in structure and structure[Default.YAML_PAYLOAD] is not None:
+        if (
+            Default.YAML_PAYLOAD in structure
+            and structure[Default.YAML_PAYLOAD] is not None
+        ):
             datatype = structure[Default.YAML_PAYLOAD]
         match datatype:
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -509,6 +512,9 @@ from genedata.structure import (
         single: list[str] = []
         permitted: list[str] = []
         enum_tags: list[str] = []
+        supers: int = 0
+        if Default.YAML_SUPERSTRUCTURES in full_structure[key]:
+            supers = len(full_structure[key][Default.YAML_SUPERSTRUCTURES])
         enum_set_key: str = Default.EMPTY
         enum_key: str = Default.EMPTY
         if Default.YAML_ENUMERATION_SET in full_structure[key]:
@@ -585,6 +591,7 @@ from genedata.structure import (
             subs={subs_init}, 
             key='{key}',
             tag='{tag}',
+            supers={supers},
             permitted={permitted_value},
             required={required_value},
             single={single_value},
@@ -613,14 +620,14 @@ from genedata.structure import (
             >>> from genedata.specifications70 import Specs
             >>> map = Classes.generate_class(
             ...     'MAP',
-            ...     Specs['Structure'],
-            ...     Specs['EnumerationSet'],
-            ...     Specs['Enumeration'],
+            ...     Specs['structure'],
+            ...     Specs['enumeration set'],
+            ...     Specs['enumeration'],
             ...     Examples['MAP'],
             ... )
 
         Args:
-            key: The key of the Specs['Structure'] dictionary.
+            key: The key of the Specs['structure'] dictionary.
             structure: The structure dictionary where GEDCOM structure specifications are found.
             enumerationset: The enumerationset dictionary where GEDCOM enumeration-set
                 specifications are found.
@@ -679,12 +686,12 @@ class {class_name}(BaseStructure):
                     examples = full_examples[key]
                 try:
                     class_data = Classes.generate_class(
-                                key,
-                                full_structure,
-                                full_enumeration_set,
-                                full_enumeration,
-                                examples,
-                            )
+                        key,
+                        full_structure,
+                        full_enumeration_set,
+                        full_enumeration,
+                        examples,
+                    )
                 except Exception:
                     logging.info(f'"{key}" failed to generate class.')
                     raise
@@ -711,24 +718,30 @@ class {class_name}(BaseStructure):
             This example constructs a string that could be used for a classes module
             using a specification module that has already been constructed.
             >>> from genedata.generate import Classes
-            >>> all = Classes.build_all('specify-ged-source','7.0')
+            >>> all = Classes.build_all('specify-ged-source', '7.0')
 
         Args:
             source: The source of the specification.
             version: The version of the specification.
         """
         version_no_periods: str = version.replace(Default.PERIOD, Default.EMPTY)
-        examples = importlib.import_module(f'genedata.examples{version_no_periods}')
-        specifications = importlib.import_module(f'genedata.specifications{version_no_periods}')
+        examples = importlib.import_module(
+            f'genedata.examples{version_no_periods}'
+        )
+        specifications = importlib.import_module(
+            f'genedata.specifications{version_no_periods}'
+        )
         return ''.join(
             [
                 Classes.preamble(source, version),
-                Classes.all_listing(specifications.Specs[Default.SPECS_STRUCTURE]),
+                Classes.all_listing(
+                    specifications.Specs[Default.YAML_TYPE_STRUCTURE]
+                ),
                 Classes.imports(),
                 Classes.all_classes(
-                    specifications.Specs[Default.SPECS_STRUCTURE],
-                    specifications.Specs[Default.SPECS_ENUMERATION_SET],
-                    specifications.Specs[Default.SPECS_ENUMERATION],
+                    specifications.Specs[Default.YAML_TYPE_STRUCTURE],
+                    specifications.Specs[Default.YAML_TYPE_ENUMERATION_SET],
+                    specifications.Specs[Default.YAML_TYPE_ENUMERATION],
                     examples.Examples,
                 ),
             ]
@@ -1097,9 +1110,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
 """
 
     @staticmethod
-    def all(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def all(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test for each generated class.
 
         All generated classes are validated with their required substructures, if any.
@@ -1109,7 +1120,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
             enumerationsets: The full EnumerationSet dictionary containing all structures.
             enumerations: The full Enumeration dictionary containing the enumerations.
         """
-        
+
         def write(key: str, value: str, subs: str) -> str:
             """Write out a single test for the class `key` with value `value`."""
             separator: str = Default.EMPTY
@@ -1125,9 +1136,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'All'
         lines: str = Tests.preamble(test_name)
         value: str = Default.EMPTY
@@ -1150,9 +1167,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def not_permitted(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def not_permitted(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test verifying that a substructure not in its permitted list is rejected.
 
         All generated classes are tested.
@@ -1181,9 +1196,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Not Permitted'
         not_permitted_sub: str = f'{Default.CODE_CLASS}.RecordIndi(indi)'
         lines: str = Tests.preamble(test_name, add_pytest=1)
@@ -1214,9 +1235,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def bad_payload(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def bad_payload(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test verifying that bad payload is rejected.
 
         All generated classes are tested.
@@ -1245,9 +1264,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Bad Payload'
         error_message: str = 'NOT_STRING'
         lines: str = Tests.preamble(
@@ -1272,9 +1297,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def bad_enum(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def bad_enum(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test verifying that a bad enumeration value is rejected.
 
         All generated classes are tested.
@@ -1303,9 +1326,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Bad Enum'
         bad_enum: str = "'XYZ1234567890'"
         lines: str = Tests.preamble(test_name, add_pytest=1)
@@ -1322,9 +1351,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def bad_singular(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def bad_singular(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test verifying that a substructure with a single constraint is rejected
         if entered more than once.
 
@@ -1354,9 +1381,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Bad Singular'
         lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
@@ -1401,9 +1434,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def missing_required(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def missing_required(specs: dict[str, dict[str, Any]]) -> str:
         """Generate a test verifying that a substructure without its required substructures is rejected.
 
         Only structures with a permitted substructure besides the required substructures are tested.
@@ -1432,9 +1463,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Missing Required'
         lines: str = Tests.preamble(test_name, add_pytest=1)
         subs: str = Default.EMPTY
@@ -1459,9 +1496,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def empty_subs(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def empty_subs(specs: dict[str, dict[str, Any]]) -> str:
         """Generate tests verifying that a substructure without substructures in its specification
         cannot enter a substructure.
 
@@ -1490,9 +1525,15 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Empty Subs'
         lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
@@ -1511,9 +1552,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         return lines
 
     @staticmethod
-    def empty_value(
-        specs: dict[str, dict[str, Any]]
-    ) -> str:
+    def empty_value(specs: dict[str, dict[str, Any]]) -> str:
         """Generate tests verifying that a substructure without substructures in its specification
         cannot enter a substructure.
 
@@ -1542,16 +1581,21 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
-        structures: dict[str, dict[str, Any]] = specs[Default.SPECS_STRUCTURE]
-        enumerationsets: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION_SET]
-        enumerations: dict[str, dict[str, Any]] = specs[Default.SPECS_ENUMERATION]
+        structures: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
+        enumerationsets: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumerations: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
         test_name: str = 'Empty Value'
         value: str = "'hi'"
         lines: str = Tests.preamble(test_name, add_pytest=2)
         for key, structure in structures.items():
             if (
-                key
-                not in Default.IGNORE
+                key not in Default.IGNORE
                 and structure[Default.YAML_PAYLOAD] == 'None'
                 and key
                 not in [

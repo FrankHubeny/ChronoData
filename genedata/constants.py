@@ -161,6 +161,17 @@ class Default:
     #     SOUR_RECORD_TYPE,
     #     SUBM_RECORD_TYPE,
     # ])
+    RECORD_CLASS: tuple[str, str, str, str, str, str, str, str] = (
+        'Head',
+        'RecordFam',
+        'RecordIndi',
+        'RecordObje',
+        'RecordRepo',
+        'RecordSnote',
+        'RecordSour',
+        'RecordSubm',
+        'Trlr',
+    )
     RECORD_TYPES: tuple[str, str, str, str, str, str, str] = (
         'FAM',
         'INDI',
@@ -173,14 +184,6 @@ class Default:
     SLASH: str = '/'
     SPACE: str = ' '
     SPACE_DOUBLE: str = '  '
-    SPECS_CALENDAR: str = 'Calendar'
-    SPECS_DATATYPE: str = 'DataType'
-    SPECS_ENUMERATION: str = 'Enumeration'
-    SPECS_ENUMERATION_SET: str = 'EnumerationSet'
-    SPECS_EXTENSIONSTRUCTURE: str = 'ExtensionStructure'
-    SPECS_MONTH: str = 'Month'
-    SPECS_STRUCTURE: str = 'Structure'
-    SPECS_URI: str = 'Uri'
     STAGE: str = 'stage'
     T: str = 'T'
     TAG_EXT: str = 'EXT'

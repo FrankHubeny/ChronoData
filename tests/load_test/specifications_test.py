@@ -17,7 +17,7 @@ onlydir_directory: str = 'tests/load_test/gedtest_onlydir/'
 
 def test_calendar_retrieval() -> None:
     """Retrieve test data for the calendar specification."""
-    lookfor: str = 'Calendar: dict'
+    lookfor: str = 'calendar: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.calendar(directory)
     assert uri[0 : len(lookfor)] == lookfor
@@ -25,7 +25,7 @@ def test_calendar_retrieval() -> None:
 
 def test_datatype_retrieval() -> None:
     """Retrieve test data for the data type specification."""
-    lookfor: str = 'DataType: dict'
+    lookfor: str = 'data type: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.datatype(directory)
     assert uri[0 : len(lookfor)] == lookfor
@@ -33,7 +33,7 @@ def test_datatype_retrieval() -> None:
 
 def test_enumeration_retrieval() -> None:
     """Retrieve test data for the enumeration specification."""
-    lookfor: str = 'Enumeration: dict'
+    lookfor: str = 'enumeration: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.enumeration(directory)
     assert uri[0 : len(lookfor)] == lookfor
@@ -41,7 +41,7 @@ def test_enumeration_retrieval() -> None:
 
 def test_enumerationset_retrieval() -> None:
     """Retrieve test data for the enumeration set specification."""
-    lookfor: str = 'EnumerationSet: dict'
+    lookfor: str = 'enumeration set: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.enumerationset(directory)
     assert uri[0 : len(lookfor)] == lookfor
@@ -49,7 +49,7 @@ def test_enumerationset_retrieval() -> None:
 
 def test_month_retrieval() -> None:
     """Retrieve test data for the month specification."""
-    lookfor: str = 'Month: dict'
+    lookfor: str = 'month: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.month(directory)
     assert uri[0 : len(lookfor)] == lookfor
@@ -57,23 +57,15 @@ def test_month_retrieval() -> None:
 
 def test_structure_retrieval() -> None:
     """Retrieve test data for the structure specification."""
-    lookfor: str = 'Structure: dict'
+    lookfor: str = 'structure: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.structure(directory)
     assert uri[0 : len(lookfor)] == lookfor
 
 
-def test_structure_extension_retrieval() -> None:
-    """Retrieve test data for the structure extension specification."""
-    lookfor: str = 'ExtensionStructure: dict'
-    uri: str = Default.EMPTY
-    uri = LoadSpecs.structure_extension(directory)
-    assert uri[0 : len(lookfor)] == lookfor
-
-
 def test_uri_retrieval() -> None:
     """Retrieve test data for the uri specification."""
-    lookfor: str = 'Uri: dict'
+    lookfor: str = 'uri: dict'
     uri: str = Default.EMPTY
     uri = LoadSpecs.uri(directory)
     assert uri[0 : len(lookfor)] == lookfor

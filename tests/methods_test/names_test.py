@@ -18,7 +18,7 @@ def test_keyname_from_classname() -> None:
     bad: int = 0
     class_name: str = Default.EMPTY
     key_name: str = Default.EMPTY 
-    for key in Specs[Default.SPECS_STRUCTURE]:
+    for key in Specs[Default.YAML_TYPE_STRUCTURE]:
         class_name = Names.classname(key)
         key_name = Names.key_from_classname(class_name, Specs)
         if key_name == key:

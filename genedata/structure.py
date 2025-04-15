@@ -318,6 +318,7 @@ class BaseStructure:
         subs: Self | list[Self] | None = None,
         key: str = Default.EMPTY,
         tag: str = Default.EMPTY,
+        supers: int = 0,
         permitted: list[str] | None = None,
         required: list[str] | None = None,
         single: list[str] | None = None,
@@ -406,6 +407,9 @@ class BaseStructure:
                         name, self.permitted, self.class_name
                     )
                 )
+            
+        # Are there records in the permitted list of substructures?
+        
 
         # Does value have the required data type?
         match self.payload:
@@ -892,96 +896,23 @@ class BaseStructure:
         )
 
 
-class Ext(BaseStructure):
-    """Store, validate and format an extension structure."""
+# class Ext(BaseStructure):
+#     """Store, validate and format an extension structure."""
 
-    def __init__(self, structure: dict[str, Any], value: str, subs: SubsType):
-        super().__init__(
-            value=value, 
-            subs=subs, 
-            key=structure[Default.YAML_LOAD_TAG],
-            tag=structure[Default.YAML_LOAD_TAG],
-            permitted=structure[Default.YAML_PERMITTED],
-            required=structure[Default.YAML_REQUIRED],
-            single=structure[Default.YAML_SINGULAR],
-            enum_key=structure[Default.YAML_ENUM_KEY],
-            enum_tags=structure[Default.YAML_ENUM_TAGS],
-            payload=structure[Default.YAML_PAYLOAD],
-            class_name='Ext',
-        )
+#     def __init__(self, key: int, value: str, subs: SubsType):
+#         super().__init__(
+#             value=value, 
+#             subs=subs, 
+#             key=key,
+#             tag=structure[Default.YAML_LOAD_TAG],
+#             supers=0,
+#             permitted=structure[Default.YAML_PERMITTED],
+#             required=structure[Default.YAML_REQUIRED],
+#             single=structure[Default.YAML_SINGULAR],
+#             enum_key=structure[Default.YAML_ENUM_KEY],
+#             enum_tags=structure[Default.YAML_ENUM_TAGS],
+#             payload=structure[Default.YAML_PAYLOAD],
+#             class_name='Ext',
+#         )
 
-        # self.tag: str = Default.EMPTY
-        # self.permitted: list[str] = []
-        # self.required: list[str] = []
-        # self.single: list[str] = []
-        # self.enums: list[str] = []
-        # self.payload: str = Default.EMPTY
-        # self.yamldict: dict[str, Any] = {}
-        # if '.yaml' in key:
-        #     if key[0:4] == 'http':
-        #         webUrl = urllib.request.urlopen(key)
-        #         result_code = str(webUrl.getcode())
-        #         if result_code == '404':
-        #             raise ValueError(Msg.PAGE_NOT_FOUND.format(key))
-        #         raw: str = webUrl.read().decode(Default.UTF8)
-        #     else:
-        #         with io.open(key, 'r', encoding='utf8') as file:  
-        #             raw = file.read()
-
-        #     # Check that file has proper yaml directive.
-        #     if Default.YAML_DIRECTIVE not in raw:
-        #         raise ValueError(
-        #             Msg.YAML_NOT_YAML_FILE.format(key, Default.YAML_DIRECTIVE)
-        #         )
-
-        #     # Put the yaml data into a dictionary.
-        #     raw2: str = raw[raw.find(Default.YAML_DIRECTIVE_END_MARKER) :]
-        #     yaml_data: str = raw2[: raw2.find(Default.YAML_DOCUMENT_END_MARKER)]
-        #     yamldict = yaml.safe_load(yaml_data)
-        #     required = []
-        #     single = []
-        #     permitted = []
-        #     enums = []
-        #     if Default.YAML_SUBSTRUCTURES in yamldict:
-        #         for yamlkey, yamlvalue in yamldict[
-        #             Default.YAML_SUBSTRUCTURES
-        #         ].items():
-        #             tag = (
-        #                 yamlkey[yamlkey.rfind(Default.SLASH) + 1 :]
-        #                 .title()
-        #                 .replace('-', '')
-        #             )
-        #             permitted.append(tag)
-        #             if Default.YAML_CARDINALITY_REQUIRED in yamlvalue:
-        #                 required.append(tag)
-        #             if Default.YAML_CARDINALITY_SINGULAR in yamlvalue:
-        #                 single.append(tag)
-        #     yamldict[Default.YAML_PERMITTED] = permitted
-        #     yamldict[Default.YAML_REQUIRED] = required
-        #     yamldict[Default.YAML_SINGULAR] = single
-        #     if Default.YAML_ENUMERATION_SET in yamldict:
-        #         enumset = yamldict[Default.YAML_ENUMERATION_SET]
-        #         for yamlkey, yamlvalue in Enumeration.items():  
-        #             if enumset in yamlvalue[Default.YAML_VALUE_OF]:
-        #                 enums.append(yamlvalue[Default.YAML_STANDARD_TAG])
-        #     yamldict[Default.YAML_ENUM_TAGS] = enums
-        #     self.tag = yamldict[Default.YAML_EXTENSION_TAGS][0]
-        #     self.permitted = yamldict[Default.YAML_PERMITTED]
-        #     self.required = yamldict[Default.YAML_REQUIRED]
-        #     self.single = yamldict[Default.YAML_SINGULAR]
-        #     self.enums = yamldict[Default.YAML_ENUM_TAGS]
-        #     self.payload = yamldict[Default.YAML_PAYLOAD]
-        # else:
-        #     self.tag = ExtensionStructure[self.key][
-        #         Default.YAML_EXTENSION_TAGS
-        #     ][0]
-        #     self.permitted = ExtensionStructure[self.key][
-        #         Default.YAML_PERMITTED
-        #     ]
-        #     self.required = ExtensionStructure[self.key][Default.YAML_REQUIRED]
-        #     self.single = ExtensionStructure[self.key][Default.YAML_SINGULAR]
-        #     self.enums = ExtensionStructure[self.key][Default.YAML_ENUM_TAGS]
-        #     self.payload = ExtensionStructure[self.key][Default.YAML_PAYLOAD]
-        #     # self.class_name: str = (
-        #     #     self.key.title().replace('_', '').replace('-', '')
-        #     # )
+        

@@ -25,6 +25,7 @@ class Msg:
     BAD_CHAR: str = 'The character "{0}" is not in the set of characters "{1}".'
     BAD_MONTH: str = 'The month "{1}" for calend "{0}" is not recognized.'
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
+    CANNOT_READ_YAML_FILE: str = 'Cannot read yaml file "{0}" for tag "{1}". The tag will be treated as undocumented.'
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
     CIRCULAR: str = '"{0}" has "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'

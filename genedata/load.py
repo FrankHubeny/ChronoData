@@ -40,9 +40,10 @@ One dictionary is available called `Specs`.  It contains the following subdictio
 - `Enumeration` corresponding to yaml files in the enumeration directory.
 - `EnumerationSet` corresponding to yaml files in the enumeration-set directory.
 - `Month` corresponding to yaml files in the month directory.
-- `Structure` corresponding to yaml files in the structure/standard directory.
-- `ExtensionStructure` corresponding to yaml files in the structure/extenion directory.
+- `Structure` corresponding to yaml files in the structure/standard directory 
 - `Uri` corresponding to yaml files in the uri directory.
+
+Documented extensions are added to this dictionary.
 
 Reference:
     [GEDCOM-registeries]({source})
@@ -87,7 +88,7 @@ from typing import Any
         """Format the calendar dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_CALENDAR}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_CALENDAR}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.calendar_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -104,7 +105,7 @@ from typing import Any
         """Format the data type dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_DATATYPE}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_DATATYPE}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.datatype_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -121,7 +122,7 @@ from typing import Any
         """Format the enumeration dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_ENUMERATION}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_ENUMERATION}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.enumeration_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -138,7 +139,7 @@ from typing import Any
         """Format the enumeration set dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_ENUMERATION_SET}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_ENUMERATION_SET}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.enumerationset_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -155,7 +156,7 @@ from typing import Any
         """Format the month dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_MONTH}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_MONTH}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.month_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -172,7 +173,7 @@ from typing import Any
         """Format the structure dictionary for use in the specs module."""
         return ''.join(
             [
-                f'{Default.SPECS_STRUCTURE}: dict[str, dict[str, Any]] = ',
+                f'{Default.YAML_TYPE_STRUCTURE}: dict[str, dict[str, Any]] = ',
                 LoadSpecs.structure_dictionary(url).replace(
                     "'payload': None,", "'payload': 'None',"
                 ),
@@ -181,25 +182,25 @@ from typing import Any
             ]
         )
 
-    @staticmethod
-    def structure_extension_dictionary(url: str) -> str:
-        """Retrive the extension structure dictionary as a string that can be sent to `eval`."""
-        return LoadSpecs.dictionary(
-            url,
-            Default.URL_STRUCTURE_EXTENSION,
-        )
+    # @staticmethod
+    # def structure_extension_dictionary(url: str) -> str:
+    #     """Retrive the extension structure dictionary as a string that can be sent to `eval`."""
+    #     return LoadSpecs.dictionary(
+    #         url,
+    #         Default.URL_STRUCTURE_EXTENSION,
+    #     )
 
-    @staticmethod
-    def structure_extension(url: str) -> str:
-        """Format the extension structure dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.SPECS_EXTENSIONSTRUCTURE}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.structure_extension_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
+    # @staticmethod
+    # def structure_extension(url: str) -> str:
+    #     """Format the extension structure dictionary for use in the specs module."""
+    #     return ''.join(
+    #         [
+    #             f'{Default.YAML_TYPE_EXTENSION_STRUCTURE}: dict[str, dict[str, Any]] = ',
+    #             LoadSpecs.structure_extension_dictionary(url),
+    #             Default.EOL,
+    #             Default.EOL,
+    #         ]
+    #     )
 
     @staticmethod
     def uri_dictionary(url: str) -> str:
@@ -211,7 +212,7 @@ from typing import Any
         """Format the uri dictionary for use in the specs module."""
         return ''.join(
             [
-                'Uri: dict[str, dict[str, Any]] = ',
+                'uri: dict[str, dict[str, Any]] = ',
                 LoadSpecs.uri_dictionary(url),
                 Default.EOL,
                 Default.EOL,
@@ -224,21 +225,21 @@ from typing import Any
             [
                 'Specs: dict[str, dict[str, Any]] = {',
                 Default.EOL,
-                f"    '{Default.SPECS_CALENDAR}': {LoadSpecs.calendar_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_CALENDAR}': {LoadSpecs.calendar_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_DATATYPE}': {LoadSpecs.datatype_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_DATATYPE}': {LoadSpecs.datatype_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_ENUMERATION}': {LoadSpecs.enumeration_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_ENUMERATION}': {LoadSpecs.enumeration_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_ENUMERATION_SET}': {LoadSpecs.enumerationset_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_ENUMERATION_SET}': {LoadSpecs.enumerationset_dictionary(url)},",
+                # Default.EOL,
+                # f"    '{Default.SPECS_EXTENSIONSTRUCTURE}': {LoadSpecs.structure_extension_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_EXTENSIONSTRUCTURE}': {LoadSpecs.structure_extension_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_MONTH}': {LoadSpecs.month_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_MONTH}': {LoadSpecs.month_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_STRUCTURE}': {LoadSpecs.structure_dictionary(url)},",
                 Default.EOL,
-                f"    '{Default.SPECS_STRUCTURE}': {LoadSpecs.structure_dictionary(url)},",
-                Default.EOL,
-                f"    '{Default.SPECS_URI}': {LoadSpecs.uri_dictionary(url)},",
+                f"    '{Default.YAML_TYPE_URI}': {LoadSpecs.uri_dictionary(url)},",
                 Default.EOL,
                 '}',
                 Default.EOL,

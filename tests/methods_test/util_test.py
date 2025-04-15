@@ -35,8 +35,8 @@ def test_extract() -> None:
     gdz: str = 'tests/ged_test/minimal70.gdz'
     to_dir: str = 'tests/methods_test/write_out_test/'
     Util.extract('gedcom.ged', gdz, to_dir)
-    read_in: str = Util.read(f'{to_dir}gedcom.ged')
-    assert read_in == '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR\n'
+    read_in: str = Util.read_ged(f'{to_dir}gedcom.ged')
+    assert read_in == '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR'
 
 
 def test_read_gdz_ged_file_not_exists() -> None:
