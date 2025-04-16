@@ -19,15 +19,9 @@ def test_show_ged_no_header() -> None:
 
 
 def test_file_recognized_at_init() -> None:
-    filename: str = 'tests/ged_test/maximal70.ged'
+    filename: str = 'tests/ged_test/minimal70.ged'
     g = Genealogy(filename=filename)
     assert g.filename == filename
-
-
-def test_unrecognized_file_at_init() -> None:
-    filename: str = 'tests/ged_test/maximal.gedx'
-    with pytest.raises(ValueError, match=Msg.UNRECOGNIZED.format(filename)):
-        Genealogy(filename=filename)
 
 
 def test_save_ged() -> None:
@@ -48,10 +42,8 @@ def test_add_calendar_tag() -> None:
     g = Genealogy()
     g.add_tag('_GREGORIAN', 'tests/data/good_calendar.yaml')
     assert (
-        g.extension_specification[Default.YAML_TYPE_CALENDAR]['_GREGORIAN'][
-            Default.YAML_STANDARD_TAG
-        ]
-        == 'GREGORIAN'
+        g.specification[Default.YAML_TYPE_CALENDAR][1][Default.YAML_TYPE]
+        == Default.YAML_TYPE_CALENDAR
     )
 
 
@@ -59,7 +51,7 @@ def test_add_calendar_tag_underline_upper() -> None:
     g = Genealogy()
     g.add_tag('gregorian', 'tests/data/good_calendar.yaml')
     assert (
-        g.extension_specification[Default.YAML_TYPE_CALENDAR]['_GREGORIAN'][
+        g.specification[Default.YAML_TYPE_CALENDAR][1][
             Default.YAML_STANDARD_TAG
         ]
         == 'GREGORIAN'

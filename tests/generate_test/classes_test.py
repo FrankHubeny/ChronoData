@@ -12,7 +12,7 @@ def test_specification_retrieval() -> None:
     lookfor: str = """
     GEDCOM Specification:"""
     all_specs: str = Default.EMPTY
-    all_specs = Classes.specification(Specs[Default.YAML_TYPE_STRUCTURE]['MAP'])
+    all_specs = Classes.specification('MAP', Specs)
     assert all_specs[0 : len(lookfor)] == lookfor
 
 
@@ -20,7 +20,7 @@ def test_substructures_retrieval() -> None:
     """Retrieve data from the `substructures` method."""
     lookfor: str = '\n\n    Substructures:'
     all_specs: str = Default.EMPTY
-    all_specs = Classes.substructures(Specs[Default.YAML_TYPE_STRUCTURE]['MAP'])
+    all_specs = Classes.substructures('MAP', Specs)
     assert all_specs[0 : len(lookfor)] == lookfor
 
 
@@ -29,7 +29,7 @@ def test_substructures_retrieval_empty() -> None:
     lookfor: str = Default.EMPTY
     all_specs: str = Default.EMPTY
     all_specs = Classes.substructures(
-        Specs[Default.YAML_TYPE_STRUCTURE]['LATI']
+        'LATI', Specs
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -39,7 +39,7 @@ def test_superstructures_retrieval() -> None:
     lookfor: str = '\n\n    Superstructures:'
     all_specs: str = Default.EMPTY
     all_specs = Classes.superstructures(
-        Specs[Default.YAML_TYPE_STRUCTURE]['LATI']
+        'LATI', Specs
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -49,7 +49,7 @@ def test_generate_superstructures_retrieval_empty() -> None:
     lookfor: str = Default.EMPTY
     all_specs: str = Default.EMPTY
     all_specs = Classes.superstructures(
-        Specs[Default.YAML_TYPE_STRUCTURE]['HEAD']
+        'HEAD', Specs
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -60,9 +60,7 @@ def test_enumerations_retrieval_empty() -> None:
     all_specs: str = Default.EMPTY
     all_specs = Classes.enumerations(
         'LATI',
-        Specs[Default.YAML_TYPE_STRUCTURE],
-        Specs[Default.YAML_TYPE_ENUMERATION_SET],
-        Specs[Default.YAML_TYPE_ENUMERATION],
+        Specs,
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -73,9 +71,7 @@ def test_enumerations_retrieval() -> None:
     all_specs: str = Default.EMPTY
     all_specs = Classes.enumerations(
         'SEX',
-        Specs[Default.YAML_TYPE_STRUCTURE],
-        Specs[Default.YAML_TYPE_ENUMERATION_SET],
-        Specs[Default.YAML_TYPE_ENUMERATION],
+        Specs,
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -86,7 +82,7 @@ def test_generate_value_of_retrieval() -> None:
 
     Enumeration Value Of:"""
     all_specs: str = Default.EMPTY
-    all_specs = Classes.value_of(Specs[Default.YAML_TYPE_STRUCTURE]['ADOP'])
+    all_specs = Classes.value_of('ADOP', Specs)
     assert all_specs[0 : len(lookfor)] == lookfor
 
 
@@ -94,7 +90,7 @@ def test_value_of_retrieval_empty() -> None:
     """Retrieve data from the `value_of` method."""
     lookfor: str = Default.EMPTY
     all_specs: str = Default.EMPTY
-    all_specs = Classes.value_of(Specs[Default.YAML_TYPE_STRUCTURE]['LATI'])
+    all_specs = Classes.value_of('LATI', Specs)
     assert all_specs[0 : len(lookfor)] == lookfor
 
 
@@ -105,7 +101,7 @@ def test_args_retrieval() -> None:
     Args:"""
     all_specs: str = Default.EMPTY
     all_specs = Classes.arguments(
-        'LATI', Specs[Default.YAML_TYPE_STRUCTURE]['LATI']
+        'LATI', Specs
     )
     assert all_specs[0 : len(lookfor)] == lookfor
 
@@ -114,7 +110,7 @@ def test_generate_references_retrieval() -> None:
     """Retrieve data from the `references` method."""
     lookfor: str = '\n\n    References:'
     all_specs: str = Default.EMPTY
-    all_specs = Classes.references(Specs[Default.YAML_TYPE_STRUCTURE]['LATI'])
+    all_specs = Classes.references('LATI', Specs)
     assert all_specs[0 : len(lookfor)] == lookfor
 
 
@@ -126,9 +122,7 @@ class"""
     all_specs: str = Default.EMPTY
     all_specs = Classes.generate_class(
         'LATI',
-        Specs[Default.YAML_TYPE_STRUCTURE],
-        Specs[Default.YAML_TYPE_ENUMERATION_SET],
-        Specs[Default.YAML_TYPE_ENUMERATION],
+        Specs,
         Examples['LATI'],
     )
     assert all_specs[0 : len(lookfor)] == lookfor
@@ -138,7 +132,7 @@ def test_build_all_retrieval() -> None:
     """Retrieve data from the build_all method."""
     # lookfor: str = "'''This module of classes"
     all_specs: str = Default.EMPTY
-    all_specs = Classes.build_all('GED', '7.0')
+    all_specs = Classes.build_all(Specs)
     assert len(all_specs) > 0
 
 

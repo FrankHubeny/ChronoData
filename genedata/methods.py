@@ -113,11 +113,11 @@ class Util:
         else:
             logging.info(Msg.FILE_NOT_FOUND.format(url))
         return raw
-    
+
     @staticmethod
     def read_ged(url: str) -> str:
         """Read a ged file removing extraneous material from the top and bottom.
-        
+
         Args:
             url: The name of the file or the internet url.
         """
@@ -143,15 +143,13 @@ class Util:
                 raise ValueError(
                     Msg.GED_VERSION_NOT_RECOGNIZED.format(url, version)
                 )
-            
+
         # Remove anything in the file prior to the ged header.
         _, _, raw_top_trimmed = raw.partition(Default.GED_HEADER)
         raw = ''.join([Default.GED_HEADER, raw_top_trimmed])
 
         # Remove anything in the file after the ged trailer.
-        raw_bottom_trimmed, _, _ = raw.partition(
-            Default.GED_TRAILER
-        )
+        raw_bottom_trimmed, _, _ = raw.partition(Default.GED_TRAILER)
         return ''.join([raw_bottom_trimmed, Default.GED_TRAILER])
 
     @staticmethod
@@ -1302,6 +1300,36 @@ class Query:
     """Some potentially useful queries of the specification."""
 
     @staticmethod
+    def enum_key_tags(key: str, specs: dict[str, dict[str, Any]]) -> tuple[str, list[str]]:
+        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
+        enumeration_set: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumeration: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_ENUMERATION
+        ]
+        enum_tags: list[str] = []
+        enum_set_key: str = Default.EMPTY
+        enum_key: str = Default.EMPTY
+        if Default.YAML_ENUMERATION_SET in structure[key]:
+            enum_set_key = Names.stem(
+                structure[key][Default.YAML_ENUMERATION_SET]
+            )
+            for enum in enumeration_set[enum_set_key][
+                Default.YAML_ENUMERATION_VALUES
+            ]:
+                enum_key = Names.stem(enum)
+                if enum_key in enumeration:
+                    enum_tags.append(
+                        enumeration[enum_key][Default.YAML_STANDARD_TAG]
+                    )
+                else:
+                    enum_tags.append(
+                        structure[enum_key][Default.YAML_STANDARD_TAG]
+                    )
+        return enum_key, enum_tags
+
+    @staticmethod
     def classes_with_tag(
         tag: str, specs: dict[str, dict[str, Any]]
     ) -> list[str]:
@@ -1326,6 +1354,19 @@ class Query:
             if structure[Default.YAML_STANDARD_TAG] == tagname:
                 classes.append(Names.classname(key))
         return classes
+
+    @staticmethod
+    def payload(key: str, specs: dict[str, dict[str, Any]]) -> str:
+        result: str = Default.EMPTY
+        if (
+            key in specs[Default.YAML_TYPE_STRUCTURE]
+            and Default.YAML_PAYLOAD in specs[Default.YAML_TYPE_STRUCTURE][key]
+            and specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_PAYLOAD] is not None
+        ):
+            result = specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_PAYLOAD
+            ]
+        return result
 
     @staticmethod
     def permitted(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
@@ -1420,6 +1461,25 @@ class Query:
             if Default.CARDINALITY_SINGULAR in cardinality:
                 classes.append(Names.classname(uri))
         return classes
+    
+    @staticmethod
+    def structure_tag(key: str, specs: dict[str, dict[str, Any]]) -> str:
+        return specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_STANDARD_TAG]
+
+    @staticmethod
+    def supers_count(key: str, specs: dict[str, dict[str, Any]]) -> int:
+        howmany: int = 0
+        if (
+            key in specs[Default.YAML_TYPE_STRUCTURE]
+            and Default.YAML_SUPERSTRUCTURES
+            in specs[Default.YAML_TYPE_STRUCTURE][key]
+        ):
+            howmany = len(
+                specs[Default.YAML_TYPE_STRUCTURE][key][
+                    Default.YAML_SUPERSTRUCTURES
+                ]
+            )
+        return howmany
 
     @staticmethod
     def record_counts(
@@ -1530,7 +1590,9 @@ class Query:
 
     @staticmethod
     def subs(key: str, specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
-        structure: dict[str, dict[str, Any]] = specs[Default.YAML_TYPE_STRUCTURE]
+        structure: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ]
         subs_dict: dict[str, Any] = {}
         if len(structure[key][Default.YAML_SUBSTRUCTURES]) > 0:
             for substructure, cardinality in structure[key][

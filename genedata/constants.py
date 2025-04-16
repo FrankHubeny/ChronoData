@@ -262,11 +262,13 @@ class Default:
     YAML_LANG: str = 'lang'
     YAML_LOAD_FILE: str = 'load file'
     YAML_LOAD_TAG: str = 'load tag'
+    YAML_META: str = 'meta'
     YAML_MONTHS: str = 'months'
     YAML_PAYLOAD: str = 'payload'
     YAML_PERMITTED: str = 'permitted'
     YAML_PERMITTED_KEY: str = 'permitted key'
     YAML_REQUIRED: str = 'required'
+    YAML_SOURCE: str = 'source'
     YAML_SINGULAR: str = 'single'
     YAML_SPECIFICATION: str = 'specification'
     YAML_STANDARD_TAG: str = 'standard tag'
@@ -301,6 +303,7 @@ class Default:
     )
     YAML_URI: str = 'uri'
     YAML_VALUE_OF: str = 'value of'
+    YAML_VERSION: str = 'version'
     YAML_WITH_HYPHEN: str = '\n    > - '
     YAML_WITHOUT_HYPHEN: str = '\n    >   '
     YEARS: int = 0

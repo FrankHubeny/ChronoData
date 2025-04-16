@@ -23,7 +23,7 @@ subm = g.submitter_xref('1')
 
 
 def test_empty_value_Bapl() -> None:
-    '''Validate the `Bapl` without substructures cannot receive a substructure.'''
+    '''Validate that `Bapl` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Bapl.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -31,7 +31,7 @@ def test_empty_value_Bapl() -> None:
 
 
 def test_empty_value_Chan() -> None:
-    '''Validate the `Chan` without substructures cannot receive a substructure.'''
+    '''Validate that `Chan` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Chan.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -39,7 +39,7 @@ def test_empty_value_Chan() -> None:
 
 
 def test_empty_value_Conl() -> None:
-    '''Validate the `Conl` without substructures cannot receive a substructure.'''
+    '''Validate that `Conl` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Conl.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -47,7 +47,7 @@ def test_empty_value_Conl() -> None:
 
 
 def test_empty_value_Crea() -> None:
-    '''Validate the `Crea` without substructures cannot receive a substructure.'''
+    '''Validate that `Crea` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Crea.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -55,7 +55,7 @@ def test_empty_value_Crea() -> None:
 
 
 def test_empty_value_Crop() -> None:
-    '''Validate the `Crop` without substructures cannot receive a substructure.'''
+    '''Validate that `Crop` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Crop.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -63,7 +63,7 @@ def test_empty_value_Crop() -> None:
 
 
 def test_empty_value_Data() -> None:
-    '''Validate the `Data` without substructures cannot receive a substructure.'''
+    '''Validate that `Data` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Data.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -71,7 +71,7 @@ def test_empty_value_Data() -> None:
 
 
 def test_empty_value_Endl() -> None:
-    '''Validate the `Endl` without substructures cannot receive a substructure.'''
+    '''Validate that `Endl` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Endl.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -79,7 +79,7 @@ def test_empty_value_Endl() -> None:
 
 
 def test_empty_value_Gedc() -> None:
-    '''Validate the `Gedc` without substructures cannot receive a substructure.'''
+    '''Validate that `Gedc` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Gedc.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -87,7 +87,7 @@ def test_empty_value_Gedc() -> None:
 
 
 def test_empty_value_HeadPlac() -> None:
-    '''Validate the `HeadPlac` without substructures cannot receive a substructure.'''
+    '''Validate that `HeadPlac` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("HeadPlac.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -95,15 +95,15 @@ def test_empty_value_HeadPlac() -> None:
 
 
 def test_empty_value_Head() -> None:
-    '''Validate the `Head` without substructures cannot receive a substructure.'''
+    '''Validate that `Head` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Head.__init__() got an unexpected keyword argument 'value'")
     ):
-        gc.Head(value='hi', subs=gc.Gedc(gc.GedcVers('abc')))  # type: ignore[call-arg]
+        gc.Head(value='hi', subs=gc.Gedc('12:12:12', gc.GedcVers('abc')))  # type: ignore[call-arg]
 
 
 def test_empty_value_Husb() -> None:
-    '''Validate the `Husb` without substructures cannot receive a substructure.'''
+    '''Validate that `Husb` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Husb.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -111,7 +111,7 @@ def test_empty_value_Husb() -> None:
 
 
 def test_empty_value_Inil() -> None:
-    '''Validate the `Inil` without substructures cannot receive a substructure.'''
+    '''Validate that `Inil` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Inil.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -119,7 +119,7 @@ def test_empty_value_Inil() -> None:
 
 
 def test_empty_value_Map() -> None:
-    '''Validate the `Map` without substructures cannot receive a substructure.'''
+    '''Validate that `Map` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Map.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -127,7 +127,7 @@ def test_empty_value_Map() -> None:
 
 
 def test_empty_value_Schma() -> None:
-    '''Validate the `Schma` without substructures cannot receive a substructure.'''
+    '''Validate that `Schma` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Schma.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -135,7 +135,7 @@ def test_empty_value_Schma() -> None:
 
 
 def test_empty_value_Slgc() -> None:
-    '''Validate the `Slgc` without substructures cannot receive a substructure.'''
+    '''Validate that `Slgc` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Slgc.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -143,7 +143,7 @@ def test_empty_value_Slgc() -> None:
 
 
 def test_empty_value_Slgs() -> None:
-    '''Validate the `Slgs` without substructures cannot receive a substructure.'''
+    '''Validate that `Slgs` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Slgs.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -151,7 +151,7 @@ def test_empty_value_Slgs() -> None:
 
 
 def test_empty_value_SourData() -> None:
-    '''Validate the `SourData` without substructures cannot receive a substructure.'''
+    '''Validate that `SourData` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("SourData.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -159,7 +159,7 @@ def test_empty_value_SourData() -> None:
 
 
 def test_empty_value_Wife() -> None:
-    '''Validate the `Wife` without substructures cannot receive a substructure.'''
+    '''Validate that `Wife` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("Wife.__init__() got an unexpected keyword argument 'value'")
     ):

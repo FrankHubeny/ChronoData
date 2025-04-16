@@ -368,6 +368,7 @@ class BaseStructure:
             single = []
         if enum_tags is None:
             enum_tags = []
+        self.supers: int = supers
         self.permitted: list[str] = permitted
         self.required: list[str] = required
         self.single: list[str] = single

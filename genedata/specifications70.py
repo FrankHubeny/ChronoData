@@ -12,13 +12,14 @@ in the directory is read into the appropriate dictionary with the stem of the ya
 and the contents of the yaml file being its value.
 
 One dictionary is available called `Specs`.  It contains the following subdictionaries.
-- `Calendar` corresponding to yaml files in the calendar directory.
-- `DataType` corresponding to yaml files in the data-type directory.
-- `Enumeration` corresponding to yaml files in the enumeration directory.
-- `EnumerationSet` corresponding to yaml files in the enumeration-set directory.
-- `Month` corresponding to yaml files in the month directory.
-- `Structure` corresponding to yaml files in the structure/standard directory 
-- `Uri` corresponding to yaml files in the uri directory.
+- `meta` provides information about the source and version of the specifications.
+- `calendar` corresponding to yaml files in the calendar directory.
+- `data type` corresponding to yaml files in the data-type directory.
+- `enumeration` corresponding to yaml files in the enumeration directory.
+- `enumeration set` corresponding to yaml files in the enumeration-set directory.
+- `month` corresponding to yaml files in the month directory.
+- `structure` corresponding to yaml files in the structure/standard directory 
+- `uri` corresponding to yaml files in the uri directory.
 
 Documented extensions are added to this dictionary.
 
@@ -32,6 +33,7 @@ __all__ = ['Specs']
 from typing import Any
 
 Specs: dict[str, dict[str, Any]] = {
+    'meta': {'source': 'https://github.com/FamilySearch/GEDCOM-registries', 'version': '7.0'},
     'calendar': {
     'cal-FRENCH_R': {'lang': 'en-US', 'type': 'calendar', 'uri': 'https://gedcom.io/terms/v7/cal-FRENCH_R', 'standard tag': 'FRENCH_R', 'specification': ['The French Republican calendar or French Revolutionary calendar are the names\ngiven to the new calendar adopted in 1794 by the French National Convention.\nThis calendar was adopted on Gregorian day 22 September 1792, which was 1\nVendÃ©miaire 1 in this calendar. It was abandoned 18 years later.\n\nPermitted months are\n\n| `stdTag` | Name                 |\n| :------- | :------------------- |\n| `VEND`   | VendÃ©miaire          |\n| `BRUM`   | Brumaire             |\n| `FRIM`   | Frimaire             |\n| `NIVO`   | NivÃ´se               |\n| `PLUV`   | PluviÃ´se             |\n| `VENT`   | VentÃ´se              |\n| `GERM`   | Germinal             |\n| `FLOR`   | FlorÃ©al              |\n| `PRAI`   | Prairial             |\n| `MESS`   | Messidor             |\n| `THER`   | Thermidor            |\n| `FRUC`   | Fructidor            |\n| `COMP`   | Jour ComplÃ©mentaires |\n\nNo epoch marker is permitted in this calendar.\n\nThe URI for this calendar is `https://gedcom.io/terms/v7/cal-FRENCH_R`\n'], 'label': 'French Republican', 'months': ['https://gedcom.io/terms/v7/month-VEND', 'https://gedcom.io/terms/v7/month-BRUM', 'https://gedcom.io/terms/v7/month-FRIM', 'https://gedcom.io/terms/v7/month-NIVO', 'https://gedcom.io/terms/v7/month-PLUV', 'https://gedcom.io/terms/v7/month-VENT', 'https://gedcom.io/terms/v7/month-GERM', 'https://gedcom.io/terms/v7/month-FLOR', 'https://gedcom.io/terms/v7/month-PRAI', 'https://gedcom.io/terms/v7/month-MESS', 'https://gedcom.io/terms/v7/month-THER', 'https://gedcom.io/terms/v7/month-FRUC', 'https://gedcom.io/terms/v7/month-COMP'], 'epochs': [], 'contact': 'https://gedcom.io/community/'},
     'cal-GREGORIAN': {'lang': 'en-US', 'type': 'calendar', 'uri': 'https://gedcom.io/terms/v7/cal-GREGORIAN', 'standard tag': 'GREGORIAN', 'specification': ['The Gregorian calendar is the now-ubiquitous calendar introduced by Pope\nGregory XIII in 1582 to correct the Julian calendar which was slowly drifting\nrelative to the seasons.\n\nPermitted months are\n\n| `stdTag` | Name      |\n| :------- | :-------- |\n| `JAN`    | January   |\n| `FEB`    | February  |\n| `MAR`    | March     |\n| `APR`    | April     |\n| `MAY`    | May       |\n| `JUN`    | June      |\n| `JUL`    | July      |\n| `AUG`    | August    |\n| `SEP`    | September |\n| `OCT`    | October   |\n| `NOV`    | November  |\n| `DEC`    | December  |\n\nThe epoch marker `BCE` is permitted in this calendar; year *y* BCE indicates a\nyear *y* years before year 1. Thus, there is no year 0; year 1 BCE was followed\nby year 1.\n\nThe URI for this calendar is `https://gedcom.io/terms/v7/cal-GREGORIAN`\n'], 'label': 'Gregorian', 'months': ['https://gedcom.io/terms/v7/month-JAN', 'https://gedcom.io/terms/v7/month-FEB', 'https://gedcom.io/terms/v7/month-MAR', 'https://gedcom.io/terms/v7/month-APR', 'https://gedcom.io/terms/v7/month-MAY', 'https://gedcom.io/terms/v7/month-JUN', 'https://gedcom.io/terms/v7/month-JUL', 'https://gedcom.io/terms/v7/month-AUG', 'https://gedcom.io/terms/v7/month-SEP', 'https://gedcom.io/terms/v7/month-OCT', 'https://gedcom.io/terms/v7/month-NOV', 'https://gedcom.io/terms/v7/month-DEC'], 'epochs': ['BCE'], 'contact': 'https://gedcom.io/community/'},

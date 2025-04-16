@@ -20,8 +20,6 @@ import logging
 import re
 from typing import Any, NamedTuple
 
-import pandas as pd
-
 # from genedata.classes70 import (
 #     Head,
 #     RecordFam,
@@ -33,7 +31,6 @@ import pandas as pd
 #     RecordSubm,
 # )
 from genedata.constants import (
-    Config,
     Default,
     Number,
     String,
@@ -199,10 +196,10 @@ class Genealogy:
         """Display a list of available extensions to use or be aware of."""
         keys: list[str] = []
         values: list[list[str]] = []
-        labels: list[str] = ['Tag', 'Specification', 'Documented']
+        labels: list[str] = ['Tag', 'Specification']
         for tag in self.ged_ext_tags:
             keys.append(tag[0])
-            values.append([tag[1], tag[2], tag[3]])
+            values.append([tag[1], tag[2]])
         return values, keys, labels
         #pd.DataFrame(data=values, index=keys, columns=labels)
 
@@ -212,28 +209,39 @@ class Genealogy:
         Run this on a specific yaml file to make the specification
         available when building the ged files.
 
+        The GEDCOM specifications provide the following recommendation
+        that this application follows (1.5.2):
+        > It is recommended that applications not use undocumented extension tags.
+
+        Undocumented extension tags will be noted as such but not made available
+        until a readable yaml specification file is made available.
+
         Args:
             tag: The extension tag with an initial underline and all capitals
                 that must be in the `extension tags` list or which must be
                 the `standard tag`.
             yaml_file: The location of the yaml_file as either a url or a file
                 in a regular or compressed directory.
+
+        References:
+            [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
         """
-        documented: bool = True
         yaml_dict: dict[str, dict[str, Any]] = {}
         tag_edited: str = tag.upper()
-        self.tag_counter += 1
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
         try:
             yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
         except Exception:
             logging.info(Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited))
-            documented = False
         else:
+            self.tag_counter += 1
             type_key: str = str(yaml_dict[Default.YAML_TYPE])
             self.specification[type_key].update({self.tag_counter: yaml_dict})
-        self.ged_ext_tags.append([str(self.tag_counter), tag, yaml_file, documented])
+            required: list[str] = Query.required(self.tag_counter, self.specification)
+            single: list[str] = Query.singular(self.tag_counter, self.specification)
+            permitted: list[str] = Query.permitted(self.tag_counter, self.specification)
+            self.ged_ext_tags.append([str(self.tag_counter), tag, yaml_file, required, single, permitted])
 
     def stage(
         self,
@@ -513,7 +521,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
             """Construct the section of the code where the imports are made."""
             return f"""# Import the required packages and classes.
 from genedata.build import Genealogy
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
 
 """
 

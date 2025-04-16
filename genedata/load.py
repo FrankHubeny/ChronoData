@@ -1,7 +1,9 @@
 # mypy: disable-error-code="name-defined"
-"""Load a version of the GEDCOM specifications into python dictionaries,
-generate classes from the loaded specifications and generate test modules for those classes.
+"""Load a version of the GEDCOM specifications into python dictionaries.
 
+This is the first step to make a GEDCOM version available.  After the specifications
+file is created and stored in a module named `specificationXX.py` where XX is the version
+number, then one generates the classes and tests for those closes using the `generate` module.
 """
 
 __all__ = ['LoadSpecs']
@@ -15,12 +17,16 @@ from genedata.methods import Names, Util
 
 
 class LoadSpecs:
-    """Read and store GEDCOM specification."""
-
-    # enumerationset_dict: ClassVar[dict[str, Any]] = {}
+    """Read and store the GEDCOM specifications into dictionaries from yaml files."""
 
     @staticmethod
     def preamble(source: str, version: str) -> str:
+        """Format the preamble for the specifications module.
+
+        Args:
+            source: The source of the yaml specification files.
+            version: The version of the GEDCOM specification.
+        """
         lines: str = f'''"""Store the GEDCOM verson {version} specifications in a dictionary format from yaml files.
 
 This is a generated module. DO NOT MODIFY THIS MODULE MANUALLY.  
@@ -35,13 +41,14 @@ in the directory is read into the appropriate dictionary with the stem of the ya
 and the contents of the yaml file being its value.
 
 One dictionary is available called `Specs`.  It contains the following subdictionaries.
-- `Calendar` corresponding to yaml files in the calendar directory.
-- `DataType` corresponding to yaml files in the data-type directory.
-- `Enumeration` corresponding to yaml files in the enumeration directory.
-- `EnumerationSet` corresponding to yaml files in the enumeration-set directory.
-- `Month` corresponding to yaml files in the month directory.
-- `Structure` corresponding to yaml files in the structure/standard directory 
-- `Uri` corresponding to yaml files in the uri directory.
+- `meta` provides information about the source and version of the specifications.
+- `calendar` corresponding to yaml files in the calendar directory.
+- `data type` corresponding to yaml files in the data-type directory.
+- `enumeration` corresponding to yaml files in the enumeration directory.
+- `enumeration set` corresponding to yaml files in the enumeration-set directory.
+- `month` corresponding to yaml files in the month directory.
+- `structure` corresponding to yaml files in the structure/standard directory 
+- `uri` corresponding to yaml files in the uri directory.
 
 Documented extensions are added to this dictionary.
 
@@ -62,6 +69,16 @@ from typing import Any
         url: str,
         base: str,
     ) -> str:
+        """Convert an entire directory of yaml files into a dictionary.
+
+        The yaml fields are found in various directories under one 
+        common named directory.  This common directory is called `url`.
+        The final part of the directory name is given by `base`.
+        
+        Args:
+            url: The main part of the uri. 
+            base: The final part of the directory name.
+        """
         lines: str = Default.BRACE_LEFT
         directory: str = f'{Names.slash(url)}{base}'
         p = Path(directory)
@@ -84,33 +101,9 @@ from typing import Any
         return LoadSpecs.dictionary(url, Default.URL_CALENDAR)
 
     @staticmethod
-    def calendar(url: str) -> str:
-        """Format the calendar dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_CALENDAR}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.calendar_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
-
-    @staticmethod
     def datatype_dictionary(url: str) -> str:
         """Retrive the data type dictionary as a string that can be sent to `eval`."""
         return LoadSpecs.dictionary(url, Default.URL_DATATYPE)
-
-    @staticmethod
-    def datatype(url: str) -> str:
-        """Format the data type dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_DATATYPE}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.datatype_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
 
     @staticmethod
     def enumeration_dictionary(url: str) -> str:
@@ -118,33 +111,9 @@ from typing import Any
         return LoadSpecs.dictionary(url, Default.URL_ENUMERATION)
 
     @staticmethod
-    def enumeration(url: str) -> str:
-        """Format the enumeration dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_ENUMERATION}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.enumeration_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
-
-    @staticmethod
     def enumerationset_dictionary(url: str) -> str:
         """Retrive the enumeration set dictionary as a string that can be sent to `eval`."""
         return LoadSpecs.dictionary(url, Default.URL_ENUMERATION_SET)
-
-    @staticmethod
-    def enumerationset(url: str) -> str:
-        """Format the enumeration set dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_ENUMERATION_SET}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.enumerationset_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
 
     @staticmethod
     def month_dictionary(url: str) -> str:
@@ -152,55 +121,9 @@ from typing import Any
         return LoadSpecs.dictionary(url, Default.URL_MONTH)
 
     @staticmethod
-    def month(url: str) -> str:
-        """Format the month dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_MONTH}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.month_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
-
-    @staticmethod
     def structure_dictionary(url: str) -> str:
         """Retrive the structure dictionary as a string that can be sent to `eval`."""
         return LoadSpecs.dictionary(url, Default.URL_STRUCTURE)
-
-    @staticmethod
-    def structure(url: str) -> str:
-        """Format the structure dictionary for use in the specs module."""
-        return ''.join(
-            [
-                f'{Default.YAML_TYPE_STRUCTURE}: dict[str, dict[str, Any]] = ',
-                LoadSpecs.structure_dictionary(url).replace(
-                    "'payload': None,", "'payload': 'None',"
-                ),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
-
-    # @staticmethod
-    # def structure_extension_dictionary(url: str) -> str:
-    #     """Retrive the extension structure dictionary as a string that can be sent to `eval`."""
-    #     return LoadSpecs.dictionary(
-    #         url,
-    #         Default.URL_STRUCTURE_EXTENSION,
-    #     )
-
-    # @staticmethod
-    # def structure_extension(url: str) -> str:
-    #     """Format the extension structure dictionary for use in the specs module."""
-    #     return ''.join(
-    #         [
-    #             f'{Default.YAML_TYPE_EXTENSION_STRUCTURE}: dict[str, dict[str, Any]] = ',
-    #             LoadSpecs.structure_extension_dictionary(url),
-    #             Default.EOL,
-    #             Default.EOL,
-    #         ]
-    #     )
 
     @staticmethod
     def uri_dictionary(url: str) -> str:
@@ -208,22 +131,23 @@ from typing import Any
         return LoadSpecs.dictionary(url, Default.URL_URI)
 
     @staticmethod
-    def uri(url: str) -> str:
-        """Format the uri dictionary for use in the specs module."""
-        return ''.join(
-            [
-                'uri: dict[str, dict[str, Any]] = ',
-                LoadSpecs.uri_dictionary(url),
-                Default.EOL,
-                Default.EOL,
-            ]
-        )
-
-    @staticmethod
-    def together(url: str) -> str:
+    def together(source: str, version: str, url: str) -> str:
+        """Return all dictionaries as strings.
+        
+        Args:
+            source: The source of the yaml specification files.
+            version: The version of the GEDCOM specification.
+            url: The location of the local filesystem where the yaml files
+                have been downloaded.
+        """
         return ''.join(
             [
                 'Specs: dict[str, dict[str, Any]] = {',
+                Default.EOL,
+                f"    '{Default.YAML_META}': ",
+                '{',
+                f"'{Default.YAML_SOURCE}': '{source}', '{Default.YAML_VERSION}': '{version}'",
+                '},',
                 Default.EOL,
                 f"    '{Default.YAML_TYPE_CALENDAR}': {LoadSpecs.calendar_dictionary(url)},",
                 Default.EOL,
@@ -232,8 +156,6 @@ from typing import Any
                 f"    '{Default.YAML_TYPE_ENUMERATION}': {LoadSpecs.enumeration_dictionary(url)},",
                 Default.EOL,
                 f"    '{Default.YAML_TYPE_ENUMERATION_SET}': {LoadSpecs.enumerationset_dictionary(url)},",
-                # Default.EOL,
-                # f"    '{Default.SPECS_EXTENSIONSTRUCTURE}': {LoadSpecs.structure_extension_dictionary(url)},",
                 Default.EOL,
                 f"    '{Default.YAML_TYPE_MONTH}': {LoadSpecs.month_dictionary(url)},",
                 Default.EOL,
@@ -248,17 +170,21 @@ from typing import Any
 
     @staticmethod
     def build_all(source: str, version: str, url: str) -> str:
+        """Generate the entire specifications module.
+
+        This is the procedure to run from LoadSpecs.  It will output a string
+        that when placed saved as a module named `specificationsXX.py` where XX
+        is the version number: '70' for version '7.0'.
+        
+        Args:
+            source: The source of the yaml specification files.
+            version: The version of the GEDCOM specification.
+            url: The location of the local filesystem where the yaml files
+                have been downloaded.
+        """
         return ''.join(
             [
                 LoadSpecs.preamble(source, version),
-                # LoadSpecs.calendar(url),
-                # LoadSpecs.datatype(url),
-                # LoadSpecs.enumeration(url),
-                # LoadSpecs.enumerationset(url),
-                # LoadSpecs.month(url),
-                # LoadSpecs.structure(url),
-                # LoadSpecs.structure_extension(url),
-                # LoadSpecs.uri(url),
-                LoadSpecs.together(url),
+                LoadSpecs.together(source, version, url),
             ]
         )

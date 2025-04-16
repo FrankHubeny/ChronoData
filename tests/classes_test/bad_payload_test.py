@@ -25,7 +25,7 @@ subm = g.submitter_xref('1')
 
 
 def test_bad_payload_Abbr() -> None:
-    '''Validate the `Abbr` structure with a value and required substructures.'''
+    '''Validate that the `Abbr` structure rejects a value not in its payload datatype.'''
     m = gc.Abbr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -34,7 +34,7 @@ def test_bad_payload_Abbr() -> None:
 
 
 def test_bad_payload_Addr() -> None:
-    '''Validate the `Addr` structure with a value and required substructures.'''
+    '''Validate that the `Addr` structure rejects a value not in its payload datatype.'''
     m = gc.Addr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -43,7 +43,7 @@ def test_bad_payload_Addr() -> None:
 
 
 def test_bad_payload_AdopFamc() -> None:
-    '''Validate the `AdopFamc` structure with a value and required substructures.'''
+    '''Validate that the `AdopFamc` structure rejects a value not in its payload datatype.'''
     m = gc.AdopFamc(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_FAMILY_XREF.format('-1', m.class_name))
@@ -52,7 +52,7 @@ def test_bad_payload_AdopFamc() -> None:
 
 
 def test_bad_payload_Adop() -> None:
-    '''Validate the `Adop` structure with a value and required substructures.'''
+    '''Validate that the `Adop` structure rejects a value not in its payload datatype.'''
     m = gc.Adop(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -61,7 +61,7 @@ def test_bad_payload_Adop() -> None:
 
 
 def test_bad_payload_Adr1() -> None:
-    '''Validate the `Adr1` structure with a value and required substructures.'''
+    '''Validate that the `Adr1` structure rejects a value not in its payload datatype.'''
     m = gc.Adr1(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -70,7 +70,7 @@ def test_bad_payload_Adr1() -> None:
 
 
 def test_bad_payload_Adr2() -> None:
-    '''Validate the `Adr2` structure with a value and required substructures.'''
+    '''Validate that the `Adr2` structure rejects a value not in its payload datatype.'''
     m = gc.Adr2(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -79,7 +79,7 @@ def test_bad_payload_Adr2() -> None:
 
 
 def test_bad_payload_Adr3() -> None:
-    '''Validate the `Adr3` structure with a value and required substructures.'''
+    '''Validate that the `Adr3` structure rejects a value not in its payload datatype.'''
     m = gc.Adr3(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -88,7 +88,7 @@ def test_bad_payload_Adr3() -> None:
 
 
 def test_bad_payload_Age() -> None:
-    '''Validate the `Age` structure with a value and required substructures.'''
+    '''Validate that the `Age` structure rejects a value not in its payload datatype.'''
     m = gc.Age(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -97,7 +97,7 @@ def test_bad_payload_Age() -> None:
 
 
 def test_bad_payload_Agnc() -> None:
-    '''Validate the `Agnc` structure with a value and required substructures.'''
+    '''Validate that the `Agnc` structure rejects a value not in its payload datatype.'''
     m = gc.Agnc(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -106,7 +106,7 @@ def test_bad_payload_Agnc() -> None:
 
 
 def test_bad_payload_Alia() -> None:
-    '''Validate the `Alia` structure with a value and required substructures.'''
+    '''Validate that the `Alia` structure rejects a value not in its payload datatype.'''
     m = gc.Alia(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INDIVIDUAL_XREF.format('-1', m.class_name))
@@ -115,7 +115,7 @@ def test_bad_payload_Alia() -> None:
 
 
 def test_bad_payload_Anci() -> None:
-    '''Validate the `Anci` structure with a value and required substructures.'''
+    '''Validate that the `Anci` structure rejects a value not in its payload datatype.'''
     m = gc.Anci(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SUBMITTER_XREF.format('-1', m.class_name))
@@ -124,7 +124,7 @@ def test_bad_payload_Anci() -> None:
 
 
 def test_bad_payload_Anul() -> None:
-    '''Validate the `Anul` structure with a value and required substructures.'''
+    '''Validate that the `Anul` structure rejects a value not in its payload datatype.'''
     m = gc.Anul(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -133,7 +133,7 @@ def test_bad_payload_Anul() -> None:
 
 
 def test_bad_payload_Asso() -> None:
-    '''Validate the `Asso` structure with a value and required substructures.'''
+    '''Validate that the `Asso` structure rejects a value not in its payload datatype.'''
     m = gc.Asso(-1, gc.Role('CHIL'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INDIVIDUAL_XREF.format('-1', m.class_name))
@@ -142,7 +142,7 @@ def test_bad_payload_Asso() -> None:
 
 
 def test_bad_payload_Auth() -> None:
-    '''Validate the `Auth` structure with a value and required substructures.'''
+    '''Validate that the `Auth` structure rejects a value not in its payload datatype.'''
     m = gc.Auth(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -151,7 +151,7 @@ def test_bad_payload_Auth() -> None:
 
 
 def test_bad_payload_Bapm() -> None:
-    '''Validate the `Bapm` structure with a value and required substructures.'''
+    '''Validate that the `Bapm` structure rejects a value not in its payload datatype.'''
     m = gc.Bapm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -160,7 +160,7 @@ def test_bad_payload_Bapm() -> None:
 
 
 def test_bad_payload_Barm() -> None:
-    '''Validate the `Barm` structure with a value and required substructures.'''
+    '''Validate that the `Barm` structure rejects a value not in its payload datatype.'''
     m = gc.Barm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -169,7 +169,7 @@ def test_bad_payload_Barm() -> None:
 
 
 def test_bad_payload_Basm() -> None:
-    '''Validate the `Basm` structure with a value and required substructures.'''
+    '''Validate that the `Basm` structure rejects a value not in its payload datatype.'''
     m = gc.Basm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -178,7 +178,7 @@ def test_bad_payload_Basm() -> None:
 
 
 def test_bad_payload_Birt() -> None:
-    '''Validate the `Birt` structure with a value and required substructures.'''
+    '''Validate that the `Birt` structure rejects a value not in its payload datatype.'''
     m = gc.Birt(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -187,7 +187,7 @@ def test_bad_payload_Birt() -> None:
 
 
 def test_bad_payload_Bles() -> None:
-    '''Validate the `Bles` structure with a value and required substructures.'''
+    '''Validate that the `Bles` structure rejects a value not in its payload datatype.'''
     m = gc.Bles(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -196,7 +196,7 @@ def test_bad_payload_Bles() -> None:
 
 
 def test_bad_payload_Buri() -> None:
-    '''Validate the `Buri` structure with a value and required substructures.'''
+    '''Validate that the `Buri` structure rejects a value not in its payload datatype.'''
     m = gc.Buri(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -205,7 +205,7 @@ def test_bad_payload_Buri() -> None:
 
 
 def test_bad_payload_Caln() -> None:
-    '''Validate the `Caln` structure with a value and required substructures.'''
+    '''Validate that the `Caln` structure rejects a value not in its payload datatype.'''
     m = gc.Caln(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -214,7 +214,7 @@ def test_bad_payload_Caln() -> None:
 
 
 def test_bad_payload_Cast() -> None:
-    '''Validate the `Cast` structure with a value and required substructures.'''
+    '''Validate that the `Cast` structure rejects a value not in its payload datatype.'''
     m = gc.Cast(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -223,7 +223,7 @@ def test_bad_payload_Cast() -> None:
 
 
 def test_bad_payload_Caus() -> None:
-    '''Validate the `Caus` structure with a value and required substructures.'''
+    '''Validate that the `Caus` structure rejects a value not in its payload datatype.'''
     m = gc.Caus(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -232,7 +232,7 @@ def test_bad_payload_Caus() -> None:
 
 
 def test_bad_payload_Chil() -> None:
-    '''Validate the `Chil` structure with a value and required substructures.'''
+    '''Validate that the `Chil` structure rejects a value not in its payload datatype.'''
     m = gc.Chil(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INDIVIDUAL_XREF.format('-1', m.class_name))
@@ -241,7 +241,7 @@ def test_bad_payload_Chil() -> None:
 
 
 def test_bad_payload_Chr() -> None:
-    '''Validate the `Chr` structure with a value and required substructures.'''
+    '''Validate that the `Chr` structure rejects a value not in its payload datatype.'''
     m = gc.Chr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -250,7 +250,7 @@ def test_bad_payload_Chr() -> None:
 
 
 def test_bad_payload_Chra() -> None:
-    '''Validate the `Chra` structure with a value and required substructures.'''
+    '''Validate that the `Chra` structure rejects a value not in its payload datatype.'''
     m = gc.Chra(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -259,7 +259,7 @@ def test_bad_payload_Chra() -> None:
 
 
 def test_bad_payload_City() -> None:
-    '''Validate the `City` structure with a value and required substructures.'''
+    '''Validate that the `City` structure rejects a value not in its payload datatype.'''
     m = gc.City(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -268,7 +268,7 @@ def test_bad_payload_City() -> None:
 
 
 def test_bad_payload_Conf() -> None:
-    '''Validate the `Conf` structure with a value and required substructures.'''
+    '''Validate that the `Conf` structure rejects a value not in its payload datatype.'''
     m = gc.Conf(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -277,7 +277,7 @@ def test_bad_payload_Conf() -> None:
 
 
 def test_bad_payload_Copr() -> None:
-    '''Validate the `Copr` structure with a value and required substructures.'''
+    '''Validate that the `Copr` structure rejects a value not in its payload datatype.'''
     m = gc.Copr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -286,7 +286,7 @@ def test_bad_payload_Copr() -> None:
 
 
 def test_bad_payload_Corp() -> None:
-    '''Validate the `Corp` structure with a value and required substructures.'''
+    '''Validate that the `Corp` structure rejects a value not in its payload datatype.'''
     m = gc.Corp(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -295,7 +295,7 @@ def test_bad_payload_Corp() -> None:
 
 
 def test_bad_payload_Crem() -> None:
-    '''Validate the `Crem` structure with a value and required substructures.'''
+    '''Validate that the `Crem` structure rejects a value not in its payload datatype.'''
     m = gc.Crem(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -304,7 +304,7 @@ def test_bad_payload_Crem() -> None:
 
 
 def test_bad_payload_Ctry() -> None:
-    '''Validate the `Ctry` structure with a value and required substructures.'''
+    '''Validate that the `Ctry` structure rejects a value not in its payload datatype.'''
     m = gc.Ctry(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -313,7 +313,7 @@ def test_bad_payload_Ctry() -> None:
 
 
 def test_bad_payload_DataEvenDate() -> None:
-    '''Validate the `DataEvenDate` structure with a value and required substructures.'''
+    '''Validate that the `DataEvenDate` structure rejects a value not in its payload datatype.'''
     m = gc.DataEvenDate(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -322,7 +322,7 @@ def test_bad_payload_DataEvenDate() -> None:
 
 
 def test_bad_payload_DataEven() -> None:
-    '''Validate the `DataEven` structure with a value and required substructures.'''
+    '''Validate that the `DataEven` structure rejects a value not in its payload datatype.'''
     m = gc.DataEven(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -331,7 +331,7 @@ def test_bad_payload_DataEven() -> None:
 
 
 def test_bad_payload_DateExact() -> None:
-    '''Validate the `DateExact` structure with a value and required substructures.'''
+    '''Validate that the `DateExact` structure rejects a value not in its payload datatype.'''
     m = gc.DateExact(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -340,7 +340,7 @@ def test_bad_payload_DateExact() -> None:
 
 
 def test_bad_payload_Date() -> None:
-    '''Validate the `Date` structure with a value and required substructures.'''
+    '''Validate that the `Date` structure rejects a value not in its payload datatype.'''
     m = gc.Date(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -349,7 +349,7 @@ def test_bad_payload_Date() -> None:
 
 
 def test_bad_payload_Deat() -> None:
-    '''Validate the `Deat` structure with a value and required substructures.'''
+    '''Validate that the `Deat` structure rejects a value not in its payload datatype.'''
     m = gc.Deat(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -358,7 +358,7 @@ def test_bad_payload_Deat() -> None:
 
 
 def test_bad_payload_Desi() -> None:
-    '''Validate the `Desi` structure with a value and required substructures.'''
+    '''Validate that the `Desi` structure rejects a value not in its payload datatype.'''
     m = gc.Desi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SUBMITTER_XREF.format('-1', m.class_name))
@@ -367,7 +367,7 @@ def test_bad_payload_Desi() -> None:
 
 
 def test_bad_payload_Dest() -> None:
-    '''Validate the `Dest` structure with a value and required substructures.'''
+    '''Validate that the `Dest` structure rejects a value not in its payload datatype.'''
     m = gc.Dest(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -376,7 +376,7 @@ def test_bad_payload_Dest() -> None:
 
 
 def test_bad_payload_Div() -> None:
-    '''Validate the `Div` structure with a value and required substructures.'''
+    '''Validate that the `Div` structure rejects a value not in its payload datatype.'''
     m = gc.Div(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -385,7 +385,7 @@ def test_bad_payload_Div() -> None:
 
 
 def test_bad_payload_Divf() -> None:
-    '''Validate the `Divf` structure with a value and required substructures.'''
+    '''Validate that the `Divf` structure rejects a value not in its payload datatype.'''
     m = gc.Divf(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -394,7 +394,7 @@ def test_bad_payload_Divf() -> None:
 
 
 def test_bad_payload_Dscr() -> None:
-    '''Validate the `Dscr` structure with a value and required substructures.'''
+    '''Validate that the `Dscr` structure rejects a value not in its payload datatype.'''
     m = gc.Dscr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -403,7 +403,7 @@ def test_bad_payload_Dscr() -> None:
 
 
 def test_bad_payload_Educ() -> None:
-    '''Validate the `Educ` structure with a value and required substructures.'''
+    '''Validate that the `Educ` structure rejects a value not in its payload datatype.'''
     m = gc.Educ(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -412,7 +412,7 @@ def test_bad_payload_Educ() -> None:
 
 
 def test_bad_payload_Email() -> None:
-    '''Validate the `Email` structure with a value and required substructures.'''
+    '''Validate that the `Email` structure rejects a value not in its payload datatype.'''
     m = gc.Email(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -421,7 +421,7 @@ def test_bad_payload_Email() -> None:
 
 
 def test_bad_payload_Emig() -> None:
-    '''Validate the `Emig` structure with a value and required substructures.'''
+    '''Validate that the `Emig` structure rejects a value not in its payload datatype.'''
     m = gc.Emig(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -430,7 +430,7 @@ def test_bad_payload_Emig() -> None:
 
 
 def test_bad_payload_Enga() -> None:
-    '''Validate the `Enga` structure with a value and required substructures.'''
+    '''Validate that the `Enga` structure rejects a value not in its payload datatype.'''
     m = gc.Enga(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -439,7 +439,7 @@ def test_bad_payload_Enga() -> None:
 
 
 def test_bad_payload_ExidType() -> None:
-    '''Validate the `ExidType` structure with a value and required substructures.'''
+    '''Validate that the `ExidType` structure rejects a value not in its payload datatype.'''
     m = gc.ExidType(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -448,7 +448,7 @@ def test_bad_payload_ExidType() -> None:
 
 
 def test_bad_payload_Exid() -> None:
-    '''Validate the `Exid` structure with a value and required substructures.'''
+    '''Validate that the `Exid` structure rejects a value not in its payload datatype.'''
     m = gc.Exid(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -457,7 +457,7 @@ def test_bad_payload_Exid() -> None:
 
 
 def test_bad_payload_FamCens() -> None:
-    '''Validate the `FamCens` structure with a value and required substructures.'''
+    '''Validate that the `FamCens` structure rejects a value not in its payload datatype.'''
     m = gc.FamCens(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -466,7 +466,7 @@ def test_bad_payload_FamCens() -> None:
 
 
 def test_bad_payload_FamEven() -> None:
-    '''Validate the `FamEven` structure with a value and required substructures.'''
+    '''Validate that the `FamEven` structure rejects a value not in its payload datatype.'''
     m = gc.FamEven(-1, gc.Type('abc'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -475,7 +475,7 @@ def test_bad_payload_FamEven() -> None:
 
 
 def test_bad_payload_FamFact() -> None:
-    '''Validate the `FamFact` structure with a value and required substructures.'''
+    '''Validate that the `FamFact` structure rejects a value not in its payload datatype.'''
     m = gc.FamFact(-1, gc.Type('abc'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -484,7 +484,7 @@ def test_bad_payload_FamFact() -> None:
 
 
 def test_bad_payload_FamHusb() -> None:
-    '''Validate the `FamHusb` structure with a value and required substructures.'''
+    '''Validate that the `FamHusb` structure rejects a value not in its payload datatype.'''
     m = gc.FamHusb(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INDIVIDUAL_XREF.format('-1', m.class_name))
@@ -493,7 +493,7 @@ def test_bad_payload_FamHusb() -> None:
 
 
 def test_bad_payload_FamNchi() -> None:
-    '''Validate the `FamNchi` structure with a value and required substructures.'''
+    '''Validate that the `FamNchi` structure rejects a value not in its payload datatype.'''
     m = gc.FamNchi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -502,7 +502,7 @@ def test_bad_payload_FamNchi() -> None:
 
 
 def test_bad_payload_FamResi() -> None:
-    '''Validate the `FamResi` structure with a value and required substructures.'''
+    '''Validate that the `FamResi` structure rejects a value not in its payload datatype.'''
     m = gc.FamResi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -511,7 +511,7 @@ def test_bad_payload_FamResi() -> None:
 
 
 def test_bad_payload_FamWife() -> None:
-    '''Validate the `FamWife` structure with a value and required substructures.'''
+    '''Validate that the `FamWife` structure rejects a value not in its payload datatype.'''
     m = gc.FamWife(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INDIVIDUAL_XREF.format('-1', m.class_name))
@@ -520,7 +520,7 @@ def test_bad_payload_FamWife() -> None:
 
 
 def test_bad_payload_FamcAdop() -> None:
-    '''Validate the `FamcAdop` structure with a value and required substructures.'''
+    '''Validate that the `FamcAdop` structure rejects a value not in its payload datatype.'''
     m = gc.FamcAdop(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -529,7 +529,7 @@ def test_bad_payload_FamcAdop() -> None:
 
 
 def test_bad_payload_FamcStat() -> None:
-    '''Validate the `FamcStat` structure with a value and required substructures.'''
+    '''Validate that the `FamcStat` structure rejects a value not in its payload datatype.'''
     m = gc.FamcStat(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -538,7 +538,7 @@ def test_bad_payload_FamcStat() -> None:
 
 
 def test_bad_payload_Famc() -> None:
-    '''Validate the `Famc` structure with a value and required substructures.'''
+    '''Validate that the `Famc` structure rejects a value not in its payload datatype.'''
     m = gc.Famc(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_FAMILY_XREF.format('-1', m.class_name))
@@ -547,7 +547,7 @@ def test_bad_payload_Famc() -> None:
 
 
 def test_bad_payload_Fams() -> None:
-    '''Validate the `Fams` structure with a value and required substructures.'''
+    '''Validate that the `Fams` structure rejects a value not in its payload datatype.'''
     m = gc.Fams(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_FAMILY_XREF.format('-1', m.class_name))
@@ -556,7 +556,7 @@ def test_bad_payload_Fams() -> None:
 
 
 def test_bad_payload_Fax() -> None:
-    '''Validate the `Fax` structure with a value and required substructures.'''
+    '''Validate that the `Fax` structure rejects a value not in its payload datatype.'''
     m = gc.Fax(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -565,7 +565,7 @@ def test_bad_payload_Fax() -> None:
 
 
 def test_bad_payload_Fcom() -> None:
-    '''Validate the `Fcom` structure with a value and required substructures.'''
+    '''Validate that the `Fcom` structure rejects a value not in its payload datatype.'''
     m = gc.Fcom(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -574,7 +574,7 @@ def test_bad_payload_Fcom() -> None:
 
 
 def test_bad_payload_FileTran() -> None:
-    '''Validate the `FileTran` structure with a value and required substructures.'''
+    '''Validate that the `FileTran` structure rejects a value not in its payload datatype.'''
     m = gc.FileTran(-1, gc.Form('text/html'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -583,7 +583,7 @@ def test_bad_payload_FileTran() -> None:
 
 
 def test_bad_payload_File() -> None:
-    '''Validate the `File` structure with a value and required substructures.'''
+    '''Validate that the `File` structure rejects a value not in its payload datatype.'''
     m = gc.File(-1, gc.Form('text/html'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -592,7 +592,7 @@ def test_bad_payload_File() -> None:
 
 
 def test_bad_payload_Form() -> None:
-    '''Validate the `Form` structure with a value and required substructures.'''
+    '''Validate that the `Form` structure rejects a value not in its payload datatype.'''
     m = gc.Form(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -601,7 +601,7 @@ def test_bad_payload_Form() -> None:
 
 
 def test_bad_payload_GedcVers() -> None:
-    '''Validate the `GedcVers` structure with a value and required substructures.'''
+    '''Validate that the `GedcVers` structure rejects a value not in its payload datatype.'''
     m = gc.GedcVers(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -610,7 +610,7 @@ def test_bad_payload_GedcVers() -> None:
 
 
 def test_bad_payload_Givn() -> None:
-    '''Validate the `Givn` structure with a value and required substructures.'''
+    '''Validate that the `Givn` structure rejects a value not in its payload datatype.'''
     m = gc.Givn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -619,7 +619,7 @@ def test_bad_payload_Givn() -> None:
 
 
 def test_bad_payload_Grad() -> None:
-    '''Validate the `Grad` structure with a value and required substructures.'''
+    '''Validate that the `Grad` structure rejects a value not in its payload datatype.'''
     m = gc.Grad(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -628,7 +628,7 @@ def test_bad_payload_Grad() -> None:
 
 
 def test_bad_payload_HeadDate() -> None:
-    '''Validate the `HeadDate` structure with a value and required substructures.'''
+    '''Validate that the `HeadDate` structure rejects a value not in its payload datatype.'''
     m = gc.HeadDate(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -637,7 +637,7 @@ def test_bad_payload_HeadDate() -> None:
 
 
 def test_bad_payload_HeadLang() -> None:
-    '''Validate the `HeadLang` structure with a value and required substructures.'''
+    '''Validate that the `HeadLang` structure rejects a value not in its payload datatype.'''
     m = gc.HeadLang(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -646,7 +646,7 @@ def test_bad_payload_HeadLang() -> None:
 
 
 def test_bad_payload_HeadPlacForm() -> None:
-    '''Validate the `HeadPlacForm` structure with a value and required substructures.'''
+    '''Validate that the `HeadPlacForm` structure rejects a value not in its payload datatype.'''
     m = gc.HeadPlacForm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -655,7 +655,7 @@ def test_bad_payload_HeadPlacForm() -> None:
 
 
 def test_bad_payload_HeadSourData() -> None:
-    '''Validate the `HeadSourData` structure with a value and required substructures.'''
+    '''Validate that the `HeadSourData` structure rejects a value not in its payload datatype.'''
     m = gc.HeadSourData(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -664,7 +664,7 @@ def test_bad_payload_HeadSourData() -> None:
 
 
 def test_bad_payload_HeadSour() -> None:
-    '''Validate the `HeadSour` structure with a value and required substructures.'''
+    '''Validate that the `HeadSour` structure rejects a value not in its payload datatype.'''
     m = gc.HeadSour(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -673,7 +673,7 @@ def test_bad_payload_HeadSour() -> None:
 
 
 def test_bad_payload_Height() -> None:
-    '''Validate the `Height` structure with a value and required substructures.'''
+    '''Validate that the `Height` structure rejects a value not in its payload datatype.'''
     m = gc.Height(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -682,7 +682,7 @@ def test_bad_payload_Height() -> None:
 
 
 def test_bad_payload_Idno() -> None:
-    '''Validate the `Idno` structure with a value and required substructures.'''
+    '''Validate that the `Idno` structure rejects a value not in its payload datatype.'''
     m = gc.Idno(-1, gc.Type('abc'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -691,7 +691,7 @@ def test_bad_payload_Idno() -> None:
 
 
 def test_bad_payload_Immi() -> None:
-    '''Validate the `Immi` structure with a value and required substructures.'''
+    '''Validate that the `Immi` structure rejects a value not in its payload datatype.'''
     m = gc.Immi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -700,7 +700,7 @@ def test_bad_payload_Immi() -> None:
 
 
 def test_bad_payload_IndiCens() -> None:
-    '''Validate the `IndiCens` structure with a value and required substructures.'''
+    '''Validate that the `IndiCens` structure rejects a value not in its payload datatype.'''
     m = gc.IndiCens(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -709,7 +709,7 @@ def test_bad_payload_IndiCens() -> None:
 
 
 def test_bad_payload_IndiEven() -> None:
-    '''Validate the `IndiEven` structure with a value and required substructures.'''
+    '''Validate that the `IndiEven` structure rejects a value not in its payload datatype.'''
     m = gc.IndiEven(-1, gc.Type('abc'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -718,7 +718,7 @@ def test_bad_payload_IndiEven() -> None:
 
 
 def test_bad_payload_IndiFact() -> None:
-    '''Validate the `IndiFact` structure with a value and required substructures.'''
+    '''Validate that the `IndiFact` structure rejects a value not in its payload datatype.'''
     m = gc.IndiFact(-1, gc.Type('abc'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -727,7 +727,7 @@ def test_bad_payload_IndiFact() -> None:
 
 
 def test_bad_payload_IndiFamc() -> None:
-    '''Validate the `IndiFamc` structure with a value and required substructures.'''
+    '''Validate that the `IndiFamc` structure rejects a value not in its payload datatype.'''
     m = gc.IndiFamc(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_FAMILY_XREF.format('-1', m.class_name))
@@ -736,7 +736,7 @@ def test_bad_payload_IndiFamc() -> None:
 
 
 def test_bad_payload_IndiName() -> None:
-    '''Validate the `IndiName` structure with a value and required substructures.'''
+    '''Validate that the `IndiName` structure rejects a value not in its payload datatype.'''
     m = gc.IndiName(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -745,7 +745,7 @@ def test_bad_payload_IndiName() -> None:
 
 
 def test_bad_payload_IndiNchi() -> None:
-    '''Validate the `IndiNchi` structure with a value and required substructures.'''
+    '''Validate that the `IndiNchi` structure rejects a value not in its payload datatype.'''
     m = gc.IndiNchi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -754,7 +754,7 @@ def test_bad_payload_IndiNchi() -> None:
 
 
 def test_bad_payload_IndiReli() -> None:
-    '''Validate the `IndiReli` structure with a value and required substructures.'''
+    '''Validate that the `IndiReli` structure rejects a value not in its payload datatype.'''
     m = gc.IndiReli(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -763,7 +763,7 @@ def test_bad_payload_IndiReli() -> None:
 
 
 def test_bad_payload_IndiResi() -> None:
-    '''Validate the `IndiResi` structure with a value and required substructures.'''
+    '''Validate that the `IndiResi` structure rejects a value not in its payload datatype.'''
     m = gc.IndiResi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -772,7 +772,7 @@ def test_bad_payload_IndiResi() -> None:
 
 
 def test_bad_payload_IndiTitl() -> None:
-    '''Validate the `IndiTitl` structure with a value and required substructures.'''
+    '''Validate that the `IndiTitl` structure rejects a value not in its payload datatype.'''
     m = gc.IndiTitl(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -781,7 +781,7 @@ def test_bad_payload_IndiTitl() -> None:
 
 
 def test_bad_payload_Lang() -> None:
-    '''Validate the `Lang` structure with a value and required substructures.'''
+    '''Validate that the `Lang` structure rejects a value not in its payload datatype.'''
     m = gc.Lang(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -790,7 +790,7 @@ def test_bad_payload_Lang() -> None:
 
 
 def test_bad_payload_Lati() -> None:
-    '''Validate the `Lati` structure with a value and required substructures.'''
+    '''Validate that the `Lati` structure rejects a value not in its payload datatype.'''
     m = gc.Lati(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -799,7 +799,7 @@ def test_bad_payload_Lati() -> None:
 
 
 def test_bad_payload_Left() -> None:
-    '''Validate the `Left` structure with a value and required substructures.'''
+    '''Validate that the `Left` structure rejects a value not in its payload datatype.'''
     m = gc.Left(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -808,7 +808,7 @@ def test_bad_payload_Left() -> None:
 
 
 def test_bad_payload_Long() -> None:
-    '''Validate the `Long` structure with a value and required substructures.'''
+    '''Validate that the `Long` structure rejects a value not in its payload datatype.'''
     m = gc.Long(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -817,7 +817,7 @@ def test_bad_payload_Long() -> None:
 
 
 def test_bad_payload_Marb() -> None:
-    '''Validate the `Marb` structure with a value and required substructures.'''
+    '''Validate that the `Marb` structure rejects a value not in its payload datatype.'''
     m = gc.Marb(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -826,7 +826,7 @@ def test_bad_payload_Marb() -> None:
 
 
 def test_bad_payload_Marc() -> None:
-    '''Validate the `Marc` structure with a value and required substructures.'''
+    '''Validate that the `Marc` structure rejects a value not in its payload datatype.'''
     m = gc.Marc(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -835,7 +835,7 @@ def test_bad_payload_Marc() -> None:
 
 
 def test_bad_payload_Marl() -> None:
-    '''Validate the `Marl` structure with a value and required substructures.'''
+    '''Validate that the `Marl` structure rejects a value not in its payload datatype.'''
     m = gc.Marl(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -844,7 +844,7 @@ def test_bad_payload_Marl() -> None:
 
 
 def test_bad_payload_Marr() -> None:
-    '''Validate the `Marr` structure with a value and required substructures.'''
+    '''Validate that the `Marr` structure rejects a value not in its payload datatype.'''
     m = gc.Marr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -853,7 +853,7 @@ def test_bad_payload_Marr() -> None:
 
 
 def test_bad_payload_Mars() -> None:
-    '''Validate the `Mars` structure with a value and required substructures.'''
+    '''Validate that the `Mars` structure rejects a value not in its payload datatype.'''
     m = gc.Mars(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -862,7 +862,7 @@ def test_bad_payload_Mars() -> None:
 
 
 def test_bad_payload_Medi() -> None:
-    '''Validate the `Medi` structure with a value and required substructures.'''
+    '''Validate that the `Medi` structure rejects a value not in its payload datatype.'''
     m = gc.Medi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -871,7 +871,7 @@ def test_bad_payload_Medi() -> None:
 
 
 def test_bad_payload_Mime() -> None:
-    '''Validate the `Mime` structure with a value and required substructures.'''
+    '''Validate that the `Mime` structure rejects a value not in its payload datatype.'''
     m = gc.Mime(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -880,7 +880,7 @@ def test_bad_payload_Mime() -> None:
 
 
 def test_bad_payload_NameTran() -> None:
-    '''Validate the `NameTran` structure with a value and required substructures.'''
+    '''Validate that the `NameTran` structure rejects a value not in its payload datatype.'''
     m = gc.NameTran(-1, gc.Lang('en-US'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -889,7 +889,7 @@ def test_bad_payload_NameTran() -> None:
 
 
 def test_bad_payload_NameType() -> None:
-    '''Validate the `NameType` structure with a value and required substructures.'''
+    '''Validate that the `NameType` structure rejects a value not in its payload datatype.'''
     m = gc.NameType(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -898,7 +898,7 @@ def test_bad_payload_NameType() -> None:
 
 
 def test_bad_payload_Name() -> None:
-    '''Validate the `Name` structure with a value and required substructures.'''
+    '''Validate that the `Name` structure rejects a value not in its payload datatype.'''
     m = gc.Name(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -907,7 +907,7 @@ def test_bad_payload_Name() -> None:
 
 
 def test_bad_payload_Nati() -> None:
-    '''Validate the `Nati` structure with a value and required substructures.'''
+    '''Validate that the `Nati` structure rejects a value not in its payload datatype.'''
     m = gc.Nati(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -916,7 +916,7 @@ def test_bad_payload_Nati() -> None:
 
 
 def test_bad_payload_Natu() -> None:
-    '''Validate the `Natu` structure with a value and required substructures.'''
+    '''Validate that the `Natu` structure rejects a value not in its payload datatype.'''
     m = gc.Natu(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -925,7 +925,7 @@ def test_bad_payload_Natu() -> None:
 
 
 def test_bad_payload_Nick() -> None:
-    '''Validate the `Nick` structure with a value and required substructures.'''
+    '''Validate that the `Nick` structure rejects a value not in its payload datatype.'''
     m = gc.Nick(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -934,7 +934,7 @@ def test_bad_payload_Nick() -> None:
 
 
 def test_bad_payload_Nmr() -> None:
-    '''Validate the `Nmr` structure with a value and required substructures.'''
+    '''Validate that the `Nmr` structure rejects a value not in its payload datatype.'''
     m = gc.Nmr(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -943,7 +943,7 @@ def test_bad_payload_Nmr() -> None:
 
 
 def test_bad_payload_NoDate() -> None:
-    '''Validate the `NoDate` structure with a value and required substructures.'''
+    '''Validate that the `NoDate` structure rejects a value not in its payload datatype.'''
     m = gc.NoDate(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -952,7 +952,7 @@ def test_bad_payload_NoDate() -> None:
 
 
 def test_bad_payload_No() -> None:
-    '''Validate the `No` structure with a value and required substructures.'''
+    '''Validate that the `No` structure rejects a value not in its payload datatype.'''
     m = gc.No(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -961,7 +961,7 @@ def test_bad_payload_No() -> None:
 
 
 def test_bad_payload_NoteTran() -> None:
-    '''Validate the `NoteTran` structure with a value and required substructures.'''
+    '''Validate that the `NoteTran` structure rejects a value not in its payload datatype.'''
     m = gc.NoteTran(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -970,7 +970,7 @@ def test_bad_payload_NoteTran() -> None:
 
 
 def test_bad_payload_Note() -> None:
-    '''Validate the `Note` structure with a value and required substructures.'''
+    '''Validate that the `Note` structure rejects a value not in its payload datatype.'''
     m = gc.Note(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -979,7 +979,7 @@ def test_bad_payload_Note() -> None:
 
 
 def test_bad_payload_Npfx() -> None:
-    '''Validate the `Npfx` structure with a value and required substructures.'''
+    '''Validate that the `Npfx` structure rejects a value not in its payload datatype.'''
     m = gc.Npfx(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -988,7 +988,7 @@ def test_bad_payload_Npfx() -> None:
 
 
 def test_bad_payload_Nsfx() -> None:
-    '''Validate the `Nsfx` structure with a value and required substructures.'''
+    '''Validate that the `Nsfx` structure rejects a value not in its payload datatype.'''
     m = gc.Nsfx(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -997,7 +997,7 @@ def test_bad_payload_Nsfx() -> None:
 
 
 def test_bad_payload_Obje() -> None:
-    '''Validate the `Obje` structure with a value and required substructures.'''
+    '''Validate that the `Obje` structure rejects a value not in its payload datatype.'''
     m = gc.Obje(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_MULTIMEDIA_XREF.format('-1', m.class_name))
@@ -1006,7 +1006,7 @@ def test_bad_payload_Obje() -> None:
 
 
 def test_bad_payload_Occu() -> None:
-    '''Validate the `Occu` structure with a value and required substructures.'''
+    '''Validate that the `Occu` structure rejects a value not in its payload datatype.'''
     m = gc.Occu(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1015,7 +1015,7 @@ def test_bad_payload_Occu() -> None:
 
 
 def test_bad_payload_OrdStat() -> None:
-    '''Validate the `OrdStat` structure with a value and required substructures.'''
+    '''Validate that the `OrdStat` structure rejects a value not in its payload datatype.'''
     m = gc.OrdStat(-1, gc.DateExact('1 JAN 2000'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1024,7 +1024,7 @@ def test_bad_payload_OrdStat() -> None:
 
 
 def test_bad_payload_Ordn() -> None:
-    '''Validate the `Ordn` structure with a value and required substructures.'''
+    '''Validate that the `Ordn` structure rejects a value not in its payload datatype.'''
     m = gc.Ordn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1033,7 +1033,7 @@ def test_bad_payload_Ordn() -> None:
 
 
 def test_bad_payload_Page() -> None:
-    '''Validate the `Page` structure with a value and required substructures.'''
+    '''Validate that the `Page` structure rejects a value not in its payload datatype.'''
     m = gc.Page(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1042,7 +1042,7 @@ def test_bad_payload_Page() -> None:
 
 
 def test_bad_payload_Pedi() -> None:
-    '''Validate the `Pedi` structure with a value and required substructures.'''
+    '''Validate that the `Pedi` structure rejects a value not in its payload datatype.'''
     m = gc.Pedi(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1051,7 +1051,7 @@ def test_bad_payload_Pedi() -> None:
 
 
 def test_bad_payload_Phon() -> None:
-    '''Validate the `Phon` structure with a value and required substructures.'''
+    '''Validate that the `Phon` structure rejects a value not in its payload datatype.'''
     m = gc.Phon(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1060,7 +1060,7 @@ def test_bad_payload_Phon() -> None:
 
 
 def test_bad_payload_Phrase() -> None:
-    '''Validate the `Phrase` structure with a value and required substructures.'''
+    '''Validate that the `Phrase` structure rejects a value not in its payload datatype.'''
     m = gc.Phrase(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1069,7 +1069,7 @@ def test_bad_payload_Phrase() -> None:
 
 
 def test_bad_payload_PlacForm() -> None:
-    '''Validate the `PlacForm` structure with a value and required substructures.'''
+    '''Validate that the `PlacForm` structure rejects a value not in its payload datatype.'''
     m = gc.PlacForm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1078,7 +1078,7 @@ def test_bad_payload_PlacForm() -> None:
 
 
 def test_bad_payload_PlacTran() -> None:
-    '''Validate the `PlacTran` structure with a value and required substructures.'''
+    '''Validate that the `PlacTran` structure rejects a value not in its payload datatype.'''
     m = gc.PlacTran(-1, gc.Lang('en-US'))
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1087,7 +1087,7 @@ def test_bad_payload_PlacTran() -> None:
 
 
 def test_bad_payload_Plac() -> None:
-    '''Validate the `Plac` structure with a value and required substructures.'''
+    '''Validate that the `Plac` structure rejects a value not in its payload datatype.'''
     m = gc.Plac(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1096,7 +1096,7 @@ def test_bad_payload_Plac() -> None:
 
 
 def test_bad_payload_Post() -> None:
-    '''Validate the `Post` structure with a value and required substructures.'''
+    '''Validate that the `Post` structure rejects a value not in its payload datatype.'''
     m = gc.Post(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1105,7 +1105,7 @@ def test_bad_payload_Post() -> None:
 
 
 def test_bad_payload_Prob() -> None:
-    '''Validate the `Prob` structure with a value and required substructures.'''
+    '''Validate that the `Prob` structure rejects a value not in its payload datatype.'''
     m = gc.Prob(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1114,7 +1114,7 @@ def test_bad_payload_Prob() -> None:
 
 
 def test_bad_payload_Prop() -> None:
-    '''Validate the `Prop` structure with a value and required substructures.'''
+    '''Validate that the `Prop` structure rejects a value not in its payload datatype.'''
     m = gc.Prop(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1123,7 +1123,7 @@ def test_bad_payload_Prop() -> None:
 
 
 def test_bad_payload_Publ() -> None:
-    '''Validate the `Publ` structure with a value and required substructures.'''
+    '''Validate that the `Publ` structure rejects a value not in its payload datatype.'''
     m = gc.Publ(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1132,7 +1132,7 @@ def test_bad_payload_Publ() -> None:
 
 
 def test_bad_payload_Quay() -> None:
-    '''Validate the `Quay` structure with a value and required substructures.'''
+    '''Validate that the `Quay` structure rejects a value not in its payload datatype.'''
     m = gc.Quay(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1141,7 +1141,7 @@ def test_bad_payload_Quay() -> None:
 
 
 def test_bad_payload_RecordSnote() -> None:
-    '''Validate the `RecordSnote` structure with a value and required substructures.'''
+    '''Validate that the `RecordSnote` structure rejects a value not in its payload datatype.'''
     m = gc.RecordSnote(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SHARED_NOTE_XREF.format('-1', m.class_name))
@@ -1150,7 +1150,7 @@ def test_bad_payload_RecordSnote() -> None:
 
 
 def test_bad_payload_Refn() -> None:
-    '''Validate the `Refn` structure with a value and required substructures.'''
+    '''Validate that the `Refn` structure rejects a value not in its payload datatype.'''
     m = gc.Refn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1159,7 +1159,7 @@ def test_bad_payload_Refn() -> None:
 
 
 def test_bad_payload_Reli() -> None:
-    '''Validate the `Reli` structure with a value and required substructures.'''
+    '''Validate that the `Reli` structure rejects a value not in its payload datatype.'''
     m = gc.Reli(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1168,7 +1168,7 @@ def test_bad_payload_Reli() -> None:
 
 
 def test_bad_payload_Repo() -> None:
-    '''Validate the `Repo` structure with a value and required substructures.'''
+    '''Validate that the `Repo` structure rejects a value not in its payload datatype.'''
     m = gc.Repo(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_REPOSITORY_XREF.format('-1', m.class_name))
@@ -1177,7 +1177,7 @@ def test_bad_payload_Repo() -> None:
 
 
 def test_bad_payload_Resn() -> None:
-    '''Validate the `Resn` structure with a value and required substructures.'''
+    '''Validate that the `Resn` structure rejects a value not in its payload datatype.'''
     m = gc.Resn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1186,7 +1186,7 @@ def test_bad_payload_Resn() -> None:
 
 
 def test_bad_payload_Reti() -> None:
-    '''Validate the `Reti` structure with a value and required substructures.'''
+    '''Validate that the `Reti` structure rejects a value not in its payload datatype.'''
     m = gc.Reti(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1195,7 +1195,7 @@ def test_bad_payload_Reti() -> None:
 
 
 def test_bad_payload_Role() -> None:
-    '''Validate the `Role` structure with a value and required substructures.'''
+    '''Validate that the `Role` structure rejects a value not in its payload datatype.'''
     m = gc.Role(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1204,7 +1204,7 @@ def test_bad_payload_Role() -> None:
 
 
 def test_bad_payload_Sdate() -> None:
-    '''Validate the `Sdate` structure with a value and required substructures.'''
+    '''Validate that the `Sdate` structure rejects a value not in its payload datatype.'''
     m = gc.Sdate(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1213,7 +1213,7 @@ def test_bad_payload_Sdate() -> None:
 
 
 def test_bad_payload_Sex() -> None:
-    '''Validate the `Sex` structure with a value and required substructures.'''
+    '''Validate that the `Sex` structure rejects a value not in its payload datatype.'''
     m = gc.Sex(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1222,7 +1222,7 @@ def test_bad_payload_Sex() -> None:
 
 
 def test_bad_payload_Snote() -> None:
-    '''Validate the `Snote` structure with a value and required substructures.'''
+    '''Validate that the `Snote` structure rejects a value not in its payload datatype.'''
     m = gc.Snote(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SHARED_NOTE_XREF.format('-1', m.class_name))
@@ -1231,7 +1231,7 @@ def test_bad_payload_Snote() -> None:
 
 
 def test_bad_payload_SourEven() -> None:
-    '''Validate the `SourEven` structure with a value and required substructures.'''
+    '''Validate that the `SourEven` structure rejects a value not in its payload datatype.'''
     m = gc.SourEven(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1240,7 +1240,7 @@ def test_bad_payload_SourEven() -> None:
 
 
 def test_bad_payload_Sour() -> None:
-    '''Validate the `Sour` structure with a value and required substructures.'''
+    '''Validate that the `Sour` structure rejects a value not in its payload datatype.'''
     m = gc.Sour(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SOURCE_XREF.format('-1', m.class_name))
@@ -1249,7 +1249,7 @@ def test_bad_payload_Sour() -> None:
 
 
 def test_bad_payload_Spfx() -> None:
-    '''Validate the `Spfx` structure with a value and required substructures.'''
+    '''Validate that the `Spfx` structure rejects a value not in its payload datatype.'''
     m = gc.Spfx(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1258,7 +1258,7 @@ def test_bad_payload_Spfx() -> None:
 
 
 def test_bad_payload_Ssn() -> None:
-    '''Validate the `Ssn` structure with a value and required substructures.'''
+    '''Validate that the `Ssn` structure rejects a value not in its payload datatype.'''
     m = gc.Ssn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1267,7 +1267,7 @@ def test_bad_payload_Ssn() -> None:
 
 
 def test_bad_payload_Stae() -> None:
-    '''Validate the `Stae` structure with a value and required substructures.'''
+    '''Validate that the `Stae` structure rejects a value not in its payload datatype.'''
     m = gc.Stae(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1276,7 +1276,7 @@ def test_bad_payload_Stae() -> None:
 
 
 def test_bad_payload_SubmLang() -> None:
-    '''Validate the `SubmLang` structure with a value and required substructures.'''
+    '''Validate that the `SubmLang` structure rejects a value not in its payload datatype.'''
     m = gc.SubmLang(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1285,7 +1285,7 @@ def test_bad_payload_SubmLang() -> None:
 
 
 def test_bad_payload_Subm() -> None:
-    '''Validate the `Subm` structure with a value and required substructures.'''
+    '''Validate that the `Subm` structure rejects a value not in its payload datatype.'''
     m = gc.Subm(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_SUBMITTER_XREF.format('-1', m.class_name))
@@ -1294,7 +1294,7 @@ def test_bad_payload_Subm() -> None:
 
 
 def test_bad_payload_Surn() -> None:
-    '''Validate the `Surn` structure with a value and required substructures.'''
+    '''Validate that the `Surn` structure rejects a value not in its payload datatype.'''
     m = gc.Surn(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1303,7 +1303,7 @@ def test_bad_payload_Surn() -> None:
 
 
 def test_bad_payload_Tag() -> None:
-    '''Validate the `Tag` structure with a value and required substructures.'''
+    '''Validate that the `Tag` structure rejects a value not in its payload datatype.'''
     m = gc.Tag(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1312,7 +1312,7 @@ def test_bad_payload_Tag() -> None:
 
 
 def test_bad_payload_Temp() -> None:
-    '''Validate the `Temp` structure with a value and required substructures.'''
+    '''Validate that the `Temp` structure rejects a value not in its payload datatype.'''
     m = gc.Temp(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1321,7 +1321,7 @@ def test_bad_payload_Temp() -> None:
 
 
 def test_bad_payload_Text() -> None:
-    '''Validate the `Text` structure with a value and required substructures.'''
+    '''Validate that the `Text` structure rejects a value not in its payload datatype.'''
     m = gc.Text(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1330,7 +1330,7 @@ def test_bad_payload_Text() -> None:
 
 
 def test_bad_payload_Time() -> None:
-    '''Validate the `Time` structure with a value and required substructures.'''
+    '''Validate that the `Time` structure rejects a value not in its payload datatype.'''
     m = gc.Time(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1339,7 +1339,7 @@ def test_bad_payload_Time() -> None:
 
 
 def test_bad_payload_Titl() -> None:
-    '''Validate the `Titl` structure with a value and required substructures.'''
+    '''Validate that the `Titl` structure rejects a value not in its payload datatype.'''
     m = gc.Titl(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1348,7 +1348,7 @@ def test_bad_payload_Titl() -> None:
 
 
 def test_bad_payload_Top() -> None:
-    '''Validate the `Top` structure with a value and required substructures.'''
+    '''Validate that the `Top` structure rejects a value not in its payload datatype.'''
     m = gc.Top(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -1357,7 +1357,7 @@ def test_bad_payload_Top() -> None:
 
 
 def test_bad_payload_Type() -> None:
-    '''Validate the `Type` structure with a value and required substructures.'''
+    '''Validate that the `Type` structure rejects a value not in its payload datatype.'''
     m = gc.Type(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1366,7 +1366,7 @@ def test_bad_payload_Type() -> None:
 
 
 def test_bad_payload_Uid() -> None:
-    '''Validate the `Uid` structure with a value and required substructures.'''
+    '''Validate that the `Uid` structure rejects a value not in its payload datatype.'''
     m = gc.Uid(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1375,7 +1375,7 @@ def test_bad_payload_Uid() -> None:
 
 
 def test_bad_payload_Vers() -> None:
-    '''Validate the `Vers` structure with a value and required substructures.'''
+    '''Validate that the `Vers` structure rejects a value not in its payload datatype.'''
     m = gc.Vers(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1384,7 +1384,7 @@ def test_bad_payload_Vers() -> None:
 
 
 def test_bad_payload_Width() -> None:
-    '''Validate the `Width` structure with a value and required substructures.'''
+    '''Validate that the `Width` structure rejects a value not in its payload datatype.'''
     m = gc.Width(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_INTEGER.format('-1', m.class_name))
@@ -1393,7 +1393,7 @@ def test_bad_payload_Width() -> None:
 
 
 def test_bad_payload_Will() -> None:
-    '''Validate the `Will` structure with a value and required substructures.'''
+    '''Validate that the `Will` structure rejects a value not in its payload datatype.'''
     m = gc.Will(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))
@@ -1402,7 +1402,7 @@ def test_bad_payload_Will() -> None:
 
 
 def test_bad_payload_Www() -> None:
-    '''Validate the `Www` structure with a value and required substructures.'''
+    '''Validate that the `Www` structure rejects a value not in its payload datatype.'''
     m = gc.Www(-1)
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_STRING.format('-1', m.class_name))

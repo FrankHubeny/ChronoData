@@ -23,8 +23,8 @@ import logging
 from textwrap import wrap
 from typing import Any
 
-from genedata.constants import Config, Default
-from genedata.methods import Names
+from genedata.constants import Default
+from genedata.methods import Names, Query
 
 
 class Classes:
@@ -84,9 +84,9 @@ from genedata.structure import (
 """
 
     @staticmethod
-    def add_links(text: str) -> str:
+    def add_links(text: str, version: str = '7') -> str:
         """Add links missing in the specifications to text with brackets around it."""
-        site: str = f'https://gedcom.io/specifications/FamilySearchGEDCOMv{Config.VERSION}.html'
+        site: str = f'https://gedcom.io/specifications/FamilySearchGEDCOMv{version}.html'
         datatracker: str = 'https://datatracker.ietf.org/doc/html/rfc'
         return (
             text.replace(
@@ -175,14 +175,18 @@ from genedata.structure import (
         )
 
     @staticmethod
-    def specification(structure: dict[str, Any]) -> str:
+    def specification(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Specification section of the documentation."""
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
+        structure: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ][key]
         specification: list[str] = structure[Default.YAML_SPECIFICATION]
         string_linked: str = Default.EMPTY
         spec: str = """
     GEDCOM Specification:"""
         for string in specification:
-            string_linked = Classes.add_links(string)
+            string_linked = Classes.add_links(string, version)
             if (
                 Default.EOL not in string_linked
                 and len(string_linked) > Default.LINE_LENGTH
@@ -236,35 +240,30 @@ from genedata.structure import (
         return spec
 
     @staticmethod
-    def enumerations(
-        key: str,
-        full_structure: dict[str, Any],
-        full_enumeration_set: dict[str, Any],
-        full_enumeration: dict[str, Any],
-    ) -> str:
+    def enumerations(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Enumerations section of the documentation."""
-        structure: dict[str, Any] = full_structure[key]
+        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
+        enumeration_set: dict[str, Any] = specs[
+            Default.YAML_TYPE_ENUMERATION_SET
+        ]
+        enumeration: dict[str, Any] = specs[Default.YAML_TYPE_ENUMERATION]
         enumeration_values: str = Default.EMPTY
-        if Default.YAML_ENUMERATION_SET in structure:
+        if Default.YAML_ENUMERATION_SET in structure[key]:
             enum_set_key: str = Names.stem(
-                structure[Default.YAML_ENUMERATION_SET]
+                structure[key][Default.YAML_ENUMERATION_SET]
             )
             enumeration_values = """
 
     Enumeration Values:"""
-            for value in full_enumeration_set[enum_set_key][
+            for value in enumeration_set[enum_set_key][
                 Default.YAML_ENUMERATION_VALUES
             ]:
                 enum_key: str = Names.stem(value)
                 enum_tag: str = Default.EMPTY
-                if enum_key in full_enumeration:
-                    enum_tag = full_enumeration[enum_key][
-                        Default.YAML_STANDARD_TAG
-                    ]
+                if enum_key in enumeration:
+                    enum_tag = enumeration[enum_key][Default.YAML_STANDARD_TAG]
                 else:
-                    enum_tag = full_structure[enum_key][
-                        Default.YAML_STANDARD_TAG
-                    ]
+                    enum_tag = structure[enum_key][Default.YAML_STANDARD_TAG]
                 enumeration_values = ''.join(
                     [
                         enumeration_values,
@@ -283,8 +282,11 @@ from genedata.structure import (
         return enumeration_values
 
     @staticmethod
-    def substructures(structure: dict[str, Any]) -> str:
+    def substructures(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Substructures section of the documentation."""
+        structure: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ][key]
         class_name: str = Default.EMPTY
         subs: dict[str, str] = {}
         if Default.YAML_SUBSTRUCTURES in structure:
@@ -333,8 +335,11 @@ from genedata.structure import (
         return substructures
 
     @staticmethod
-    def superstructures(structure: dict[str, Any]) -> str:
+    def superstructures(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Substructures section of the documentation."""
+        structure: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ][key]
         class_name: str = Default.EMPTY
         supers: dict[str, str] = {}
         if Default.YAML_SUPERSTRUCTURES in structure:
@@ -381,8 +386,11 @@ from genedata.structure import (
         return superstructures
 
     @staticmethod
-    def value_of(structure: dict[str, Any]) -> str:
+    def value_of(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Enumerations section of the documentation."""
+        structure: dict[str, dict[str, Any]] = specs[
+            Default.YAML_TYPE_STRUCTURE
+        ][key]
         value_of: str = Default.EMPTY
         if Default.YAML_VALUE_OF in structure:
             value_of = """
@@ -393,8 +401,9 @@ from genedata.structure import (
         return value_of
 
     @staticmethod
-    def arguments(key: str, structure: dict[str, Any]) -> str:
+    def arguments(key: str, specs: dict[str, dict[str, Any]]) -> str:
         """Construct the Args section of the documentation."""
+        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE][key]
         args = """
         
     Args:"""
@@ -402,7 +411,7 @@ from genedata.structure import (
             Default.YAML_PAYLOAD in structure
             and structure[Default.YAML_PAYLOAD] != 'None'
             and structure[Default.YAML_PAYLOAD] is not None
-            and key[0:6] != Default.RECORD
+            and len(structure[Default.YAML_SUPERSTRUCTURES]) > 0
         ):
             args = ''.join(
                 [
@@ -414,7 +423,7 @@ from genedata.structure import (
                     structure[Default.YAML_PAYLOAD],
                 ]
             )
-        if key[0:6] == Default.RECORD:
+        if len(structure[Default.YAML_SUPERSTRUCTURES]) == 0 and key != 'HEAD':
             args = ''.join(
                 [
                     args,
@@ -438,15 +447,16 @@ from genedata.structure import (
         return args
 
     @staticmethod
-    def references(structure: dict[str, Any]) -> str:
+    def references(key: str, specs: dict[str, Any]) -> str:
         """Construct the References section of the documentation."""
-        uri = structure[Default.YAML_URI]
-        tag = structure[Default.YAML_STANDARD_TAG]
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION][0:1]
+        uri = specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_URI]
+        tag = specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_STANDARD_TAG]
         return f"""
 
     References:
     - [GEDCOM {tag} Structure]({uri})
-    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv{Config.VERSION}.html)"""
+    - [GEDCOM Specifications](https://gedcom.io/specifications/FamilySearchGEDCOMv{version}.html)"""
 
     @staticmethod
     def get_datatype(structure: dict[str, Any]) -> str:
@@ -502,49 +512,20 @@ from genedata.structure import (
     @staticmethod
     def init(
         key: str,
-        full_structure: dict[str, Any],
-        full_enumeration_set: dict[str, dict[str, Any]],
-        full_enumeration: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]],
     ) -> str:
         """Construct the global constants and init section of the class."""
-        tag: str = full_structure[key][Default.YAML_STANDARD_TAG]
-        required: list[str] = []
-        single: list[str] = []
-        permitted: list[str] = []
-        enum_tags: list[str] = []
-        supers: int = 0
-        if Default.YAML_SUPERSTRUCTURES in full_structure[key]:
-            supers = len(full_structure[key][Default.YAML_SUPERSTRUCTURES])
-        enum_set_key: str = Default.EMPTY
+        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
+        tag: str = Query.structure_tag(key, specs)
+        required: list[str] = Query.required(key, specs)
+        single: list[str] = Query.singular(key, specs)
+        permitted: list[str] = Query.permitted(key, specs)
         enum_key: str = Default.EMPTY
-        if Default.YAML_ENUMERATION_SET in full_structure[key]:
-            enum_set_key = Names.stem(
-                full_structure[key][Default.YAML_ENUMERATION_SET]
-            )
-            for enum in full_enumeration_set[enum_set_key][
-                Default.YAML_ENUMERATION_VALUES
-            ]:
-                enum_key = Names.stem(enum)
-                if enum_key in full_enumeration:
-                    enum_tags.append(
-                        full_enumeration[enum_key][Default.YAML_STANDARD_TAG]
-                    )
-                else:
-                    enum_tags.append(
-                        full_structure[enum_key][Default.YAML_STANDARD_TAG]
-                    )
-        if Default.YAML_SUBSTRUCTURES in full_structure[key]:
-            for uri, cardinality in full_structure[key][
-                Default.YAML_SUBSTRUCTURES
-            ].items():
-                class_name: str = Names.classname(uri)
-                if Names.keyname(uri) not in Default.IGNORE:
-                    permitted.append(class_name)
-                    if Default.YAML_CARDINALITY_REQUIRED in cardinality:
-                        required.append(class_name)
-                    if Default.YAML_CARDINALITY_SINGULAR in cardinality:
-                        single.append(class_name)
-        value_arg: str = f', {Default.CODE_VALUE}: {Classes.get_datatype(full_structure[key])}'
+        enum_tags: list[str] = []
+        enum_key, enum_tags = Query.enum_key_tags(key, specs)
+        value_arg: str = (
+            f', {Default.CODE_VALUE}: {Classes.get_datatype(structure[key])}'
+        )
         value_init: str = Default.CODE_VALUE
         required_value: str = str(required)
         if len(required) == 0:
@@ -568,13 +549,7 @@ from genedata.structure import (
         separator: str = Default.EMPTY
         if value_arg != Default.EMPTY and subs_arg != Default.EMPTY:  # noqa: PLR1714
             separator = ', '
-        payload: str = Default.EMPTY
-        if (
-            Default.YAML_PAYLOAD in full_structure[key]
-            and full_structure[key][Default.YAML_PAYLOAD] != 'None'
-            and full_structure[key][Default.YAML_PAYLOAD] is not None
-        ):
-            payload = full_structure[key][Default.YAML_PAYLOAD]
+        payload: str = Query.payload(key, specs)
         if payload == Default.EMPTY or key == 'record-SNOTE':
             value_arg = Default.EMPTY
             value_init = 'None'
@@ -591,13 +566,13 @@ from genedata.structure import (
             subs={subs_init}, 
             key='{key}',
             tag='{tag}',
-            supers={supers},
+            supers={Query.supers_count(key, specs)},
             permitted={permitted_value},
             required={required_value},
             single={single_value},
             enum_key='{enum_key}',
             enum_tags={enum_tags_value},
-            payload='{full_structure[key][Default.YAML_PAYLOAD]}',
+            payload='{payload}',
             class_name='{Names.classname(key)}',
         ){deprecation_line}"""
         return init_line  #''.join([init, init_line])
@@ -605,9 +580,7 @@ from genedata.structure import (
     @staticmethod
     def generate_class(
         key: str,
-        full_structure: dict[str, Any],
-        full_enumeration_set: dict[str, Any],
-        full_enumeration: dict[str, Any],
+        specs: dict[str, dict[str, Any]],
         examples: str,
     ) -> str:
         """Generate a single class and its documentation defined by its Structure definition.
@@ -620,35 +593,27 @@ from genedata.structure import (
             >>> from genedata.specifications70 import Specs
             >>> map = Classes.generate_class(
             ...     'MAP',
-            ...     Specs['structure'],
-            ...     Specs['enumeration set'],
-            ...     Specs['enumeration'],
+            ...     Specs,
             ...     Examples['MAP'],
             ... )
 
         Args:
-            key: The key of the Specs['structure'] dictionary.
-            structure: The structure dictionary where GEDCOM structure specifications are found.
-            enumerationset: The enumerationset dictionary where GEDCOM enumeration-set
-                specifications are found.
-            enumeration: The enumeration dictionary where GEDCOM enumeration specifications
-                are found.
+            key: The key of the structure being generated.
+            specs: The dictionary of specifications.
             examples: The dictionary of examples to add to this class.
         """
-        tag: str = full_structure[key][Default.YAML_STANDARD_TAG]
+        tag: str = Query.structure_tag(key, specs)
         class_name: str = Names.classname(key)
         parts: str = ''.join(
             [
-                Classes.specification(full_structure[key]),
+                Classes.specification(key, specs),
                 examples,
-                Classes.substructures(full_structure[key]),
-                Classes.superstructures(full_structure[key]),
-                Classes.enumerations(
-                    key, full_structure, full_enumeration_set, full_enumeration
-                ),
-                Classes.value_of(full_structure[key]),
-                Classes.arguments(key, full_structure[key]),
-                Classes.references(full_structure[key]),
+                Classes.substructures(key, specs),
+                Classes.superstructures(key, specs),
+                Classes.enumerations(key, specs),
+                Classes.value_of(key, specs),
+                Classes.arguments(key, specs),
+                Classes.references(key, specs),
             ]
         )
         lines: str = f"""
@@ -664,22 +629,20 @@ class {class_name}(BaseStructure):
 
     {parts}
     '''
-    {Classes.init(key, full_structure, full_enumeration_set, full_enumeration)}
+    {Classes.init(key, specs)}
     """
         return lines
 
     @staticmethod
     def all_classes(
-        full_structure: dict[str, dict[str, Any]],
-        full_enumeration_set: dict[str, dict[str, Any]],
-        full_enumeration: dict[str, dict[str, Any]],
+        specs: dict[str, dict[str, Any]],
         full_examples: dict[str, str],
     ) -> str:
         """Generate all classes and their documentation defined by the Structure dictionary."""
 
         lines: str = Default.EMPTY
         class_data: str = Default.EMPTY
-        for key, _structure in full_structure.items():
+        for key, _structure in specs[Default.YAML_TYPE_STRUCTURE].items():
             if key not in Default.IGNORE:
                 examples: str = Default.EMPTY
                 if key in full_examples:
@@ -687,9 +650,7 @@ class {class_name}(BaseStructure):
                 try:
                     class_data = Classes.generate_class(
                         key,
-                        full_structure,
-                        full_enumeration_set,
-                        full_enumeration,
+                        specs,
                         examples,
                     )
                 except Exception:
@@ -704,10 +665,7 @@ class {class_name}(BaseStructure):
         return lines
 
     @staticmethod
-    def build_all(
-        source: str,
-        version: str,
-    ) -> str:
+    def build_all(specs: dict[str, dict[str, Any]]) -> str:
         """Construct the entire module containing GEDCOM structures converted to classes.
 
         To build the classes module one either needs a base directory where the yaml files
@@ -718,30 +676,25 @@ class {class_name}(BaseStructure):
             This example constructs a string that could be used for a classes module
             using a specification module that has already been constructed.
             >>> from genedata.generate import Classes
-            >>> all = Classes.build_all('specify-ged-source', '7.0')
+            >>> from genedata.specifications70 import Specs
+            >>> all = Classes.build_all(Specs)
 
         Args:
-            source: The source of the specification.
-            version: The version of the specification.
+            specs: The specification module generated when the yaml files were loaded.
         """
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
+        source: str = specs[Default.YAML_META][Default.YAML_SOURCE]
         version_no_periods: str = version.replace(Default.PERIOD, Default.EMPTY)
         examples = importlib.import_module(
             f'genedata.examples{version_no_periods}'
         )
-        specifications = importlib.import_module(
-            f'genedata.specifications{version_no_periods}'
-        )
         return ''.join(
             [
-                Classes.preamble(source, version),
-                Classes.all_listing(
-                    specifications.Specs[Default.YAML_TYPE_STRUCTURE]
-                ),
+                Classes.preamble(source, version[0:1]),
+                Classes.all_listing(specs[Default.YAML_TYPE_STRUCTURE]),
                 Classes.imports(),
                 Classes.all_classes(
-                    specifications.Specs[Default.YAML_TYPE_STRUCTURE],
-                    specifications.Specs[Default.YAML_TYPE_ENUMERATION_SET],
-                    specifications.Specs[Default.YAML_TYPE_ENUMERATION],
+                    specs,
                     examples.Examples,
                 ),
             ]
@@ -831,8 +784,6 @@ class Tests:
                 class_name = Names.classname(sub_key)
                 if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
                     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_required})'
-                # elif sub_required != Default.EMPTY:
-                #     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
                 else:
                     singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value})'
                 break
@@ -996,7 +947,7 @@ class Tests:
                 if y:
                     return "'Y'"
                 return "''"
-            case 'None':
+            case None:
                 match key:
                     case 'record-FAM':
                         return 'fam'
@@ -1069,25 +1020,29 @@ class Tests:
 
     @staticmethod
     def preamble(
-        test: str, add_pytest: int = 0, firstline: str = Default.EMPTY
+        test: str,
+        add_pytest: int = 0,
+        firstline: str = Default.EMPTY,
+        version: str = '70',
     ) -> str:
         """Construct a document to describe a module containing a set of tests."""
+        version_no_periods: str = version.replace(Default.PERIOD, Default.EMPTY)
         match add_pytest:
             case 0:
                 pytest: str = f"""from genedata.build import Genealogy   # noqa: I001
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}"""
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS}"""
             case 1:
                 pytest = f"""import pytest   # noqa: I001
 import re
 
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS}
 from genedata.build import Genealogy
 from genedata.messages import Msg"""
             case 2:
                 pytest = f"""import pytest   # noqa: I001
 import re
 
-import genedata.classes{Config.VERSION} as {Default.CODE_CLASS}
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS}
 from genedata.build import Genealogy"""
         return f"""{firstline}'''This module contains {test} tests to be run with pytest.
 
@@ -1116,9 +1071,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
         All generated classes are validated with their required substructures, if any.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str) -> str:
@@ -1136,6 +1089,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1146,7 +1100,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             Default.YAML_TYPE_ENUMERATION
         ]
         test_name: str = 'All'
-        lines: str = Tests.preamble(test_name)
+        lines: str = Tests.preamble(test_name, version=version)
         value: str = Default.EMPTY
         subs: str = Default.EMPTY
         y: bool = True
@@ -1173,9 +1127,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         All generated classes are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str) -> str:
@@ -1196,6 +1148,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1207,7 +1160,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         ]
         test_name: str = 'Not Permitted'
         not_permitted_sub: str = f'{Default.CODE_CLASS}.RecordIndi(indi)'
-        lines: str = Tests.preamble(test_name, add_pytest=1)
+        lines: str = Tests.preamble(test_name, add_pytest=1, version=version)
         value: str = Default.EMPTY
         subs: str = Default.EMPTY
         for key in structures:
@@ -1241,9 +1194,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         All generated classes are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str, error_message: str) -> str:
@@ -1255,7 +1206,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             lines: str = f"""
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
-    '''Validate the `{class_name}` structure with a value and required substructures.'''
+    '''Validate that the `{class_name}` structure rejects a value not in its payload datatype.'''
     m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.{error_message}.format('-1', m.class_name))
@@ -1264,6 +1215,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1279,13 +1231,14 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             test_name,
             add_pytest=1,
             firstline='# mypy: disable-error-code="arg-type, unused-ignore"\n',
+            version=version,
         )
         value: str = '-1'
         subs: str = Default.EMPTY
         for key in structures:
             if (
                 key not in Default.IGNORE
-                and structures[key][Default.YAML_PAYLOAD] != 'None'
+                and structures[key][Default.YAML_PAYLOAD] is not None
             ):
                 subs = Tests.get_required(
                     key, structures, enumerationsets, enumerations
@@ -1303,9 +1256,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         All generated classes are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str) -> str:
@@ -1326,6 +1277,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1337,7 +1289,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         ]
         test_name: str = 'Bad Enum'
         bad_enum: str = "'XYZ1234567890'"
-        lines: str = Tests.preamble(test_name, add_pytest=1)
+        lines: str = Tests.preamble(test_name, add_pytest=1, version=version)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             if (
@@ -1358,9 +1310,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         Only structures with permitted single substructures are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str, name: str) -> str:
@@ -1381,6 +1331,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1391,7 +1342,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             Default.YAML_TYPE_ENUMERATION
         ]
         test_name: str = 'Bad Singular'
-        lines: str = Tests.preamble(test_name, add_pytest=1)
+        lines: str = Tests.preamble(test_name, add_pytest=1, version=version)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             value = Tests.get_value(
@@ -1440,9 +1391,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         Only structures with a permitted substructure besides the required substructures are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str) -> str:
@@ -1463,6 +1412,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1473,7 +1423,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             Default.YAML_TYPE_ENUMERATION
         ]
         test_name: str = 'Missing Required'
-        lines: str = Tests.preamble(test_name, add_pytest=1)
+        lines: str = Tests.preamble(test_name, add_pytest=1, version=version)
         subs: str = Default.EMPTY
         for key, structure in structures.items():
             if (
@@ -1503,9 +1453,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         Only structures with a value of `{}` for the `substructures` key are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str = 'gc.Phrase("hi")') -> str:
@@ -1525,6 +1473,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1535,7 +1484,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             Default.YAML_TYPE_ENUMERATION
         ]
         test_name: str = 'Empty Subs'
-        lines: str = Tests.preamble(test_name, add_pytest=2)
+        lines: str = Tests.preamble(test_name, add_pytest=2, version=version)
         for key, structure in structures.items():
             if (
                 key not in Default.IGNORE
@@ -1559,9 +1508,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         Only structures with a value of `None` for the `payload` key are tested.
 
         Args:
-            structures: The full Structure dictionary containing all structures.
-            enumerationsets: The full EnumerationSet dictionary containing all structures.
-            enumerations: The full Enumeration dictionary containing the enumerations.
+            specs: The specification dictionary derived from GEDCOM yaml files.
         """
 
         def write(key: str, value: str, subs: str = 'gc.Phrase("hi")') -> str:
@@ -1573,7 +1520,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             lines: str = f"""
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
-    '''Validate the `{class_name}` without substructures cannot receive a substructure.'''
+    '''Validate that `{class_name}` without a value argument cannot receive a value argument.'''
     with pytest.raises(
         TypeError, match=re.escape("{class_name}.__init__() got an unexpected keyword argument 'value'")
     ):
@@ -1581,6 +1528,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 """
             return lines
 
+        version: str = specs[Default.YAML_META][Default.YAML_VERSION]
         structures: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ]
@@ -1592,11 +1540,11 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
         ]
         test_name: str = 'Empty Value'
         value: str = "'hi'"
-        lines: str = Tests.preamble(test_name, add_pytest=2)
+        lines: str = Tests.preamble(test_name, add_pytest=2, version=version)
         for key, structure in structures.items():
             if (
                 key not in Default.IGNORE
-                and structure[Default.YAML_PAYLOAD] == 'None'
+                and structure[Default.YAML_PAYLOAD] is None
                 and key
                 not in [
                     'record-FAM',
