@@ -3,8 +3,6 @@
 
 """
 
-import pytest
-
 from genedata.methods import Query
 from genedata.specifications70 import Specs
 
@@ -17,14 +15,12 @@ def test_required() -> None:
 def test_required_empty() -> None:
     """Verify that the empty key raises an error."""
     key: str = ''
-    with pytest.raises(KeyError, match=('')):
-        Query.required(key, Specs)
+    assert Query.required(key, Specs) == []
 
 def test_required_bad_key() -> None:
     """Verify that a bad key raises an error."""
     key: str = 'abc'
-    with pytest.raises(KeyError, match=('abc')):
-        Query.required(key, Specs)
+    assert Query.required(key, Specs) == []
 
 def test_required_good_key() -> None:
     """Verify that the required methods runs."""
@@ -39,14 +35,12 @@ def test_permitted_keys() -> None:
 def test_permitted_keys_empty() -> None:
     """Verify that the empty key raises an error."""
     key: str = ''
-    with pytest.raises(KeyError, match=('')):
-        Query.permitted_keys(key, Specs)
+    assert Query.permitted_keys(key, Specs) == []
 
 def test_permitted_keys_bad_key() -> None:
     """Verify that a bad key raises an error."""
     key: str = 'abc'
-    with pytest.raises(KeyError, match=('abc')):
-        Query.permitted_keys(key, Specs)
+    assert Query.permitted_keys(key, Specs) == []
 
 def test_permitted_keys_good_key() -> None:
     """Verify that the required methods runs."""
@@ -61,14 +55,12 @@ def test_permitted() -> None:
 def test_permitted_empty() -> None:
     """Verify that the empty key raises an error."""
     key: str = ''
-    with pytest.raises(KeyError, match=('')):
-        Query.permitted(key, Specs)
+    assert Query.permitted(key, Specs) == []
 
 def test_permitted_bad_key() -> None:
     """Verify that a bad key raises an error."""
     key: str = 'abc'
-    with pytest.raises(KeyError, match=('abc')):
-        Query.permitted(key, Specs)
+    assert Query.permitted(key, Specs) == []
 
 def test_permitted_good_key() -> None:
     """Verify that the required methods runs."""
@@ -103,14 +95,12 @@ def test_singular() -> None:
 def test_singular_empty() -> None:
     """Verify that the empty key raises an error."""
     key: str = ''
-    with pytest.raises(KeyError, match=('')):
-        Query.singular(key, Specs)
+    assert Query.singular(key, Specs) == []
 
 def test_singular_bad_key() -> None:
     """Verify that a bad key raises an error."""
     key: str = 'abc'
-    with pytest.raises(KeyError, match=('abc')):
-        Query.singular(key, Specs)
+    assert Query.singular(key, Specs) == []
 
 def test_singular_good_key() -> None:
     """Verify that the required methods runs."""

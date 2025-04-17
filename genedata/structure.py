@@ -2,6 +2,7 @@
 """Store, validate and display GEDCOM files."""
 
 __all__ = [
+    'ExtensionAttributes',
     'ExtensionXref',
     'FamilyXref',
     'IndividualXref',
@@ -15,7 +16,7 @@ __all__ = [
 
 import collections
 import re
-from typing import Any, Literal, Self
+from typing import Any, Literal, NamedTuple, Self
 
 from genedata.constants import Default
 from genedata.messages import Msg
@@ -301,6 +302,7 @@ class Void:
     EXTTAG: ExtensionXref = ExtensionXref(NAME)
     XREF: Xref = Xref(NAME)
 
+
 ExtType = Any | list[Any] | None
 
 
@@ -326,7 +328,6 @@ class BaseStructure:
         enum_tags: list[str] | None = None,
         payload: str = Default.EMPTY,
         class_name: str = Default.EMPTY,
-        
     ):
         # Process value argument
         self.value: str | int | Xref | None = value
@@ -408,9 +409,8 @@ class BaseStructure:
                         name, self.permitted, self.class_name
                     )
                 )
-            
+
         # Are there records in the permitted list of substructures?
-        
 
         # Does value have the required data type?
         match self.payload:
@@ -418,7 +418,9 @@ class BaseStructure:
                 if self.key == 'record-SNOTE':
                     if not isinstance(self.value, SharedNoteXref):
                         raise ValueError(
-                            Msg.NOT_SHARED_NOTE_XREF.format(repr(self.value), self.class_name)
+                            Msg.NOT_SHARED_NOTE_XREF.format(
+                                repr(self.value), self.class_name
+                            )
                         )
                 elif not isinstance(self.value, str):
                     raise ValueError(
@@ -529,7 +531,9 @@ class BaseStructure:
                     re.search('[a-z]', self.value) is not None
                     or re.search('[0-9]', self.value) is None
                 ):
-                    raise ValueError(Msg.NOT_DATE.format(self.value, self.class_name))
+                    raise ValueError(
+                        Msg.NOT_DATE.format(self.value, self.class_name)
+                    )
             case 'https://gedcom.io/terms/v7/type-FilePath':
                 if not isinstance(self.value, str):
                     raise ValueError(
@@ -654,7 +658,9 @@ class BaseStructure:
         match self.class_name:
             case 'Lati':
                 if not isinstance(self.value, str):
-                    raise ValueError(Msg.NOT_STRING.format(str(self.value), self.class_name))
+                    raise ValueError(
+                        Msg.NOT_STRING.format(str(self.value), self.class_name)
+                    )
                 if self.value[0] not in [
                     Default.LATI_NORTH,
                     Default.LATI_SOUTH,
@@ -682,7 +688,9 @@ class BaseStructure:
                     )
             case 'Long':
                 if not isinstance(self.value, str):
-                    raise ValueError(Msg.NOT_STRING.format(str(self.value), self.class_name))
+                    raise ValueError(
+                        Msg.NOT_STRING.format(str(self.value), self.class_name)
+                    )
                 if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
                     raise ValueError(
                         Msg.LONG_EAST_WEST.format(
@@ -796,9 +804,14 @@ class BaseStructure:
                 )
         # if self.tag == 'HEAD':
         #     lines = lines.replace('0 HEAD\n', '0 HEAD\n1 GEDC\n2 VERS 7.0\n')
-        return lines #.replace('0 TRLR\n', '0 TRLR')
+        return lines  # .replace('0 TRLR\n', '0 TRLR')
 
-    def code(self, tabs: int = 0, no_indent: bool = False, as_name: str = Default.EMPTY) -> str:
+    def code(
+        self,
+        tabs: int = 0,
+        no_indent: bool = False,
+        as_name: str = Default.EMPTY,
+    ) -> str:
         """Generate a formatted code that can be evaluated of the class."""
         class_name: str = self.class_name
         if as_name != Default.EMPTY:
@@ -897,23 +910,37 @@ class BaseStructure:
         )
 
 
-# class Ext(BaseStructure):
-#     """Store, validate and format an extension structure."""
+class ExtensionAttributes(NamedTuple):
+    key: int = 0
+    tag: str = Default.EMPTY
+    yaml_file: str = Default.EMPTY
+    yaml_type: str = Default.EMPTY
+    supers: int = 0
+    payload: str = Default.EMPTY
+    required: list[str] | None = None
+    single: list[str] | None = None
+    permitted: list[str] | None = None
+    enum_key: str = Default.EMPTY
+    enum_tags: list[str] | None = None
 
-#     def __init__(self, key: int, value: str, subs: SubsType):
-#         super().__init__(
-#             value=value, 
-#             subs=subs, 
-#             key=key,
-#             tag=structure[Default.YAML_LOAD_TAG],
-#             supers=0,
-#             permitted=structure[Default.YAML_PERMITTED],
-#             required=structure[Default.YAML_REQUIRED],
-#             single=structure[Default.YAML_SINGULAR],
-#             enum_key=structure[Default.YAML_ENUM_KEY],
-#             enum_tags=structure[Default.YAML_ENUM_TAGS],
-#             payload=structure[Default.YAML_PAYLOAD],
-#             class_name='Ext',
-#         )
 
-        
+class Ext(BaseStructure):
+    """Store, validate and format an extension structure."""
+
+    def __init__(
+        self, attributes: ExtensionAttributes, value: str, subs: SubsType
+    ):
+        super().__init__(
+            value=value,
+            subs=subs,
+            key=attributes.key,
+            tag=attributes.tag,
+            supers=attributes.supers,
+            permitted=attributes.permitted,
+            required=attributes.required,
+            single=attributes.single,
+            enum_key=attributes.enum_key,
+            enum_tags=attributes.enum_tags,
+            payload=attributes.payload,
+            class_name='Ext',
+        )

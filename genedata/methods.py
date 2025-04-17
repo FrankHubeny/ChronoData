@@ -1311,7 +1311,7 @@ class Query:
         enum_tags: list[str] = []
         enum_set_key: str = Default.EMPTY
         enum_key: str = Default.EMPTY
-        if Default.YAML_ENUMERATION_SET in structure[key]:
+        if key in structure and Default.YAML_ENUMERATION_SET in structure[key]:
             enum_set_key = Names.stem(
                 structure[key][Default.YAML_ENUMERATION_SET]
             )
@@ -1385,10 +1385,11 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
-            Default.YAML_SUBSTRUCTURES
-        ].items():
-            classes.append(Names.classname(uri))
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUBSTRUCTURES
+            ].items():
+                classes.append(Names.classname(uri))
         return classes
 
     @staticmethod
@@ -1408,10 +1409,11 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         keys: list[str] = []
-        for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
-            Default.YAML_SUBSTRUCTURES
-        ].items():
-            keys.append(Names.keyname(uri))
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, _cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUBSTRUCTURES
+            ].items():
+                keys.append(Names.keyname(uri))
         return keys
 
     @staticmethod
@@ -1431,11 +1433,12 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
-            Default.YAML_SUBSTRUCTURES
-        ].items():
-            if Default.CARDINALITY_REQUIRED in cardinality:
-                classes.append(Names.classname(uri))
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUBSTRUCTURES
+            ].items():
+                if Default.CARDINALITY_REQUIRED in cardinality:
+                    classes.append(Names.classname(uri))
         return classes
 
     @staticmethod
@@ -1455,21 +1458,31 @@ class Query:
             specs: The specification dictionary one wants to search.
         """
         classes: list[str] = []
-        for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
-            Default.YAML_SUBSTRUCTURES
-        ].items():
-            if Default.CARDINALITY_SINGULAR in cardinality:
-                classes.append(Names.classname(uri))
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUBSTRUCTURES
+            ].items():
+                if Default.CARDINALITY_SINGULAR in cardinality:
+                    classes.append(Names.classname(uri))
         return classes
     
     @staticmethod
     def structure_tag(key: str, specs: dict[str, dict[str, Any]]) -> str:
-        return specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_STANDARD_TAG]
+        tag: str = Default.EMPTY
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            return specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_STANDARD_TAG]
+        if key in specs[Default.YAML_TYPE_ENUMERATION]:
+            return specs[Default.YAML_TYPE_ENUMERATION][key][Default.YAML_STANDARD_TAG]
+        if key in specs[Default.YAML_TYPE_CALENDAR]:
+            return specs[Default.YAML_TYPE_CALENDAR][key][Default.YAML_STANDARD_TAG]
+        if key in specs[Default.YAML_TYPE_MONTH]:
+            return specs[Default.YAML_TYPE_MONTH][key][Default.YAML_STANDARD_TAG]
+        return tag
 
     @staticmethod
     def supers_count(key: str, specs: dict[str, dict[str, Any]]) -> int:
         howmany: int = 0
-        if (
+        if key in specs[Default.YAML_TYPE_STRUCTURE] and (
             key in specs[Default.YAML_TYPE_STRUCTURE]
             and Default.YAML_SUPERSTRUCTURES
             in specs[Default.YAML_TYPE_STRUCTURE][key]

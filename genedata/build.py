@@ -37,9 +37,9 @@ from genedata.constants import (
 )
 from genedata.messages import Msg
 from genedata.methods import Names, Query, Util
-
-#from genedata.specifications70 import Structure
 from genedata.structure import (
+    ExtensionAttributes,
+    ExtensionXref,
     FamilyXref,
     IndividualXref,
     MultimediaXref,
@@ -65,7 +65,6 @@ class Genealogy:
         filename: str = Default.EMPTY,
         version: str = '7.0',
     ) -> None:
-        
         # Store the input values.
         self.filename: str = filename
         self.version: str = version
@@ -73,31 +72,36 @@ class Genealogy:
         # Prepare to load the ged file if filename is not empty.
         self.tag_counter: int = 0
         self.ged_file: str = Default.EMPTY
-        self.ged_ext_tags: list[list[str]] = []
+        self.ged_ext_tags: list[list[Any]] = []
         self.tag_uri: list[list[str]] = []
         if self.filename != Default.EMPTY:
             self.ged_file = Util.read_ged(self.filename)
             self.tag_uri = Query.extensions(self.ged_file)
             self.version = Query.version(self.ged_file)
-            
 
         # Remove the periods from the version.
-        self.version_no_periods: str = self.version.replace(Default.PERIOD, Default.EMPTY)
+        self.version_no_periods: str = self.version.replace(
+            Default.PERIOD, Default.EMPTY
+        )
 
         # Import the version's specification module and load the Genealogy's specification with it.
-        self.specs = importlib.import_module(f'genedata.specifications{self.version_no_periods}')
+        self.specs = importlib.import_module(
+            f'genedata.specifications{self.version_no_periods}'
+        )
         self.specification: dict[str, dict[str, Any]] = self.specs.Specs
         if len(self.tag_uri) > 0:
             for item in self.tag_uri:
                 self.add_tag(item[0], item[1])
 
         # Load into the Genealogy's specification any extension tags from the file. Set tag counter.
-        
+
         # if len(self.ged_ext_tags) > 0:
         #     for tag_uri in self.ged_ext_tags:
         #         self.tag_counter += 1
         #         self.add_tag(str(self.tag_counter), tag_uri[0], tag_uri[1])
-        self.classes = importlib.import_module(f'genedata.classes{self.version_no_periods}')
+        self.classes = importlib.import_module(
+            f'genedata.classes{self.version_no_periods}'
+        )
 
         # Storage areas for ged data that is created through the classes and not read from the file.
         self.ged_data: list[str] = []
@@ -116,20 +120,20 @@ class Genealogy:
         self.ged_submitter: str = ''
         self.ged_file_records: list[str] = []
         self.records: list[Any] = []
-            # self.classes.RecordFam
-            # | self.classes.RecordIndi
-            # | self.classes.RecordObje
-            # | self.classes.RecordRepo
-            # | self.classes.RecordSnote
-            # | self.classes.RecordSour
-            # | self.classes.RecordSubm
-        #] = []
-        self.record_header: Any = None #self.classes.Head | None = None
-        #self.schma: str = Default.EMPTY
-        
-        #self.filename_type: str = self._get_filename_type(self.filename)
+        # self.classes.RecordFam
+        # | self.classes.RecordIndi
+        # | self.classes.RecordObje
+        # | self.classes.RecordRepo
+        # | self.classes.RecordSnote
+        # | self.classes.RecordSour
+        # | self.classes.RecordSubm
+        # ] = []
+        self.record_header: Any = None  # self.classes.Head | None = None
+        # self.schma: str = Default.EMPTY
+
+        # self.filename_type: str = self._get_filename_type(self.filename)
         self.xref_counter: int = 1
-        
+
         # self.extension_specification: dict[str, dict[str, Any]] = {
         #     Default.YAML_TYPE_CALENDAR: {},
         #     Default.YAML_TYPE_DATATYPE: {},
@@ -193,17 +197,53 @@ class Genealogy:
         }
 
     def view_extensions(self) -> tuple[list[str], list[list[str]], list[str]]:
-        """Display a list of available extensions to use or be aware of."""
+        """Display a list of available extensions to use or be aware of.
+        
+        There are three lists returned.  The first list corresponds to the
+        pandas DataFrame `data` argument.  The second corresponds to the `index` argument.
+        The third corresponds to the `columns` argument. 
+
+        The final value is the full yaml_dictionary read by the `add_tag` method.  
+        This may be worth checking if something doesn't look right.  
+        Since this final value will likely take up many lines, one can simply type 
+        the variable assigned to this first returned list in a Jupyter notebook 
+        to see all of the values.
+        """
         keys: list[str] = []
         values: list[list[str]] = []
-        labels: list[str] = ['Tag', 'Specification']
+        labels: list[str] = [
+            'Tag',
+            'Specification',
+            'Type',
+            'Payload',
+            'Supers',
+            'Required',
+            'Permitted',
+            'Single',
+            'Enum Key',
+            'Enum Tags',
+            'Yaml Dictionary',
+        ]
         for tag in self.ged_ext_tags:
             keys.append(tag[0])
-            values.append([tag[1], tag[2]])
+            values.append(
+                [
+                    tag[1],
+                    tag[2],
+                    tag[3],
+                    tag[4],
+                    tag[5],
+                    tag[6],
+                    tag[7],
+                    tag[8],
+                    tag[9],
+                    tag[10],
+                    tag[11],
+                ]
+            )
         return values, keys, labels
-        #pd.DataFrame(data=values, index=keys, columns=labels)
 
-    def add_tag(self, tag: str, yaml_file: str) -> None:
+    def add_tag(self, tag: str, yaml_file: str) -> ExtensionAttributes:
         """Add an extension tag to the extension specifications.
 
         Run this on a specific yaml file to make the specification
@@ -216,32 +256,107 @@ class Genealogy:
         Undocumented extension tags will be noted as such but not made available
         until a readable yaml specification file is made available.
 
+        The GEDCOM specification states the following:
+        > A given schema should map only one tag to each URI.
+
+        To implement this a ValueError is thrown if a yaml_file has already been used.
+
+        Examples:
+            With the `good_calendar.yaml` file in the testing data directory
+            one can create an extension tag `_MYTAG` by running the following:
+            >>> from genedata.build import Genealogy
+            >>> g = Genealogy()
+            >>> mytag = g.add_tag('_MYTAG', 'tests/data/good_calendar.yaml')
+
+            If one tries to use the same file again, an error is produced.
+            >>> yourtag = g.add_tag('_YOURTAG', 'tests/data/good_calendar.yaml')
+            Traceback (most recent call last)
+            ValueError: The yaml file "tests/data/good_calendar.yaml" has already been used for another extension.
+
         Args:
             tag: The extension tag with an initial underline and all capitals
                 that must be in the `extension tags` list or which must be
                 the `standard tag`.
             yaml_file: The location of the yaml_file as either a url or a file
-                in a regular or compressed directory.
+                in a regular or compressed directory such as a GDZ archive.
 
         References:
             [GEDCOM Extensions](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#extensions)
         """
+        for tag_line in self.ged_ext_tags:
+            if tag_line[2] == yaml_file:
+                raise ValueError(Msg.YAML_FILE_HAS_BEEN_USED.format(yaml_file))
         yaml_dict: dict[str, dict[str, Any]] = {}
+        yaml_type: str = Default.EMPTY
+        required: list[str] = []
+        single: list[str] = []
+        permitted: list[str] = []
+        payload: str = Default.EMPTY
+        enum_key: str = Default.EMPTY
+        enum_tags: list[str] = []
+        supers: int = 0
         tag_edited: str = tag.upper()
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
         try:
             yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
         except Exception:
-            logging.info(Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited))
+            logging.info(
+                Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited)
+            )
         else:
             self.tag_counter += 1
-            type_key: str = str(yaml_dict[Default.YAML_TYPE])
-            self.specification[type_key].update({self.tag_counter: yaml_dict})
-            required: list[str] = Query.required(self.tag_counter, self.specification)
-            single: list[str] = Query.singular(self.tag_counter, self.specification)
-            permitted: list[str] = Query.permitted(self.tag_counter, self.specification)
-            self.ged_ext_tags.append([str(self.tag_counter), tag, yaml_file, required, single, permitted])
+            if Default.YAML_TYPE in yaml_dict:
+                yaml_type: str = str(yaml_dict[Default.YAML_TYPE])
+            self.specification[yaml_type].update({self.tag_counter: yaml_dict})
+            # match yaml_type:
+            #     case Default.YAML_TYPE_STRUCTURE:
+            required = Query.required(
+                self.tag_counter, self.specification
+            )
+            single = Query.singular(
+                self.tag_counter, self.specification
+            )
+            permitted = Query.permitted(
+                self.tag_counter, self.specification
+            )
+            payload = Query.payload(self.tag_counter, self.specification)
+            supers = Query.supers_count(
+                self.tag_counter, self.specification
+            )
+            # case Default.YAML_TYPE_ENUMERATION:
+            enum_key, enum_tags = Query.enum_key_tags(
+                self.tag_counter, self.specification
+            )
+            self.ged_ext_tags.append(
+                [
+                    str(self.tag_counter),
+                    tag,
+                    yaml_file,
+                    yaml_type,
+                    payload,
+                    supers,
+                    required,
+                    single,
+                    permitted,
+                    enum_key,
+                    enum_tags,
+                    yaml_dict,
+                ]
+            )
+        return ExtensionAttributes(
+            key=self.tag_counter,
+            tag=tag,
+            yaml_file=yaml_file,
+            yaml_type=yaml_type,
+            required=required,
+            single=single,
+            permitted=permitted,
+            enum_key=enum_key,
+            enum_tags=enum_tags,
+            payload=payload,
+            supers=supers,
+        )
 
     def stage(
         self,
@@ -405,11 +520,15 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
         def get_subs_specs(key: str) -> list[StructureSpecs]:
             """Associate the permitted substructure classes with the tags in the ged file."""
             subs: list[StructureSpecs] = []
-            permitted_keys: list[str] = Query.permitted_keys(key, self.specs.Structure)
+            permitted_keys: list[str] = Query.permitted_keys(
+                key, self.specs.Structure
+            )
             for sub in permitted_keys:
                 subs.append(
                     StructureSpecs(
-                        tag=self.specs.Structure[sub][Default.YAML_STANDARD_TAG],
+                        tag=self.specs.Structure[sub][
+                            Default.YAML_STANDARD_TAG
+                        ],
                         key=sub,
                         class_name=Names.classname(sub),
                     )
@@ -536,13 +655,19 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
 # Add any extensions that were registered in the header record.
 """
             lines: str = Default.EMPTY
-            #split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
+            # split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
             for line in self.ged_ext_tags:
                 # if line[0:6] == '0 TAG ':
                 #     words: list[str] = line[6:].split(Default.SPACE, 1)
                 lines = ''.join(
                     [
                         lines,
+                        line[1].lower(),
+                        Default.UNDERLINE,
+                        str(line[0]),
+                        Default.SPACE,
+                        Default.EQUAL,
+                        Default.SPACE,
                         Default.CODE_GENEALOGY,
                         Default.PERIOD,
                         'add_tag',
@@ -685,15 +810,6 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
         if filename[-Number.GEDLEN :] == String.GED:
             filename_type = String.GED
         return filename_type
-
-    # def read_ged(self) -> None:
-    #     """Read and validate the GEDCOM file."""
-    #     # try:
-    #     with Path.open(
-    #         Path(self.filename), encoding='utf-8', mode=String.READ
-    #     ) as infile:
-    #         data: Any = infile.readlines()
-    #         self.ged_data.append(Tagger.clean_input(data))
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -1201,6 +1317,66 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
             initial,
         )
         return SubmitterXref(submitter_xref)
+    
+    def extension_xref(
+        self, xref_name: str = '', initial: bool = False
+    ) -> SubmitterXref:
+        """
+        Create an ExtensionXref identifier from a unique string according to the
+        GEDCOM standard.
+
+        Args:
+            xref_name (str, optional): A name for the identifier. Defaults to ''.
+            initial (bool, optional): Whether to use the name as an initial
+                value with an integer following. Defaults to False.
+
+        Returns:
+            ExtensionXref: A unique identifier string with type ExtensionXref.
+
+        Examples:
+            The first example generates identifier for a shared note record.
+            >>> from genedata.build import Genealogy
+            >>> a = Genealogy()
+            >>> id = a.extension_xref()
+            >>> print(id)
+            @1@
+
+            The second example shows the output when the identifier has a name.
+            >>> id2 = a.extension_xref('sub')
+            >>> print(id2)
+            @SUB@
+
+            The third example shows the output when the name is to be used as the initial
+            part of the identifier.
+            >>> id3 = a.exension_xref('SUB', True)
+            >>> print(id3)
+            @SUB2@
+
+            The final example shows what happens if we try to assign two different
+            records with the same name.  We already have @SUB@ so we will try
+            creating that name again.
+            >>> a.extension_xref('sub')
+            Traceback (most recent call last):
+            ValueError: The identifier "@SUB@" built from "sub" already exists.
+
+
+        See Also:
+            - `family_xref`: create a typed identifier for a family record.
+            - `individual_xref`: create a typed identifier for an individual record.
+            - `multimedia_xref`: create a typed identifier for a multimedia record.
+            - `repository_xref`: create a typed identifier for a repository record.
+            - `shared_note_xref`: create a typed identifier for a shared note record.
+            - `source_xref`: create a typed identifier for a source record.
+
+        Reference:
+            [GEDCOM Repository Record](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#SUBMITTER_RECORD)
+        """
+        extension_xref = self._counter(
+            self.extension_xreflist,
+            xref_name,
+            initial,
+        )
+        return ExtensionXref(extension_xref)
 
     def _gather(self, records: list[Any], xref_list: list[str]) -> str:
         destination = ''

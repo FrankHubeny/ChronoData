@@ -215,6 +215,7 @@ class Msg:
     )
     VALUE_NOT_Y_OR_NULL: str = 'The value "{0}" is neither "Y" nor the empty string for structure "{1}".'
     XREF_EXISTS: str = 'The identifier "{0}" built from "{1}" already exists.'
+    YAML_FILE_HAS_BEEN_USED: str = 'The yaml file "{0}" has already been used for another extension.'
     YAML_NOT_YAML_FILE: str = (
         'The file "{0}" does not contain the YAML directive "{1}".'
     )
