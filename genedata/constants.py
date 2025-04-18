@@ -60,6 +60,14 @@ class Default:
     CARDINALITY_OPTIONAL: str = '{0:'
     CARDINALITY_REQUIRED: str = '{1:'
     CARDINALITY_SINGULAR: str = ':1}'
+    CLASS_EXT: str = 'RecordExt'
+    CLASS_FAM: str = 'RecordFam'
+    CLASS_INDI: str = 'RecordIndi'
+    CLASS_OBJE: str = 'RecordObje'
+    CLASS_REPO: str = 'RecordRepo'
+    CLASS_SNOTE: str = 'RecordSnote'
+    CLASS_SOUR: str = 'RecordSour'
+    CLASS_SUBM: str = 'RecordSubm'
     CODE_CLASS: str = 'gc'
     CODE_GENEALOGY: str = 'g'
     CODE_SUBS: str = 'subs'
@@ -83,6 +91,7 @@ class Default:
     GED_EXT_SCHMA: str = f'{EOL}1 SCHMA{EOL}'
     GED_EXT_TAG: str = '2 TAG '
     GED_HEADER: str = f'0 HEAD{EOL}'
+    GED_REPLACE_THIS: str = ' REPLACETHISWITHANENDOFLINE '
     GED_TRAILER: str = f'{EOL}0 TRLR'
     GED_VERSIONS: frozenset[str] = frozenset(
         [

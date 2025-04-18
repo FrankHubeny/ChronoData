@@ -1197,7 +1197,6 @@ class Names:
         key: str,
         tag: str,
         specs: dict[str, dict[str, Any]],
-        extension: dict[str, dict[str, Any]] | None = None,
     ) -> tuple[str, str]:
         """Find the key and class name given the superstructure's key and the class's tag.
 
@@ -1231,8 +1230,6 @@ class Names:
             key: The key of the tag's superstructure.
             tag: The tag of the structure's key we are looking for.
             specs: The specification dictionary to search through.
-            extension: An optional dictionary of structures which are extensions
-                to the structure dictionary.
         """
         if key in specs[Default.YAML_TYPE_STRUCTURE]:
             for uri in specs[Default.YAML_TYPE_STRUCTURE][key][
@@ -1241,22 +1238,6 @@ class Names:
                 sub_key = Names.keyname(uri)
                 if (
                     specs[Default.YAML_TYPE_STRUCTURE][sub_key][
-                        Default.YAML_STANDARD_TAG
-                    ]
-                    == tag
-                ):
-                    return sub_key, Names.classname(sub_key)
-        if extension is not None and key in extension:
-            for uri in extension[key][Default.YAML_SUBSTRUCTURES]:
-                sub_key = Names.keyname(uri)
-                if (
-                    sub_key in extension
-                    and tag in extension[sub_key][Default.YAML_EXTENSION_TAGS]
-                ):
-                    return sub_key, Names.classname(sub_key)
-                if (
-                    sub_key in specs[Default.YAML_TYPE_STRUCTURE]
-                    and specs[Default.YAML_TYPE_STRUCTURE][sub_key][
                         Default.YAML_STANDARD_TAG
                     ]
                     == tag
@@ -1294,6 +1275,60 @@ class Names:
         if Default.QUOTE_SINGLE in value:
             return f'"{value}"'
         return f"'{value}'"
+    
+    def extension_name(tag: str, url: str) -> str:
+        """Construct a variable name for an extension."""
+        return ''.join(
+            [
+                tag.lower(),
+                Default.UNDERLINE,
+                Names.stem(url),
+            ]
+        )
+    
+    def top_class(tag: str) -> str:
+        """For a top level tag return the class name or empty."""
+        match tag:
+            case Default.TAG_EXT:
+                return Default.CLASS_EXT
+            case Default.TAG_FAM:
+                return Default.CLASS_FAM
+            case Default.TAG_INDI:
+                return Default.CLASS_INDI
+            case Default.TAG_OBJE:
+                return Default.CLASS_OBJE
+            case Default.TAG_REPO:
+                return Default.CLASS_REPO
+            case Default.TAG_SNOTE:
+                return Default.CLASS_SNOTE
+            case Default.TAG_SOUR:
+                return Default.CLASS_SOUR
+            case Default.TAG_SUBM:
+                return Default.CLASS_SUBM
+            case _:
+                return Default.EMPTY
+    
+    def xref_name(tag: str, xref: str) -> str:
+        """Construct a variable name for a cross reference identifier."""
+        return ''.join(
+            [
+                tag.lower(),
+                Default.UNDERLINE,
+                xref.replace(Default.ATSIGN, Default.EMPTY),
+                Default.UNDERLINE,
+                'xref',
+            ]
+        )
+    
+    def record_name(tag: str, xref: str) -> str:
+        """Construct a variable name for a cross reference identifier."""
+        return ''.join(
+            [
+                tag.lower(),
+                Default.UNDERLINE,
+                xref.replace(Default.ATSIGN, Default.EMPTY),
+            ]
+        )
 
 
 class Query:

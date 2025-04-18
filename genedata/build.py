@@ -20,16 +20,16 @@ import logging
 import re
 from typing import Any, NamedTuple
 
-# from genedata.classes70 import (
-#     Head,
-#     RecordFam,
-#     RecordIndi,
-#     RecordObje,
-#     RecordRepo,
-#     RecordSnote,
-#     RecordSour,
-#     RecordSubm,
-# )
+from genedata.classes70 import (
+    Head,
+    # RecordFam,
+    # RecordIndi,
+    # RecordObje,
+    # RecordRepo,
+    # RecordSnote,
+    # RecordSour,
+    # RecordSubm,
+)
 from genedata.constants import (
     Default,
     Number,
@@ -55,6 +55,13 @@ class StructureSpecs(NamedTuple):
     tag: str
     key: str
     class_name: str
+
+
+class Line(NamedTuple):
+    level: int = 0
+    xref: str = Default.EMPTY
+    tag: str = Default.EMPTY
+    payload: str = Default.EMPTY
 
 
 class Genealogy:
@@ -198,15 +205,15 @@ class Genealogy:
 
     def view_extensions(self) -> tuple[list[str], list[list[str]], list[str]]:
         """Display a list of available extensions to use or be aware of.
-        
+
         There are three lists returned.  The first list corresponds to the
         pandas DataFrame `data` argument.  The second corresponds to the `index` argument.
-        The third corresponds to the `columns` argument. 
+        The third corresponds to the `columns` argument.
 
-        The final value is the full yaml_dictionary read by the `add_tag` method.  
-        This may be worth checking if something doesn't look right.  
-        Since this final value will likely take up many lines, one can simply type 
-        the variable assigned to this first returned list in a Jupyter notebook 
+        The final value is the full yaml_dictionary read by the `add_tag` method.
+        This may be worth checking if something doesn't look right.
+        Since this final value will likely take up many lines, one can simply type
+        the variable assigned to this first returned list in a Jupyter notebook
         to see all of the values.
         """
         keys: list[str] = []
@@ -270,7 +277,7 @@ class Genealogy:
 
             If one tries to use the same file again, an error is produced.
             >>> yourtag = g.add_tag('_YOURTAG', 'tests/data/good_calendar.yaml')
-            Traceback (most recent call last)
+            Traceback (most recent call last):
             ValueError: The yaml file "tests/data/good_calendar.yaml" has already been used for another extension.
 
         Args:
@@ -311,19 +318,11 @@ class Genealogy:
             self.specification[yaml_type].update({self.tag_counter: yaml_dict})
             # match yaml_type:
             #     case Default.YAML_TYPE_STRUCTURE:
-            required = Query.required(
-                self.tag_counter, self.specification
-            )
-            single = Query.singular(
-                self.tag_counter, self.specification
-            )
-            permitted = Query.permitted(
-                self.tag_counter, self.specification
-            )
+            required = Query.required(self.tag_counter, self.specification)
+            single = Query.singular(self.tag_counter, self.specification)
+            permitted = Query.permitted(self.tag_counter, self.specification)
             payload = Query.payload(self.tag_counter, self.specification)
-            supers = Query.supers_count(
-                self.tag_counter, self.specification
-            )
+            supers = Query.supers_count(self.tag_counter, self.specification)
             # case Default.YAML_TYPE_ENUMERATION:
             enum_key, enum_tags = Query.enum_key_tags(
                 self.tag_counter, self.specification
@@ -426,13 +425,6 @@ class Genealogy:
         """Save the ged file constructed by this instance of the Genealogy class."""
         Util.write_ged(self.show_ged(), file_name)
 
-    # def load_ged(self) -> None:
-    #     """Load a ged file."""
-    #     # self.filename = file_name
-    #     # if self.ged_file != Default.EMPTY:
-    #     #     raise ValueError(Msg.GED_FILE_ALREADY_LOADED)
-    #     self.ged_file = Util.read(self.filename)
-
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
 
@@ -440,6 +432,94 @@ class Genealogy:
             """Split a ged string on substructures at the specified level."""
             marker: str = f'{Default.EOL}{level}{Default.SPACE}'
             return ged.split(marker)
+
+        def get_level(line: str) -> int:
+            line_list: list[str] = line.split(Default.SPACE, 1)
+            return int(line_list[0])
+
+        def get_tag(line: str) -> str:
+            """Return the tag from the line."""
+            level: int = get_level(line)
+            line_list: list[str]
+            if level == 0:
+                line_list = line.split(Default.SPACE, 3)
+                return line_list[2]
+            line_list = line.split(Default.SPACE, 2)
+            return line_list[1]
+
+        def get_value(line: str) -> str:
+            level: int = get_level(line)
+            line_list: list[str]
+            if level == 0:
+                line_list = line.split(Default.SPACE, 3)
+                return remove_at(line_list[3])
+            line_list = line.split(Default.SPACE, 2)
+            return remove_at(line_list[2])
+
+        def parse(line: str) -> Line:
+            """Parse a GEDCOM line into level, xref, tag and payload."""
+
+            # Initialize the local variables for type checking.
+            line_list: list[str] = []
+            level: int = 0
+            xref: str = Default.EMPTY
+            tag: str = Default.EMPTY
+            payload: str = Default.EMPTY
+
+            # Get the level as an integer.
+            line_list = line.split(Default.SPACE, 2)
+            level = int(line_list[0])
+
+            # If the level is greater than 0 there is only a level, tag and payload.
+            # We only need to split on space twice to get these if they are all there.
+            # Remove the extra `@` on the payload.
+            if level > 0:
+                tag = line_list[1]
+                if len(line_list) > 2:
+                    payload = Names.quote_text(remove_at(line_list[2]))
+
+            # If the level equals 0, this is a record with also an xref value.
+            # Resplit on space three times and assign values.  Remove the extra `@`
+            # on the payload.
+            else:
+                line_list = line.split(Default.SPACE, 3)
+                if line_list[1][0:1] == Default.ATSIGN:
+                    xref = line_list[1]
+                    tag = line_list[2]
+                    if len(line_list) > 3:
+                        payload = Names.quote_text(remove_at(line_list[3]))
+                else:
+                    tag = line_list[1]
+                    if len(line_list) > 2:
+                        payload = Names.quote_text(remove_at(line_list[2]))
+
+            # Now return the values as a NamedTuple.
+            return Line(level, xref, tag, payload)
+
+        def process_cont(ged: str) -> tuple[str, str]:
+            more_payload: str = Default.EMPTY
+            first, _, last = ged.partition(Default.EOL)
+            line: Line = parse(first)
+            while line.tag == Default.CONT:
+                ged = last
+                more_payload = ''.join(
+                    [
+                        more_payload,
+                        Default.EOL,
+                        line.payload,
+                    ]
+                )
+                first, _, last = ged.partition(Default.EOL)
+                line = parse(first)
+            return more_payload, ged
+
+        def remove_at(value: str) -> str:
+            """Remove the first `@` which escapes the second `@`
+            at the beginning of a string value.
+            """
+            if value[0:2] == '@@':
+                return value[1:]
+            return value
 
         def split_ged() -> None:
             """Validate the ged string then split it into records without the trailer."""
@@ -465,9 +545,14 @@ class Genealogy:
             _, _, ged_temp = ged.partition(Default.HEADER)
             ged = ''.join([Default.HEADER, ged_temp])
 
+            # Remove extra @.
+            # ged = re.sub(' NOTE @@', ' NOTE @', ged)
+            # ged = re.sub(' PHRASE @@', 'PHRASE @', ged)
+            # ged = re.sub(' SNOTE @@', ' SNOTE @', ged)
+
             # Remove CONT tags.
-            ged = re.sub('\n[0-9] CONT @', Default.EOL, ged)
-            ged = re.sub('\n[0-9] CONT ', Default.EOL, ged)
+            # ged = re.sub('\n[0-9] CONT @', Default.EOL, ged)
+            # ged = re.sub('\n[0-9] CONT ', Default.EOL, ged)
 
             # Split the rest into a list of ged records.
             self.ged_file_records = split_subs(ged, 0)
@@ -504,7 +589,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
                 ]
             )
 
-        def start_value(class_name: str, level: int = 0) -> str:
+        def start_value(class_name: str) -> str:
             return ''.join(
                 [
                     Default.CODE_CLASS,
@@ -521,14 +606,14 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
             """Associate the permitted substructure classes with the tags in the ged file."""
             subs: list[StructureSpecs] = []
             permitted_keys: list[str] = Query.permitted_keys(
-                key, self.specs.Structure
+                key, self.specification
             )
             for sub in permitted_keys:
                 subs.append(
                     StructureSpecs(
-                        tag=self.specs.Structure[sub][
-                            Default.YAML_STANDARD_TAG
-                        ],
+                        tag=self.specification[Default.YAML_TYPE_STRUCTURE][
+                            sub
+                        ][Default.YAML_STANDARD_TAG],
                         key=sub,
                         class_name=Names.classname(sub),
                     )
@@ -548,7 +633,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
                 return ''.join(
                     [
                         lines,
-                        start_value(class_name, level),
+                        start_value(class_name),
                         value,
                         format_subs(
                             ged_structures, key_name, level, value=value
@@ -566,7 +651,9 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
         def format_value(key: str, words: list[str]) -> str:
             if len(words) == 1:
                 return Default.EMPTY
-            payload: str = self.specs.Structure[key][Default.YAML_PAYLOAD]
+            payload: str = self.specification[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_PAYLOAD
+            ]
             match payload:
                 case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                     return f'{words[1]}'
@@ -584,7 +671,7 @@ header = {Default.CODE_CLASS}{Default.PERIOD}{Names.classname(value_pieces[1])}{
                     return f'source_{format_xref(words[1])}_xref'
                 case '@<https://gedcom.io/terms/v7/record-OBJE>@':
                     return f'submitter_{format_xref(words[1])}_xref'
-            return Names.quote_text(words[1])
+            return Names.quote_text(remove_at(words[1]))
 
         def format_subs(
             ged: list[str],
@@ -646,40 +733,65 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
 
         def initialize() -> str:
             """Construct the section of the code where the Genealogy class is instantiated."""
-            return f"""# Instantiate a Genealogy class with the name of the ged file.
-{Default.CODE_GENEALOGY} = Genealogy(version='{self.version}')
+            return f"""# Instantiate a Genealogy class.
+{Default.CODE_GENEALOGY} = Genealogy()
 """
 
         def extensions() -> str:
+            """Construct the extension assignments."""
+
+            # If there are any extensions, this will introduce them in the generated code.
             intro: str = """
 # Add any extensions that were registered in the header record.
 """
+            # Initialize the return value.
             lines: str = Default.EMPTY
-            # split_lines: list[str] = self.ged_file_records[0].split(Default.EOL)
-            for line in self.ged_ext_tags:
-                # if line[0:6] == '0 TAG ':
-                #     words: list[str] = line[6:].split(Default.SPACE, 1)
-                lines = ''.join(
-                    [
-                        lines,
-                        line[1].lower(),
-                        Default.UNDERLINE,
-                        str(line[0]),
-                        Default.SPACE,
-                        Default.EQUAL,
-                        Default.SPACE,
-                        Default.CODE_GENEALOGY,
-                        Default.PERIOD,
-                        'add_tag',
-                        Default.PARENS_LEFT,
-                        line[1],
-                        Default.COMMA,
-                        Default.SPACE,
-                        line[2],
-                        Default.PARENS_RIGHT,
-                        Default.EOL,
-                    ]
-                )
+
+            # The SCHMA take is the superstructure for the desired TAG lines.
+            # Without this being present, return the empty string.
+            if Default.GED_EXT_SCHMA in self.ged_file_records[0]:
+                # Initialize and type the local variables used.
+                tag_data: str = Default.EMPTY
+                tag_data_words: list[str] = []
+                tag_list: list[str] = []
+                ext_name: str = Default.EMPTY
+
+                # Split the string based on the TAG identifier which begins each TAG line.
+                tag_list = self.ged_file_records[0].split('0 TAG ')
+
+                # Ignoring the first item in the list, obtain tag information from the others.
+                for tag in tag_list[1:]:
+                    # The end of line was left in the first split to identify the end of the TAG line.
+                    tag_data = tag.split(Default.EOL, 1)
+
+                    # There is only one space in the string separating the tag from the url.
+                    tag_data_words = tag_data.split(Default.SPACE, 1)
+
+                    # Construct the variable name that will be used in the code from these two items.
+                    ext_name = Names.extension_name(
+                        tag_data_words[0], tag_data_words[1]
+                    )
+
+                    # Construct the code line for the external tag.
+                    lines = ''.join(
+                        [
+                            lines,
+                            ext_name,
+                            Default.EQUAL,
+                            Default.CODE_GENEALOGY,
+                            Default.PERIOD,
+                            'add_tag',
+                            Default.PARENS_LEFT,
+                            tag_data_words[0],
+                            Default.COMMA,
+                            Default.SPACE,
+                            tag_data_words[1],
+                            Default.PARENS_RIGHT,
+                            Default.EOL,
+                        ]
+                    )
+
+            # If there were any tags, then add in the intro, otherwise return the empty string.
             if lines != Default.EMPTY:
                 lines = ''.join([intro, lines])
             return lines
@@ -689,44 +801,166 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
             lines: str = """
 # Instantiate the cross reference identifiers.
 """
-            for record in self.ged_file_records:
-                # Remove the first lines prior to the first substructure starting with 1.
-                record_subs: list[str] = split_subs(record, 1)
+            # For all records except the first which is the header record.
+            for record in self.ged_file_records[1:]:
+                # Partition on the first end of line character keeping the first and last parts.
+                first, _, last = record.partition(Default.EOL)
 
-                # Split the first two strings from the first split.
-                line_words: list[str] = record_subs[0].split(Default.SPACE, 2)
+                # Split the first part into two or three strings.
+                words: list[str] = first.split(Default.SPACE, 2)
 
-                # Avoid the header record which still has a '0' string.
-                if line_words[0] != '0':
-                    name: str = xref_name(line_words[0])
-                    tag: str = line_words[1].lower()
-                    call: str = self.record_dict[line_words[1]]['call']
-                    text: str = Default.EMPTY
-                    if tag == Default.SNOTE_RECORD_TYPE:
-                        text = Names.quote_text(line_words[2])
-                        text = f', {text}'
-                    lines = ''.join(
+                # Get the name for the cross reference variable.
+                name: str = Names.xref_name(words[1], words[0])
+
+                # Get the name for the method to call to create that variable.
+                call: str = self.record_dict[words[1]]['call']
+
+                # If the record has a payload, such as SNOTE has, include it.
+                payload: str = Default.EMPTY
+                add_comma: str = Default.EMPTY
+
+                # A payload would be text in the third string.
+                if len(words) > 2:
+                    payload = remove_at(words[2])
+                    add_comma = ', '
+
+                    # This text might be continued or an indefinite number of lines.
+                    # more_payload, _ = process_cont(last)
+                    # payload = ''.join(
+                    #         [
+                    #             payload,
+                    #             Default.EOL,
+                    #             remove_at(more_payload)
+                    #         ]
+                    #     )
+                    while last[0:7] == '1 CONT ':
+                        first, _, last = last.partition(Default.EOL)
+                        _, _, more_payload = first.partition('1 CONT ')
+                        payload = ''.join(
+                            [payload, Default.EOL, remove_at(more_payload)]
+                        )
+
+                # Add each to the code lines to be generated.
+                lines = ''.join(
+                    [
+                        lines,
+                        name,
+                        Default.EQUAL,
+                        Default.CODE_GENEALOGY,
+                        Default.PERIOD,
+                        call,
+                        Default.PARENS_LEFT,
+                        Default.QUOTE_SINGLE,
+                        words[0].replace(Default.ATSIGN, Default.EMPTY),
+                        Default.QUOTE_SINGLE,
+                        add_comma,
+                        Names.quote_text(payload),
+                        Default.PARENS_RIGHT,
+                        Default.EOL,
+                    ]
+                )
+            return lines
+
+        def record_loop() -> str:
+            """Construct the code for a record."""
+
+            # Initialize and type the local variables.
+            line: str = """
+# Instantiate the records holding the GED data.
+"""
+            parts: Line = Line()
+            recordname: str = Default.EMPTY
+            xrefname: str = Default.EMPTY
+            classname: str = Default.EMPTY
+            level_key: dict[int:str] = {}
+            previous_level: int = 0
+            subs_list: list[str] = []
+            subs_lines: list[Line] = []
+
+            # Loop through all the records excluding the header record at index 0.
+            for record in self.ged_file_records[1:]:
+                # Partition on end of life to get the first line of the record
+                # which may be all there is.
+                top, _, bottom = record.partition(Default.EOL)
+
+                # Parse the first line into its components and format the names.
+                parts = parse(''.join(['0 ', top]))
+                recordname = Names.record_name(parts.tag, parts.xref)
+                xrefname = Names.xref_name(parts.tag, parts.xref)
+                classname = Names.top_class(parts.tag)
+                level_key.update({0: Names.keyname(classname)})
+
+                # Added the parsed contents to the output line.
+                line = ''.join(
+                    [
+                        line,
+                        recordname,
+                        Default.EQUAL,
+                        Default.CODE_CLASS,
+                        Default.PERIOD,
+                        classname,
+                        Default.PARENS_LEFT,
+                        xrefname,
+                    ]
+                )
+
+                # If there is more, then prepare for substructures.
+                if bottom != Default.EMPTY:
+                    line = ''.join(
                         [
-                            lines,
-                            tag,
-                            Default.UNDERLINE,
-                            name,
-                            Default.UNDERLINE,
-                            Default.XREF,
-                            Default.EQUAL,
-                            Default.CODE_GENEALOGY,
-                            Default.PERIOD,
-                            call,
-                            Default.PARENS_LEFT,
-                            Default.QUOTE_SINGLE,
-                            name,
-                            Default.QUOTE_SINGLE,
-                            text,
-                            Default.PARENS_RIGHT,
-                            Default.EOL,
+                            line,
+                            Default.COMMA,
+                            Default.SPACE,
+                            Default.BRACKET_LEFT,
                         ]
                     )
-            return lines
+
+                    # Save the level.
+                    previous_level = parts.level
+
+                    # Split the remaining part of the record on the end of line and then
+                    # parse the contents of each line.
+                    bottom = re.sub(
+                        '\n\\d CONT @@', Default.GED_REPLACE_THIS, bottom
+                    )
+                    bottom = re.sub(
+                        '\n\\d CONT ', Default.GED_REPLACE_THIS, bottom
+                    )
+                    subs_list = bottom.split(Default.EOL)
+                    subs_lines = [
+                        parse(item)
+                        for item in subs_list
+                        if item != Default.EMPTY
+                    ]
+                    for subs in subs_lines:
+                        if subs.level > previous_level:
+                            keyname, classname = (
+                                Names.key_tag_to_subkey_class(
+                                    level_key[subs.level - 1],
+                                    subs.tag,
+                                    self.specification,
+                                ),
+                            )
+                            line = ''.join(
+                                [
+                                    line,
+                                    Default.PARENS_RIGHT,
+                                    Default.SPACE,
+                                    Default.BRACKET_LEFT,
+                                    Default.EOL,
+                                    subs.level * Default.INDENT,
+                                    classname,
+                                    Default.PARENS_LEFT,
+                                    subs.payload,
+                                ]
+                            )
+
+                    # Loop through each parsed line adding to the output line the generated code.
+
+                # End the record because there are no substructures.
+                else:
+                    line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
+            return line.replace(Default.GED_REPLACE_THIS, Default.EOL)
 
         def records() -> str:
             lines: str = """
@@ -772,8 +1006,8 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
                 record_lines: list[str] = record.split(Default.EOL)
                 line_words: list[str] = record_lines[0].split(Default.SPACE)
                 if line_words[0] != '0':
-                    name: str = xref_name(line_words[0])
-                    tag: str = line_words[1].lower()
+                    name: str = Names.record_name(line_words[1], line_words[0])
+                    # tag: str = line_words[1].lower()
                     lines = ''.join(
                         [
                             lines,
@@ -781,8 +1015,8 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
                             Default.PERIOD,
                             Default.STAGE,
                             Default.PARENS_LEFT,
-                            tag,
-                            Default.UNDERLINE,
+                            # tag,
+                            # Default.UNDERLINE,
                             name,
                             Default.PARENS_RIGHT,
                             Default.EOL,
@@ -798,7 +1032,7 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
                 xrefs(),
                 extensions(),
                 header(),
-                records(),
+                record_loop(),
                 stage(),
             ]
         )
@@ -1317,7 +1551,7 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
             initial,
         )
         return SubmitterXref(submitter_xref)
-    
+
     def extension_xref(
         self, xref_name: str = '', initial: bool = False
     ) -> SubmitterXref:
@@ -1348,7 +1582,7 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
 
             The third example shows the output when the name is to be used as the initial
             part of the identifier.
-            >>> id3 = a.exension_xref('SUB', True)
+            >>> id3 = a.extension_xref('SUB', True)
             >>> print(id3)
             @SUB2@
 
@@ -1751,16 +1985,16 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS}
         """
         self.ged_submitter = self._gather(records, self.submitter_xreflist)
 
-    # def header(self, ged_header: Head) -> None:
-    #     """Collect and store the header record.
+    def header(self, ged_header: Head) -> None:
+        """Collect and store the header record.
 
-    #     Args:
-    #         ged_header: is the text of the header record.
+        Args:
+            ged_header: is the text of the header record.
 
-    #     References:
-    #         [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
-    #     """
-    #     self.ged_header = ged_header.ged()
+        References:
+            [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
+        """
+        self.ged_header = ged_header.ged()
 
     def query_record_counts(
         self,
