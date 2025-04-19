@@ -1231,6 +1231,7 @@ class Names:
             tag: The tag of the structure's key we are looking for.
             specs: The specification dictionary to search through.
         """
+        logging.info(f'key-tag-to-subkey_class: {key}, {tag}')
         if key in specs[Default.YAML_TYPE_STRUCTURE]:
             for uri in specs[Default.YAML_TYPE_STRUCTURE][key][
                 Default.YAML_SUBSTRUCTURES
@@ -1268,14 +1269,17 @@ class Names:
         Args:
             value: The text to be quoted.
         """
-        if Default.EOL in value:
-            if Default.QUOTE_SINGLE in value:
-                return f'"""{value}"""'
-            return f"'''{value}'''"
-        if Default.QUOTE_SINGLE in value:
-            return f'"{value}"'
-        return f"'{value}'"
-    
+        value_with_eol: str = value.replace(
+            Default.GED_REPLACE_THIS, Default.EOL
+        )
+        if Default.EOL in value_with_eol:
+            if Default.QUOTE_SINGLE in value_with_eol:
+                return f'"""{value_with_eol}"""'
+            return f"'''{value_with_eol}'''"
+        if Default.QUOTE_SINGLE in value_with_eol:
+            return f'"{value_with_eol}"'
+        return f"'{value_with_eol}'"
+
     def extension_name(tag: str, url: str) -> str:
         """Construct a variable name for an extension."""
         return ''.join(
@@ -1285,7 +1289,7 @@ class Names:
                 Names.stem(url),
             ]
         )
-    
+
     def top_class(tag: str) -> str:
         """For a top level tag return the class name or empty."""
         match tag:
@@ -1306,8 +1310,8 @@ class Names:
             case Default.TAG_SUBM:
                 return Default.CLASS_SUBM
             case _:
-                return Default.EMPTY
-    
+                return 'Head'
+
     def xref_name(tag: str, xref: str) -> str:
         """Construct a variable name for a cross reference identifier."""
         return ''.join(
@@ -1319,9 +1323,11 @@ class Names:
                 'xref',
             ]
         )
-    
+
     def record_name(tag: str, xref: str) -> str:
         """Construct a variable name for a cross reference identifier."""
+        if tag == 'HEAD':
+            return 'header'
         return ''.join(
             [
                 tag.lower(),
@@ -1335,7 +1341,9 @@ class Query:
     """Some potentially useful queries of the specification."""
 
     @staticmethod
-    def enum_key_tags(key: str, specs: dict[str, dict[str, Any]]) -> tuple[str, list[str]]:
+    def enum_key_tags(
+        key: str, specs: dict[str, dict[str, Any]]
+    ) -> tuple[str, list[str]]:
         structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
         enumeration_set: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_ENUMERATION_SET
@@ -1396,7 +1404,8 @@ class Query:
         if (
             key in specs[Default.YAML_TYPE_STRUCTURE]
             and Default.YAML_PAYLOAD in specs[Default.YAML_TYPE_STRUCTURE][key]
-            and specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_PAYLOAD] is not None
+            and specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_PAYLOAD]
+            is not None
         ):
             result = specs[Default.YAML_TYPE_STRUCTURE][key][
                 Default.YAML_PAYLOAD
@@ -1500,18 +1509,26 @@ class Query:
                 if Default.CARDINALITY_SINGULAR in cardinality:
                     classes.append(Names.classname(uri))
         return classes
-    
+
     @staticmethod
     def structure_tag(key: str, specs: dict[str, dict[str, Any]]) -> str:
         tag: str = Default.EMPTY
         if key in specs[Default.YAML_TYPE_STRUCTURE]:
-            return specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_STANDARD_TAG]
+            return specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_STANDARD_TAG
+            ]
         if key in specs[Default.YAML_TYPE_ENUMERATION]:
-            return specs[Default.YAML_TYPE_ENUMERATION][key][Default.YAML_STANDARD_TAG]
+            return specs[Default.YAML_TYPE_ENUMERATION][key][
+                Default.YAML_STANDARD_TAG
+            ]
         if key in specs[Default.YAML_TYPE_CALENDAR]:
-            return specs[Default.YAML_TYPE_CALENDAR][key][Default.YAML_STANDARD_TAG]
+            return specs[Default.YAML_TYPE_CALENDAR][key][
+                Default.YAML_STANDARD_TAG
+            ]
         if key in specs[Default.YAML_TYPE_MONTH]:
-            return specs[Default.YAML_TYPE_MONTH][key][Default.YAML_STANDARD_TAG]
+            return specs[Default.YAML_TYPE_MONTH][key][
+                Default.YAML_STANDARD_TAG
+            ]
         return tag
 
     @staticmethod
