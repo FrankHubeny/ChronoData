@@ -581,6 +581,114 @@ class Genealogy:
             # Split the rest into a list of ged records.
             self.ged_file_records = split_subs(ged, 0)
 
+        def record_subs(bottom: str) -> str:
+            """Convert the GEDCOM lines after the first lines of the record to code."""
+
+            # Initial local variables with typing.
+            line: str = Default.EMPTY
+            current_level: int = 0
+            next_level: int = 1
+            endline: str = Default.EMPTY
+            subs_list: list[str] = []
+            next_level_list: list[int] = []
+            parsed_subs: list[Line] = []
+
+            # Split the remaining part of the record string into a list breaking on end of lines.
+            subs_list = bottom.split(Default.EOL)
+
+            # Loop through the list parsing each line keeping a separate list of the levels.
+            for sub in subs_list:
+                parsed_item = parse(sub)
+                next_level_list.append(parsed_item.level)
+                parsed_subs.append(parsed_item)
+            next_level_list.append(0)
+
+            # Loop through the parsed list formatting the code output.
+            for i in range(len(parsed_subs)):
+
+                # Provide variables for current and next level for clarity.
+                current_level = parsed_subs[i].level
+                next_level = next_level_list[i + 1]
+
+                # Paths to format the end of a line.
+                # If there is no payload.
+                if parsed_subs[i].payload == Default.EMPTY:
+
+                    # If there are substructures.
+                    if next_level > current_level:
+                        endline = f'{Default.BRACKET_LEFT}{Default.EOL}'
+
+                    # if substructures have ended.
+                    elif next_level < current_level:
+                        endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
+
+                    # If there are no more substructures.
+                    elif next_level == 0:
+                        endline = ''.join(
+                            [
+                                Default.PARENS_RIGHT,
+                                Default.COMMA,
+                                Default.EOL,
+                                Default.BRACKET_RIGHT,
+                                Default.PARENS_RIGHT,
+                            ]
+                        )
+
+                    # If there are more substructures.
+                    else:
+                        endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
+
+                # If there is a payload and there are substructures.
+                elif next_level > current_level:
+                    endline = f'{Default.COMMA}{Default.SPACE}{Default.BRACE_LEFT}{Default.EOL}'
+
+                # If there is a payload and substructures have ended.
+                elif next_level < current_level and next_level > 0:
+                    endline = ''.join(
+                        [
+                            Default.PARENS_RIGHT,
+                            Default.COMMA,
+                            Default.EOL,
+                            next_level * Default.INDENT,
+                            Default.BRACKET_RIGHT,
+                            Default.PARENS_RIGHT,
+                            Default.COMMA,
+                            Default.EOL,
+                        ]
+                    )
+
+                # If there are no more substructures.
+                elif next_level == 0:
+                    endline = ''.join(
+                        [
+                            Default.PARENS_RIGHT,
+                            Default.COMMA,
+                            Default.EOL,
+                            Default.BRACKET_RIGHT,
+                            Default.PARENS_RIGHT,
+                        ]
+                    )
+
+                # If there is a payload and there are more substructures.
+                else:
+                    endline = (
+                        f'{Default.PARENS_RIGHT}{Default.COMMA}{Default.EOL}'
+                    )
+
+                # Add to line the additional code details.
+                line = ''.join(
+                    [
+                        line,
+                        current_level * Default.INDENT,
+                        Default.CODE_CLASS,
+                        parsed_subs[i].classname,
+                        Default.PARENS_LEFT,
+                        parsed_subs[i].payload,
+                        endline,
+                    ]
+                )
+            return ''.join([line, Default.EOL])
+
         def header() -> str:
             line: str = """
 # Instantiate the header record.
@@ -588,12 +696,6 @@ class Genealogy:
             parts: Line = Line()
             recordname: str = Default.EMPTY
             classname: str = Default.EMPTY
-            current_level: int = 0
-            next_level: int = 1
-            endline: str = Default.EMPTY
-            subs_list: list[str] = []
-            next_level_list: list[int] = []
-            parsed_subs: list[Line] = []
 
             # Partition on end of life to get the first line of the record
             # which may be all there is.
@@ -623,174 +725,12 @@ class Genealogy:
 
             # If there is more, then prepare for substructures.
             if bottom != Default.EMPTY:
-
-                subs_list = bottom.split(Default.EOL)
-                for sub in subs_list:
-                    parsed_item = parse(sub)
-                    next_level_list.append(parsed_item.level)
-                    parsed_subs.append(parsed_item)
-                next_level_list.append(0)
-                for i in range(len(parsed_subs)):
-
-                    # Provide variables for current and next level for clarity.
-                    current_level = parsed_subs[i].level
-                    next_level = next_level_list[i + 1]
-
-                    # Paths to format the end of a line.
-                    # If there is no payload.
-                    if parsed_subs[i].payload == Default.EMPTY:
-
-                        # If there are substructures.
-                        if next_level > current_level:
-                            endline = f'{Default.BRACKET_LEFT}{Default.EOL}'
-
-                        # if substructures have ended.
-                        elif next_level < current_level:
-                            endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
-
-                        # If there are no more substructures.
-                        elif next_level == 0:
-                            endline = ''.join(
-                                [
-                                    Default.PARENS_RIGHT,
-                                    Default.COMMA,
-                                    Default.EOL,
-                                    Default.BRACKET_RIGHT,
-                                    Default.PARENS_RIGHT,
-                                ]
-                            )
-
-                        # If there are more substructures.
-                        else:
-                            endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
-
-                    # If there is a payload and there are substructures.
-                    elif next_level > current_level:
-                        endline = f'{Default.COMMA}{Default.SPACE}{Default.BRACE_LEFT}{Default.EOL}'
-
-                    # If there is a payload and substructures have ended.
-                    elif next_level < current_level and next_level > 0:
-                        #endline = f'{Default.PARENS_RIGHT}{Default.COMMA}{Default.EOL}{next_level * Default.INDENT}{Default.BRACKET_RIGHT}{Default.PARENS_RIGHT}{Default.COMMA}{Default.EOL}'
-                        endline = ''.join(
-                            [
-                                Default.PARENS_RIGHT,
-                                Default.COMMA,
-                                Default.EOL,
-                                next_level * Default.INDENT,
-                                Default.BRACKET_RIGHT,
-                                Default.PARENS_RIGHT,
-                                Default.COMMA,
-                                Default.EOL,
-                            ]
-                        )
-
-                    # If there are no more substructures.
-                    elif next_level == 0:
-                        endline = ''.join(
-                            [
-                                Default.PARENS_RIGHT,
-                                Default.COMMA,
-                                Default.EOL,
-                                Default.BRACKET_RIGHT,
-                                Default.PARENS_RIGHT,
-                            ]
-                        )
-
-                    # If there is a payload and there are more substructures.
-                    else:
-                        endline = f'{Default.PARENS_RIGHT}{Default.COMMA}{Default.EOL}'
-
-                    line = ''.join(
-                        [
-                            line,
-                            current_level * Default.INDENT,
-                            Default.CODE_CLASS,
-                            parsed_subs[i].classname,
-                            Default.PARENS_LEFT,
-                            parsed_subs[i].payload,
-                            endline,
-                        ]
-                    )
-
-                    
-                    # if current_level > previous_level:
-                    #     line = ''.join(
-                    #         [
-                    #             line,
-                    #             current_level * Default.INDENT,
-                    #             Default.CODE_CLASS,
-                    #             parsed_subs[i].classname,
-                    #             Default.PARENS_LEFT,
-                    #             parsed_subs[i].payload,
-                    #             endline,
-                    #         ]
-                    #     )
-                    #     if current_level > next_level: 
-                    #         line = ''.join(
-                    #             [
-                    #                 line,
-                    #                 Default.EOL,
-                    #                 next_level * Default.INDENT,
-                    #                 Default.BRACKET_RIGHT,
-                    #                 Default.PARENS_RIGHT,
-                    #                 Default.COMMA,
-                    #                 Default.EOL,
-                    #             ]
-                    #         )
-                    #     elif current_level < next_level: 
-                    #         line = ''.join([line, endline])
-                    #     else:
-                    #         line = ''.join(
-                    #             [
-                    #                 line,
-                    #                 Default.PARENS_RIGHT,
-                    #                 Default.COMMA,
-                    #                 Default.EOL,
-                    #             ]
-                    #         )
-                    # elif current_level == previous_level:
-                    #     line = ''.join(
-                    #         [
-                    #             line,
-                    #             current_level * Default.INDENT,
-                    #             Default.CODE_CLASS,
-                    #             parsed_subs[i].classname,
-                    #             Default.PARENS_LEFT,
-                    #             parsed_subs[i].payload,
-                    #             endline,
-                    #         ]
-                    #     )
-                    # else:
-                    #     line = ''.join(
-                    #         [
-                    #             line,
-                    #             current_level * Default.INDENT,
-                    #             Default.CODE_CLASS,
-                    #             parsed_subs[i].classname,
-                    #             Default.PARENS_LEFT,
-                    #             parsed_subs[i].payload,
-                    #             endline,
-                    #         ]
-                    #     )
-                    #previous_level = current_level
-
-                
-                # line = ''.join(
-                #     [
-                #         line,
-                #         Default.PARENS_RIGHT,
-                #         Default.COMMA,
-                #         Default.EOL,
-                #         Default.BRACKET_RIGHT,
-                #         Default.PARENS_RIGHT,
-                #         Default.EOL,
-                #     ]
-                # )
+                line = ''.join([line, record_subs(bottom)])
 
             # End the record because there are no substructures.
             else:
                 line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
-            return line  
+            return line
 
         def imports() -> str:
             """Construct the section of the code where the imports are made."""
@@ -934,10 +874,6 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
             xrefname: str = Default.EMPTY
             classname: str = Default.EMPTY
 
-            previous_level: int = 0
-            subs_list: list[str] = []
-            parsed_subs: list[Line] = []
-
             # Loop through all the records excluding the header record at index 0.
             for record in self.ged_file_records[1:]:
                 # Partition on end of life to get the first line of the record
@@ -967,83 +903,14 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
                     ]
                 )
 
-                # If there is more, then prepare for substructures.
+                # If there is more, then construct the substructures.
                 if bottom != Default.EMPTY:
-                    line = ''.join(
-                        [
-                            line,
-                            Default.COMMA,
-                            Default.SPACE,
-                            Default.BRACKET_LEFT,
-                        ]
-                    )
-
-                    # Save the level.
-                    previous_level = 0
-                    subs_list = bottom.split(Default.EOL)
-                    for sub in subs_list:
-                        parsed_item = parse(sub)
-                        parsed_subs.append(parsed_item)
-                    for subs in parsed_subs:
-                        if subs.level > previous_level:
-                            line = ''.join(
-                                [
-                                    line,
-                                    Default.EOL,
-                                    subs.level * Default.INDENT,
-                                    Default.CODE_CLASS,
-                                    subs.classname,
-                                    Default.PARENS_LEFT,
-                                    subs.payload,
-                                ]
-                            )
-                        elif subs.level == previous_level:
-                            line = ''.join(
-                                [
-                                    line,
-                                    Default.PARENS_RIGHT,
-                                    Default.COMMA,
-                                    Default.EOL,
-                                    subs.level * Default.INDENT,
-                                    Default.CODE_CLASS,
-                                    subs.classname,
-                                    Default.PARENS_LEFT,
-                                    subs.payload,
-                                ]
-                            )
-                        else:
-                            line = ''.join(
-                                [
-                                    line,
-                                    Default.PARENS_RIGHT,
-                                    Default.COMMA,
-                                    Default.EOL,
-                                    subs.level * Default.INDENT,
-                                    Default.CODE_CLASS,
-                                    subs.classname,
-                                    Default.PARENS_LEFT,
-                                    subs.payload,
-                                ]
-                            )
-                        previous_level = subs.level
-                    line = ''.join(
-                        [
-                            line,
-                            Default.PARENS_RIGHT,
-                            Default.COMMA,
-                            Default.EOL,
-                            Default.BRACKET_RIGHT,
-                            Default.PARENS_RIGHT,
-                            Default.EOL,
-                        ]
-                    )
-
-                    # Loop through each parsed line adding to the output line the generated code.
-
+                    line = ''.join([line, record_subs(bottom)])
+                    
                 # End the record because there are no substructures.
                 else:
                     line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
-            return line.replace(Default.GED_REPLACE_THIS, Default.EOL)
+            return line
 
         def stage() -> str:
             lines: str = f"""
