@@ -423,10 +423,10 @@ class Genealogy:
 
         level_key: dict[int:str] = {}
 
-        def split_subs(ged: str, level: int = 0) -> list[str]:
-            """Split a ged string on substructures at the specified level."""
-            marker: str = f'{Default.EOL}{level}{Default.SPACE}'
-            return ged.split(marker)
+        # def split_subs(ged: str, level: int = 0) -> list[str]:
+        #     """Split a ged string on substructures at the specified level."""
+        #     marker: str = f'{Default.EOL}{level}{Default.SPACE}'
+        #     return ged.split(marker)
 
         def parse(line: str) -> Line:
             """Parse a GEDCOM line into level, xref, tag and payload."""
@@ -552,12 +552,12 @@ class Genealogy:
             """Validate the ged string then split it into records without the trailer."""
 
             # A trailer record `0 TRLR` must be in the file.
-            if Default.TRAILER not in self.ged_file:
-                raise ValueError(Msg.NO_TRAILER.format(Default.TRAILER))
+            if Default.GED_TRAILER not in self.ged_file:
+                raise ValueError(Msg.NO_TRAILER.format(Default.GED_TRAILER))
 
             # A header record `0 HEAD` must be in the file.
-            if Default.HEADER not in self.ged_file:
-                raise ValueError(Msg.NO_HEADER.format(Default.HEADER))
+            if Default.GED_HEADER not in self.ged_file:
+                raise ValueError(Msg.NO_HEADER.format(Default.GED_HEADER))
 
             # Each line starts with a digit.
             if re.search('\n\\D', self.ged_file):
@@ -573,13 +573,14 @@ class Genealogy:
             ged = ''.join([Default.HEADER, ged_temp])
 
             # Replace CONT and escaped @ with special string to remove later.
-            ged = re.sub('\n\\d CONT @', Default.GED_REPLACE_THIS, ged)
+            ged: str = re.sub('\n\\d CONT @', Default.GED_REPLACE_THIS, ged)
 
             # Replace remaining CONT with special string to remove later.
             ged = re.sub('\n\\d CONT ', Default.GED_REPLACE_THIS, ged)
 
             # Split the rest into a list of ged records.
-            self.ged_file_records = split_subs(ged, 0)
+            #self.ged_file_records = split_subs(ged, 0)
+            self.ged_file_records = ged.split(f'{Default.EOL}0{Default.SPACE}')
 
         def record_subs(bottom: str) -> str:
             """Convert the GEDCOM lines after the first lines of the record to code."""
@@ -640,34 +641,51 @@ class Genealogy:
 
                 # If there is a payload and there are substructures.
                 elif next_level > current_level:
-                    endline = f'{Default.COMMA}{Default.SPACE}{Default.BRACE_LEFT}{Default.EOL}'
-
-                # If there is a payload and substructures have ended.
-                elif next_level < current_level and next_level > 0:
-                    endline = ''.join(
-                        [
-                            Default.PARENS_RIGHT,
-                            Default.COMMA,
-                            Default.EOL,
-                            next_level * Default.INDENT,
-                            Default.BRACKET_RIGHT,
-                            Default.PARENS_RIGHT,
-                            Default.COMMA,
-                            Default.EOL,
-                        ]
-                    )
-
+                    endline = f'{Default.COMMA}{Default.SPACE}{Default.BRACKET_LEFT}{Default.EOL}'
+            
                 # If there are no more substructures.
-                elif next_level == 0:
+                elif next_level < current_level:
                     endline = ''.join(
                         [
                             Default.PARENS_RIGHT,
                             Default.COMMA,
-                            Default.EOL,
-                            Default.BRACKET_RIGHT,
-                            Default.PARENS_RIGHT,
                         ]
                     )
+                    if current_level > 1:
+                        for level in range(current_level, next_level + 1, -1):
+                            endline = ''.join(
+                                [
+                                    endline,
+                                    Default.EOL,
+                                    (level - 1) * Default.INDENT,
+                                    Default.BRACKET_RIGHT,
+                                    Default.PARENS_RIGHT,
+                                    Default.COMMA,
+                                    #Default.EOL,
+                                ]
+                            )
+                    if next_level == 0:
+                        endline = ''.join(
+                            [
+                                endline,
+                                Default.EOL,
+                                Default.BRACKET_RIGHT,
+                                Default.PARENS_RIGHT,
+                                Default.EOL,
+                            ]
+                        )
+                    else:
+                        endline = ''.join(
+                            [
+                                endline,
+                                Default.EOL,
+                                next_level * Default.INDENT,
+                                Default.BRACKET_RIGHT,
+                                Default.PARENS_RIGHT,
+                                Default.COMMA,
+                                Default.EOL,
+                            ]
+                        )
 
                 # If there is a payload and there are more substructures.
                 else:
@@ -676,18 +694,19 @@ class Genealogy:
                     )
 
                 # Add to line the additional code details.
-                line = ''.join(
-                    [
-                        line,
-                        current_level * Default.INDENT,
-                        Default.CODE_CLASS,
-                        parsed_subs[i].classname,
-                        Default.PARENS_LEFT,
-                        parsed_subs[i].payload,
-                        endline,
-                    ]
-                )
-            return ''.join([line, Default.EOL])
+                if parsed_subs[i].classname != Default.EMPTY:
+                    line = ''.join(
+                        [
+                            line,
+                            current_level * Default.INDENT,
+                            Default.CODE_CLASS,
+                            parsed_subs[i].classname,
+                            Default.PARENS_LEFT,
+                            parsed_subs[i].payload,
+                            endline,
+                        ]
+                    )
+            return line  #''.join([line, Default.EOL])
 
         def header() -> str:
             line: str = """
@@ -729,7 +748,7 @@ class Genealogy:
 
             # End the record because there are no substructures.
             else:
-                line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
+                line = ''.join([line, Default.PARENS_RIGHT])
             return line
 
         def imports() -> str:
@@ -737,7 +756,7 @@ class Genealogy:
             return f"""# Import the required packages and classes.
 from genedata.build import Genealogy
 import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE}
-
+{structure_module}
 """
 
         def initialize() -> str:
@@ -810,53 +829,74 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
             lines: str = """
 # Instantiate the cross reference identifiers.
 """
-            # For all records except the first which is the header record.
-            for record in self.ged_file_records[1:]:
-                # Partition on the first end of line character keeping the first and last parts.
-                first, _, last = record.partition(Default.EOL)
+            xref_lines: str = Default.EMPTY
+            xref_count: int = 0
+            if record_count > 1:
+                
+                # For all records except the first which is the header record.
+                for record in self.ged_file_records[1:]:
+                    # Partition on the first end of line character keeping the first and last parts.
+                    first, _, last = record.partition(Default.EOL)
 
-                # Split the first part into two or three strings.
-                words: list[str] = first.split(Default.SPACE, 2)
+                    # Split the first part into two or three strings.
+                    words: list[str] = first.split(Default.SPACE, 2)
 
-                # Get the name for the cross reference variable.
-                name: str = Names.xref_name(words[1], words[0])
+                    # Get the name for the cross reference variable.
+                    name: str = Names.xref_name(words[1], words[0])
+                    xref_count += 1
 
-                # Get the name for the method to call to create that variable.
-                call: str = self.record_dict[words[1]]['call']
+                    # Get the name for the method to call to create that variable.
+                    call: str = self.record_dict[words[1]]['call']
 
-                # If the record has a payload, such as SNOTE has, include it.
-                payload: str = Default.EMPTY
-                add_comma: str = Default.EMPTY
+                    # If the record has a payload, such as SNOTE has, include it.
+                    payload: str = Default.EMPTY
+                    add_comma: str = Default.EMPTY
 
-                # A payload would be text in the third string.
-                if len(words) > 2:
-                    payload = remove_at(words[2])
-                    add_comma = ', '
+                    # A payload would be text in the third string.
+                    if len(words) > 2:
+                        payload = remove_at(words[2])
+                        add_comma = ', '
 
-                    # This text might be continued or an indefinite number of lines.
-                    while last[0:7] == '1 CONT ':
-                        first, _, last = last.partition(Default.EOL)
-                        _, _, more_payload = first.partition('1 CONT ')
-                        payload = ''.join(
-                            [payload, Default.EOL, remove_at(more_payload)]
-                        )
-                    payload = Names.quote_text(payload)
+                        # This text might be continued or an indefinite number of lines.
+                        while last[0:7] == '1 CONT ':
+                            first, _, last = last.partition(Default.EOL)
+                            _, _, more_payload = first.partition('1 CONT ')
+                            payload = ''.join(
+                                [payload, Default.EOL, remove_at(more_payload)]
+                            )
+                        payload = Names.quote_text(payload)
 
-                # Add each to the code lines to be generated.
+                    # Add each to the code lines to be generated.
+                    xref_lines = ''.join(
+                        [
+                            xref_lines,
+                            name,
+                            Default.EQUAL,
+                            Default.CODE_GENEALOGY,
+                            call,
+                            Default.PARENS_LEFT,
+                            Default.QUOTE_SINGLE,
+                            words[0].replace(Default.ATSIGN, Default.EMPTY),
+                            Default.QUOTE_SINGLE,
+                            add_comma,
+                            payload,
+                            Default.PARENS_RIGHT,
+                            Default.EOL,
+                        ]
+                    )
                 lines = ''.join(
                     [
                         lines,
-                        name,
-                        Default.EQUAL,
-                        Default.CODE_GENEALOGY,
-                        call,
-                        Default.PARENS_LEFT,
-                        Default.QUOTE_SINGLE,
-                        words[0].replace(Default.ATSIGN, Default.EMPTY),
-                        Default.QUOTE_SINGLE,
-                        add_comma,
-                        payload,
-                        Default.PARENS_RIGHT,
+                        f'# There were {xref_count} cross reference identifiers.',
+                        Default.EOL,
+                        xref_lines,
+                    ]
+                )
+            else:
+                lines = ''.join(
+                    [
+                        lines, 
+                        '# There were no cross reference identifiers.',
                         Default.EOL,
                     ]
                 )
@@ -874,42 +914,63 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
             xrefname: str = Default.EMPTY
             classname: str = Default.EMPTY
 
-            # Loop through all the records excluding the header record at index 0.
-            for record in self.ged_file_records[1:]:
-                # Partition on end of life to get the first line of the record
-                # which may be all there is.
-                top, _, bottom = record.partition(Default.EOL)
+            # Skip if there aren't any records except for the header record.
+            if record_count > 1:
 
-                # Parse the first line into its components and format the names.
-                # parts = parse(''.join(['0 ', top]))
-                parts = top.split(Default.SPACE, 2)
-                recordname = Names.record_name(parts[1], parts[0])
-                xrefname = Names.xref_name(parts[1], parts[0])
-                classname = Names.top_class(parts[1])
-                level_key.update(
-                    {0: Names.key_from_classname(classname, self.specification)}
-                )
+                # Loop through all the records excluding the header record at index 0.
+                for record in self.ged_file_records[1:]:
 
-                # Added the parsed contents to the output line.
+                    # Partition on end of life to get the first line of the record
+                    # which may be all there is.
+                    top, _, bottom = record.partition(Default.EOL)
+
+                    # Parse the first line into its components and format the names.
+                    # parts = parse(''.join(['0 ', top]))
+                    parts = top.split(Default.SPACE, 2)
+                    recordname = Names.record_name(parts[1], parts[0])
+                    xrefname = Names.xref_name(parts[1], parts[0])
+                    classname = Names.top_class(parts[1])
+                    level_key.update(
+                        {0: Names.key_from_classname(classname, self.specification)}
+                    )
+
+                    # Added the parsed contents to the output line.
+                    line = ''.join(
+                        [
+                            line,
+                            recordname,
+                            Default.EQUAL,
+                            Default.CODE_CLASS,
+                            classname,
+                            Default.PARENS_LEFT,
+                            xrefname,
+                        ]
+                    )
+
+                    # If there is more, then construct the substructures.
+                    if bottom != Default.EMPTY:
+                        line = ''.join(
+                            [
+                                line, 
+                                Default.COMMA, 
+                                Default.SPACE, 
+                                Default.BRACKET_LEFT, 
+                                Default.EOL,
+                                record_subs(bottom)
+                            ]
+                        )
+                        
+                    # End the record because there are no substructures.
+                    else:
+                        line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
+            else:
                 line = ''.join(
                     [
                         line,
-                        recordname,
-                        Default.EQUAL,
-                        Default.CODE_CLASS,
-                        classname,
-                        Default.PARENS_LEFT,
-                        xrefname,
+                        '# There were no records outside of the header record.',
+                        Default.EOL,
                     ]
                 )
-
-                # If there is more, then construct the substructures.
-                if bottom != Default.EMPTY:
-                    line = ''.join([line, record_subs(bottom)])
-                    
-                # End the record because there are no substructures.
-                else:
-                    line = ''.join([line, Default.PARENS_RIGHT, Default.EOL])
             return line
 
         def stage() -> str:
@@ -937,8 +998,23 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
                         ]
                     )
             return lines.replace(Default.GED_REPLACE_THIS, Default.EOL)
+        
+        def run_code() -> str:
+            lines: str = f"""
+# Run the following to show the ged file that the above code would produce.
+ged_file = {Default.CODE_GENEALOGY}show_ged()
 
+# Then print this file to view it.
+print(ged_file)
+"""
+            return lines
+
+        # Run the methods to generate the code to produce the ged file.
         split_ged()
+        record_count: int = len(self.ged_file_records)
+        structure_module: str = Default.EMPTY
+        if Default.VOID_POINTER in self.ged_file:
+            structure_module = f'from genedata.structure import Void{Default.EOL}'
         return ''.join(
             [
                 imports(),
@@ -948,6 +1024,7 @@ import genedata.classes{self.version_no_periods} as {Default.CODE_CLASS_VARIABLE
                 header(),
                 record_loop(),
                 stage(),
+                run_code()
             ]
         )
 

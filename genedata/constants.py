@@ -236,7 +236,8 @@ class Default:
     URL_URI: str = 'uri/exid-types/'
     URL_URI_PREFIX: str = ''
     UTF8: str = 'utf-8'
-    VOID_POINTER: str = '@VOID@'
+    VOID_NAME: str = 'VOID'
+    VOID_POINTER: str = f'@{VOID_NAME}@'
     WEEKS: int = 0
     WIDTH: int = 0
     XREF: str = 'xref'

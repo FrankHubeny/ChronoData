@@ -99,7 +99,7 @@ def test_empty_value_Head() -> None:
     with pytest.raises(
         TypeError, match=re.escape("Head.__init__() got an unexpected keyword argument 'value'")
     ):
-        gc.Head(value='hi', subs=gc.Gedc('12:12:12', gc.GedcVers('abc')))  # type: ignore[call-arg]
+        gc.Head(value='hi', subs=gc.Gedc(gc.GedcVers('abc')))  # type: ignore[call-arg]
 
 
 def test_empty_value_Husb() -> None:

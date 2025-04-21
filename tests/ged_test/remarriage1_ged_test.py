@@ -1,159 +1,95 @@
 # remarriage1_ged_test.py
 """Generate the Remarriage 1 example gedcom file."""
 
-import genedata.classes70 as gc
-from genedata.build import Genealogy
-from genedata.constants import Default
+
 from genedata.methods import Util
-from genedata.structure import FamilyXref, IndividualXref  # noqa: F401
 
 ged_version: str = '7.0'
 
 def test_remarriage1_ged() -> None:
     # Test constructing the remarriage1_ged test data.
     file = Util.read('tests\\ged_test\\remarriage1.ged')
-    g = Genealogy(version=ged_version)
-    indi_i1_xref = g.individual_xref('I1')
-    indi_i2_xref = g.individual_xref('I2')
-    indi_i3_xref = g.individual_xref('I3')
-    fam_f1_xref = g.family_xref('F1')
-    fam_f2_xref = g.family_xref('F2')
+    
+    # Import the required packages and classes.
+    import genedata.classes70 as gc
+    from genedata.build import Genealogy
 
-    head = gc.Head(gc.Gedc(gc.GedcVers('7.0')))
+    # Instantiate a Genealogy class.
+    g = Genealogy()
 
-    indi1 = gc.RecordIndi(
-        indi_i1_xref,
-        [
-            gc.IndiName('John Q /Public/'),
-            gc.Sex('M'),
-            gc.Fams(fam_f1_xref),
-            gc.Fams(fam_f2_xref),
-        ],
-    )
+    # Instantiate the cross reference identifiers.
+    # There were 5 xref identifiers and 0 void identifiers.
+    indi_I1_xref = g.individual_xref('I1')
+    indi_I2_xref = g.individual_xref('I2')
+    indi_I3_xref = g.individual_xref('I3')
+    fam_F1_xref = g.family_xref('F1')
+    fam_F2_xref = g.family_xref('F2')
 
-    indi2 = gc.RecordIndi(
-        indi_i2_xref,
-        [
-            gc.IndiName('Jane /Doe/'),
-            gc.Sex('F'),
-            gc.Fams(fam_f1_xref),
-        ],
-    )
-
-    indi3 = gc.RecordIndi(
-        indi_i3_xref,
-        [
-            gc.IndiName('Mary /Roe/'),
-            gc.Deat('', gc.Date('1 MAR 1914')),
-            gc.Fams(fam_f2_xref),
-        ],
-    )
-
-    fam1 = gc.RecordFam(
-        fam_f1_xref,
-        [
-            gc.FamHusb(indi_i1_xref),
-            gc.FamWife(indi_i2_xref),
-            gc.Marr('', gc.Date('1 APR 1911')),
-            gc.Div('', gc.Date('2 MAY 1912')),
-            gc.Marr('', gc.Date('4 JUL 1914')),
-        ],
-    )
-
-    fam2 = gc.RecordFam(
-        fam_f2_xref,
-        [
-            gc.FamHusb(indi_i1_xref),
-            gc.FamWife(indi_i3_xref),
-            gc.Marr('', gc.Date('3 JUN 1913')),
-        ],
-    )
-
-    gedcom = ''.join(
-        [
-            head.ged(),
-            indi1.ged(),
-            indi2.ged(),
-            indi3.ged(),
-            fam1.ged(),
-            fam2.ged(),
-            Default.TRAILER,
-        ]
-    )
-
-    assert file == gedcom
+    # Instantiate the header record.
+    header = gc.Head([
+        gc.Gedc([
+            gc.GedcVers('7.0'),
+        ]),
+    ])
 
 
-def test_remarriage1_ged_code() -> None:
-    # Test generating code, evaluating it and then finding the ged lines.
-    file = Util.read('tests\\ged_test\\remarriage1.ged')
-    g = Genealogy(version=ged_version)
-    indi_i1_xref = g.individual_xref('I1')
-    indi_i2_xref = g.individual_xref('I2')
-    indi_i3_xref = g.individual_xref('I3')
-    fam_f1_xref = g.family_xref('F1')
-    fam_f2_xref = g.family_xref('F2')
+    # Instantiate the records holding the GED data.
+    indi_I1 = gc.RecordIndi(indi_I1_xref, [
+        gc.IndiName('John Q /Public/'),
+        gc.Sex('M'),
+        gc.Fams(fam_F1_xref),
+        gc.Fams(fam_F2_xref),
+    ])
 
-    head = gc.Head(gc.Gedc(gc.GedcVers('7.0')))
+    indi_I2 = gc.RecordIndi(indi_I2_xref, [
+        gc.IndiName('Jane /Doe/'),
+        gc.Sex('F'),
+        gc.Fams(fam_F1_xref),
+    ])
 
-    indi1 = gc.RecordIndi(
-        indi_i1_xref,
-        [
-            gc.IndiName('John Q /Public/'),
-            gc.Sex('M'),
-            gc.Fams(fam_f1_xref),
-            gc.Fams(fam_f2_xref),
-        ],
-    )
+    indi_I3 = gc.RecordIndi(indi_I3_xref, [
+        gc.IndiName('Mary /Roe/'),
+        gc.Deat('', [
+            gc.Date('1 MAR 1914'),
+        ]),
+        gc.Fams(fam_F2_xref),
+    ])
 
-    indi2 = gc.RecordIndi(
-        indi_i2_xref,
-        [
-            gc.IndiName('Jane /Doe/'),
-            gc.Sex('F'),
-            gc.Fams(fam_f1_xref),
-        ],
-    )
+    fam_F1 = gc.RecordFam(fam_F1_xref, [
+        gc.FamHusb(indi_I1_xref),
+        gc.FamWife(indi_I2_xref),
+        gc.Marr('', [
+            gc.Date('1 APR 1911'),
+        ]),
+        gc.Div('', [
+            gc.Date('2 MAY 1912'),
+        ]),
+        gc.Marr('', [
+            gc.Date('4 JUL 1914'),
+        ]),
+    ])
 
-    indi3 = gc.RecordIndi(
-        indi_i3_xref,
-        [
-            gc.IndiName('Mary /Roe/'),
-            gc.Deat('', gc.Date('1 MAR 1914')),
-            gc.Fams(fam_f2_xref),
-        ],
-    )
+    fam_F2 = gc.RecordFam(fam_F2_xref, [
+        gc.FamHusb(indi_I1_xref),
+        gc.FamWife(indi_I3_xref),
+        gc.Marr('', [
+            gc.Date('3 JUN 1913'),
+        ]),
+    ])
 
-    fam1 = gc.RecordFam(
-        fam_f1_xref,
-        [
-            gc.FamHusb(indi_i1_xref),
-            gc.FamWife(indi_i2_xref),
-            gc.Marr('', gc.Date('1 APR 1911')),
-            gc.Div('', gc.Date('2 MAY 1912')),
-            gc.Marr('', gc.Date('4 JUL 1914')),
-        ],
-    )
 
-    fam2 = gc.RecordFam(
-        fam_f2_xref,
-        [
-            gc.FamHusb(indi_i1_xref),
-            gc.FamWife(indi_i3_xref),
-            gc.Marr('', gc.Date('3 JUN 1913')),
-        ],
-    )
+    # Stage the GEDCOM records to generate the ged lines.
+    g.stage(header)
+    g.stage(indi_I1)
+    g.stage(indi_I2)
+    g.stage(indi_I3)
+    g.stage(fam_F1)
+    g.stage(fam_F2)
 
-    gedcom = ''.join(
-        [
-            eval(head.code(as_name='gc')).ged(),
-            eval(indi1.code(as_name='gc')).ged(),
-            eval(indi2.code(as_name='gc')).ged(),
-            eval(indi3.code(as_name='gc')).ged(),
-            eval(fam1.code(as_name='gc')).ged(),
-            eval(fam2.code(as_name='gc')).ged(),
-            Default.TRAILER,
-        ]
-    )
+    # Run the following to show the ged file that the above code would produce.
+    ged_file = g.show_ged()
 
-    assert file == gedcom
+
+    assert file == ged_file
+
+

@@ -18,14 +18,14 @@ def test_keyname_from_classname() -> None:
     bad: int = 0
     class_name: str = Default.EMPTY
     key_name: str = Default.EMPTY 
-    for key in Specs[Default.YAML_TYPE_STRUCTURE]:
-        class_name = Names.classname(key)
+    for key_raw in Specs[Default.YAML_TYPE_STRUCTURE]:
+        class_name = Names.classname(key_raw)
         key_name = Names.key_from_classname(class_name, Specs)
-        if key_name == key:
+        if key_name == key_raw:
             good += 1
         else:
             bad += 1
-            logging.info(f'"{key_name}" does not equal "{key}"')
+            logging.info(f'"{key_name}" does not equal "{key_raw}"')
     assert bad == 0
 
 def test_key_from_classname_not_present() -> None:

@@ -1,106 +1,64 @@
 # ssex_ged_test.py
 """Generate the [Same Sex Marriange GEDCOM Example File](https://gedcom.io/testfiles/gedcom70/same-sex-marriage.ged)."""
 
-import genedata.classes70 as gc
-from genedata.build import Genealogy
-from genedata.constants import Default
+
 from genedata.methods import Util
-from genedata.structure import FamilyXref, IndividualXref  # noqa: F401
 
 ged_version: str = '7.0'
 
 def test_ssex_ged() -> None:
     """ Test constructing the same sex marriage_ged test data."""
     file = Util.read('tests\\ged_test\\same-sex-marriage.ged')
-    g = Genealogy(version=ged_version)
-    indi1_xref = g.individual_xref('I1')
-    indi2_xref = g.individual_xref('I2')
-    fam_xref = g.family_xref('F1')
+    
+    # Import the required packages and classes.
+    import genedata.classes70 as gc
+    from genedata.build import Genealogy
 
-    head = gc.Head(gc.Gedc(gc.GedcVers('7.0'))) 
+    # Instantiate a Genealogy class.
+    g = Genealogy()
 
-    indi1 = gc.RecordIndi(
-        indi1_xref,
-        [
-            gc.IndiName('John /Doe/'),
-            gc.Sex('M'),
-            gc.Fams(fam_xref),
-        ]
-    )
+    # Instantiate the cross reference identifiers.
+    # There were 3 xref identifiers and 0 void identifiers.
+    indi_I1_xref = g.individual_xref('I1')
+    indi_I2_xref = g.individual_xref('I2')
+    fam_F1_xref = g.family_xref('F1')
 
-    indi2 = gc.RecordIndi(
-        indi2_xref,
-        [
-            gc.IndiName('Richard /Roe/'),
-            gc.Sex('M'),
-            gc.Fams(fam_xref),
-        ],
-    )
+    # Instantiate the header record.
+    header = gc.Head([
+        gc.Gedc([
+            gc.GedcVers('7.0'),
+        ]),
+    ])
 
-    fam = gc.RecordFam(
-        fam_xref,
-        [
-            gc.FamHusb(indi1_xref),
-            gc.FamWife(indi2_xref),
-        ],
-    )
 
-    gedcom = ''.join(
-        [
-            head.ged(), 
-            indi1.ged(),
-            indi2.ged(),
-            fam.ged(),
-            Default.TRAILER,
-        ]
-    )
+    # Instantiate the records holding the GED data.
+    indi_I1 = gc.RecordIndi(indi_I1_xref, [
+        gc.IndiName('John /Doe/'),
+        gc.Sex('M'),
+        gc.Fams(fam_F1_xref),
+    ])
 
-    assert file == gedcom
+    indi_I2 = gc.RecordIndi(indi_I2_xref, [
+        gc.IndiName('Richard /Roe/'),
+        gc.Sex('M'),
+        gc.Fams(fam_F1_xref),
+    ])
 
-def test_ssex_ged_code() -> None:
-    # Test generating code, evaluating it and then finding the ged lines.
-    file = Util.read('tests\\ged_test\\same-sex-marriage.ged')
-    g = Genealogy(version=ged_version)
-    indi1_xref = g.individual_xref('I1')
-    indi2_xref = g.individual_xref('I2')
-    fam_xref = g.family_xref('F1')
+    fam_F1 = gc.RecordFam(fam_F1_xref, [
+        gc.FamHusb(indi_I1_xref),
+        gc.FamWife(indi_I2_xref),
+    ])
 
-    head = gc.Head(gc.Gedc(gc.GedcVers('7.0'))) 
 
-    indi1 = gc.RecordIndi(
-        indi1_xref,
-        [
-            gc.IndiName('John /Doe/'),
-            gc.Sex('M'),
-            gc.Fams(fam_xref),
-        ]
-    )
+    # Stage the GEDCOM records to generate the ged lines.
+    g.stage(header)
+    g.stage(indi_I1)
+    g.stage(indi_I2)
+    g.stage(fam_F1)
 
-    indi2 = gc.RecordIndi(
-        indi2_xref,
-        [
-            gc.IndiName('Richard /Roe/'),
-            gc.Sex('M'),
-            gc.Fams(fam_xref),
-        ],
-    )
+    # Run the following to show the ged file that the above code would produce.
+    ged_file = g.show_ged()
 
-    fam = gc.RecordFam(
-        fam_xref,
-        [
-            gc.FamHusb(indi1_xref),
-            gc.FamWife(indi2_xref),
-        ],
-    )
 
-    gedcom = ''.join(
-        [
-            eval(head.code(as_name='gc')).ged(), 
-            eval(indi1.code(as_name='gc')).ged(),
-            eval(indi2.code(as_name='gc')).ged(),
-            eval(fam.code(as_name='gc')).ged(),
-            Default.TRAILER,
-        ]
-    )
+    assert file == ged_file
 
-    assert file == gedcom

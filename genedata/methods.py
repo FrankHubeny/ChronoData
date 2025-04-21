@@ -1314,6 +1314,8 @@ class Names:
 
     def xref_name(tag: str, xref: str) -> str:
         """Construct a variable name for a cross reference identifier."""
+        if xref == Default.VOID_POINTER:
+            return f'Void.{tag.upper()}'
         return ''.join(
             [
                 tag.lower(),
