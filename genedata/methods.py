@@ -55,22 +55,31 @@ class Util:
 
     @staticmethod
     def read_gdz_ged_file(file: str, gdz: str) -> str:
-        """Read a file from a GEDCOM gdz archive file.
+        """Read a ged file from a GEDCOM gdz archive file.
+
+        ValueErrors will appear if the file is not a ged file.
+
+        Anythiing before the header or after the trailer
+        in the ged file will be removed.
 
         Args:
-            gdz: The path to the archive gdz file.
+            file: The name of the file in the archive.
+            gdz: The full name of the archive gdz file.
         """
+        ged: str = Default.EMPTY
         with zipfile.ZipFile(gdz, 'r') as zip_ref:
             for file_name in zip_ref.namelist():
                 if file_name == file:
                     with zip_ref.open(file_name) as f:
-                        return (
+                        ged = (
                             f.read()
                             .decode('utf-8')
                             .replace('\r\n', '\n')
                             .replace('\ufeff', '')
                         )
-        return Default.EMPTY
+                        break
+        Util.check_ged_file(ged)
+        return Util.clean_ged_file(ged)
 
     @staticmethod
     def extract(
@@ -115,42 +124,90 @@ class Util:
         return raw
 
     @staticmethod
+    def check_ged_file(ged: str) -> bool:
+        """Validate that the file is a ged file raising ValueErrors if not."""
+
+        # Return True if no errors are raised.
+        check: bool = True
+
+        # Check that the file is not empty.
+        # if ged == Default.EMPTY:
+        #     raise ValueError(
+        #         Msg.GED_FILE_EMPTY.format(ged)
+        #     )
+
+        # Check that the file has a correct header line.
+        if Default.GED_HEADER not in ged:
+            raise ValueError(Msg.GED_NO_HEADER.format(ged, Default.GED_HEADER))
+
+        # Check that the file has a correct trailer line.
+        if Default.GED_TRAILER not in ged:
+            raise ValueError(
+                Msg.GED_NO_TRAILER.format(ged, Default.GED_TRAILER)
+            )
+
+        # Check that the file has a version that the application can accept.
+        version: str = Query.version(ged)
+        if version not in Default.GED_VERSIONS:
+            raise ValueError(
+                Msg.GED_VERSION_NOT_RECOGNIZED.format(ged, version)
+            )
+
+        return check
+
+    @staticmethod
+    def clean_ged_file(ged) -> str:
+        """Remove extraneous content from the before the header and after the trailer."""
+        modified_ged: str = ged
+
+        # Remove anything in the file prior to the ged header.
+        _, _, ged_top_trimmed = modified_ged.partition(Default.GED_HEADER)
+        modified_ged = ''.join([Default.GED_HEADER, ged_top_trimmed])
+
+        # Remove anything in the file after the ged trailer.
+        ged_bottom_trimmed, _, _ = modified_ged.partition(Default.GED_TRAILER)
+        return ''.join([ged_bottom_trimmed, Default.GED_TRAILER])
+
+    @staticmethod
     def read_ged(url: str) -> str:
         """Read a ged file removing extraneous material from the top and bottom.
 
         Args:
             url: The name of the file or the internet url.
         """
-        raw: str = Default.EMPTY
+        ged: str = Default.EMPTY
         # Retrieve the file.
         try:
-            raw = Util.read(url)
+            ged = Util.read(url)
         except Exception:
-            raw = Util.read_binary(url)
+            ged = Util.read_binary(url)
 
         # Check that file has proper ged header and trailer and a recognized version.
-        if raw != Default.EMPTY:
-            if Default.GED_HEADER not in raw:
-                raise ValueError(
-                    Msg.GED_NO_HEADER.format(url, Default.GED_HEADER)
-                )
-            if Default.GED_TRAILER not in raw:
-                raise ValueError(
-                    Msg.GED_NO_TRAILER.format(url, Default.GED_TRAILER)
-                )
-            version: str = Query.version(raw)
-            if version not in Default.GED_VERSIONS:
-                raise ValueError(
-                    Msg.GED_VERSION_NOT_RECOGNIZED.format(url, version)
-                )
+        # if raw != Default.EMPTY:
+        #     if Default.GED_HEADER not in raw:
+        #         raise ValueError(
+        #             Msg.GED_NO_HEADER.format(url, Default.GED_HEADER)
+        #         )
+        #     if Default.GED_TRAILER not in raw:
+        #         raise ValueError(
+        #             Msg.GED_NO_TRAILER.format(url, Default.GED_TRAILER)
+        #         )
+        #     version: str = Query.version(raw)
+        #     if version not in Default.GED_VERSIONS:
+        #         raise ValueError(
+        #             Msg.GED_VERSION_NOT_RECOGNIZED.format(url, version)
+        #         )
+
+        Util.check_ged_file(ged)
+        return Util.clean_ged_file(ged)
 
         # Remove anything in the file prior to the ged header.
-        _, _, raw_top_trimmed = raw.partition(Default.GED_HEADER)
-        raw = ''.join([Default.GED_HEADER, raw_top_trimmed])
+        # _, _, raw_top_trimmed = raw.partition(Default.GED_HEADER)
+        # raw = ''.join([Default.GED_HEADER, raw_top_trimmed])
 
-        # Remove anything in the file after the ged trailer.
-        raw_bottom_trimmed, _, _ = raw.partition(Default.GED_TRAILER)
-        return ''.join([raw_bottom_trimmed, Default.GED_TRAILER])
+        # # Remove anything in the file after the ged trailer.
+        # raw_bottom_trimmed, _, _ = raw.partition(Default.GED_TRAILER)
+        # return ''.join([raw_bottom_trimmed, Default.GED_TRAILER])
 
     @staticmethod
     def write_ged(ged: str, file: str) -> None:
@@ -1286,7 +1343,7 @@ class Names:
             [
                 tag.lower(),
                 Default.UNDERLINE,
-                Names.stem(url),
+                Names.stem(url).replace(Default.HYPHEN, Default.UNDERLINE),
             ]
         )
 
@@ -1310,7 +1367,7 @@ class Names:
             case Default.TAG_SUBM:
                 return Default.CLASS_SUBM
             case _:
-                return 'Head'
+                return 'Ext'
 
     def xref_name(tag: str, xref: str) -> str:
         """Construct a variable name for a cross reference identifier."""
@@ -1343,6 +1400,23 @@ class Query:
     """Some potentially useful queries of the specification."""
 
     @staticmethod
+    def enumerations(
+        enumset_key: str, specs: dict[str, dict[str, Any]]
+    ) -> list[str]:
+        """Return all the enumerations in an enumeration set based on the enumset key.
+
+        Args:
+            key: The key of the enumset.
+            specs: The specification to search through.
+        """
+        enums: list[str] = []
+        for _, value in specs[Default.YAML_TYPE_ENUMERATION].items():
+            for name in value[Default.YAML_VALUE_OF]:
+                if enumset_key == Names.keyname(name):
+                    enums.append(value[Default.YAML_STANDARD_TAG])
+        return enums
+
+    @staticmethod
     def enum_key_tags(
         key: str, specs: dict[str, dict[str, Any]]
     ) -> tuple[str, list[str]]:
@@ -1354,13 +1428,13 @@ class Query:
             Default.YAML_TYPE_ENUMERATION
         ]
         enum_tags: list[str] = []
-        enum_set_key: str = Default.EMPTY
+        enumset_key: str = Default.EMPTY
         enum_key: str = Default.EMPTY
         if key in structure and Default.YAML_ENUMERATION_SET in structure[key]:
-            enum_set_key = Names.stem(
+            enumset_key = Names.stem(
                 structure[key][Default.YAML_ENUMERATION_SET]
             )
-            for enum in enumeration_set[enum_set_key][
+            for enum in enumeration_set[enumset_key][
                 Default.YAML_ENUMERATION_VALUES
             ]:
                 enum_key = Names.stem(enum)
@@ -1372,7 +1446,7 @@ class Query:
                     enum_tags.append(
                         structure[enum_key][Default.YAML_STANDARD_TAG]
                     )
-        return enum_key, enum_tags
+        return enumset_key, enum_tags
 
     @staticmethod
     def classes_with_tag(

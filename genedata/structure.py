@@ -20,7 +20,7 @@ from typing import Any, Literal, NamedTuple, Self
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.methods import Names, Tagger
+from genedata.methods import Names, Query, Tagger
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -72,7 +72,7 @@ class Xref:
         return f"Xref('{self.fullname}')"
 
     # def ged(self, info: str = Default.EMPTY) -> str:
-    def ged(self) -> str:
+    def ged(self, specs: dict[str, dict[str, Any]] | None = None) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
         lines: str = Default.EMPTY
         xref_name: str = self.fullname
@@ -324,7 +324,7 @@ class BaseStructure:
         permitted: list[str] | None = None,
         required: list[str] | None = None,
         single: list[str] | None = None,
-        enum_key: str = Default.EMPTY,
+        enumset_key: str = Default.EMPTY,
         enum_tags: list[str] | None = None,
         payload: str = Default.EMPTY,
         class_name: str = Default.EMPTY,
@@ -373,7 +373,7 @@ class BaseStructure:
         self.permitted: list[str] = permitted
         self.required: list[str] = required
         self.single: list[str] = single
-        self.enum_key: str = enum_key
+        self.enumset_key: str = enumset_key
         self.enum_tags: list[str] = enum_tags
         self.payload: str = payload
         self.class_name: str = class_name
@@ -384,8 +384,23 @@ class BaseStructure:
         # Identify which cross reference identifier opened the record.
         self.originator: Xref = Void.XREF
 
-    def validate(self) -> bool:
+    def validate(self, specs: dict[str, dict[str, Any]] | None = None) -> bool:
         """Validate the stored value."""
+        date_exact: dict[str, int] = {
+            'JAN': 31,
+            'FEB': 28,
+            'FEB_LEAP': 29,
+            'MAR': 31,
+            'APR': 30,
+            'MAY': 31,
+            'JUN': 30,
+            'JUL': 31,
+            'AUG': 31,
+            'SEP': 30,
+            'OCT': 31,
+            'NOV': 30,
+            'DEC': 31,
+        }
 
         # Does it have all required substructures?
         for name in self.required:
@@ -461,7 +476,16 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                if self.value not in self.enum_tags:
+                if specs is None:
+                    if self.value not in self.enum_tags:
+                        raise ValueError(
+                            Msg.NOT_VALID_ENUM.format(
+                                self.value, self.enum_tags, self.class_name
+                            )
+                        )
+                elif self.value not in Query.enumerations(
+                    self.enumset_key, specs
+                ):
                     raise ValueError(
                         Msg.NOT_VALID_ENUM.format(
                             self.value, self.enum_tags, self.class_name
@@ -498,6 +522,9 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
+                
+            # Verify that the constrainsts in 
+            # [GEDCOM Date datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date) are met.
             case 'https://gedcom.io/terms/v7/type-Date#period':
                 if not isinstance(self.value, str):
                     raise ValueError(
@@ -509,6 +536,9 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_DATE_PERIOD.format(self.value, self.class_name)
                     )
+                
+            # Verify that the constrainsts in 
+            # [GEDCOM Date datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date) are met.
             case 'https://gedcom.io/terms/v7/type-Date#exact':
                 if not isinstance(self.value, str):
                     raise ValueError(
@@ -517,10 +547,67 @@ class BaseStructure:
                 if (
                     re.search('[a-z]', self.value) is not None
                     or re.search('[0-9]', self.value) is None
-                    or len(re.findall(' ', self.value)) != 2
                 ):
                     raise ValueError(
                         Msg.NOT_DATE_EXACT.format(self.value, self.class_name)
+                    )
+                if len(self.value) > Default.DATE_EXACT_MAX_SIZE:
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_TOO_LARGE.format(self.value, self.class_name, str(len(self.value)), Default.DATE_EXACT_MAX_SIZE)
+                    )
+                space_count: int = self.value.count(Default.SPACE)
+                if space_count != Default.DATE_EXACT_SPACES:
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_SPACES.format(
+                            self.value,
+                            self.class_name,
+                            str(space_count),
+                            Default.DATE_EXACT_SPACES,
+                        )
+                    )
+                date_parts: list[str] = self.value.split(Default.SPACE)
+                day: int = int(date_parts[0])
+                month: str = date_parts[1]
+                year: int = int(date_parts[2])
+                if month not in date_exact:
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_MONTH.format(
+                            self.value, self.class_name, date_parts[1]
+                        )
+                    )
+                if (day < 1 or day > date_exact[month]) and month != 'FEB':
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_DAY.format(
+                            self.value,
+                            self.class_name,
+                            date_parts[0],
+                            str(date_exact[month]),
+                        )
+                    )
+                if month == 'FEB' and (
+                    (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+                ):
+                    if day < 1 or day > date_exact['FEB_LEAP']:
+                        raise ValueError(
+                            Msg.NOT_DATE_EXACT_DAY.format(
+                                self.value,
+                                self.class_name,
+                                date_parts[0],
+                                date_exact['FEB_LEAP'],
+                            )
+                        )
+                elif month == 'FEB' and (day < 1 or day > date_exact[month]):
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_DAY.format(
+                            self.value,
+                            self.class_name,
+                            date_parts[0],
+                            date_exact[month],
+                        )
+                    )
+                if not isinstance(year, int) or year == 0:
+                    raise ValueError(
+                        Msg.NOT_DATE_EXACT_YEAR.format(self.value, self.class_name, date_parts[2])
                     )
             case 'https://gedcom.io/terms/v7/type-Date':
                 if not isinstance(self.value, str):
@@ -601,6 +688,60 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_TIME.format(self.value, self.class_name)
                     )
+                colon_count: int = self.value.count(Default.COLON)
+                if colon_count > 2 or colon_count == 0:
+                    raise ValueError(
+                        Msg.NOT_TIME_COLON_COUNT.format(
+                            self.value, self.class_name, str(colon_count)
+                        )
+                    )
+                time_parts: list[str] = self.value.split(Default.COLON)
+                hours: int = int(time_parts[0])
+                minutes: int = int(time_parts[1])
+                if (
+                    not isinstance(hours, int)
+                    or hours < Default.TIME_MIN_HOUR
+                    or hours > Default.TIME_MAX_HOUR
+                ):
+                    raise ValueError(
+                        Msg.NOT_TIME_HOURS.format(
+                            self.value,
+                            self.class_name,
+                            time_parts[0],
+                            Default.TIME_MIN_HOUR,
+                            Default.TIME_MAX_HOUR,
+                        )
+                    )
+                if (
+                    not isinstance(minutes, int)
+                    or minutes < Default.TIME_MIN_MINUTE
+                    or minutes > Default.TIME_MAX_MINUTE
+                ):
+                    raise ValueError(
+                        Msg.NOT_TIME_MINUTES.format(
+                            self.value,
+                            self.class_name,
+                            time_parts[1],
+                            Default.TIME_MIN_MINUTE,
+                            Default.TIME_MAX_MINUTE,
+                        )
+                    )
+                if len(time_parts) == 3:
+                    secs, _, _ = time_parts[2].partition(Default.TIME_UTC_CODE)
+                    seconds: float = float(secs)
+                    if (
+                        seconds < Default.TIME_MIN_SECOND
+                        or seconds >= Default.TIME_MAX_SECOND
+                    ):
+                        raise ValueError(
+                            Msg.NOT_TIME_SECONDS.format(
+                                self.value,
+                                self.class_name,
+                                time_parts[2],
+                                Default.TIME_MIN_SECOND,
+                                Default.TIME_MAX_SECOND,
+                            )
+                        )
 
         # Do records have the correct class?
         match self.key:
@@ -718,9 +859,9 @@ class BaseStructure:
         if self.subs is not None:
             if isinstance(self.subs, list):
                 for sub in self.subs:
-                    sub.validate()
+                    sub.validate(specs=specs)
             else:
-                self.subs.validate()
+                self.subs.validate(specs=specs)
         return True
 
     def ged(
@@ -728,9 +869,10 @@ class BaseStructure:
         level: int = 1,
         format: bool = True,
         recordkey: Xref = Void.XREF,
+        specs: dict[str, dict[str:Any]] | None = None,
     ) -> str:
         """Generate the GEDCOM lines."""
-        if self.validate():
+        if self.validate(specs=specs):
             lines: str = Default.EMPTY
             if self.class_name in [
                 'Head',
@@ -769,7 +911,7 @@ class BaseStructure:
             if self.value == Default.EMPTY or self.value is None:
                 lines = Tagger.empty(lines, level, self.tag)
             elif isinstance(self.value, Xref) and level == 0:
-                lines = self.value.ged()
+                lines = self.value.ged(specs=specs)
             else:
                 lines = Tagger.string(
                     lines,
@@ -920,7 +1062,7 @@ class ExtensionAttributes(NamedTuple):
     required: list[str] | None = None
     single: list[str] | None = None
     permitted: list[str] | None = None
-    enum_key: str = Default.EMPTY
+    enumset_key: str = Default.EMPTY
     enum_tags: list[str] | None = None
 
 

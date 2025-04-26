@@ -27,7 +27,7 @@ class Msg:
     CANNOT_READ_SCHEMA_DEFINITION: str = 'The schema file "{0}" cannot be read.'
     CANNOT_READ_YAML_FILE: str = 'Cannot read yaml file "{0}" for tag "{1}". The tag will not be available until a yaml specification file is referenced.'
     CANNOT_SHOW: str = 'Cannot show item "{0}".'
-    CIRCULAR: str = '"{0}" has "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
+    CIRCULAR: str = '"{0}" and "{1}" reference each other. The https://gedcom.io/terms/v7/record-SNOTE prohibits this between shared notes and source records.'
     DEPRECATION_WARNING: str = 'The structure "{0}" has been deprecated and should not be used going forward.'
     DIRECTORY_NOT_FOUND: str = 'The directory "{0}" could not be found.'
     DOES_NOT_EQUAL: str = ' * DOES NOT EQUAL * '
@@ -47,6 +47,7 @@ class Msg:
     FILE_EXISTS: str = 'The file "{0}" already exists.'
     FILE_NOT_FOUND: str = 'The file "{0}" could not be found.'
     GED_FILE_ALREADY_LOADED: str = 'A ged file has already been loaded.'
+    GED_FILE_EMPTY: str = 'The file "{0}" is empty.'
     GED_NO_HEADER: str = 'The file "{0}" does not have the ged header: "{1}".'
     GED_NO_TRAILER: str = 'The file "{0}" does not have the ged trailer: "{1}".'
     GED_INVALID: str = 'The GEDCOM invalidation failed.'
@@ -115,6 +116,21 @@ class Msg:
     NOT_DATE_EXACT: str = (
         'The value "{0}" is not an exact date for structure "{1}".'
     )
+    NOT_DATE_EXACT_SPACES: str = (
+        'The value "{0}" is not an exact date for structure "{1}" since it has {2} spaces but it should have exactly {3} spaces.'
+    )
+    NOT_DATE_EXACT_MONTH: str = (
+        'The value "{0}" is not an exact date for structure "{1}" since the month value "{2}" is not recognized as a Gregorian month.'
+    )
+    NOT_DATE_EXACT_DAY: str = (
+        'The value "{0}" is not an exact date for structure "{1}" since the day value "{2}" is not greater than 0 but less than or equal to {3}.'
+    )
+    NOT_DATE_EXACT_TOO_LARGE: str = (
+        'The value "{0}" is not an exact date for structure "{1}" since it has {2} character but it should have no more than {3}.'
+    )
+    NOT_DATE_EXACT_YEAR: str = (
+        'The value "{0}" is not an exact date for structure "{1}" since the year value "{2}" is not an integer different from 0.'
+    )
     NOT_DATE_PERIOD: str = (
         'The value "{0}" is not a date period for structure "{1}".'
     )
@@ -155,6 +171,10 @@ class Msg:
     NOT_STRING: str = 'The value "{0}" is not a string for structure "{1}".'
     NOT_SUBMITTER_XREF: str = 'The value "{0}" is not a submitter cross reference for structure "{1}".'
     NOT_TIME: str = 'The value "{0}" is not a time for structure "{1}".'
+    NOT_TIME_COLON_COUNT: str = 'The value "{0}" is not a time for structure "{1}" since it has {2} colons. Only one or two are permitted.'
+    NOT_TIME_HOURS: str = 'The value "{0}" is not a time for structure "{1}" since it has hours "{2}" which is not between {3} and {4} for a 24-hour time.'
+    NOT_TIME_MINUTES: str = 'The value "{0}" is not a time for structure "{1}" since it has minutes "{2}" which is not between {3} and {4} for a 24-hour time.'
+    NOT_TIME_SECONDS: str = 'The value "{0}" is not a time for structure "{1}" since it has seconds "{2}" which is not greater than or equal to {3} and strictly less than {4} for a 24-hour time.'
     NOT_UNICODE: str = 'The file "{0}" is not unicode encoded.'
     NOT_VALID_ENUM: str = 'The value "{0}" is not in the enumeration list {1} for structure "{2}".'
 

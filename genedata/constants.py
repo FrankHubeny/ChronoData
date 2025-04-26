@@ -81,6 +81,8 @@ class Default:
     COMMA_REQUIRED: str = ',  # REQUIRED'
     CHOICE: int = 1
     CONT: str = 'CONT'
+    DATE_EXACT_SPACES: int = 2
+    DATE_EXACT_MAX_SIZE: int = len('01 JAN -2000') 
     DATE_DAY: int = 0
     DATE_MONTH: int = 0
     DATE_YEAR: int = 0
@@ -104,7 +106,7 @@ class Default:
     GED_VERSION_END: str = EOL
     GREATER_LESS_THAN: str = '>'
     HEAD_LINE: str = f'0 HEAD{EOL}'
-    HEADER: str = f'{HEAD_LINE}1 GEDC{EOL}2 VERS '
+    #HEADER: str = f'{HEAD_LINE}1 GEDC{EOL}2 VERS '
     HEIGHT: int = 0
     HYPHEN: str = '-'
     IGNORE: frozenset[str] = frozenset([
@@ -133,6 +135,7 @@ class Default:
     MIME: str = ''
     MONTHS: int = 0
     NO: str = 'No'
+    NOID: str = 'NOID'
     NONE: str = 'None'
     OCCURRED: str = 'Y'
     ONLY_ONE: str = 'Only One'
@@ -156,6 +159,7 @@ class Default:
     QUOTE_SINGLE: str = "'"
     QUOTE_DOUBLE: str = '"'
     RECORD: str = 'record'
+    EXT_RECORD_TYPE: str = 'ext'
     FAM_RECORD_TYPE: str = 'fam'
     INDI_RECORD_TYPE: str = 'indi'
     OBJE_RECORD_TYPE: str = 'obje'
@@ -212,9 +216,16 @@ class Default:
     TEST_SINGLE: str = 'Single'
     TEST_PAYLOAD: str = 'Payload'
     TIME_HOUR: int = 0
+    TIME_MIN_HOUR: int = 0
+    TIME_MAX_HOUR: int = 23
     TIME_MINUTE: int = 0
+    TIME_MIN_MINUTE: int = 0
+    TIME_MAX_MINUTE: int = 59
     TIME_SECOND: float = 0.0
+    TIME_MIN_SECOND: float = 0.0
+    TIME_MAX_SECOND: float = 60.0
     TIME_UTC: bool = False
+    TIME_UTC_CODE: str = 'Z'
     TOP: int = 0
     TRAILER: str = '0 TRLR'
     TRLR: str = 'TRLR'

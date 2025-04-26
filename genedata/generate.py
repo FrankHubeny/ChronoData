@@ -520,9 +520,9 @@ from genedata.structure import (
         required: list[str] = Query.required(key, specs)
         single: list[str] = Query.singular(key, specs)
         permitted: list[str] = Query.permitted(key, specs)
-        enum_key: str = Default.EMPTY
+        enumset_key: str = Default.EMPTY
         enum_tags: list[str] = []
-        enum_key, enum_tags = Query.enum_key_tags(key, specs)
+        enumset_key, enum_tags = Query.enum_key_tags(key, specs)
         value_arg: str = (
             f', {Default.CODE_VALUE}: {Classes.get_datatype(structure[key])}'
         )
@@ -570,7 +570,7 @@ from genedata.structure import (
             permitted={permitted_value},
             required={required_value},
             single={single_value},
-            enum_key='{enum_key}',
+            enumset_key='{enumset_key}',
             enum_tags={enum_tags_value},
             payload='{payload}',
             class_name='{Names.classname(key)}',

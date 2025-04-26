@@ -14,7 +14,7 @@ from genedata.methods import Util
 ged_version: str = '7.0'
 def test_age_ged() -> None:
     """Reproduce the age_ged example file."""
-    file = Util.read('tests\\ged_test\\age.ged')
+    file = Util.read_ged('tests\\ged_test\\age.ged')
     
     # Instantiate a Genealogy class.
     g = Genealogy()
