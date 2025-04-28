@@ -20,7 +20,8 @@ from typing import Any, Literal, NamedTuple, Self
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.methods import Names, Query, Tagger
+from genedata.methods import Names, Query, Tagger, Validate
+from genedata.specifications70 import Specs
 
 AnyList = Any | list[Any] | None
 FloatNone = float | None
@@ -72,7 +73,7 @@ class Xref:
         return f"Xref('{self.fullname}')"
 
     # def ged(self, info: str = Default.EMPTY) -> str:
-    def ged(self, specs: dict[str, dict[str, Any]] | None = None) -> str:
+    def ged(self) -> str:
         """Return the identifier formatted according to the GEDCOM standard."""
         lines: str = Default.EMPTY
         xref_name: str = self.fullname
@@ -331,18 +332,12 @@ class BaseStructure:
     ):
         # Process value argument
         self.value: str | int | Xref | None = value
+        self.payload: str = payload
+        if isinstance(self.value, str):
+            self.value = Validate.clean_value(self.value, self.payload)
         self.code_value: str = Default.EMPTY
         if isinstance(self.value, str):
             self.code_value = Names.quote_text(self.value)
-            # if Default.EOL in self.value:
-            #     if Default.QUOTE_SINGLE in self.value:
-            #         self.code_value = f'"""{self.value}"""'
-            #     else:
-            #         self.code_value = f"'''{self.value}'''"
-            # elif Default.QUOTE_SINGLE in self.value:
-            #     self.code_value = f'"{self.value}"'
-            # else:
-            #     self.code_value = f"'{self.value}'"
         elif isinstance(self.value, int):
             self.code_value = str(self.value)
         elif isinstance(self.value, Xref):
@@ -375,7 +370,6 @@ class BaseStructure:
         self.single: list[str] = single
         self.enumset_key: str = enumset_key
         self.enum_tags: list[str] = enum_tags
-        self.payload: str = payload
         self.class_name: str = class_name
         if len(self.enum_tags) > 0 and isinstance(self.value, str):
             self.value = self.value.upper()
@@ -384,23 +378,12 @@ class BaseStructure:
         # Identify which cross reference identifier opened the record.
         self.originator: Xref = Void.XREF
 
-    def validate(self, specs: dict[str, dict[str, Any]] | None = None) -> bool:
+    def validate(self, specs: dict[str, dict[str, Any]] = Specs) -> bool:
         """Validate the stored value."""
-        date_exact: dict[str, int] = {
-            'JAN': 31,
-            'FEB': 28,
-            'FEB_LEAP': 29,
-            'MAR': 31,
-            'APR': 30,
-            'MAY': 31,
-            'JUN': 30,
-            'JUL': 31,
-            'AUG': 31,
-            'SEP': 30,
-            'OCT': 31,
-            'NOV': 30,
-            'DEC': 31,
-        }
+
+        # specs: dict[str, dict[str, Any]] = {}
+        # if specifications is not None:
+        #     specs = specifications
 
         # Does it have all required substructures?
         for name in self.required:
@@ -429,7 +412,10 @@ class BaseStructure:
 
         # Does value have the required data type?
         match self.payload:
+            # Verify the value is a string.
             case 'http://www.w3.org/2001/XMLSchema#string':
+                # A shared note has its text incorporated in the SharedNoteXref,
+                # so just verify that the value is a SharedNoteXref.
                 if self.key == 'record-SNOTE':
                     if not isinstance(self.value, SharedNoteXref):
                         raise ValueError(
@@ -437,60 +423,85 @@ class BaseStructure:
                                 repr(self.value), self.class_name
                             )
                         )
-                elif not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+
+                # If the value is not an instance of SharedNoteXref, check that it is a string.
+                else:
+                    return Validate.string(self.value, self.class_name)
+                # elif not isinstance(self.value, str):
+                #     raise ValueError(
+                #         Msg.NOT_STRING.format(repr(self.value), self.class_name)
+                #     )
+
+            # Verify that the value is either `Y` or `''`, but not ``.
             case 'Y|<NULL>':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if self.value not in ['Y', '']:
-                    raise ValueError(
-                        Msg.VALUE_NOT_Y_OR_NULL.format(
-                            self.value, self.class_name
-                        )
-                    )
-                return True
+                return Validate.string(
+                    self.value, self.class_name
+                ) and Validate.y_or_null(self.value, self.class_name)
+                # if not isinstance(self.value, str) or self.value not in ['Y', '']:
+                #     raise ValueError(
+                #         Msg.VALUE_NOT_Y_OR_NULL.format(
+                #             self.value, self.class_name
+                #         )
+                #     )
+
+            # Verify that the value is a non-negative integer.
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                if not isinstance(self.value, int) or self.value < 0:
-                    raise ValueError(
-                        Msg.NOT_INTEGER.format(self.value, self.class_name)
-                    )
-                return True
+                return Validate.non_negative_integer(
+                    self.value, self.class_name
+                )
+
+            # Verify a value is in the enumeration set.
+            # Do this for a list of enumberation values.
             case 'https://gedcom.io/terms/v7/type-List#Enum':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                for value in self.value.split(','):
-                    if value.strip() not in self.enum_tags:
-                        raise ValueError(
-                            Msg.NOT_VALID_ENUM.format(
-                                self.value, self.enum_tags, self.class_name
-                            )
-                        )
-            case 'https://gedcom.io/terms/v7/type-Enum':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if specs is None:
-                    if self.value not in self.enum_tags:
-                        raise ValueError(
-                            Msg.NOT_VALID_ENUM.format(
-                                self.value, self.enum_tags, self.class_name
-                            )
-                        )
-                elif self.value not in Query.enumerations(
-                    self.enumset_key, specs
+                if Validate.string(self.value, self.class_name) and isinstance(
+                    self.value, str
                 ):
-                    raise ValueError(
-                        Msg.NOT_VALID_ENUM.format(
-                            self.value, self.enum_tags, self.class_name
+                    for value in self.value.split(Default.LIST_ITEM_SEPARATOR):
+                        # There are no extensions.
+                        if specs == Specs and value.strip() not in self.enum_tags:
+                            raise ValueError(
+                                Msg.NOT_VALID_ENUM.format(
+                                    self.value, self.enum_tags, self.class_name
+                                )
+                            )
+
+                        # There are extensions, so check this enumeration value
+                        # against the updated specification.
+                        if specs != Specs and self.value not in Query.enumerations(
+                            self.enumset_key, specs
+                        ):
+                            raise ValueError(
+                                Msg.NOT_VALID_ENUM.format(
+                                    self.value, self.enum_tags, self.class_name
+                                )
+                            )
+
+            # Verify a value is in the enumeration set.
+            case 'https://gedcom.io/terms/v7/type-Enum':
+                if Validate.string(self.value, self.class_name) and isinstance(
+                    self.value, str
+                ):
+                    # There are no extensions.
+                    if specs == Specs:
+                        if self.value not in self.enum_tags:
+                            raise ValueError(
+                                Msg.NOT_VALID_ENUM.format(
+                                    self.value, self.enum_tags, self.class_name
+                                )
+                            )
+
+                    # There are extensions, so check this enumeration value
+                    # against the updated specification.
+                    elif self.value not in Query.enumerations(
+                        self.enumset_key, specs
+                    ):
+                        raise ValueError(
+                            Msg.NOT_VALID_ENUM.format(
+                                self.value, self.enum_tags, self.class_name
+                            )
                         )
-                    )
+
+            # Verify that the value is an instance of IndividualXref.
             case '@<https://gedcom.io/terms/v7/record-INDI>@':
                 if not isinstance(self.value, IndividualXref):
                     raise ValueError(
@@ -498,6 +509,8 @@ class BaseStructure:
                             str(self.value), self.class_name
                         )
                     )
+
+            # Verify that the value is an instance of FamilyXref.
             case '@<https://gedcom.io/terms/v7/record-FAM>@':
                 if not isinstance(self.value, FamilyXref):
                     raise ValueError(
@@ -510,6 +523,8 @@ class BaseStructure:
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
+
+            # Verify that the value is an instance of SubmitterXref.
             case '@<https://gedcom.io/terms/v7/record-SUBM>@':
                 if not isinstance(self.value, SubmitterXref):
                     raise ValueError(
@@ -517,140 +532,43 @@ class BaseStructure:
                             str(self.value), self.class_name
                         )
                     )
+
+            # Verify the value meets the language specification.
             case 'http://www.w3.org/2001/XMLSchema#Language':
                 if not isinstance(self.value, str):
                     raise ValueError(
                         Msg.NOT_STRING.format(repr(self.value), self.class_name)
                     )
-                
-            # Verify that the constrainsts in 
-            # [GEDCOM Date datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date) are met.
+
+            # Verify the value meets the date period specifications
             case 'https://gedcom.io/terms/v7/type-Date#period':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if not re.match('^TO|^FROM', self.value) or re.match(
-                    '[a-z]', self.value
-                ):
-                    raise ValueError(
-                        Msg.NOT_DATE_PERIOD.format(self.value, self.class_name)
-                    )
-                
-            # Verify that the constrainsts in 
-            # [GEDCOM Date datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date) are met.
+                return Validate.date_period(self.value, self.class_name, specs)
+
+            # Verify the value meets the date exact specifications.
             case 'https://gedcom.io/terms/v7/type-Date#exact':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if (
-                    re.search('[a-z]', self.value) is not None
-                    or re.search('[0-9]', self.value) is None
-                ):
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT.format(self.value, self.class_name)
-                    )
-                if len(self.value) > Default.DATE_EXACT_MAX_SIZE:
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_TOO_LARGE.format(self.value, self.class_name, str(len(self.value)), Default.DATE_EXACT_MAX_SIZE)
-                    )
-                space_count: int = self.value.count(Default.SPACE)
-                if space_count != Default.DATE_EXACT_SPACES:
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_SPACES.format(
-                            self.value,
-                            self.class_name,
-                            str(space_count),
-                            Default.DATE_EXACT_SPACES,
-                        )
-                    )
-                date_parts: list[str] = self.value.split(Default.SPACE)
-                day: int = int(date_parts[0])
-                month: str = date_parts[1]
-                year: int = int(date_parts[2])
-                if month not in date_exact:
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_MONTH.format(
-                            self.value, self.class_name, date_parts[1]
-                        )
-                    )
-                if (day < 1 or day > date_exact[month]) and month != 'FEB':
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_DAY.format(
-                            self.value,
-                            self.class_name,
-                            date_parts[0],
-                            str(date_exact[month]),
-                        )
-                    )
-                if month == 'FEB' and (
-                    (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
-                ):
-                    if day < 1 or day > date_exact['FEB_LEAP']:
-                        raise ValueError(
-                            Msg.NOT_DATE_EXACT_DAY.format(
-                                self.value,
-                                self.class_name,
-                                date_parts[0],
-                                date_exact['FEB_LEAP'],
-                            )
-                        )
-                elif month == 'FEB' and (day < 1 or day > date_exact[month]):
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_DAY.format(
-                            self.value,
-                            self.class_name,
-                            date_parts[0],
-                            date_exact[month],
-                        )
-                    )
-                if not isinstance(year, int) or year == 0:
-                    raise ValueError(
-                        Msg.NOT_DATE_EXACT_YEAR.format(self.value, self.class_name, date_parts[2])
-                    )
+                return Validate.date_exact(self.value, self.class_name)
+
+            # Verify the value meets the general date specifications.
             case 'https://gedcom.io/terms/v7/type-Date':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if (
-                    re.search('[a-z]', self.value) is not None
-                    or re.search('[0-9]', self.value) is None
-                ):
-                    raise ValueError(
-                        Msg.NOT_DATE.format(self.value, self.class_name)
-                    )
+                return Validate.date(self.value, self.class_name, specs)
+
+            # Verify the value meets the file path specifications.
             case 'https://gedcom.io/terms/v7/type-FilePath':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+                return Validate.string(self.value, self.class_name)
+
+            # Verify the value meets the personal name specifications.
             case 'https://gedcom.io/terms/v7/type-Name':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+                return Validate.name(self.value, self.class_name)
+
+            # Verify that the value meets the age specifications.
             case 'https://gedcom.io/terms/v7/type-Age':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if (
-                    re.search('[abcefghijklnopqrstuxz]|[A-Z]', self.value)
-                    or not re.search('[ymwd]', self.value)
-                    or not re.search('[0-9]', self.value)
-                    or not re.search('^[<|>|\\d]', self.value)
-                    or re.search('[ymwd][ymwd]', self.value)
-                ) and self.value != Default.EMPTY:
-                    raise ValueError(
-                        Msg.NOT_AGE.format(str(self.value), self.class_name)
-                    )
+                return Validate.age(self.value, self.class_name)
+
+            # Verify the media type meets the specifications.
             case 'http://www.w3.org/ns/dcat#mediaType':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+                return Validate.string(self.value, self.class_name)
+
+            # Verify that the value is an instance of MultimediaXref.
             case '@<https://gedcom.io/terms/v7/record-OBJE>@':
                 if not isinstance(self.value, MultimediaXref):
                     raise ValueError(
@@ -658,6 +576,8 @@ class BaseStructure:
                             repr(self.value), self.class_name
                         )
                     )
+
+            # Verify that the value is an instance of RepositoryXref.
             case '@<https://gedcom.io/terms/v7/record-REPO>@':
                 if not isinstance(self.value, RepositoryXref):
                     raise ValueError(
@@ -665,6 +585,8 @@ class BaseStructure:
                             repr(self.value), self.class_name
                         )
                     )
+
+            # Verify that the value is an instance of SharedNoteXref.
             case '@<https://gedcom.io/terms/v7/record-SNOTE>@':
                 if not isinstance(self.value, SharedNoteXref):
                     raise ValueError(
@@ -672,6 +594,8 @@ class BaseStructure:
                             repr(self.value), self.class_name
                         )
                     )
+
+            # Verify that the value is an instance of SourceXref.
             case '@<https://gedcom.io/terms/v7/record-SOUR>@':
                 if not isinstance(self.value, SourceXref):
                     raise ValueError(
@@ -679,69 +603,10 @@ class BaseStructure:
                             repr(self.value), self.class_name
                         )
                     )
+
+            # Verify that the data type meets the time specifications.
             case 'https://gedcom.io/terms/v7/type-Time':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
-                if re.search('[a-zA-Y]', self.value):
-                    raise ValueError(
-                        Msg.NOT_TIME.format(self.value, self.class_name)
-                    )
-                colon_count: int = self.value.count(Default.COLON)
-                if colon_count > 2 or colon_count == 0:
-                    raise ValueError(
-                        Msg.NOT_TIME_COLON_COUNT.format(
-                            self.value, self.class_name, str(colon_count)
-                        )
-                    )
-                time_parts: list[str] = self.value.split(Default.COLON)
-                hours: int = int(time_parts[0])
-                minutes: int = int(time_parts[1])
-                if (
-                    not isinstance(hours, int)
-                    or hours < Default.TIME_MIN_HOUR
-                    or hours > Default.TIME_MAX_HOUR
-                ):
-                    raise ValueError(
-                        Msg.NOT_TIME_HOURS.format(
-                            self.value,
-                            self.class_name,
-                            time_parts[0],
-                            Default.TIME_MIN_HOUR,
-                            Default.TIME_MAX_HOUR,
-                        )
-                    )
-                if (
-                    not isinstance(minutes, int)
-                    or minutes < Default.TIME_MIN_MINUTE
-                    or minutes > Default.TIME_MAX_MINUTE
-                ):
-                    raise ValueError(
-                        Msg.NOT_TIME_MINUTES.format(
-                            self.value,
-                            self.class_name,
-                            time_parts[1],
-                            Default.TIME_MIN_MINUTE,
-                            Default.TIME_MAX_MINUTE,
-                        )
-                    )
-                if len(time_parts) == 3:
-                    secs, _, _ = time_parts[2].partition(Default.TIME_UTC_CODE)
-                    seconds: float = float(secs)
-                    if (
-                        seconds < Default.TIME_MIN_SECOND
-                        or seconds >= Default.TIME_MAX_SECOND
-                    ):
-                        raise ValueError(
-                            Msg.NOT_TIME_SECONDS.format(
-                                self.value,
-                                self.class_name,
-                                time_parts[2],
-                                Default.TIME_MIN_SECOND,
-                                Default.TIME_MAX_SECOND,
-                            )
-                        )
+                return Validate.time(self.value, self.class_name)
 
         # Do records have the correct class?
         match self.key:
@@ -869,7 +734,7 @@ class BaseStructure:
         level: int = 1,
         format: bool = True,
         recordkey: Xref = Void.XREF,
-        specs: dict[str, dict[str:Any]] | None = None,
+        specs: dict[str, dict[str, Any]] = Specs,
     ) -> str:
         """Generate the GEDCOM lines."""
         if self.validate(specs=specs):
@@ -911,7 +776,7 @@ class BaseStructure:
             if self.value == Default.EMPTY or self.value is None:
                 lines = Tagger.empty(lines, level, self.tag)
             elif isinstance(self.value, Xref) and level == 0:
-                lines = self.value.ged(specs=specs)
+                lines = self.value.ged()
             else:
                 lines = Tagger.string(
                     lines,
@@ -1053,7 +918,7 @@ class BaseStructure:
 
 
 class ExtensionAttributes(NamedTuple):
-    key: int = 0
+    key: str = Default.EMPTY
     tag: str = Default.EMPTY
     yaml_file: str = Default.EMPTY
     yaml_type: str = Default.EMPTY
@@ -1081,7 +946,7 @@ class Ext(BaseStructure):
             permitted=attributes.permitted,
             required=attributes.required,
             single=attributes.single,
-            enum_key=attributes.enum_key,
+            enumset_key=attributes.enumset_key,
             enum_tags=attributes.enum_tags,
             payload=attributes.payload,
             class_name='Ext',

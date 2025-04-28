@@ -113,6 +113,10 @@ class Msg:
     NO_HEADER: str = 'The file does not have a ged header: {0}'
     NOT_AGE: str = 'The value "{0}" is not an age for structure "{1}".'
     NOT_DATE: str = 'The value "{0}" is not a date for structure "{1}".'
+    NOT_DATE_CALENDAR: str = 'The value "{0}" is not a date for structure "{1}" because the calendar "{2}" is not in the list {3} of available calendars.'
+    NOT_DATE_EPOCH: str = (
+        'The value "{0}" is not a date period for structure "{1}" since the epoch is not in the list of epochs {2}.'
+    )
     NOT_DATE_EXACT: str = (
         'The value "{0}" is not an exact date for structure "{1}".'
     )
@@ -125,14 +129,26 @@ class Msg:
     NOT_DATE_EXACT_DAY: str = (
         'The value "{0}" is not an exact date for structure "{1}" since the day value "{2}" is not greater than 0 but less than or equal to {3}.'
     )
-    NOT_DATE_EXACT_TOO_LARGE: str = (
-        'The value "{0}" is not an exact date for structure "{1}" since it has {2} character but it should have no more than {3}.'
-    )
+    # NOT_DATE_EXACT_TOO_LARGE: str = (
+    #     'The value "{0}" is not an exact date for structure "{1}" since it has {2} character but it should have no more than {3}.'
+    # )
     NOT_DATE_EXACT_YEAR: str = (
         'The value "{0}" is not an exact date for structure "{1}" since the year value "{2}" is not an integer different from 0.'
     )
+    NOT_DATE_MONTH: str = (
+        'The value "{0}" is not a date period for structure "{1}" since the month is not in the list of months {2}.'
+    )
     NOT_DATE_PERIOD: str = (
         'The value "{0}" is not a date period for structure "{1}".'
+    )
+    NOT_DATE_PREFACE: str = (
+        'The value "{0}" is not a date period for structure "{1}" since "{2}" is not recognized.'
+    )
+    NOT_DATE_SPACES: str = (
+        'The value "{0}" is not a date period for structure "{1}" because there are {1} spaces in the string, more than expected.'
+    )
+    NOT_DATE_ZERO_YEAR: str = (
+        'The value "{0}" is not a date period for structure "{1}" since there in no zero year in the calendar.'
     )
     NOT_DEFAULT: str = (
         'GEDCOM requires a specific value different from the default "{0}".'
@@ -159,6 +175,7 @@ class Msg:
     )
     NOT_MULTIMEDIA_XREF: str = 'The value "{0}" is not a multimedia cross reference for structure "{1}".'
     NOT_NAME: str = 'The value "{0}" is not a name for structure "{1}".'
+    NOT_NAME_SLASH: str = 'The value "{0}" is not a name for structure "{1}" since it contains {2} slash marks when it can have either 0 or 2 of them.'
     NOT_PERMITTED: str = 'The substructure "{0}" is not in the permitted list {1} for structure "{2}".'
     NOT_RECORD: str = (
         'The value "{0}" is not an appropriate xref value for structure "{1}".'

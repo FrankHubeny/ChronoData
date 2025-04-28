@@ -10300,6 +10300,7 @@ class Plac(BaseStructure):
         First create source cross reference identifier `S1` and then build the ged lines
         in a RecordSour.
         >>> import genedata.classes70 as gc
+        >>> from genedata.specifications70 import Specs
         >>> from genedata.build import Genealogy
         >>> g = Genealogy()
         >>> sour = g.source_xref('S1')
@@ -10312,7 +10313,7 @@ class Plac(BaseStructure):
         ...         )
         ...     )
         ... )
-        >>> print(m.ged())
+        >>> print(m.ged(specs=Specs))
         0 @S1@ SOUR
         1 DATA
         2 EVEN BIRT
@@ -11695,15 +11696,16 @@ class Resn(BaseStructure):
         This example shows a successful run of the Resn structure using
         the enumeration value 'CONFIDENTIAL'.
         >>> import genedata.classes70 as gc
+        >>> from genedata.specifications70 import Specs
         >>> m = gc.Resn('CONFIDENTIAL')
-        >>> print(m.ged(1))
+        >>> print(m.ged(1, Specs))
         1 RESN CONFIDENTIAL
         <BLANKLINE>
 
         More than one enumeration value may be entered for this particular
         enumeration set by separating the values with a comma.  For example,
         >>> n = gc.Resn('CONFIDENTIAL, LOCKED')
-        >>> print(n.ged(1))
+        >>> print(n.ged(1, Specs))
         1 RESN CONFIDENTIAL, LOCKED
         <BLANKLINE>
 

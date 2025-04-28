@@ -40,7 +40,7 @@ def test_save_ged() -> None:
 
 def test_add_calendar_tag() -> None:
     g = Genealogy()
-    g.add_tag('_GREGORIAN', 'tests/data/good_calendar.yaml')
+    g.document_tag('_GREGORIAN', 'tests/data/good_calendar.yaml')
     assert (
         g.specification[Default.YAML_TYPE_CALENDAR][1][Default.YAML_TYPE]
         == Default.YAML_TYPE_CALENDAR
@@ -49,7 +49,7 @@ def test_add_calendar_tag() -> None:
 
 def test_add_calendar_tag_underline_upper() -> None:
     g = Genealogy()
-    g.add_tag('gregorian', 'tests/data/good_calendar.yaml')
+    g.document_tag('gregorian', 'tests/data/good_calendar.yaml')
     assert (
         g.specification[Default.YAML_TYPE_CALENDAR][1][
             Default.YAML_STANDARD_TAG

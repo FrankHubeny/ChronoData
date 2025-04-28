@@ -12,12 +12,259 @@ import re
 
 import pytest
 
-from genedata.classes70 import Date, DateExact, HeadDate, Time
+from genedata.classes70 import (
+    DataEvenDate,
+    Date,
+    DateExact,
+    HeadDate,
+    NoDate,
+    Sdate,
+    Time,
+)
 from genedata.constants import Default
 from genedata.messages import Msg
+from genedata.specifications70 import Specs
 
 # 1. Validate: Exercise all validation checks.
 #    a. Good run.
+
+
+def test_data_even_date_year() -> None:
+    assert DataEvenDate('FROM 2000 TO 2001').validate(specs=Specs)
+
+
+def test_data_even_data_full() -> None:
+    assert DataEvenDate('FROM JULIAN 1 JAN 2000 TO JULIAN 1 JAN 2001').validate(
+        specs=Specs
+    )
+
+
+def test_data_even_date_just_to() -> None:
+    assert DataEvenDate('TO 2001').validate(specs=Specs)
+
+
+def test_date_just_year() -> None:
+    assert Date('2000').validate(specs=Specs)
+
+
+def test_sdate_just_year() -> None:
+    assert Sdate('2000').validate(specs=Specs)
+
+
+def test_date_cal_year() -> None:
+    assert Date('CAL 2000').validate(specs=Specs)
+
+
+def test_date_abt_year() -> None:
+    assert Date('ABT 2000').validate(specs=Specs)
+
+
+def test_date_est_year() -> None:
+    assert Date('EST 2000').validate(specs=Specs)
+
+
+def test_date_bef_year() -> None:
+    assert Date('BEF 2000').validate(specs=Specs)
+
+
+def test_date_aft_year() -> None:
+    assert Date('AFT 2000').validate(specs=Specs)
+
+
+def test_date_just_est_year() -> None:
+    assert Date('EST 2000').validate(specs=Specs)
+
+
+def test_date_just_bet_year() -> None:
+    assert Date('BET 2000 AND 2001').validate(specs=Specs)
+
+
+def test_date_just_from_year() -> None:
+    assert Date('FROM 2000 TO 2001').validate(specs=Specs)
+
+
+def test_date_just_to_year() -> None:
+    assert Date('TO 2000').validate(specs=Specs)
+
+
+def test_date_cal_full_year() -> None:
+    assert Date('CAL GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_abt_full_year() -> None:
+    assert Date('ABT GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_est_full_year() -> None:
+    assert Date('EST GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_bef_full_year() -> None:
+    assert Date('BEF GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_aft_full_year() -> None:
+    assert Date('AFT GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_est_full_year2() -> None:
+    assert Date('EST GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_bet_full_year() -> None:
+    assert Date(
+        'BET GREGORIAN 1 JAN 2000 BCE AND GREGORIAN 1 JAN 2001 BCE'
+    ).validate(specs=Specs)
+
+
+def test_date_from_full_year() -> None:
+    assert Date(
+        'FROM GREGORIAN 1 JAN 2000 BCE TO GREGORIAN 1 JAN 2001 BCE'
+    ).validate(specs=Specs)
+
+
+def test_date_to_full_year() -> None:
+    assert Date('TO GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_cal_year() -> None:
+    assert Date('CAL 2000').validate(specs=Specs)
+
+
+def test_date_just_abt_year() -> None:
+    assert Date('ABT 2000').validate(specs=Specs)
+
+
+def test_date_just_bef_year() -> None:
+    assert Date('BEF 2000').validate(specs=Specs)
+
+
+def test_date_just_aft_year() -> None:
+    assert Date('AFT 2000').validate(specs=Specs)
+
+
+def test_date_just_year_epoch() -> None:
+    assert Date('2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_est_year_epoch() -> None:
+    assert Date('EST 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_cal_year_epoch() -> None:
+    assert Date('CAL 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_abt_year_epoch() -> None:
+    assert Date('ABT 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_bef_year_epoch() -> None:
+    assert Date('BEF 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_aft_year_epoch() -> None:
+    assert Date('AFT 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_fullyear() -> None:
+    assert Date('1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_est_fullyear() -> None:
+    assert Date('EST 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_cal_fullyear() -> None:
+    assert Date('CAL 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_abt_fullyear() -> None:
+    assert Date('ABT 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_bef_fullyear() -> None:
+    assert Date('BEF 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_aft_fullyear() -> None:
+    assert Date('AFT 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_monthyear() -> None:
+    assert Date('1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_est_monthyear() -> None:
+    assert Date('EST JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_cal_monthyear() -> None:
+    assert Date('CAL JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_abt_monthyear() -> None:
+    assert Date('ABT JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_bef_monthyear() -> None:
+    assert Date('BEF JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_aft_monthyear() -> None:
+    assert Date('AFT JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_julian_year() -> None:
+    assert Date('JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_est_julian_year() -> None:
+    assert Date('EST JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_cal_julian_year() -> None:
+    assert Date('CAL JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_abt_julian_year() -> None:
+    assert Date('ABT JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_bef_julian_year() -> None:
+    assert Date('BEF JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_aft_julian_year() -> None:
+    assert Date('AFT JULIAN 1 JAN 2000').validate(specs=Specs)
+
+
+def test_date_just_julian_fullyear() -> None:
+    assert Date('GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_est_julian_fullyear() -> None:
+    assert Date('EST GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_cal_julian_fullyear() -> None:
+    assert Date('CAL GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_abt_julian_fullyear() -> None:
+    assert Date('ABT GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_bef_julian_fullyear() -> None:
+    assert Date('BEF GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_just_aft_julian_fullyear() -> None:
+    assert Date('AFT GREGORIAN 1 JAN 2000 BCE').validate(specs=Specs)
+
+
+def test_date_empty() -> None:
+    assert Date('').validate(specs=Specs)
 
 
 def test_dateexact_nozero() -> None:
@@ -59,8 +306,264 @@ def test_time_seconds_float_utc() -> None:
 #    a. Catch exceptions.
 
 
+def test_date_not_string() -> None:
+    m = Date(12345)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_STRING.format(str(m.value), m.class_name)),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_gregorian_month() -> None:
+    m = Date('1 XYZ 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_MONTH.format(
+                m.value,
+                m.class_name,
+                str(
+                    [
+                        'APR',
+                        'AUG',
+                        'DEC',
+                        'FEB',
+                        'JAN',
+                        'JUL',
+                        'JUN',
+                        'MAR',
+                        'MAY',
+                        'NOV',
+                        'OCT',
+                        'SEP',
+                    ]
+                ),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_julian_month() -> None:
+    m = Date('JULIAN 1 XYZ 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_MONTH.format(
+                m.value,
+                m.class_name,
+                str(
+                    [
+                        'APR',
+                        'AUG',
+                        'DEC',
+                        'FEB',
+                        'JAN',
+                        'JUL',
+                        'JUN',
+                        'MAR',
+                        'MAY',
+                        'NOV',
+                        'OCT',
+                        'SEP',
+                    ]
+                ),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_hebrew_month() -> None:
+    m = Date('HEBREW 1 XYZ 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_MONTH.format(
+                m.value,
+                m.class_name,
+                str(
+                    [
+                        'APR',
+                        'AUG',
+                        'DEC',
+                        'FEB',
+                        'JAN',
+                        'JUL',
+                        'JUN',
+                        'MAR',
+                        'MAY',
+                        'NOV',
+                        'OCT',
+                        'SEP',
+                    ]
+                ),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_month_day_high() -> None:
+    m = Date('32 JAN 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(32),
+                str(31),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_month_day_low() -> None:
+    m = Date('0 JAN 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(0),
+                str(31),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_high_leapyear() -> None:
+    m = Date('30 FEB 2004')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(30),
+                str(29),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_high() -> None:
+    m = Date('29 FEB 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(29),
+                str(28),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_low() -> None:
+    m = Date('0 FEB 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(0),
+                str(28),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_julian_high_leapyear() -> None:
+    m = Date('JULIAN 29 FEB 2002')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(29),
+                str(28),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_julian_high() -> None:
+    m = Date('JULIAN 30 FEB 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(30),
+                str(29),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_not_feb_day_julian_low() -> None:
+    m = Date('JULIAN 0 FEB 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                m.value,
+                m.class_name,
+                str(0),
+                str(29),
+            )
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_bad_epoch() -> None:
+    m = Date('1 JAN 2000 XYZ')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EPOCH.format(m.value, m.class_name, str(['BCE']))
+        ),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_zero_year() -> None:
+    m = Date('1 JAN 0')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_DATE_ZERO_YEAR.format(m.value, m.class_name)),
+    ):
+        m.validate(specs=Specs)
+
+
+def test_date_only_zero_year() -> None:
+    m = Date('0')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_DATE_ZERO_YEAR.format(m.value, m.class_name)),
+    ):
+        m.validate(specs=Specs)
+
+
 def test_dateexact_not_string() -> None:
-    m = DateExact(12345)
+    m = DateExact(12345)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.NOT_STRING.format(str(m.value), m.class_name)),
@@ -86,21 +589,8 @@ def test_not_dateexact_no_digit() -> None:
         m.validate()
 
 
-def test_not_dateexact_too_large() -> None:
-    m = DateExact('01 JAN -2000 ')
-    with pytest.raises(
-        ValueError,
-        match=re.escape(
-            Msg.NOT_DATE_EXACT_TOO_LARGE.format(
-                m.value, m.class_name, 13, Default.DATE_EXACT_MAX_SIZE
-            )
-        ),
-    ):
-        m.validate()
-
-
 def test_not_dateexact_extra_space() -> None:
-    m = DateExact('1 JAN 2000 ')
+    m = DateExact('1 JAN 2000 BCE')
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -218,8 +708,26 @@ def test_not_dateexact_year_zero() -> None:
         m.validate()
 
 
+def test_not_dateevendate_not_est() -> None:
+    m = DataEvenDate('EST 1 JAN 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_DATE_PERIOD.format(m.value, m.class_name)),
+    ):
+        m.validate()
+
+
+def test_not_nodate_not_bet_and() -> None:
+    m = NoDate('BET 1 JAN 2000 AND 2 JAN 2000')
+    with pytest.raises(
+        ValueError,
+        match=re.escape(Msg.NOT_DATE_PERIOD.format(m.value, m.class_name)),
+    ):
+        m.validate()
+
+
 def test_time_not_string() -> None:
-    m = Time(12345)
+    m = Time(12345)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
         match=re.escape(Msg.NOT_STRING.format(str(m.value), m.class_name)),
@@ -291,6 +799,7 @@ def test_not_time_over_24_hours() -> None:
     ):
         m.validate()
 
+
 def test_not_time_negative_minutes() -> None:
     m = Time('01:-1:02.1')
     with pytest.raises(
@@ -323,6 +832,7 @@ def test_not_time_over_59_minutes() -> None:
         ),
     ):
         m.validate()
+
 
 def test_not_time_negative_seconds() -> None:
     m = Time('01:01:-1.1')
