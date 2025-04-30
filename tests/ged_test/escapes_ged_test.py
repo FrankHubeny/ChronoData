@@ -10,7 +10,7 @@ from genedata.methods import Util
 
 def test_escape_ged() -> None:
     # Test constructing the escapes.ged test data.
-    file = Util.read_ged('tests\\ged_test\\escapes.ged')
+    file = Util.read_ged('tests\\data\\ged_examples\\escapes.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc

@@ -1,0 +1,20 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: month
+
+uri: tests/data/extension_tests/months/month-_MYAPR
+
+extension tags: '_MYAPR'
+
+specification:
+  - My April
+
+label: 'My April'
+
+calendars:
+  - "tests/data/extension_tests/calendars/cal-_MYGREGORIAN"
+
+contact: "genedata"
+...

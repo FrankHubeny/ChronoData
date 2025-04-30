@@ -1,0 +1,20 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: month
+
+uri: tests/data/extension_tests/months/month-_MYSEP
+
+extension tags: '_MYSEP'
+
+specification:
+  - My September
+
+label: 'September'
+
+calendars:
+  - "tests/data/extension_tests/calendars/cal-_MYGREGORIAN"
+
+contact: "genedata"
+...

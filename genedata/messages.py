@@ -43,6 +43,7 @@ class Msg:
     EXTENSION_ENUM_TAG: str = (
         'The tag "{0}" is not a value of the enumeration "{1}".'
     )
+    # EXTENSION_EXISTS: str = 'The extension key "{0}" based on the uri already exists in the "{1}" dictionary.'
     FACT_REQUIRES_TYPE: str = 'The FACT tag requires a non-empty TYPE.'
     FILE_EXISTS: str = 'The file "{0}" already exists.'
     FILE_NOT_FOUND: str = 'The file "{0}" could not be found.'
@@ -109,6 +110,7 @@ class Msg:
         'The value is required to be other than the empty string.'
     )
     NO_EMPTY_TAG: str = 'The tag is required to be not the empty tag.'
+    NO_SLASH: str = 'The value "{0}" is not a media type for structure "{1}" because it does not have a slash in the value.'
     NO_TRAILER: str = 'The file does not have a ged trailer: {0}'
     NO_HEADER: str = 'The file does not have a ged header: {0}'
     NOT_AGE: str = 'The value "{0}" is not an age for structure "{1}".'
@@ -238,6 +240,7 @@ class Msg:
         'The tag {0} cannot have a payload different from "Y" or "".'
     )
     TAG_REQUIRED: str = 'The substructure "{0}" is required by "{0}".'
+    TAG_SPACES: str = 'The value "{0}" contains {1} spaces.  Only one space separating the tag from the uri is permitted.'
     UNDOCUMENTED: str = 'Tags without adequate documentation are not supported.'
     UNKNOWN_TAG: str = (
         'The structure at "{0}" does not have a name for its tag.'

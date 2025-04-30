@@ -8,7 +8,7 @@ ged_version: str = '7.0'
 
 def test_remarriage2_ged() -> None:
     # Test constructing the remarriage2_ged test data.
-    file = Util.read('tests\\ged_test\\remarriage2.ged')
+    file = Util.read('tests\\data\\ged_examples\\remarriage2.ged')
     
     # Import the required packages and classes.
     import genedata.classes70 as gc

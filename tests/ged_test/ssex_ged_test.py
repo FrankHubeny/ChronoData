@@ -8,7 +8,7 @@ ged_version: str = '7.0'
 
 def test_ssex_ged() -> None:
     """ Test constructing the same sex marriage_ged test data."""
-    file = Util.read('tests\\ged_test\\same-sex-marriage.ged')
+    file = Util.read('tests\\data\\ged_examples\\same-sex-marriage.ged')
     
     # Import the required packages and classes.
     import genedata.classes70 as gc

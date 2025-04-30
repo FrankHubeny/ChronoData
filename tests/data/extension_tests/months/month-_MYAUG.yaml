@@ -1,0 +1,20 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: month
+
+uri: tests/data/extension_tests/months/month-_MYAUG
+
+extension tags: '_MYAUG'
+
+specification:
+  - My August
+
+label: 'August'
+
+calendars:
+  - "tests/data/extension_tests/calendars/cal-_MYGREGORIAN"
+
+contact: "genedata"
+...

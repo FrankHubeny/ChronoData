@@ -6,7 +6,7 @@ from genedata.methods import Util
 
 def test_lang_ged() -> None:
     # Test constructing the remarriage2_ged test data.
-    file = Util.read('tests\\ged_test\\lang.ged')
+    file = Util.read('tests\\data\\ged_examples\\lang.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc

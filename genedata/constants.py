@@ -56,6 +56,8 @@ class Default:
     BRACKET_RIGHT: str = ']'
     BRACKET_LEFT: str = '['
     BRACKET_LEFT_RIGHT: str = '[]'
+    CALENDAR_DEFAULT: str = 'GREGORIAN'
+    CALENDAR_KEY_DEFAULT: str = 'cal-GREGORIAN'
     CARDINALITY_ANY_NUMBER: str = ':M}'
     CARDINALITY_OPTIONAL: str = '{0:'
     CARDINALITY_REQUIRED: str = '{1:'
@@ -176,7 +178,7 @@ class Default:
     #     SOUR_RECORD_TYPE,
     #     SUBM_RECORD_TYPE,
     # ])
-    RECORD_CLASS: tuple[str, str, str, str, str, str, str, str] = (
+    RECORD_CLASS: tuple[str, str, str, str, str, str, str, str, str] = (
         'Head',
         'RecordFam',
         'RecordIndi',

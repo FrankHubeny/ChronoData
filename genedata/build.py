@@ -217,17 +217,17 @@ class Genealogy:
         """Validate the ged string then split it into records without the trailer."""
 
         if self.ged_file != Default.EMPTY:
-            # A trailer record `0 TRLR` must be in the file.
-            if Default.GED_TRAILER not in self.ged_file:
-                raise ValueError(Msg.NO_TRAILER.format(Default.GED_TRAILER))
+            # # A trailer record `0 TRLR` must be in the file.
+            # if Default.GED_TRAILER not in self.ged_file:
+            #     raise ValueError(Msg.NO_TRAILER.format(Default.GED_TRAILER))
 
-            # A header record `0 HEAD` must be in the file.
-            if Default.GED_HEADER not in self.ged_file:
-                raise ValueError(Msg.NO_HEADER.format(Default.GED_HEADER))
+            # # A header record `0 HEAD` must be in the file.
+            # if Default.GED_HEADER not in self.ged_file:
+            #     raise ValueError(Msg.NO_HEADER.format(Default.GED_HEADER))
 
             # Each line starts with a digit.
-            if re.search('\n\\D', self.ged_file):
-                raise ValueError(Msg.NOT_GED_STRINGS)
+            # if re.search('\n\\D', self.ged_file):
+            #     raise ValueError(Msg.NOT_GED_STRINGS)
 
             # Remove the trailer along with everything after it.
             ged: str = Default.EMPTY
@@ -239,7 +239,7 @@ class Genealogy:
             ged = ''.join([Default.GED_HEADER, ged_temp])
 
             # Replace CONT and escaped @ with special string to remove later.
-            ged: str = re.sub('\n\\d CONT @', Default.GED_REPLACE_THIS, ged)
+            ged = re.sub('\n\\d CONT @', Default.GED_REPLACE_THIS, ged)
 
             # Replace remaining CONT with special string to remove later.
             ged = re.sub('\n\\d CONT ', Default.GED_REPLACE_THIS, ged)
@@ -286,7 +286,7 @@ class Genealogy:
                                 Default.SPACE, 2
                             )
                             name = Names.record_name(xref_tag[1], xref_tag[0])
-                            xref_name: str = ''.join(
+                            xref_name = ''.join(
                                 [
                                     name,
                                     Default.UNDERLINE,
@@ -299,7 +299,7 @@ class Genealogy:
                                 )
                             )
 
-    def view_extensions(self) -> tuple[list[str], list[list[str]], list[str]]:
+    def view_extensions(self) -> tuple[list[list[str]], list[str], list[str]]:
         """Display a list of available extensions to use or be aware of.
 
         There are three lists returned.  The first list corresponds to the
@@ -312,8 +312,8 @@ class Genealogy:
         the variable assigned to this first returned list in a Jupyter notebook
         to see all of the values.
         """
-        keys: list[str] = []
         values: list[list[str]] = []
+        keys: list[str] = []
         labels: list[str] = [
             'Tag',
             'Specification',
@@ -323,7 +323,7 @@ class Genealogy:
             'Required',
             'Permitted',
             'Single',
-            'Enum Key',
+            'Enumset Key',
             'Enum Tags',
             'Yaml Dictionary',
         ]
@@ -406,26 +406,28 @@ class Genealogy:
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
         try:
-            yaml_dict: dict[str, Any] = Util.read_yaml(yaml_file)
+            yaml_dict = Util.read_yaml(yaml_file)
         except Exception:
             logging.info(
                 Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited)
             )
         else:
             self.tag_counter += 1
-            #if Default.YAML_TYPE in yaml_dict:
-            yaml_type: str = str(yaml_dict[Default.YAML_TYPE])
-            self.specification[yaml_type].update({self.tag_counter: yaml_dict})
+            yaml_type = str(yaml_dict[Default.YAML_TYPE])
+            extension_key: str = Names.keyname(str(yaml_dict[Default.YAML_URI]))
+            # if extension_key in self.specification[yaml_type]:
+            #     raise ValueError(Msg.EXTENSION_EXISTS.format(extension_key, yaml_type))
+            self.specification[yaml_type].update({extension_key: yaml_dict})
             # match yaml_type:
             #     case Default.YAML_TYPE_STRUCTURE:
-            required = Query.required(self.tag_counter, self.specification)
-            single = Query.singular(self.tag_counter, self.specification)
-            permitted = Query.permitted(self.tag_counter, self.specification)
-            payload = Query.payload(self.tag_counter, self.specification)
-            supers = Query.supers_count(self.tag_counter, self.specification)
+            required = Query.required(extension_key, self.specification)
+            single = Query.singular(extension_key, self.specification)
+            permitted = Query.permitted(extension_key, self.specification)
+            payload = Query.payload(extension_key, self.specification)
+            supers = Query.supers_count(extension_key, self.specification)
             # case Default.YAML_TYPE_ENUMERATION:
             enumset_key, enum_tags = Query.enum_key_tags(
-                self.tag_counter, self.specification
+                extension_key, self.specification
             )
             self.ged_ext_tags.append(
                 [
@@ -444,7 +446,8 @@ class Genealogy:
                 ]
             )
         return ExtensionAttributes(
-            key=self.tag_counter,
+            id = self.tag_counter,
+            key=extension_key,
             tag=tag,
             yaml_file=yaml_file,
             yaml_type=yaml_type,
@@ -521,7 +524,7 @@ class Genealogy:
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
 
-        level_key: dict[int:str] = {}
+        level_key: dict[int,str] = {}
 
         # def split_subs(ged: str, level: int = 0) -> list[str]:
         #     """Split a ged string on substructures at the specified level."""
@@ -632,7 +635,7 @@ class Genealogy:
                         payload = Names.xref_name(Default.TAG_SOUR, payload)
                     case 'https://gedcom.io/terms/v7/type-Time':
                         payload = Names.quote_text(payload)
-                    case None | 'None':
+                    case 'None':
                         payload = Default.EMPTY
                     case _:
                         payload = Default.EMPTY
@@ -842,25 +845,24 @@ from genedata.build import Genealogy
             # Without this being present, return the empty string.
             if Default.GED_EXT_SCHMA in self.ged_file_records[0]:
                 # Initialize and type the local variables used.
-                tag_data: str = Default.EMPTY
-                tag_data_words: list[str] = []
+                tag_words: list[str] = []
                 tag_list: list[str] = []
                 ext_name: str = Default.EMPTY
 
                 # Split the string based on the TAG identifier which begins each TAG line.
-                tag_list = self.ged_file_records[0].split('2 TAG ')
+                tag_list = self.ged_file_records[0].split('\n2 TAG ')
 
                 # Ignoring the first item in the list, obtain tag information from the others.
                 for tag in tag_list[1:]:
                     # The end of line was left in the first split to identify the end of the TAG line.
-                    tag_data = tag.split(Default.EOL, 1)
+                    #tag_data = tag.split(Default.EOL, 1)
 
                     # There is only one space in the string separating the tag from the url.
-                    tag_data_words = tag_data[0].split(Default.SPACE, 1)
+                    tag_words = tag.split(Default.SPACE)
 
                     # Construct the variable name that will be used in the code from these two items.
                     ext_name = Names.extension_name(
-                        tag_data_words[0], tag_data_words[1]
+                        tag_words[0], tag_words[1]
                     )
 
                     # Construct the code line for the external tag.
@@ -872,10 +874,10 @@ from genedata.build import Genealogy
                             Default.CODE_GENEALOGY,
                             'document_tag',
                             Default.PARENS_LEFT,
-                            Names.quote_text(tag_data_words[0]),
+                            Names.quote_text(tag_words[0]),
                             Default.COMMA,
                             Default.SPACE,
-                            Names.quote_text(tag_data_words[1]),
+                            Names.quote_text(tag_words[1]),
                             Default.PARENS_RIGHT,
                             Default.EOL,
                         ]
@@ -983,7 +985,7 @@ from genedata.build import Genealogy
             line: str = """
 # Instantiate the records holding the GED data.
 """
-            parts: Line = Line()
+            parts: list[str] = []
             classname: str = Default.EMPTY
             spaces: int = 0
 
@@ -1105,11 +1107,11 @@ print(ged_file)
             ]
         )
 
-    def _get_filename_type(self, filename: str) -> str:
-        filename_type: str = ''
-        if filename[-Number.GEDLEN :] == String.GED:
-            filename_type = String.GED
-        return filename_type
+    # def _get_filename_type(self, filename: str) -> str:
+    #     filename_type: str = ''
+    #     if filename[-Number.GEDLEN :] == String.GED:
+    #         filename_type = String.GED
+    #     return filename_type
 
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
@@ -1620,7 +1622,7 @@ print(ged_file)
 
     def extension_xref(
         self, xref_name: str = '', initial: bool = False
-    ) -> SubmitterXref:
+    ) -> ExtensionXref:
         """
         Create an ExtensionXref identifier from a unique string according to the
         GEDCOM standard.
@@ -2051,16 +2053,16 @@ print(ged_file)
         """
         self.ged_submitter = self._gather(records, self.submitter_xreflist)
 
-    def header(self, ged_header: Any) -> None:
-        """Collect and store the header record.
+    # def header(self, ged_header: Any) -> None:
+    #     """Collect and store the header record.
 
-        Args:
-            ged_header: is the text of the header record.
+    #     Args:
+    #         ged_header: is the text of the header record.
 
-        References:
-            [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
-        """
-        self.ged_header = ged_header.ged()
+    #     References:
+    #         [GEDCOM Example Files](https://gedcom.io/tools/#example-familysearch-gedcom-70-files)
+    #     """
+    #     self.ged_header = ged_header.ged()
 
     def query_record_counts(
         self,

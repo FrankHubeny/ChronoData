@@ -146,6 +146,10 @@ class Util:
                 Msg.GED_NO_TRAILER.format(ged, Default.GED_TRAILER)
             )
 
+        # Check that each line starts with a digit.
+        if re.search('\n\\D', ged):
+            raise ValueError(Msg.NOT_GED_STRINGS)
+
         # Check that the file has a version that the application can accept.
         version: str = Query.version(ged)
         if version not in Default.GED_VERSIONS:
@@ -182,32 +186,8 @@ class Util:
         except Exception:
             ged = Util.read_binary(url)
 
-        # Check that file has proper ged header and trailer and a recognized version.
-        # if raw != Default.EMPTY:
-        #     if Default.GED_HEADER not in raw:
-        #         raise ValueError(
-        #             Msg.GED_NO_HEADER.format(url, Default.GED_HEADER)
-        #         )
-        #     if Default.GED_TRAILER not in raw:
-        #         raise ValueError(
-        #             Msg.GED_NO_TRAILER.format(url, Default.GED_TRAILER)
-        #         )
-        #     version: str = Query.version(raw)
-        #     if version not in Default.GED_VERSIONS:
-        #         raise ValueError(
-        #             Msg.GED_VERSION_NOT_RECOGNIZED.format(url, version)
-        #         )
-
         Util.check_ged_file(ged)
         return Util.clean_ged_file(ged)
-
-        # Remove anything in the file prior to the ged header.
-        # _, _, raw_top_trimmed = raw.partition(Default.GED_HEADER)
-        # raw = ''.join([Default.GED_HEADER, raw_top_trimmed])
-
-        # # Remove anything in the file after the ged trailer.
-        # raw_bottom_trimmed, _, _ = raw.partition(Default.GED_TRAILER)
-        # return ''.join([raw_bottom_trimmed, Default.GED_TRAILER])
 
     @staticmethod
     def write_ged(ged: str, file: str) -> None:
@@ -1288,7 +1268,7 @@ class Names:
             tag: The tag of the structure's key we are looking for.
             specs: The specification dictionary to search through.
         """
-        logging.info(f'key-tag-to-subkey_class: {key}, {tag}')
+
         if key in specs[Default.YAML_TYPE_STRUCTURE]:
             for uri in specs[Default.YAML_TYPE_STRUCTURE][key][
                 Default.YAML_SUBSTRUCTURES
@@ -1441,8 +1421,10 @@ class Query:
             if calendar_uri in value[Default.YAML_CALENDARS]:
                 if Default.YAML_STANDARD_TAG in value:
                     months.append(value[Default.YAML_STANDARD_TAG])
+                elif isinstance(value[Default.YAML_EXTENSION_TAGS], list):
+                    months.append(value[Default.YAML_EXTENSION_TAGS][0])
                 else:
-                    months.extend(value[Default.YAML_EXTENSION_TAGS])
+                    months.append(value[Default.YAML_EXTENSION_TAGS])
         return months, epoch
 
     @staticmethod
@@ -1459,7 +1441,14 @@ class Query:
         for _, value in specs[Default.YAML_TYPE_ENUMERATION].items():
             for name in value[Default.YAML_VALUE_OF]:
                 if enumset_key == Names.keyname(name):
-                    enums.append(value[Default.YAML_STANDARD_TAG])
+                    if Default.YAML_STANDARD_TAG in value:
+                        enums.append(value[Default.YAML_STANDARD_TAG])
+                    elif Default.YAML_EXTENSION_TAGS in value:
+                        tags: Any = value[Default.YAML_EXTENSION_TAGS]
+                        if isinstance(tags, list):
+                            enums.append(tags[0])
+                        else:
+                            enums.append(tags)
         return enums
 
     @staticmethod
@@ -1812,29 +1801,29 @@ class Query:
                 )
         return subs_dict
 
-    @staticmethod
-    def make_dictionary(ged: str) -> dict[str, Any]:
-        ged_dict: dict[str, Any] = {
-            'HEAD': {},
-            'FAM': {},
-            'INDI': {},
-            'OBJE': {},
-            'REPO': {},
-            'SNOTE': {},
-            'SOUR': {},
-            'SUBM': {},
-        }
-        ged_list: list[str] = ged.split(Default.EOL)
-        for line in ged_list:
-            line_list: list[str] = line.split(Default.SPACE, 2)
-            if (
-                line_list[0] == '0'
-                and len(line_list) > 2
-                and line_list[2][0:5] != 'SNOTE'
-            ):
-                ged_dict[line_list[2]].update({line_list[1]: {}})
-            ged_dict.update({})
-        return ged_dict
+    # @staticmethod
+    # def make_dictionary(ged: str) -> dict[str, Any]:
+    #     ged_dict: dict[str, Any] = {
+    #         'HEAD': {},
+    #         'FAM': {},
+    #         'INDI': {},
+    #         'OBJE': {},
+    #         'REPO': {},
+    #         'SNOTE': {},
+    #         'SOUR': {},
+    #         'SUBM': {},
+    #     }
+    #     ged_list: list[str] = ged.split(Default.EOL)
+    #     for line in ged_list:
+    #         line_list: list[str] = line.split(Default.SPACE, 2)
+    #         if (
+    #             line_list[0] == '0'
+    #             and len(line_list) > 2
+    #             and line_list[2][0:5] != 'SNOTE'
+    #         ):
+    #             ged_dict[line_list[2]].update({line_list[1]: {}})
+    #         ged_dict.update({})
+    #     return ged_dict
 
 
 class Tagger:
@@ -2202,7 +2191,7 @@ class Validate:
         Reference:
         - [GEDCOM Age datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#age)
         """
-        check: bool = Validate.string(value, class_name)
+        Validate.string(value, class_name)
         if (
             re.search('[abcefghijklnopqrstuxz]|[A-Z]', value)
             or not re.search('[ymwd]', value)
@@ -2211,7 +2200,7 @@ class Validate:
             or re.search('[ymwd][ymwd]', value)
         ) and value != Default.EMPTY:
             raise ValueError(Msg.NOT_AGE.format(str(value), class_name))
-        return check
+        return True
 
     @staticmethod
     def clean_value(value: str, payload: str) -> str:
@@ -2222,13 +2211,14 @@ class Validate:
             payload: The payload specified for the value.
         """
         match payload:
+            case 'https://gedcom.io/terms/v7/type-Age':
+                return Validate.remove_double_spaces(value.strip())
             case (
                 'https://gedcom.io/terms/v7/type-Date#exact'
                 | 'https://gedcom.io/terms/v7/type-Date'
                 | 'https://gedcom.io/terms/v7/type-Date#period'
-                | 'https://gedcom.io/terms/v7/type-Age'
             ):
-                return Validate.remove_double_spaces(value.strip())
+                return Validate.remove_double_spaces(value.upper().strip())
             case (
                 'https://gedcom.io/terms/v7/type-List#Text'
                 | 'https://gedcom.io/terms/v7/type-List#Enum'
@@ -2263,26 +2253,40 @@ class Validate:
             class_name: The class having the value as payload.
             specs: Specifications allowing for extension calendars.
         """
+
+        # If the value is not a string a ValueError will be thrown.
+        Validate.string(value, class_name)
+
+        # For these date values the empty string is an acceptable date.
         if value == Default.EMPTY:
             return True
-        if not Validate.string(value, class_name):
-            return False
+
+        # Partition the date value into a possible preface and the date value.
         preface, _, remainder = value.partition(Default.SPACE)
+
+        # Consider cases.
         match preface:
+            # Consider prefaces that single only one date is involved.
             case 'ABT' | 'AFT' | 'BEF' | 'CAL' | 'EST' | 'TO':
                 return Validate.date_general(remainder, class_name, specs)
+
+            # Consider the between-and pair that have two dates.
             case 'BET':
                 between_date, _, and_date = remainder.partition(' AND ')
                 return Validate.date_general(
                     between_date, class_name, specs
                 ) and Validate.date_general(and_date, class_name, specs)
+
+            # Consider the from-to pair that have two dates.
             case 'FROM':
                 from_date, _, to_date = remainder.partition(' TO ')
                 return Validate.date_general(
                     from_date, class_name, specs
                 ) and Validate.date_general(to_date, class_name, specs)
+
+            # There is no preface so send the whole value to `date_general``.
             case _:
-                return Validate.date_general(remainder, class_name, specs)
+                return Validate.date_general(value, class_name, specs)
 
     @staticmethod
     def date_exact(value: Any, class_name: str) -> bool:
@@ -2290,6 +2294,9 @@ class Validate:
 
         This is a full date containing day, month and year in the Gregorian calendar.
         It does not use an epoch, so years BC are negative.  There is no zero year.
+
+        These constaints make it a special case of `date_general`
+        except that the empty string is not accepted as a valid date.
 
         Args:
             value: The date exact value entered.
@@ -2300,95 +2307,98 @@ class Validate:
         """
 
         # Validate that the value is a string.
-        if not Validate.string(value, class_name):
-            return False
+        # if not Validate.string(value, class_name):
+        #     return False
+        # check: bool = Validate.string(value, class_name)
+        # # Validate that a strong containing lower case letters
+        # # or a string without numbers is rejected.
+        # if (
+        #     re.search('[a-z]', value) is not None
+        #     or re.search('[0-9]', value) is None
+        # ):
+        #     raise ValueError(Msg.NOT_DATE_EXACT.format(value, class_name))
+        # # if len(value) > Default.DATE_EXACT_MAX_SIZE:
+        # #     raise ValueError(
+        # #         Msg.NOT_DATE_EXACT_TOO_LARGE.format(
+        # #             value,
+        # #             class_name,
+        # #             str(len(value)),
+        # #             Default.DATE_EXACT_MAX_SIZE,
+        # #         )
+        # #     )
 
-        # Validate that a strong containing lower case letters
-        # or a string without numbers is rejected.
-        if (
-            re.search('[a-z]', value) is not None
-            or re.search('[0-9]', value) is None
-        ):
-            raise ValueError(Msg.NOT_DATE_EXACT.format(value, class_name))
-        # if len(value) > Default.DATE_EXACT_MAX_SIZE:
+        # # Check how many spaces are in the string.  There should only be 2.
+        # space_count: int = value.count(Default.SPACE)
+        # if space_count != Default.DATE_EXACT_SPACES:
         #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_TOO_LARGE.format(
+        #         Msg.NOT_DATE_EXACT_SPACES.format(
         #             value,
         #             class_name,
-        #             str(len(value)),
-        #             Default.DATE_EXACT_MAX_SIZE,
+        #             str(space_count),
+        #             Default.DATE_EXACT_SPACES,
         #         )
         #     )
 
-        # Check how many spaces are in the string.  There should only be 2.
-        space_count: int = value.count(Default.SPACE)
-        if space_count != Default.DATE_EXACT_SPACES:
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_SPACES.format(
-                    value,
-                    class_name,
-                    str(space_count),
-                    Default.DATE_EXACT_SPACES,
-                )
-            )
+        # # Split the string on spaces and initialize local variables.
+        # date_parts: list[str] = value.split(Default.SPACE)
+        # day: int = int(date_parts[0])
+        # month: str = date_parts[1]
+        # year: int = int(date_parts[2])
 
-        # Split the string on spaces and initialize local variables.
-        date_parts: list[str] = value.split(Default.SPACE)
-        day: int = int(date_parts[0])
-        month: str = date_parts[1]
-        year: int = int(date_parts[2])
+        # # Check that the month is a valid month for the Gregorian calendar.
+        # # This uses a dictionary from the Validate class.
+        # if month not in Validate.month_days:
+        #     raise ValueError(
+        #         Msg.NOT_DATE_EXACT_MONTH.format(
+        #             value, class_name, date_parts[1]
+        #         )
+        #     )
 
-        # Check that the month is a valid month for the Gregorian calendar.
-        # This uses a dictionary from the Validate class.
-        if month not in Validate.month_days:
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_MONTH.format(
-                    value, class_name, date_parts[1]
-                )
-            )
+        # # Check that the month has the correct day if it is not February.
+        # if (day < 1 or day > Validate.month_days[month]) and month != 'FEB':
+        #     raise ValueError(
+        #         Msg.NOT_DATE_EXACT_DAY.format(
+        #             value,
+        #             class_name,
+        #             date_parts[0],
+        #             str(Validate.month_days[month]),
+        #         )
+        #     )
 
-        # Check that the month has the correct day if it is not February.
-        if (day < 1 or day > Validate.month_days[month]) and month != 'FEB':
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    date_parts[0],
-                    str(Validate.month_days[month]),
-                )
-            )
+        # # Check the two cases for February: leap year and not leap year.
+        # if month == 'FEB' and (
+        #     (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+        # ):
+        #     if day < 1 or day > Validate.month_days['FEB_LEAP']:
+        #         raise ValueError(
+        #             Msg.NOT_DATE_EXACT_DAY.format(
+        #                 value,
+        #                 class_name,
+        #                 date_parts[0],
+        #                 Validate.month_days['FEB_LEAP'],
+        #             )
+        #         )
+        # elif month == 'FEB' and (day < 1 or day > Validate.month_days[month]):
+        #     raise ValueError(
+        #         Msg.NOT_DATE_EXACT_DAY.format(
+        #             value,
+        #             class_name,
+        #             date_parts[0],
+        #             Validate.month_days[month],
+        #         )
+        #     )
 
-        # Check the two cases for February: leap year and not leap year.
-        if month == 'FEB' and (
-            (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
-        ):
-            if day < 1 or day > Validate.month_days['FEB_LEAP']:
-                raise ValueError(
-                    Msg.NOT_DATE_EXACT_DAY.format(
-                        value,
-                        class_name,
-                        date_parts[0],
-                        Validate.month_days['FEB_LEAP'],
-                    )
-                )
-        elif month == 'FEB' and (day < 1 or day > Validate.month_days[month]):
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    date_parts[0],
-                    Validate.month_days[month],
-                )
-            )
+        # # Check that the year is not 0.  There is no 0 year in the Gregorian calendar.
+        # if year == 0:
+        #     raise ValueError(
+        #         Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, date_parts[2])
+        #     )
 
-        # Check that the year is not 0.  There is no 0 year in the Gregorian calendar.
-        if year == 0:
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, date_parts[2])
-            )
-
-        # If it gets past all of the above return True.
-        return True
+        # These dates non-empty Gregorian day, month and year values,
+        # so `date_general` can validate them with the default specification.
+        return value != Default.EMPTY and Validate.date_general(
+            value, class_name
+        )
 
     @staticmethod
     def date_general(
@@ -2406,45 +2416,38 @@ class Validate:
         """
 
         # Make sure the value is a string.
-        if not Validate.string(value, class_name):
-            return False
+        Validate.string(value, class_name)
 
-        # An empty date passes the test by default.
+        # An empty date passes the test.
         if value == Default.EMPTY:
             return True
-
-        # Identify the available calendars using their tags.
-        # calendars: list[str] = [
-        #     'GREGORIAN',
-        #     'JULIAN',
-        #     'FRENCH_R',
-        #     'HEBREW',
-        # ]
-        # if specs is not None:
 
         # Get the available calendar tags.
         calendars: list[str] = Query.calendars(specs)
 
         # The Gregorian calendar is the default if no calendar is specified.
-        calendar: str = 'GREGORIAN'
+        calendar: str = Default.CALENDAR_DEFAULT
 
-        # Count the spaces and split the value on space.
+        # Count the spaces.
         spaces_count: int = value.count(Default.SPACE)
+
+        # Split the value into date parts separated by a space.
         date_parts: list[str] = value.split(Default.SPACE)
 
-        # Initialize and type the date variables.
+        # Initialize and type the date values.
         days: int = 0
         month: str = Default.EMPTY
         year: int = 0
         epoch: str = Default.EMPTY
 
-        # Initialize a subcase variable to distinguish within a match-case condition.
+        # Initialize a subcase variable to distinguish subcases.
         subcase: int = 0
 
         # Go through cases to validate the date string.
         # Subcases will be identified by attempting to convert a string to an integer.
         match spaces_count:
             # Four spaces have been counted in the string.
+            # Subcase 0 Example: GREGORIAN 1 JAN 2000 BCE
             case 4:
                 if date_parts[0] not in calendars:
                     raise ValueError(
@@ -2460,6 +2463,8 @@ class Validate:
                 subcase = 0
 
             # Three spaces have been counted in the string.
+            # Subcase 1 Example: 1 JAN 2000 BCE
+            # Subcase 2 Example: GREGORIAN 1 JAN 2000
             case 3:
                 try:
                     days = int(date_parts[0])
@@ -2474,12 +2479,15 @@ class Validate:
                                 value, class_name, date_parts[0], calendars
                             )
                         ) from None
+                    calendar = date_parts[0]
                     days = int(date_parts[1])
                     month = date_parts[2]
                     year = int(date_parts[3])
                     subcase = 2
 
             # Two spaces have been counted in the string.
+            # Subcase 3 Example: 1 JAN 2000
+            # Subcase 4 Example: GREGORIAN 2000 BCE
             case 2:
                 try:
                     days = int(date_parts[0])
@@ -2493,11 +2501,15 @@ class Validate:
                                 value, class_name, date_parts[0], calendars
                             )
                         ) from None
+                    calendar = date_parts[0]
                     year = int(date_parts[1])
                     epoch = date_parts[2]
                     subcase = 4
 
             # One space has been counted in the string.
+            # Subcase 5 Example: 2000 BCE
+            # Subcase 6 Example: GREGORIAN 2000
+            # Subcase 7 Example: JAN 2000
             case 1:
                 try:
                     year = int(date_parts[0])
@@ -2513,6 +2525,7 @@ class Validate:
                     year = int(date_parts[1])
 
             # No spaces have been counted in the string.
+            # Subcase 8 Example: 2000
             case 0:
                 year = int(date_parts[0])
                 subcase = 8
@@ -2525,6 +2538,10 @@ class Validate:
                     )
                 )
 
+        # Perform this for all cases since a year must be in any non-empty date.
+        if calendar in ['GREGORIAN', 'JULIAN'] and year == 0:
+            raise ValueError(Msg.NOT_DATE_ZERO_YEAR.format(value, class_name))
+
         # Get the calendar's months and epochs.
         months, epochs = Query.months_epoch(calendar, specs)
 
@@ -2534,8 +2551,9 @@ class Validate:
                 Msg.NOT_DATE_MONTH.format(value, class_name, months)
             )
 
-        # Only where a month and days have been identified perform this check.
-        # Only for GREGORIAN and JULIAN calendars.
+        # Perform for GREGORIAN and JULIAN calendars where days and months are given.
+        # The days of the months are hard-coded from convention not from the GEDCOM specifications.
+        # See the `Validate.month-days` dictionary.
         if (
             subcase in [0, 1, 2, 3]
             and calendar in ['GREGORIAN', 'JULIAN']
@@ -2551,39 +2569,65 @@ class Validate:
                 )
             )
 
-        # Only where a month and days have been identified perform this check.
-        # Only for GREGORIAN calendar.
+        # Check the two cases for February in the GREGORIAN calendar:
         if (
             spaces_count in [0, 1, 2, 3]
-            and calendar == 'GREGORIAN'
             and month == 'FEB'
+            and calendar == 'GREGORIAN'
             and ((year % 4 == 0 and year % 100 != 0) or (year % 400 == 0))
-            and (days < 1 or days > Validate.month_days['FEB_LEAP'])
+        ):
+            if days < 1 or days > Validate.month_days['FEB_LEAP']:
+                raise ValueError(
+                    Msg.NOT_DATE_EXACT_DAY.format(
+                        value,
+                        class_name,
+                        days,
+                        Validate.month_days['FEB_LEAP'],
+                    )
+                )
+        elif (
+            spaces_count in [0, 1, 2, 3]
+            and month == 'FEB'
+            and calendar == 'GREGORIAN'
+            and (days < 1 or days > Validate.month_days[month])
         ):
             raise ValueError(
                 Msg.NOT_DATE_EXACT_DAY.format(
                     value,
                     class_name,
-                    str(days),
-                    Validate.month_days['FEB_LEAP'],
+                    days,
+                    Validate.month_days[month],
                 )
             )
 
-        # Only where a month and days have been identified perform this check.
-        # Only for JULIAN calendar.
+        # Check the two cases for February in the JULIAN calendar.
         if (
-            subcase in [0, 1, 2, 3]
-            and calendar == 'JULIAN'
+            spaces_count in [0, 1, 2, 3]
             and month == 'FEB'
+            and calendar == 'JULIAN'
             and (year % 4 == 0 and year % 100 != 0)
-            and (days < 1 or days > Validate.month_days['FEB_LEAP'])
+        ):
+            if days < 1 or days > Validate.month_days['FEB_LEAP']:
+                raise ValueError(
+                    Msg.NOT_DATE_EXACT_DAY.format(
+                        value,
+                        class_name,
+                        days,
+                        Validate.month_days['FEB_LEAP'],
+                    )
+                )
+        elif (
+            spaces_count in [0, 1, 2, 3]
+            and month == 'FEB'
+            and calendar == 'JULIAN'
+            and (days < 1 or days > Validate.month_days[month])
         ):
             raise ValueError(
                 Msg.NOT_DATE_EXACT_DAY.format(
                     value,
                     class_name,
-                    str(days),
-                    Validate.month_days['FEB_LEAP'],
+                    days,
+                    Validate.month_days[month],
                 )
             )
 
@@ -2592,10 +2636,6 @@ class Validate:
             raise ValueError(
                 Msg.NOT_DATE_EPOCH.format(value, class_name, epochs)
             )
-
-        # Perform this for all cases since a year must be in any non-empty date.
-        if calendar in ['GREGORIAN', 'JULIAN'] and year == 0:
-            raise ValueError(Msg.NOT_DATE_ZERO_YEAR.format(value, class_name))
 
         # If it gets this far, return True.
         return True
@@ -2613,10 +2653,10 @@ class Validate:
         Reference:
         - [GEDCOM Date Period datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#date)
         """
+
         # If the value is not a string, reject it.
-        if not Validate.string(value, class_name):
-            return False
-        
+        check: bool = Validate.string(value, class_name)
+
         # If the value is the empty string, accept it.
         if value == Default.EMPTY:
             return True
@@ -2626,7 +2666,6 @@ class Validate:
             raise ValueError(Msg.NOT_DATE_PERIOD.format(value, class_name))
 
         # Split out a FROM date, if any.
-        check: bool = True
         from_date, _, to_date = value.partition('TO ')
         if from_date != Default.EMPTY:
             check = check and Validate.date_general(
@@ -2637,6 +2676,71 @@ class Validate:
 
         # Check the TO date which should be there unless this is the empty string.
         return check and Validate.date_general(to_date, class_name, specs)
+
+    @staticmethod
+    def enum(
+        value: Any,
+        class_name: str,
+        enum_tags: list[str],
+        enumset_key: str,
+        specs: dict[str, dict[str, Any]],
+    ) -> bool:
+        # If the value is not a string, reject it.
+        check: bool = Validate.string(value, class_name)
+
+        value_list: list[str] = value.split(Default.LIST_ITEM_SEPARATOR)
+        if len(value_list) > 1:
+            for item in value_list:
+                Validate.enum(item, class_name, enum_tags, enumset_key, specs)
+
+        # There are no extensions.
+        elif specs == Specs:
+            if value not in enum_tags:
+                raise ValueError(
+                    Msg.NOT_VALID_ENUM.format(value, enum_tags, class_name)
+                )
+
+        # There are extensions, so check this enumeration value
+        # against the updated specification.
+        elif value not in Query.enumerations(enumset_key, specs):
+            raise ValueError(
+                Msg.NOT_VALID_ENUM.format(
+                    value, Query.enumerations(enumset_key, specs), class_name
+                )
+            )
+        return check
+
+    @staticmethod
+    def filepath(value: Any, class_name: str) -> bool:
+        """Validate a string listing with delimiter `, `."""
+
+        # Reject a value that is not a string otherwise accept it.
+        return Validate.string(value, class_name)
+
+    @staticmethod
+    def language(value: Any, class_name: str) -> bool:
+        """Validate a string representing a language code."""
+
+        # Reject a value that is not a string otherwise accept it.
+        return Validate.string(value, class_name)
+
+    @staticmethod
+    def listing(value: Any, class_name: str) -> bool:
+        """Validate a string listing with optional ', ' delimiter."""
+
+        # Reject a value that is not a string otherwise accept it.
+        return Validate.string(value, class_name)
+
+    @staticmethod
+    def mediatype(value: Any, class_name: str) -> bool:
+        """Validate a string listing with a single required '/' delimiter."""
+
+        # Reject a value that is not a string as well as one without a '/' in it.
+        if Validate.string(value, class_name) and Default.SLASH not in value:
+            raise ValueError(Msg.NO_SLASH.format(value, class_name))
+
+        # If it gets this far, return True.
+        return True
 
     @staticmethod
     def name(value: Any, class_name: str) -> bool:
@@ -2650,26 +2754,28 @@ class Validate:
         - [GEDCOM Name datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#personal-name)
         """
 
-        # Reject the value if it is not a string.
-        if not Validate.string(value, class_name):
-            return False
-        
-        # There can be no more nor less than two slashes in the name.
+        # There can be either two '/' (slash) characters in the name or none.
         slash_count: int = value.count(Default.SLASH)
-        if slash_count > 2 or slash_count == 1:
+        if Validate.string(value, class_name) and (
+            slash_count > 2 or slash_count == 1
+        ):
             raise ValueError(
                 Msg.NOT_NAME_SLASH.format(value, class_name, slash_count)
             )
-        
+
         # If it makes it this far, return True.
         return True
 
     @staticmethod
     def non_negative_integer(value: Any, class_name: str) -> bool:
-        check: bool = True
+        """Verify that the value is an integer greater than or equal to zero."""
+
+        # Raise a ValueError if the value is not an integer or it is less than zero.
         if not isinstance(value, int) or value < 0:
             raise ValueError(Msg.NOT_INTEGER.format(repr(value), class_name))
-        return check
+
+        # If it gets this far, return True.
+        return True
 
     @staticmethod
     def remove_double_spaces(value: str) -> str:
@@ -2681,16 +2787,27 @@ class Validate:
         Args:
             value: The value to modify by removing double spaces.
         """
+
+        # Keep replacing "  " with " " until there are no more "  " in the value.
         while Default.SPACE_DOUBLE in value:
             value = re.sub(Default.SPACE_DOUBLE, Default.SPACE, value)
         return value
 
     @staticmethod
     def string(value: Any, class_name: str) -> bool:
-        check: bool = True
+        """Check if the payload value for the class is a string.
+
+        Args:
+            value: The payload of the class.
+            class_name: The name of the class with the payload.
+        """
+
+        # Raise a ValueError if the value is not a string.
         if not isinstance(value, str):
             raise ValueError(Msg.NOT_STRING.format(repr(value), class_name))
-        return check
+
+        # If it gets this far, return True.
+        return True
 
     @staticmethod
     def time(value: Any, class_name: str) -> bool:
@@ -2704,14 +2821,10 @@ class Validate:
         - [GEDCOM Time datatype](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html#time)
         """
 
-        # Reject the value if it is not a string.
-        if not Validate.string(value, class_name):
-            return False
-        
-        # Reject the value if it contains any letter besides 'Z' as UTC code.
-        if re.search('[a-zA-Y]', value):
+        # Reject the value if it contains any letter besides 'Z' as the UTC code.
+        if Validate.string(value, class_name) and re.search('[a-zA-Y]', value):
             raise ValueError(Msg.NOT_TIME.format(value, class_name))
-        
+
         # If there's less than 1 or more than 2 colons reject the string.
         colon_count: int = value.count(Default.COLON)
         if colon_count > 2 or colon_count == 0:
@@ -2720,7 +2833,7 @@ class Validate:
                     value, class_name, str(colon_count)
                 )
             )
-        
+
         # Split the string based on the colon and initialize variables.
         time_parts: list[str] = value.split(Default.COLON)
         hours: int = int(time_parts[0])
@@ -2737,7 +2850,7 @@ class Validate:
                     Default.TIME_MAX_HOUR,
                 )
             )
-        
+
         # Check that the minutes are in the proper range.
         if (
             minutes < Default.TIME_MIN_MINUTE
@@ -2752,7 +2865,7 @@ class Validate:
                     Default.TIME_MAX_MINUTE,
                 )
             )
-        
+
         # Check that the seconds are in the proper range.
         if len(time_parts) == 3:
             secs, _, _ = time_parts[2].partition(Default.TIME_UTC_CODE)
@@ -2770,7 +2883,7 @@ class Validate:
                         Default.TIME_MAX_SECOND,
                     )
                 )
-            
+
         # If it makes it to here, return True.
         return True
 
@@ -2782,9 +2895,12 @@ class Validate:
             value: The value that must be either 'Y' or the empty string.
             class_name: The name of the class with the value as payload.
         """
-        check: bool = True
-        if value not in ['Y', '']:
+
+        # If the value is neither the empty string nor 'Y', reject it.
+        if Validate.string(value, class_name) and value not in ['Y', '']:
             raise ValueError(
                 Msg.VALUE_NOT_Y_OR_NULL.format(str(value), class_name)
             )
-        return check
+
+        # If it gets this far, return True.
+        return True

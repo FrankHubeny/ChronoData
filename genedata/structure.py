@@ -15,12 +15,11 @@ __all__ = [
 ]
 
 import collections
-import re
 from typing import Any, Literal, NamedTuple, Self
 
 from genedata.constants import Default
 from genedata.messages import Msg
-from genedata.methods import Names, Query, Tagger, Validate
+from genedata.methods import Names, Tagger, Validate
 from genedata.specifications70 import Specs
 
 AnyList = Any | list[Any] | None
@@ -381,10 +380,6 @@ class BaseStructure:
     def validate(self, specs: dict[str, dict[str, Any]] = Specs) -> bool:
         """Validate the stored value."""
 
-        # specs: dict[str, dict[str, Any]] = {}
-        # if specifications is not None:
-        #     specs = specifications
-
         # Does it have all required substructures?
         for name in self.required:
             if name not in self.counted:
@@ -408,9 +403,7 @@ class BaseStructure:
                     )
                 )
 
-        # Are there records in the permitted list of substructures?
-
-        # Does value have the required data type?
+        # Does the value have the required data type?
         match self.payload:
             # Verify the value is a string.
             case 'http://www.w3.org/2001/XMLSchema#string':
@@ -427,22 +420,10 @@ class BaseStructure:
                 # If the value is not an instance of SharedNoteXref, check that it is a string.
                 else:
                     return Validate.string(self.value, self.class_name)
-                # elif not isinstance(self.value, str):
-                #     raise ValueError(
-                #         Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                #     )
 
             # Verify that the value is either `Y` or `''`, but not ``.
             case 'Y|<NULL>':
-                return Validate.string(
-                    self.value, self.class_name
-                ) and Validate.y_or_null(self.value, self.class_name)
-                # if not isinstance(self.value, str) or self.value not in ['Y', '']:
-                #     raise ValueError(
-                #         Msg.VALUE_NOT_Y_OR_NULL.format(
-                #             self.value, self.class_name
-                #         )
-                #     )
+                return Validate.y_or_null(self.value, self.class_name)
 
             # Verify that the value is a non-negative integer.
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
@@ -451,55 +432,35 @@ class BaseStructure:
                 )
 
             # Verify a value is in the enumeration set.
-            # Do this for a list of enumberation values.
-            case 'https://gedcom.io/terms/v7/type-List#Enum':
-                if Validate.string(self.value, self.class_name) and isinstance(
-                    self.value, str
-                ):
-                    for value in self.value.split(Default.LIST_ITEM_SEPARATOR):
-                        # There are no extensions.
-                        if specs == Specs and value.strip() not in self.enum_tags:
-                            raise ValueError(
-                                Msg.NOT_VALID_ENUM.format(
-                                    self.value, self.enum_tags, self.class_name
-                                )
-                            )
-
-                        # There are extensions, so check this enumeration value
-                        # against the updated specification.
-                        if specs != Specs and self.value not in Query.enumerations(
-                            self.enumset_key, specs
-                        ):
-                            raise ValueError(
-                                Msg.NOT_VALID_ENUM.format(
-                                    self.value, self.enum_tags, self.class_name
-                                )
-                            )
+            # Do this also for a list of enumberation values.
+            case (
+                'https://gedcom.io/terms/v7/type-Enum'
+                | 'https://gedcom.io/terms/v7/type-List#Enum'
+            ):
+                return Validate.enum(
+                    self.value,
+                    self.class_name,
+                    self.enum_tags,
+                    self.enumset_key,
+                    specs,
+                )
+                # if Validate.string(self.value, self.class_name) and isinstance(
+                #     self.value, str
+                # ):
+                #     for value in self.value.split(Default.LIST_ITEM_SEPARATOR):
+                #         if not Validate.enum(value, self.class_name, self.enum_tags, self.enumset_key, specs):
+                #             return False
+                #     return True
 
             # Verify a value is in the enumeration set.
-            case 'https://gedcom.io/terms/v7/type-Enum':
-                if Validate.string(self.value, self.class_name) and isinstance(
-                    self.value, str
-                ):
-                    # There are no extensions.
-                    if specs == Specs:
-                        if self.value not in self.enum_tags:
-                            raise ValueError(
-                                Msg.NOT_VALID_ENUM.format(
-                                    self.value, self.enum_tags, self.class_name
-                                )
-                            )
-
-                    # There are extensions, so check this enumeration value
-                    # against the updated specification.
-                    elif self.value not in Query.enumerations(
-                        self.enumset_key, specs
-                    ):
-                        raise ValueError(
-                            Msg.NOT_VALID_ENUM.format(
-                                self.value, self.enum_tags, self.class_name
-                            )
-                        )
+            # case 'https://gedcom.io/terms/v7/type-Enum':
+            #     return Validate.enum(
+            #         self.value,
+            #         self.class_name,
+            #         self.enum_tags,
+            #         self.enumset_key,
+            #         specs,
+            #     )
 
             # Verify that the value is an instance of IndividualXref.
             case '@<https://gedcom.io/terms/v7/record-INDI>@':
@@ -518,11 +479,10 @@ class BaseStructure:
                             str(self.value), self.class_name
                         )
                     )
+
+            # Verify the value is a listing with items separated by `, `.
             case 'https://gedcom.io/terms/v7/type-List#Text':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+                return Validate.listing(self.value, self.class_name)
 
             # Verify that the value is an instance of SubmitterXref.
             case '@<https://gedcom.io/terms/v7/record-SUBM>@':
@@ -535,10 +495,7 @@ class BaseStructure:
 
             # Verify the value meets the language specification.
             case 'http://www.w3.org/2001/XMLSchema#Language':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(repr(self.value), self.class_name)
-                    )
+                return Validate.language(self.value, self.class_name)
 
             # Verify the value meets the date period specifications
             case 'https://gedcom.io/terms/v7/type-Date#period':
@@ -554,7 +511,7 @@ class BaseStructure:
 
             # Verify the value meets the file path specifications.
             case 'https://gedcom.io/terms/v7/type-FilePath':
-                return Validate.string(self.value, self.class_name)
+                return Validate.filepath(self.value, self.class_name)
 
             # Verify the value meets the personal name specifications.
             case 'https://gedcom.io/terms/v7/type-Name':
@@ -566,7 +523,7 @@ class BaseStructure:
 
             # Verify the media type meets the specifications.
             case 'http://www.w3.org/ns/dcat#mediaType':
-                return Validate.string(self.value, self.class_name)
+                return Validate.mediatype(self.value, self.class_name)
 
             # Verify that the value is an instance of MultimediaXref.
             case '@<https://gedcom.io/terms/v7/record-OBJE>@':
@@ -663,11 +620,7 @@ class BaseStructure:
         # Is value formatted correctly for its structure specification?
         match self.class_name:
             case 'Lati':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(str(self.value), self.class_name)
-                    )
-                if self.value[0] not in [
+                if isinstance(self.value, str) and self.value[0] not in [
                     Default.LATI_NORTH,
                     Default.LATI_SOUTH,
                 ]:
@@ -680,7 +633,7 @@ class BaseStructure:
                             self.class_name,
                         )
                     )
-                if (
+                if isinstance(self.value, str) and (
                     float(self.value[1:]) > Default.LATI_HIGH
                     or float(self.value[1:]) < Default.LATI_LOW
                 ):
@@ -693,11 +646,10 @@ class BaseStructure:
                         )
                     )
             case 'Long':
-                if not isinstance(self.value, str):
-                    raise ValueError(
-                        Msg.NOT_STRING.format(str(self.value), self.class_name)
-                    )
-                if self.value[0] not in [Default.LONG_EAST, Default.LONG_WEST]:
+                if isinstance(self.value, str) and self.value[0] not in [
+                    Default.LONG_EAST,
+                    Default.LONG_WEST,
+                ]:
                     raise ValueError(
                         Msg.LONG_EAST_WEST.format(
                             self.value[0],
@@ -707,7 +659,7 @@ class BaseStructure:
                             self.class_name,
                         )
                     )
-                if (
+                if isinstance(self.value, str) and (
                     float(self.value[1:]) > Default.LONG_HIGH
                     or float(self.value[1:]) < Default.LONG_LOW
                 ):
@@ -719,6 +671,15 @@ class BaseStructure:
                             self.class_name,
                         )
                     )
+            case 'Tag':
+                if isinstance(self.value, str):
+                    tag_list: list[str] = self.value.split(Default.SPACE)
+                    if len(tag_list) != 2:
+                        raise ValueError(
+                            Msg.TAG_SPACES.format(
+                                self.value, str(len(tag_list))
+                            )
+                        )
 
         # Check if all subs validate.
         if self.subs is not None:
@@ -918,6 +879,7 @@ class BaseStructure:
 
 
 class ExtensionAttributes(NamedTuple):
+    id: int = 0
     key: str = Default.EMPTY
     tag: str = Default.EMPTY
     yaml_file: str = Default.EMPTY

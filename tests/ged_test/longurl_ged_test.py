@@ -9,7 +9,7 @@ ged_version: str = '7.0'
 
 def test_longurl_ged() -> None:
     # Test constructing the xref_ged test data.
-    file = Util.read('tests\\ged_test\\long-url.ged')
+    file = Util.read('tests\\data\\ged_examples\\long-url.ged')
 
     # Instantiate a Genealogy class.
     g = Genealogy()

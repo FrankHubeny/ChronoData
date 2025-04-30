@@ -1,0 +1,20 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: month
+
+uri: tests/data/extension_tests/months/month-_MYJAN
+
+extension tags: '_MYJAN'
+
+specification:
+  - My January
+
+label: 'My January'
+
+calendars:
+  - "tests/data/extension_tests/calendars/cal-_MYGREGORIAN"
+
+contact: "genedata"
+...

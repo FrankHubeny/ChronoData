@@ -1,0 +1,60 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: calendar
+
+uri: tests/data/extension_tests/calendars/cal-_MYGREGORIAN
+
+extension tags: '_MYGREGORIAN'
+
+specification:
+  - |
+    The Gregorian calendar is the now-ubiquitous calendar introduced by Pope
+    Gregory XIII in 1582 to correct the Julian calendar which was slowly drifting
+    relative to the seasons.
+    
+    Permitted months are
+    
+    | `stdTag` | Name      |
+    | :------- | :-------- |
+    | `_MYJAN`    | My January   |
+    | `_MYFEB`    | My February  |
+    | `_MYMAR`    | My March     |
+    | `_MYAPR`    | My April     |
+    | `_MYMAY`    | My May       |
+    | `_MYJUN`    | My June      |
+    | `_MYJUL`    | My July      |
+    | `_MYAUG`    | My August    |
+    | `_MYSEP`    | My September |
+    | `_MYOCT`    | My October   |
+    | `_MYNOV`    | My November  |
+    | `_MYDEC`    | My December  |
+    
+    The epoch marker `BC` is permitted in this calendar; year *y* BC indicates a
+    year *y* years before year 1. Thus, there is no year 0; year 1 BCE was followed
+    by year 1.
+    
+    The URI for this calendar is 'tests/data/extension_tests/calendars/cal-_MYGREGORIAN`
+
+label: 'My Gregorian'
+
+months:
+  - "tests/data/extension_tests/months/month-_MYJAN"
+  - "tests/data/extension_tests/months/month-_MYFEB"
+  - "tests/data/extension_tests/months/month-_MYMAR"
+  - "tests/data/extension_tests/months/month-_MYAPR"
+  - "tests/data/extension_tests/months/month-_MYMAY"
+  - "tests/data/extension_tests/months/month-_MYJUN"
+  - "tests/data/extension_tests/months/month-_MYJUL"
+  - "tests/data/extension_tests/months/month-_MYAUG"
+  - "tests/data/extension_tests/months/month-_MYSEP"
+  - "tests/data/extension_tests/months/month-_MYOCT"
+  - "tests/data/extension_tests/months/month-_MYNOV"
+  - "tests/data/extension_tests/months/month-_MYDEC"
+
+epochs:
+  - BC
+
+contact: "genedata"
+...

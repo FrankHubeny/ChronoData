@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: month
+
+uri: tests/data/extension_tests/months/month-_MYFEB
+
+extension tags: '_MYFEB'
+
+specification:
+  - My February
+
+label: 'My February'
+
+calendars:
+  - "tests/data/extension_tests/calendars/cal-_MYGREGORIAN"
+
+
+contact: "genedata"
+...
