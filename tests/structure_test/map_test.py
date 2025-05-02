@@ -21,6 +21,7 @@ import genedata.classes70 as gc
 from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Input
+from genedata.specifications70 import Specs
 
 
 # 1. Validate Section
@@ -36,7 +37,9 @@ def test_good_run() -> None:
 
 def test_not_permitted() -> None:
     """Check that a substructure not in the permitted list cannot be used by the structure."""
-    m = gc.Map([gc.Lati('N18.150944'), gc.Phrase('test'), gc.Long('E168.150944')])
+    m = gc.Map(
+        [gc.Lati('N18.150944'), gc.Phrase('test'), gc.Long('E168.150944')]
+    )
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -54,7 +57,9 @@ def test_lati_not_present() -> None:
     m = gc.Map([gc.Long('E168.150944')])
     with pytest.raises(
         ValueError,
-        match=re.escape(Msg.MISSING_REQUIRED.format(str(m.required), m.class_name)),
+        match=re.escape(
+            Msg.MISSING_REQUIRED.format(str(m.required), m.class_name)
+        ),
     ):
         m.validate()
 
@@ -64,7 +69,9 @@ def test_long_not_present() -> None:
     m = gc.Map([gc.Lati('N68.150944')])
     with pytest.raises(
         ValueError,
-        match=re.escape(Msg.MISSING_REQUIRED.format(str(m.required), m.class_name)),
+        match=re.escape(
+            Msg.MISSING_REQUIRED.format(str(m.required), m.class_name)
+        ),
     ):
         m.validate()
 
@@ -74,7 +81,9 @@ def test_long_not_present() -> None:
 
 def test_lati_only_one() -> None:
     """Check that the lati structure can be used only once by Map."""
-    m = gc.Map([gc.Lati('N18.150944'), gc.Lati('N18.150944'), gc.Long('E168.150944')])
+    m = gc.Map(
+        [gc.Lati('N18.150944'), gc.Lati('N18.150944'), gc.Long('E168.150944')]
+    )
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Lati', m.class_name)
     ):
@@ -83,7 +92,9 @@ def test_lati_only_one() -> None:
 
 def test_long_only_one() -> None:
     """Check that the lati structure can be used only once by Map."""
-    m = gc.Map([gc.Lati('N18.150944'), gc.Long('E168.150944'), gc.Long('E168.150944')])
+    m = gc.Map(
+        [gc.Lati('N18.150944'), gc.Long('E168.150944'), gc.Long('E168.150944')]
+    )
     with pytest.raises(
         ValueError, match=Msg.ONLY_ONE_PERMITTED.format('Long', m.class_name)
     ):
@@ -156,7 +167,7 @@ def test_long_range_high() -> None:
             )
         ),
     ):
-        m.validate()
+        m.validate(specs=Specs)
 
 
 def test_long_range_low() -> None:
@@ -165,10 +176,10 @@ def test_long_range_low() -> None:
     with pytest.raises(
         ValueError,
         match=Msg.LONG_RANGE.format(
-                'W180.1', str(Default.LONG_LOW), str(Default.LONG_HIGH), 'Long'
-            ),
+            'W180.1', str(Default.LONG_LOW), str(Default.LONG_HIGH), 'Long'
+        ),
     ):
-        m.validate()
+        m.validate(specs=Specs)
 
 
 # 2. Ged Section
@@ -182,7 +193,9 @@ def test_ged() -> None:
 
 def test_ged_using_input() -> None:
     """Illustrate the use of the Map class with Input."""
-    m = gc.Map([gc.Lati(Input.lati(18, 9, 3.4)), gc.Long(Input.long(168, 9, 3.4))])
+    m = gc.Map(
+        [gc.Lati(Input.lati(18, 9, 3.4)), gc.Long(Input.long(168, 9, 3.4))]
+    )
     assert m.ged(1) == '1 MAP\n2 LATI N18.150944\n2 LONG E168.150944\n'
 
 
@@ -191,7 +204,9 @@ def test_ged_using_input() -> None:
 
 def test_code() -> None:
     """Illustrate code running."""
-    m = gc.Map([gc.Lati(Input.lati(18, 9, 3.4)), gc.Long(Input.long(168, 9, 3.4))])
+    m = gc.Map(
+        [gc.Lati(Input.lati(18, 9, 3.4)), gc.Long(Input.long(168, 9, 3.4))]
+    )
     assert (
         m.code(as_name='gc')
         == "\ngc.Map(\n    [\n        gc.Lati('N18.150944'),\n        gc.Long('E168.150944'),\n    ]\n)"

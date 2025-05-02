@@ -25,7 +25,7 @@ def test_note1_ged() -> None:
     # Test constructing the note1_ged test data without the circular issue.
 
     # Test constructing the remarriage2_ged test data.
-    file = Util.read('tests\\data\\ged_examples\\notes-1.ged')
+    file = Util.read('tests/data/ged_examples/notes-1.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc

@@ -1522,6 +1522,17 @@ class Query:
                 Default.YAML_PAYLOAD
             ]
         return result
+    
+    @staticmethod
+    def superstructures(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+        classes: list[str] = []
+        if (
+            key in specs[Default.YAML_TYPE_STRUCTURE]
+            and Default.YAML_SUPERSTRUCTURES in specs[Default.YAML_TYPE_STRUCTURE][key]
+        ):
+            for uri, _ in specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_SUPERSTRUCTURES].items():
+                classes.append(Names.classname(uri))
+        return classes
 
     @staticmethod
     def permitted(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
@@ -1572,6 +1583,31 @@ class Query:
         return keys
 
     @staticmethod
+    def supers_required(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+        """Provide a list of required classes.
+
+        Example:
+            We can find the classes that are required under the `HEAD` key
+            in the GEDCOM version 7 specifications by doing the following:
+            >>> from genedata.methods import Query
+            >>> from genedata.specifications70 import Specs
+            >>> Query.required('HEAD', Specs)
+            ['Gedc']
+
+        Args:
+            key: The top level name in the dictionary.
+            specs: The specification dictionary one wants to search.
+        """
+        classes: list[str] = []
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUPERSTRUCTURES
+            ].items():
+                if Default.CARDINALITY_REQUIRED in cardinality:
+                    classes.append(Names.classname(uri))
+        return classes
+
+    @staticmethod
     def required(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
         """Provide a list of required classes.
 
@@ -1593,6 +1629,31 @@ class Query:
                 Default.YAML_SUBSTRUCTURES
             ].items():
                 if Default.CARDINALITY_REQUIRED in cardinality:
+                    classes.append(Names.classname(uri))
+        return classes
+
+    @staticmethod
+    def supers_singular(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+        """Provide a list of classes that can be used only once as substructures.
+
+        Example:
+            We can find the classes that can only be used once as substructures
+            in the GEDCOM version 7 specifications under the `HEAD` key by doing the following:
+            >>> from genedata.methods import Query
+            >>> from genedata.specifications70 import Specs
+            >>> Query.singular('HEAD', Specs)
+            ['Copr', 'Dest', 'Gedc', 'HeadDate', 'HeadLang', 'HeadPlac', 'HeadSour', 'Note', 'Schma', 'Snote', 'Subm']
+
+        Args:
+            key: The top level name in the dictionary.
+            specs: The specification dictionary one wants to search.
+        """
+        classes: list[str] = []
+        if key in specs[Default.YAML_TYPE_STRUCTURE]:
+            for uri, cardinality in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUPERSTRUCTURES
+            ].items():
+                if Default.CARDINALITY_SINGULAR in cardinality:
                     classes.append(Names.classname(uri))
         return classes
 
@@ -2218,7 +2279,7 @@ class Validate:
                 | 'https://gedcom.io/terms/v7/type-Date'
                 | 'https://gedcom.io/terms/v7/type-Date#period'
             ):
-                return Validate.remove_double_spaces(value.upper().strip())
+                return Validate.remove_double_spaces(value.strip()).upper()
             case (
                 'https://gedcom.io/terms/v7/type-List#Text'
                 | 'https://gedcom.io/terms/v7/type-List#Enum'
@@ -2307,98 +2368,98 @@ class Validate:
         """
 
         # Validate that the value is a string.
-        # if not Validate.string(value, class_name):
-        #     return False
-        # check: bool = Validate.string(value, class_name)
-        # # Validate that a strong containing lower case letters
-        # # or a string without numbers is rejected.
-        # if (
-        #     re.search('[a-z]', value) is not None
-        #     or re.search('[0-9]', value) is None
-        # ):
-        #     raise ValueError(Msg.NOT_DATE_EXACT.format(value, class_name))
-        # # if len(value) > Default.DATE_EXACT_MAX_SIZE:
-        # #     raise ValueError(
-        # #         Msg.NOT_DATE_EXACT_TOO_LARGE.format(
-        # #             value,
-        # #             class_name,
-        # #             str(len(value)),
-        # #             Default.DATE_EXACT_MAX_SIZE,
-        # #         )
-        # #     )
+        Validate.string(value, class_name)
 
-        # # Check how many spaces are in the string.  There should only be 2.
-        # space_count: int = value.count(Default.SPACE)
-        # if space_count != Default.DATE_EXACT_SPACES:
+        # Validate that a strong containing lower case letters
+        # or a string without numbers is rejected.
+        if (
+            re.search('[a-z]', value) is not None
+            or re.search('[0-9]', value) is None
+        ):
+            raise ValueError(Msg.NOT_DATE_EXACT.format(value, class_name))
+        # if len(value) > Default.DATE_EXACT_MAX_SIZE:
         #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_SPACES.format(
+        #         Msg.NOT_DATE_EXACT_TOO_LARGE.format(
         #             value,
         #             class_name,
-        #             str(space_count),
-        #             Default.DATE_EXACT_SPACES,
+        #             str(len(value)),
+        #             Default.DATE_EXACT_MAX_SIZE,
         #         )
         #     )
 
-        # # Split the string on spaces and initialize local variables.
-        # date_parts: list[str] = value.split(Default.SPACE)
-        # day: int = int(date_parts[0])
-        # month: str = date_parts[1]
-        # year: int = int(date_parts[2])
+        # Check how many spaces are in the string.  There should only be 2.
+        space_count: int = value.count(Default.SPACE)
+        if space_count != Default.DATE_EXACT_SPACES:
+            raise ValueError(
+                Msg.NOT_DATE_EXACT_SPACES.format(
+                    value,
+                    class_name,
+                    str(space_count),
+                    Default.DATE_EXACT_SPACES,
+                )
+            )
 
-        # # Check that the month is a valid month for the Gregorian calendar.
-        # # This uses a dictionary from the Validate class.
-        # if month not in Validate.month_days:
-        #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_MONTH.format(
-        #             value, class_name, date_parts[1]
-        #         )
-        #     )
+        # Split the string on spaces and initialize local variables.
+        date_parts: list[str] = value.split(Default.SPACE)
+        day: int = int(date_parts[0])
+        month: str = date_parts[1]
+        year: int = int(date_parts[2])
 
-        # # Check that the month has the correct day if it is not February.
-        # if (day < 1 or day > Validate.month_days[month]) and month != 'FEB':
-        #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_DAY.format(
-        #             value,
-        #             class_name,
-        #             date_parts[0],
-        #             str(Validate.month_days[month]),
-        #         )
-        #     )
+        # Check that the month is a valid month for the Gregorian calendar.
+        # This uses a dictionary from the Validate class.
+        if month not in Validate.month_days:
+            raise ValueError(
+                Msg.NOT_DATE_EXACT_MONTH.format(
+                    value, class_name, date_parts[1]
+                )
+            )
 
-        # # Check the two cases for February: leap year and not leap year.
-        # if month == 'FEB' and (
-        #     (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
-        # ):
-        #     if day < 1 or day > Validate.month_days['FEB_LEAP']:
-        #         raise ValueError(
-        #             Msg.NOT_DATE_EXACT_DAY.format(
-        #                 value,
-        #                 class_name,
-        #                 date_parts[0],
-        #                 Validate.month_days['FEB_LEAP'],
-        #             )
-        #         )
-        # elif month == 'FEB' and (day < 1 or day > Validate.month_days[month]):
-        #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_DAY.format(
-        #             value,
-        #             class_name,
-        #             date_parts[0],
-        #             Validate.month_days[month],
-        #         )
-        #     )
+        # Check that the month has the correct day if it is not February.
+        if (day < 1 or day > Validate.month_days[month]) and month != 'FEB':
+            raise ValueError(
+                Msg.NOT_DATE_EXACT_DAY.format(
+                    value,
+                    class_name,
+                    date_parts[0],
+                    str(Validate.month_days[month]),
+                )
+            )
 
-        # # Check that the year is not 0.  There is no 0 year in the Gregorian calendar.
-        # if year == 0:
-        #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, date_parts[2])
-        #     )
+        # Check the two cases for February: leap year and not leap year.
+        if month == 'FEB' and (
+            (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+        ):
+            if day < 1 or day > Validate.month_days['FEB_LEAP']:
+                raise ValueError(
+                    Msg.NOT_DATE_EXACT_DAY.format(
+                        value,
+                        class_name,
+                        date_parts[0],
+                        Validate.month_days['FEB_LEAP'],
+                    )
+                )
+        elif month == 'FEB' and (day < 1 or day > Validate.month_days[month]):
+            raise ValueError(
+                Msg.NOT_DATE_EXACT_DAY.format(
+                    value,
+                    class_name,
+                    date_parts[0],
+                    Validate.month_days[month],
+                )
+            )
 
-        # These dates non-empty Gregorian day, month and year values,
-        # so `date_general` can validate them with the default specification.
-        return value != Default.EMPTY and Validate.date_general(
-            value, class_name
-        )
+        # Check that the year is not 0.  There is no 0 year in the Gregorian calendar.
+        if year == 0:
+            raise ValueError(
+                Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, date_parts[2])
+            )
+
+        return True
+        # # These dates non-empty Gregorian day, month and year values,
+        # # so `date_general` can validate them with the default specification.
+        # return value != Default.EMPTY and Validate.date_general(
+        #     value, class_name
+        # )
 
     @staticmethod
     def date_general(
@@ -2755,10 +2816,9 @@ class Validate:
         """
 
         # There can be either two '/' (slash) characters in the name or none.
+        Validate.string(value, class_name)
         slash_count: int = value.count(Default.SLASH)
-        if Validate.string(value, class_name) and (
-            slash_count > 2 or slash_count == 1
-        ):
+        if slash_count > 2 or slash_count == 1:
             raise ValueError(
                 Msg.NOT_NAME_SLASH.format(value, class_name, slash_count)
             )

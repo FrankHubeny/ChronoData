@@ -181,7 +181,7 @@ from genedata.structure import (
         structure: dict[str, dict[str, Any]] = specs[
             Default.YAML_TYPE_STRUCTURE
         ][key]
-        specification: list[str] = structure[Default.YAML_SPECIFICATION]
+        specification: list[str] = list(structure[Default.YAML_SPECIFICATION])
         string_linked: str = Default.EMPTY
         spec: str = """
     GEDCOM Specification:"""
@@ -567,6 +567,7 @@ from genedata.structure import (
             key='{key}',
             tag='{tag}',
             supers={Query.supers_count(key, specs)},
+            superstructures={Query.superstructures(key, specs)},
             permitted={permitted_value},
             required={required_value},
             single={single_value},
@@ -783,9 +784,9 @@ class Tests:
                 )
                 class_name = Names.classname(sub_key)
                 if sub_required != Default.EMPTY and sub_value == Default.EMPTY:
-                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_required})'
+                    singular = f'{singular}{Default.CODE_CLASS}{class_name}({sub_required})'
                 else:
-                    singular = f'{singular}{Default.CODE_CLASS}.{class_name}({sub_value})'
+                    singular = f'{singular}{Default.CODE_CLASS}{class_name}({sub_value})'
                 break
         return name, singular
 
@@ -812,16 +813,16 @@ class Tests:
                 class_name = Names.classname(sub_key)
                 if sub_not_required != Default.EMPTY:
                     if sub_value != Default.EMPTY:
-                        not_required = f'{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_not_required})'
+                        not_required = f'{Default.CODE_CLASS}{class_name}({sub_value}, {sub_not_required})'
                     else:
-                        not_required = f'{Default.CODE_CLASS}.{class_name}({sub_not_required})'
+                        not_required = f'{Default.CODE_CLASS}{class_name}({sub_not_required})'
                 else:
                     # if sub_value != Default.EMPTY:
                     not_required = (
-                        f'{Default.CODE_CLASS}.{class_name}({sub_value})'
+                        f'{Default.CODE_CLASS}{class_name}({sub_value})'
                     )
                     # else:
-                    #     not_required = f'{Default.CODE_CLASS}.{class_name}()'
+                    #     not_required = f'{Default.CODE_CLASS}{class_name}()'
                 break
         return not_required
 
@@ -848,20 +849,20 @@ class Tests:
                 class_name = Names.classname(sub_key)
                 if required != Default.EMPTY:
                     # if sub_required != Default.EMPTY:
-                    #     required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value}({sub_required}))'
+                    #     required = f'{required}, {Default.CODE_CLASS}{class_name}({sub_value}({sub_required}))'
                     # else:
                     more_than_one = True
-                    required = f'{required}, {Default.CODE_CLASS}.{class_name}({sub_value})'
+                    required = f'{required}, {Default.CODE_CLASS}{class_name}({sub_value})'
                 else:  # noqa: PLR5501
                     if (
                         sub_required != Default.EMPTY
                         and sub_value == Default.EMPTY
                     ):
-                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_required})'
+                        required = f'{required}{Default.CODE_CLASS}{class_name}({sub_required})'
                     elif sub_required != Default.EMPTY:
-                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_value}, {sub_required})'
+                        required = f'{required}{Default.CODE_CLASS}{class_name}({sub_value}, {sub_required})'
                     else:
-                        required = f'{required}{Default.CODE_CLASS}.{class_name}({sub_value})'
+                        required = f'{required}{Default.CODE_CLASS}{class_name}({sub_value})'
         if required == Default.EMPTY:
             return required
         if more_than_one:
@@ -931,7 +932,7 @@ class Tests:
         enum: str = Tests.get_enum(
             key, structures, enumerationsets, enumerations
         )
-        payload: str = structures[key][Default.YAML_PAYLOAD]
+        payload: str = str(structures[key][Default.YAML_PAYLOAD])
         match payload:
             case 'http://www.w3.org/2001/XMLSchema#string':
                 match key:
@@ -941,13 +942,15 @@ class Tests:
                         return "'E10.1'"
                     case 'record-SNOTE':
                         return 'snote'
+                    case 'TAG':
+                        return "'tag uri'"
                     case _:
                         return "'abc'"
             case 'Y|<NULL>':
                 if y:
                     return "'Y'"
                 return "''"
-            case None:
+            case 'None':
                 match key:
                     case 'record-FAM':
                         return 'fam'
@@ -1030,19 +1033,19 @@ class Tests:
         match add_pytest:
             case 0:
                 pytest: str = f"""from genedata.build import Genealogy   # noqa: I001
-import genedata.classes{version_no_periods} as {Default.CODE_CLASS}"""
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS_VARIABLE}"""
             case 1:
                 pytest = f"""import pytest   # noqa: I001
 import re
 
-import genedata.classes{version_no_periods} as {Default.CODE_CLASS}
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS_VARIABLE}
 from genedata.build import Genealogy
 from genedata.messages import Msg"""
             case 2:
                 pytest = f"""import pytest   # noqa: I001
 import re
 
-import genedata.classes{version_no_periods} as {Default.CODE_CLASS}
+import genedata.classes{version_no_periods} as {Default.CODE_CLASS_VARIABLE}
 from genedata.build import Genealogy"""
         return f"""{firstline}'''This module contains {test} tests to be run with pytest.
 
@@ -1054,14 +1057,14 @@ DO NOT MODIFY THIS FILE.
 {pytest}
 
 
-{Default.CODE_GENEALOGY} = Genealogy()
-fam = {Default.CODE_GENEALOGY}.family_xref('1')
-indi = {Default.CODE_GENEALOGY}.individual_xref('1')
-obje = {Default.CODE_GENEALOGY}.multimedia_xref('1')
-repo = {Default.CODE_GENEALOGY}.repository_xref('1')
-snote = {Default.CODE_GENEALOGY}.shared_note_xref('1', 'a note')
-sour = {Default.CODE_GENEALOGY}.source_xref('1')
-subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
+{Default.CODE_GENEALOGY_VARIABLE} = Genealogy()
+fam = {Default.CODE_GENEALOGY}family_xref('1')
+indi = {Default.CODE_GENEALOGY}individual_xref('1')
+obje = {Default.CODE_GENEALOGY}multimedia_xref('1')
+repo = {Default.CODE_GENEALOGY}repository_xref('1')
+snote = {Default.CODE_GENEALOGY}shared_note_xref('1', 'a note')
+sour = {Default.CODE_GENEALOGY}source_xref('1')
+subm = {Default.CODE_GENEALOGY}submitter_xref('1')
 """
 
     @staticmethod
@@ -1084,7 +1087,7 @@ subm = {Default.CODE_GENEALOGY}.submitter_xref('1')
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a value and required substructures.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     assert m.validate()
 """
             return lines
@@ -1140,7 +1143,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a value and required substructures.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_PERMITTED.format('RecordIndi', m.permitted, m.class_name))
     ):
@@ -1207,7 +1210,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate that the `{class_name}` structure rejects a value not in its payload datatype.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.{error_message}.format('-1', m.class_name))
     ):
@@ -1269,7 +1272,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a bad enumeration value and required substructures.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.NOT_VALID_ENUM.format({value}, m.enum_tags, m.class_name))
     ):
@@ -1323,7 +1326,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a single substructure that is repeated.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.ONLY_ONE_PERMITTED.format({name}, m.class_name))
     ):
@@ -1404,7 +1407,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
 
 def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_name}() -> None:
     '''Validate the `{class_name}` structure with a single substructure that is repeated.'''
-    m = {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})
+    m = {Default.CODE_CLASS}{class_name}({value}{separator}{subs})
     with pytest.raises(
         ValueError, match=re.escape(Msg.MISSING_REQUIRED.format(m.required, m.class_name))
     ):
@@ -1469,7 +1472,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
     with pytest.raises(
         TypeError, match=re.escape("{class_name}.__init__() takes 2 positional arguments but 3 were given")
     ):
-        {Default.CODE_CLASS}.{class_name}({value}{separator}{subs})  # type: ignore[call-arg]
+        {Default.CODE_CLASS}{class_name}({value}{separator}{subs})  # type: ignore[call-arg]
 """
             return lines
 
@@ -1524,7 +1527,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
     with pytest.raises(
         TypeError, match=re.escape("{class_name}.__init__() got an unexpected keyword argument 'value'")
     ):
-        {Default.CODE_CLASS}.{class_name}(value={value}{separator}subs={subs})  # type: ignore[call-arg]
+        {Default.CODE_CLASS}{class_name}(value={value}{separator}subs={subs})  # type: ignore[call-arg]
 """
             return lines
 

@@ -3,4 +3,9 @@
 
 from genedata.methods import Util
 
-file = Util.read('tests\\data\\ged_examples\\extension-record.ged')
+file = Util.read('tests/data/ged_examples/extension-record.ged')
+
+def test_extension_record_ged() -> None:
+
+
+    assert file == ged_file

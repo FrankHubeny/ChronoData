@@ -12,11 +12,7 @@ import re
 from copy import deepcopy
 from typing import Any, NamedTuple
 
-from genedata.constants import (
-    Default,
-    Number,
-    String,
-)
+from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Names, Query, Util
 from genedata.structure import (
@@ -320,6 +316,7 @@ class Genealogy:
             'Type',
             'Payload',
             'Supers',
+            'Superstructures',
             'Required',
             'Permitted',
             'Single',
@@ -342,6 +339,7 @@ class Genealogy:
                     tag[9],
                     tag[10],
                     tag[11],
+                    tag[12],
                 ]
             )
         return values, keys, labels
@@ -402,6 +400,9 @@ class Genealogy:
         enumset_key: str = Default.EMPTY
         enum_tags: list[str] = []
         supers: int = 0
+        superstructures: list[str] = []
+        supers_required: list[str] = []
+        supers_single: list[str] = []
         tag_edited: str = tag.upper()
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
@@ -425,6 +426,10 @@ class Genealogy:
             permitted = Query.permitted(extension_key, self.specification)
             payload = Query.payload(extension_key, self.specification)
             supers = Query.supers_count(extension_key, self.specification)
+            superstructures = Query.superstructures(extension_key, self.specification)
+            supers_required = Query.supers_required(extension_key, self.specification)
+            supers_single = Query.supers_singular(extension_key, self.specification)
+            logging.info(f'superstructures = {superstructures}')
             # case Default.YAML_TYPE_ENUMERATION:
             enumset_key, enum_tags = Query.enum_key_tags(
                 extension_key, self.specification
@@ -437,6 +442,9 @@ class Genealogy:
                     yaml_type,
                     payload,
                     supers,
+                    superstructures,
+                    supers_required,
+                    supers_single,
                     required,
                     single,
                     permitted,
@@ -458,6 +466,9 @@ class Genealogy:
             enum_tags=enum_tags,
             payload=payload,
             supers=supers,
+            superstructures=superstructures,
+            supers_required=supers_required,
+            supers_single=supers_single,
         )
 
     def stage(

@@ -383,22 +383,7 @@ def test_date_not_hebrew_month() -> None:
             Msg.NOT_DATE_MONTH.format(
                 m.value,
                 m.class_name,
-                str(
-                    [
-                        'APR',
-                        'AUG',
-                        'DEC',
-                        'FEB',
-                        'JAN',
-                        'JUL',
-                        'JUN',
-                        'MAR',
-                        'MAY',
-                        'NOV',
-                        'OCT',
-                        'SEP',
-                    ]
-                ),
+                str(['AAV', 'ADR', 'ADS', 'CSH', 'ELL', 'IYR', 'KSL', 'NSN', 'SHV', 'SVN', 'TMZ', 'TSH', 'TVT']),
             )
         ),
     ):
@@ -573,11 +558,12 @@ def test_dateexact_not_string() -> None:
 
 def test_not_dateexact_lowercase() -> None:
     m = DateExact('1 JAn 2000')
-    with pytest.raises(
-        ValueError,
-        match=re.escape(Msg.NOT_DATE_EXACT.format(str(m.value), m.class_name)),
-    ):
-        m.validate()
+    assert m.ged() == '1 DATE 1 JAN 2000\n'
+    # with pytest.raises(
+    #     ValueError,
+    #     match=re.escape(Msg.NOT_DATE_EXACT.format(str(m.value), m.class_name)),
+    # ):
+    #     m.validate()
 
 
 def test_not_dateexact_no_digit() -> None:
@@ -602,18 +588,11 @@ def test_not_dateexact_extra_space() -> None:
         m.validate()
 
 
-def test_not_dateexact_too_few_spaces() -> None:
+def test_not_dateexact_two_spaces_needed() -> None:
     m = DateExact('1JAN 2000')
     with pytest.raises(
         ValueError,
-        match=re.escape(
-            Msg.NOT_DATE_EXACT_SPACES.format(
-                m.value,
-                m.class_name,
-                str(1),
-                Default.DATE_EXACT_SPACES,
-            )
-        ),
+        match=re.escape(Msg.NOT_DATE_EXACT_SPACES.format(m.value, m.class_name, str(1), str(2))),
     ):
         m.validate()
 

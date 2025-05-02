@@ -15,7 +15,7 @@ ged_version: str = '7.0'
 
 def test_xref_ged() -> None:
     # Test constructing the xref_ged test data.
-    file = Util.read('tests\\ged_test\\xref.ged')
+    file = Util.read('tests/data/ged_examples/xref.ged')
 
     g = Genealogy(version=ged_version)
 

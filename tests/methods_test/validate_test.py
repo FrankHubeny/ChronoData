@@ -5,6 +5,8 @@ import re
 
 import pytest
 
+import genedata.classes70 as gc
+from genedata.build import Genealogy
 from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Validate
@@ -131,11 +133,8 @@ def test_date_exact_leapyear() -> None:
     assert Validate.date_exact('29 FEB 2004', 'DateExact')
 
 
-def test_date_exact_lowercase() -> None:
-    with pytest.raises(
-        ValueError, match=Msg.NOT_DATE_EXACT.format('abc9', 'DateExact')
-    ):
-        Validate.date_exact('abc9', 'DateExact')
+def test_date_exact_lowercase_ok() -> None:
+    assert Validate.date_exact('29 feb 2004', 'DateExact')
 
 
 def test_date_exact_no_numbers() -> None:
@@ -205,6 +204,14 @@ def test_date_general_no_space() -> None:
 def test_date_general_empty() -> None:
     assert Validate.date_general('', 'Date', Specs)
 
+def test_date_calendar_month_extension() -> None:
+    mycalendar: str = 'tests/data/extension_tests/calendars/cal-_MYGREGORIAN.yaml'
+    myjan: str = 'tests/data/extension_tests/months/month-_MYJAN.yaml'
+    g = Genealogy()
+    g.document_tag('_MYGREGORIAN', mycalendar)
+    g.document_tag('_MYJAN', myjan)
+    assert gc.Date('_MYGREGORIAN 1 _MYJAN 2000 BC').validate(specs=g.specification)
+
 
 def test_bad_date_general_not_string_int() -> None:
     with pytest.raises(
@@ -260,14 +267,23 @@ def test_bad_date_general_not_month() -> None:
 def test_bad_date_general_calendar() -> None:
     with pytest.raises(
         ValueError,
-        match=re.escape(Msg.NOT_DATE_CALENDAR.format(
-            'SOMETHING 1 JAN 2000',
-            'Date',
-            'SOMETHING',
-            ['FRENCH_R', 'GREGORIAN', 'HEBREW', 'JULIAN']),
+        match=re.escape(
+            Msg.NOT_DATE_CALENDAR.format(
+                'SOMETHING 1 JAN 2000',
+                'Date',
+                'SOMETHING',
+                ['FRENCH_R', 'GREGORIAN', 'HEBREW', 'JULIAN'],
+            ),
         ),
     ):
         Validate.date_general('SOMETHING 1 JAN 2000', 'Date', Specs)
+
+
+def test_bad_date_general_epoch() -> None:
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.NOT_DATE_EPOCH.format('2000 BC', 'Date', ['BCE']))
+    ):
+        Validate.date_general('2000 BC', 'Date', Specs)
 
 
 def test_bad_date_spaces() -> None:
@@ -306,7 +322,7 @@ def test_bad_date_month_day_too_few() -> None:
         Validate.date_general('0 JAN 2000', 'Date', Specs)
 
 
-def test_bad_date_month_day_leapyear() -> None:
+def test_bad_date_month_day_leapyear_gregorian() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -318,7 +334,64 @@ def test_bad_date_month_day_leapyear() -> None:
             )
         ),
     ):
-        Validate.date_general('29 FEB 2000', 'Date', Specs)
+        Validate.date_general('29 FEB 2002', 'Date', Specs)
+
+
+def test_bad_date_month_day_not_leapyear_julian() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                'JULIAN 29 FEB 2002',
+                'Date',
+                str(29),
+                str(28),
+            )
+        ),
+    ):
+        Validate.date_general('JULIAN 29 FEB 2002', 'Date', Specs)
+
+def test_bad_date_month_day_leapyear_julian() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                'JULIAN 30 FEB 2000',
+                'Date',
+                str(30),
+                str(29),
+            )
+        ),
+    ):
+        Validate.date_general('JULIAN 30 FEB 2000', 'Date', Specs)
+
+def test_bad_date_month_day_not_leapyear_julian_zero() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                'JULIAN 0 FEB 2002',
+                'Date',
+                str(0),
+                str(28),
+            )
+        ),
+    ):
+        Validate.date_general('JULIAN 0 FEB 2002', 'Date', Specs)
+
+def test_bad_date_month_day_leapyear_julian_zero() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_EXACT_DAY.format(
+                'JULIAN 0 FEB 2000',
+                'Date',
+                str(0),
+                str(29),
+            )
+        ),
+    ):
+        Validate.date_general('JULIAN 0 FEB 2000', 'Date', Specs)
 
 
 # date_period tests
@@ -346,6 +419,49 @@ def test_date_period_no_lower_case() -> None:
         ValueError, match=Msg.NOT_DATE_PERIOD.format('to 1 JAN 2000', 'Date')
     ):
         Validate.date_period('to 1 JAN 2000', 'Date', Specs)
+
+
+# enum tests
+def test_enum_resn() -> None:
+    assert Validate.enum(
+        'LOCKED', 'INDI', ['LOCKED', 'CONFIDENTIAL'], 'enumset-RESN', Specs
+    )
+
+
+def test_enum_hide_extension() -> None:
+    enum_hide: str = 'tests\\data\\extension_tests\\enumerations\\enum-_HIDE.yaml'
+    g = Genealogy()
+    g.document_tag('_HIDE', enum_hide)
+    assert gc.Resn('_HIDE').validate(specs=g.specification)
+
+
+# filepath tests
+def test_filepath() -> None:
+    assert Validate.filepath(
+        'tests/data/extension_tests/enum-_HIDE.yaml', 'File'
+    )
+
+
+# language tests
+def test_language() -> None:
+    assert Validate.language('en-US', 'Lang')
+
+
+# listing tests
+def test_listing() -> None:
+    assert Validate.listing(', , here', 'Plac')
+
+
+# mediatype tests
+def test_media_type() -> None:
+    assert Validate.mediatype('text/html', 'Medi')
+
+
+def test_media_type_no_slash() -> None:
+    with pytest.raises(
+        ValueError, match=Msg.NO_SLASH.format('texthtml', 'Medi')
+    ):
+        Validate.mediatype('texthtml', 'Medi')
 
 
 # name tests
@@ -614,13 +730,13 @@ def test_bad_y_or_null_1() -> None:
 
 def test_bad_y_or_null_2() -> None:
     with pytest.raises(
-        ValueError, match=Msg.VALUE_NOT_Y_OR_NULL.format('None', 'Name')
+        ValueError, match=Msg.NOT_STRING.format(repr(None), 'Name')
     ):
         Validate.y_or_null(None, 'Name')
 
 
 def test_bad_y_or_null_3() -> None:
     with pytest.raises(
-        ValueError, match=Msg.VALUE_NOT_Y_OR_NULL.format('1', 'Name')
+        ValueError, match=Msg.NOT_STRING.format(repr(1), 'Name')
     ):
         Validate.y_or_null(1, 'Name')

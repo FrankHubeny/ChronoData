@@ -5,7 +5,7 @@ from genedata.methods import Util
 
 def test_minimal_ged() -> None:
     # Test constructing the minimal70.ged test file.
-    file = Util.read('tests\\data\\ged_examples\\minimal70.ged')
+    file = Util.read('tests/data/ged_examples/minimal70.ged')
     
     # Import the required packages and classes.
     import genedata.classes70 as gc

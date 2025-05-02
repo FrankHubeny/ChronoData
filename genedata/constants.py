@@ -568,12 +568,12 @@ class Cal:
     }
 
 
-@dataclass(frozen=True)
-class Number:
-    CSVLEN: int = 4
-    GEDLEN: int = 4
-    GRAMPSLEN: int = 7
-    JSONLEN: int = 5
+# @dataclass(frozen=True)
+# class Number:
+#     CSVLEN: int = 4
+#     GEDLEN: int = 4
+#     GRAMPSLEN: int = 7
+#     JSONLEN: int = 5
 
 
 @dataclass(frozen=True)

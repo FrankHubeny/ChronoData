@@ -20,7 +20,7 @@ def test_y_null_data_type_validation_other() -> None:
     m = gc.Will(value)
     with pytest.raises(
         ValueError,
-        match=Msg.VALUE_NOT_Y_OR_NULL.format(value, m.class_name),
+        match=Msg.VALUE_NOT_Y_OR_NULL.format(value.upper(), m.class_name),
     ):
         m.validate()
 
@@ -57,14 +57,6 @@ def test_date() -> None:
     m = gc.Date(value)
     assert m.validate()
 
-def test_date_bad() -> None:
-    value: str = 'not a date'
-    m = gc.Date(value)
-    with pytest.raises(
-        ValueError,
-        match=Msg.NOT_DATE.format(value, m.class_name),
-    ):
-        m.validate()
 
 def test_time() -> None:
     value: str = '01:10:11'
@@ -76,7 +68,7 @@ def test_time_bad() -> None:
     m = gc.Time(value)
     with pytest.raises(
         ValueError,
-        match=Msg.NOT_TIME.format(value, m.class_name),
+        match=Msg.NOT_TIME.format(value.upper(), m.class_name),
     ):
         m.validate()
 

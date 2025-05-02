@@ -14,13 +14,17 @@ from genedata.methods import Util
 ged_version: str = '7.0'
 def test_age_ged() -> None:
     """Reproduce the age_ged example file."""
-    file = Util.read_ged('tests\\data\\ged_examples\\age.ged')
+    file = Util.read_ged('tests/data/ged_examples/age.ged')
     
+    # Import the required packages and classes.
+    import genedata.classes70 as gc
+    from genedata.build import Genealogy
+
     # Instantiate a Genealogy class.
     g = Genealogy()
 
     # Instantiate the cross reference identifiers.
-    # There were 1 xref identifiers and 0 void identifiers.
+    # There were 1 cross reference identifiers.
     indi_I1_xref = g.individual_xref('I1')
 
     # Instantiate the header record.
@@ -30,7 +34,6 @@ def test_age_ged() -> None:
         ]),
         gc.Note('This file is intended to provide coverage of parts of the specification and does not contain meaningful historical or genealogical data.'),
     ])
-
 
     # Instantiate the records holding the GED data.
     indi_I1 = gc.RecordIndi(indi_I1_xref, [
@@ -335,10 +338,13 @@ def test_age_ged() -> None:
         ]),
     ])
 
-
-    # Stage the GEDCOM records to generate the ged lines.
+    # Stage the 2 GEDCOM records to generate the ged lines.
     g.stage(header)
     g.stage(indi_I1)
+
+    # Run the following to show the ged file that the above code would produce.
+    ged_file = g.show_ged()
+
 
     # Run the following to show the ged file that the above code would produce.
     ged_file = g.show_ged()

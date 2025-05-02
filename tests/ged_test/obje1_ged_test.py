@@ -11,7 +11,7 @@ from genedata.methods import Util
 
 def test_obje1_ged() -> None:
     """Construct the obje1_ged example file."""
-    file = Util.read('tests\\data\\ged_examples\\obje-1.ged')
+    file = Util.read('tests/data/ged_examples/obje-1.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc

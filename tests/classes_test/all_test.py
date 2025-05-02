@@ -1011,7 +1011,7 @@ def test_all_Surn() -> None:
 
 def test_all_Tag() -> None:
     '''Validate the `Tag` structure with a value and required substructures.'''
-    m = gc.Tag('abc')
+    m = gc.Tag('tag uri')
     assert m.validate()
 
 

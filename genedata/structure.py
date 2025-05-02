@@ -15,6 +15,7 @@ __all__ = [
 ]
 
 import collections
+import logging
 from typing import Any, Literal, NamedTuple, Self
 
 from genedata.constants import Default
@@ -321,6 +322,9 @@ class BaseStructure:
         key: str = Default.EMPTY,
         tag: str = Default.EMPTY,
         supers: int = 0,
+        superstructures: list[str] | None = None,
+        supers_required: list[str] | None = None,
+        supers_single: list[str] | None = None,
         permitted: list[str] | None = None,
         required: list[str] | None = None,
         single: list[str] | None = None,
@@ -363,7 +367,16 @@ class BaseStructure:
             single = []
         if enum_tags is None:
             enum_tags = []
+        if superstructures is None:
+            superstructures = []
+        if supers_required is None:
+            supers_required = []
+        if supers_single is None:
+            supers_single = []
         self.supers: int = supers
+        self.superstructures: list[str] = superstructures
+        self.supers_required = supers_required
+        self.supers_single = supers_single
         self.permitted: list[str] = permitted
         self.required: list[str] = required
         self.single: list[str] = single
@@ -396,12 +409,35 @@ class BaseStructure:
 
         # Are there substructures not in the permitted list of substructures?
         for name in self.counted:
-            if name not in self.permitted:
+            if (
+                name != 'Ext'
+                and self.permitted != []
+                and name not in self.permitted
+            ):
                 raise ValueError(
                     Msg.NOT_PERMITTED.format(
                         name, self.permitted, self.class_name
                     )
                 )
+
+        # Are there extension substructures that do not have this class as a superstructure?
+        if self.subs is not None and isinstance(self.subs, list):
+            for sub in self.subs:
+                if (
+                    sub.class_name == 'Ext'
+                    and self.class_name not in sub.superstructures
+                ):
+                    raise ValueError(
+                        Msg.NOT_SUPERSTRUCTURE.format(self.class_name, sub.tag)
+                    )
+        elif (
+            self.subs is not None
+            and self.subs.class_name == 'Ext'
+            and self.class_name not in self.subs.superstructures
+        ):
+            raise ValueError(
+                Msg.NOT_SUPERSTRUCTURE.format(self.class_name, self.subs.tag)
+            )
 
         # Does the value have the required data type?
         match self.payload:
@@ -419,17 +455,15 @@ class BaseStructure:
 
                 # If the value is not an instance of SharedNoteXref, check that it is a string.
                 else:
-                    return Validate.string(self.value, self.class_name)
+                    Validate.string(self.value, self.class_name)
 
             # Verify that the value is either `Y` or `''`, but not ``.
             case 'Y|<NULL>':
-                return Validate.y_or_null(self.value, self.class_name)
+                Validate.y_or_null(self.value, self.class_name)
 
             # Verify that the value is a non-negative integer.
             case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
-                return Validate.non_negative_integer(
-                    self.value, self.class_name
-                )
+                Validate.non_negative_integer(self.value, self.class_name)
 
             # Verify a value is in the enumeration set.
             # Do this also for a list of enumberation values.
@@ -437,30 +471,13 @@ class BaseStructure:
                 'https://gedcom.io/terms/v7/type-Enum'
                 | 'https://gedcom.io/terms/v7/type-List#Enum'
             ):
-                return Validate.enum(
+                Validate.enum(
                     self.value,
                     self.class_name,
                     self.enum_tags,
                     self.enumset_key,
                     specs,
                 )
-                # if Validate.string(self.value, self.class_name) and isinstance(
-                #     self.value, str
-                # ):
-                #     for value in self.value.split(Default.LIST_ITEM_SEPARATOR):
-                #         if not Validate.enum(value, self.class_name, self.enum_tags, self.enumset_key, specs):
-                #             return False
-                #     return True
-
-            # Verify a value is in the enumeration set.
-            # case 'https://gedcom.io/terms/v7/type-Enum':
-            #     return Validate.enum(
-            #         self.value,
-            #         self.class_name,
-            #         self.enum_tags,
-            #         self.enumset_key,
-            #         specs,
-            #     )
 
             # Verify that the value is an instance of IndividualXref.
             case '@<https://gedcom.io/terms/v7/record-INDI>@':
@@ -482,7 +499,7 @@ class BaseStructure:
 
             # Verify the value is a listing with items separated by `, `.
             case 'https://gedcom.io/terms/v7/type-List#Text':
-                return Validate.listing(self.value, self.class_name)
+                Validate.listing(self.value, self.class_name)
 
             # Verify that the value is an instance of SubmitterXref.
             case '@<https://gedcom.io/terms/v7/record-SUBM>@':
@@ -495,35 +512,35 @@ class BaseStructure:
 
             # Verify the value meets the language specification.
             case 'http://www.w3.org/2001/XMLSchema#Language':
-                return Validate.language(self.value, self.class_name)
+                Validate.language(self.value, self.class_name)
 
             # Verify the value meets the date period specifications
             case 'https://gedcom.io/terms/v7/type-Date#period':
-                return Validate.date_period(self.value, self.class_name, specs)
+                Validate.date_period(self.value, self.class_name, specs)
 
             # Verify the value meets the date exact specifications.
             case 'https://gedcom.io/terms/v7/type-Date#exact':
-                return Validate.date_exact(self.value, self.class_name)
+                Validate.date_exact(self.value, self.class_name)
 
             # Verify the value meets the general date specifications.
             case 'https://gedcom.io/terms/v7/type-Date':
-                return Validate.date(self.value, self.class_name, specs)
+                Validate.date(self.value, self.class_name, specs)
 
             # Verify the value meets the file path specifications.
             case 'https://gedcom.io/terms/v7/type-FilePath':
-                return Validate.filepath(self.value, self.class_name)
+                Validate.filepath(self.value, self.class_name)
 
             # Verify the value meets the personal name specifications.
             case 'https://gedcom.io/terms/v7/type-Name':
-                return Validate.name(self.value, self.class_name)
+                Validate.name(self.value, self.class_name)
 
             # Verify that the value meets the age specifications.
             case 'https://gedcom.io/terms/v7/type-Age':
-                return Validate.age(self.value, self.class_name)
+                Validate.age(self.value, self.class_name)
 
             # Verify the media type meets the specifications.
             case 'http://www.w3.org/ns/dcat#mediaType':
-                return Validate.mediatype(self.value, self.class_name)
+                Validate.mediatype(self.value, self.class_name)
 
             # Verify that the value is an instance of MultimediaXref.
             case '@<https://gedcom.io/terms/v7/record-OBJE>@':
@@ -563,7 +580,7 @@ class BaseStructure:
 
             # Verify that the data type meets the time specifications.
             case 'https://gedcom.io/terms/v7/type-Time':
-                return Validate.time(self.value, self.class_name)
+                Validate.time(self.value, self.class_name)
 
         # Do records have the correct class?
         match self.key:
@@ -620,6 +637,7 @@ class BaseStructure:
         # Is value formatted correctly for its structure specification?
         match self.class_name:
             case 'Lati':
+                logging.info('entered lati')
                 if isinstance(self.value, str) and self.value[0] not in [
                     Default.LATI_NORTH,
                     Default.LATI_SOUTH,
@@ -673,13 +691,9 @@ class BaseStructure:
                     )
             case 'Tag':
                 if isinstance(self.value, str):
-                    tag_list: list[str] = self.value.split(Default.SPACE)
-                    if len(tag_list) != 2:
-                        raise ValueError(
-                            Msg.TAG_SPACES.format(
-                                self.value, str(len(tag_list))
-                            )
-                        )
+                    spaces: int = self.value.count(Default.SPACE)
+                    if spaces != 1:
+                        raise ValueError(Msg.TAG_SPACES.format(self.value))
 
         # Check if all subs validate.
         if self.subs is not None:
@@ -700,7 +714,7 @@ class BaseStructure:
         """Generate the GEDCOM lines."""
         if self.validate(specs=specs):
             lines: str = Default.EMPTY
-            if self.class_name in [
+            if self.supers == 0 or self.class_name in [
                 'Head',
                 'RecordFam',
                 'RecordIndi',
@@ -885,6 +899,9 @@ class ExtensionAttributes(NamedTuple):
     yaml_file: str = Default.EMPTY
     yaml_type: str = Default.EMPTY
     supers: int = 0
+    superstructures: list[str] | None = None
+    supers_required: list[str] | None = None
+    supers_single: list[str] | None = None
     payload: str = Default.EMPTY
     required: list[str] | None = None
     single: list[str] | None = None
@@ -897,7 +914,10 @@ class Ext(BaseStructure):
     """Store, validate and format an extension structure."""
 
     def __init__(
-        self, attributes: ExtensionAttributes, value: str, subs: SubsType
+        self,
+        attributes: ExtensionAttributes,
+        value: str | int | Xref,
+        subs: SubsType,
     ):
         super().__init__(
             value=value,
@@ -905,6 +925,9 @@ class Ext(BaseStructure):
             key=attributes.key,
             tag=attributes.tag,
             supers=attributes.supers,
+            superstructures=attributes.superstructures,
+            supers_required=attributes.supers_required,
+            supers_single=attributes.supers_single,
             permitted=attributes.permitted,
             required=attributes.required,
             single=attributes.single,

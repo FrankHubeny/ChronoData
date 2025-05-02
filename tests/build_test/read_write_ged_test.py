@@ -17,7 +17,7 @@ def test_show_ged_no_header() -> None:
 
 
 def test_file_recognized_at_init() -> None:
-    filename: str = 'tests/ged_test/minimal70.ged'
+    filename: str = 'tests/data/ged_examples/minimal70.ged'
     g = Genealogy(filename=filename)
     assert g.filename == filename
 
@@ -42,6 +42,6 @@ def test_read_gdz() -> None:
 2 VERS 7.0
 0 TRLR"""
     file = 'gedcom.ged'
-    archive = 'tests\\ged_test\\minimal70.gdz'
+    archive = 'tests\\data\\ged_examples\\minimal70.gdz'
     g = Genealogy(file, archive)
     assert g.ged_file == ged

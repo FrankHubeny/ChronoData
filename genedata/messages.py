@@ -137,6 +137,7 @@ class Msg:
     NOT_DATE_EXACT_YEAR: str = (
         'The value "{0}" is not an exact date for structure "{1}" since the year value "{2}" is not an integer different from 0.'
     )
+    NOT_DATE_EXACT_YEAR_NOT_INTEGER: str = "invalid literal for int() with base 10: '{0}'"
     NOT_DATE_MONTH: str = (
         'The value "{0}" is not a date period for structure "{1}" since the month is not in the list of months {2}.'
     )
@@ -189,6 +190,7 @@ class Msg:
     )
     NOT_STRING: str = 'The value "{0}" is not a string for structure "{1}".'
     NOT_SUBMITTER_XREF: str = 'The value "{0}" is not a submitter cross reference for structure "{1}".'
+    NOT_SUPERSTRUCTURE: str = 'The structure "{0}" contains an extension substructure with tag "{1}" that does not recognize it as a superstructure.'
     NOT_TIME: str = 'The value "{0}" is not a time for structure "{1}".'
     NOT_TIME_COLON_COUNT: str = 'The value "{0}" is not a time for structure "{1}" since it has {2} colons. Only one or two are permitted.'
     NOT_TIME_HOURS: str = 'The value "{0}" is not a time for structure "{1}" since it has hours "{2}" which is not between {3} and {4} for a 24-hour time.'
@@ -240,7 +242,7 @@ class Msg:
         'The tag {0} cannot have a payload different from "Y" or "".'
     )
     TAG_REQUIRED: str = 'The substructure "{0}" is required by "{0}".'
-    TAG_SPACES: str = 'The value "{0}" contains {1} spaces.  Only one space separating the tag from the uri is permitted.'
+    TAG_SPACES: str = 'The TAG value "{0}" must contain one and only one space.'
     UNDOCUMENTED: str = 'Tags without adequate documentation are not supported.'
     UNKNOWN_TAG: str = (
         'The structure at "{0}" does not have a name for its tag.'

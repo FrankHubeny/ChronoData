@@ -7,7 +7,7 @@ from genedata.methods import Util
 
 def test_void_ged() -> None:
     # Test constructing the remarriage1_ged test data.
-    file = Util.read('tests\\data\\ged_examples\\voidptr.ged')
+    file = Util.read('tests/data/ged_examples/voidptr.ged')
     
     # Import the required packages and classes.
     import genedata.classes70 as gc
