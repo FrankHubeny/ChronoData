@@ -14,12 +14,12 @@ from genedata.build import Genealogy
 
 g = Genealogy()
 fam = g.family_xref('1')
-indi = g.individual_xref('1')
-obje = g.multimedia_xref('1')
-repo = g.repository_xref('1')
-snote = g.shared_note_xref('1', 'a note')
-sour = g.source_xref('1')
-subm = g.submitter_xref('1')
+indi = g.individual_xref('2')
+obje = g.multimedia_xref('3')
+repo = g.repository_xref('4')
+snote = g.shared_note_xref('5', 'a note')
+sour = g.source_xref('6')
+subm = g.submitter_xref('7')
 
 
 def test_empty_subs_Abbr() -> None:
@@ -403,7 +403,7 @@ def test_empty_subs_Tag() -> None:
     with pytest.raises(
         TypeError, match=re.escape("Tag.__init__() takes 2 positional arguments but 3 were given")
     ):
-        gc.Tag('abc', gc.Phrase("hi"))  # type: ignore[call-arg]
+        gc.Tag('tag uri', gc.Phrase("hi"))  # type: ignore[call-arg]
 
 
 def test_empty_subs_Temp() -> None:

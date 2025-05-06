@@ -15,12 +15,12 @@ from genedata.messages import Msg
 
 g = Genealogy()
 fam = g.family_xref('1')
-indi = g.individual_xref('1')
-obje = g.multimedia_xref('1')
-repo = g.repository_xref('1')
-snote = g.shared_note_xref('1', 'a note')
-sour = g.source_xref('1')
-subm = g.submitter_xref('1')
+indi = g.individual_xref('2')
+obje = g.multimedia_xref('3')
+repo = g.repository_xref('4')
+snote = g.shared_note_xref('5', 'a note')
+sour = g.source_xref('6')
+subm = g.submitter_xref('7')
 
 
 def test_missing_required_Asso() -> None:

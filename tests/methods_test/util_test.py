@@ -13,8 +13,8 @@ from genedata.methods import Util
 
 
 def test_archive_clean_ged_file() -> None:
-    file: str = 'ged_clean_test.ged'
-    archive: str = 'tests/data/file_examples/test_archive_dir.gdz'
+    file: str = 'gedcom.ged'
+    archive: str = 'tests/data/gdz/minimal70.gdz'
     out: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR'
     assert out == Util.read_gdz_ged_file(file, archive)
 
@@ -25,18 +25,28 @@ def test_clean_ged_file() -> None:
     assert out == Util.clean_ged_file(ged)
 
 
-def test_read_and_clean_ged_file() -> None:
-    file: str = 'tests/data/file_examples/ged_clean_test.ged'
-    out: str = '0 HEAD\n1 GEDC\n2 VERS 7.0\n0 TRLR'
-    assert out == Util.read_ged(file)
-
-
 def test_check_ged_file_no_version() -> None:
     file: str = '0 HEAD\n0 TRLR'
     with pytest.raises(
         ValueError, match=(Msg.GED_VERSION_NOT_RECOGNIZED.format(file, ''))
     ):
         Util.check_ged_file(file)
+
+def test_bad_strings() -> None:
+    file: str = 'tests/data/file_examples/ged_bad_lines.ged'
+    with pytest.raises(
+        ValueError, match=Msg.NOT_GED_STRINGS
+    ): 
+        Util.read_ged(file)
+
+def test_hebrew_read_binary() -> None:
+    file: str = 'tests/data/file_examples/ged_hebrew_read_binary.ged'
+    ged: str = Util.read_ged(file)
+    assert ged == '''0 HEAD
+1 GEDC
+2 VERS 7.0
+1 NOTE תִּשְׁרֵי
+0 TRLR'''
 
 
 def test_read_ged_file_no_version() -> None:

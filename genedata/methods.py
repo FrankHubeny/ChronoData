@@ -186,6 +186,9 @@ class Util:
         except Exception:
             ged = Util.read_binary(url)
 
+        # Replace '\r\n' with '\n'.
+        ged = ged.replace(Default.EOL_CARRIAGE_RETURN, Default.EOL)
+
         Util.check_ged_file(ged)
         return Util.clean_ged_file(ged)
 
@@ -1522,15 +1525,20 @@ class Query:
                 Default.YAML_PAYLOAD
             ]
         return result
-    
+
     @staticmethod
-    def superstructures(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+    def superstructures(
+        key: str, specs: dict[str, dict[str, Any]]
+    ) -> list[str]:
         classes: list[str] = []
         if (
             key in specs[Default.YAML_TYPE_STRUCTURE]
-            and Default.YAML_SUPERSTRUCTURES in specs[Default.YAML_TYPE_STRUCTURE][key]
+            and Default.YAML_SUPERSTRUCTURES
+            in specs[Default.YAML_TYPE_STRUCTURE][key]
         ):
-            for uri, _ in specs[Default.YAML_TYPE_STRUCTURE][key][Default.YAML_SUPERSTRUCTURES].items():
+            for uri, _ in specs[Default.YAML_TYPE_STRUCTURE][key][
+                Default.YAML_SUPERSTRUCTURES
+            ].items():
                 classes.append(Names.classname(uri))
         return classes
 
@@ -1583,7 +1591,9 @@ class Query:
         return keys
 
     @staticmethod
-    def supers_required(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+    def supers_required(
+        key: str, specs: dict[str, dict[str, Any]]
+    ) -> list[str]:
         """Provide a list of required classes.
 
         Example:
@@ -1633,7 +1643,9 @@ class Query:
         return classes
 
     @staticmethod
-    def supers_singular(key: str, specs: dict[str, dict[str, Any]]) -> list[str]:
+    def supers_singular(
+        key: str, specs: dict[str, dict[str, Any]]
+    ) -> list[str]:
         """Provide a list of classes that can be used only once as substructures.
 
         Example:
@@ -1681,24 +1693,38 @@ class Query:
                 if Default.CARDINALITY_SINGULAR in cardinality:
                     classes.append(Names.classname(uri))
         return classes
+    
+    @staticmethod
+    def all_structure_tags(specs: dict[str, dict[str, Any]] = Specs) -> list[str]:
+        """Construct a list of all structure tags, standard or extension, in a specification."""
+        tags: list[str] = list(Default.IGNORE)
+        for _, value in specs[Default.YAML_TYPE_STRUCTURE].items():
+            if Default.YAML_STANDARD_TAG in value:
+                tags.append(value[Default.YAML_STANDARD_TAG])
+            if Default.YAML_EXTENSION_TAGS in value:
+                if isinstance(value[Default.YAML_EXTENSION_TAGS], list):
+                    tags.extend(value[Default.YAML_EXTENSION_TAGS])
+                else:
+                    tags.append(value[Default.YAML_EXTENSION_TAGS])
+        return tags
 
     @staticmethod
-    def structure_tag(key: str, specs: dict[str, dict[str, Any]]) -> str:
+    def standard_structure_tag(key: str, specs: dict[str, dict[str, Any]]) -> str:
         tag: str = Default.EMPTY
         if key in specs[Default.YAML_TYPE_STRUCTURE]:
             tag = specs[Default.YAML_TYPE_STRUCTURE][key][
                 Default.YAML_STANDARD_TAG
             ]
-        elif key in specs[Default.YAML_TYPE_ENUMERATION]:
-            tag = specs[Default.YAML_TYPE_ENUMERATION][key][
-                Default.YAML_STANDARD_TAG
-            ]
-        elif key in specs[Default.YAML_TYPE_CALENDAR]:
-            tag = specs[Default.YAML_TYPE_CALENDAR][key][
-                Default.YAML_STANDARD_TAG
-            ]
-        elif key in specs[Default.YAML_TYPE_MONTH]:
-            tag = specs[Default.YAML_TYPE_MONTH][key][Default.YAML_STANDARD_TAG]
+        # elif key in specs[Default.YAML_TYPE_ENUMERATION]:
+        #     tag = specs[Default.YAML_TYPE_ENUMERATION][key][
+        #         Default.YAML_STANDARD_TAG
+        #     ]
+        # elif key in specs[Default.YAML_TYPE_CALENDAR]:
+        #     tag = specs[Default.YAML_TYPE_CALENDAR][key][
+        #         Default.YAML_STANDARD_TAG
+        #     ]
+        # elif key in specs[Default.YAML_TYPE_MONTH]:
+        #     tag = specs[Default.YAML_TYPE_MONTH][key][Default.YAML_STANDARD_TAG]
         return tag
 
     @staticmethod
@@ -1803,64 +1829,64 @@ class Query:
                 tag_uri_list.append(tag_uri.split(Default.SPACE))
         return tag_uri_list
 
-    @staticmethod
-    def top(specs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
-        structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
-        top_dict: dict[str, dict[str, Any]] = {}
-        for key in structure:
-            if (
-                key not in Default.IGNORE
-                and len(structure[key][Default.YAML_SUPERSTRUCTURES]) == 0
-            ):
-                top_dict.update(
-                    {
-                        key: {
-                            Default.YAML_KEY: key,
-                            Default.YAML_CLASS_NAME: Names.classname(key),
-                            Default.YAML_SUBSTRUCTURES: Query.subs(key, specs),
-                        }
-                    }
-                )
-        return top_dict
+    # @staticmethod
+    # def top(specs: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    #     structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
+    #     top_dict: dict[str, dict[str, Any]] = {}
+    #     for key in structure:
+    #         if (
+    #             key not in Default.IGNORE
+    #             and len(structure[key][Default.YAML_SUPERSTRUCTURES]) == 0
+    #         ):
+    #             top_dict.update(
+    #                 {
+    #                     key: {
+    #                         Default.YAML_KEY: key,
+    #                         Default.YAML_CLASS_NAME: Names.classname(key),
+    #                         Default.YAML_SUBSTRUCTURES: Query.subs(key, specs),
+    #                     }
+    #                 }
+    #             )
+    #     return top_dict
 
-    @staticmethod
-    def subs(key: str, specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
-        structure: dict[str, dict[str, Any]] = specs[
-            Default.YAML_TYPE_STRUCTURE
-        ]
-        subs_dict: dict[str, Any] = {}
-        if len(structure[key][Default.YAML_SUBSTRUCTURES]) > 0:
-            for substructure, cardinality in structure[key][
-                Default.YAML_SUBSTRUCTURES
-            ].items():
-                subkey: str = Names.keyname(substructure)
-                subclass: str = Names.classname(subkey)
-                subtag: str = structure[subkey][Default.YAML_STANDARD_TAG]
-                payload: str | None = structure[subkey][Default.YAML_PAYLOAD]
-                payload = (
-                    Default.NONE if payload is None else Names.keyname(payload)
-                )
-                subsingular: bool = False
-                if Default.YAML_CARDINALITY_SINGULAR in cardinality:
-                    subsingular = True
-                subrequired: bool = False
-                if Default.YAML_CARDINALITY_REQUIRED in cardinality:
-                    subrequired = True
-                subs_dict.update(
-                    {
-                        subkey: {
-                            Default.YAML_STANDARD_TAG: subtag,
-                            Default.YAML_SINGULAR: subsingular,
-                            Default.YAML_REQUIRED: subrequired,
-                            Default.YAML_CLASS_NAME: subclass,
-                            Default.YAML_PAYLOAD: payload,
-                            # Default.YAML_SUBSTRUCTURES: Query.subs(
-                            #     subkey, specs
-                            # ),
-                        }
-                    }
-                )
-        return subs_dict
+    # @staticmethod
+    # def subs(key: str, specs: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    #     structure: dict[str, dict[str, Any]] = specs[
+    #         Default.YAML_TYPE_STRUCTURE
+    #     ]
+    #     subs_dict: dict[str, Any] = {}
+    #     if len(structure[key][Default.YAML_SUBSTRUCTURES]) > 0:
+    #         for substructure, cardinality in structure[key][
+    #             Default.YAML_SUBSTRUCTURES
+    #         ].items():
+    #             subkey: str = Names.keyname(substructure)
+    #             subclass: str = Names.classname(subkey)
+    #             subtag: str = structure[subkey][Default.YAML_STANDARD_TAG]
+    #             payload: str | None = structure[subkey][Default.YAML_PAYLOAD]
+    #             payload = (
+    #                 Default.NONE if payload is None else Names.keyname(payload)
+    #             )
+    #             subsingular: bool = False
+    #             if Default.YAML_CARDINALITY_SINGULAR in cardinality:
+    #                 subsingular = True
+    #             subrequired: bool = False
+    #             if Default.YAML_CARDINALITY_REQUIRED in cardinality:
+    #                 subrequired = True
+    #             subs_dict.update(
+    #                 {
+    #                     subkey: {
+    #                         Default.YAML_STANDARD_TAG: subtag,
+    #                         Default.YAML_SINGULAR: subsingular,
+    #                         Default.YAML_REQUIRED: subrequired,
+    #                         Default.YAML_CLASS_NAME: subclass,
+    #                         Default.YAML_PAYLOAD: payload,
+    #                         # Default.YAML_SUBSTRUCTURES: Query.subs(
+    #                         #     subkey, specs
+    #                         # ),
+    #                     }
+    #                 }
+    #             )
+    #     return subs_dict
 
     # @staticmethod
     # def make_dictionary(ged: str) -> dict[str, Any]:
@@ -2355,9 +2381,11 @@ class Validate:
 
         This is a full date containing day, month and year in the Gregorian calendar.
         It does not use an epoch, so years BC are negative.  There is no zero year.
+        The calendar cannot be modified by an extension.
 
-        These constaints make it a special case of `date_general`
-        except that the empty string is not accepted as a valid date.
+        Although not given by the specification, since the calendar is Gregorian
+        and the months are known, a dictionary is added to the class to check
+        if the day given is between 1 and the max day for the month.
 
         Args:
             value: The date exact value entered.
@@ -2377,15 +2405,6 @@ class Validate:
             or re.search('[0-9]', value) is None
         ):
             raise ValueError(Msg.NOT_DATE_EXACT.format(value, class_name))
-        # if len(value) > Default.DATE_EXACT_MAX_SIZE:
-        #     raise ValueError(
-        #         Msg.NOT_DATE_EXACT_TOO_LARGE.format(
-        #             value,
-        #             class_name,
-        #             str(len(value)),
-        #             Default.DATE_EXACT_MAX_SIZE,
-        #         )
-        #     )
 
         # Check how many spaces are in the string.  There should only be 2.
         space_count: int = value.count(Default.SPACE)
@@ -2414,52 +2433,32 @@ class Validate:
                 )
             )
 
-        # Check that the month has the correct day if it is not February.
-        if (day < 1 or day > Validate.month_days[month]) and month != 'FEB':
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    date_parts[0],
-                    str(Validate.month_days[month]),
-                )
-            )
-
-        # Check the two cases for February: leap year and not leap year.
+        # Use the `month_days` dictionary in this class to find the max days of the month.
+        max_days: int = Validate.month_days[month]
         if month == 'FEB' and (
-            (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+            (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
         ):
-            if day < 1 or day > Validate.month_days['FEB_LEAP']:
-                raise ValueError(
-                    Msg.NOT_DATE_EXACT_DAY.format(
-                        value,
-                        class_name,
-                        date_parts[0],
-                        Validate.month_days['FEB_LEAP'],
-                    )
-                )
-        elif month == 'FEB' and (day < 1 or day > Validate.month_days[month]):
+            max_days = Validate.month_days['FEB_LEAP']
+
+        # Check that the day value is between 1 and the max days inclusively.
+        if day < 1 or day > max_days:
             raise ValueError(
                 Msg.NOT_DATE_EXACT_DAY.format(
                     value,
                     class_name,
-                    date_parts[0],
-                    Validate.month_days[month],
+                    str(day),
+                    max_days,
                 )
             )
 
         # Check that the year is not 0.  There is no 0 year in the Gregorian calendar.
         if year == 0:
             raise ValueError(
-                Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, date_parts[2])
+                Msg.NOT_DATE_EXACT_YEAR.format(value, class_name, str(year))
             )
 
+        # If it gets this far, return True.
         return True
-        # # These dates non-empty Gregorian day, month and year values,
-        # # so `date_general` can validate them with the default specification.
-        # return value != Default.EMPTY and Validate.date_general(
-        #     value, class_name
-        # )
 
     @staticmethod
     def date_general(
@@ -2615,82 +2614,79 @@ class Validate:
         # Perform for GREGORIAN and JULIAN calendars where days and months are given.
         # The days of the months are hard-coded from convention not from the GEDCOM specifications.
         # See the `Validate.month-days` dictionary.
-        if (
-            subcase in [0, 1, 2, 3]
-            and calendar in ['GREGORIAN', 'JULIAN']
-            and month != 'FEB'
-            and (days < 1 or days > Validate.month_days[month])
-        ):
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    str(days),
-                    str(Validate.month_days[month]),
+        # if (
+        #     subcase in [0, 1, 2, 3]
+        #     and calendar in ['GREGORIAN', 'JULIAN']
+        #     and month != 'FEB'
+        #     and (days < 1 or days > Validate.month_days[month])
+        # ):
+        #     raise ValueError(
+        #         Msg.NOT_DATE_EXACT_DAY.format(
+        #             value,
+        #             class_name,
+        #             str(days),
+        #             str(Validate.month_days[month]),
+        #         )
+        #     )
+        if subcase in [0, 1, 2, 3] and calendar in ['GREGORIAN', 'JULIAN']:
+            max_days: int = Validate.month_days[month]
+            if month == 'FEB' and (
+                (
+                    calendar == 'GREGORIAN'
+                    and ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0)
                 )
-            )
+                or (calendar == 'JULIAN' and year % 4 == 0 and year % 100 != 0)
+            ):
+                max_days = Validate.month_days['FEB_LEAP']
 
-        # Check the two cases for February in the GREGORIAN calendar:
-        if (
-            spaces_count in [0, 1, 2, 3]
-            and month == 'FEB'
-            and calendar == 'GREGORIAN'
-            and ((year % 4 == 0 and year % 100 != 0) or (year % 400 == 0))
-        ):
-            if days < 1 or days > Validate.month_days['FEB_LEAP']:
+            if days < 1 or days > max_days:
                 raise ValueError(
                     Msg.NOT_DATE_EXACT_DAY.format(
                         value,
                         class_name,
-                        days,
-                        Validate.month_days['FEB_LEAP'],
+                        str(days),
+                        str(Validate.month_days[month]),
                     )
                 )
-        elif (
-            spaces_count in [0, 1, 2, 3]
-            and month == 'FEB'
-            and calendar == 'GREGORIAN'
-            and (days < 1 or days > Validate.month_days[month])
-        ):
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    days,
-                    Validate.month_days[month],
-                )
-            )
 
-        # Check the two cases for February in the JULIAN calendar.
-        if (
-            spaces_count in [0, 1, 2, 3]
-            and month == 'FEB'
-            and calendar == 'JULIAN'
-            and (year % 4 == 0 and year % 100 != 0)
-        ):
-            if days < 1 or days > Validate.month_days['FEB_LEAP']:
-                raise ValueError(
-                    Msg.NOT_DATE_EXACT_DAY.format(
-                        value,
-                        class_name,
-                        days,
-                        Validate.month_days['FEB_LEAP'],
-                    )
-                )
-        elif (
-            spaces_count in [0, 1, 2, 3]
-            and month == 'FEB'
-            and calendar == 'JULIAN'
-            and (days < 1 or days > Validate.month_days[month])
-        ):
-            raise ValueError(
-                Msg.NOT_DATE_EXACT_DAY.format(
-                    value,
-                    class_name,
-                    days,
-                    Validate.month_days[month],
-                )
-            )
+        # if (
+        #     spaces_count in [0, 1, 2, 3]
+        #     and calendar == 'JULIAN'
+        #     and month == 'FEB'
+        # ):
+        #     if year % 4 == 0 and year % 100 != 0:
+        #         max_days: int = Validate.month_days['FEB_LEAP']
+        #     else:
+        #         max_days = Validate.month_days['FEB']
+
+        #     if days < 1 or days > max_days:
+        #         raise ValueError(
+        #             Msg.NOT_DATE_EXACT_DAY.format(
+        #                 value,
+        #                 class_name,
+        #                 days,
+        #                 max_days,
+        #             )
+        #         )
+        # if (
+        #     spaces_count in [0, 1, 2, 3]
+        #     and month == 'FEB'
+        #     and calendar == 'GREGORIAN'
+        # ):
+        #     if ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0):
+        #         max_days = Validate.month_days['FEB_LEAP']
+        #     else:
+        #         max_days = Validate.month_days['FEB']
+
+        #     if days < 1 or days > max_days:
+        #         raise ValueError(
+        #             Msg.NOT_DATE_EXACT_DAY.format(
+        #                 value,
+        #                 class_name,
+        #                 days,
+        #                 max_days,
+        #             )
+        #         )
 
         # Only where an epoch has been identified perform this check.
         if subcase in [0, 1, 4, 5] and epoch not in epochs:

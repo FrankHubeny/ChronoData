@@ -19,7 +19,6 @@ for a version numer.
 __all__ = ['Classes', 'Tests']
 
 import importlib
-import logging
 from textwrap import wrap
 from typing import Any
 
@@ -516,7 +515,7 @@ from genedata.structure import (
     ) -> str:
         """Construct the global constants and init section of the class."""
         structure: dict[str, Any] = specs[Default.YAML_TYPE_STRUCTURE]
-        tag: str = Query.structure_tag(key, specs)
+        tag: str = Query.standard_structure_tag(key, specs)
         required: list[str] = Query.required(key, specs)
         single: list[str] = Query.singular(key, specs)
         permitted: list[str] = Query.permitted(key, specs)
@@ -603,7 +602,7 @@ from genedata.structure import (
             specs: The dictionary of specifications.
             examples: The dictionary of examples to add to this class.
         """
-        tag: str = Query.structure_tag(key, specs)
+        tag: str = Query.standard_structure_tag(key, specs)
         class_name: str = Names.classname(key)
         parts: str = ''.join(
             [
@@ -648,15 +647,15 @@ class {class_name}(BaseStructure):
                 examples: str = Default.EMPTY
                 if key in full_examples:
                     examples = full_examples[key]
-                try:
-                    class_data = Classes.generate_class(
-                        key,
-                        specs,
-                        examples,
-                    )
-                except Exception:
-                    logging.info(f'"{key}" failed to generate class.')
-                    raise
+                #try:
+                class_data = Classes.generate_class(
+                    key,
+                    specs,
+                    examples,
+                )
+                # except Exception:
+                #     logging.info(f'"{key}" failed to generate class.')
+                #     raise
                 lines = ''.join(
                     [
                         lines,
@@ -1059,12 +1058,12 @@ DO NOT MODIFY THIS FILE.
 
 {Default.CODE_GENEALOGY_VARIABLE} = Genealogy()
 fam = {Default.CODE_GENEALOGY}family_xref('1')
-indi = {Default.CODE_GENEALOGY}individual_xref('1')
-obje = {Default.CODE_GENEALOGY}multimedia_xref('1')
-repo = {Default.CODE_GENEALOGY}repository_xref('1')
-snote = {Default.CODE_GENEALOGY}shared_note_xref('1', 'a note')
-sour = {Default.CODE_GENEALOGY}source_xref('1')
-subm = {Default.CODE_GENEALOGY}submitter_xref('1')
+indi = {Default.CODE_GENEALOGY}individual_xref('2')
+obje = {Default.CODE_GENEALOGY}multimedia_xref('3')
+repo = {Default.CODE_GENEALOGY}repository_xref('4')
+snote = {Default.CODE_GENEALOGY}shared_note_xref('5', 'a note')
+sour = {Default.CODE_GENEALOGY}source_xref('6')
+subm = {Default.CODE_GENEALOGY}submitter_xref('7')
 """
 
     @staticmethod
@@ -1162,7 +1161,7 @@ def test_{test_name.lower().replace(Default.SPACE, Default.UNDERLINE)}_{class_na
             Default.YAML_TYPE_ENUMERATION
         ]
         test_name: str = 'Not Permitted'
-        not_permitted_sub: str = f'{Default.CODE_CLASS}.RecordIndi(indi)'
+        not_permitted_sub: str = f'{Default.CODE_CLASS}RecordIndi(indi)'
         lines: str = Tests.preamble(test_name, add_pytest=1, version=version)
         value: str = Default.EMPTY
         subs: str = Default.EMPTY

@@ -3,7 +3,7 @@
 
 This module implements reading and writing genealogy files according to the
 [FamilySearch GEDCOM Version 7](https://gedcom.io/specifications/FamilySearchGEDCOMv7.html)
-standard.  
+standard.
 """
 
 import importlib
@@ -58,9 +58,9 @@ class Genealogy:
 
         If one does not know the contents of the archive file, one can find that out by using
         the `Util.list_gdz` method.
-        
+
         Args:
-            filename: The full path the the file is an archive directory is not provided, 
+            filename: The full path the the file is an archive directory is not provided,
                 otherwise the name of the file in the archive.
             archive: The full path to the archive (gdz) file if this is where the gedcom file
                 and/or yaml specification files are stored.
@@ -96,7 +96,9 @@ class Genealogy:
         self.specs = importlib.import_module(
             f'genedata.specifications{self.version_no_periods}'
         )
-        self.specification: dict[str, dict[str, Any]] = deepcopy(self.specs.Specs)
+        self.specification: dict[str, dict[str, Any]] = deepcopy(
+            self.specs.Specs
+        )
         if len(self.tag_uri) > 0:
             for item in self.tag_uri:
                 self.document_tag(item[0], item[1])
@@ -149,6 +151,7 @@ class Genealogy:
         #     Default.YAML_TYPE_STRUCTURE: {},
         #     Default.YAML_TYPE_URI: {},
         # }
+        self.all_xrefs: dict[str, str] = {}
         self.extension_xreflist: list[str] = [Void.NAME]
         self.family_xreflist: list[str] = [Void.NAME]
         self.individual_xreflist: list[str] = [Void.NAME]
@@ -210,21 +213,9 @@ class Genealogy:
         self.split_ged()
 
     def split_ged(self) -> None:
-        """Validate the ged string then split it into records without the trailer."""
+        """Split the ged string into records without the trailer."""
 
         if self.ged_file != Default.EMPTY:
-            # # A trailer record `0 TRLR` must be in the file.
-            # if Default.GED_TRAILER not in self.ged_file:
-            #     raise ValueError(Msg.NO_TRAILER.format(Default.GED_TRAILER))
-
-            # # A header record `0 HEAD` must be in the file.
-            # if Default.GED_HEADER not in self.ged_file:
-            #     raise ValueError(Msg.NO_HEADER.format(Default.GED_HEADER))
-
-            # Each line starts with a digit.
-            # if re.search('\n\\D', self.ged_file):
-            #     raise ValueError(Msg.NOT_GED_STRINGS)
-
             # Remove the trailer along with everything after it.
             ged: str = Default.EMPTY
             ged, _, _ = self.ged_file.partition(Default.TRAILER)
@@ -237,63 +228,69 @@ class Genealogy:
             # Replace CONT and escaped @ with special string to remove later.
             ged = re.sub('\n\\d CONT @', Default.GED_REPLACE_THIS, ged)
 
-            # Replace remaining CONT with special string to remove later.
+            # Replace CONT with a non-empty payload to remove later.
             ged = re.sub('\n\\d CONT ', Default.GED_REPLACE_THIS, ged)
 
+            # Replace CONT with no payload to remove later.
+            ged = re.sub('\n\\d CONT', Default.GED_REPLACE_THIS, ged)
+
             # Split the rest into a list of ged records.
-            # self.ged_file_records = split_subs(ged, 0)
             self.ged_file_records = []
             self.ged_file_records = ged.split(f'{Default.EOL}0{Default.SPACE}')
 
             # Name each record with a unique name based on cross reference identifier if present.
             for record in self.ged_file_records:
                 first_line, _, _ = record.partition(Default.EOL)
-                if first_line == Default.GED_HEADER:
-                    self.named_records.append(
-                        RecordName(name='header', record=record, has_xref=False)
-                    )
-                else:
-                    spaces = first_line.count(Default.SPACE)
-                    match spaces:
-                        case 0:
-                            name: str = ''.join(
-                                [first_line, str(self.record_counter)]
+                # if first_line == Default.GED_HEADER:
+                #     self.named_records.append(
+                #         RecordName(name='header', record=record, has_xref=False)
+                #     )
+                # else:
+                spaces = first_line.count(Default.SPACE)
+                match spaces:
+                    case 0:
+                        name: str = ''.join(
+                            [first_line, str(self.record_counter)]
+                        )
+                        if first_line in [
+                            Default.TAG_FAM,
+                            Default.TAG_INDI,
+                            Default.TAG_OBJE,
+                            Default.TAG_REPO,
+                            Default.TAG_SNOTE,
+                            Default.TAG_SOUR,
+                            Default.TAG_SUBM,
+                        ]:
+                            xref_name: str = f'Void.{first_line}'
+                        else:
+                            xref_name = 'Void.EXT'
+                        self.record_counter += 1
+                        self.named_records.append(
+                            RecordName(
+                                name=name,
+                                record=record,
+                                xref_name=xref_name,
                             )
-                            if first_line in [
-                                Default.TAG_FAM,
-                                Default.TAG_INDI,
-                                Default.TAG_OBJE,
-                                Default.TAG_REPO,
-                                Default.TAG_SNOTE,
-                                Default.TAG_SOUR,
-                                Default.TAG_SUBM,
-                            ]:
-                                xref_name: str = f'Void.{first_line}'
-                            else:
-                                xref_name = 'Void.EXT'
-                            self.record_counter += 1
-                            self.named_records.append(
-                                RecordName(
-                                    name=name, record=record, xref_name=xref_name
-                                )
+                        )
+                    case _:
+                        xref_tag: list[str] = first_line.split(
+                            Default.SPACE, 2
+                        )
+                        name = Names.record_name(xref_tag[1], xref_tag[0])
+                        xref_name = ''.join(
+                            [
+                                name,
+                                Default.UNDERLINE,
+                                Default.XREF,
+                            ]
+                        )
+                        self.named_records.append(
+                            RecordName(
+                                name=name,
+                                xref_name=xref_name,
+                                record=record,
                             )
-                        case _:
-                            xref_tag: list[str] = first_line.split(
-                                Default.SPACE, 2
-                            )
-                            name = Names.record_name(xref_tag[1], xref_tag[0])
-                            xref_name = ''.join(
-                                [
-                                    name,
-                                    Default.UNDERLINE,
-                                    Default.XREF,
-                                ]
-                            )
-                            self.named_records.append(
-                                RecordName(
-                                    name=name, xref_name=xref_name, record=record
-                                )
-                            )
+                        )
 
     def view_extensions(self) -> tuple[list[list[str]], list[str], list[str]]:
         """Display a list of available extensions to use or be aware of.
@@ -404,18 +401,21 @@ class Genealogy:
         supers_required: list[str] = []
         supers_single: list[str] = []
         tag_edited: str = tag.upper()
+        extension_key: str = Default.EMPTY
         if tag_edited[0] != Default.UNDERLINE:
             tag_edited = ''.join([Default.UNDERLINE, tag_edited])
+        documented: bool = True
         try:
             yaml_dict = Util.read_yaml(yaml_file)
         except Exception:
             logging.info(
                 Msg.CANNOT_READ_YAML_FILE.format(yaml_file, tag_edited)
             )
-        else:
-            self.tag_counter += 1
+            documented = False
+        self.tag_counter += 1
+        if documented:
             yaml_type = str(yaml_dict[Default.YAML_TYPE])
-            extension_key: str = Names.keyname(str(yaml_dict[Default.YAML_URI]))
+            extension_key = Names.keyname(str(yaml_dict[Default.YAML_URI]))
             # if extension_key in self.specification[yaml_type]:
             #     raise ValueError(Msg.EXTENSION_EXISTS.format(extension_key, yaml_type))
             self.specification[yaml_type].update({extension_key: yaml_dict})
@@ -426,9 +426,15 @@ class Genealogy:
             permitted = Query.permitted(extension_key, self.specification)
             payload = Query.payload(extension_key, self.specification)
             supers = Query.supers_count(extension_key, self.specification)
-            superstructures = Query.superstructures(extension_key, self.specification)
-            supers_required = Query.supers_required(extension_key, self.specification)
-            supers_single = Query.supers_singular(extension_key, self.specification)
+            superstructures = Query.superstructures(
+                extension_key, self.specification
+            )
+            supers_required = Query.supers_required(
+                extension_key, self.specification
+            )
+            supers_single = Query.supers_singular(
+                extension_key, self.specification
+            )
             logging.info(f'superstructures = {superstructures}')
             # case Default.YAML_TYPE_ENUMERATION:
             enumset_key, enum_tags = Query.enum_key_tags(
@@ -454,7 +460,7 @@ class Genealogy:
                 ]
             )
         return ExtensionAttributes(
-            id = self.tag_counter,
+            id=self.tag_counter,
             key=extension_key,
             tag=tag,
             yaml_file=yaml_file,
@@ -535,7 +541,7 @@ class Genealogy:
     def ged_to_code(self) -> str:
         """Convert the loaded ged file to code that produces the ged file."""
 
-        level_key: dict[int,str] = {}
+        level_key: dict[int, str] = {}
 
         # def split_subs(ged: str, level: int = 0) -> list[str]:
         #     """Split a ged string on substructures at the specified level."""
@@ -571,17 +577,17 @@ class Genealogy:
                 # If the level equals 0, this is a record with also an xref value.
                 # Resplit on space three times and assign values.  Remove the extra `@`
                 # on the payload.
-                else:
-                    words = line.split(Default.SPACE, 3)
-                    if words[1][0:1] == Default.ATSIGN:
-                        xref = words[1]
-                        tag = words[2]
-                        if len(words) > 3:
-                            payload = words[3]
-                    else:
-                        tag = words[1]
-                        if len(words) > 2:
-                            payload = words[2]
+                # else:
+                #     words = line.split(Default.SPACE, 3)
+                #     if words[1][0:1] == Default.ATSIGN:
+                #         xref = words[1]
+                #         tag = words[2]
+                #         if len(words) > 3:
+                #             payload = words[3]
+                #     else:
+                #         tag = words[1]
+                #         if len(words) > 2:
+                #             payload = words[2]
 
                 key = level_key[level - 1]
                 if key in self.specification[Default.YAML_TYPE_STRUCTURE]:
@@ -604,8 +610,7 @@ class Genealogy:
                     case 'http://www.w3.org/2001/XMLSchema#string':
                         payload = Names.quote_text(remove_at(payload))
                     case 'Y|<NULL>':
-                        if payload == Default.EMPTY:
-                            payload = "''"
+                        payload = "''" if payload == Default.EMPTY else "'Y'"
                     case 'http://www.w3.org/2001/XMLSchema#nonNegativeInteger':
                         pass
                     case 'https://gedcom.io/terms/v7/type-List#Enum':
@@ -646,8 +651,8 @@ class Genealogy:
                         payload = Names.xref_name(Default.TAG_SOUR, payload)
                     case 'https://gedcom.io/terms/v7/type-Time':
                         payload = Names.quote_text(payload)
-                    case 'None':
-                        payload = Default.EMPTY
+                    # case 'None':
+                    #     payload = Default.EMPTY
                     case _:
                         payload = Default.EMPTY
 
@@ -739,7 +744,6 @@ class Genealogy:
                                     Default.BRACKET_RIGHT,
                                     Default.PARENS_RIGHT,
                                     Default.COMMA,
-                                    # Default.EOL,
                                 ]
                             )
                     if next_level == 0:
@@ -784,7 +788,7 @@ class Genealogy:
                             endline,
                         ]
                     )
-            return line  #''.join([line, Default.EOL])
+            return line
 
         def header() -> str:
             """Generate the header record."""
@@ -824,8 +828,8 @@ class Genealogy:
                 line = ''.join([line, record_subs(bottom)])
 
             # End the record because there are no substructures which should not be the case.
-            else:
-                line = ''.join([line, Default.PARENS_RIGHT])
+            # else:
+            #     line = ''.join([line, Default.PARENS_RIGHT])
             return line
 
         def imports() -> str:
@@ -864,17 +868,18 @@ from genedata.build import Genealogy
                 tag_list = self.ged_file_records[0].split('\n2 TAG ')
 
                 # Ignoring the first item in the list, obtain tag information from the others.
-                for tag in tag_list[1:]:
+                last_index: int = len(tag_list[1:]) - 1
+                for index, tag in enumerate(tag_list[1:]):
                     # The end of line was left in the first split to identify the end of the TAG line.
-                    #tag_data = tag.split(Default.EOL, 1)
+                    tag_line: str = tag
+                    if index == last_index:
+                        tag_line, _, _ = tag.partition(Default.EOL)
 
                     # There is only one space in the string separating the tag from the url.
-                    tag_words = tag.split(Default.SPACE)
+                    tag_words = tag_line.split(Default.SPACE)
 
                     # Construct the variable name that will be used in the code from these two items.
-                    ext_name = Names.extension_name(
-                        tag_words[0], tag_words[1]
-                    )
+                    ext_name = Names.extension_name(tag_words[0], tag_words[1])
 
                     # Construct the code line for the external tag.
                     lines = ''.join(
@@ -937,18 +942,18 @@ from genedata.build import Genealogy
                                 add_comma = ', '
 
                                 # This text might be continued or an indefinite number of lines.
-                                while last[0:7] == '1 CONT ':
-                                    first, _, last = last.partition(Default.EOL)
-                                    _, _, more_payload = first.partition(
-                                        '1 CONT '
-                                    )
-                                    payload = ''.join(
-                                        [
-                                            payload,
-                                            Default.EOL,
-                                            remove_at(more_payload),
-                                        ]
-                                    )
+                                # while last[0:7] == '1 CONT':
+                                #     first, _, last = last.partition(Default.EOL)
+                                #     _, _, more_payload = first.partition(
+                                #         '1 CONT'
+                                #     )
+                                #     payload = ''.join(
+                                #         [
+                                #             payload,
+                                #             Default.EOL,
+                                #             remove_at(more_payload[1:]),
+                                #         ]
+                                #     )
                                 payload = Names.quote_text(payload)
 
                             # Add each to the code lines to be generated.
@@ -1118,12 +1123,6 @@ print(ged_file)
             ]
         )
 
-    # def _get_filename_type(self, filename: str) -> str:
-    #     filename_type: str = ''
-    #     if filename[-Number.GEDLEN :] == String.GED:
-    #         filename_type = String.GED
-    #     return filename_type
-
     def _get_counter(self) -> str:
         counter = str(self.xref_counter)
         self.xref_counter += 1
@@ -1132,9 +1131,13 @@ print(ged_file)
     def _set_xref(
         self, xref_list: list[str], xref: str, xref_name: str = ''
     ) -> None:
+        if xref in self.all_xrefs:
+            raise ValueError(Msg.XREF_EXISTS.format(xref, xref_name))
+        self.all_xrefs.update({xref: f'xref_{xref.replace(Default.ATSIGN, Default.EMPTY)}'})
         if xref in xref_list:
             raise ValueError(Msg.XREF_EXISTS.format(xref, xref_name))
         xref_list.append(xref)
+
 
     def _format_name(self, name: str = '', counter: str = '') -> str:
         return ''.join(
@@ -1157,7 +1160,7 @@ print(ged_file)
         to build a genealogy with the `tuples` module.
 
         Exception:
-            ValueError if a name is used twice for this record type.
+            ValueError if a name is used twice.
 
 
         Parameters:

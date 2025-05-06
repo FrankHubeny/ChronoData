@@ -50,7 +50,7 @@ def test_enumerationset_retrieval() -> None:
         LoadSpecs.enumerationset_dictionary(directory)
     )
     assert (
-        enumerationset['enumset-ADOP'][Default.YAML_TYPE]
+        enumerationset['enumset-QUAY'][Default.YAML_TYPE]
         == Default.YAML_TYPE_ENUMERATION_SET
     )
 
@@ -68,7 +68,7 @@ def test_structure_retrieval() -> None:
     structure: dict[str, dict[str, Any]] = eval(
         LoadSpecs.structure_dictionary(directory)
     )
-    assert structure['ABBR'][Default.YAML_TYPE] == Default.YAML_TYPE_STRUCTURE
+    assert structure['ADOP'][Default.YAML_TYPE] == Default.YAML_TYPE_STRUCTURE
 
 
 def test_uri_retrieval() -> None:

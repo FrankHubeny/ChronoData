@@ -33,7 +33,7 @@ def test_escape_ged() -> None:
     snote_N19_xref = g.shared_note_xref(
         'N19',
         """@ at at front and @ inside line and 
-    @ at after CONT and @ inside CONT's line too.""",
+@ at after CONT and @ inside CONT's line too.""",
     )
 
     # Instantiate the header record.
@@ -56,8 +56,8 @@ def test_escape_ged() -> None:
         [
             gc.IndiName('John /Doe/'),
             gc.Note("""me@example.com is an example email address.
-    @me and @I are example social media handles.
-    @@@@ has four @ characters where only the first is escaped."""),
+@me and @I are example social media handles.
+@@@@ has four @ characters where only the first is escaped."""),
         ],
     )
     snote_N01 = gc.RecordSnote(snote_N01_xref)

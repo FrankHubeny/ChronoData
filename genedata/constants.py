@@ -93,6 +93,7 @@ class Default:
     EMPTY: str = ''
     EQUAL: str = ' = '
     EOL: str = '\n'
+    EOL_CARRIAGE_RETURN: str = '\r\n'
     EOL_DOUBLE: str = '\n\n'
     GED_EXT_SCHMA: str = f'{EOL}1 SCHMA{EOL}'
     GED_EXT_TAG: str = '2 TAG '

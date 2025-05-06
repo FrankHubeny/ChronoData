@@ -134,7 +134,8 @@ def test_date_exact_leapyear() -> None:
 
 
 def test_date_exact_lowercase_ok() -> None:
-    assert Validate.date_exact('29 feb 2004', 'DateExact')
+    m = gc.DateExact('29 feb 2004')
+    assert m.validate()
 
 
 def test_date_exact_no_numbers() -> None:
@@ -204,13 +205,21 @@ def test_date_general_no_space() -> None:
 def test_date_general_empty() -> None:
     assert Validate.date_general('', 'Date', Specs)
 
+def test_date_general_leapyear() -> None:
+    assert Validate.date_general('29 FEB 2004', 'Date', Specs)
+
+
 def test_date_calendar_month_extension() -> None:
-    mycalendar: str = 'tests/data/extension_tests/calendars/cal-_MYGREGORIAN.yaml'
+    mycalendar: str = (
+        'tests/data/extension_tests/calendars/cal-_MYGREGORIAN.yaml'
+    )
     myjan: str = 'tests/data/extension_tests/months/month-_MYJAN.yaml'
     g = Genealogy()
     g.document_tag('_MYGREGORIAN', mycalendar)
     g.document_tag('_MYJAN', myjan)
-    assert gc.Date('_MYGREGORIAN 1 _MYJAN 2000 BC').validate(specs=g.specification)
+    assert gc.Date('_MYGREGORIAN 1 _MYJAN 2000 BC').validate(
+        specs=g.specification
+    )
 
 
 def test_bad_date_general_not_string_int() -> None:
@@ -218,6 +227,35 @@ def test_bad_date_general_not_string_int() -> None:
         ValueError, match=Msg.NOT_STRING.format(repr(123), 'Date')
     ):
         Validate.date_general(123, 'Date', Specs)
+
+
+def test_bad_calendar() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_CALENDAR.format(
+                'XYZ 1 JAN 2000 BCE',
+                'Date',
+                'XYZ',
+                ['FRENCH_R', 'GREGORIAN', 'HEBREW', 'JULIAN'],
+            )
+        ),
+    ):
+        gc.Date('XYZ 1 JAN 2000 BCE').validate()
+
+def test_bad_calendar_shorter() -> None:
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            Msg.NOT_DATE_CALENDAR.format(
+                'XYZ 2000 BCE',
+                'Date',
+                'XYZ',
+                ['FRENCH_R', 'GREGORIAN', 'HEBREW', 'JULIAN'],
+            )
+        ),
+    ):
+        gc.Date('XYZ 2000 BCE').validate()
 
 
 def test_bad_date_general_not_string_xref() -> None:
@@ -281,7 +319,8 @@ def test_bad_date_general_calendar() -> None:
 
 def test_bad_date_general_epoch() -> None:
     with pytest.raises(
-        ValueError, match=re.escape(Msg.NOT_DATE_EPOCH.format('2000 BC', 'Date', ['BCE']))
+        ValueError,
+        match=re.escape(Msg.NOT_DATE_EPOCH.format('2000 BC', 'Date', ['BCE'])),
     ):
         Validate.date_general('2000 BC', 'Date', Specs)
 
@@ -351,19 +390,21 @@ def test_bad_date_month_day_not_leapyear_julian() -> None:
     ):
         Validate.date_general('JULIAN 29 FEB 2002', 'Date', Specs)
 
+
 def test_bad_date_month_day_leapyear_julian() -> None:
     with pytest.raises(
         ValueError,
         match=re.escape(
             Msg.NOT_DATE_EXACT_DAY.format(
-                'JULIAN 30 FEB 2000',
+                'JULIAN 29 FEB 2000',
                 'Date',
-                str(30),
                 str(29),
+                str(28),
             )
         ),
     ):
-        Validate.date_general('JULIAN 30 FEB 2000', 'Date', Specs)
+        Validate.date_general('JULIAN 29 FEB 2000', 'Date', Specs)
+
 
 def test_bad_date_month_day_not_leapyear_julian_zero() -> None:
     with pytest.raises(
@@ -379,6 +420,7 @@ def test_bad_date_month_day_not_leapyear_julian_zero() -> None:
     ):
         Validate.date_general('JULIAN 0 FEB 2002', 'Date', Specs)
 
+
 def test_bad_date_month_day_leapyear_julian_zero() -> None:
     with pytest.raises(
         ValueError,
@@ -387,7 +429,7 @@ def test_bad_date_month_day_leapyear_julian_zero() -> None:
                 'JULIAN 0 FEB 2000',
                 'Date',
                 str(0),
-                str(29),
+                str(28),
             )
         ),
     ):
@@ -429,7 +471,9 @@ def test_enum_resn() -> None:
 
 
 def test_enum_hide_extension() -> None:
-    enum_hide: str = 'tests\\data\\extension_tests\\enumerations\\enum-_HIDE.yaml'
+    enum_hide: str = (
+        'tests\\data\\extension_tests\\enumerations\\enum-_HIDE.yaml'
+    )
     g = Genealogy()
     g.document_tag('_HIDE', enum_hide)
     assert gc.Resn('_HIDE').validate(specs=g.specification)

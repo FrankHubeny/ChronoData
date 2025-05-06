@@ -422,8 +422,8 @@ def test_date_not_month_day_low() -> None:
         m.validate(specs=Specs)
 
 
-def test_date_not_feb_day_high_leapyear() -> None:
-    m = Date('30 FEB 2004')
+def test_date_exact_bad_gregorian_feb_day_high_leapyear() -> None:
+    m = DateExact('30 FEB 2004')
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -439,15 +439,15 @@ def test_date_not_feb_day_high_leapyear() -> None:
 
 
 def test_date_not_feb_day_high() -> None:
-    m = Date('29 FEB 2000')
+    m = DateExact('30 FEB 2000')
     with pytest.raises(
         ValueError,
         match=re.escape(
             Msg.NOT_DATE_EXACT_DAY.format(
                 m.value,
                 m.class_name,
+                str(30),
                 str(29),
-                str(28),
             )
         ),
     ):
@@ -455,7 +455,7 @@ def test_date_not_feb_day_high() -> None:
 
 
 def test_date_not_feb_day_low() -> None:
-    m = Date('0 FEB 2000')
+    m = DateExact('0 FEB 2000')
     with pytest.raises(
         ValueError,
         match=re.escape(
@@ -463,7 +463,7 @@ def test_date_not_feb_day_low() -> None:
                 m.value,
                 m.class_name,
                 str(0),
-                str(28),
+                str(29),
             )
         ),
     ):
@@ -487,15 +487,15 @@ def test_date_not_feb_day_julian_high_leapyear() -> None:
 
 
 def test_date_not_feb_day_julian_high() -> None:
-    m = Date('JULIAN 30 FEB 2000')
+    m = Date('JULIAN 29 FEB 2000')
     with pytest.raises(
         ValueError,
         match=re.escape(
             Msg.NOT_DATE_EXACT_DAY.format(
                 m.value,
                 m.class_name,
-                str(30),
                 str(29),
+                str(28),
             )
         ),
     ):
@@ -511,7 +511,7 @@ def test_date_not_feb_day_julian_low() -> None:
                 m.value,
                 m.class_name,
                 str(0),
-                str(29),
+                str(28),
             )
         ),
     ):

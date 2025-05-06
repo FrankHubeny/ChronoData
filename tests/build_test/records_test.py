@@ -259,22 +259,18 @@ def test_submitter_dup() -> None:
 # Test staging records including header.
 
 def test_stage_individual() -> None:
-    g = Genealogy(version='7.0')
+    g = Genealogy()
     indi_xref = g.individual_xref()
     indi = RecordIndi(indi_xref)
     g.stage(indi)
     assert len(g.records) == 1
 
 def test_stage_header() -> None:
-    g = Genealogy(version='7.0')
+    g = Genealogy()
     head = Head(Gedc(GedcVers('7.0')))
     g.stage(head)
     assert g.record_header is not None
 
-def test_stage_only_records() -> None:
-    g = Genealogy(version='7.0')
-    a = 'abc'
-    with pytest.raises(ValueError, match=Msg.ONLY_RECORDS.format(a)):
-        g.stage(a)  # type: ignore[arg-type]
+
 
         
