@@ -221,6 +221,18 @@ def test_date_calendar_month_extension() -> None:
         specs=g.specification
     )
 
+def test_date_calendar_month_extension_tag_in_list() -> None:
+    mycalendar: str = (
+        'tests/data/extension_tests/calendars/cal-_MYGREGORIANLIST.yaml'
+    )
+    myjan: str = 'tests/data/extension_tests/months/month-_MYJANLIST.yaml'
+    g = Genealogy()
+    g.document_tag('_MYGREGORIANLIST', mycalendar)
+    g.document_tag('_MYJAN', myjan)
+    assert gc.Date('_MYGREGORIANLIST 1 _MYJANLIST 2000 BC').validate(
+        specs=g.specification
+    )
+
 
 def test_bad_date_general_not_string_int() -> None:
     with pytest.raises(
@@ -477,6 +489,15 @@ def test_enum_hide_extension() -> None:
     g = Genealogy()
     g.document_tag('_HIDE', enum_hide)
     assert gc.Resn('_HIDE').validate(specs=g.specification)
+
+def test_enum_hide_extension_list() -> None:
+    enum_hide: str = (
+        'tests\\data\\extension_tests\\enumerations\\enum-_HIDELIST.yaml'
+    )
+    g = Genealogy()
+    g.document_tag('_HIDELIST', enum_hide)
+    assert gc.Resn('_HIDELIST').validate(specs=g.specification)
+
 
 
 # filepath tests

@@ -1697,7 +1697,7 @@ class Query:
     @staticmethod
     def all_structure_tags(specs: dict[str, dict[str, Any]] = Specs) -> list[str]:
         """Construct a list of all structure tags, standard or extension, in a specification."""
-        tags: list[str] = list(Default.IGNORE)
+        tags: list[str] = []
         for _, value in specs[Default.YAML_TYPE_STRUCTURE].items():
             if Default.YAML_STANDARD_TAG in value:
                 tags.append(value[Default.YAML_STANDARD_TAG])

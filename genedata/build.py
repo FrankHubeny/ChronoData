@@ -99,6 +99,7 @@ class Genealogy:
         self.specification: dict[str, dict[str, Any]] = deepcopy(
             self.specs.Specs
         )
+        self.all_structure_tags: list[str] = Query.all_structure_tags(self.specification)
         if len(self.tag_uri) > 0:
             for item in self.tag_uri:
                 self.document_tag(item[0], item[1])
@@ -414,6 +415,7 @@ class Genealogy:
             documented = False
         self.tag_counter += 1
         if documented:
+            self.all_structure_tags.append(tag)
             yaml_type = str(yaml_dict[Default.YAML_TYPE])
             extension_key = Names.keyname(str(yaml_dict[Default.YAML_URI]))
             # if extension_key in self.specification[yaml_type]:
@@ -574,6 +576,10 @@ class Genealogy:
                     if len(words) > 2:
                         payload = words[2]
 
+                # Raise an error if the tag is neither a standard tag nor a documented extension tag.
+                if tag not in self.all_structure_tags:
+                    raise ValueError(Msg.NOT_DOCUMENTED_TAG.format(tag))
+
                 # If the level equals 0, this is a record with also an xref value.
                 # Resplit on space three times and assign values.  Remove the extra `@`
                 # on the payload.
@@ -719,8 +725,8 @@ class Genealogy:
                         )
 
                     # If there are more substructures.
-                    else:
-                        endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
+                    # else:
+                    #     endline = f'{Default.PARENS_RIGHT}{Default.COMMA}'
 
                 # If there is a payload and there are substructures.
                 elif next_level > current_level:

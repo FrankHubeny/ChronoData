@@ -159,6 +159,7 @@ class Msg:
     NOT_DEFINED_FOR_STRUCTURE: str = (
         'The extension "{0}" is not defined for the current structure.'
     )
+    NOT_DOCUMENTED_TAG: str = 'The tag "{0}" is not documented either as a standard tag or as an extension tag.  Provide a yaml file for the tag in the header record.'
     NOT_FAMILY_XREF: str = (
         'The value "{0}" is not a family cross reference for structure "{1}".'
     )

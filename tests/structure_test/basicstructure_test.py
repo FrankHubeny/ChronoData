@@ -1,6 +1,7 @@
 # basicstructure_test.py
 """Tests to cover the BasicStructure class."""
 
+
 import pytest
 
 import genedata.classes70 as gc
@@ -11,9 +12,11 @@ def test_y_null_data_type_validation_y() -> None:
     m = gc.Will('Y')
     assert m.validate()
 
+
 def test_y_null_data_type_validation_null() -> None:
     m = gc.Will('')
     assert m.validate()
+
 
 def test_y_null_data_type_validation_other() -> None:
     value: str = 'abc'
@@ -24,10 +27,12 @@ def test_y_null_data_type_validation_other() -> None:
     ):
         m.validate()
 
+
 def test_date_period() -> None:
     value: str = 'FROM 1 JAN 2000 TO 1 JAN 2001'
     m = gc.DataEvenDate(value)
     assert m.validate()
+
 
 def test_date_period_bad() -> None:
     value: str = 'ABT 1 JAN 2000'
@@ -38,10 +43,12 @@ def test_date_period_bad() -> None:
     ):
         m.validate()
 
+
 def test_date_exact() -> None:
     value: str = '1 JAN 2000'
     m = gc.DateExact(value)
     assert m.validate()
+
 
 def test_date_exact_bad() -> None:
     value: str = '2000'
@@ -51,6 +58,7 @@ def test_date_exact_bad() -> None:
         match=Msg.NOT_DATE_EXACT.format(value, m.class_name),
     ):
         m.validate()
+
 
 def test_date() -> None:
     value: str = '1 JAN 2000'
@@ -63,6 +71,7 @@ def test_time() -> None:
     m = gc.Time(value)
     assert m.validate()
 
+
 def test_time_bad() -> None:
     value: str = 'not a time'
     m = gc.Time(value)
@@ -71,6 +80,7 @@ def test_time_bad() -> None:
         match=Msg.NOT_TIME.format(value.upper(), m.class_name),
     ):
         m.validate()
+
 
 def test_lati_integer() -> None:
     value: int = 10
@@ -81,6 +91,7 @@ def test_lati_integer() -> None:
     ):
         m.validate()
 
+
 def test_long_integer() -> None:
     value: int = 10
     m = gc.Long(value)  # type: ignore[arg-type]
@@ -89,4 +100,26 @@ def test_long_integer() -> None:
         match=Msg.NOT_STRING.format(str(value), m.class_name),
     ):
         m.validate()
-        
+
+
+def test_tag_spaces() -> None:
+    value: str = 'T A G'
+    m = gc.Tag(value)
+    with pytest.raises(ValueError, match=Msg.TAG_SPACES.format(value)):
+        m.validate()
+
+
+def test_not_shared_note() -> None:
+    value: int = 1
+    m = gc.RecordSnote(value)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError,
+        match=Msg.NOT_SHARED_NOTE_XREF.format(value, m.class_name),
+    ):
+        m.validate()
+
+
+# def test_xref_code() -> None:
+#     m = Xref('test')
+
+#     assert 
