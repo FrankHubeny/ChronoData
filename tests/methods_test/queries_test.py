@@ -16,8 +16,7 @@ def test_all_structure_tags_includes_cont() -> None:
 def test_all_structure_tags_includes_extensions() -> None:
     g = Genealogy()
     g.document_tag('_DATE', 'tests/data/extension_tests/structures/_DATE.yaml')
-    tags: list[str] = Query.all_structure_tags(g.specification)
-    assert '_DATE' in tags
+    assert '_DATE' in g.all_structure_tags
 
 
 def test_required() -> None:
@@ -138,3 +137,10 @@ def test_singular_good_key() -> None:
     """Verify that the required methods runs."""
     key: str = 'MAP'
     assert Query.singular(key, Specs) == ['Lati', 'Long']
+
+# supers_required
+
+def test_supers_required() -> None:
+    """Verify that the supers_required method runs."""
+    key: str = 'NAME'
+    assert 'RecordRepo' in Query.supers_required(key, Specs)

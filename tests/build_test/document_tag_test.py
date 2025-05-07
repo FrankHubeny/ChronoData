@@ -10,8 +10,7 @@ from genedata.build import Genealogy
 from genedata.constants import Default
 from genedata.messages import Msg
 from genedata.methods import Query
-from genedata.specifications70 import Specs
-from genedata.structure import Ext, Void
+from genedata.structure import Ext
 
 # Calendar Extensions
 
@@ -314,3 +313,8 @@ def test_structure_date_payload_bad() -> None:
         ),
     ):
         m.ged()
+
+def test_void_xref_record() -> None:
+    g = Genealogy('tests/data/ged_examples/extension-record-void.ged')
+    g.ged_to_code()
+    assert len(g.ged_ext_tags) > 0

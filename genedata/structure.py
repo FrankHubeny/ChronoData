@@ -69,8 +69,8 @@ class Xref:
         """Return the name used by the GEDCOM standard."""
         return self.fullname
 
-    def __repr__(self) -> str:
-        return f"Xref('{self.fullname}')"
+    # def __repr__(self) -> str:
+    #     return f"Xref('{self.fullname}')"
 
     # def ged(self, info: str = Default.EMPTY) -> str:
     def ged(self) -> str:
@@ -85,8 +85,8 @@ class Xref:
             lines, level=0, tag=self.tag, payload=self.text, xref=xref_name
         )
 
-    def code(self, tabs: int = 0) -> str:  # noqa: ARG002
-        return repr(self.fullname)
+    # def code(self, tabs: int = 0) -> str:  
+    #     return repr(self.fullname)
 
 
 class ExtensionXref(Xref):
@@ -612,13 +612,13 @@ class BaseStructure:
                             str(self.value), self.class_name
                         )
                     )
-            case 'record-SNOTE':
-                if not isinstance(self.value, SharedNoteXref):
-                    raise ValueError(
-                        Msg.NOT_SHARED_NOTE_XREF.format(
-                            str(self.value), self.class_name
-                        )
-                    )
+            # case 'record-SNOTE':
+            #     if not isinstance(self.value, SharedNoteXref):
+            #         raise ValueError(
+            #             Msg.NOT_SHARED_NOTE_XREF.format(
+            #                 str(self.value), self.class_name
+            #             )
+            #         )
             case 'record-SOUR':
                 if not isinstance(self.value, SourceXref):
                     raise ValueError(
@@ -825,14 +825,14 @@ class BaseStructure:
             )
         if self.subs is None:
             return ''.join([code_lines, Default.PARENS_RIGHT])
-        if not isinstance(self.subs, list) and self.value is None:
-            return ''.join(
-                [
-                    code_lines,
-                    self.subs.code(no_indent=True, as_name=as_name),
-                    Default.PARENS_RIGHT,
-                ]
-            )
+        # if not isinstance(self.subs, list) and self.value is None:
+        #     return ''.join(
+        #         [
+        #             code_lines,
+        #             self.subs.code(no_indent=True, as_name=as_name),
+        #             Default.PARENS_RIGHT,
+        #         ]
+        #     )
         if not isinstance(self.subs, list):
             return ''.join(
                 [

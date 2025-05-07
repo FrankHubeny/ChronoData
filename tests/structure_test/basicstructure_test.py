@@ -5,7 +5,9 @@
 import pytest
 
 import genedata.classes70 as gc
+from genedata.build import Genealogy
 from genedata.messages import Msg
+from genedata.structure import Ext
 
 
 def test_y_null_data_type_validation_y() -> None:
@@ -119,7 +121,22 @@ def test_not_shared_note() -> None:
         m.validate()
 
 
-# def test_xref_code() -> None:
-#     m = Xref('test')
+def test_superstructure_check_sub_list() -> None:
+    g = Genealogy()
+    d = g.document_tag('_DATE', 'tests/data/extension_tests/structures/_DATE.yaml')
+    m = gc.Map([gc.Lati('N10.1'), gc.Long('E10.1'), Ext(d, '1 JAN 2000', []), ])
+    with pytest.raises(
+        ValueError,
+        match=Msg.NOT_SUPERSTRUCTURE.format(m.class_name, '_DATE')
+    ):
+        m.validate()
 
-#     assert 
+def test_superstructure_check_sub_not_list() -> None:
+    g = Genealogy()
+    d = g.document_tag('_DATE', 'tests/data/extension_tests/structures/_DATE.yaml')
+    m = gc.Date('1 JAN 2000', Ext(d, '1 JAN 2000', []))
+    with pytest.raises(
+        ValueError,
+        match=Msg.NOT_SUPERSTRUCTURE.format(m.class_name, '_DATE')
+    ):
+        m.validate()

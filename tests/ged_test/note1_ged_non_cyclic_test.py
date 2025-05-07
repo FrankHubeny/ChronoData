@@ -1,26 +1,18 @@
-# note1_ged_test.py
-"""Reproduce the `note-1.ged` output.
+# note1_ged_cyclic_test.py
+"""This test returns the note1 file without the cyclic error that was
+to be caught in the original note1.ged file.
 
-This test contains a cyclic cross reference which generates a log message.  
-The portion of the ged file is presented as a comment in the `ged_to_code` method.
-
-Reference:
-    [GEDCOM Age test file](https://gedcom.io/testfiles/gedcom70/note-1.ged)
+The parts from the notes1_ged_test.py were commented out below.
 """
 
-import re
-
-import pytest
-
-from genedata.messages import Msg
 from genedata.methods import Util
 
 
-def test_note1_ged() -> None:
-    # Test constructing the note1_ged test data addressing the circular issue.
+def test_note1_non_cyclic_ged() -> None:
+    # Test constructing the note1_ged test data without the circular issue.
 
     # Test constructing the remarriage2_ged test data.
-    file = Util.read('tests/data/ged_examples/notes-1.ged')
+    file = Util.read('tests/data/ged_examples/notes-1-non-cyclic.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc
@@ -35,7 +27,7 @@ def test_note1_ged() -> None:
     sour_2_xref = g.source_xref('2')
     snote_3_xref = g.shared_note_xref('3', 'A single-use note record')
     snote_4_xref = g.shared_note_xref('4', 'A dual-use note record')
-    snote_5_xref = g.shared_note_xref('5', 'A cyclic note record')
+    # snote_5_xref = g.shared_note_xref('5', 'A cyclic note record')
 
     # Instantiate the header record.
     header = gc.Head([
@@ -56,7 +48,7 @@ def test_note1_ged() -> None:
     sour_2 = gc.RecordSour(sour_2_xref, [
         gc.Snote(snote_3_xref),
         gc.Snote(snote_4_xref),
-        gc.Snote(snote_5_xref),
+        # gc.Snote(snote_5_xref),
     ])
     snote_3 = gc.RecordSnote(snote_3_xref, [
         gc.Chan([
@@ -68,9 +60,9 @@ def test_note1_ged() -> None:
             gc.DateExact('25 MAY 2021'),
         ]),
     ])
-    snote_5 = gc.RecordSnote(snote_5_xref, [
-        gc.Sour(sour_2_xref),
-    ])
+    # snote_5 = gc.RecordSnote(snote_5_xref, [
+    #     gc.Sour(sour_2_xref),
+    # ])
 
     # Stage the GEDCOM records to generate the ged lines.
     g.stage(header)
@@ -78,15 +70,10 @@ def test_note1_ged() -> None:
     g.stage(sour_2)
     g.stage(snote_3)
     g.stage(snote_4)
-    g.stage(snote_5)
+    # g.stage(snote_5)
 
     # Run the following to show the ged file that the above code would produce.
-
-    with pytest.raises(
-        ValueError, match=re.escape(Msg.CIRCULAR.format(repr(sour_2_xref), repr(snote_5_xref)))
-    ):
-        g.show_ged()
+    ged_file: str = g.show_ged()
 
 
-    
-
+    assert file == ged_file

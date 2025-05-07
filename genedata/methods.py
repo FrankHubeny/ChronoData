@@ -1335,8 +1335,6 @@ class Names:
     def top_class(tag: str) -> str:
         """For a top level tag return the class name or empty."""
         match tag:
-            case Default.TAG_EXT:
-                return Default.CLASS_EXT
             case Default.TAG_FAM:
                 return Default.CLASS_FAM
             case Default.TAG_INDI:
@@ -1529,7 +1527,7 @@ class Query:
     @staticmethod
     def superstructures(
         key: str, specs: dict[str, dict[str, Any]]
-    ) -> list[str]:
+    ) -> list[str] | None:
         classes: list[str] = []
         if (
             key in specs[Default.YAML_TYPE_STRUCTURE]
@@ -1540,6 +1538,8 @@ class Query:
                 Default.YAML_SUPERSTRUCTURES
             ].items():
                 classes.append(Names.classname(uri))
+        if len(classes) == 0:
+            return None
         return classes
 
     @staticmethod
@@ -1601,8 +1601,8 @@ class Query:
             in the GEDCOM version 7 specifications by doing the following:
             >>> from genedata.methods import Query
             >>> from genedata.specifications70 import Specs
-            >>> Query.required('HEAD', Specs)
-            ['Gedc']
+            >>> Query.supers_required('NAME', Specs)
+            ['RecordRepo', 'RecordSubm']
 
         Args:
             key: The top level name in the dictionary.
@@ -1701,11 +1701,11 @@ class Query:
         for _, value in specs[Default.YAML_TYPE_STRUCTURE].items():
             if Default.YAML_STANDARD_TAG in value:
                 tags.append(value[Default.YAML_STANDARD_TAG])
-            if Default.YAML_EXTENSION_TAGS in value:
-                if isinstance(value[Default.YAML_EXTENSION_TAGS], list):
-                    tags.extend(value[Default.YAML_EXTENSION_TAGS])
-                else:
-                    tags.append(value[Default.YAML_EXTENSION_TAGS])
+            # if Default.YAML_EXTENSION_TAGS in value:
+            #     if isinstance(value[Default.YAML_EXTENSION_TAGS], list):
+            #         tags.extend(value[Default.YAML_EXTENSION_TAGS])
+            #     else:
+            #         tags.append(value[Default.YAML_EXTENSION_TAGS])
         return tags
 
     @staticmethod

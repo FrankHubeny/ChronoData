@@ -263,8 +263,8 @@ class Genealogy:
                             Default.TAG_SUBM,
                         ]:
                             xref_name: str = f'Void.{first_line}'
-                        else:
-                            xref_name = 'Void.EXT'
+                        # else:
+                        #     xref_name = 'Void.EXT'
                         self.record_counter += 1
                         self.named_records.append(
                             RecordName(
@@ -398,7 +398,7 @@ class Genealogy:
         enumset_key: str = Default.EMPTY
         enum_tags: list[str] = []
         supers: int = 0
-        superstructures: list[str] = []
+        superstructures: list[str] | None = None
         supers_required: list[str] = []
         supers_single: list[str] = []
         tag_edited: str = tag.upper()

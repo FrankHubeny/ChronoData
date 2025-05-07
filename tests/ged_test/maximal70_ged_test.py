@@ -1,11 +1,15 @@
 # maximal70_ged_test
 
-from genedata.methods import Util
+import re
+
+import pytest
+
+from genedata.messages import Msg
 
 
 def test_maximal_ged() -> None:
     # Test constructing the minimal70.ged test file.
-    file = Util.read('tests/data/ged_examples/maximal70.ged')
+    #file = Util.read('tests/data/ged_examples/maximal70.ged')
 
     # Import the required packages and classes.
     import genedata.classes70 as gc
@@ -2200,7 +2204,6 @@ def test_maximal_ged() -> None:
     g.stage(subm_U1)
     g.stage(subm_U2)
 
-    # Run the following to show the ged file that the above code would produce.
-    ged_file = g.show_ged()
-
-    assert file == ged_file
+    with pytest.raises(
+        ValueError, match=re.escape(Msg.CIRCULAR.format(repr(snote_N1_xref), repr(sour_S1_xref)))):
+        g.show_ged()

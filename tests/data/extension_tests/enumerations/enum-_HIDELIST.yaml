@@ -1,0 +1,18 @@
+%YAML 1.2
+---
+lang: en-US
+
+type: enumeration
+
+uri: tests/data/extension_tests/enum-_HIDELIST
+
+extension tags: ['_HIDELIST']
+
+specification:
+  - Testing an extension tag for RESN which allows lists of tags.
+
+value of:
+  - "https://gedcom.io/terms/v7/enumset-RESN"
+
+contact: "https://gedcom.io/community/"
+...
